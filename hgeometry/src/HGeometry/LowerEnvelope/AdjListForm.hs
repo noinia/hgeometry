@@ -24,8 +24,6 @@ module HGeometry.LowerEnvelope.AdjListForm
   , unboundedVertexId
   , HasUnboundedEdges(..)
 
-  , LEEdge(Edge)
-
   , EdgeGeometry
   , projectedEdgeGeometries, projectedEdgeGeometry
   ) where
@@ -119,24 +117,6 @@ singleton v = LowerEnvelope v0 (Seq.singleton v')
 
 --------------------------------------------------------------------------------
 
-type IntermediateFace plane = NonEmptyVector (IntermediateVertex plane)
-
--- type IntermediateFace plane = IntermediateFaceF (IntermediateVertex plane)
-
--- data IntermediateFaceF v = BoundedFace (NonEmptyVector v)
---                          -- ^ the vertices of a bounded face, in order along the bounded
---                          -- face starting from the leftmost (and lowest if there are
---                          -- multiple) vertex
---                          | UnboundedFace (NonEmptyVector v)
---                          -- ^ vertices of an unbounded face, starting from the first
---                          -- vertex to the last one
---   deriving (Show,Eq,Functor)
-
-
-
-
-
-
 
 --------------------------------------------------------------------------------
 
@@ -167,15 +147,14 @@ fromVertexForm lEnv = LowerEnvelope v0 boundedVs
     allEdges :: [FaceEdges plane]
     allEdges = traceShowWith ("allEdges",) .
       fmap (faceToEdges . sortAlongBoundary)
-             . traceShowWith ("allFaces",)
              . groupOnCheap definingPlane
              $ foldMap (^._3) boundedVs'
 
     -- | construct the unbounded edges, by simply filtering and flipping the
     -- edges towards infinity.
     unboundedEdges :: Seq.Seq (LEEdge plane)
-    unboundedEdges = mapMaybe (\(u, Edge v hl hr) ->
-                                 if v == unboundedVertexId then Just (Edge u hr hl) else Nothing
+    unboundedEdges = mapMaybe (\(u, e) -> if e^.destination == unboundedVertexId
+                                          then Just (flipEdge u e) else Nothing
                               -- flip every unbounded edge
                               )
                    $ foldMap fromFoldable allEdges
@@ -204,62 +183,161 @@ fromVertexForm lEnv = LowerEnvelope v0 boundedVs
     definingPlane (h,_,_,_) = h
 
 
-
-
-
-
--- type IntermediateFace plane = NonEmptyV.NonEmptyVector (IntermediateVertex plane)
-
-
--- data First1 a = None | First1 a deriving (Show,Eq)
--- -- todo, rename to UnboundedE or so
-
--- -- | destructor akin to maybe
--- first1                  :: b -> (a -> b) -> First1 a -> b
--- first1 def _ None       = def
--- first1 _   f (First1 x) = f x
-
--- instance Semigroup (First1 a) where
---   None         <> r    = r
---   l@(First1 _) <> None = l
---   (First1 _)   <> (First1 _) = error "First1, two First1's this should not happen."
-
-
 -- | For each bounded vertex (represented by their ID) the outgoing halfedge.
 type FaceEdges plane = NonEmpty (VertexID, LEEdge plane)
 
--- | Given a convex face h (represented by its bounded vertices in CCW order along the
--- face; starting with the leftmost one), compute the half-edges that bound the face
--- (i.e. that have h to their left), and start at such a bounded vertex.
---
---
--- The result is a vector with for each bounded vertex (represented by their ID) the
--- outgoing halfedge.
---
--- running time: \(O(n)\)   (assuming general position)
-faceToEdges      :: forall plane r. (Plane_ plane r, Ord r, Fractional r, Ord plane
-                    , Show plane, Show r
-                    )
-                 => IntermediateFace plane -> FaceEdges plane
-faceToEdges face = case toNonEmpty face of
-    v1 :| []   -> traceShowWith ("oneVertex: ", ) $ oneVertex v1
-    v1 :| [v2] -> twoVertices v1 v2
-    _  :| _    -> manyVertices
-  where
-    n = length face
-    -- | The main case
-    manyVertices = traceShowWith ("faceToEdges: ", ) $ ifoldMap1 computEdge face
-    -- | Compute the outgoing edge from u to its successor.
 
-    computEdge                       :: Int -> IntermediateVertex plane -> FaceEdges plane
-    computEdge i u@(h,uIdx,up,uDefs) =
-      let v@(_,vIdx,vp,vDefs) = face NonEmptyV.! ((i+1) `mod` n)
-          EdgeDefs mh' hu hv = extractEdgeDefs h up uDefs vp vDefs
-      in traceShowWith ("computeEdge", h, u, ) $
-        case mh' of
-        Just h' -> NonEmpty.singleton (uIdx, Edge vIdx h h')
-        Nothing -> NonEmpty.singleton (uIdx, Edge unboundedVertexId h hu)
-                  -- unbounded edge from u to v_infty, and from v_infty to v
+-- | Helper type for edgedefs
+data EdgeDefs plane = EdgeDefs { common :: plane
+                               , uNeigh :: plane
+                               , vNeigh :: plane
+                               } deriving (Show,Eq)
+
+-- | Given a plane h, and vertices u (with its definers), and v (with its definers) that
+-- define an edge of h, computes:
+--
+-- - plane h' that is on the other side of the edge from u to v,
+-- - the plane hu incident only to u that is adjacent to h, and
+-- - the plane hv incident only to v that is adjacent to h.
+extractEdgeDefs                   :: (Ord plane
+                                     , Show plane, Show r
+                                     )
+                                  => plane
+                                  -> Point 3 r -> VertexForm.Definers plane
+                                  -> Point 3 r -> VertexForm.Definers plane
+                                  -> Maybe (EdgeDefs plane)
+extractEdgeDefs h u uDefs v vDefs
+  -- | traceShow ("extractEdgeDefs",h,u,uDefs,v,vDefs) False = undefined
+  -- | otherwise
+  = case traceShowWith ("commons",) commons of
+    []   -> Nothing
+    [h'] -> Just $ EdgeDefs h' hu hv
+    _    -> error "extractEdgeDefs: unhandled degeneracy. u and v have >2 planes in common."
+  where
+    commons = F.toList $ Set.delete h --- $ traceShowWith ("udefs intersect vDefs",)
+              (uDefs `Set.intersection` vDefs)
+    uOnlies = F.toList $ uDefs Set.\\ vDefs
+    vOnlies = F.toList $ vDefs Set.\\ uDefs
+
+    hu = from' u uOnlies
+    hv = from' v vOnlies
+
+    from' x hss
+      |traceShow ("from'",x,hss) False = undefined
+      | otherwise
+      = case hss of
+      []   -> error "extractEdgeDefs: absurd, too few definers"
+      [h'] -> h'
+      hs    -> error $ "extractEdgeDefs: unhandled degeneracy. More than 3 planes at a vertex. "
+                     <> show ("extractEdgeDefs",h,u,v,uOnlies,vOnlies)
+             -- TODO we should either the neighbor of h in the order around the given
+             -- vertex here.
+
+--------------------------------------------------------------------------------
+
+-- TODO: move to the definition below
+data IntermediateVertex' plane =
+  IntermediateVertex' { ivPlane :: plane
+                      , ivId    :: {-# UNPACK #-} !VertexID
+                      , ivLoc   :: Point 3 (NumType plane)
+                      , ivDefs  :: VertexForm.Definers plane
+                      , ivEdges :: Seq.Seq (LEEdge plane)
+                      }
+
+type IntermediateVertex plane =
+  (plane, VertexID, Point 3 (NumType plane), VertexForm.Definers plane)
+
+
+--------------------------------------------------------------------------------
+
+-- type IntermediateFace plane = NonEmptyVector (IntermediateVertex plane)
+
+-- type IntermediateFace' plane = IntermediateFaceF (IntermediateVertex plane)
+
+-- data IntermediateFaceF v = BoundedFace (NonEmptyVector v)
+--                          -- ^ the vertices of a bounded face, in order along the bounded
+--                          -- face starting from the leftmost (and lowest if there are
+--                          -- multiple) vertex
+--                          | UnboundedFace (NonEmptyVector v)
+--                          -- ^ vertices of an unbounded face, starting from the first
+--                          -- vertex to the last one
+--   deriving (Show,Eq,Functor)
+
+
+--------------------------------------------------------------------------------
+
+-- | Sort the vertices of a (convex) face in counter clockwise order around its
+-- boundary.
+--
+-- running time: \(O(n \log n)\)
+sortAlongBoundary      :: forall plane r. (Plane_ plane r, Ord r, Num r
+                                          , Show plane, Show r
+                                          )
+                       => NonEmptyVector (IntermediateVertex plane)
+                       -> NonEmptyVector (IntermediateVertex plane)
+sortAlongBoundary face = case mv0 of
+    Nothing            -> face -- already sorted, since there is only one vertex
+    Just (_, _, v0, _) -> NonEmptyV.unsafeFromVector $ sortBy (cmpAround $ v1 .-. v0) face
+    -- TODO: I guess that in degenerate situations, there now may be consecutive
+    -- points (vertices) at the same location. We should group those and get rid of them?
+  where
+    -- we find the leftmost vertex v1 of the face (pick the lexicographically smallest
+    -- when there are multiple), and then compute its predecessor v0 in the order along
+    -- the boundary of the face (i.e. we find the point v for which the line through v1
+    -- and v has maximum slope).
+
+    -- To get the list of vertices in CCW order along the face, we then sort the vertices
+    -- around v1
+    (_, iv1, v1, _) = minimumBy (comparing (^._3)) face
+    v1' = projectPoint v1
+    -- its predecessor v0, if it exists
+    mv0 :: Maybe (IntermediateVertex plane)
+    mv0 = foldr findPred Nothing face
+    findPred v@(_, iv, _, _) acc
+      | iv == iv1 = acc -- skip v1 itself
+      | otherwise = Just $ case acc of
+                             Nothing -> v -- anything is better than nothing
+                             Just u  -> maxBy cmpSlope' u v
+
+    cmpSlope' :: IntermediateVertex plane -> IntermediateVertex plane -> Ordering
+    cmpSlope' (_, _, u, _) (_, _, v, _) = case ccw v1' (projectPoint u) (projectPoint v) of
+                                            CCW      -> GT
+                                            CW       -> LT
+                                            CoLinear -> EQ
+
+    -- | sort the vertices around the direction wrt. (the downward projection of) w
+    cmpAround :: Vector 3 r -> IntermediateVertex plane -> IntermediateVertex plane -> Ordering
+    cmpAround w (_, _, u, _) (_, _, v, _) =
+        ccwCmpAroundWith (Vec.prefix w) v1' u' v' <> cmpByDistanceTo v1' u' v'
+      where
+        u' = projectPoint u
+        v' = projectPoint v
+
+-- | given an edge (u,v) that has h to its left, and all remaining vertices of the face,
+-- sorted in CCW order around the face starting with *v*, compute all its edgesf
+faceToEdges       :: forall plane r. (Plane_ plane r, Ord r, Fractional r, Ord plane
+                                     , Show plane, Show r
+                                     )
+                   => NonEmptyVector (IntermediateVertex plane) -> FaceEdges plane
+faceToEdges faceV = case toNonEmpty faceV of
+                      u :| []  -> oneVertex u
+                      u :| [v] -> twoVertices u v
+                      _        -> toNonEmpty $ manyVertices
+  where
+    manyVertices = NonEmptyV.zipWith3 mkEdge (shiftR (-1) faceV) faceV (shiftR 1 faceV)
+
+    mkEdge (_,uIdx,up,uDefs) (h,vIdx,vp,vDefs) (_,wIdx,wp,wDefs) =
+      case extractEdgeDefs h vp vDefs wp wDefs of
+        Nothing -> -- vw are separated by the unbounded vertex
+                    case extractEdgeDefs h up uDefs vp vDefs of
+                      Nothing                    ->
+                        error "mkEdge: absurd, u and v don't share a plane!?"
+                      Just (EdgeDefs hUV _hu hv) -> (vIdx, Edge unboundedVertexId h hv)
+        Just (EdgeDefs hVW _ _) -> (vIdx, Edge wIdx h hVW)
+      -- the main idea is that every pair of subsequent bounded vertices necessarily has
+      -- exactly one defining plane, except for when two bounded vertices are separted by
+      -- the vertex at infinity.
+
 
 -- | compute the face edges of the face of h, when v is the only vertex incident to h.
 oneVertex              :: (Plane_ plane r, Ord r, Fractional r, Ord plane
@@ -287,149 +365,33 @@ oneVertex (h,i,v,defs) = case List.sort outgoingEdges of
 -- | Compute the edges of the face incident to h, when there are only two vertices
 -- incident to that face.
 --
--- more or less a special case of the manyFaces scenario, in which we don't know
+-- more or less a special case of the manyVertices scenario, in which we don't know
 -- the if edge should be oriented from u to v or from v to u.
 twoVertices  :: (Plane_ plane r, Ord r, Fractional r, Ord plane
                 , Show plane, Show r
                 )
              => IntermediateVertex plane -> IntermediateVertex plane -> FaceEdges plane
-twoVertices u@(h,ui,up,uDefs) v@(_,vi,vp,vDefs)
-  -- | traceShow ("twoVertices",u,v) False = undefined
-  -- | otherwise
-  = case mh' >>= withUVOrder of
+twoVertices u@(h,ui,up,uDefs) v@(_,vi,vp,vDefs) =
+  case extractEdgeDefs h up uDefs vp vDefs >>= withUVOrder of
       Nothing  -> error "twoVertices. absurd, h and h' don't define an edge!?"
-      Just (hr,uBeforeV) -- -> traceShowWith ("twoVertices",u,v,uBeforeV,) $
-        -- NonEmpty.fromList [ (ui, Edge vi                h hr)
-        --                   , (vi, Edge unboundedVertexId h hv)
-        --                   ]
+      Just (EdgeDefs hr hu hv, uBeforeV) -- -> traceShowWith ("twoVertices",u,v,uBeforeV,) $
         | uBeforeV -> NonEmpty.fromList [ (vi, Edge ui                h hr)
                                         , (ui, Edge unboundedVertexId h hu)
                                         ]
-                      -- the edge must be oriented from v to u
+                      -- the edge must be oriented from v to u so that h is on the left
         | otherwise  -> NonEmpty.fromList [ (ui, Edge vi                h hr)
                                          , (vi, Edge unboundedVertexId h hv)
                                          ]
                         -- the edge must be oriented from u to v
   where
-    EdgeDefs mh' hu hv = traceShowId $ extractEdgeDefs h up uDefs vp vDefs
-
     -- determine if u lies before v in the order of u and v along the intersection line of
     -- h and hr.
-    withUVOrder hr = ( \l -> let m = traceShowWith ("uvorder",l,) $
-                                   perpendicularTo l &anchorPoint .~ projectPoint up
-                             in (hr, projectPoint vp `onSide` m /= LeftSide)
-                                -- if v lies on the left it lies further along
-                                -- commonLine. So u lies before v if v does not lie in
-                                -- the left haflpalne
-                     ) <$> intersectionLine' h hr
-
-
-
--- | Helper type for edgedefs
-data EdgeDefs plane = EdgeDefs { common :: Maybe plane
-                               , uNeigh :: !plane
-                               , vNeigh :: !plane
-                               } deriving (Show,Eq)
-
--- | Given a plane h, and vertices u (with its definers), and v (with its definers) that
--- define an edge of h, computes:
---
--- - plane h' that is on the other side of the edge from u to v,
--- - the plane hu incident only to u that is adjacent to h, and
--- - the plane hv incident only to v that is adjacent to h.
-extractEdgeDefs                   :: (Ord plane
-                                     , Show plane, Show r
-                                     )
-                                  => plane
-                                  -> Point 3 r -> VertexForm.Definers plane
-                                  -> Point 3 r -> VertexForm.Definers plane
-                                  -> EdgeDefs plane
-extractEdgeDefs h u uDefs v vDefs
-  | traceShow ("extractEdgeDefs",h,u,uDefs,v,vDefs) False = undefined
-  | otherwise
-  = case traceShowWith ("commons",) commons of
-    []   -> EdgeDefs Nothing   hu hv
-    [h'] -> EdgeDefs (Just h') hu hv
-    _    -> error "extractEdgeDefs: unhandled degeneracy. u and v have >2 planes in common."
-  where
-    commons = F.toList $ Set.delete h --- $ traceShowWith ("udefs intersect vDefs",)
-              (uDefs `Set.intersection` vDefs)
-    uOnlies = F.toList $ uDefs Set.\\ vDefs
-    vOnlies = F.toList $ vDefs Set.\\ uDefs
-
-    hu = from' u uOnlies
-    hv = from' v vOnlies
-
-    from' x hss
-      |traceShow ("from'",x,hss) False = undefined
-      | otherwise
-      = case hss of
-      []   -> error "extractEdgeDefs: absurd, too few definers"
-      [h'] -> h'
-      hs    -> error $ "extractEdgeDefs: unhandled degeneracy. More than 3 planes at a vertex. "
-             -- TODO we should either the neighbor of h in the order around the given
-             -- vertex here.
-
---------------------------------------------------------------------------------
-
--- TODO: move to the definition below
-data IntermediateVertex' plane =
-  IntermediateVertex' { ivPlane :: plane
-                      , ivId    :: {-# UNPACK #-} !VertexID
-                      , ivLoc   :: Point 3 (NumType plane)
-                      , ivDefs  :: VertexForm.Definers plane
-                      , ivEdges :: Seq.Seq (LEEdge plane)
-                      }
-
-type IntermediateVertex plane =
-  (plane, VertexID, Point 3 (NumType plane), VertexForm.Definers plane)
-
-
--- | Sort the vertices of a (convex) face in counter clockwise order around its
--- boundary.
---
--- running time: \(O(n \log n)\)
-sortAlongBoundary      :: forall plane r. (Plane_ plane r, Ord r, Num r)
-                       => NonEmptyV.NonEmptyVector (IntermediateVertex plane)
-                       -> IntermediateFace plane
-sortAlongBoundary face = case mv0 of
-    Nothing            -> face -- face only has one vertex, so it is already sorted.
-    Just (_, _, v0, _) -> NonEmptyV.unsafeFromVector $ sortBy (cmpAround $ v1 .-. v0) face
-    -- TODO: I guess that in degenerate situations, there now may be consecutive
-    -- points (vertices) at the same location. We should group those and get rid of them?
-  where
-    -- we find the leftmost vertex v1 of the face (pick lexicographically when there are
-    -- multiple), and then compute its predecessor v0 in the order along the boundary of
-    -- the face (i.e. we find the point v for which the line through v1 and v has maximum
-    -- slope). We can then sort the vertices CCW around v1, with respect to the line
-    -- through v1 and v0.
-
-    -- the leftmost vertex v1
-
-    (_, iv1, v1, _) = minimumBy (comparing (^._3)) face
-    v1' = projectPoint v1
-
-    -- its predecessor v0, if it exists
-    mv0 :: Maybe (IntermediateVertex plane)
-    mv0 = foldr findPred Nothing face
-    findPred v@(_, iv, _, _) acc
-      | iv == iv1 = acc -- skip v1 itself
-      | otherwise = Just $ case acc of
-                             Nothing -> v -- anything is better than nothing
-                             Just u  -> maxBy cmpSlope' u v
-
-    cmpSlope' :: IntermediateVertex plane -> IntermediateVertex plane -> Ordering
-    cmpSlope' (_, _, u, _) (_, _, v, _) = case ccw v1' (projectPoint u) (projectPoint v) of
-                                            CCW      -> GT
-                                            CW       -> LT
-                                            CoLinear -> EQ
-
-    cmpAround :: Vector 3 r -> IntermediateVertex plane -> IntermediateVertex plane -> Ordering
-    cmpAround w (_, _, u, _) (_, _, v, _) =
-        ccwCmpAroundWith (Vec.prefix w) v1' u' v' <> cmpByDistanceTo v1' u' v'
-      where
-        u' = projectPoint u
-        v' = projectPoint v
+    withUVOrder e@(EdgeDefs hr _ _) =
+      ( \l -> let m = perpendicularTo l &anchorPoint .~ projectPoint up
+              in (e, projectPoint vp `onSide` m /= LeftSide)
+              -- if v lies on the left it lies further along commonLine. So u lies before
+              -- v if v does not lie in the left haflpalne
+      ) <$> intersectionLine' h hr
 
 --------------------------------------------------------------------------------
 
@@ -783,3 +745,9 @@ maxBy         :: (t -> t -> Ordering) -> t -> t -> t
 maxBy cmp a b = case cmp a b of
                   LT -> b
                   _  -> a
+
+
+-- | shift the vector by d
+shiftR     :: Int -> NonEmptyVector v -> NonEmptyVector v
+shiftR d v = let n = length v
+             in NonEmptyV.generate1 n $ \i -> v NonEmptyV.! ((i+n+d) `mod` n)
