@@ -17,6 +17,7 @@ module HGeometry.LowerEnvelope.Connected.Type
 
   , singleton
 
+  , BoundedVertex
   , BoundedVertexF(Vertex)
   , location, definers, location2
 
@@ -28,7 +29,7 @@ module HGeometry.LowerEnvelope.Connected.Type
   , projectedEdgeGeometries, projectedEdgeGeometry
 
 
-
+  , outgoingUnboundedEdge
   , edgeIntersectionLine
   , intersectionLine'
   , intersectionLineWithDefiners
@@ -84,16 +85,16 @@ instance (Ord (NumType plane), Num (NumType plane)) => IsBoxable (LowerEnvelope'
   boundingBox env = boundingBox . NonEmpty.fromList $ env^..boundedVertices.traverse.location
     -- the fromList is safe since there is alwasy at least one vertex
 
--- instance Functor LowerEnvelope' where
--- instance Foldable LowerEnvelope' where
--- instance Traversable LowerEnvelope' where
-
--- | Traversal of the planes in the lower envelope
+-- | Traversal of the planes in the lower envelope. Since we need an Ord constraint we
+-- can't make LowerEnvelope' an instance of Traversable.
+--
+-- Be aware that this may destroy some of the invariants. So use this function with care.
 traverseLowerEnvelope                         :: ( Applicative f, NumType plane ~ NumType plane'
                                                  , Ord plane'
                                                  )
                                               => (plane -> f plane')
-                                              -> LowerEnvelope' plane -> f (LowerEnvelope' plane')
+                                              -> LowerEnvelope' plane
+                                              -> f (LowerEnvelope' plane')
 traverseLowerEnvelope f (LowerEnvelope v0 vs) =
     LowerEnvelope <$> traverse f v0 <*> traverse (traverseBoundedV f) vs
 
@@ -118,18 +119,6 @@ singleton v = LowerEnvelope v0 (Seq.singleton v')
     v' = fromLEVertex v
     v0 = UnboundedVertex $ flipEdge i <$> view incidentEdgesB v'
     -- do we need to reverse the sequenceo f edges?
-
---------------------------------------------------------------------------------
-
-
---------------------------------------------------------------------------------
-
-
--- | Helper type for edgedefs
-data EdgeDefs plane = EdgeDefs { common :: plane
-                               , uNeigh :: plane
-                               , vNeigh :: plane
-                               } deriving (Show,Eq)
 
 --------------------------------------------------------------------------------
 
@@ -270,8 +259,9 @@ edgeIntersectionLine e = case intersectionLine' (e^.leftPlane) (e^.rightPlane) o
 
 --------------------------------------------------------------------------------
 
--- |
+-- | Types that have an IncidentEdges' field.
 class HasIncidentEdges t  where
+  -- | Lens to access the incident edges field.
   incidentEdges' :: Lens' (t plane) (Seq.Seq (LEEdge plane))
 
 instance HasIncidentEdges UnboundedVertex where
@@ -449,18 +439,5 @@ projectedEdgeGeometry env (ui,vi) e = case env^?!vertexAt ui of
     -- edge e is oriented from the lowerId towards the higherId, so in particular *from*
     -- the unbounded vertex into the bounded vertex that means that to construct the
     -- halfline we actually wish to flip the orientation of the line
-
-
-
---       case
--- --      traceShowWith ("unbEdge", e, "h=",e^.rightPlane, "h'=",e^.leftPlane, "line'",) $
---         intersectionLine' (e^.rightPlane) (e^.leftPlane) of
---       Just l  -> Left $ HalfLine (v^.location2) (l^.direction)
---                  -- edge e is oriented from the lowerId towards the higherId,
---                  -- so in particular *from* the unbounded vertex into the bounded vertex
---                  -- that means that to construct the halfline we actually wish to
---                  -- flip the left and right plane, so that the halfline is directed outwards.
---       Nothing -> error "projectedEdgeGeometry: absurd, no intersection between the planes"
-
 
 --------------------------------------------------------------------------------

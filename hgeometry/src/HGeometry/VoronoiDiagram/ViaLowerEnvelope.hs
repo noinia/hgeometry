@@ -20,7 +20,6 @@ module HGeometry.VoronoiDiagram.ViaLowerEnvelope
 
 import           Control.Lens
 import           Data.Default.Class
-import qualified Data.Map as Map
 import           HGeometry.Box
 import           HGeometry.Duality
 import           HGeometry.Ext
@@ -31,7 +30,6 @@ import           HGeometry.LowerEnvelope.Naive (lowerEnvelopeVertexForm)
 import           HGeometry.LowerEnvelope.VertexForm (VertexForm)
 import           HGeometry.Point
 import           HGeometry.Properties
-import           HGeometry.Vector
 import           Hiraffe.Graph
 
 --------------------------------------------------------------------------------

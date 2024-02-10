@@ -10,22 +10,14 @@ module HGeometry.LowerEnvelope.Naive
 
 --------------------------------------------------------------------------------
 
-import           Control.Lens
 import           Control.Monad (guard)
-import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
 import           HGeometry.Combinatorial.Util
-import           HGeometry.Foldable.Sort
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Intersection
-import           HGeometry.Line
-import           HGeometry.Line.LineEQ
 import           HGeometry.LowerEnvelope.AdjListForm (LowerEnvelope, fromVertexForm)
 import           HGeometry.LowerEnvelope.VertexForm
 import           HGeometry.Point
-import           HGeometry.Properties
-import           Hiraffe.Graph
 
 --------------------------------------------------------------------------------
 
@@ -61,10 +53,7 @@ lowerEnvelope = fromVertexForm . lowerEnvelopeVertexForm
 lowerEnvelopeVertexForm    :: ( Plane_ plane r
                               , Ord r, Fractional r, Foldable f, Ord plane
                               ) => f plane -> VertexForm plane
-lowerEnvelopeVertexForm hs = foldMap (\t -> case asVertex hs t of
-                                              Nothing -> mempty
-                                              Just v  -> singleton v
-                                     ) $ uniqueTriplets hs
+lowerEnvelopeVertexForm hs = foldMap (maybe mempty singleton . asVertex hs) $ uniqueTriplets hs
 
 -- | Given all planes, and a triple, computes if the triple defines a
 -- vertex of the lower envelope, and if so returns it.
@@ -75,8 +64,8 @@ asVertex hs t@(Three h1 h2 h3) = do v <- intersectionPoint t
                                     pure $ LEVertex v (Set.fromList [h1,h2,h3])
 
 -- | test if v lies below (or on) all the planes in hs
-belowAll      :: (Plane_ plane r, Ord r, Num r, Foldable f) => Point 3 r -> f plane -> Bool
-belowAll v hs = all (\h -> onSideTest v h /= GT) hs
+belowAll   :: (Plane_ plane r, Ord r, Num r, Foldable f) => Point 3 r -> f plane -> Bool
+belowAll v = all (\h -> onSideTest v h /= GT)
 {-# INLINE belowAll #-}
 
 

@@ -235,8 +235,7 @@ sortAlongBoundary face = case mv0 of
         u' = projectPoint $ ivLoc u
         v' = projectPoint $ ivLoc v
 
--- | given an edge (u,v) that has h to its left, and all remaining vertices of the face,
--- sorted in CCW order around the face starting with *v*, compute all its edgesf
+-- | given the vertices of the face in CCW order, compute all its edges of the face.
 faceToEdges       :: forall plane r. (Plane_ plane r, Ord r, Fractional r, Ord plane
                                      , Show plane, Show r
                                      )
@@ -297,14 +296,14 @@ twoVertices (Vtx h ui up uDefs) (Vtx _ vi vp vDefs) =
   case extractEdgeDefs h up uDefs vp vDefs >>= withUVOrder of
       Nothing  -> error "twoVertices. absurd, h and h' don't define an edge!?"
       Just (EdgeDefs hr hu hv, uBeforeV) -- -> traceShowWith ("twoVertices",u,v,uBeforeV,) $
-        | uBeforeV -> NonEmpty.fromList [ (vi, Edge ui                h hr)
-                                        , (ui, Edge unboundedVertexId h hu)
-                                        ]
+        | uBeforeV  -> NonEmpty.fromList [ (vi, Edge ui                h hr)
+                                         , (ui, Edge unboundedVertexId h hu)
+                                         ]
                       -- the edge must be oriented from v to u so that h is on the left
-        | otherwise  -> NonEmpty.fromList [ (ui, Edge vi                h hr)
-                                          , (vi, Edge unboundedVertexId h hv)
-                                          ]
-                        -- the edge must be oriented from u to v
+        | otherwise -> NonEmpty.fromList [ (ui, Edge vi                h hr)
+                                         , (vi, Edge unboundedVertexId h hv)
+                                         ]
+                       -- the edge must be oriented from u to v
   where
     -- determine if u lies before v in the order of u and v along the intersection line of
     -- h and hr.
@@ -314,64 +313,6 @@ twoVertices (Vtx h ui up uDefs) (Vtx _ vi vp vDefs) =
               -- if v lies on the left it lies further along commonLine. So u lies before
               -- v if v does not lie in the left haflpalne
       ) <$> intersectionLine' h hr
-
-
---------------------------------------------------------------------------------
-
--- | Vertices in of the lower envelope in adjacencylist form.
-type BoundedVertex = BoundedVertexF Seq.Seq
-
-
--- | Given a location of a vertex v, a pair of planes h1,h2 and the
--- remaining defining planes of v, computes the outgoing half-line
--- from v on which h1,h2 are the lowest (if such an halfline exists).
-outgoingUnboundedEdge                   :: ( Plane_ plane r, Ord r, Fractional r
-                                           , Foldable1 f
-                                           )
-                                        => Point 3 r -- ^ the location of the vertex v
-                                        -> Two plane -- ^ the pair of planes for which to compute
-                                        -- the halfine
-                                        -> f plane -- ^ the other planes intersecting at v
-                                        -> Maybe (HalfLine (Point 2 r) :+ EdgeDefiners plane)
-outgoingUnboundedEdge v (Two h1 h2) h3s =
-  intersectionLineWithDefiners h1 h2 >>= toHalfLineFrom (projectPoint v) h3s
-  -- todo, if there are more planes, I guess we should check if the hl is not dominated by the other
-  -- planes either.
-
--- | Given :
---
--- v : the projected location of the vertex
--- hs : the remaining planes defining v (typically just one plane h3)
--- l   : the (projection of the) line l in which planes h1 and h2 intersect (containing v)
---
--- we compute the half-line eminating from v in which h1 and h2 define
--- an edge incident to v.
-toHalfLineFrom                  :: (Plane_ plane r, Foldable1 f, Fractional r, Ord r)
-                                => Point 2 r -- ^ vertex v
-                                -> f plane     -- ^ the remaining plane(s) hs
-                                -> LinePV 2 r :+ EdgeDefiners plane -- ^ the line l
-                                -> Maybe (HalfLine (Point 2 r) :+ EdgeDefiners plane)
-toHalfLineFrom v hs ((LinePV _ w) :+ defs@(EdgeDefiners h1 h2)) =
-    validate w defs <|> validate ((-1) *^ w) (EdgeDefiners h2 h1)
-    -- We try both directions. Note that if we reverse the direction
-    -- of the line, what the left/right plane is changes.
-    --
-    -- If neither direction works, then h1,h2 do not define a good
-    -- direction. This should happen only when there are more than 3
-    -- planes intersecting in v, i.e. in degernate sitatuions
-  where
-    -- | test if direction d is a good direction, i.e. if towards direction d
-    -- h1 (and thus also h2) is actually lower than all remaining defining planes.
-    validate d defs' = let zVal = evalAt (v .+^ d)
-                       in if all (\h3 -> zVal h1 < zVal h3) hs
-                          then Just (HalfLine v d :+ defs') else Nothing
-
-
-
-
-
-
-
 
 --------------------------------------------------------------------------------
 -- * Convenience functions
@@ -394,7 +335,7 @@ maxBy cmp a b = case cmp a b of
                   _  -> a
 
 
--- | shift the vector by d
+-- | shift the vector by d items to the right
 shiftR     :: Int -> NonEmptyVector v -> NonEmptyVector v
 shiftR d v = let n = length v
              in NonEmptyV.generate1 n $ \i -> v NonEmptyV.! ((i+n+d) `mod` n)
