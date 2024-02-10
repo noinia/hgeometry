@@ -38,7 +38,6 @@ import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line
 import           HGeometry.LowerEnvelope.Connected.Type
 import           HGeometry.LowerEnvelope.Type
-import           HGeometry.LowerEnvelope.VertexForm (IntersectionLine(..),intersectionLine)
 import qualified HGeometry.LowerEnvelope.VertexForm as VertexForm
 import           HGeometry.Point
 import           HGeometry.Properties
@@ -66,6 +65,8 @@ fromVertexForm' lEnv = LowerEnvelope v0 boundedVs
   where
     v0 = UnboundedVertex unboundedEdges'
 
+    -- TODO: we may want to sort the edges cyclically around every vertex.
+
     -- the bounded vertices.
     boundedVs = Seq.zipWith ( \(_,v,_) outs -> v&incidentEdgesB .~ toSeq outs
                             ) boundedVs' boundedEsByOrigin
@@ -91,7 +92,6 @@ fromVertexForm' lEnv = LowerEnvelope v0 boundedVs
                                -- flip every unbounded edge
                                )
                     $ foldMap fromFoldable allEdges
-    -- FIXME: we should probably sort those right?
 
 
     -- | A sequence of bounded vertices, ordered by vertexID, together with a bunch of
@@ -112,6 +112,20 @@ fromVertexForm' lEnv = LowerEnvelope v0 boundedVs
                                         -- defs here already? instead of in the various delete h
                                         -- cases
                                         )
+
+{-
+-- | Given a bunch of halflines that all share their starting point v,
+-- sort them cyclically around the starting point v.
+sortCyclic :: (Foldable f, Plane_ plane r, Ord r, Fractional r)
+           => f (LEEdge plane) -> Seq.Seq (LEEdge plane)
+sortCyclic  = fromFoldable . sortBy @V.Vector cmpAround
+  where
+    cmpAround e1 e2 = ccwCmpAround origin (dir e1) (dir e2)
+    dir e = Point . negated $ edgeIntersectionLine e ^. direction
+    -- these direction vectors all point "inward", we negate them to make sure they are
+    -- pointing outward (towards +infty again).
+-}
+
 
 -- | For each bounded vertex (represented by their ID) the outgoing halfedge.
 type FaceEdges plane = NonEmpty (VertexID, LEEdge plane)
@@ -165,12 +179,11 @@ extractEdgeDefs h u uDefs v vDefs
 
 --------------------------------------------------------------------------------
 
--- TODO: move to the definition below
+-- | Intermediate representation of a vertex.
 data IntermediateVertex plane = Vtx { definingPlane :: !plane
                                     , ivId          :: {-# UNPACK #-} !VertexID
                                     , ivLoc         :: !(Point 3 (NumType plane))
                                     , _ivDefs       :: VertexForm.Definers plane
-                                    -- , ivEdges :: Seq.Seq (LEEdge plane)
                                     }
 
 --------------------------------------------------------------------------------
@@ -235,7 +248,7 @@ faceToEdges faceV = case toNonEmpty faceV of
   where
     manyVertices = NonEmptyV.zipWith3 mkEdge (shiftR (-1) faceV) faceV (shiftR 1 faceV)
 
-    mkEdge (Vtx _ uIdx up uDefs) (Vtx h vIdx vp vDefs) (Vtx _ wIdx wp wDefs) =
+    mkEdge (Vtx _ _ up uDefs) (Vtx h vIdx vp vDefs) (Vtx _ wIdx wp wDefs) =
       case extractEdgeDefs h vp vDefs wp wDefs of
         Nothing -> -- vw are separated by the unbounded vertex
                     case extractEdgeDefs h up uDefs vp vDefs of
@@ -309,17 +322,6 @@ twoVertices (Vtx h ui up uDefs) (Vtx _ vi vp vDefs) =
 type BoundedVertex = BoundedVertexF Seq.Seq
 
 
--- | Given a bunch of halflines that all share their starting point v,
--- sort them cyclically around the starting point v.
-sortAroundStart :: (Foldable f, Ord r, Num r)
-                => f (HalfLine (Point 2 r) :+ e) -> Seq.Seq (HalfLine (Point 2 r) :+ e)
-sortAroundStart = fromFoldable . sortBy @V.Vector compareAroundStart
-  where
-    compareAroundStart (HalfLine v d  :+ _)
-                       (HalfLine _ d' :+ _) = ccwCmpAround v (v .+^ d) (v .+^ d')
-
-
-
 -- | Given a location of a vertex v, a pair of planes h1,h2 and the
 -- remaining defining planes of v, computes the outgoing half-line
 -- from v on which h1,h2 are the lowest (if such an halfline exists).
@@ -367,35 +369,9 @@ toHalfLineFrom v hs ((LinePV _ w) :+ defs@(EdgeDefiners h1 h2)) =
 
 
 
--- | The planes left (above) and right (below) their intersection
--- line.
-data EdgeDefiners plane = EdgeDefiners { _leftPlane  :: plane -- ^ above plane
-                                       , _rightPlane :: plane -- ^ below plane
-                                       }
 
--- | Computes the line in which the two planes intersect, and labels
--- the halfplanes with the lowest plane.
---
--- The returned line will have h to its left and h' to its right.
-intersectionLineWithDefiners      :: ( Plane_ plane r, Ord r, Fractional r)
-                                  => plane -> plane -> Maybe (LinePV 2 r :+ EdgeDefiners plane)
-intersectionLineWithDefiners h h' = (:+ EdgeDefiners h h') <$> intersectionLine' h h'
 
--- | Computes the line in which the two planes intersect. The returned line will have h to
--- its left and h' to its right.
---
---
-intersectionLine'      :: ( Plane_ plane r, Ord r, Fractional r)
-                       => plane -> plane -> Maybe (LinePV 2 r)
-intersectionLine' h h' = intersectionLine h h' <&> \case
-    Vertical x    -> reorient (LinePV (Point2 x 0) (Vector2 0 1)) (Point2 (x-1) 0)
-    NonVertical l -> let l'@(LinePV p _) = fromLineEQ l
-                     in reorient l' (p&yCoord %~ (+1))
-  where
-    -- make sure h is to the left of the line
-    reorient l q = let f = evalAt q
-                   in if f h <= f h' then l else l&direction %~ negated
-    fromLineEQ (LineEQ a b) = fromLinearFunction a b
+
 
 --------------------------------------------------------------------------------
 -- * Convenience functions

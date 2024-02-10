@@ -6,6 +6,7 @@ module HGeometry.LowerEnvelope.Type
   , traverseBoundedV
 
   , LEEdge(Edge)
+  -- , createEdge
   , destination, leftPlane, rightPlane
   , flipEdge
   ) where
@@ -98,6 +99,13 @@ data LEEdge plane = Edge { _destination :: {-# UNPACK #-}!VertexID
                          , _rightPlane  :: plane
                          } deriving stock (Show,Eq,Ord,Functor,Foldable,Traversable)
 
+-- -- | Create an edge
+-- createEdge         :: VertexID  -- ^ the destination
+--                    -> plane     -- ^ the left plane
+--                    -> plane     -- ^ the right plane
+--                    -> LEEdge plane
+-- createEdge u hl hr = Edge u hl hr
+
 -- | Given some vertex u and an edge e from u towards some other
 -- vertex v, flip the edge e, s othat it is the edge from v to u.
 flipEdge                  :: VertexID -> LEEdge plane -> LEEdge plane
@@ -115,3 +123,5 @@ leftPlane = lens _leftPlane (\ed h -> ed { _leftPlane = h })
 -- | Lens to access the plane right of/below the edge
 rightPlane :: Lens' (LEEdge plane) plane
 rightPlane = lens _rightPlane (\ed h -> ed { _rightPlane = h })
+
+--------------------------------------------------------------------------------

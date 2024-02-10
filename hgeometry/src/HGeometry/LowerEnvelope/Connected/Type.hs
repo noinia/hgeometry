@@ -26,6 +26,13 @@ module HGeometry.LowerEnvelope.Connected.Type
 
   , EdgeGeometry
   , projectedEdgeGeometries, projectedEdgeGeometry
+
+
+
+  , edgeIntersectionLine
+  , intersectionLine'
+  , intersectionLineWithDefiners
+  , EdgeDefiners(..)
   ) where
 
 import           Control.Applicative
@@ -235,6 +242,7 @@ intersectionLineWithDefiners      :: ( Plane_ plane r, Ord r, Fractional r)
                                   => plane -> plane -> Maybe (LinePV 2 r :+ EdgeDefiners plane)
 intersectionLineWithDefiners h h' = (:+ EdgeDefiners h h') <$> intersectionLine' h h'
 
+
 -- | Computes the line in which the two planes intersect. The returned line will have h to
 -- its left and h' to its right.
 --
@@ -251,6 +259,12 @@ intersectionLine' h h' = intersectionLine h h' <&> \case
                    in if f h <= f h' then l else l&direction %~ negated
     fromLineEQ (LineEQ a b) = fromLinearFunction a b
 
+-- | Computes the supportingline of the (downward projection of) the edge.
+edgeIntersectionLine   :: ( Plane_ plane r, Ord r, Fractional r)
+                       => LEEdge plane -> LinePV 2 r
+edgeIntersectionLine e = case intersectionLine' (e^.leftPlane) (e^.rightPlane) of
+    Just l  -> l
+    Nothing -> error "edgeIntersectionLine: absurd. no intersection line !?"
 
 
 
@@ -423,22 +437,30 @@ projectedEdgeGeometry               :: (Plane_ plane r, Ord r, Fractional r
                                     -> Edge (LowerEnvelope' plane)
                                     -> EdgeGeometry (Point 2 r)
 projectedEdgeGeometry env (ui,vi) e = case env^?!vertexAt ui of
-    Left unboundedVtx -> case env^?!vertexAt vi of
+    Left _unboundedVtx -> case env^?!vertexAt vi of
       Left _  -> error "projectedEdgeGeometry: absurd edge from vInfty to vInfty"
-      Right v -> unboundedEdge unboundedVtx v
+      Right v -> unboundedEdge v
     Right u           -> case env^?!vertexAt vi of
-      Left unboundedVtx -> unboundedEdge unboundedVtx u
-      Right v           -> Right $ ClosedLineSegment (u^.location2) (v^.location2)
+      Left _unboundedVtx -> unboundedEdge u
+      Right v            -> Right $ ClosedLineSegment (u^.location2) (v^.location2)
   where
-    unboundedEdge unboundedVtx v = case
---      traceShowWith ("unbEdge", e, "h=",e^.rightPlane, "h'=",e^.leftPlane, "line'",) $
-        intersectionLine' (e^.rightPlane) (e^.leftPlane) of
-      Just l  -> Left $ HalfLine (v^.location2) (l^.direction)
-                 -- edge e is oriented from the lowerId towards the higherId,
-                 -- so in particular *from* the unbounded vertex into the bounded vertex
-                 -- that means that to construct the halfline we actually wish to
-                 -- flip the left and right plane, so that the halfline is directed outwards.
-      Nothing -> error "projectedEdgeGeometry: absurd, no intersection between the planes"
+    unboundedEdge v = let dir = edgeIntersectionLine e ^.direction.to negated
+                      in Left $ HalfLine (v^.location2) dir
+    -- edge e is oriented from the lowerId towards the higherId, so in particular *from*
+    -- the unbounded vertex into the bounded vertex that means that to construct the
+    -- halfline we actually wish to flip the orientation of the line
+
+
+
+--       case
+-- --      traceShowWith ("unbEdge", e, "h=",e^.rightPlane, "h'=",e^.leftPlane, "line'",) $
+--         intersectionLine' (e^.rightPlane) (e^.leftPlane) of
+--       Just l  -> Left $ HalfLine (v^.location2) (l^.direction)
+--                  -- edge e is oriented from the lowerId towards the higherId,
+--                  -- so in particular *from* the unbounded vertex into the bounded vertex
+--                  -- that means that to construct the halfline we actually wish to
+--                  -- flip the left and right plane, so that the halfline is directed outwards.
+--       Nothing -> error "projectedEdgeGeometry: absurd, no intersection between the planes"
 
 
 --------------------------------------------------------------------------------
