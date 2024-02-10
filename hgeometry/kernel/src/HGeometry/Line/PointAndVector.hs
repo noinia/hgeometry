@@ -348,7 +348,7 @@ bisector p q = let v = q .-. p
 -- oriented such that v points into the left halfplane of m.
 --
 -- >>> perpendicularTo $ LinePV (Point2 3 4) (Vector2 (-1) 2)
--- LinePV (Point2 3 4) (Vector2 2 1
+-- LinePV (Point2 3 4) (Vector2 2 1)
 -- >>> perpendicularTo $ LinePV (Point2 (-1000) 268) (Vector2 (-50) 8)
 -- LinePV (Point2 (-1000) 268) (Vector2 8 50)
 perpendicularTo   :: Num r => LinePV 2 r -> LinePV 2 r
