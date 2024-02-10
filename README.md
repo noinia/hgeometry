@@ -79,31 +79,50 @@ using the library.
 
 # Available Geometric Algorithms and Data Structures
 
-This is a brief overview of the main available algorithms in
-HGeometry. Refer to the haddocks for more details.
+This is a brief overview of some of the main available algorithms in
+HGeometry. Refer to the haddocks for more details. HGeometry contains
+algorithms for computing
 
-* Convex hull algorithms for $n$ points in $\mathbb{R}^2$
+* the *convex hull* of $n$ points in $\mathbb{R}^2$. In particular,
 
   - worst case optimal $O(n\log n)$ time implementations of Graham
-    scan, Divide and Conquer,
+    scan and Divide and Conquer,
   - an output sensitive $O(nh)$ time Jarvis March, and
   - a QuickHull implementation (which has worst case complexity $O(n^2)$)
 
-* Closest Pair algorithms for $n$ points in $\mathbb{R}^2$
+  Furtheremore, an optimal linear time algorithm for when the points
+  are the vertices of a convex polygon.
+
+* the *closest pair* among $n$ points in $\mathbb{R}^2$
 
     - $O(n\log n)$ time using divide and conquer
 
-* Point in polygon tests (in linear time for simple polygons, and in
-  $O(\log n)$ time for convex polygons.).
+* the *intersections* among a set of $n$ line segments in
+  $\mathbb{R}^2$.
 
-* Finding tangents and extremal points with respect to a polygon
+  - The algorithm runs in $O((n+k)\log n)$ time, where
+    $k$ is the output size.
+  - Alternatively, one can of course also compute all intersections in
+    $O(n^2)$ time (which may be better if $k$ is large).
 
-  - $O(\log n)$ time for convex polygons, and
-  - linear time in case of simple polygons.
+* the *Minkowski sum* of two convex polygons. The algorithm runs in
+  optimal $O(n+m)$ time, where $n$ and $m$ are the sizes of the polygons.
 
-* Tangent finding algorithms (linear time for simple polygons and
-  $O(\log n)$ time for convex polygons).
+* if a *point lies in a polygon*. In particular,
 
+    - in linear time for simple polygons, and
+    - in $O(\log n)$ time for convex polygons.
+
+* *tangents* and *extremal points* in a polygon In particular,
+
+  - in $O(\log n)$ time for convex polygons, and
+  - in linear time in simple polygons.
+
+* a *simplification of a polyline*. In particular, an implementation
+  of
+
+  - the Imai-Iri algorithm, and
+  - the well-known Douglas Peucker algorithm.
 
 HGeometry also contains an implementation of some geometric data
 structures. In particular,
