@@ -61,8 +61,10 @@ spec = describe "Voronoi diagram tests" $ do
             [osp|simplest_out|]
     testIpe [osp|simpler.ipe|]
             [osp|simpler_out|]
-    -- testIpe [osp|simple.ipe|]
-    --         [osp|simple_out|]
+    testIpe [osp|simple.ipe|]
+            [osp|simple_out|]
+    testIpe [osp|simple1.ipe|]
+            [osp|simple1_out|]
 
 
 
