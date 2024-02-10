@@ -107,14 +107,11 @@ fromVertexForm' lEnv = LowerEnvelope v0 boundedVs
     mkVtx i (v,defs) = let j = i+1
                        in Seq.singleton ( j
                                         , Vertex v defs mempty
-                                        , [ (h,j,v,defs) | h <- F.toList defs ]
+                                        , [ Vtx h j v defs | h <- F.toList defs ]
                                         -- TODO: conceivably, we could delete the h from the
                                         -- defs here already? instead of in the various delete h
                                         -- cases
                                         )
-
-    definingPlane (h,_,_,_) = h
-
 
 -- | For each bounded vertex (represented by their ID) the outgoing halfedge.
 type FaceEdges plane = NonEmpty (VertexID, LEEdge plane)
@@ -169,17 +166,12 @@ extractEdgeDefs h u uDefs v vDefs
 --------------------------------------------------------------------------------
 
 -- TODO: move to the definition below
-data IntermediateVertex' plane =
-  IntermediateVertex' { ivPlane :: plane
-                      , ivId    :: {-# UNPACK #-} !VertexID
-                      , ivLoc   :: Point 3 (NumType plane)
-                      , ivDefs  :: VertexForm.Definers plane
-                      , ivEdges :: Seq.Seq (LEEdge plane)
-                      }
-
-type IntermediateVertex plane =
-  (plane, VertexID, Point 3 (NumType plane), VertexForm.Definers plane)
-
+data IntermediateVertex plane = Vtx { definingPlane :: !plane
+                                    , ivId          :: {-# UNPACK #-} !VertexID
+                                    , ivLoc         :: !(Point 3 (NumType plane))
+                                    , _ivDefs       :: VertexForm.Definers plane
+                                    -- , ivEdges :: Seq.Seq (LEEdge plane)
+                                    }
 
 --------------------------------------------------------------------------------
 
@@ -193,8 +185,8 @@ sortAlongBoundary      :: forall plane r. (Plane_ plane r, Ord r, Num r
                        => NonEmptyVector (IntermediateVertex plane)
                        -> NonEmptyVector (IntermediateVertex plane)
 sortAlongBoundary face = case mv0 of
-    Nothing            -> face -- already sorted, since there is only one vertex
-    Just (_, _, v0, _) -> NonEmptyV.unsafeFromVector $ sortBy (cmpAround $ v1 .-. v0) face
+    Nothing             -> face -- already sorted, since there is only one vertex
+    Just (Vtx _ _ v0 _) -> NonEmptyV.unsafeFromVector $ sortBy (cmpAround $ v1 .-. v0) face
     -- TODO: I guess that in degenerate situations, there now may be consecutive
     -- points (vertices) at the same location. We should group those and get rid of them?
   where
@@ -205,30 +197,30 @@ sortAlongBoundary face = case mv0 of
 
     -- To get the list of vertices in CCW order along the face, we then sort the vertices
     -- around v1
-    (_, iv1, v1, _) = minimumBy (comparing (^._3)) face
+    Vtx _ iv1 v1 _ = minimumBy (comparing ivLoc) face
     v1' = projectPoint v1
     -- its predecessor v0, if it exists
     mv0 :: Maybe (IntermediateVertex plane)
     mv0 = foldr findPred Nothing face
-    findPred v@(_, iv, _, _) acc
-      | iv == iv1 = acc -- skip v1 itself
+    findPred v acc
+      | ivId v == iv1 = acc -- skip v1 itself
       | otherwise = Just $ case acc of
                              Nothing -> v -- anything is better than nothing
                              Just u  -> maxBy cmpSlope' u v
 
-    cmpSlope' :: IntermediateVertex plane -> IntermediateVertex plane -> Ordering
-    cmpSlope' (_, _, u, _) (_, _, v, _) = case ccw v1' (projectPoint u) (projectPoint v) of
-                                            CCW      -> GT
-                                            CW       -> LT
-                                            CoLinear -> EQ
+    cmpSlope'     :: IntermediateVertex plane -> IntermediateVertex plane -> Ordering
+    cmpSlope' u v = case ccw v1' (projectPoint $ ivLoc u) (projectPoint $ ivLoc v) of
+                      CCW      -> GT
+                      CW       -> LT
+                      CoLinear -> EQ
 
     -- | sort the vertices around the direction wrt. (the downward projection of) w
     cmpAround :: Vector 3 r -> IntermediateVertex plane -> IntermediateVertex plane -> Ordering
-    cmpAround w (_, _, u, _) (_, _, v, _) =
+    cmpAround w u v =
         ccwCmpAroundWith (Vec.prefix w) v1' u' v' <> cmpByDistanceTo v1' u' v'
       where
-        u' = projectPoint u
-        v' = projectPoint v
+        u' = projectPoint $ ivLoc u
+        v' = projectPoint $ ivLoc v
 
 -- | given an edge (u,v) that has h to its left, and all remaining vertices of the face,
 -- sorted in CCW order around the face starting with *v*, compute all its edgesf
@@ -243,13 +235,13 @@ faceToEdges faceV = case toNonEmpty faceV of
   where
     manyVertices = NonEmptyV.zipWith3 mkEdge (shiftR (-1) faceV) faceV (shiftR 1 faceV)
 
-    mkEdge (_,uIdx,up,uDefs) (h,vIdx,vp,vDefs) (_,wIdx,wp,wDefs) =
+    mkEdge (Vtx _ uIdx up uDefs) (Vtx h vIdx vp vDefs) (Vtx _ wIdx wp wDefs) =
       case extractEdgeDefs h vp vDefs wp wDefs of
         Nothing -> -- vw are separated by the unbounded vertex
                     case extractEdgeDefs h up uDefs vp vDefs of
                       Nothing                    ->
                         error "mkEdge: absurd, u and v don't share a plane!?"
-                      Just (EdgeDefs hUV _hu hv) -> (vIdx, Edge unboundedVertexId h hv)
+                      Just (EdgeDefs _hUV _hu hv) -> (vIdx, Edge unboundedVertexId h hv)
         Just (EdgeDefs hVW _ _) -> (vIdx, Edge wIdx h hVW)
       -- the main idea is that every pair of subsequent bounded vertices necessarily has
       -- exactly one defining plane, except for when two bounded vertices are separted by
@@ -257,11 +249,11 @@ faceToEdges faceV = case toNonEmpty faceV of
 
 
 -- | compute the face edges of the face of h, when v is the only vertex incident to h.
-oneVertex              :: (Plane_ plane r, Ord r, Fractional r, Ord plane
-                          , Show plane, Show r
-                          )
-                       => IntermediateVertex plane -> FaceEdges plane
-oneVertex (h,i,v,defs) = case List.sort outgoingEdges of
+oneVertex                  :: (Plane_ plane r, Ord r, Fractional r, Ord plane
+                              , Show plane, Show r
+                              )
+                           => IntermediateVertex plane -> FaceEdges plane
+oneVertex (Vtx h i v defs) = case List.sort outgoingEdges of
     [ Left _hPred, Right hSucc ] -> NonEmpty.singleton (i, Edge unboundedVertexId h hSucc)
     _ -> error "oneVertex. absurd. Other than a single Left, and Right"
   where
@@ -288,7 +280,7 @@ twoVertices  :: (Plane_ plane r, Ord r, Fractional r, Ord plane
                 , Show plane, Show r
                 )
              => IntermediateVertex plane -> IntermediateVertex plane -> FaceEdges plane
-twoVertices u@(h,ui,up,uDefs) v@(_,vi,vp,vDefs) =
+twoVertices (Vtx h ui up uDefs) (Vtx _ vi vp vDefs) =
   case extractEdgeDefs h up uDefs vp vDefs >>= withUVOrder of
       Nothing  -> error "twoVertices. absurd, h and h' don't define an edge!?"
       Just (EdgeDefs hr hu hv, uBeforeV) -- -> traceShowWith ("twoVertices",u,v,uBeforeV,) $
@@ -297,8 +289,8 @@ twoVertices u@(h,ui,up,uDefs) v@(_,vi,vp,vDefs) =
                                         ]
                       -- the edge must be oriented from v to u so that h is on the left
         | otherwise  -> NonEmpty.fromList [ (ui, Edge vi                h hr)
-                                         , (vi, Edge unboundedVertexId h hv)
-                                         ]
+                                          , (vi, Edge unboundedVertexId h hv)
+                                          ]
                         -- the edge must be oriented from u to v
   where
     -- determine if u lies before v in the order of u and v along the intersection line of
