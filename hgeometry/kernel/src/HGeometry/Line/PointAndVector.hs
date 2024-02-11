@@ -33,11 +33,12 @@ import qualified Data.Foldable as F
 import           Data.Ord (comparing)
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
+import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.Intersection
 import           HGeometry.Line.Class
-import           HGeometry.Line.LineEQ
 import           HGeometry.Line.Intersection
+import           HGeometry.Line.LineEQ
 import           HGeometry.Point
 -- import           HGeometry.Point.EuclideanDistance
 -- import           HGeometry.Point.Orientation.Degenerate
@@ -242,6 +243,9 @@ instance ( Ord r
 -- that contains the thing of type t.
 class HasSupportingLine t where
   supportingLine :: t -> LinePV (Dimension t) (NumType t)
+
+instance HasSupportingLine t => HasSupportingLine (t :+ extra) where
+  supportingLine = supportingLine . view core
 
 instance HasSupportingLine (LinePV d r) where
   supportingLine = id

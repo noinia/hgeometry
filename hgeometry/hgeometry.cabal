@@ -403,6 +403,9 @@ library
         HGeometry.RangeTree
         HGeometry.RangeTree.Base
 
+        HGeometry.VerticalRayShooting
+        HGeometry.VerticalRayShooting.PersistentSweep
+
     other-modules:
        HGeometry.Polygon.Simple.Implementation
        HGeometry.Polygon.Simple.InPolygon
@@ -417,11 +420,11 @@ library
        HGeometry.LowerEnvelope.Type
        HGeometry.LowerEnvelope.Connected.Type
        HGeometry.LowerEnvelope.Connected.FromVertexForm
+       -- HGeometry.LowerEnvelope.Sample
+
 
        -- HGeometry.LowerEnvelope.AtMostThree
        -- HGeometry.LowerEnvelope.Triangulate
-
-       -- HGeometry.LowerEnvelope.Sample
 
        HGeometry.VoronoiDiagram.ViaLowerEnvelope
 
@@ -629,6 +632,7 @@ test-suite hspec
       SegmentTreeSpec
       SegmentTree.R2Spec
       RangeTreeSpec
+      VerticalRayShootingSpec
 
   hs-source-dirs: test
   build-depends:

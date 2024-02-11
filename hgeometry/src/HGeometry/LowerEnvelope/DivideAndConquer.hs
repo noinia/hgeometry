@@ -1,20 +1,23 @@
 module HGeometry.LowerEnvelope.DivideAndConquer
   ( lowerEnvelope
-  , lowerEnvelopeWith
   ) where
 
-
--- import Control.Monad.Random
-import           HGeometry.LowerEnvelope.Type
-import           Witherable
-import           System.Random.Stateful
-import           Control.Monad.State.Class
 import           Control.Lens
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.Map as Map
 import           Data.Word
+import           HGeometry.HyperPlane.Class
+import           HGeometry.HyperPlane.NonVertical
+import           HGeometry.LowerEnvelope.AdjListForm
+import           HGeometry.LowerEnvelope.EpsApproximation
 import qualified HGeometry.LowerEnvelope.Naive as Naive
 import           HGeometry.LowerEnvelope.Sample
-
---------------------------------------------------------------------------------
+import           HGeometry.LowerEnvelope.Type
+import           HGeometry.LowerEnvelope.VertexForm
+import           HGeometry.Point
+import           HGeometry.Properties
+import           Witherable
 
 --------------------------------------------------------------------------------
 
@@ -29,45 +32,85 @@ eps = 1/8 -- TODO figure out what this had to be again.
 
 -- | divide and conquer algorithm
 --
--- expected running time: \(O(n \log n)\)
-lowerEnvelope    :: ( Foldable f, Ord r, Fractional r
-                    , RandomGen gen, MonadState gen m
-                    )
-                  => f (Plane r) -> m (LowerEnvelope [] Boxed.Vector r)
-lowerEnvelope hs
-  | n <= nZero = pure $ Naive.lowerEnvelope hs
-  | otherwise  = do ss            <- sample p hs
-                    (env, prisms) <- computePrisms hs ss
-                    subEnvs       <- mapM (over conflictList (SubEnv . lowerEnvelope)) prisms
-                    merge env subEnvs
-  where
-    n = length hs
-    s = n ^^^ (1-eps)
-    p = probability s n
+-- running time: \(O(n \log n)\)
+lowerEnvelope    :: ( Plane_ plane r
+                    , Ord r, Fractional r, Foldable f, Functor f, Ord plane
+                    , Show plane, Show r
+                    ) => f plane -> LowerEnvelope plane
+lowerEnvelope = fromVertexForm . lowerEnvelopeVertexForm
 
-data SubEnv plane = SubEnv (LowerEnvelope [] Boxed.Vector (NumType plane))
+-- FIXME: make sure not all planes are parallel first, otherwise the triangulatedEnvelope part is kind of weird.
 
--- | Run the divide and conquer algorithm with a given generator.
+-- | Compute the vertices of the lower envelope
 --
--- expected running time: \(O(n \log n)\)
-lowerEnvelopeWith     :: ( Foldable f, Ord r, Fractional r
-                         , RandomGen gen
-                         )
-                      => gen -> f (Plane r) -> m (LowerEnvelope [] Boxed.Vector r)
-lowerEnvelopeWith gen = runStateGen gen . lowerEnvelope
+--
+-- running time: \(O(n \log n)\)
+lowerEnvelopeVertexForm    :: forall f plane r.
+                              ( Plane_ plane r
+                              , Ord r, Fractional r, Foldable f, Ord plane
+                              ) => f plane -> VertexForm plane
+lowerEnvelopeVertexForm hs
+    | n <= nZero = Naive.lowerEnvelopeVertexForm hs
+    | otherwise  = undefined
+  where
+    r = undefined
+    s = undefined
 
---------------------------------------------------------------------------------
+    as  = epsApproximation r hs
+    env = triangulatedLowerEnvelope as
 
--- | represents the result after computing the lower envelope on the conflict lists
-data SubEnv plane = SubEnv (LowerEnvelope [] Boxed.Vector (NumType plane))
 
---------------------------------------------------------------------------------
+    conflictLists' = computeConflictLists env hs
 
--- | Given the gloal envelope, and the envelopes of of the prisms,
--- merge them into one big structure
-merge              :: LowerEnvelope [] Boxed.Vector r
-                   -> f (Prism SubEnv r)
-                   -> LowerEnvelope [] Boxed.Vector r
-merge env _subEnvs = pure env -- TODO
+    superCells = formSuperCells s env
 
---------------------------------------------------------------------------------
+    conflictLists = undefined --- combineConlictLists
+
+
+
+
+    -- do ss            <- sample p hs
+    --                 (env, prisms) <- computePrisms hs ss
+    --                 subEnvs       <- mapM (over conflictList lowerEnvelope) prisms
+    --                 merge env subEnvs
+    n = length hs
+    -- s = n ^^^ (1-eps)
+    -- p = probability s n
+
+
+type TriangulatedLowerEnvelope plane = LowerEnvelope' plane
+
+triangulatedLowerEnvelope :: ( Plane_ plane r
+                             , Ord r, Fractional r, Foldable f, Functor f, Ord plane
+                             , Show plane, Show r
+                             ) => f plane -> TriangulatedLowerEnvelope plane
+triangulatedLowerEnvelope = undefined
+
+
+type SuperCell plane = SuperCell' (NumType plane) plane
+data SuperCell' r plane = SuperCell
+                          -- { boundary :: SimplePolygon (Point 2 r)
+                          -- , internalVertices :: [BoundedVertex plane]
+                          -- }
+
+
+
+formSuperCells :: Int -- ^ the number of triangles s in each super cell
+               -> TriangulatedLowerEnvelope plane
+               -> NonEmpty (SuperCell plane)
+formSuperCells = undefined
+
+
+-- newtype VerticesWithConflictLists
+
+newtype Vertex' plane = Vertex' (Point 3 (NumType plane))
+
+
+computeConflictLists :: TriangulatedLowerEnvelope plane
+                     -> f plane
+                     -> Map.Map (Vertex' plane) (f plane)
+computeConflictLists = undefined
+
+
+mergeConflictLists :: Map.Map (Vertex' plane) (f plane)
+mergeConflictLists = undefined
