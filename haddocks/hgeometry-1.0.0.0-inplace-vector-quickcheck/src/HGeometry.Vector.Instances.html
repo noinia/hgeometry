@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE QuantifiedConstraints #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -Wno-orphans #-}</span><span>
+</span><span id="line-4"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Module      :  HGeometry.Vector.Instances</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Arbitrary instances for the types in hgeometry-vector</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.Vector.Instances</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- import Control.Lens</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- import D</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- import HGeometry.Vector.Class</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.14.3-1223e67aa49e8f1f827da39dcd19cae13ea5d33f6fb28f3d2f0f0196e5acced5/share/doc/html/src/Test.QuickCheck.html"><span class="hs-identifier">Test.QuickCheck</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.html"><span class="hs-identifier">HGeometry.Vector</span></a></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679089199"><span id="local-6989586621679089200"><span id="local-6989586621679089213"><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.14.3-1223e67aa49e8f1f827da39dcd19cae13ea5d33f6fb28f3d2f0f0196e5acced5/share/doc/html/src/Test.QuickCheck.Arbitrary.html#Arbitrary"><span class="hs-identifier hs-type">Arbitrary</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679089199"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Vector_"><span class="hs-identifier hs-type">Vector_</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679089200"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679089199"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679089200"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679089199"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.14.3-1223e67aa49e8f1f827da39dcd19cae13ea5d33f6fb28f3d2f0f0196e5acced5/share/doc/html/src/Test.QuickCheck.Arbitrary.html#Arbitrary"><span class="hs-identifier hs-type">Arbitrary</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679089200"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679089199"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-25"></span><span>  </span><span id="local-6989586621679089234"><span class="annot"><span class="annottext">arbitrary :: Gen (Vector d r)
+</span><a href="#local-6989586621679089234"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Gen r) -&gt; Gen (Vector d r)
+forall vector (d :: Nat) r (f :: * -&gt; *).
+(Vector_ vector d r, Applicative f) =&gt;
+(Int -&gt; f r) -&gt; f vector
+forall (f :: * -&gt; *).
+Applicative f =&gt;
+(Int -&gt; f r) -&gt; f (Vector d r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#generateA"><span class="hs-identifier hs-var">generateA</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Gen r -&gt; Int -&gt; Gen r
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">Gen r
+forall a. Arbitrary a =&gt; Gen a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.14.3-1223e67aa49e8f1f827da39dcd19cae13ea5d33f6fb28f3d2f0f0196e5acced5/share/doc/html/src/Test.QuickCheck.Arbitrary.html#arbitrary"><span class="hs-identifier hs-var">arbitrary</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- instance ( forall r. VectorLike_ (Vector d r)</span><span>
+</span><span id="line-28"></span><span class="hs-comment">--          ) =&gt; Arbitrary1 (Vector d) where</span><span>
+</span><span id="line-29"></span><span class="hs-comment">--   liftArbitrary gen = generateA (const gen)</span><span>
+</span><span id="line-30"></span><span class="hs-comment">--   -- I think this instance is unreachable, so let's comment it for now.</span><span>
+</span><span id="line-31"></span></pre></body></html>

@@ -1,0 +1,655 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  HGeometry.HalfLine</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Half-lines in \(d\)-dimensional space.</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.HalfLine</span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier">HalfLine</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.HalfLine.html#halfLineThrough"><span class="hs-identifier">halfLineThrough</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.HalfLine.html#LineHalfLineIntersection"><span class="hs-identifier">LineHalfLineIntersection</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.TypeLits</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html"><span class="hs-identifier">HGeometry.Intersection</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Interval.Class.html"><span class="hs-identifier">HGeometry.Interval.Class</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Line.Intersection.html"><span class="hs-identifier">HGeometry.Line.Intersection</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Line.PointAndVector.html"><span class="hs-identifier">HGeometry.Line.PointAndVector</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.html"><span class="hs-identifier">HGeometry.Point</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Properties.html"><span class="hs-identifier">HGeometry.Properties</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.html"><span class="hs-identifier">HGeometry.Vector</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Read</span></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="annot"><span class="hs-comment">-- | A Halfline in R^d</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">data</span><span> </span><span id="HalfLine"><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-var">HalfLine</span></a></span></span><span> </span><span id="local-6989586621679296011"><span class="annot"><a href="#local-6989586621679296011"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="HalfLine"><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-var">HalfLine</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679296011"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-34"></span><span>                               </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Properties.html#Dimension"><span class="hs-identifier hs-type">Dimension</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296011"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296011"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Properties.html#Dimension"><span class="hs-identifier hs-var">Dimension</span></a></span></span><span> </span><span id="local-6989586621679296137"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296137"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Properties.html#Dimension"><span class="hs-identifier hs-type">Dimension</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296137"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Properties.html#NumType"><span class="hs-identifier hs-var">NumType</span></a></span></span><span>   </span><span id="local-6989586621679296138"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296138"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296138"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span id="local-6989586621679295964"><span id="local-6989586621679295965"><span id="local-6989586621679295966"><span id="local-6989586621679296144"><span id="local-6989586621679296148"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679295964"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679295965"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679295966"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span>                  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679295965"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Properties.html#Dimension"><span class="hs-identifier hs-type">Dimension</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679295964"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679295966"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679295964"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679295964"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679295982"><span id="local-6989586621679295983"><span id="local-6989586621679295984"><span id="local-6989586621679296169"><span id="local-6989586621679296178"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679295982"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679295983"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679295984"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Properties.html#Dimension"><span class="hs-identifier hs-type">Dimension</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679295982"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679295983"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679295982"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-43"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679295984"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Has_"><span class="hs-identifier hs-type">Has_</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Additive_"><span class="hs-identifier hs-type">Additive_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679295984"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679295983"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-44"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679295982"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-45"></span><span>  </span><span id="local-6989586621679296208"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; HalfLine point -&gt; ShowS
+</span><a href="#local-6989586621679296208"><span class="hs-identifier hs-var hs-var hs-var hs-var">showsPrec</span></a></span></span><span> </span><span id="local-6989586621679296210"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679296210"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span id="local-6989586621679296211"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296211"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679296212"><span class="annot"><span class="annottext">Vector (Dimension point) (NumType point)
+</span><a href="#local-6989586621679296212"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ShowS -&gt; ShowS
+</span><span class="hs-identifier hs-var">showParen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679296210"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="HGeometry.HalfLine.html#appPrec"><span class="hs-identifier hs-var">appPrec</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; ShowS) -&gt; ShowS -&gt; ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-46"></span><span>                                 </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;HalfLine &quot;</span></span><span>
+</span><span id="line-47"></span><span>                               </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; point -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="HGeometry.HalfLine.html#appPrec"><span class="hs-identifier hs-var">appPrec</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296211"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-48"></span><span>                               </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
+</span><span class="hs-identifier hs-var">showChar</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">' '</span></span><span>
+</span><span id="line-49"></span><span>                               </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Vector d r -&gt; ShowS
+forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
+</span><span class="hs-identifier hs-var">showsPrec</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="HGeometry.HalfLine.html#appPrec"><span class="hs-identifier hs-var">appPrec</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector d r
+Vector (Dimension point) (NumType point)
+</span><a href="#local-6989586621679296212"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- instance ( Show r, KnownNat d, Has_ Additive_ d r</span><span>
+</span><span id="line-52"></span><span class="hs-comment">--          ) =&gt; Show (HalfLine d r) where</span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="annot"><a href="HGeometry.HalfLine.html#appPrec"><span class="hs-identifier hs-type">appPrec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-55"></span><span id="appPrec"><span class="annot"><span class="annottext">appPrec :: Int
+</span><a href="HGeometry.HalfLine.html#appPrec"><span class="hs-identifier hs-var hs-var">appPrec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">10</span></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679296001"><span id="local-6989586621679296002"><span id="local-6989586621679296003"><span id="local-6989586621679296227"><span id="local-6989586621679296236"><span id="local-6989586621679296245"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="#local-6989586621679296001"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="#local-6989586621679296002"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Has_"><span class="hs-identifier hs-type">Has_</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Additive_"><span class="hs-identifier hs-type">Additive_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296003"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296001"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679296003"><span class="hs-identifier hs-type">d</span></a></span><span>
+</span><span id="line-58"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679296003"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Properties.html#Dimension"><span class="hs-identifier hs-type">Dimension</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296002"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679296001"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296002"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-59"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296002"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>  </span><span id="local-6989586621679296275"><span class="annot"><span class="annottext">readPrec :: ReadPrec (HalfLine point)
+</span><a href="#local-6989586621679296275"><span class="hs-identifier hs-var hs-var hs-var hs-var">readPrec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReadPrec (HalfLine point) -&gt; ReadPrec (HalfLine point)
+forall a. ReadPrec a -&gt; ReadPrec a
+</span><span class="hs-identifier hs-var">parens</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; ReadPrec (HalfLine point) -&gt; ReadPrec (HalfLine point)
+forall a. Int -&gt; ReadPrec a -&gt; ReadPrec a
+</span><span class="hs-identifier hs-var">prec</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="HGeometry.HalfLine.html#appPrec"><span class="hs-identifier hs-var">appPrec</span></a></span><span> </span><span class="annot"><span class="annottext">(ReadPrec (HalfLine point) -&gt; ReadPrec (HalfLine point))
+-&gt; ReadPrec (HalfLine point) -&gt; ReadPrec (HalfLine point)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-61"></span><span>                        </span><span class="annot"><span class="hs-identifier hs-type">Ident</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;HalfLine&quot;</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ReadPrec Lexeme
+</span><span class="hs-identifier hs-var">lexP</span></span><span>
+</span><span id="line-62"></span><span>                        </span><span id="local-6989586621679296281"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296281"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ReadPrec point -&gt; ReadPrec point
+forall a. ReadPrec a -&gt; ReadPrec a
+</span><span class="hs-identifier hs-var">step</span></span><span> </span><span class="annot"><span class="annottext">ReadPrec point
+forall a. Read a =&gt; ReadPrec a
+</span><span class="hs-identifier hs-var">readPrec</span></span><span>
+</span><span id="line-63"></span><span>                        </span><span id="local-6989586621679296283"><span class="annot"><span class="annottext">Vector d r
+</span><a href="#local-6989586621679296283"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ReadPrec (Vector d r) -&gt; ReadPrec (Vector d r)
+forall a. ReadPrec a -&gt; ReadPrec a
+</span><span class="hs-identifier hs-var">step</span></span><span> </span><span class="annot"><span class="annottext">ReadPrec (Vector d r)
+forall a. Read a =&gt; ReadPrec a
+</span><span class="hs-identifier hs-var">readPrec</span></span><span>
+</span><span id="line-64"></span><span>                        </span><span class="annot"><span class="annottext">HalfLine point -&gt; ReadPrec (HalfLine point)
+forall a. a -&gt; ReadPrec a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point -&gt; Vector (Dimension point) (NumType point) -&gt; HalfLine point
+forall point.
+point -&gt; Vector (Dimension point) (NumType point) -&gt; HalfLine point
+</span><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-var">HalfLine</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296281"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Vector d r
+Vector (Dimension point) (NumType point)
+</span><a href="#local-6989586621679296283"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679296017"><span class="annot"><a href="HGeometry.Interval.Class.html#HasStart"><span class="hs-identifier hs-type">HasStart</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296017"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679296017"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-67"></span><span>  </span><span id="local-6989586621679296289"><span class="annot"><span class="annottext">start :: Lens' (HalfLine point) point
+</span><a href="#local-6989586621679296289"><span class="hs-identifier hs-var hs-var hs-var hs-var">start</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(HalfLine point -&gt; point)
+-&gt; (HalfLine point -&gt; point -&gt; HalfLine point)
+-&gt; Lens' (HalfLine point) point
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span id="local-6989586621679296292"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296292"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="annottext">Vector (Dimension point) (NumType point)
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296292"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679296293"><span class="annot"><span class="annottext">Vector (Dimension point) (NumType point)
+</span><a href="#local-6989586621679296293"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679296294"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296294"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">point -&gt; Vector (Dimension point) (NumType point) -&gt; HalfLine point
+forall point.
+point -&gt; Vector (Dimension point) (NumType point) -&gt; HalfLine point
+</span><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-var">HalfLine</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296294"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (Dimension point) (NumType point)
+</span><a href="#local-6989586621679296293"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.Interval.Class.html#start"><span class="hs-pragma hs-type">start</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679296029"><span class="annot"><a href="HGeometry.Line.PointAndVector.html#HasDirection"><span class="hs-identifier hs-type">HasDirection</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296029"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-71"></span><span>  </span><span id="local-6989586621679296310"><span class="annot"><span class="annottext">direction :: forall (d :: Nat) r.
+(Dimension (HalfLine point) ~ d, NumType (HalfLine point) ~ r) =&gt;
+Lens' (HalfLine point) (Vector d r)
+</span><a href="#local-6989586621679296310"><span class="hs-identifier hs-var hs-var hs-var hs-var">direction</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(HalfLine point -&gt; Vector d r)
+-&gt; (HalfLine point -&gt; Vector d r -&gt; HalfLine point)
+-&gt; Lens (HalfLine point) (HalfLine point) (Vector d r) (Vector d r)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679296312"><span class="annot"><span class="annottext">Vector (Dimension point) (NumType point)
+</span><a href="#local-6989586621679296312"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Vector d r
+Vector (Dimension point) (NumType point)
+</span><a href="#local-6989586621679296312"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span id="local-6989586621679296313"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296313"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="annottext">Vector (Dimension point) (NumType point)
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679296314"><span class="annot"><span class="annottext">Vector d r
+</span><a href="#local-6989586621679296314"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">point -&gt; Vector (Dimension point) (NumType point) -&gt; HalfLine point
+forall point.
+point -&gt; Vector (Dimension point) (NumType point) -&gt; HalfLine point
+</span><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-var">HalfLine</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296313"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Vector d r
+Vector (Dimension point) (NumType point)
+</span><a href="#local-6989586621679296314"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#direction"><span class="hs-pragma hs-type">direction</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679296040"><span id="local-6989586621679296041"><span id="local-6989586621679296042"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296040"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296041"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296042"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#HasSupportingLine"><span class="hs-identifier hs-type">HasSupportingLine</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296040"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-75"></span><span>  </span><span id="local-6989586621679296332"><span class="annot"><span class="annottext">supportingLine :: HalfLine point
+-&gt; LinePV (Dimension (HalfLine point)) (NumType (HalfLine point))
+</span><a href="#local-6989586621679296332"><span class="hs-identifier hs-var hs-var hs-var hs-var">supportingLine</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span id="local-6989586621679296334"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296334"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679296335"><span class="annot"><span class="annottext">Vector (Dimension point) (NumType point)
+</span><a href="#local-6989586621679296335"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; Vector d r -&gt; LinePV d r
+forall (d :: Nat) r. Point d r -&gt; Vector d r -&gt; LinePV d r
+</span><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-var">LinePV</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296334"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Point d r) point (Point d r) -&gt; Point d r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point d r) point (Point d r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' point (Point d r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.html#asPoint"><span class="hs-identifier hs-var">asPoint</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector d r
+Vector (Dimension point) (NumType point)
+</span><a href="#local-6989586621679296335"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#supportingLine"><span class="hs-pragma hs-type">supportingLine</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679296066"><span id="local-6989586621679296067"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679296066"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679296066"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296067"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679296066"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-82"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#HasIntersectionWith"><span class="hs-identifier hs-type">HasIntersectionWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-type">LinePV</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679296066"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296067"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-83"></span><span>  </span><span id="local-6989586621679296370"><span class="annot"><span class="annottext">l :: LinePV 2 r
+</span><a href="#local-6989586621679296370"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-type">LinePV</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679296371"><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679296371"><span class="hs-identifier hs-var">u</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679296372"><span class="annot"><span class="annottext">intersects :: LinePV 2 r -&gt; HalfLine point -&gt; Bool
+</span><a href="#local-6989586621679296372"><span class="hs-operator hs-var hs-var hs-var hs-var">`intersects`</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span id="local-6989586621679296374"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296374"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679296375"><span class="annot"><span class="annottext">Vector (Dimension point) (NumType point)
+</span><a href="#local-6989586621679296375"><span class="hs-identifier hs-var">w</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296374"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; LinePV 2 r -&gt; SideTest
+forall r point.
+(Ord r, Num r, Point_ point 2 r) =&gt;
+point -&gt; LinePV 2 r -&gt; SideTest
+</span><a href="HGeometry.Line.PointAndVector.html#onSide"><span class="hs-operator hs-var">`onSide`</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV 2 r
+</span><a href="#local-6989586621679296370"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-84"></span><span>      </span><span class="annot"><span class="annottext">SideTest
+</span><a href="HGeometry.Line.PointAndVector.html#OnLine"><span class="hs-identifier hs-var">OnLine</span></a></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-85"></span><span>      </span><span class="annot"><span class="annottext">SideTest
+</span><a href="HGeometry.Line.PointAndVector.html#LeftSide"><span class="hs-identifier hs-var">LeftSide</span></a></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296374"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; Vector 2 r -&gt; point
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; Vector d r -&gt; point
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.Class.html#.%2B%5E"><span class="hs-operator hs-var">.+^</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+Vector (Dimension point) (NumType point)
+</span><a href="#local-6989586621679296375"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">point -&gt; LinePV 2 r -&gt; SideTest
+forall r point.
+(Ord r, Num r, Point_ point 2 r) =&gt;
+point -&gt; LinePV 2 r -&gt; SideTest
+</span><a href="HGeometry.Line.PointAndVector.html#onSide"><span class="hs-operator hs-var">`onSide`</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV 2 r
+</span><a href="#local-6989586621679296380"><span class="hs-identifier hs-var">l'</span></a></span><span> </span><span class="annot"><span class="annottext">SideTest -&gt; SideTest -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">SideTest
+</span><a href="HGeometry.Line.PointAndVector.html#RightSide"><span class="hs-identifier hs-var">RightSide</span></a></span><span>
+</span><span id="line-86"></span><span>      </span><span class="annot"><span class="annottext">SideTest
+</span><a href="HGeometry.Line.PointAndVector.html#RightSide"><span class="hs-identifier hs-var">RightSide</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296374"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; Vector 2 r -&gt; point
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; Vector d r -&gt; point
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.Class.html#.%2B%5E"><span class="hs-operator hs-var">.+^</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+Vector (Dimension point) (NumType point)
+</span><a href="#local-6989586621679296375"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">point -&gt; LinePV 2 r -&gt; SideTest
+forall r point.
+(Ord r, Num r, Point_ point 2 r) =&gt;
+point -&gt; LinePV 2 r -&gt; SideTest
+</span><a href="HGeometry.Line.PointAndVector.html#onSide"><span class="hs-operator hs-var">`onSide`</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV 2 r
+</span><a href="#local-6989586621679296380"><span class="hs-identifier hs-var">l'</span></a></span><span> </span><span class="annot"><span class="annottext">SideTest -&gt; SideTest -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">SideTest
+</span><a href="HGeometry.Line.PointAndVector.html#LeftSide"><span class="hs-identifier hs-var">LeftSide</span></a></span><span>
+</span><span id="line-87"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-88"></span><span>      </span><span id="local-6989586621679296380"><span class="annot"><span class="annottext">l' :: LinePV 2 r
+</span><a href="#local-6989586621679296380"><span class="hs-identifier hs-var hs-var">l'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Vector 2 r -&gt; LinePV 2 r
+forall (d :: Nat) r. Point d r -&gt; Vector d r -&gt; LinePV d r
+</span><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-var">LinePV</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296374"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Point 2 r) point (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' point (Point 2 r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.html#asPoint"><span class="hs-identifier hs-var">asPoint</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679296371"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><span id="line-89"></span><span>    </span><span class="hs-comment">-- we construct a line l' parallel to l that goes through the startPoint of our</span><span>
+</span><span id="line-90"></span><span>    </span><span class="hs-comment">-- ray/halfline.</span><span>
+</span><span id="line-91"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-92"></span><span>    </span><span class="hs-comment">-- Now if the start point was left of l, going in the direction of the ray we must end</span><span>
+</span><span id="line-93"></span><span>    </span><span class="hs-comment">-- up right of l'. Symmetrically, if the starting point was right of the ray, we must</span><span>
+</span><span id="line-94"></span><span>    </span><span class="hs-comment">-- go left to intersect instead.</span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Intersection"><span class="annot"><a href="HGeometry.Intersection.html#Intersection"><span class="hs-identifier hs-var">Intersection</span></a></span></span><span> </span><span id="local-6989586621679296382"><span id="local-6989586621679296383"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-type">LinePV</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679296382"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296383"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-97"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#LineHalfLineIntersection"><span class="hs-identifier hs-type">LineHalfLineIntersection</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679296382"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296383"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span class="annot"><span class="hs-comment">-- | Data type representing the intersection of a Line and a HalfLine</span></span><span>
+</span><span id="line-100"></span><span class="hs-keyword">data</span><span> </span><span id="LineHalfLineIntersection"><span class="annot"><a href="HGeometry.HalfLine.html#LineHalfLineIntersection"><span class="hs-identifier hs-var">LineHalfLineIntersection</span></a></span></span><span> </span><span id="local-6989586621679296127"><span class="annot"><a href="#local-6989586621679296127"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span id="local-6989586621679296128"><span class="annot"><a href="#local-6989586621679296128"><span class="hs-identifier hs-type">halfLine</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-101"></span><span>      </span><span id="Line_x_HalfLine_Point"><span class="annot"><a href="HGeometry.HalfLine.html#Line_x_HalfLine_Point"><span class="hs-identifier hs-var">Line_x_HalfLine_Point</span></a></span></span><span>    </span><span class="annot"><a href="#local-6989586621679296127"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-102"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span id="Line_x_HalfLine_HalfLine"><span class="annot"><a href="HGeometry.HalfLine.html#Line_x_HalfLine_HalfLine"><span class="hs-identifier hs-var">Line_x_HalfLine_HalfLine</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679296128"><span class="hs-identifier hs-type">halfLine</span></a></span><span>
+</span><span id="line-103"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679296389"><span id="local-6989586621679296395"><span id="local-6989586621679296399"><span class="annot"><span class="annottext">Int -&gt; LineHalfLineIntersection point halfLine -&gt; ShowS
+[LineHalfLineIntersection point halfLine] -&gt; ShowS
+LineHalfLineIntersection point halfLine -&gt; String
+(Int -&gt; LineHalfLineIntersection point halfLine -&gt; ShowS)
+-&gt; (LineHalfLineIntersection point halfLine -&gt; String)
+-&gt; ([LineHalfLineIntersection point halfLine] -&gt; ShowS)
+-&gt; Show (LineHalfLineIntersection point halfLine)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall point halfLine.
+(Show point, Show halfLine) =&gt;
+Int -&gt; LineHalfLineIntersection point halfLine -&gt; ShowS
+forall point halfLine.
+(Show point, Show halfLine) =&gt;
+[LineHalfLineIntersection point halfLine] -&gt; ShowS
+forall point halfLine.
+(Show point, Show halfLine) =&gt;
+LineHalfLineIntersection point halfLine -&gt; String
+$cshowsPrec :: forall point halfLine.
+(Show point, Show halfLine) =&gt;
+Int -&gt; LineHalfLineIntersection point halfLine -&gt; ShowS
+showsPrec :: Int -&gt; LineHalfLineIntersection point halfLine -&gt; ShowS
+$cshow :: forall point halfLine.
+(Show point, Show halfLine) =&gt;
+LineHalfLineIntersection point halfLine -&gt; String
+show :: LineHalfLineIntersection point halfLine -&gt; String
+$cshowList :: forall point halfLine.
+(Show point, Show halfLine) =&gt;
+[LineHalfLineIntersection point halfLine] -&gt; ShowS
+showList :: [LineHalfLineIntersection point halfLine] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679296404"><span id="local-6989586621679296408"><span class="annot"><span class="annottext">LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Bool
+(LineHalfLineIntersection point halfLine
+ -&gt; LineHalfLineIntersection point halfLine -&gt; Bool)
+-&gt; (LineHalfLineIntersection point halfLine
+    -&gt; LineHalfLineIntersection point halfLine -&gt; Bool)
+-&gt; Eq (LineHalfLineIntersection point halfLine)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall point halfLine.
+(Eq point, Eq halfLine) =&gt;
+LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Bool
+$c== :: forall point halfLine.
+(Eq point, Eq halfLine) =&gt;
+LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Bool
+== :: LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Bool
+$c/= :: forall point halfLine.
+(Eq point, Eq halfLine) =&gt;
+LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Bool
+/= :: LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679296414"><span id="local-6989586621679296418"><span id="local-6989586621679296421"><span id="local-6989586621679296431"><span class="annot"><span class="annottext">ReadPrec [LineHalfLineIntersection point halfLine]
+ReadPrec (LineHalfLineIntersection point halfLine)
+Int -&gt; ReadS (LineHalfLineIntersection point halfLine)
+ReadS [LineHalfLineIntersection point halfLine]
+(Int -&gt; ReadS (LineHalfLineIntersection point halfLine))
+-&gt; ReadS [LineHalfLineIntersection point halfLine]
+-&gt; ReadPrec (LineHalfLineIntersection point halfLine)
+-&gt; ReadPrec [LineHalfLineIntersection point halfLine]
+-&gt; Read (LineHalfLineIntersection point halfLine)
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+forall point halfLine.
+(Read point, Read halfLine) =&gt;
+ReadPrec [LineHalfLineIntersection point halfLine]
+forall point halfLine.
+(Read point, Read halfLine) =&gt;
+ReadPrec (LineHalfLineIntersection point halfLine)
+forall point halfLine.
+(Read point, Read halfLine) =&gt;
+Int -&gt; ReadS (LineHalfLineIntersection point halfLine)
+forall point halfLine.
+(Read point, Read halfLine) =&gt;
+ReadS [LineHalfLineIntersection point halfLine]
+$creadsPrec :: forall point halfLine.
+(Read point, Read halfLine) =&gt;
+Int -&gt; ReadS (LineHalfLineIntersection point halfLine)
+readsPrec :: Int -&gt; ReadS (LineHalfLineIntersection point halfLine)
+$creadList :: forall point halfLine.
+(Read point, Read halfLine) =&gt;
+ReadS [LineHalfLineIntersection point halfLine]
+readList :: ReadS [LineHalfLineIntersection point halfLine]
+$creadPrec :: forall point halfLine.
+(Read point, Read halfLine) =&gt;
+ReadPrec (LineHalfLineIntersection point halfLine)
+readPrec :: ReadPrec (LineHalfLineIntersection point halfLine)
+$creadListPrec :: forall point halfLine.
+(Read point, Read halfLine) =&gt;
+ReadPrec [LineHalfLineIntersection point halfLine]
+readListPrec :: ReadPrec [LineHalfLineIntersection point halfLine]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679296440"><span id="local-6989586621679296444"><span id="local-6989586621679296448"><span id="local-6989586621679296452"><span id="local-6989586621679296455"><span id="local-6989586621679296458"><span id="local-6989586621679296461"><span class="annot"><span class="annottext">Eq (LineHalfLineIntersection point halfLine)
+Eq (LineHalfLineIntersection point halfLine) =&gt;
+(LineHalfLineIntersection point halfLine
+ -&gt; LineHalfLineIntersection point halfLine -&gt; Ordering)
+-&gt; (LineHalfLineIntersection point halfLine
+    -&gt; LineHalfLineIntersection point halfLine -&gt; Bool)
+-&gt; (LineHalfLineIntersection point halfLine
+    -&gt; LineHalfLineIntersection point halfLine -&gt; Bool)
+-&gt; (LineHalfLineIntersection point halfLine
+    -&gt; LineHalfLineIntersection point halfLine -&gt; Bool)
+-&gt; (LineHalfLineIntersection point halfLine
+    -&gt; LineHalfLineIntersection point halfLine -&gt; Bool)
+-&gt; (LineHalfLineIntersection point halfLine
+    -&gt; LineHalfLineIntersection point halfLine
+    -&gt; LineHalfLineIntersection point halfLine)
+-&gt; (LineHalfLineIntersection point halfLine
+    -&gt; LineHalfLineIntersection point halfLine
+    -&gt; LineHalfLineIntersection point halfLine)
+-&gt; Ord (LineHalfLineIntersection point halfLine)
+LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Bool
+LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Ordering
+LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall point halfLine.
+(Ord point, Ord halfLine) =&gt;
+Eq (LineHalfLineIntersection point halfLine)
+forall point halfLine.
+(Ord point, Ord halfLine) =&gt;
+LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Bool
+forall point halfLine.
+(Ord point, Ord halfLine) =&gt;
+LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Ordering
+forall point halfLine.
+(Ord point, Ord halfLine) =&gt;
+LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine
+$ccompare :: forall point halfLine.
+(Ord point, Ord halfLine) =&gt;
+LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Ordering
+compare :: LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Ordering
+$c&lt; :: forall point halfLine.
+(Ord point, Ord halfLine) =&gt;
+LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Bool
+&lt; :: LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Bool
+$c&lt;= :: forall point halfLine.
+(Ord point, Ord halfLine) =&gt;
+LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Bool
+&lt;= :: LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Bool
+$c&gt; :: forall point halfLine.
+(Ord point, Ord halfLine) =&gt;
+LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Bool
+&gt; :: LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Bool
+$c&gt;= :: forall point halfLine.
+(Ord point, Ord halfLine) =&gt;
+LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Bool
+&gt;= :: LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine -&gt; Bool
+$cmax :: forall point halfLine.
+(Ord point, Ord halfLine) =&gt;
+LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine
+max :: LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine
+$cmin :: forall point halfLine.
+(Ord point, Ord halfLine) =&gt;
+LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine
+min :: LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine
+-&gt; LineHalfLineIntersection point halfLine
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679296466"><span id="local-6989586621679296468"><span class="annot"><span class="annottext">(forall x.
+ LineHalfLineIntersection point halfLine
+ -&gt; Rep (LineHalfLineIntersection point halfLine) x)
+-&gt; (forall x.
+    Rep (LineHalfLineIntersection point halfLine) x
+    -&gt; LineHalfLineIntersection point halfLine)
+-&gt; Generic (LineHalfLineIntersection point halfLine)
+forall x.
+Rep (LineHalfLineIntersection point halfLine) x
+-&gt; LineHalfLineIntersection point halfLine
+forall x.
+LineHalfLineIntersection point halfLine
+-&gt; Rep (LineHalfLineIntersection point halfLine) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall point halfLine x.
+Rep (LineHalfLineIntersection point halfLine) x
+-&gt; LineHalfLineIntersection point halfLine
+forall point halfLine x.
+LineHalfLineIntersection point halfLine
+-&gt; Rep (LineHalfLineIntersection point halfLine) x
+$cfrom :: forall point halfLine x.
+LineHalfLineIntersection point halfLine
+-&gt; Rep (LineHalfLineIntersection point halfLine) x
+from :: forall x.
+LineHalfLineIntersection point halfLine
+-&gt; Rep (LineHalfLineIntersection point halfLine) x
+$cto :: forall point halfLine x.
+Rep (LineHalfLineIntersection point halfLine) x
+-&gt; LineHalfLineIntersection point halfLine
+to :: forall x.
+Rep (LineHalfLineIntersection point halfLine) x
+-&gt; LineHalfLineIntersection point halfLine
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679296472"><span id="local-6989586621679296474"><span class="annot"><span class="annottext">(forall a b.
+ (a -&gt; b)
+ -&gt; LineHalfLineIntersection point a
+ -&gt; LineHalfLineIntersection point b)
+-&gt; (forall a b.
+    a
+    -&gt; LineHalfLineIntersection point b
+    -&gt; LineHalfLineIntersection point a)
+-&gt; Functor (LineHalfLineIntersection point)
+forall a b.
+a
+-&gt; LineHalfLineIntersection point b
+-&gt; LineHalfLineIntersection point a
+forall a b.
+(a -&gt; b)
+-&gt; LineHalfLineIntersection point a
+-&gt; LineHalfLineIntersection point b
+forall point a b.
+a
+-&gt; LineHalfLineIntersection point b
+-&gt; LineHalfLineIntersection point a
+forall point a b.
+(a -&gt; b)
+-&gt; LineHalfLineIntersection point a
+-&gt; LineHalfLineIntersection point b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall point a b.
+(a -&gt; b)
+-&gt; LineHalfLineIntersection point a
+-&gt; LineHalfLineIntersection point b
+fmap :: forall a b.
+(a -&gt; b)
+-&gt; LineHalfLineIntersection point a
+-&gt; LineHalfLineIntersection point b
+$c&lt;$ :: forall point a b.
+a
+-&gt; LineHalfLineIntersection point b
+-&gt; LineHalfLineIntersection point a
+&lt;$ :: forall a b.
+a
+-&gt; LineHalfLineIntersection point b
+-&gt; LineHalfLineIntersection point a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span>
+</span><span id="line-106"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679296114"><span id="local-6989586621679296115"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679296114"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679296114"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296115"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679296114"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-107"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#IsIntersectableWith"><span class="hs-identifier hs-type">IsIntersectableWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-type">LinePV</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679296114"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296115"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-108"></span><span>  </span><span id="local-6989586621679296553"><span class="annot"><span class="annottext">LinePV 2 r
+</span><a href="#local-6989586621679296553"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679296554"><span class="annot"><span class="annottext">intersect :: LinePV 2 r
+-&gt; HalfLine point -&gt; Intersection (LinePV 2 r) (HalfLine point)
+</span><a href="#local-6989586621679296554"><span class="hs-operator hs-var hs-var hs-var hs-var">`intersect`</span></a></span></span><span> </span><span id="local-6989586621679296556"><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679296556"><span class="hs-identifier hs-var">hl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LinePV 2 r
+LinePV (Dimension (HalfLine point)) (NumType (HalfLine point))
+</span><a href="#local-6989586621679296557"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV 2 r -&gt; LinePV 2 r -&gt; Intersection (LinePV 2 r) (LinePV 2 r)
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><a href="HGeometry.Intersection.html#intersect"><span class="hs-operator hs-var">`intersect`</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV 2 r
+</span><a href="#local-6989586621679296553"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (LineLineIntersection (LinePV 2 r))
+-&gt; (LineLineIntersection (LinePV 2 r)
+    -&gt; Maybe (LineHalfLineIntersection (Point 2 r) (HalfLine point)))
+-&gt; Maybe (LineHalfLineIntersection (Point 2 r) (HalfLine point))
+forall a b. Maybe a -&gt; (a -&gt; Maybe b) -&gt; Maybe b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-109"></span><span>      </span><span class="annot"><a href="HGeometry.Line.Intersection.html#Line_x_Line_Point"><span class="hs-identifier hs-type">Line_x_Line_Point</span></a></span><span> </span><span id="local-6989586621679296559"><span class="annot"><span class="annottext">Point 2 (NumType (LinePV 2 r))
+</span><a href="#local-6989586621679296559"><span class="hs-identifier hs-var">p</span></a></span></span><span>
+</span><span id="line-110"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+Point 2 (NumType (LinePV 2 r))
+</span><a href="#local-6989586621679296559"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; LinePV 2 r -&gt; SideTest
+forall r point.
+(Ord r, Num r, Point_ point 2 r) =&gt;
+point -&gt; LinePV 2 r -&gt; SideTest
+</span><a href="HGeometry.Line.PointAndVector.html#onSide"><span class="hs-operator hs-var">`onSide`</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV 2 r -&gt; LinePV 2 r
+forall r. Num r =&gt; LinePV 2 r -&gt; LinePV 2 r
+</span><a href="HGeometry.Line.PointAndVector.html#perpendicularTo"><span class="hs-identifier hs-var">perpendicularTo</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV 2 r
+LinePV (Dimension (HalfLine point)) (NumType (HalfLine point))
+</span><a href="#local-6989586621679296557"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">SideTest -&gt; SideTest -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">SideTest
+</span><a href="HGeometry.Line.PointAndVector.html#LeftSide"><span class="hs-identifier hs-var">LeftSide</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LineHalfLineIntersection (Point 2 r) (HalfLine point)
+-&gt; Maybe (LineHalfLineIntersection (Point 2 r) (HalfLine point))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(LineHalfLineIntersection (Point 2 r) (HalfLine point)
+ -&gt; Maybe (LineHalfLineIntersection (Point 2 r) (HalfLine point)))
+-&gt; LineHalfLineIntersection (Point 2 r) (HalfLine point)
+-&gt; Maybe (LineHalfLineIntersection (Point 2 r) (HalfLine point))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; LineHalfLineIntersection (Point 2 r) (HalfLine point)
+forall point halfLine.
+point -&gt; LineHalfLineIntersection point halfLine
+</span><a href="HGeometry.HalfLine.html#Line_x_HalfLine_Point"><span class="hs-identifier hs-var">Line_x_HalfLine_Point</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+Point 2 (NumType (LinePV 2 r))
+</span><a href="#local-6989586621679296559"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-111"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>                                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (LineHalfLineIntersection (Point 2 r) (HalfLine point))
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-112"></span><span>      </span><span class="annot"><a href="HGeometry.Line.Intersection.html#Line_x_Line_Line"><span class="hs-identifier hs-type">Line_x_Line_Line</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV 2 r
+</span><span class="hs-identifier">_</span></span><span>                           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LineHalfLineIntersection (Point 2 r) (HalfLine point)
+-&gt; Maybe (LineHalfLineIntersection (Point 2 r) (HalfLine point))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(LineHalfLineIntersection (Point 2 r) (HalfLine point)
+ -&gt; Maybe (LineHalfLineIntersection (Point 2 r) (HalfLine point)))
+-&gt; LineHalfLineIntersection (Point 2 r) (HalfLine point)
+-&gt; Maybe (LineHalfLineIntersection (Point 2 r) (HalfLine point))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">HalfLine point
+-&gt; LineHalfLineIntersection (Point 2 r) (HalfLine point)
+forall point halfLine.
+halfLine -&gt; LineHalfLineIntersection point halfLine
+</span><a href="HGeometry.HalfLine.html#Line_x_HalfLine_HalfLine"><span class="hs-identifier hs-var">Line_x_HalfLine_HalfLine</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679296556"><span class="hs-identifier hs-var">hl</span></a></span><span>
+</span><span id="line-113"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-114"></span><span>      </span><span id="local-6989586621679296557"><span class="annot"><span class="annottext">m :: LinePV (Dimension (HalfLine point)) (NumType (HalfLine point))
+</span><a href="#local-6989586621679296557"><span class="hs-identifier hs-var hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HalfLine point
+-&gt; LinePV (Dimension (HalfLine point)) (NumType (HalfLine point))
+forall t.
+HasSupportingLine t =&gt;
+t -&gt; LinePV (Dimension t) (NumType t)
+</span><a href="HGeometry.Line.PointAndVector.html#supportingLine"><span class="hs-identifier hs-var">supportingLine</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679296556"><span class="hs-identifier hs-var">hl</span></a></span><span>
+</span><span id="line-115"></span><span>    </span><span class="hs-comment">-- the left side is suposedly the halfplane containing the halfLine</span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span>
+</span><span id="line-119"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-120"></span><span>
+</span><span id="line-121"></span><span class="hs-comment">-- | Given two points p and q, create a halfline from p through q.</span><span>
+</span><span id="line-122"></span><span class="hs-comment">--</span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- &gt;&gt;&gt; halfLineThrough (Point2 5 10) (Point2 10 30 :: Point 2 Int)</span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- HalfLine (Point2 5 10) (Vector2 5 20)</span><span>
+</span><span id="line-125"></span><span id="local-6989586621679296129"><span id="local-6989586621679296130"><span id="local-6989586621679296131"><span class="annot"><a href="HGeometry.HalfLine.html#halfLineThrough"><span class="hs-identifier hs-type">halfLineThrough</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296129"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296130"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296131"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679296131"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679296129"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679296129"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679296129"><span class="hs-identifier hs-type">point</span></a></span></span></span></span><span>
+</span><span id="line-126"></span><span id="halfLineThrough"><span class="annot"><span class="annottext">halfLineThrough :: forall point (d :: Nat) r.
+(Point_ point d r, Num r) =&gt;
+point -&gt; point -&gt; HalfLine point
+</span><a href="HGeometry.HalfLine.html#halfLineThrough"><span class="hs-identifier hs-var hs-var">halfLineThrough</span></a></span></span><span> </span><span id="local-6989586621679296573"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296573"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679296574"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296574"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point -&gt; Vector (Dimension point) (NumType point) -&gt; HalfLine point
+forall point.
+point -&gt; Vector (Dimension point) (NumType point) -&gt; HalfLine point
+</span><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-var">HalfLine</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296573"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296574"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; Vector d r
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; point -&gt; Vector d r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.Class.html#.-."><span class="hs-operator hs-var">.-.</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679296573"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-127"></span></pre></body></html>

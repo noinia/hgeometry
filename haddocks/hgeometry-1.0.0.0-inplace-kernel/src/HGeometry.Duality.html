@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# OPTIONS_GHC -fplugin-opt GHC.TypeLits.Normalise:allow-negated-numbers #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}</span><span>
+</span><span id="line-4"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Module      :  HGeometry.Duality</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Standard duality between points and non-vertical hyperplanes (or lines in R^2)</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.Duality</span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Duality.html#dualPoint"><span class="hs-identifier">dualPoint</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Duality.html#dualHyperPlane"><span class="hs-identifier">dualHyperPlane</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Duality.html#dualLine"><span class="hs-identifier">dualLine</span></a></span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Duality.html#liftPointToPlane"><span class="hs-identifier">liftPointToPlane</span></a></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.TypeNats</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Class.html"><span class="hs-identifier">HGeometry.HyperPlane.Class</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html"><span class="hs-identifier">HGeometry.HyperPlane.NonVertical</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Line.LineEQ.html"><span class="hs-identifier">HGeometry.Line.LineEQ</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.html"><span class="hs-identifier">HGeometry.Point</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.html"><span class="hs-identifier">HGeometry.Vector</span></a></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- | Compute the point dual to a non-vertical hyperplane</span><span>
+</span><span id="line-33"></span><span class="hs-comment">--</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- &gt;&gt;&gt; dualPoint (LineEQ 10 20)</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- Point2 10 (-20)</span><span>
+</span><span id="line-36"></span><span class="annot"><a href="HGeometry.Duality.html#dualPoint"><span class="hs-identifier hs-type">dualPoint</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679293707"><span class="annot"><a href="#local-6989586621679293707"><span class="hs-identifier hs-type">hyperPlane</span></a></span></span><span> </span><span id="local-6989586621679293708"><span class="annot"><a href="#local-6989586621679293708"><span class="hs-identifier hs-type">d</span></a></span></span><span> </span><span id="local-6989586621679293709"><span class="annot"><a href="#local-6989586621679293709"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.Class.html#NonVerticalHyperPlane_"><span class="hs-identifier hs-type">NonVerticalHyperPlane_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679293707"><span class="hs-identifier hs-type">hyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679293708"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679293709"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679293709"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;=</span></span><span> </span><span class="annot"><a href="#local-6989586621679293708"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679293707"><span class="hs-identifier hs-type">hyperPlane</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.html#Point"><span class="hs-identifier hs-type">Point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679293708"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679293709"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-38"></span><span id="dualPoint"><span class="annot"><span class="annottext">dualPoint :: forall hyperPlane (d :: Natural) r.
+(NonVerticalHyperPlane_ hyperPlane d r, Num r, 1 &lt;= d) =&gt;
+hyperPlane -&gt; Point d r
+</span><a href="HGeometry.Duality.html#dualPoint"><span class="hs-identifier hs-var hs-var">dualPoint</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector d r -&gt; PointF (Vector d r)
+forall v. v -&gt; PointF v
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.PointF.html#Point"><span class="hs-identifier hs-var">Point</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector d r -&gt; PointF (Vector d r))
+-&gt; (hyperPlane -&gt; Vector d r) -&gt; hyperPlane -&gt; PointF (Vector d r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ASetter (Vector d r) (Vector d r) r r
+-&gt; (r -&gt; r) -&gt; Vector d r -&gt; Vector d r
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Setter.html#over"><span class="hs-identifier hs-var">over</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (i :: Natural) vector r (d :: Natural).
+(i &lt;= (d - 1), KnownNat i, Vector_ vector d r) =&gt;
+IndexedLens' Int vector r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#component"><span class="hs-identifier hs-var">component</span></a></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679293708"><span class="hs-identifier hs-type">d</span></a></span><span class="annot"><span class="hs-glyph hs-type">-</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">negate</span></span><span> </span><span class="annot"><span class="annottext">(Vector d r -&gt; Vector d r)
+-&gt; (hyperPlane -&gt; Vector d r) -&gt; hyperPlane -&gt; Vector d r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting (Vector d r) hyperPlane (Vector d r)
+-&gt; hyperPlane -&gt; Vector d r
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Vector d r) hyperPlane (Vector d r)
+forall hyperPlane (d :: Natural) r.
+NonVerticalHyperPlane_ hyperPlane d r =&gt;
+Lens' hyperPlane (Vector d r)
+Lens' hyperPlane (Vector d r)
+</span><a href="HGeometry.HyperPlane.Class.html#hyperPlaneCoefficients"><span class="hs-identifier hs-var">hyperPlaneCoefficients</span></a></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- | Compute the dual of a hyperplane</span><span>
+</span><span id="line-41"></span><span class="hs-comment">--</span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- &gt;&gt;&gt; dualHyperPlane (Point2 10 (-20))</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- NonVerticalHyperPlane [10,20]</span><span>
+</span><span id="line-44"></span><span class="annot"><a href="HGeometry.Duality.html#dualHyperPlane"><span class="hs-identifier hs-type">dualHyperPlane</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679293769"><span class="annot"><a href="#local-6989586621679293769"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span id="local-6989586621679293770"><span class="annot"><a href="#local-6989586621679293770"><span class="hs-identifier hs-type">d</span></a></span></span><span> </span><span id="local-6989586621679293771"><span class="annot"><a href="#local-6989586621679293771"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679293769"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679293770"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679293771"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679293771"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;=</span></span><span> </span><span class="annot"><a href="#local-6989586621679293770"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>               </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679293769"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html#NonVerticalHyperPlane"><span class="hs-identifier hs-type">NonVerticalHyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679293770"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679293771"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-46"></span><span id="dualHyperPlane"><span class="annot"><span class="annottext">dualHyperPlane :: forall point (d :: Natural) r.
+(Point_ point d r, Num r, 1 &lt;= d) =&gt;
+point -&gt; NonVerticalHyperPlane d r
+</span><a href="HGeometry.Duality.html#dualHyperPlane"><span class="hs-identifier hs-var hs-var">dualHyperPlane</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector d r -&gt; NonVerticalHyperPlane d r
+forall (d :: Natural) r. Vector d r -&gt; NonVerticalHyperPlane d r
+</span><a href="HGeometry.HyperPlane.NonVertical.html#NonVerticalHyperPlane"><span class="hs-identifier hs-var">NonVerticalHyperPlane</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector d r -&gt; NonVerticalHyperPlane d r)
+-&gt; (point -&gt; Vector d r) -&gt; point -&gt; NonVerticalHyperPlane d r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ASetter (Vector d r) (Vector d r) r r
+-&gt; (r -&gt; r) -&gt; Vector d r -&gt; Vector d r
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Setter.html#over"><span class="hs-identifier hs-var">over</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (i :: Natural) vector r (d :: Natural).
+(i &lt;= (d - 1), KnownNat i, Vector_ vector d r) =&gt;
+IndexedLens' Int vector r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#component"><span class="hs-identifier hs-var">component</span></a></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679293770"><span class="hs-identifier hs-type">d</span></a></span><span class="annot"><span class="hs-glyph hs-type">-</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">negate</span></span><span> </span><span class="annot"><span class="annottext">(Vector d r -&gt; Vector d r)
+-&gt; (point -&gt; Vector d r) -&gt; point -&gt; Vector d r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r) -&gt; point -&gt; Vector d r
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
+forall (d :: Natural) r s.
+(Dimension point ~ d, NumType point ~ r, Dimension point ~ d,
+ NumType point ~ s) =&gt;
+Lens point point (Vector d r) (Vector d s)
+forall point point' (d :: Natural) r s.
+(HasVector point point', Dimension point ~ d, NumType point ~ r,
+ Dimension point' ~ d, NumType point' ~ s) =&gt;
+Lens point point' (Vector d r) (Vector d s)
+Lens point point (Vector d r) (Vector d r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.Class.html#vector"><span class="hs-identifier hs-var">vector</span></a></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- | Compute the line dual to a point</span><span>
+</span><span id="line-49"></span><span class="hs-comment">--</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- &gt;&gt;&gt; dualLine (Point2 10 (-20))</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- LineEQ 10 20</span><span>
+</span><span id="line-52"></span><span id="local-6989586621679293801"><span id="local-6989586621679293802"><span class="annot"><a href="HGeometry.Duality.html#dualLine"><span class="hs-identifier hs-type">dualLine</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679293801"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679293802"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679293802"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679293801"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Line.LineEQ.html#LineEQ"><span class="hs-identifier hs-type">LineEQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679293802"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-53"></span><span id="dualLine"><span class="annot"><span class="annottext">dualLine :: forall point r. (Point_ point 2 r, Num r) =&gt; point -&gt; LineEQ r
+</span><a href="HGeometry.Duality.html#dualLine"><span class="hs-identifier hs-var hs-var">dualLine</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonVerticalHyperPlane 2 r -&gt; LineEQ r
+forall r. NonVerticalHyperPlane 2 r -&gt; LineEQ r
+</span><a href="HGeometry.Line.LineEQ.html#MkLineEQ"><span class="hs-identifier hs-var">MkLineEQ</span></a></span><span> </span><span class="annot"><span class="annottext">(NonVerticalHyperPlane 2 r -&gt; LineEQ r)
+-&gt; (point -&gt; NonVerticalHyperPlane 2 r) -&gt; point -&gt; LineEQ r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">point -&gt; NonVerticalHyperPlane 2 r
+forall point (d :: Natural) r.
+(Point_ point d r, Num r, 1 &lt;= d) =&gt;
+point -&gt; NonVerticalHyperPlane d r
+</span><a href="HGeometry.Duality.html#dualHyperPlane"><span class="hs-identifier hs-var">dualHyperPlane</span></a></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- | The standard lifting transform, that lifts a point to the plane</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- tangent to the unit hyperboloid.</span><span>
+</span><span id="line-60"></span><span id="local-6989586621679293807"><span id="local-6989586621679293808"><span class="annot"><a href="HGeometry.Duality.html#liftPointToPlane"><span class="hs-identifier hs-type">liftPointToPlane</span></a></span><span>               </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679293807"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679293808"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679293808"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679293807"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html#NonVerticalHyperPlane"><span class="hs-identifier hs-type">NonVerticalHyperPlane</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679293808"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-61"></span><span id="liftPointToPlane"><span class="annot"><span class="annottext">liftPointToPlane :: forall point r.
+(Point_ point 2 r, Num r) =&gt;
+point -&gt; NonVerticalHyperPlane 3 r
+</span><a href="HGeometry.Duality.html#liftPointToPlane"><span class="hs-identifier hs-var hs-var">liftPointToPlane</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.Class.html#Point2_"><span class="hs-identifier hs-type">Point2_</span></a></span><span> </span><span id="local-6989586621679293939"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679293939"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679293940"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679293940"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; Plane r
+forall r. r -&gt; r -&gt; r -&gt; Plane r
+</span><a href="HGeometry.HyperPlane.NonVertical.html#Plane"><span class="hs-identifier hs-var">Plane</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">2</span></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679293939"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">2</span></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679293940"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">negate</span></span><span> </span><span class="annot"><span class="annottext">(r -&gt; r) -&gt; r -&gt; r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679293939"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679293939"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679293940"><span class="hs-identifier hs-var">y</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679293940"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span></pre></body></html>

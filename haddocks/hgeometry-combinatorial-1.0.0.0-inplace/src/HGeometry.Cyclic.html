@@ -1,0 +1,811 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE BangPatterns #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE QuantifiedConstraints #-}</span><span>
+</span><span id="line-4"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Module      :  HGeometry.Cyclic</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Representing Cyclic Sequences</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.Cyclic</span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier">Cyclic</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Cyclic.html#toCircularVector"><span class="hs-identifier">toCircularVector</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Cyclic.html#HasDirectedTraversals"><span class="hs-identifier">HasDirectedTraversals</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Cyclic.html#ShiftedEq"><span class="hs-identifier">ShiftedEq</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NFData</span></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">forM_</span></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">isJust</span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.0.1-9ec1790380a4b5f817dc869b2bda3941c07dcf79de495272f28ea710715e6d27/share/doc/html/src/Data.Semigroup.Foldable.html"><span class="hs-identifier">Data.Semigroup.Foldable</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.html"><span class="hs-identifier">Data.Vector</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">V</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-circular-0.1.4-c160461f88915ecf597894cf144eb5e191370bb58f0f2e4749025e723bae3e26/share/doc/html/src/Data.Vector.Circular.html"><span class="hs-identifier">Data.Vector.Circular</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-circular-0.1.4-c160461f88915ecf597894cf144eb5e191370bb58f0f2e4749025e723bae3e26/share/doc/html/src/Data.Vector.Circular.html#CircularVector"><span class="hs-identifier">CircularVector</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Mutable.html"><span class="hs-identifier">Data.Vector.Mutable</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">MV</span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.html"><span class="hs-identifier">Data.Vector.NonEmpty</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NV</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Foldable.Util.html"><span class="hs-identifier">HGeometry.Foldable.Util</span></a></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.StringSearch.KMP.html"><span class="hs-identifier">HGeometry.StringSearch.KMP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.StringSearch.KMP.html#isSubStringOf"><span class="hs-identifier">isSubStringOf</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Vector.NonEmpty.Util.html"><span class="hs-identifier">HGeometry.Vector.NonEmpty.Util</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="annot"><span class="hs-comment">-- | A cyclic sequence type</span></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">newtype</span><span> </span><span id="Cyclic"><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-var">Cyclic</span></a></span></span><span> </span><span id="local-6989586621679185364"><span class="annot"><a href="#local-6989586621679185364"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679185365"><span class="annot"><a href="#local-6989586621679185365"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Cyclic"><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-var">Cyclic</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679185364"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185365"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">newtype</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679185548"><span id="local-6989586621679185552"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; Cyclic v a -&gt; Cyclic v b)
+-&gt; (forall a b. a -&gt; Cyclic v b -&gt; Cyclic v a)
+-&gt; Functor (Cyclic v)
+forall a b. a -&gt; Cyclic v b -&gt; Cyclic v a
+forall a b. (a -&gt; b) -&gt; Cyclic v a -&gt; Cyclic v b
+forall (v :: * -&gt; *) a b.
+Functor v =&gt;
+a -&gt; Cyclic v b -&gt; Cyclic v a
+forall (v :: * -&gt; *) a b.
+Functor v =&gt;
+(a -&gt; b) -&gt; Cyclic v a -&gt; Cyclic v b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall (v :: * -&gt; *) a b.
+Functor v =&gt;
+(a -&gt; b) -&gt; Cyclic v a -&gt; Cyclic v b
+fmap :: forall a b. (a -&gt; b) -&gt; Cyclic v a -&gt; Cyclic v b
+$c&lt;$ :: forall (v :: * -&gt; *) a b.
+Functor v =&gt;
+a -&gt; Cyclic v b -&gt; Cyclic v a
+&lt;$ :: forall a b. a -&gt; Cyclic v b -&gt; Cyclic v a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679185561"><span id="local-6989586621679185569"><span id="local-6989586621679185577"><span id="local-6989586621679185583"><span id="local-6989586621679185587"><span id="local-6989586621679185591"><span id="local-6989586621679185595"><span id="local-6989586621679185599"><span id="local-6989586621679185603"><span id="local-6989586621679185607"><span id="local-6989586621679185611"><span id="local-6989586621679185615"><span id="local-6989586621679185621"><span id="local-6989586621679185629"><span id="local-6989586621679185637"><span id="local-6989586621679185645"><span id="local-6989586621679185653"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; Cyclic v m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Cyclic v a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Cyclic v a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Cyclic v a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Cyclic v a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Cyclic v a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Cyclic v a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Cyclic v a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Cyclic v a -&gt; a)
+-&gt; (forall a. Cyclic v a -&gt; [a])
+-&gt; (forall a. Cyclic v a -&gt; Bool)
+-&gt; (forall a. Cyclic v a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; Cyclic v a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; Cyclic v a -&gt; a)
+-&gt; (forall a. Ord a =&gt; Cyclic v a -&gt; a)
+-&gt; (forall a. Num a =&gt; Cyclic v a -&gt; a)
+-&gt; (forall a. Num a =&gt; Cyclic v a -&gt; a)
+-&gt; Foldable (Cyclic v)
+forall a. Eq a =&gt; a -&gt; Cyclic v a -&gt; Bool
+forall a. Num a =&gt; Cyclic v a -&gt; a
+forall a. Ord a =&gt; Cyclic v a -&gt; a
+forall m. Monoid m =&gt; Cyclic v m -&gt; m
+forall a. Cyclic v a -&gt; Bool
+forall a. Cyclic v a -&gt; Int
+forall a. Cyclic v a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; Cyclic v a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Cyclic v a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Cyclic v a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Cyclic v a -&gt; b
+forall (v :: * -&gt; *) a.
+(Foldable v, Eq a) =&gt;
+a -&gt; Cyclic v a -&gt; Bool
+forall (v :: * -&gt; *) a. (Foldable v, Num a) =&gt; Cyclic v a -&gt; a
+forall (v :: * -&gt; *) a. (Foldable v, Ord a) =&gt; Cyclic v a -&gt; a
+forall (v :: * -&gt; *) m. (Foldable v, Monoid m) =&gt; Cyclic v m -&gt; m
+forall (v :: * -&gt; *) a. Foldable v =&gt; Cyclic v a -&gt; Bool
+forall (v :: * -&gt; *) a. Foldable v =&gt; Cyclic v a -&gt; Int
+forall (v :: * -&gt; *) a. Foldable v =&gt; Cyclic v a -&gt; [a]
+forall (v :: * -&gt; *) a.
+Foldable v =&gt;
+(a -&gt; a -&gt; a) -&gt; Cyclic v a -&gt; a
+forall (v :: * -&gt; *) m a.
+(Foldable v, Monoid m) =&gt;
+(a -&gt; m) -&gt; Cyclic v a -&gt; m
+forall (v :: * -&gt; *) b a.
+Foldable v =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; Cyclic v a -&gt; b
+forall (v :: * -&gt; *) a b.
+Foldable v =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; Cyclic v a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+$cfold :: forall (v :: * -&gt; *) m. (Foldable v, Monoid m) =&gt; Cyclic v m -&gt; m
+fold :: forall m. Monoid m =&gt; Cyclic v m -&gt; m
+$cfoldMap :: forall (v :: * -&gt; *) m a.
+(Foldable v, Monoid m) =&gt;
+(a -&gt; m) -&gt; Cyclic v a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Cyclic v a -&gt; m
+$cfoldMap' :: forall (v :: * -&gt; *) m a.
+(Foldable v, Monoid m) =&gt;
+(a -&gt; m) -&gt; Cyclic v a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Cyclic v a -&gt; m
+$cfoldr :: forall (v :: * -&gt; *) a b.
+Foldable v =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; Cyclic v a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Cyclic v a -&gt; b
+$cfoldr' :: forall (v :: * -&gt; *) a b.
+Foldable v =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; Cyclic v a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Cyclic v a -&gt; b
+$cfoldl :: forall (v :: * -&gt; *) b a.
+Foldable v =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; Cyclic v a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Cyclic v a -&gt; b
+$cfoldl' :: forall (v :: * -&gt; *) b a.
+Foldable v =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; Cyclic v a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Cyclic v a -&gt; b
+$cfoldr1 :: forall (v :: * -&gt; *) a.
+Foldable v =&gt;
+(a -&gt; a -&gt; a) -&gt; Cyclic v a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Cyclic v a -&gt; a
+$cfoldl1 :: forall (v :: * -&gt; *) a.
+Foldable v =&gt;
+(a -&gt; a -&gt; a) -&gt; Cyclic v a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Cyclic v a -&gt; a
+$ctoList :: forall (v :: * -&gt; *) a. Foldable v =&gt; Cyclic v a -&gt; [a]
+toList :: forall a. Cyclic v a -&gt; [a]
+$cnull :: forall (v :: * -&gt; *) a. Foldable v =&gt; Cyclic v a -&gt; Bool
+null :: forall a. Cyclic v a -&gt; Bool
+$clength :: forall (v :: * -&gt; *) a. Foldable v =&gt; Cyclic v a -&gt; Int
+length :: forall a. Cyclic v a -&gt; Int
+$celem :: forall (v :: * -&gt; *) a.
+(Foldable v, Eq a) =&gt;
+a -&gt; Cyclic v a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; Cyclic v a -&gt; Bool
+$cmaximum :: forall (v :: * -&gt; *) a. (Foldable v, Ord a) =&gt; Cyclic v a -&gt; a
+maximum :: forall a. Ord a =&gt; Cyclic v a -&gt; a
+$cminimum :: forall (v :: * -&gt; *) a. (Foldable v, Ord a) =&gt; Cyclic v a -&gt; a
+minimum :: forall a. Ord a =&gt; Cyclic v a -&gt; a
+$csum :: forall (v :: * -&gt; *) a. (Foldable v, Num a) =&gt; Cyclic v a -&gt; a
+sum :: forall a. Num a =&gt; Cyclic v a -&gt; a
+$cproduct :: forall (v :: * -&gt; *) a. (Foldable v, Num a) =&gt; Cyclic v a -&gt; a
+product :: forall a. Num a =&gt; Cyclic v a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679185667"><span id="local-6989586621679185675"><span id="local-6989586621679185683"><span id="local-6989586621679185689"><span id="local-6989586621679185695"><span id="local-6989586621679185703"><span id="local-6989586621679185709"><span id="local-6989586621679185713"><span id="local-6989586621679185717"><span id="local-6989586621679185721"><span id="local-6989586621679185725"><span id="local-6989586621679185729"><span class="annot"><span class="annottext">Foldable (Cyclic v)
+Foldable (Cyclic v) =&gt;
+(forall m. Semigroup m =&gt; Cyclic v m -&gt; m)
+-&gt; (forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; Cyclic v a -&gt; m)
+-&gt; (forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; Cyclic v a -&gt; m)
+-&gt; (forall a. Cyclic v a -&gt; NonEmpty a)
+-&gt; (forall a. Ord a =&gt; Cyclic v a -&gt; a)
+-&gt; (forall a. Ord a =&gt; Cyclic v a -&gt; a)
+-&gt; (forall a. Cyclic v a -&gt; a)
+-&gt; (forall a. Cyclic v a -&gt; a)
+-&gt; (forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; Cyclic v a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; Cyclic v a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; Cyclic v a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; Cyclic v a -&gt; b)
+-&gt; Foldable1 (Cyclic v)
+forall a. Ord a =&gt; Cyclic v a -&gt; a
+forall m. Semigroup m =&gt; Cyclic v m -&gt; m
+forall a. Cyclic v a -&gt; a
+forall a. Cyclic v a -&gt; NonEmpty a
+forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; Cyclic v a -&gt; m
+forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; Cyclic v a -&gt; b
+forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; Cyclic v a -&gt; b
+forall (t :: * -&gt; *).
+Foldable t =&gt;
+(forall m. Semigroup m =&gt; t m -&gt; m)
+-&gt; (forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a. t a -&gt; NonEmpty a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; a)
+-&gt; (forall a. t a -&gt; a)
+-&gt; (forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; t a -&gt; b)
+-&gt; Foldable1 t
+forall (v :: * -&gt; *). Foldable1 v =&gt; Foldable (Cyclic v)
+forall (v :: * -&gt; *) a. (Foldable1 v, Ord a) =&gt; Cyclic v a -&gt; a
+forall (v :: * -&gt; *) m.
+(Foldable1 v, Semigroup m) =&gt;
+Cyclic v m -&gt; m
+forall (v :: * -&gt; *) a. Foldable1 v =&gt; Cyclic v a -&gt; a
+forall (v :: * -&gt; *) a. Foldable1 v =&gt; Cyclic v a -&gt; NonEmpty a
+forall (v :: * -&gt; *) m a.
+(Foldable1 v, Semigroup m) =&gt;
+(a -&gt; m) -&gt; Cyclic v a -&gt; m
+forall (v :: * -&gt; *) a b.
+Foldable1 v =&gt;
+(a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; Cyclic v a -&gt; b
+forall (v :: * -&gt; *) a b.
+Foldable1 v =&gt;
+(a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; Cyclic v a -&gt; b
+$cfold1 :: forall (v :: * -&gt; *) m.
+(Foldable1 v, Semigroup m) =&gt;
+Cyclic v m -&gt; m
+fold1 :: forall m. Semigroup m =&gt; Cyclic v m -&gt; m
+$cfoldMap1 :: forall (v :: * -&gt; *) m a.
+(Foldable1 v, Semigroup m) =&gt;
+(a -&gt; m) -&gt; Cyclic v a -&gt; m
+foldMap1 :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; Cyclic v a -&gt; m
+$cfoldMap1' :: forall (v :: * -&gt; *) m a.
+(Foldable1 v, Semigroup m) =&gt;
+(a -&gt; m) -&gt; Cyclic v a -&gt; m
+foldMap1' :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; Cyclic v a -&gt; m
+$ctoNonEmpty :: forall (v :: * -&gt; *) a. Foldable1 v =&gt; Cyclic v a -&gt; NonEmpty a
+toNonEmpty :: forall a. Cyclic v a -&gt; NonEmpty a
+$cmaximum :: forall (v :: * -&gt; *) a. (Foldable1 v, Ord a) =&gt; Cyclic v a -&gt; a
+maximum :: forall a. Ord a =&gt; Cyclic v a -&gt; a
+$cminimum :: forall (v :: * -&gt; *) a. (Foldable1 v, Ord a) =&gt; Cyclic v a -&gt; a
+minimum :: forall a. Ord a =&gt; Cyclic v a -&gt; a
+$chead :: forall (v :: * -&gt; *) a. Foldable1 v =&gt; Cyclic v a -&gt; a
+head :: forall a. Cyclic v a -&gt; a
+$clast :: forall (v :: * -&gt; *) a. Foldable1 v =&gt; Cyclic v a -&gt; a
+last :: forall a. Cyclic v a -&gt; a
+$cfoldrMap1 :: forall (v :: * -&gt; *) a b.
+Foldable1 v =&gt;
+(a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; Cyclic v a -&gt; b
+foldrMap1 :: forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; Cyclic v a -&gt; b
+$cfoldlMap1' :: forall (v :: * -&gt; *) a b.
+Foldable1 v =&gt;
+(a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; Cyclic v a -&gt; b
+foldlMap1' :: forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; Cyclic v a -&gt; b
+$cfoldlMap1 :: forall (v :: * -&gt; *) a b.
+Foldable1 v =&gt;
+(a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; Cyclic v a -&gt; b
+foldlMap1 :: forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; Cyclic v a -&gt; b
+$cfoldrMap1' :: forall (v :: * -&gt; *) a b.
+Foldable1 v =&gt;
+(a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; Cyclic v a -&gt; b
+foldrMap1' :: forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; Cyclic v a -&gt; b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable1</span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679185737"><span class="annot"><span class="annottext">Cyclic v a -&gt; ()
+(Cyclic v a -&gt; ()) -&gt; NFData (Cyclic v a)
+forall a. (a -&gt; ()) -&gt; NFData a
+forall k (v :: k -&gt; *) (a :: k). NFData (v a) =&gt; Cyclic v a -&gt; ()
+$crnf :: forall k (v :: k -&gt; *) (a :: k). NFData (v a) =&gt; Cyclic v a -&gt; ()
+rnf :: Cyclic v a -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">NFData</span></span></span><span class="hs-special">,</span><span id="local-6989586621679185744"><span id="local-6989586621679185748"><span class="annot"><span class="annottext">Cyclic v a -&gt; Cyclic v a -&gt; Bool
+(Cyclic v a -&gt; Cyclic v a -&gt; Bool)
+-&gt; (Cyclic v a -&gt; Cyclic v a -&gt; Bool) -&gt; Eq (Cyclic v a)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall k (v :: k -&gt; *) (a :: k).
+Eq (v a) =&gt;
+Cyclic v a -&gt; Cyclic v a -&gt; Bool
+$c== :: forall k (v :: k -&gt; *) (a :: k).
+Eq (v a) =&gt;
+Cyclic v a -&gt; Cyclic v a -&gt; Bool
+== :: Cyclic v a -&gt; Cyclic v a -&gt; Bool
+$c/= :: forall k (v :: k -&gt; *) (a :: k).
+Eq (v a) =&gt;
+Cyclic v a -&gt; Cyclic v a -&gt; Bool
+/= :: Cyclic v a -&gt; Cyclic v a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679185754"><span id="local-6989586621679185756"><span class="annot"><span class="annottext">(forall x. Cyclic v a -&gt; Rep (Cyclic v a) x)
+-&gt; (forall x. Rep (Cyclic v a) x -&gt; Cyclic v a)
+-&gt; Generic (Cyclic v a)
+forall x. Rep (Cyclic v a) x -&gt; Cyclic v a
+forall x. Cyclic v a -&gt; Rep (Cyclic v a) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall k (v :: k -&gt; *) (a :: k) x. Rep (Cyclic v a) x -&gt; Cyclic v a
+forall k (v :: k -&gt; *) (a :: k) x. Cyclic v a -&gt; Rep (Cyclic v a) x
+$cfrom :: forall k (v :: k -&gt; *) (a :: k) x. Cyclic v a -&gt; Rep (Cyclic v a) x
+from :: forall x. Cyclic v a -&gt; Rep (Cyclic v a) x
+$cto :: forall k (v :: k -&gt; *) (a :: k) x. Rep (Cyclic v a) x -&gt; Cyclic v a
+to :: forall x. Rep (Cyclic v a) x -&gt; Cyclic v a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- not sure if we want this Eq instance or not .</span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679185358"><span id="local-6989586621679185769"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.0.1-9ec1790380a4b5f817dc869b2bda3941c07dcf79de495272f28ea710715e6d27/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185358"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.0.1-9ec1790380a4b5f817dc869b2bda3941c07dcf79de495272f28ea710715e6d27/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185358"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-48"></span><span>  </span><span id="local-6989586621679185783"><span class="annot"><span class="annottext">traverse1 :: forall (f :: * -&gt; *) a b.
+Apply f =&gt;
+(a -&gt; f b) -&gt; Cyclic v a -&gt; f (Cyclic v b)
+</span><a href="#local-6989586621679185783"><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse1</span></a></span></span><span> </span><span id="local-6989586621679185785"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679185785"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span id="local-6989586621679185786"><span class="annot"><span class="annottext">v a
+</span><a href="#local-6989586621679185786"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">v b -&gt; Cyclic v b
+forall {k} (v :: k -&gt; *) (a :: k). v a -&gt; Cyclic v a
+</span><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-var">Cyclic</span></a></span><span> </span><span class="annot"><span class="annottext">(v b -&gt; Cyclic v b) -&gt; f (v b) -&gt; f (Cyclic v b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; v a -&gt; f (v b)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable1 t, Apply f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b. Apply f =&gt; (a -&gt; f b) -&gt; v a -&gt; f (v b)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.0.1-9ec1790380a4b5f817dc869b2bda3941c07dcf79de495272f28ea710715e6d27/share/doc/html/src/Data.Semigroup.Traversable.Class.html#traverse1"><span class="hs-identifier hs-var">traverse1</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679185785"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">v a
+</span><a href="#local-6989586621679185786"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-49"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679185357"><span id="local-6989586621679185797"><span id="local-6989586621679185802"><span id="local-6989586621679185807"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="annot"><a href="#local-6989586621679185357"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185357"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-50"></span><span>  </span><span id="local-6989586621679185820"><span class="annot"><span class="annottext">traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Cyclic v a -&gt; f (Cyclic v b)
+</span><a href="#local-6989586621679185820"><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse</span></a></span></span><span> </span><span id="local-6989586621679185822"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679185822"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span id="local-6989586621679185823"><span class="annot"><span class="annottext">v a
+</span><a href="#local-6989586621679185823"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">v b -&gt; Cyclic v b
+forall {k} (v :: k -&gt; *) (a :: k). v a -&gt; Cyclic v a
+</span><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-var">Cyclic</span></a></span><span> </span><span class="annot"><span class="annottext">(v b -&gt; Cyclic v b) -&gt; f (v b) -&gt; f (Cyclic v b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; v a -&gt; f (v b)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; v a -&gt; f (v b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679185822"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">v a
+</span><a href="#local-6989586621679185823"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679185395"><span id="local-6989586621679185396"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/indexed-traversable-0.1.3-e5b922fae6b2c7e2ee92f6d12ef1f6e04bcd6effac8ec8432b61e95ae8ff3a74/share/doc/html/src/WithIndex.html#FunctorWithIndex"><span class="hs-identifier hs-type">FunctorWithIndex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185395"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185396"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/indexed-traversable-0.1.3-e5b922fae6b2c7e2ee92f6d12ef1f6e04bcd6effac8ec8432b61e95ae8ff3a74/share/doc/html/src/WithIndex.html#FunctorWithIndex"><span class="hs-identifier hs-type">FunctorWithIndex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185395"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185396"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-54"></span><span>  </span><span id="local-6989586621679185833"><span class="annot"><span class="annottext">imap :: forall a b. (i -&gt; a -&gt; b) -&gt; Cyclic v a -&gt; Cyclic v b
+</span><a href="#local-6989586621679185833"><span class="hs-identifier hs-var hs-var hs-var hs-var">imap</span></a></span></span><span> </span><span id="local-6989586621679185835"><span class="annot"><span class="annottext">i -&gt; a -&gt; b
+</span><a href="#local-6989586621679185835"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span id="local-6989586621679185836"><span class="annot"><span class="annottext">v a
+</span><a href="#local-6989586621679185836"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">v b -&gt; Cyclic v b
+forall {k} (v :: k -&gt; *) (a :: k). v a -&gt; Cyclic v a
+</span><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-var">Cyclic</span></a></span><span> </span><span class="annot"><span class="annottext">(v b -&gt; Cyclic v b) -&gt; v b -&gt; Cyclic v b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(i -&gt; a -&gt; b) -&gt; v a -&gt; v b
+forall a b. (i -&gt; a -&gt; b) -&gt; v a -&gt; v b
+forall i (f :: * -&gt; *) a b.
+FunctorWithIndex i f =&gt;
+(i -&gt; a -&gt; b) -&gt; f a -&gt; f b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/indexed-traversable-0.1.3-e5b922fae6b2c7e2ee92f6d12ef1f6e04bcd6effac8ec8432b61e95ae8ff3a74/share/doc/html/src/WithIndex.html#imap"><span class="hs-identifier hs-var">imap</span></a></span><span> </span><span class="annot"><span class="annottext">i -&gt; a -&gt; b
+</span><a href="#local-6989586621679185835"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">v a
+</span><a href="#local-6989586621679185836"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-55"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679185414"><span id="local-6989586621679185415"><span id="local-6989586621679185843"><span id="local-6989586621679185849"><span id="local-6989586621679185852"><span id="local-6989586621679185855"><span id="local-6989586621679185858"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/indexed-traversable-0.1.3-e5b922fae6b2c7e2ee92f6d12ef1f6e04bcd6effac8ec8432b61e95ae8ff3a74/share/doc/html/src/WithIndex.html#FoldableWithIndex"><span class="hs-identifier hs-type">FoldableWithIndex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185414"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185415"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/indexed-traversable-0.1.3-e5b922fae6b2c7e2ee92f6d12ef1f6e04bcd6effac8ec8432b61e95ae8ff3a74/share/doc/html/src/WithIndex.html#FoldableWithIndex"><span class="hs-identifier hs-type">FoldableWithIndex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185414"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185415"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-56"></span><span>  </span><span id="local-6989586621679185865"><span class="annot"><span class="annottext">ifoldMap :: forall m a. Monoid m =&gt; (i -&gt; a -&gt; m) -&gt; Cyclic v a -&gt; m
+</span><a href="#local-6989586621679185865"><span class="hs-identifier hs-var hs-var hs-var hs-var">ifoldMap</span></a></span></span><span> </span><span id="local-6989586621679185867"><span class="annot"><span class="annottext">i -&gt; a -&gt; m
+</span><a href="#local-6989586621679185867"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span id="local-6989586621679185868"><span class="annot"><span class="annottext">v a
+</span><a href="#local-6989586621679185868"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(i -&gt; a -&gt; m) -&gt; v a -&gt; m
+forall m a. Monoid m =&gt; (i -&gt; a -&gt; m) -&gt; v a -&gt; m
+forall i (f :: * -&gt; *) m a.
+(FoldableWithIndex i f, Monoid m) =&gt;
+(i -&gt; a -&gt; m) -&gt; f a -&gt; m
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/indexed-traversable-0.1.3-e5b922fae6b2c7e2ee92f6d12ef1f6e04bcd6effac8ec8432b61e95ae8ff3a74/share/doc/html/src/WithIndex.html#ifoldMap"><span class="hs-identifier hs-var">ifoldMap</span></a></span><span> </span><span class="annot"><span class="annottext">i -&gt; a -&gt; m
+</span><a href="#local-6989586621679185867"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">v a
+</span><a href="#local-6989586621679185868"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-57"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679185426"><span id="local-6989586621679185427"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/indexed-traversable-0.1.3-e5b922fae6b2c7e2ee92f6d12ef1f6e04bcd6effac8ec8432b61e95ae8ff3a74/share/doc/html/src/WithIndex.html#TraversableWithIndex"><span class="hs-identifier hs-type">TraversableWithIndex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185426"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185427"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/indexed-traversable-0.1.3-e5b922fae6b2c7e2ee92f6d12ef1f6e04bcd6effac8ec8432b61e95ae8ff3a74/share/doc/html/src/WithIndex.html#TraversableWithIndex"><span class="hs-identifier hs-type">TraversableWithIndex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185426"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185427"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-58"></span><span>  </span><span id="local-6989586621679185890"><span class="annot"><span class="annottext">itraverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(i -&gt; a -&gt; f b) -&gt; Cyclic v a -&gt; f (Cyclic v b)
+</span><a href="#local-6989586621679185890"><span class="hs-identifier hs-var hs-var hs-var hs-var">itraverse</span></a></span></span><span> </span><span id="local-6989586621679185892"><span class="annot"><span class="annottext">i -&gt; a -&gt; f b
+</span><a href="#local-6989586621679185892"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span id="local-6989586621679185893"><span class="annot"><span class="annottext">v a
+</span><a href="#local-6989586621679185893"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">v b -&gt; Cyclic v b
+forall {k} (v :: k -&gt; *) (a :: k). v a -&gt; Cyclic v a
+</span><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-var">Cyclic</span></a></span><span> </span><span class="annot"><span class="annottext">(v b -&gt; Cyclic v b) -&gt; f (v b) -&gt; f (Cyclic v b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(i -&gt; a -&gt; f b) -&gt; v a -&gt; f (v b)
+forall i (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(TraversableWithIndex i t, Applicative f) =&gt;
+(i -&gt; a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(i -&gt; a -&gt; f b) -&gt; v a -&gt; f (v b)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/indexed-traversable-0.1.3-e5b922fae6b2c7e2ee92f6d12ef1f6e04bcd6effac8ec8432b61e95ae8ff3a74/share/doc/html/src/WithIndex.html#itraverse"><span class="hs-identifier hs-var">itraverse</span></a></span><span> </span><span class="annot"><span class="annottext">i -&gt; a -&gt; f b
+</span><a href="#local-6989586621679185892"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">v a
+</span><a href="#local-6989586621679185893"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679185437"><span class="annot"><a href="HGeometry.Foldable.Util.html#HasFromFoldable"><span class="hs-identifier hs-type">HasFromFoldable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185437"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Foldable.Util.html#HasFromFoldable"><span class="hs-identifier hs-type">HasFromFoldable</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185437"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-61"></span><span>  </span><span id="local-6989586621679185902"><span class="annot"><span class="annottext">fromFoldable :: forall (g :: * -&gt; *) a. Foldable g =&gt; g a -&gt; Cyclic v a
+</span><a href="#local-6989586621679185902"><span class="hs-identifier hs-var hs-var hs-var hs-var">fromFoldable</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">v a -&gt; Cyclic v a
+forall {k} (v :: k -&gt; *) (a :: k). v a -&gt; Cyclic v a
+</span><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-var">Cyclic</span></a></span><span> </span><span class="annot"><span class="annottext">(v a -&gt; Cyclic v a) -&gt; (g a -&gt; v a) -&gt; g a -&gt; Cyclic v a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">g a -&gt; v a
+forall (f :: * -&gt; *) (g :: * -&gt; *) a.
+(HasFromFoldable f, Foldable g) =&gt;
+g a -&gt; f a
+forall (g :: * -&gt; *) a. Foldable g =&gt; g a -&gt; v a
+</span><a href="HGeometry.Foldable.Util.html#fromFoldable"><span class="hs-identifier hs-var">fromFoldable</span></a></span><span>
+</span><span id="line-62"></span><span>  </span><span id="local-6989586621679185906"><span class="annot"><span class="annottext">fromList :: forall a. [a] -&gt; Cyclic v a
+</span><a href="#local-6989586621679185906"><span class="hs-identifier hs-var hs-var hs-var hs-var">fromList</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">v a -&gt; Cyclic v a
+forall {k} (v :: k -&gt; *) (a :: k). v a -&gt; Cyclic v a
+</span><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-var">Cyclic</span></a></span><span> </span><span class="annot"><span class="annottext">(v a -&gt; Cyclic v a) -&gt; ([a] -&gt; v a) -&gt; [a] -&gt; Cyclic v a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; v a
+forall a. [a] -&gt; v a
+forall (f :: * -&gt; *) a. HasFromFoldable f =&gt; [a] -&gt; f a
+</span><a href="HGeometry.Foldable.Util.html#fromList"><span class="hs-identifier hs-var">fromList</span></a></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679185450"><span class="annot"><a href="HGeometry.Foldable.Util.html#HasFromFoldable1"><span class="hs-identifier hs-type">HasFromFoldable1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185450"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Foldable.Util.html#HasFromFoldable1"><span class="hs-identifier hs-type">HasFromFoldable1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185450"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-65"></span><span>  </span><span id="local-6989586621679185916"><span class="annot"><span class="annottext">fromFoldable1 :: forall (g :: * -&gt; *) a. Foldable1 g =&gt; g a -&gt; Cyclic v a
+</span><a href="#local-6989586621679185916"><span class="hs-identifier hs-var hs-var hs-var hs-var">fromFoldable1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">v a -&gt; Cyclic v a
+forall {k} (v :: k -&gt; *) (a :: k). v a -&gt; Cyclic v a
+</span><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-var">Cyclic</span></a></span><span> </span><span class="annot"><span class="annottext">(v a -&gt; Cyclic v a) -&gt; (g a -&gt; v a) -&gt; g a -&gt; Cyclic v a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">g a -&gt; v a
+forall (f :: * -&gt; *) (g :: * -&gt; *) a.
+(HasFromFoldable1 f, Foldable1 g) =&gt;
+g a -&gt; f a
+forall (g :: * -&gt; *) a. Foldable1 g =&gt; g a -&gt; v a
+</span><a href="HGeometry.Foldable.Util.html#fromFoldable1"><span class="hs-identifier hs-var">fromFoldable1</span></a></span><span>
+</span><span id="line-66"></span><span>  </span><span id="local-6989586621679185919"><span class="annot"><span class="annottext">fromNonEmpty :: forall a. NonEmpty a -&gt; Cyclic v a
+</span><a href="#local-6989586621679185919"><span class="hs-identifier hs-var hs-var hs-var hs-var">fromNonEmpty</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">v a -&gt; Cyclic v a
+forall {k} (v :: k -&gt; *) (a :: k). v a -&gt; Cyclic v a
+</span><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-var">Cyclic</span></a></span><span> </span><span class="annot"><span class="annottext">(v a -&gt; Cyclic v a)
+-&gt; (NonEmpty a -&gt; v a) -&gt; NonEmpty a -&gt; Cyclic v a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty a -&gt; v a
+forall a. NonEmpty a -&gt; v a
+forall (f :: * -&gt; *) a. HasFromFoldable1 f =&gt; NonEmpty a -&gt; f a
+</span><a href="HGeometry.Foldable.Util.html#fromNonEmpty"><span class="hs-identifier hs-var">fromNonEmpty</span></a></span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Index"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.At.html#Index"><span class="hs-identifier hs-var">Index</span></a></span></span><span>   </span><span id="local-6989586621679185921"><span id="local-6989586621679185922"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185921"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185922"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.At.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679185921"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185922"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="IxValue"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.At.html#IxValue"><span class="hs-identifier hs-var">IxValue</span></a></span></span><span> </span><span id="local-6989586621679185923"><span id="local-6989586621679185924"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185923"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185924"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.At.html#IxValue"><span class="hs-identifier hs-type">IxValue</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679185923"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185924"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679185461"><span id="local-6989586621679185462"><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.At.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679185461"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185462"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679185461"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.At.html#Ixed"><span class="hs-identifier hs-type">Ixed</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679185461"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185462"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.At.html#Ixed"><span class="hs-identifier hs-type">Ixed</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185461"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185462"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-72"></span><span>  </span><span id="local-6989586621679185940"><span class="annot"><span class="annottext">ix :: Index (Cyclic v a)
+-&gt; Traversal' (Cyclic v a) (IxValue (Cyclic v a))
+</span><a href="#local-6989586621679185940"><span class="hs-identifier hs-var hs-var hs-var hs-var">ix</span></a></span></span><span> </span><span id="local-6989586621679185942"><span class="annot"><span class="annottext">Index (Cyclic v a)
+</span><a href="#local-6989586621679185942"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679185943"><span class="annot"><span class="annottext">IxValue (Cyclic v a) -&gt; f (IxValue (Cyclic v a))
+</span><a href="#local-6989586621679185943"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span id="local-6989586621679185944"><span class="annot"><span class="annottext">v a
+</span><a href="#local-6989586621679185944"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679185945"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679185945"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">v a -&gt; Int
+forall a. v a -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">F.length</span></span><span> </span><span class="annot"><span class="annottext">v a
+</span><a href="#local-6989586621679185944"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-73"></span><span>                          </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">v a -&gt; Cyclic v a
+forall {k} (v :: k -&gt; *) (a :: k). v a -&gt; Cyclic v a
+</span><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-var">Cyclic</span></a></span><span> </span><span class="annot"><span class="annottext">(v a -&gt; Cyclic v a) -&gt; f (v a) -&gt; f (Cyclic v a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Index (v a) -&gt; Traversal' (v a) (IxValue (v a))
+forall m. Ixed m =&gt; Index m -&gt; Traversal' m (IxValue m)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.At.html#ix"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+Index (Cyclic v a)
+</span><a href="#local-6989586621679185942"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Integral a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">`mod`</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679185945"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">IxValue (v a) -&gt; f (IxValue (v a))
+IxValue (Cyclic v a) -&gt; f (IxValue (Cyclic v a))
+</span><a href="#local-6989586621679185943"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">v a
+</span><a href="#local-6989586621679185944"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span class="annot"><span class="hs-comment">-- | Turn the cyclic vector into a circular Vector</span></span><span>
+</span><span id="line-76"></span><span id="local-6989586621679185466"><span class="annot"><a href="HGeometry.Cyclic.html#toCircularVector"><span class="hs-identifier hs-type">toCircularVector</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NV.NonEmptyVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185466"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-circular-0.1.4-c160461f88915ecf597894cf144eb5e191370bb58f0f2e4749025e723bae3e26/share/doc/html/src/Data.Vector.Circular.html#CircularVector"><span class="hs-identifier hs-type">CircularVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185466"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-77"></span><span id="toCircularVector"><span class="annot"><span class="annottext">toCircularVector :: forall a. Cyclic NonEmptyVector a -&gt; CircularVector a
+</span><a href="HGeometry.Cyclic.html#toCircularVector"><span class="hs-identifier hs-var hs-var">toCircularVector</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span id="local-6989586621679185948"><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679185948"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; Int -&gt; CircularVector a
+forall a. NonEmptyVector a -&gt; Int -&gt; CircularVector a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-circular-0.1.4-c160461f88915ecf597894cf144eb5e191370bb58f0f2e4749025e723bae3e26/share/doc/html/src/Data.Vector.Circular.html#CircularVector"><span class="hs-identifier hs-var">CircularVector</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679185948"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- | Class that models that some type has a cyclic traversal starting</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- from a particular index.</span><span>
+</span><span id="line-82"></span><span class="hs-keyword">class</span><span> </span><span id="HasDirectedTraversals"><span class="annot"><a href="HGeometry.Cyclic.html#HasDirectedTraversals"><span class="hs-identifier hs-var">HasDirectedTraversals</span></a></span></span><span> </span><span id="local-6989586621679185474"><span class="annot"><a href="#local-6989586621679185474"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-83"></span><span>  </span><span class="hs-comment">-- | A rightward-traversal over all elements starting from the given one.</span><span>
+</span><span id="line-84"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-85"></span><span>  </span><span class="hs-comment">-- running time : \(O(n)\)</span><span>
+</span><span id="line-86"></span><span>  </span><span id="traverseRightFrom"><span class="annot"><a href="HGeometry.Cyclic.html#traverseRightFrom"><span class="hs-identifier hs-type">traverseRightFrom</span></a></span></span><span>          </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679185471"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.At.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679185474"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185471"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Type.html#IndexedTraversal1%27"><span class="hs-identifier hs-type">IndexedTraversal1'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.At.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679185474"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185471"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679185474"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185471"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679185471"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span>  </span><span class="hs-comment">-- | A rightward-traversal over all elements starting from the given one.</span><span>
+</span><span id="line-89"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-90"></span><span>  </span><span class="hs-comment">-- running time : \(O(n)\)</span><span>
+</span><span id="line-91"></span><span>  </span><span id="traverseLeftFrom"><span class="annot"><a href="HGeometry.Cyclic.html#traverseLeftFrom"><span class="hs-identifier hs-type">traverseLeftFrom</span></a></span></span><span>          </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679185952"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.At.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679185474"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185952"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Type.html#IndexedTraversal1%27"><span class="hs-identifier hs-type">IndexedTraversal1'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.At.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679185474"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185952"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679185474"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185952"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679185952"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679185475"><span class="annot"><a href="HGeometry.Cyclic.html#HasDirectedTraversals"><span class="hs-identifier hs-type">HasDirectedTraversals</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185475"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Cyclic.html#HasDirectedTraversals"><span class="hs-identifier hs-type">HasDirectedTraversals</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185475"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-94"></span><span>  </span><span id="local-6989586621679185966"><span class="annot"><span class="annottext">traverseRightFrom :: forall a.
+Index (Cyclic v a)
+-&gt; IndexedTraversal1' (Index (Cyclic v a)) (Cyclic v a) a
+</span><a href="HGeometry.Cyclic.html#traverseRightFrom"><span class="hs-identifier hs-var hs-var hs-var hs-var">traverseRightFrom</span></a></span></span><span> </span><span id="local-6989586621679185967"><span class="annot"><span class="annottext">Index (Cyclic v a)
+</span><a href="#local-6989586621679185967"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679185968"><span class="annot"><span class="annottext">p a (f a)
+</span><a href="#local-6989586621679185968"><span class="hs-identifier hs-var">paFa</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span id="local-6989586621679185969"><span class="annot"><span class="annottext">v a
+</span><a href="#local-6989586621679185969"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">v a -&gt; Cyclic v a
+forall {k} (v :: k -&gt; *) (a :: k). v a -&gt; Cyclic v a
+</span><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-var">Cyclic</span></a></span><span> </span><span class="annot"><span class="annottext">(v a -&gt; Cyclic v a) -&gt; f (v a) -&gt; f (Cyclic v a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Index (v a) -&gt; IndexedTraversal1' (Index (v a)) (v a) a
+forall a. Index (v a) -&gt; IndexedTraversal1' (Index (v a)) (v a) a
+forall (v :: * -&gt; *) a.
+HasDirectedTraversals v =&gt;
+Index (v a) -&gt; IndexedTraversal1' (Index (v a)) (v a) a
+</span><a href="HGeometry.Cyclic.html#traverseRightFrom"><span class="hs-identifier hs-var">traverseRightFrom</span></a></span><span> </span><span class="annot"><span class="annottext">Index (v a)
+Index (Cyclic v a)
+</span><a href="#local-6989586621679185967"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">p a (f a)
+</span><a href="#local-6989586621679185968"><span class="hs-identifier hs-var">paFa</span></a></span><span> </span><span class="annot"><span class="annottext">v a
+</span><a href="#local-6989586621679185969"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-95"></span><span>  </span><span id="local-6989586621679185978"><span class="annot"><span class="annottext">traverseLeftFrom :: forall a.
+Index (Cyclic v a)
+-&gt; IndexedTraversal1' (Index (Cyclic v a)) (Cyclic v a) a
+</span><a href="HGeometry.Cyclic.html#traverseLeftFrom"><span class="hs-identifier hs-var hs-var hs-var hs-var">traverseLeftFrom</span></a></span></span><span>  </span><span id="local-6989586621679185979"><span class="annot"><span class="annottext">Index (Cyclic v a)
+</span><a href="#local-6989586621679185979"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679185980"><span class="annot"><span class="annottext">p a (f a)
+</span><a href="#local-6989586621679185980"><span class="hs-identifier hs-var">paFa</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span id="local-6989586621679185981"><span class="annot"><span class="annottext">v a
+</span><a href="#local-6989586621679185981"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">v a -&gt; Cyclic v a
+forall {k} (v :: k -&gt; *) (a :: k). v a -&gt; Cyclic v a
+</span><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-var">Cyclic</span></a></span><span> </span><span class="annot"><span class="annottext">(v a -&gt; Cyclic v a) -&gt; f (v a) -&gt; f (Cyclic v a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Index (v a) -&gt; IndexedTraversal1' (Index (v a)) (v a) a
+forall a. Index (v a) -&gt; IndexedTraversal1' (Index (v a)) (v a) a
+forall (v :: * -&gt; *) a.
+HasDirectedTraversals v =&gt;
+Index (v a) -&gt; IndexedTraversal1' (Index (v a)) (v a) a
+</span><a href="HGeometry.Cyclic.html#traverseLeftFrom"><span class="hs-identifier hs-var">traverseLeftFrom</span></a></span><span>  </span><span class="annot"><span class="annottext">Index (v a)
+Index (Cyclic v a)
+</span><a href="#local-6989586621679185979"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">p a (f a)
+</span><a href="#local-6989586621679185980"><span class="hs-identifier hs-var">paFa</span></a></span><span> </span><span class="annot"><span class="annottext">v a
+</span><a href="#local-6989586621679185981"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="HGeometry.Cyclic.html#HasDirectedTraversals"><span class="hs-identifier hs-type">HasDirectedTraversals</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NV.NonEmptyVector</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-98"></span><span>  </span><span id="local-6989586621679186000"><span class="annot"><span class="annottext">traverseRightFrom :: forall a.
+Index (NonEmptyVector a)
+-&gt; IndexedTraversal1'
+     (Index (NonEmptyVector a)) (NonEmptyVector a) a
+</span><a href="HGeometry.Cyclic.html#traverseRightFrom"><span class="hs-identifier hs-var hs-var hs-var hs-var">traverseRightFrom</span></a></span></span><span> </span><span id="local-6989586621679186001"><span class="annot"><span class="annottext">Index (NonEmptyVector a)
+</span><a href="#local-6989586621679186001"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679186002"><span class="annot"><span class="annottext">p a (f a)
+</span><a href="#local-6989586621679186002"><span class="hs-identifier hs-var">paFa</span></a></span></span><span> </span><span id="local-6989586621679186003"><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679186003"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty Int -&gt; IndexedTraversal1' Int (NonEmptyVector a) a
+forall a.
+NonEmpty Int -&gt; IndexedTraversal1' Int (NonEmptyVector a) a
+</span><a href="HGeometry.Cyclic.html#traverseByOrder"><span class="hs-identifier hs-var">traverseByOrder</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty Int
+</span><a href="#local-6989586621679186005"><span class="hs-identifier hs-var">indices'</span></a></span><span> </span><span class="annot"><span class="annottext">p a (f a)
+</span><a href="#local-6989586621679186002"><span class="hs-identifier hs-var">paFa</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679186003"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-99"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-100"></span><span>      </span><span id="local-6989586621679186006"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679186006"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; Int
+forall a. NonEmptyVector a -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">F.length</span></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679186003"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-101"></span><span>      </span><span id="local-6989586621679186005"><span class="annot"><span class="annottext">indices' :: NonEmpty Int
+</span><a href="#local-6989586621679186005"><span class="hs-identifier hs-var hs-var">indices'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; NonEmpty Int
+forall a. HasCallStack =&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">NonEmpty.fromList</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+Index (NonEmptyVector a)
+</span><a href="#local-6989586621679186001"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-glyph">..</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+Index (NonEmptyVector a)
+</span><a href="#local-6989586621679186001"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679186006"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span>  </span><span id="local-6989586621679186023"><span class="annot"><span class="annottext">traverseLeftFrom :: forall a.
+Index (NonEmptyVector a)
+-&gt; IndexedTraversal1'
+     (Index (NonEmptyVector a)) (NonEmptyVector a) a
+</span><a href="HGeometry.Cyclic.html#traverseLeftFrom"><span class="hs-identifier hs-var hs-var hs-var hs-var">traverseLeftFrom</span></a></span></span><span> </span><span id="local-6989586621679186024"><span class="annot"><span class="annottext">Index (NonEmptyVector a)
+</span><a href="#local-6989586621679186024"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679186025"><span class="annot"><span class="annottext">p a (f a)
+</span><a href="#local-6989586621679186025"><span class="hs-identifier hs-var">paFa</span></a></span></span><span> </span><span id="local-6989586621679186026"><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679186026"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty Int -&gt; IndexedTraversal1' Int (NonEmptyVector a) a
+forall a.
+NonEmpty Int -&gt; IndexedTraversal1' Int (NonEmptyVector a) a
+</span><a href="HGeometry.Cyclic.html#traverseByOrder"><span class="hs-identifier hs-var">traverseByOrder</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty Int
+</span><a href="#local-6989586621679186027"><span class="hs-identifier hs-var">indices'</span></a></span><span> </span><span class="annot"><span class="annottext">p a (f a)
+</span><a href="#local-6989586621679186025"><span class="hs-identifier hs-var">paFa</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679186026"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-104"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-105"></span><span>      </span><span id="local-6989586621679186028"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679186028"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; Int
+forall a. NonEmptyVector a -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">F.length</span></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679186026"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-106"></span><span>      </span><span id="local-6989586621679186027"><span class="annot"><span class="annottext">indices' :: NonEmpty Int
+</span><a href="#local-6989586621679186027"><span class="hs-identifier hs-var hs-var">indices'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; NonEmpty Int
+forall a. HasCallStack =&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">NonEmpty.fromList</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+Index (NonEmptyVector a)
+</span><a href="#local-6989586621679186024"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+Index (NonEmptyVector a)
+</span><a href="#local-6989586621679186024"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-glyph">..</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+Index (NonEmptyVector a)
+</span><a href="#local-6989586621679186024"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679186028"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span class="annot"><span class="hs-comment">-- | traverse the vector in the given order</span></span><span>
+</span><span id="line-109"></span><span id="local-6989586621679185487"><span class="annot"><a href="HGeometry.Cyclic.html#traverseByOrder"><span class="hs-identifier hs-type">traverseByOrder</span></a></span><span>                 </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty.NonEmpty</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-110"></span><span>                                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Type.html#IndexedTraversal1%27"><span class="hs-identifier hs-type">IndexedTraversal1'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NV.NonEmptyVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185487"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679185487"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-111"></span><span id="traverseByOrder"><span class="annot"><span class="annottext">traverseByOrder :: forall a.
+NonEmpty Int -&gt; IndexedTraversal1' Int (NonEmptyVector a) a
+</span><a href="HGeometry.Cyclic.html#traverseByOrder"><span class="hs-identifier hs-var hs-var">traverseByOrder</span></a></span></span><span> </span><span id="local-6989586621679186040"><span class="annot"><span class="annottext">NonEmpty Int
+</span><a href="#local-6989586621679186040"><span class="hs-identifier hs-var">indices'</span></a></span></span><span> </span><span id="local-6989586621679186041"><span class="annot"><span class="annottext">p a (f a)
+</span><a href="#local-6989586621679186041"><span class="hs-identifier hs-var">paFa</span></a></span></span><span> </span><span id="local-6989586621679186042"><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679186042"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (Int, a) -&gt; NonEmptyVector a
+</span><a href="#local-6989586621679186043"><span class="hs-identifier hs-var">build</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (Int, a) -&gt; NonEmptyVector a)
+-&gt; f (NonEmpty (Int, a)) -&gt; f (NonEmptyVector a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">f (NonEmpty (Int, a))
+</span><a href="#local-6989586621679186044"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-112"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-113"></span><span>    </span><span id="local-6989586621679186045"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679186045"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; Int
+forall a. NonEmptyVector a -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">F.length</span></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679186042"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-114"></span><span>    </span><span id="local-6989586621679186044"><span class="annot"><span class="annottext">xs :: f (NonEmpty (Int, a))
+</span><a href="#local-6989586621679186044"><span class="hs-identifier hs-var hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; f (Int, a)) -&gt; NonEmpty Int -&gt; f (NonEmpty (Int, a))
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable1 t, Apply f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Apply f =&gt;
+(a -&gt; f b) -&gt; NonEmpty a -&gt; f (NonEmpty b)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.0.1-9ec1790380a4b5f817dc869b2bda3941c07dcf79de495272f28ea710715e6d27/share/doc/html/src/Data.Semigroup.Traversable.Class.html#traverse1"><span class="hs-identifier hs-var">traverse1</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679186046"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679186046"><span class="hs-identifier hs-var">i'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679186047"><span class="annot"><span class="annottext">i :: Int
+</span><a href="#local-6989586621679186047"><span class="hs-identifier hs-var hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679186046"><span class="hs-identifier hs-var">i'</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Integral a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">`mod`</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679186045"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-115"></span><span>                           </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679186047"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(a -&gt; (Int, a)) -&gt; f a -&gt; f (Int, a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">p a (f a) -&gt; Int -&gt; a -&gt; f a
+forall a b. p a b -&gt; Int -&gt; a -&gt; b
+forall i (p :: * -&gt; * -&gt; *) a b.
+Indexable i p =&gt;
+p a b -&gt; i -&gt; a -&gt; b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Internal.Indexed.html#indexed"><span class="hs-identifier hs-var">indexed</span></a></span><span> </span><span class="annot"><span class="annottext">p a (f a)
+</span><a href="#local-6989586621679186041"><span class="hs-identifier hs-var">paFa</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679186047"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679186042"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; Int -&gt; a
+forall a. NonEmptyVector a -&gt; Int -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.html#%21"><span class="hs-operator hs-var">NV.!</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679186047"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-116"></span><span>                   </span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NonEmpty Int
+</span><a href="#local-6989586621679186040"><span class="hs-identifier hs-var">indices'</span></a></span><span>
+</span><span id="line-117"></span><span>    </span><span id="local-6989586621679186043"><span class="annot"><span class="annottext">build :: NonEmpty (Int, a) -&gt; NonEmptyVector a
+</span><a href="#local-6989586621679186043"><span class="hs-identifier hs-var hs-var">build</span></a></span></span><span> </span><span id="local-6989586621679186050"><span class="annot"><span class="annottext">NonEmpty (Int, a)
+</span><a href="#local-6989586621679186050"><span class="hs-identifier hs-var">ys</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector a -&gt; NonEmptyVector a
+forall a. Vector a -&gt; NonEmptyVector a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.html#unsafeFromVector"><span class="hs-identifier hs-var">NV.unsafeFromVector</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector a -&gt; NonEmptyVector a) -&gt; Vector a -&gt; NonEmptyVector a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(forall s. ST s (MVector s a)) -&gt; Vector a
+forall a. (forall s. ST s (MVector s a)) -&gt; Vector a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.html#create"><span class="hs-identifier hs-var">V.create</span></a></span><span> </span><span class="annot"><span class="annottext">((forall s. ST s (MVector s a)) -&gt; Vector a)
+-&gt; (forall s. ST s (MVector s a)) -&gt; Vector a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-118"></span><span>                   </span><span id="local-6989586621679186064"><span class="annot"><span class="annottext">MVector s a
+</span><a href="#local-6989586621679186064"><span class="hs-identifier hs-var">v'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ST s (MVector (PrimState (ST s)) a)
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+Int -&gt; m (MVector (PrimState m) a)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Mutable.html#unsafeNew"><span class="hs-identifier hs-var">MV.unsafeNew</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679186045"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-119"></span><span>                   </span><span class="annot"><span class="annottext">NonEmpty (Int, a) -&gt; ((Int, a) -&gt; ST s ()) -&gt; ST s ()
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Foldable t, Monad m) =&gt;
+t a -&gt; (a -&gt; m b) -&gt; m ()
+</span><span class="hs-identifier hs-var">forM_</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Int, a)
+</span><a href="#local-6989586621679186050"><span class="hs-identifier hs-var">ys</span></a></span><span> </span><span class="annot"><span class="annottext">(((Int, a) -&gt; ST s ()) -&gt; ST s ())
+-&gt; ((Int, a) -&gt; ST s ()) -&gt; ST s ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679186066"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679186066"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679186067"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679186067"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-120"></span><span>                     </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) a -&gt; Int -&gt; a -&gt; ST s ()
+forall (m :: * -&gt; *) a.
+PrimMonad m =&gt;
+MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Mutable.html#write"><span class="hs-identifier hs-var">MV.write</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s a
+MVector (PrimState (ST s)) a
+</span><a href="#local-6989586621679186064"><span class="hs-identifier hs-var">v'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679186066"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679186067"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-121"></span><span>                   </span><span class="annot"><span class="annottext">MVector s a -&gt; ST s (MVector s a)
+forall a. a -&gt; ST s a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">MVector s a
+</span><a href="#local-6989586621679186064"><span class="hs-identifier hs-var">v'</span></a></span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- | Test if the circular list is a cyclic shift of the second</span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- list.</span><span>
+</span><span id="line-125"></span><span class="hs-comment">--</span><span>
+</span><span id="line-126"></span><span class="hs-comment">-- Running time: \(O(n+m)\), where \(n\) and \(m\) are the sizes of</span><span>
+</span><span id="line-127"></span><span class="hs-comment">-- the lists.</span><span>
+</span><span id="line-128"></span><span id="local-6989586621679185522"><span id="local-6989586621679185523"><span class="annot"><a href="HGeometry.Cyclic.html#isShiftOfI"><span class="hs-identifier hs-type">isShiftOfI</span></a></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679185522"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679185523"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185523"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185522"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185523"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185522"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span><span>
+</span><span id="line-129"></span><span id="local-6989586621679186082"><span class="annot"><span class="annottext">Cyclic v a
+</span><a href="#local-6989586621679186082"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span id="isShiftOfI"><span class="annot"><span class="annottext">isShiftOfI :: forall a (v :: * -&gt; *).
+(Eq a, Foldable1 v) =&gt;
+Cyclic v a -&gt; Cyclic v a -&gt; Bool
+</span><a href="HGeometry.Cyclic.html#isShiftOfI"><span class="hs-operator hs-var hs-var">`isShiftOfI`</span></a></span></span><span> </span><span id="local-6989586621679186083"><span class="annot"><span class="annottext">Cyclic v a
+</span><a href="#local-6989586621679186083"><span class="hs-identifier hs-var">ys</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679186084"><span class="annot"><span class="annottext">twice :: Cyclic v a -&gt; NonEmptyVector a
+</span><a href="#local-6989586621679186084"><span class="hs-identifier hs-var hs-var">twice</span></a></span></span><span> </span><span id="local-6989586621679186085"><span class="annot"><span class="annottext">Cyclic v a
+</span><a href="#local-6989586621679186085"><span class="hs-identifier hs-var">zs</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679186086"><span class="annot"><span class="annottext">zs' :: NonEmptyVector a
+</span><a href="#local-6989586621679186086"><span class="hs-identifier hs-var hs-var">zs'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cyclic v a -&gt; NonEmptyVector a
+forall {a}. Cyclic v a -&gt; NonEmptyVector a
+</span><a href="#local-6989586621679186087"><span class="hs-identifier hs-var">leftElements</span></a></span><span> </span><span class="annot"><span class="annottext">Cyclic v a
+</span><a href="#local-6989586621679186085"><span class="hs-identifier hs-var">zs</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679186086"><span class="hs-identifier hs-var">zs'</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; NonEmptyVector a -&gt; NonEmptyVector a
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679186086"><span class="hs-identifier hs-var">zs'</span></a></span><span>
+</span><span id="line-130"></span><span>                         </span><span id="local-6989586621679186088"><span class="annot"><span class="annottext">once :: Cyclic v a -&gt; NonEmptyVector a
+</span><a href="#local-6989586621679186088"><span class="hs-identifier hs-var hs-var">once</span></a></span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cyclic v a -&gt; NonEmptyVector a
+forall {a}. Cyclic v a -&gt; NonEmptyVector a
+</span><a href="#local-6989586621679186087"><span class="hs-identifier hs-var">leftElements</span></a></span><span>
+</span><span id="line-131"></span><span>                         </span><span id="local-6989586621679186087"><span class="annot"><span class="annottext">leftElements :: Cyclic v a -&gt; NonEmptyVector a
+</span><a href="#local-6989586621679186087"><span class="hs-identifier hs-var hs-var">leftElements</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty a -&gt; NonEmptyVector a
+forall a. NonEmpty a -&gt; NonEmptyVector a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.html#fromNonEmpty"><span class="hs-identifier hs-var">NV.fromNonEmpty</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty a -&gt; NonEmptyVector a)
+-&gt; (Cyclic v a -&gt; NonEmpty a) -&gt; Cyclic v a -&gt; NonEmptyVector a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Cyclic v a -&gt; NonEmpty a
+forall a. Cyclic v a -&gt; NonEmpty a
+forall (t :: * -&gt; *) a. Foldable1 t =&gt; t a -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">toNonEmpty</span></span><span>
+</span><span id="line-132"></span><span>                         </span><span id="local-6989586621679186093"><span class="annot"><span class="annottext">check :: Cyclic v a -&gt; Cyclic v a -&gt; Bool
+</span><a href="#local-6989586621679186093"><span class="hs-identifier hs-var hs-var">check</span></a></span></span><span> </span><span id="local-6989586621679186094"><span class="annot"><span class="annottext">Cyclic v a
+</span><a href="#local-6989586621679186094"><span class="hs-keyword hs-var">as</span></a></span></span><span> </span><span id="local-6989586621679186095"><span class="annot"><span class="annottext">Cyclic v a
+</span><a href="#local-6989586621679186095"><span class="hs-identifier hs-var">bs</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Int -&gt; Bool
+forall a. Maybe a -&gt; Bool
+</span><span class="hs-identifier hs-var">isJust</span></span><span> </span><span class="annot"><span class="annottext">(Maybe Int -&gt; Bool) -&gt; Maybe Int -&gt; Bool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Cyclic v a -&gt; NonEmptyVector a
+</span><a href="#local-6989586621679186088"><span class="hs-identifier hs-var">once</span></a></span><span> </span><span class="annot"><span class="annottext">Cyclic v a
+</span><a href="#local-6989586621679186094"><span class="hs-keyword hs-var">as</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; NonEmptyVector a -&gt; Maybe Int
+forall a (p :: * -&gt; *) (t :: * -&gt; *).
+(Eq a, Foldable p, Foldable t) =&gt;
+p a -&gt; t a -&gt; Maybe Int
+</span><a href="HGeometry.StringSearch.KMP.html#isSubStringOf"><span class="hs-operator hs-var">`isSubStringOf`</span></a></span><span> </span><span class="annot"><span class="annottext">Cyclic v a -&gt; NonEmptyVector a
+</span><a href="#local-6989586621679186084"><span class="hs-identifier hs-var">twice</span></a></span><span> </span><span class="annot"><span class="annottext">Cyclic v a
+</span><a href="#local-6989586621679186095"><span class="hs-identifier hs-var">bs</span></a></span><span>
+</span><span id="line-133"></span><span>                     </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Cyclic v a -&gt; Int
+forall a. Cyclic v a -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">Cyclic v a
+</span><a href="#local-6989586621679186082"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Cyclic v a -&gt; Int
+forall a. Cyclic v a -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">Cyclic v a
+</span><a href="#local-6989586621679186083"><span class="hs-identifier hs-var">ys</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Cyclic v a -&gt; Cyclic v a -&gt; Bool
+</span><a href="#local-6989586621679186093"><span class="hs-identifier hs-var">check</span></a></span><span> </span><span class="annot"><span class="annottext">Cyclic v a
+</span><a href="#local-6989586621679186082"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">Cyclic v a
+</span><a href="#local-6989586621679186083"><span class="hs-identifier hs-var">ys</span></a></span><span>
+</span><span id="line-134"></span><span>
+</span><span id="line-135"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-136"></span><span>
+</span><span id="line-137"></span><span class="annot"><span class="hs-comment">-- | Class for types that have an Equality test up to cyclic shifts</span></span><span>
+</span><span id="line-138"></span><span class="hs-keyword">class</span><span> </span><span id="ShiftedEq"><span class="annot"><a href="HGeometry.Cyclic.html#ShiftedEq"><span class="hs-identifier hs-var">ShiftedEq</span></a></span></span><span> </span><span id="local-6989586621679185538"><span class="annot"><a href="#local-6989586621679185538"><span class="hs-identifier hs-type">t</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-139"></span><span>  </span><span class="hs-comment">-- | The type of the elements stored in this cyclic container.</span><span>
+</span><span id="line-140"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="ElemCyclic"><span class="annot"><a href="HGeometry.Cyclic.html#ElemCyclic"><span class="hs-identifier hs-var">ElemCyclic</span></a></span></span><span> </span><span id="local-6989586621679185538"><span class="annot"><a href="#local-6989586621679185538"><span class="hs-identifier hs-type">t</span></a></span></span><span>
+</span><span id="line-141"></span><span>  </span><span class="hs-comment">-- | Given a and b, test if a is a shifted version of the other.</span><span>
+</span><span id="line-142"></span><span>  </span><span id="isShiftOf"><span class="annot"><a href="HGeometry.Cyclic.html#isShiftOf"><span class="hs-identifier hs-type">isShiftOf</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#ElemCyclic"><span class="hs-identifier hs-type">ElemCyclic</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185538"><span class="hs-identifier hs-type">t</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679185538"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679185538"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-143"></span><span>
+</span><span id="line-144"></span><span>  </span><span class="hs-comment">-- TODO: It may be nice to have a version that actually returns the index, if it is a</span><span>
+</span><span id="line-145"></span><span>  </span><span class="hs-comment">-- shift.</span><span>
+</span><span id="line-146"></span><span>
+</span><span id="line-147"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679185539"><span id="local-6989586621679185540"><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679185539"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Cyclic.html#ShiftedEq"><span class="hs-identifier hs-type">ShiftedEq</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185539"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185540"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-148"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="ElemCyclic"><span class="annot"><a href="HGeometry.Cyclic.html#ElemCyclic"><span class="hs-identifier hs-var">ElemCyclic</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185539"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679185540"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679185540"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-149"></span><span>  </span><span class="hs-comment">-- ^ runs in linear time in the inputs.</span><span>
+</span><span id="line-150"></span><span>  </span><span id="local-6989586621679186106"><span class="annot"><span class="annottext">isShiftOf :: Eq (ElemCyclic (Cyclic v a)) =&gt; Cyclic v a -&gt; Cyclic v a -&gt; Bool
+</span><a href="HGeometry.Cyclic.html#isShiftOf"><span class="hs-identifier hs-var hs-var hs-var hs-var">isShiftOf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cyclic v a -&gt; Cyclic v a -&gt; Bool
+forall a (v :: * -&gt; *).
+(Eq a, Foldable1 v) =&gt;
+Cyclic v a -&gt; Cyclic v a -&gt; Bool
+</span><a href="HGeometry.Cyclic.html#isShiftOfI"><span class="hs-identifier hs-var">isShiftOfI</span></a></span><span>
+</span><span id="line-151"></span></pre></body></html>
