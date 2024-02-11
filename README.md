@@ -88,7 +88,7 @@ algorithms for computing
   - worst case optimal $O(n\log n)$ time implementations of Graham
     scan and Divide and Conquer,
   - an output sensitive $O(nh)$ time Jarvis March, and
-  - a QuickHull implementation (which has worst case complexity $O(n^2)$)
+  - a QuickHull implementation (which has worst case complexity $O(n^2)$ )
 
   Furtheremore, an optimal linear time algorithm for when the points
   are the vertices of a convex polygon.

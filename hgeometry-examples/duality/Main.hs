@@ -146,8 +146,8 @@ instance Drawable (LineEQ R) where
   draw l = let maxP = Point2 large large
                minP = maxP&vector %~ negated
            in case l `intersect` Rectangle minP maxP of
-                Just (Line_x_Box_Segment s) -> draw s
-                _                           -> flip g_ []
+                Just (Line_x_Box_LineSegment s) -> draw s
+                _                               -> flip g_ []
 
 large = 100000
 
