@@ -13,8 +13,6 @@ module HGeometry.Polygon.Convex.Tangents
   ( leftTangent, rightTangent
   , lowerTangent, lowerTangent'
   , upperTangent, upperTangent'
-
-  , findMaxWith
   ) where
 
 import           Control.Lens
@@ -33,7 +31,7 @@ import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex.Class
 import           HGeometry.Vector
-
+import           HGeometry.Polygon.Convex.Implementation (findMaxWith)
 --------------------------------------------------------------------------------
 
 -- | Given a convex polygon poly, and a point outside the polygon, find the
@@ -61,35 +59,6 @@ tangentCmp o p q = case ccw o p q of
                      CCW      -> LT -- q is left of the line from o to p
                      CoLinear -> EQ -- q is *on* the line from o to p
                      CW       -> GT -- q is right of the line from o to p
-
-
--- | Find the maximum vertex in a convex polygon using a binary search.
--- \( O(\log n) \)
-findMaxWith :: ( ConvexPolygon_ convexPolygon point r
-               , Point_ point 2 r --, OptCVector_ 2 r
-               )
-            => (point -> point -> Ordering)
-             -> convexPolygon -> point
-findMaxWith cmp p = p^.outerBoundaryVertexAt (worker 0 (lengthOf outerBoundary p))
-  where
-    a `icmp` b = (p^.outerBoundaryVertexAt a) `cmp` (p^.outerBoundaryVertexAt b)
-    worker a b
-      | localMaximum c = c
-      | a+1==b         = b
-      | otherwise      =
-        case  (isUpwards a, isUpwards c, c `icmp` a /= LT) of
-          (True, False, _)      -> worker a c -- A is up, C is down, pick [a,c]
-          (True, True, True)    -> worker c b -- A is up, C is up, C is GTE A, pick [c,b]
-          (True, True, False)   -> worker a c -- A is up, C is LT A, pick [a,c]
-          (False, True, _)      -> worker c b -- A is down, C is up, pick [c,b]
-          (False, False, False) -> worker c b -- A is down, C is down, C is LT A, pick [c,b]
-          (False, _, True)      -> worker a c -- A is down, C is GTE A, pick [a,c]
-      where
-        c = (a+b) `div` 2
-        localMaximum idx = idx `icmp` (c-1) == GT && idx `icmp` (c+1) == GT
-    isUpwards idx = idx `icmp` (idx+1) /= GT
-  -- FIXME: c+1 is always less than n so we don't need to use `mod` or do bounds checking.
-  --        Use unsafe indexing.
 
 --------------------------------------------------------------------------------
 -- * Computing Tangents Of Polyons

@@ -17,6 +17,7 @@ module HGeometry.Polygon.Convex.Implementation
   , isStrictlyConvex, isConvex
   , verifyConvex
   , maxInDirection
+  , findMaxWith
   , inConvex
   ) where
 
@@ -208,8 +209,7 @@ maxInDirection   :: (Num r, Ord r, ConvexPolygon_ convexPolygon point r)
                  => Vector 2 r -> convexPolygon -> point
 maxInDirection u = findMaxWith (cmpInDirection u)
 
--- FIXME: c+1 is always less than n so we don't need to use `mod` or do bounds checking.
---        Use unsafe indexing.
+-- | Find the maximum vertex in a convex polygon using a binary search.
 -- \( O(\log n) \)
 findMaxWith        :: (ConvexPolygon_ convexPolygon point r)
                    => (point -> point -> Ordering)
