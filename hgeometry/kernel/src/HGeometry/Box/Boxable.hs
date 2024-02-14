@@ -16,7 +16,6 @@ module HGeometry.Box.Boxable
   ) where
 
 import Control.Lens
-import Data.Functor.Contravariant (phantom)
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.Semigroup.Foldable
 import HGeometry.Box.Class
@@ -51,25 +50,13 @@ class IsBoxable g where
   {-# INLINE boundingBox #-}
 
 -- | default implementation of boundingBox
-defaultBBox  :: forall g point d r. ( d ~ Dimension g, r ~ NumType g
-                , HasPoints' g point
-                , Point_ point d r
-                , Ord (Vector d r)
-                )
+defaultBBox :: ( d ~ Dimension g, r ~ NumType g
+               , HasPoints' g point
+               , Point_ point d r
+               , Ord (Vector d r), Ord r
+               )
               => g -> Box (Point d r)
-defaultBBox g = Box bl tr
-    where
-      thePoints :: Fold1 g (Point d r)
-      thePoints = folding1 (fmap (view asPoint) . toNonEmptyOf allPoints)
-      bl = minimum1Of thePoints g
-      tr = maximum1Of thePoints g
-
--- | construct a Fold1 from a function that produces a Foldable1
-folding1         :: Foldable1 f => (s -> f a) -> Fold1 s a
-folding1 sfa agb = phantom . traverse1_ agb . sfa
-{-# INLINE folding1 #-}
-
-  -- $ \g -> g^..allPoints
+defaultBBox = boundingBox . toNonEmptyOf (allPoints.asPoint)
 
 --------------------------------------------------------------------------------
 -- Instances

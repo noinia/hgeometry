@@ -389,10 +389,6 @@ instance HasEdges (LowerEnvelope' plane) (LowerEnvelope' plane) where
   edges = darts . ifiltered (\(u,v) _ -> u < v)
   {-# INLINE edges #-}
 
--- FIXME: I guess strictly speaking the lower envelope is a multigraph: in case
--- the lower envelope is a bunch of parallel edges connecting v_infty to v_infty
--- for example.
-
 -- instance Graph_ (LowerEnvelope' plane) where
 
 class HasUnboundedEdges t e | t -> e where

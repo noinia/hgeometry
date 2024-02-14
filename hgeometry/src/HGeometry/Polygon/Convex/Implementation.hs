@@ -28,6 +28,7 @@ import Data.Vector.NonEmpty (NonEmptyVector)
 import HGeometry.Boundary
 import HGeometry.Box
 import HGeometry.Cyclic
+import HGeometry.Foldable.Util
 import HGeometry.Intersection
 import HGeometry.LineSegment
 import HGeometry.Point
@@ -167,9 +168,14 @@ instance ( VertexContainer f point
          ) => IsTransformable (ConvexPolygonF f point)
 
 instance ( VertexContainer f point
-         , Point_ point 2 r
-         ) => IsBoxable (ConvexPolygonF f point)
-  -- TODO: We could implement this in O(log n) time instead.
+         , Point_ point 2 r, Num r, HasFromFoldable1 f
+         ) => IsBoxable (ConvexPolygonF f point) where
+  boundingBox pg = Box (Point2 xMin yMin) (Point2 xMax yMax)
+    where
+      xMin = view xCoord $ maxInDirection (Vector2 (-1) 0   ) pg
+      xMax = view xCoord $ maxInDirection (Vector2 1    0   ) pg
+      yMin = view yCoord $ maxInDirection (Vector2 0    (-1)) pg
+      yMax = view yCoord $ maxInDirection (Vector2 0    1   ) pg
 
 --------------------------------------------------------------------------------
 

@@ -112,6 +112,14 @@ spec = describe "Convex Polygon tests" $ do
                   cPt = aPt .+^ (0.5 *^ (bPt .-. aPt))
               in inPolygon cPt convex === StrictlyInside
 
+        -- Check that bounding box is correct
+        prop "boundingBox convex == boundingBox (toSimplePolygon convex)" $
+          \(convex :: ConvexPolygon (Point 2  Rational)) ->
+            let s = toSimplePolygon convex in
+              boundingBox convex === boundingBox s
+
+
+
 --   -- Verify that convexPolygon always returns convex polygons.
 --   specify "verifyConvex (convexPolygon p)" $
 --     property $ \(p :: SimplePolygon () R) ->
