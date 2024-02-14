@@ -36,7 +36,7 @@ import           Miso.Svg (svg_, g_, transform_)
 --------------------------------------------------------------------------------
 -- *A Canvas
 
--- | Svg Canvas that has a "proper" Coordinate system whose origin is in the bottom left.
+-- | Static Canvas that has a "proper" Coordinate system whose origin is in the bottom left.
 data StaticCanvas r =
   Canvas { _theViewport :: !(Viewport r)
          -- ^ the viewport

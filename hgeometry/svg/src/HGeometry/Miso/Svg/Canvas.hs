@@ -104,7 +104,7 @@ handleInternalCanvasAction canvas = noEff . \case
 --------------------------------------------------------------------------------
 -- * The View
 
--- | Draws the actual canvas
+-- | Draws the actual canvas using an svg tag
 svgCanvas_               :: (RealFrac r, ToSvgCoordinate r)
                          => Canvas r
                          -> [Attribute action] -> [View action]

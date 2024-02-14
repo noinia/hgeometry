@@ -100,11 +100,14 @@ interpret = \case
   Delete s -> \cmp -> SS.deleteAllBy cmp s
 
 
+-- | An event; i.e. an x coordinate together with a bunch of actions.
 type Event r lineSegment = r :+ NonEmpty (Action lineSegment)
 
+-- | The x-coordinate at which an event happens
 eventX :: Event r lineSegment -> r
 eventX = view core
 
+-- | The actions at a particular event
 eventActions :: Event r lineSegment -> NonEmpty (Action lineSegment)
 eventActions = view extra
 

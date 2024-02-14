@@ -1,9 +1,7 @@
 module VerticalRayShootingSpec where
 
 import           HGeometry.VerticalRayShooting.PersistentSweep
-import           Control.Lens hiding (contains, below)
 import           HGeometry.Ext
-import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           HGeometry.Number.Real.Rational
 import           HGeometry.LineSegment
