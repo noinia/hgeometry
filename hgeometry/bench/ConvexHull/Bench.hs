@@ -29,10 +29,7 @@ gen = genByName "convex hull"
 --------------------------------------------------------------------------------
 
 runBenchmark :: IO ()
-runBenchmark = do
-    let intPts = randomPoints @(Point 2 Integer) gen 1000 -- generate points in a 1000x1000 square
-    defaultMain [ benchmark intPts
-                ]
+runBenchmark = defaultMain [ benchmark ]
 
 genPts       :: forall r. (Num r, NFData r)
              => NonEmpty (Point 2 Integer) -> Int -> NonEmpty (Point 2 r)
@@ -41,13 +38,13 @@ genPts pts n = pts' `deepseq` (NonEmpty.fromList pts')
     pts' :: [Point 2 r]
     pts' = over coordinates fromInteger <$> NonEmpty.take n pts
 
-
--- asPoints   :: [Point 2 Int] -> [point]
--- asPoints n = NonEmpty.fromList . take n
-
 -- | Benchmark building the convexHull
-benchmark       :: NonEmpty (Point 2 Integer) -> Benchmark
-benchmark inPts = bgroup "ConvexHull" $
+benchmark :: Benchmark
+benchmark = benchmark'
+          $ randomPoints @(Point 2 Integer) gen 1000 -- generate points in a 1000x1000 square
+
+benchmark'       :: NonEmpty (Point 2 Integer) -> Benchmark
+benchmark' inPts = bgroup "ConvexHull" $
       [ bgroup ("1e"++show i ++ "/RealNumber") (convexHullFractional $ genPts @R inPts n)
       | i <- sizes
       , let n = 10^i
