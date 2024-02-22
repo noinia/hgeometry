@@ -39,16 +39,6 @@ the -fspecialise-aggressively -fexpose-all-unfoldings flags are
 curcial in making sure this benchmark is sufficiently fast.
 -}
 
-
--- myConvexHull :: NonEmpty      (PointF (VectorFamily 2 Int))
---              -> ConvexPolygon (PointF (VectorFamily 2 Int))
--- myConvexHull = GrahamScan.convexHull
-
-myConvexHull :: NonEmpty      (Point 2 Double)
-             -> ConvexPolygon (Point 2 Double)
-myConvexHull = GrahamScan.convexHull
-
-
 sort' :: NonEmpty      (Point 2 Int) ->
          NonEmpty      (Point 2 Int)
 sort' = NonEmpty.fromList . UV.toList . sortBy incXdecY
@@ -77,18 +67,17 @@ runBenchmark :: IO ()
 runBenchmark = defaultMain [ benchmark ]
 
 benchmark :: Benchmark
-benchmark = chBench $ take' 1_000_000 $ randomPoints @(Point 2 Int) gen 1000
+benchmark = chBench $ take' 1_000 $ randomPoints @(Point 2 Int) gen 1000
   where
     chBench pts = bgroup "ConvexHull.GrahamBench"
         [ bench "GrahamScan"    $ nf GrahamScan.convexHull pts
-        , bench "GrahamScanAnnot"    $ nf myConvexHull pts'
         , bench "GrahamScanV2"  $ nf GrahamV2.convexHull   (GrahamV2.fromP <$> pts)
         , bench "GrahamScanInt" $ nf GrahamInt.convexHull (GrahamInt.fromP <$> pts)
         , bench "GrahamScanFastest" $ nf GrahamFastest.convexHull (GrahamFastest.fromP <$> pts)
-          -- , bench "GrahamScanClassy" $ nf GrahamClassy.convexHull (GrahamClassy.fromP <$> pt                                                                           s)
+        --   -- , bench "GrahamScanClassy" $ nf GrahamClassy.convexHull (GrahamClassy.fromP <$> pt                                                                           s)
 
-          -- , bench "ClassySort" $ nf GrahamClassy.sort' (GrahamClassy.fromP <$> pts)
-        , bench "Sort" $ nf sort' pts
+        --   -- , bench "ClassySort" $ nf GrahamClassy.sort' (GrahamClassy.fromP <$> pts)
+        -- , bench "Sort" $ nf sort' pts
         ]
-      where
-        pts' = force ((\(Point2_ x y) -> Point2 (fromIntegral x) (fromIntegral y)) <$> pts)
+      -- where
+      --   pts' = force ((\(Point2_ x y) -> Point2 (fromIntegral x) (fromIntegral y)) <$> pts)

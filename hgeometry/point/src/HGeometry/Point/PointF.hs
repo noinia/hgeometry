@@ -87,8 +87,10 @@ instance ( Vector_ vector d r
          , Vector_ vector' d s
          , Has_ Vector_ d r
          , Has_ Vector_ d s
+         , AsVector_ vector vector' d r s
          , HasComponents vector vector'
          ) => HasVector (PointF vector) (PointF vector') where
+
   vector = _PointF._Vector
   {-# INLINE vector #-}
 
@@ -96,6 +98,7 @@ instance ( Has_ Vector_ d r
          , Has_ Vector_ d s
          , Vector_ vector d r
          , Vector_ vector' d s
+         , AsVector_ vector vector' d r s
          , HasComponents (Vector d r) (Vector d s)
          , HasComponents vector vector'
          ) => HasCoordinates (PointF vector) (PointF vector')

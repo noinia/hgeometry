@@ -15,10 +15,10 @@ module HGeometry.ConvexHull.GrahamScan
   ) where
 
 import           Control.Lens ((^.))
-import           HGeometry.Foldable.Sort
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Vector as Vector
+import           HGeometry.Foldable.Sort
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple.Class
@@ -30,14 +30,10 @@ import           HGeometry.Polygon.Simple.Class
 -- pre: input contains at least three points
 convexHull            :: (Ord r, Num r, Point_ point 2 r)
                       => NonEmpty point -> ConvexPolygon point
--- convexHull (p :| []) = ConvexPolygon . unsafeFromPoints $ [p]
 convexHull ps        = let ps' = Vector.toList . sortBy incXdecY $ ps
                            uh  = NonEmpty.tail . hull' $         ps'
                            lh  = NonEmpty.tail . hull' $ reverse ps'
                        in uncheckedFromCCWPoints $ lh ++ uh
--- {-# INLINABLE convexHull #-}
-
--- {-# SPECIALIZE convexHull :: NonEmpty (Point 2 Int) -> ConvexPolygon (Point 2 Int) #-}
 
 -- | Computes the upper hull. The upper hull is given from left to right.
 --
@@ -104,9 +100,8 @@ hull f pts         = hull' .  f
 --{-# INLINABLE hull #-}
 
 incXdecY :: (Ord r, Point_ point 2 r) => point -> point -> Ordering
-incXdecY (Point2_ px py) (Point2_ qx qy) =
-  compare px qx <> compare qy py
---{-# INLINABLE incXdecY #-}
+incXdecY (Point2_ px py) (Point2_ qx qy) = compare px qx <> compare qy py
+-- note that we flipped the order of qy and py
 
 -- | Given a sequence of points that is sorted on increasing
 -- x-coordinate and decreasing y-coordinate, computes the upper

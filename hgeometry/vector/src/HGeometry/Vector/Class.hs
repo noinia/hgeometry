@@ -18,7 +18,6 @@
 module HGeometry.Vector.Class
   ( AsVector_(..)
   , Vector_(..) --, pattern Vector1_, pattern Vector2_, pattern Vector3_, pattern Vector4_
-  , _Vector
   , Has_
   , generate, vectorFromList
   , component
@@ -45,7 +44,6 @@ module HGeometry.Vector.Class
 import           Control.Lens hiding (cons,snoc,uncons,unsnoc)
 import           Control.Monad.State
 import           Control.Monad (guard, replicateM)
-import           Data.Coerce
 import qualified Data.Foldable as F
 import qualified Data.Functor.Apply as Apply
 import           Data.Functor.Classes (readData, readUnaryWith)
@@ -78,7 +76,7 @@ import qualified HGeometry.Number.Radical as Radical
 -}
 
 --------------------------------------------------------------------------------
-
+{-
 -- | A class for types that are isomorphic to d-dimensional vectors
 class ( r ~ IxValue vector
       , d ~ Dimension vector
@@ -91,26 +89,41 @@ class ( r ~ IxValue vector
                      ) => Iso' vector (Vector d r)
   _Vector' = _Vector
   {-# INLINE _Vector' #-}
+-}
 
--- | An iso to convert between an arbitrary vector type, and the
--- specific vector type implemented in HGeometry.Vector
-_Vector :: ( Vector_ (Vector d r) d r
-           , Vector_ vector       d r
-           , Vector_ vector'      d s
-           , Vector_ (Vector d s) d s
-           ) => Iso vector vector' (Vector d r) (Vector d s)
-_Vector = iso (\v -> generate (\i -> v^?!component' i))
-              (\v -> generate (\i -> v^?!component' i))
-{-# INLINE _Vector #-}
+class ( r ~ IxValue vector
+      , s ~ IxValue vector'
+      , d ~ Dimension vector
+      , d ~ Dimension vector'
+      ) =>  AsVector_ vector vector' d r s | vector -> d
+                                           , vector -> r
+                                           , vector' -> s  where
+  -- | Convert from a 'Vector d r' and into a 'Vector d s'
+  _Vector :: Iso vector vector' (Vector d r) (Vector d s)
+
+instance AsVector_ (Vector d r) (Vector d s) d r s where
+  _Vector = id
+  {-# INLINE _Vector #-}
+
+-- -- | An iso to convert between an arbitrary vector type, and the
+-- -- specific vector type implemented in HGeometry.Vector
+-- _Vector :: ( Vector_ (Vector d r) d r
+--            , Vector_ vector       d r
+--            , Vector_ vector'      d s
+--            , Vector_ (Vector d s) d s
+--            ) => Iso vector vector' (Vector d r) (Vector d s)
+-- _Vector = iso (\v -> generate (\i -> v^?!component' i))
+--               (\v -> generate (\i -> v^?!component' i))
+-- {-# INLINE _Vector #-}
 
 
-instance AsVector_ (Vector d r) d r where
-  _Vector' = id
-  {-# INLINE _Vector' #-}
+-- instance AsVector_ (Vector d r) d r where
+--   _Vector' = id
+--   {-# INLINE _Vector' #-}
 
 -- | Class for representing d dimensional vectors.
 class ( HasComponents vector vector
-      , AsVector_ vector d r
+      , AsVector_ vector vector d r r
       , KnownNat d
       ) => Vector_ vector d r where
   {-# MINIMAL generateA #-}
@@ -423,10 +436,9 @@ instance (Additive_ (Vector d r) d r, Uniform r, UniformRange r) => Random (Vect
 
 type instance Dimension (Linear.V1 r) = 1
 
-instance AsVector_ (Linear.V1 r) 1 r where
-  _Vector' = iso (coerce @(Linear.V1 r) @(Vector 1 r))
-                 (coerce @(Vector 1 r) @(Linear.V1 r) )
-  {-# INLINE _Vector' #-}
+instance AsVector_ (Linear.V1 r)  (Linear.V1 s) 1 r s where
+  _Vector = coerced
+  {-# INLINE _Vector #-}
 
 instance Vector_ (Linear.V1 r) 1 r where
   generateA f = Linear.V1 <$> f 0
@@ -451,10 +463,9 @@ instance Metric_ (Linear.V1 r) 1 r
 
 type instance Dimension (Linear.V2 r) = 2
 
-instance AsVector_ (Linear.V2 r) 2 r where
-  _Vector' = iso (coerce @(Linear.V2 r) @(Vector 2 r))
-                 (coerce @(Vector 2 r) @(Linear.V2 r) )
-  {-# INLINE _Vector' #-}
+instance AsVector_ (Linear.V2 r)  (Linear.V2 s) 2 r s where
+  _Vector = coerced
+  {-# INLINE _Vector #-}
 
 instance Vector_ (Linear.V2 r) 2 r where
   generateA f = Linear.V2 <$> f 0 <*> f 1
@@ -478,10 +489,9 @@ instance Metric_ (Linear.V2 r) 2 r
 
 type instance Dimension (Linear.V3 r) = 3
 
-instance AsVector_ (Linear.V3 r) 3 r where
-  _Vector' = iso (coerce @(Linear.V3 r) @(Vector 3 r))
-                 (coerce @(Vector 3 r) @(Linear.V3 r) )
-  {-# INLINE _Vector' #-}
+instance AsVector_ (Linear.V3 r) (Linear.V3 s) 3 r s where
+  _Vector = coerced
+  {-# INLINE _Vector #-}
 
 instance Vector_ (Linear.V3 r) 3 r where
   generateA f = Linear.V3 <$> f 0 <*> f 1 <*> f 2
@@ -506,10 +516,9 @@ instance Metric_ (Linear.V3 r) 3 r
 
 type instance Dimension (Linear.V4 r) = 4
 
-instance AsVector_ (Linear.V4 r) 4 r where
-  _Vector' = iso (coerce @(Linear.V4 r) @(Vector 4 r))
-                 (coerce @(Vector 4 r) @(Linear.V4 r) )
-  {-# INLINE _Vector' #-}
+instance AsVector_ (Linear.V4 r) (Linear.V4 s) 4 r s where
+  _Vector = coerced
+  {-# INLINE _Vector #-}
 
 instance Vector_ (Linear.V4 r) 4 r where
   generateA f = Linear.V4 <$> f 0 <*> f 1 <*> f 2 <*> f 3

@@ -159,7 +159,7 @@ instance ( SimplePolygon_ (ConvexPolygonF f point) point r
          , Ord r, Fractional r)
        => HasSquaredEuclideanDistance (ConvexPolygonF f point) where
   pointClosestToWithDistance q = pointClosestToWithDistance q . toSimplePolygon
-  -- FIXME: we should be able to implement this in O(log n) time instead!!
+  -- TODO: we should be able to implement this in O(log n) time instead!!
 -}
 
 instance ( VertexContainer f point

@@ -64,11 +64,11 @@ class HasVector point point' where
   -- >>> (myPoint & coordinates %~ show ) :: Point 3 String
   -- Point3 "1" "2" "3"
   vector :: ( Dimension point ~ d
-             , NumType point ~ r
-             , Dimension point' ~  d
-             , NumType point' ~ s
-             )
-          => Lens point point' (Vector d r) (Vector d s)
+            , NumType point ~ r
+            , Dimension point' ~  d
+            , NumType point' ~ s
+            )
+         => Lens point point' (Vector d r) (Vector d s)
 
 type instance Dimension (Linear.Point v r) = Dimension (v r)
 type instance NumType (Linear.Point v r)   = r
@@ -76,8 +76,8 @@ type instance NumType (Linear.Point v r)   = r
 instance ( Vector_ (v r) d r
          , Vector_ (v s) d s
          ) => HasVector (Linear.Point v r) (Linear.Point v s) where
-  vector = lens (\(Linear.P v) -> v^._Vector')
-                (\_ v -> Linear.P $ v^.from _Vector')
+  vector = lens (\(Linear.P v) -> v^._Vector)
+                (\_ v -> Linear.P $ v^.from _Vector)
   {-# INLINE vector #-}
 
 -- | Class for point types that have a type changing traversal over
@@ -232,6 +232,7 @@ pattern Point2_ x y <- (view vector -> Vector2 x y)
    Point2_ x y = fromVector $ Vector2 x y
 {-# INLINE Point2_ #-}
 {-# COMPLETE Point2_ #-}
+
 
 -- | A bidirectional pattern synonym for 3 dimensional points.
 pattern Point3_       :: ( Point_ point 3 r
