@@ -137,6 +137,11 @@ instance ( Point_ point 2 r
              . toCounterClockwiseOrder
              . uncheckedFromCCWPoints
              . requireThree "fromPoints" . F.toList
+  -- TODO: verify that:
+  --      we have no repeated vertices,
+  --      no self intersections, and
+  --      not all vertices are colinear
+
 
 -- | Validate that we have at least three points
 requireThree :: String -> [a] -> [a]
@@ -144,7 +149,6 @@ requireThree _ lst@(_:_:_:_) = lst
 requireThree label _ = error $
   "HGeometry.Polygon." ++ label ++ ": Polygons must have at least three points."
 
-  -- FIXME: Do the acutal tests verifying the preconditions !!!
 
 instance ( Show point
          , SimplePolygon_ (SimplePolygonF f point) point r

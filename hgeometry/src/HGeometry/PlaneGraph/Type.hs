@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometryPlaneGraph.Type
@@ -11,21 +12,20 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.PlaneGraph.Type
-  ( PlaneGraph
+  ( PlaneGraph(..)
   -- , VertexData(VertexData), location
   ) where
 
 import           Control.Lens hiding (holes, holesOf, (.=))
+import           Data.Coerce
 import           GHC.Generics (Generic)
 import           HGeometry.Box
 import           HGeometry.Ext
+import           HGeometry.PlaneGraph.Class
 import           HGeometry.Point
 import           HGeometry.Properties
-import           Hiraffe.Graph.Class
+import           Hiraffe.PlanarGraph
 import qualified Hiraffe.PlanarGraph as PG
-import           Hiraffe.PlanarGraph(FaceId, PlanarGraph, VertexId, DartId
-                                    , World (..), dual, planarGraph, twin
-                                    )
 
 --------------------------------------------------------------------------------
 -- * The PlaneGraph type
@@ -34,6 +34,7 @@ import           Hiraffe.PlanarGraph(FaceId, PlanarGraph, VertexId, DartId
 newtype PlaneGraph s v e f =
     PlaneGraph (PlanarGraph s Primal v e f)
       deriving stock (Show,Eq,Generic)
+
 
 type instance NumType   (PlaneGraph s v e f) = NumType v
 type instance Dimension (PlaneGraph s v e f) = 2
@@ -86,14 +87,38 @@ instance HasFaces (PlaneGraph s v e f) (PlaneGraph s v e f') where
   faces = _PlanarGraph.faces
 
 ----------------------------------------
+instance DirGraph_ (PlaneGraph s v e f) where
+  type DirGraphFromAdjListExtraConstraints (PlaneGraph s v e f) = (f ~ ())
+  dirGraphFromAdjacencyLists = PlaneGraph . dirGraphFromAdjacencyLists
+  endPoints (PlaneGraph g) = endPoints g
+  twinDartOf d = twinOf d . to Just
+  outgoingDartsOf v = _PlanarGraph.outgoingDartsOf v
+
+instance BidirGraph_ (PlaneGraph s v e f) where
+  twinOf d = to $ const (PG.twin d)
 
 instance Graph_ (PlaneGraph s v e f) where
+  type GraphFromAdjListExtraConstraints (PlaneGraph s v e f) = (f ~ ())
+  fromAdjacencyLists = PlaneGraph . fromAdjacencyLists
+
+instance PlanarGraph_ (PlaneGraph s v e f) where
+  type DualGraphOf (PlaneGraph s v e f) = PlanarGraph s Dual f e v
+
+  dualGraph = dualGraph . coerce @_ @(PlanarGraph s Primal v e f)
+
+  leftFace  d = leftFace d  . coerce @_ @(PlanarGraph s Primal v e f)
+  rightFace d = rightFace d . coerce @_ @(PlanarGraph s Primal v e f)
+
+  nextEdge d = nextEdge d  . coerce @_ @(PlanarGraph s Primal v e f)
+  prevEdge d = prevEdge d  . coerce @_ @(PlanarGraph s Primal v e f)
+
+  boundaryDart f = boundaryDart f . coerce @_ @(PlanarGraph s Primal v e f)
+  boundary f = boundary f         . coerce @_ @(PlanarGraph s Primal v e f)
 
 
-
-
--- instance Functor (PlaneGraph s v e) where
---   fmap f pg = pg&_PlanarGraph.PG.vertexData.traverse.location %~ fmap f
+instance ( Point_ v 2 (NumType v)
+         ) => PlaneGraph_ (PlaneGraph s v e f) v where
+  outerFaceDart _ = error "outerFaceDart: PlaneGraph not yet implemented"
 
 
 -- instance ( Point_ v 2 r, Point_ v' 2 r'
@@ -107,49 +132,3 @@ instance Graph_ (PlaneGraph s v e f) where
 
 
   -- boundingBox = boundingBoxList' . F.toList . fmap (^._2.location) . vertices
-
-
-
-
-
-
--- -- | Note that the functor instance is in v
--- data VertexData v r = VertexData { _location :: !(Point 2 r)
---                                  , _vData    :: !v
---                                  } deriving (Show,Eq,Ord,Generic
---                                             ,Functor,Foldable,Traversable)
-
--- type instance Dimension (VertexData v r) = 2
--- type instance NumType   (VertexData v r) = r
-
--- -- | Vertex data is essentially just an ext
--- _VertexDataExt :: Iso (VertexData v r) (VertexData v' s) (Point 2 r :+ v) (Point 2 s :+ v')
--- _VertexDataExt = iso (\(VertexData l v) -> l :+ v) (\(l :+ v) -> VertexData l v)
-
--- instance AsExt (VertexData v r) where
---   _Ext = _VertexDataExt
-
--- instance HasPoints (VertexData v r) (VertexData v s)
---                    (Point 2 r :+ v) (Point 2 s :+ v) where
---   allPoints = _VertexDataExt
-
--- class HasLocation s t where
---   -- | Lens to access the location
---   location :: Lens s t (Point (Dimension s) (NumType s)) (Point (Dimension t) (NumType t))
-
--- instance HasLocation (VertexData v r) (VertexData v s) where
---   location = lens _location (\vd l -> vd { _location = l })
-
--- -- class HasVertexData s t v v' where
--- --   -- | Lens to access the Vertex data
--- --   vertexData :: Lens s t v v'
-
--- instance Bifunctor VertexData where
---   bimap f g (VertexData p v) = VertexData (fmap g p) (f v)
-
--- -- instance (FromJSON r, FromJSON v) => FromJSON (VertexData v r ) where
--- --   parseJSON = fmap (\(l :+ d) -> VertexData l d) . parseJSON
-
--- -- instance (ToJSON r, ToJSON v) => ToJSON (VertexData v r ) where
--- --   toJSON     = toJSON     . vtxDataToExt
--- --   toEncoding = toEncoding . vtxDataToExt

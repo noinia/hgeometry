@@ -10,15 +10,13 @@
 --------------------------------------------------------------------------------
 module HGeometry.PlaneGraph
   ( module Hiraffe.Graph.Class
-  , PlaneGraph
+  , PlaneGraph(..)
   ) where
 
 
 import HGeometry.PlaneGraph.Class
+import HGeometry.PlaneGraph.Type
 import Hiraffe.Graph.Class
-import Hiraffe.PlanarGraph
+
 
 --------------------------------------------------------------------------------
-
--- | A Plane graph
-type PlaneGraph s v e f = PlanarGraph s Primal v e f

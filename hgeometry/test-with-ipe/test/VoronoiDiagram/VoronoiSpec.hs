@@ -16,6 +16,7 @@ import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.LowerEnvelope
 import           HGeometry.LowerEnvelope.AdjListForm
 import qualified Data.Set as Set
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Sequence as Seq
 import           HGeometry.Number.Real.Rational
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -71,6 +72,24 @@ spec = describe "Voronoi diagram tests" $ do
             [osp|foo_out|]
 
 
+
+
+degenerateTests :: Spec
+degenerateTests = describe "degnereate inputs" $ do
+  it "single point diagram" $
+    voronoiDiagram (NonEmpty.singleton $ Point2 1 (2 :: R))
+    `shouldBe`
+    AllColinear () -- TODO
+  it "two point diagram" $
+    voronoiDiagram (NonEmpty.fromList [Point2 1 (2 :: R), Point2 3 2])
+    `shouldBe`
+    AllColinear () -- TODO
+  it "multiple parallel point diagram" $
+    voronoiDiagram (NonEmpty.fromList [ Point2 x (2 :: R)
+                                      | x <- fromInteger <$> [1..10]
+                                      ])
+    `shouldBe`
+    AllColinear () -- TODO
 
              -- goldenWith [osp|data/test-with-ipe/golden/|]
   --            (ipeContentGolden { name = [osp|voronoi|] })

@@ -187,7 +187,12 @@ probably requires testing if two polygons are cyclic shifts
 ** TODO have some type representing the unbounded common intersection part
 
 
-* TODO profile the convex hull algos, since they are quite a bit slower than just sorting.
+* DONE profile the convex hull algos, since they are quite a bit slower than just sorting.
+
+-- I'm now guessing that the _Vector iso is causing the trouble, since
+that thing is potentially rebuilding a new vector (using generate)
+even if we are just accessing some field. If that is indeed happening,
+then that is very wasteful.
 
 * DONE clean up the benchmarks
 
