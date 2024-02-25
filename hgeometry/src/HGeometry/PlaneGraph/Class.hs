@@ -16,6 +16,7 @@ module HGeometry.PlaneGraph.Class
   ) where
 
 import Control.Lens
+import Data.Functor.Apply
 import Data.Maybe (fromMaybe)
 import Data.Monoid (Endo(..))
 import HGeometry.LineSegment
@@ -93,8 +94,6 @@ dartSegmentAt ei = theFold
     theFold pSegFSeg g = dartAt ei pDartFDart g
       where
         pDartFDart = dimap dartToSeg fSegTofDart pSegFSeg
-
-        dartToSeg   :: dart -> ClosedLineSegment vertex
         dartToSeg _ = uncurry ClosedLineSegment $ g^.endPointsOf ei
         fSegTofDart = contramap dartToSeg
 
@@ -114,20 +113,67 @@ edgeSegmentAt ei = theFold
   where
     theFold pSegFSeg g = edgeAt ei pEdgeFEdge g
       where
-        pEdgeFEdge = dimap edgeToSeg fSegTofEdge pSegFSeg
-
-        edgeToSeg   :: edge -> ClosedLineSegment vertex
+        pEdgeFEdge = dimap edgeToSeg (contramap edgeToSeg) pSegFSeg
         edgeToSeg _ = uncurry ClosedLineSegment $ g^.endPointsOf (getPositiveDart g ei)
-        fSegTofEdge = contramap edgeToSeg
+  -- see dartSegment for more info.
 
+-- | Renders all darts as line segments. Thesegments are all oriented in the direction of
+-- the dart.
+dartSegments :: forall planeGraph vertex.
+                ( PlaneGraph_ planeGraph vertex
+                , Point_ vertex 2 (NumType vertex)
+                )
+             => IndexedFold (EdgeIx planeGraph) planeGraph (ClosedLineSegment vertex)
+dartSegments = \_pSegFSeg g -> (darts.asIndex) (drawDart g) g
 
--- edgeSegments :: ( PlaneGraph_ planeGraph vertex
+drawDart     :: planeGraph -> DartIx planeGraph -> f (DartIx planeGraph)
+drawDart g d = uncurry ClosedLineSegment $ g^.endPointsOf d
+
+-- -- | Renders all edges as line segments.
+-- edgeSegments :: forall planeGraph vertex.
+--                 ( PlaneGraph_ planeGraph vertex
 --                 , Point_ vertex 2 (NumType vertex)
 --                 )
---              => IndexedFold1 (VertexIx planeGraph) planeGraph (ClosedLineSegment vertex)
--- edgeSegments = edges . to
+--              => IndexedFold (EdgeIx planeGraph) planeGraph (ClosedLineSegment vertex)
+-- edgeSegments = theFold
+--   where
+--     theFold            :: forall p f.
+--                           ( Indexable (EdgeIx planeGraph) p, Applicative f, Contravariant f)
+--                        => p (ClosedLineSegment vertex) (f (ClosedLineSegment vertex))
+--                        -> planeGraph
+--                        -> f planeGraph
+--     theFold pSegFSeg g = edges (Indexed draw) g
+--       where
+--         draw      :: EdgeIx planeGraph -> Edge planeGraph -> f (Edge planeGraph)
+--         draw ei _ = let seg = uncurry ClosedLineSegment $ g^.endPointsOf (getPositiveDart g ei)
+--                     in contramap (const seg) $ indexed pSegFSeg ei seg
 
--- (uncurry ClosedLineSegment)
+
+-- interiorFacePolygons :: forall planeGraph vertex.
+--                         ( PlaneGraph_ planeGraph vertex
+--                         , Point_ vertex 2 (NumType vertex)
+--                         )
+--                      => IndexedFold (FaceIx planeGraph) planeGraph (SimplePolygon vertex)
+-- interiorFacePolygons = theFold
+--   where
+--     theFold            :: forall p f.
+--                           ( Indexable (FaceIx planeGraph) p, Applicative f, Contravariant f)
+--                        => p (SimplePolygon vertex) (f (SimplePolygon vertex))
+--                        -> planeGraph
+--                        -> f planeGraph
+--     theFold pSegFSeg g = faces.indices
+
+
+--     (Indexed draw) g
+--       where
+--         draw      :: FaceIx planeGraph -> Face planeGraph -> f (Face planeGraph)
+--         draw ei _ =
+
+
+--           let seg = uncurry ClosedLineSegment $ g^.endPointsOf (getPositiveDart g ei)
+--                     in contramap (const seg) $ indexed pSegFSeg ei seg
+
+
 
 --------------------------------------------------------------------------------
 
