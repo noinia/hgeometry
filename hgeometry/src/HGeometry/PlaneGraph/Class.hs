@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometryPlaneGraph.Class
@@ -17,10 +18,12 @@ module HGeometry.PlaneGraph.Class
 
 import Control.Lens
 import Data.Functor.Apply
+import Data.Kind (Constraint)
 import Data.Maybe (fromMaybe)
 import Data.Monoid (Endo(..))
 import HGeometry.LineSegment
 import HGeometry.Point
+import HGeometry.Polygon.Simple
 import HGeometry.Properties
 import Hiraffe.Graph.Class
 import Hiraffe.PlanarGraph.Class
@@ -43,9 +46,33 @@ class ( PlanarGraph_ planeGraph
 
   {-# MINIMAL outerFaceDart  #-}
 
+  type OuterFaceIdConstraints planeGraph :: Constraint
+  type OuterFaceIdConstraints planeGraph = ( Ord (NumType planeGraph)
+                                           , Num (NumType planeGraph)
+                                           )
+
+  -- | Getter to access the outer face
+  outerFace :: (OuterFaceIdConstraints planeGraph, Eq (FaceIx planeGraph))
+            => IndexedLens' (FaceIx planeGraph) planeGraph (Face planeGraph)
+  outerFace = singular $ theLens
+    where
+      theLens pFaceFFace g = faceAt theOuterFaceId pFaceFFace g
+        where
+          theOuterFaceId = outerFaceId g
+
+  -- | Traversal of all interior faces in the graph
+  interiorFaces :: (OuterFaceIdConstraints planeGraph, Eq (FaceIx planeGraph))
+                => IndexedTraversal' (FaceIx planeGraph) planeGraph (Face planeGraph)
+  interiorFaces = theTraversal
+    where
+      theTraversal pFaceFFace g = (faces.ifiltered (\i _ -> i /= theOuterFaceId)) pFaceFFace g
+        where
+          theOuterFaceId = outerFaceId g
+
+
   -- | gets the id of the outer face
   --
-  outerFaceId    :: (r ~ NumType planeGraph, Ord r, Num r) => planeGraph -> FaceIx planeGraph
+  outerFaceId    :: OuterFaceIdConstraints planeGraph => planeGraph -> FaceIx planeGraph
   outerFaceId ps = leftFace (outerFaceDart ps) ps
 
   -- | gets a dart incident to the outer face (in particular, that has the
@@ -53,7 +80,7 @@ class ( PlanarGraph_ planeGraph
   --
   -- running time: \(O(n)\)
   --
-  outerFaceDart    :: (r ~ NumType planeGraph, Ord r, Num r) => planeGraph -> DartIx planeGraph
+  outerFaceDart    :: OuterFaceIdConstraints planeGraph => planeGraph -> DartIx planeGraph
 {-
   outerFaceDart pg = d
     where
@@ -123,56 +150,61 @@ dartSegments :: forall planeGraph vertex.
                 ( PlaneGraph_ planeGraph vertex
                 , Point_ vertex 2 (NumType vertex)
                 )
+             => IndexedFold (DartIx planeGraph) planeGraph (ClosedLineSegment vertex)
+dartSegments = theFold
+  where
+    theFold            :: forall p f.
+                          ( Indexable (DartIx planeGraph) p, Applicative f, Contravariant f)
+                       => p (ClosedLineSegment vertex) (f (ClosedLineSegment vertex))
+                       -> planeGraph
+                       -> f planeGraph
+    theFold pSegFSeg g = darts (Indexed draw) g
+      where
+        draw      :: DartIx planeGraph -> Dart planeGraph -> f (Dart planeGraph)
+        draw d _ = let seg = uncurry ClosedLineSegment $ g^.endPointsOf d
+                   in seg >$ indexed pSegFSeg d seg
+
+-- | Renders all edges as line segments.
+edgeSegments :: forall planeGraph vertex.
+                ( PlaneGraph_ planeGraph vertex
+                , Point_ vertex 2 (NumType vertex)
+                )
              => IndexedFold (EdgeIx planeGraph) planeGraph (ClosedLineSegment vertex)
-dartSegments = \_pSegFSeg g -> (darts.asIndex) (drawDart g) g
+edgeSegments = theFold
+  where
+    theFold            :: forall p f.
+                          ( Indexable (EdgeIx planeGraph) p, Applicative f, Contravariant f)
+                       => p (ClosedLineSegment vertex) (f (ClosedLineSegment vertex))
+                       -> planeGraph
+                       -> f planeGraph
+    theFold pSegFSeg g = edges (Indexed draw) g
+      where
+        draw      :: EdgeIx planeGraph -> Edge planeGraph -> f (Edge planeGraph)
+        draw ei _ = let seg = uncurry ClosedLineSegment $ g^.endPointsOf (getPositiveDart g ei)
+                    in seg >$ indexed pSegFSeg ei seg
 
-drawDart     :: planeGraph -> DartIx planeGraph -> f (DartIx planeGraph)
-drawDart g d = uncurry ClosedLineSegment $ g^.endPointsOf d
-
--- -- | Renders all edges as line segments.
--- edgeSegments :: forall planeGraph vertex.
---                 ( PlaneGraph_ planeGraph vertex
---                 , Point_ vertex 2 (NumType vertex)
---                 )
---              => IndexedFold (EdgeIx planeGraph) planeGraph (ClosedLineSegment vertex)
--- edgeSegments = theFold
---   where
---     theFold            :: forall p f.
---                           ( Indexable (EdgeIx planeGraph) p, Applicative f, Contravariant f)
---                        => p (ClosedLineSegment vertex) (f (ClosedLineSegment vertex))
---                        -> planeGraph
---                        -> f planeGraph
---     theFold pSegFSeg g = edges (Indexed draw) g
---       where
---         draw      :: EdgeIx planeGraph -> Edge planeGraph -> f (Edge planeGraph)
---         draw ei _ = let seg = uncurry ClosedLineSegment $ g^.endPointsOf (getPositiveDart g ei)
---                     in contramap (const seg) $ indexed pSegFSeg ei seg
-
-
--- interiorFacePolygons :: forall planeGraph vertex.
---                         ( PlaneGraph_ planeGraph vertex
---                         , Point_ vertex 2 (NumType vertex)
---                         )
---                      => IndexedFold (FaceIx planeGraph) planeGraph (SimplePolygon vertex)
--- interiorFacePolygons = theFold
---   where
---     theFold            :: forall p f.
---                           ( Indexable (FaceIx planeGraph) p, Applicative f, Contravariant f)
---                        => p (SimplePolygon vertex) (f (SimplePolygon vertex))
---                        -> planeGraph
---                        -> f planeGraph
---     theFold pSegFSeg g = faces.indices
-
-
---     (Indexed draw) g
---       where
---         draw      :: FaceIx planeGraph -> Face planeGraph -> f (Face planeGraph)
---         draw ei _ =
-
-
---           let seg = uncurry ClosedLineSegment $ g^.endPointsOf (getPositiveDart g ei)
---                     in contramap (const seg) $ indexed pSegFSeg ei seg
-
+-- | Renders all interior faces as simple polygons.
+interiorFacePolygons :: forall planeGraph vertex.
+                        ( PlaneGraph_ planeGraph vertex
+                        , Point_ vertex 2 (NumType vertex)
+                        , OuterFaceIdConstraints planeGraph, Eq (FaceIx planeGraph)
+                        )
+                     => IndexedFold (FaceIx planeGraph) planeGraph (SimplePolygon vertex)
+interiorFacePolygons = theFold
+  where
+    theFold              :: forall p f.
+                            ( Indexable (FaceIx planeGraph) p, Applicative f, Contravariant f)
+                         => p (SimplePolygon vertex) (f (SimplePolygon vertex))
+                         -> planeGraph
+                         -> f planeGraph
+    theFold pPolyFPoly g = interiorFaces (Indexed draw) g
+      where
+        draw      :: FaceIx planeGraph -> Face planeGraph -> f (Face planeGraph)
+        draw fi _ = let poly = uncheckedFromCCWPoints . fmap (\vi -> g^?!vertexAt vi)
+                             $ boundaryVertices fi g
+                    in poly >$ indexed pPolyFPoly fi poly
+        -- note that this is safe, since boundaryVerticesOf guarantees that for
+        -- interior faces, the vertices are returned in CCW order.
 
 
 --------------------------------------------------------------------------------
