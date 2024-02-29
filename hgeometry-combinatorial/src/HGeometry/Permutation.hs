@@ -33,7 +33,6 @@ import qualified Data.Foldable as F
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (catMaybes)
-import qualified Data.Vector.Generic as GV
 import           Data.Vector.NonEmpty (NonEmptyVector)
 import qualified Data.Vector.NonEmpty as NonEmptyV
 import qualified Data.Vector.Unboxed as UV
@@ -80,7 +79,7 @@ elems = NonEmptyV.concatMap id . _orbits
 --
 -- running time: \(O(1)\)
 size      :: Permutation a -> Int
-size perm = GV.length (perm^.indexes)
+size perm = UV.length (perm^.indexes)
 
 -- | The cycle containing a given item
 cycleOf        :: Enum a => Permutation a -> a -> Orbit a
@@ -115,19 +114,19 @@ orbitFrom s p = s :| (takeWhile (/= s) . tail $ iterate p s)
 -- | Given a vector with items in the permutation, and a permutation (by its
 -- functional representation) construct the cyclic representation of the
 -- permutation.
-cycleRep        :: (GV.Vector v a, Enum a, Eq a) => v a -> (a -> a) -> Permutation a
+cycleRep        :: (Enum a, Eq a) => NonEmptyVector a -> (a -> a) -> Permutation a
 cycleRep v perm = toCycleRep n $ runST $ do
     bv    <- UMV.replicate n False -- bit vector of marks
     morbs <- forM [0..(n - 1)] $ \i -> do
-               m <- UMV.read bv (fromEnum $ v GV.! i)
+               m <- UMV.read bv (fromEnum $ v NonEmptyV.! i)
                if m then pure Nothing -- already visited
                     else do
-                      let xs = orbitFrom (v GV.! i) perm
+                      let xs = orbitFrom (v NonEmptyV.! i) perm
                       markAll bv $ fmap fromEnum xs
                       pure . Just $ xs
     pure . NonEmpty.fromList . catMaybes $ morbs
   where
-    n  = GV.length v
+    n  = NonEmptyV.length v
 
     mark    bv i = UMV.write bv i True
     markAll bv   = mapM_ (mark bv)
