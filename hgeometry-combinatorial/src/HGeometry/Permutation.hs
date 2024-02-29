@@ -5,7 +5,7 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
--- Data type for representing a Permutation
+-- Data type for representing a non-empty Permutation
 --
 --------------------------------------------------------------------------------
 module HGeometry.Permutation
@@ -30,30 +30,33 @@ import           Control.Lens
 import           Control.Monad (forM)
 import           Control.Monad.ST (runST)
 import qualified Data.Foldable as F
+import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (catMaybes)
-import qualified Data.Traversable as T
-import qualified Data.Vector as V
 import qualified Data.Vector.Generic as GV
+import           Data.Vector.NonEmpty (NonEmptyVector)
+import qualified Data.Vector.NonEmpty as NonEmptyV
 import qualified Data.Vector.Unboxed as UV
 import qualified Data.Vector.Unboxed.Mutable as UMV
 import           GHC.Generics (Generic)
+import           HGeometry.Vector.NonEmpty.Util ()
 
 --------------------------------------------------------------------------------
 
 -- | Orbits (Cycles) are represented by vectors
-type Orbit a = V.Vector a
+type Orbit a = NonEmptyVector a
 
--- | Cyclic representation of a permutation.
-data Permutation a = Permutation { _orbits  :: V.Vector (Orbit a)
+-- | Cyclic representation of a non-empty permutation.
+data Permutation a = Permutation { _orbits  :: NonEmptyVector (Orbit a)
                                  , _indexes :: UV.Vector (Int,Int)
                                                -- ^ idxes (fromEnum a) = (i,j)
                                                -- implies that a is the j^th
                                                -- item in the i^th orbit
                                  }
-                   deriving (Show,Eq,Generic)
+                   deriving (Show,Eq,Generic,Functor,Foldable)
 
 -- | Lens to access the orbits of the permutation
-orbits :: Lens (Permutation a) (Permutation b) (V.Vector (Orbit a)) (V.Vector (Orbit b))
+orbits :: Lens (Permutation a) (Permutation b) (NonEmptyVector (Orbit a)) (NonEmptyVector (Orbit b))
 orbits = lens _orbits (\p os -> p { _orbits = os })
 
 -- | Lens to access the indexes of the permutation.
@@ -66,18 +69,12 @@ indexes = lens _indexes (\p ixs -> p { _indexes = ixs })
 
 instance NFData a => NFData (Permutation a)
 
-instance Functor Permutation where
-  fmap = T.fmapDefault
-
-instance F.Foldable Permutation where
-  foldMap = T.foldMapDefault
-
-instance T.Traversable Permutation where
-  traverse f (Permutation os is) = flip Permutation is <$> T.traverse (T.traverse f) os
+instance Traversable Permutation where
+  traverse f (Permutation os is) = flip Permutation is <$> traverse (traverse f) os
 
 -- | Get the elements of the permutation
-elems :: Permutation a -> V.Vector a
-elems = GV.concat . GV.toList . _orbits
+elems :: Permutation a -> NonEmptyVector a
+elems = NonEmptyV.concatMap id . _orbits
 
 -- | Get the size of a permutation
 --
@@ -91,12 +88,12 @@ cycleOf perm x = perm^?!orbits.ix (perm^?!indexes.ix (fromEnum x)._1)
 
 
 -- | Next item in a cyclic permutation
-next     :: GV.Vector v a => v a -> Int -> a
-next v i = let n = GV.length v in v GV.! ((i+1) `mod` n)
+next     :: NonEmptyVector a -> Int -> a
+next v i = let n = NonEmptyV.length v in v NonEmptyV.! ((i+1) `mod` n)
 
 -- | Previous item in a cyclic permutation
-previous     :: GV.Vector v a => v a -> Int -> a
-previous v i = let n = GV.length v in v GV.! ((i-1) `mod` n)
+previous     :: NonEmptyVector a -> Int -> a
+previous v i = let n = NonEmptyV.length v in v NonEmptyV.! ((i-1) `mod` n)
 
 -- | Lookup the indices of an element, i.e. in which orbit the item is, and the
 -- index within the orbit.
@@ -112,8 +109,8 @@ apply perm x = let (c,i) = lookupIdx perm x
 
 
 -- | Find the cycle in the permutation starting at element s
-orbitFrom     :: Eq a => a -> (a -> a) -> [a]
-orbitFrom s p = s : (takeWhile (/= s) . tail $ iterate p s)
+orbitFrom     :: Eq a => a -> (a -> a) -> NonEmpty a
+orbitFrom s p = s :| (takeWhile (/= s) . tail $ iterate p s)
 
 -- | Given a vector with items in the permutation, and a permutation (by its
 -- functional representation) construct the cyclic representation of the
@@ -126,27 +123,27 @@ cycleRep v perm = toCycleRep n $ runST $ do
                if m then pure Nothing -- already visited
                     else do
                       let xs = orbitFrom (v GV.! i) perm
-                      markAll bv $ map fromEnum xs
+                      markAll bv $ fmap fromEnum xs
                       pure . Just $ xs
-    pure . catMaybes $ morbs
+    pure . NonEmpty.fromList . catMaybes $ morbs
   where
     n  = GV.length v
 
     mark    bv i = UMV.write bv i True
     markAll bv   = mapM_ (mark bv)
 
-
 -- | Given the size n, and a list of Cycles, turns the cycles into a
 -- cyclic representation of the Permutation.
-toCycleRep      :: Enum a => Int -> [[a]] -> Permutation a
-toCycleRep n os = Permutation (V.fromList . map V.fromList $ os) (genIndexes n os)
+toCycleRep      :: Enum a => Int -> NonEmpty (NonEmpty a) -> Permutation a
+toCycleRep n os = Permutation (NonEmptyV.fromNonEmpty . fmap NonEmptyV.fromNonEmpty $ os)
+                              (genIndexes n os)
 
 -- | Helper function to generate the indices of a permutation
-genIndexes      :: Enum a => Int -> [[a]] -> UV.Vector (Int,Int)
+genIndexes      :: Enum a => Int -> NonEmpty (NonEmpty a)  -> UV.Vector (Int,Int)
 genIndexes n os = UV.create $ do
                                 v <- UMV.new n
                                 mapM_ (uncurry $ UMV.write v) ixes'
                                 pure v
   where
-    f i c = zipWith (\x j -> (fromEnum x,(i,j))) c [0..]
-    ixes' = concat $ zipWith f [0..] os
+    f i c = zipWith (\x j -> (fromEnum x,(i,j))) (F.toList c) [0..]
+    ixes' = concat $ zipWith f [0..] (F.toList os)
