@@ -59,7 +59,7 @@ instance HasVertices' (Triangle point) where
   vertexAt i = _TriangleVector.iix i
 
 instance HasVertices (Triangle point) (Triangle point') where
-  vertices = cloneIndexedTraversal (_TriangleVector.components)
+  vertices = cloneIndexedTraversal1 (_TriangleVector.components)
 
 instance HasPoints (Triangle point) (Triangle point') point point' where
   allPoints = _TriangleVector.components

@@ -63,11 +63,12 @@ instance Traversable1 f => Traversable1 (PolyLineF f) where
   traverse1 f (PolyLine vs) = PolyLine <$> traverse1 f vs
 
 instance ( TraversableWithIndex Int f
+         , Traversable1 f
          , IxValue (f point) ~ point
          , Index   (f point) ~ Int
          , Ixed    (f point)
          ) => HasVertices (PolyLineF f point) (PolyLineF f point') where
-  vertices = _PolyLineF . itraversed
+  vertices = _PolyLineF . traversed1
 
 instance ( Traversable1 f
          , IxValue (f point) ~ point
@@ -93,6 +94,7 @@ instance ( Traversable1 f
          ) => IsBoxable (PolyLineF f point)
 
 instance ( TraversableWithIndex Int f
+         , Traversable1 f
          , Ixed (f point)
          , IxValue (f point) ~ point
          , Index (f point) ~ Int

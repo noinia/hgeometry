@@ -88,7 +88,7 @@ type VertexContainer f point = ( IxValue (f point) ~ point
 
 instance ( VertexContainer f point
          ) => HasVertices (SimplePolygonF f point) (SimplePolygonF f point') where
-  vertices = _SimplePolygonF . itraversed
+  vertices = _SimplePolygonF . traversed1
 
 instance ( VertexContainer f point
          ) => HasPoints (SimplePolygonF f point) (SimplePolygonF f point') point point' where

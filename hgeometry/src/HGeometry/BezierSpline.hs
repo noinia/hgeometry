@@ -76,12 +76,12 @@ instance Traversable f => Traversable (BezierSplineF f) where
 instance Traversable1 f => Traversable1 (BezierSplineF f) where
   traverse1 f (BezierSpline vs) = BezierSpline <$> traverse1 f vs
 
-instance (TraversableWithIndex Int f
+instance ( Traversable1 f
          , IxValue (f point) ~ point
          , Index   (f point) ~ Int
          , Ixed    (f point)
          ) => HasVertices (BezierSplineF f point) (BezierSplineF f point') where
-  vertices = _BezierSplineF . itraversed
+  vertices = _BezierSplineF . traversed1
 
 instance ( Traversable1 f
          , IxValue (f point) ~ point
@@ -105,7 +105,7 @@ instance ( Traversable1 f
          , Point_ point 2 r
          ) => IsBoxable (BezierSplineF f point)
 
-instance ( TraversableWithIndex Int f
+instance ( Traversable1 f
          , Ixed (f point)
          , IxValue (f point) ~ point
          , Index (f point) ~ Int

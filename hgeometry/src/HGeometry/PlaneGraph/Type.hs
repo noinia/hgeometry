@@ -18,6 +18,7 @@ module HGeometry.PlaneGraph.Type
 
 import           Control.Lens hiding (holes, holesOf, (.=))
 import           Data.Coerce
+import           Data.Foldable1
 import           GHC.Generics (Generic)
 import           HGeometry.Box
 import           HGeometry.Ext
@@ -88,7 +89,7 @@ instance HasFaces (PlaneGraph s v e f) (PlaneGraph s v e f') where
 
 ----------------------------------------
 instance DirGraph_ (PlaneGraph s v e f) where
-  type DirGraphFromAdjListExtraConstraints (PlaneGraph s v e f) = (f ~ ())
+  type DirGraphFromAdjListExtraConstraints (PlaneGraph s v e f) h = (f ~ (), Foldable1 h)
   dirGraphFromAdjacencyLists = PlaneGraph . dirGraphFromAdjacencyLists
   endPoints (PlaneGraph g) = endPoints g
   twinDartOf d = twinOf d . to Just
@@ -98,7 +99,7 @@ instance BidirGraph_ (PlaneGraph s v e f) where
   twinOf d = to $ const (PG.twin d)
 
 instance Graph_ (PlaneGraph s v e f) where
-  type GraphFromAdjListExtraConstraints (PlaneGraph s v e f) = (f ~ ())
+  type GraphFromAdjListExtraConstraints (PlaneGraph s v e f) h = (f ~ (), Foldable1 h)
   fromAdjacencyLists = PlaneGraph . fromAdjacencyLists
 
 instance PlanarGraph_ (PlaneGraph s v e f) where
@@ -117,17 +118,17 @@ instance PlanarGraph_ (PlaneGraph s v e f) where
 
 
 instance ( Point_ v 2 (NumType v)
-         ) => PlaneGraph_ (PlaneGraph s v e f) v where
-  outerFaceDart _ = error "outerFaceDart: PlaneGraph not yet implemented"
+         , Ord (NumType v), Num (NumType v)
+         ) => PlaneGraph_ (PlaneGraph s v e f) v
 
+instance ( Point_ v 2 r, Point_ v' 2 r'
+         ) => HasPoints (PlaneGraph s v e f)
+                        (PlaneGraph s v' e f) v v' where
+  allPoints = vertices
 
--- instance ( Point_ v 2 r, Point_ v' 2 r'
---          ) => HasPoints (PlaneGraph s v e f)
---                         (PlaneGraph s v' e f) v v' where
---   allPoints = vertices
-
-
--- instance IsBoxable (PlaneGraph s vertex e f)
+instance ( Point_ v 2 r
+         , Ord r, Num r
+         ) => IsBoxable (PlaneGraph s v e f)
 
 
 

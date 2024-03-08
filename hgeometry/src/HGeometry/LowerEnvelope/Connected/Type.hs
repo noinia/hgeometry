@@ -40,10 +40,14 @@ import           Control.Applicative
 import           Control.Lens
 import qualified Data.Foldable as F
 import           Data.Foldable1
+import           Data.Functor.Apply (Apply, (<.*>))
+import qualified Data.Functor.Apply as Apply
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Semigroup.Traversable(traverse1Maybe)
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
 import qualified Data.Vector as V
+import           HGeometry.Box
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
 import           HGeometry.Foldable.Sort
@@ -57,7 +61,6 @@ import           HGeometry.LowerEnvelope.Type
 import           HGeometry.LowerEnvelope.VertexForm (IntersectionLine(..),intersectionLine)
 import qualified HGeometry.LowerEnvelope.VertexForm as VertexForm
 import           HGeometry.Point
-import           HGeometry.Box
 import           HGeometry.Properties
 import           HGeometry.Vector
 import           HGeometry.Vector.NonEmpty.Util ()
@@ -293,8 +296,8 @@ instance HasVertices' (LowerEnvelope' plane) where
       trav0  f (LowerEnvelope v0 vs)  = flip LowerEnvelope vs . unLeft <$> f   (Left v0)
 
       itrav0                          :: Applicative f
-                                      => (VertexID -> Vertex   (LowerEnvelope' plane)
-                                         -> f (Vertex   (LowerEnvelope' plane)))
+                                      => (VertexID -> Vertex (LowerEnvelope' plane)
+                                         -> f (Vertex (LowerEnvelope' plane)))
                                       -> LowerEnvelope' plane -> f (LowerEnvelope' plane)
       itrav0 f (LowerEnvelope v0 vs)  = flip LowerEnvelope vs . unLeft <$> f 0 (Left v0)
 
@@ -316,22 +319,28 @@ instance HasVertices (LowerEnvelope' plane) (LowerEnvelope' plane') where
 
   vertices = conjoined traverse' (itraverse' . indexed)
     where
-      traverse' :: (Applicative f)
+      traverse' :: (Apply f)
                 => (Vertex (LowerEnvelope' plane) -> f (Vertex (LowerEnvelope' plane')))
                 -> LowerEnvelope' plane -> f (LowerEnvelope' plane')
       traverse'  f (LowerEnvelope v0 vs) =
-        LowerEnvelope <$> (fmap unLeft . f .Left) v0 <*> traverse (fmap unRight . f . Right) vs
+        LowerEnvelope <$> (fmap unLeft . f .Left) v0
+                      <.*> traverse1Maybe (fmap unRight . f . Right) vs
 
       unLeft  = either id (error "LowerEnvelope'.vertices: trying to convert v_infty into a normal vertex is not allowed")
       unRight = either (error "LowerEnvelope'.vertices: trying to convert a regular bounded vertex into v_infty is not allowed") id
 
-      itraverse' :: (Applicative f)
+      itraverse' :: (Apply f)
                  => (VertexID -> Vertex (LowerEnvelope' plane) -> f (Vertex (LowerEnvelope' plane')))
                 -> LowerEnvelope' plane -> f (LowerEnvelope' plane')
       itraverse' f (LowerEnvelope v0 vs) =
         LowerEnvelope <$> (fmap unLeft . f unboundedVertexId .Left) v0
-                      <*> itraverse (\i -> fmap unRight . f (i+1) . Right) vs
+                      <.*> itraverse1Maybe (\i -> fmap unRight . f (i+1) . Right) vs
   {-# INLINE vertices #-}
+
+-- | Indexed version of 'traverse1Maybe'.
+itraverse1Maybe   :: (TraversableWithIndex i t, Apply f)
+                  => (i -> a -> f b) -> t a -> Apply.MaybeApply f (t b)
+itraverse1Maybe f = itraverse (\i -> Apply.MaybeApply . Left . f i)
 
 ----------------------------------------
 

@@ -10,6 +10,7 @@ import           Test.Tasty.Bench (defaultMain)
 
 main :: IO ()
 main = defaultMain
-         [ ConvexHull.benchmark
+         [
+           ConvexHull.benchmark
          , ConvexHull.GrahamBench.benchmark
          ]

@@ -1,3 +1,4 @@
+{-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
@@ -21,58 +22,53 @@ import Data.Functor.Apply
 import Data.Kind (Constraint)
 import Data.Maybe (fromMaybe)
 import Data.Monoid (Endo(..))
+import Data.Ord (comparing)
 import HGeometry.LineSegment
 import HGeometry.Point
 import HGeometry.Polygon.Simple
 import HGeometry.Properties
+import HGeometry.Vector
 import Hiraffe.Graph.Class
 import Hiraffe.PlanarGraph.Class
 
 --------------------------------------------------------------------------------
 
--- -- | Types that have a location field.
--- class HasLocation s t where
---   -- | Lens to access the location
---   location :: Lens s t (Point (Dimension s) (NumType s)) (Point (Dimension t) (NumType t))
-
-
-
-
+-- | A class representing Plane graphs, i.e. planar graphs that have a straight line
+-- embedding in the plane.
 class ( PlanarGraph_ planeGraph
       , vertex ~ Vertex planeGraph
       , Point_ vertex 2 (NumType vertex)
       , NumType vertex ~ NumType planeGraph
       ) => PlaneGraph_ planeGraph vertex | planeGraph -> vertex where
 
-  {-# MINIMAL outerFaceDart  #-}
-
-  type OuterFaceIdConstraints planeGraph :: Constraint
-  type OuterFaceIdConstraints planeGraph = ( Ord (NumType planeGraph)
-                                           , Num (NumType planeGraph)
-                                           )
+  {-# MINIMAL #-}
 
   -- | Getter to access the outer face
-  outerFace :: (OuterFaceIdConstraints planeGraph, Eq (FaceIx planeGraph))
+  outerFace :: Eq (FaceIx planeGraph)
             => IndexedLens' (FaceIx planeGraph) planeGraph (Face planeGraph)
-  outerFace = singular $ theLens
+  outerFace = singular theLens
     where
       theLens pFaceFFace g = faceAt theOuterFaceId pFaceFFace g
         where
           theOuterFaceId = outerFaceId g
 
   -- | Traversal of all interior faces in the graph
-  interiorFaces :: (OuterFaceIdConstraints planeGraph, Eq (FaceIx planeGraph))
+  interiorFaces :: (Eq (FaceIx planeGraph))
                 => IndexedTraversal' (FaceIx planeGraph) planeGraph (Face planeGraph)
   interiorFaces = theTraversal
     where
-      theTraversal pFaceFFace g = (faces.ifiltered (\i _ -> i /= theOuterFaceId)) pFaceFFace g
+      theTraversal :: (Applicative f, Indexable (FaceIx planeGraph) p)
+                   => p (Face planeGraph) (f (Face planeGraph)) -> planeGraph -> f planeGraph
+      theTraversal pFaceFFace g = unwrapApplicative
+                                $ (faces.ifiltered (\i _ -> i /= theOuterFaceId))
+                                                   (rmap WrapApplicative pFaceFFace)
+                                                   g
         where
           theOuterFaceId = outerFaceId g
 
-
   -- | gets the id of the outer face
   --
-  outerFaceId    :: OuterFaceIdConstraints planeGraph => planeGraph -> FaceIx planeGraph
+  outerFaceId    :: planeGraph -> FaceIx planeGraph
   outerFaceId ps = leftFace (outerFaceDart ps) ps
 
   -- | gets a dart incident to the outer face (in particular, that has the
@@ -80,17 +76,15 @@ class ( PlanarGraph_ planeGraph
   --
   -- running time: \(O(n)\)
   --
-  outerFaceDart    :: OuterFaceIdConstraints planeGraph => planeGraph -> DartIx planeGraph
-{-
-  outerFaceDart pg = d
+  outerFaceDart :: planeGraph -> DartIx planeGraph
+  default outerFaceDart :: (r ~ NumType planeGraph, Ord r, Num r)
+                   => planeGraph -> DartIx planeGraph
+  outerFaceDart pg = minimum1ByOf (outgoingDartsOf vi.asIndex) cmp pg
     where
-      (v,_)  = minimum1ByOf vertices (comparing^.location) pg
-             -- compare lexicographically; i.e. if same x-coord prefer the one with the
-             -- smallest y-coord
+      (vi,v) = minimum1ByOf (vertices.withIndex) (comparing (^._2.asPoint)) pg
+          -- compare lexicographically; i.e. if same x-coord prefer the one with the lowest one
+      cmp d1 d2 = cwCmpAroundWith (Vector2 (-1) 0) v (pg^.headOf d1) (pg^.headOf d2)
 
-      (_ :+ d) = V.minimumBy (cwCmpAroundWith' (Vector2 (-1) 0) (pg^.locationOf v :+ ()))
-               . fmap (\d' -> let u = headOf d' pg in (pg^.locationOf u) :+ d')
-               $ outgoingEdges v pg
       -- based on the approach sketched at https://cstheory.stackexchange.com/questions/27586/finding-outer-face-in-plane-graph-embedded-planar-graph
       -- basically: find the leftmost vertex, find the incident edge with the largest slope
       -- and take the face left of that edge. This is the outerface.
@@ -100,7 +94,6 @@ class ( PlanarGraph_ planeGraph
       -- vertec cw vertex around v. First with respect to some direction
       -- pointing towards the left.
 
--}
 
 --------------------------------------------------------------------------------
 
@@ -184,10 +177,11 @@ edgeSegments = theFold
                     in seg >$ indexed pSegFSeg ei seg
 
 -- | Renders all interior faces as simple polygons.
-interiorFacePolygons :: forall planeGraph vertex.
+interiorFacePolygons :: forall planeGraph vertex r.
                         ( PlaneGraph_ planeGraph vertex
-                        , Point_ vertex 2 (NumType vertex)
-                        , OuterFaceIdConstraints planeGraph, Eq (FaceIx planeGraph)
+                        , Point_ vertex 2 r
+                        , Ord r, Num r
+                        , Eq (FaceIx planeGraph)
                         )
                      => IndexedFold (FaceIx planeGraph) planeGraph (SimplePolygon vertex)
 interiorFacePolygons = theFold
@@ -212,3 +206,80 @@ interiorFacePolygons = theFold
 -- | get the minimum of the elements the lens points to using the given comparison function
 minimum1ByOf       :: Getting (Endo (Endo (Maybe a))) s a -> (a -> a -> Ordering) -> s -> a
 minimum1ByOf l cmp = fromMaybe (error "minimum1ByOf") . minimumByOf l cmp
+
+
+-- -- type Getting r s a = (a -> Const r a) -> s -> Const r s
+
+-- -- Endo a ===  a -> a
+-- --
+-- -- Endo (Endo (Maybe a)))
+-- --
+-- -- so r is here (Maybe a -> Maybe a) -> (Maybe a -> Maybe a)
+
+
+
+-- -- Getting : a -> a -> a
+
+
+
+
+-- -- | get the minimum of the elements the lens points to using the given comparison function
+-- minimum1ByOf       :: Getting (Endo (Endo a)) s a
+--                    -> (a -> a -> Ordering) -> s -> a
+-- minimum1ByOf l cmp =
+
+
+--   -- Endo (Endo (Maybe a)))
+
+
+-- -- foldlOf' l mf Nothing where
+-- --   mf Nothing y = Just $! y
+-- --   mf (Just x) y = Just $! if cmp x y == GT then y else x
+-- -- {-# INLINE minimumByOf #-}
+
+
+-- --   fromMaybe (error "minimum1ByOf") . minimumByOf l cmp
+
+
+
+
+-- -- foldl1Of'X        :: Getting (Endo (Endo a)) s a -> (a -> a -> a) -> s -> a
+-- -- foldl1Of'X l f xs = (foldlOf' l mf Nothing xs) where
+-- --   mf Nothing y = Just $! y
+-- --   mf (Just x) y = Just $! f x y
+-- -- {-# INLINE foldl1Of'X #-}
+
+
+-- -- foldlOf' :: Getting (Endo (Endo r)) s a -> (r -> a -> r) -> r -> s -> r
+-- -- foldlOf' l f z0 xs = foldrOf l f' (Endo id) xs `appEndo` z0
+-- --   where f' x (Endo k) = Endo $ \z -> k $! f z x
+-- -- {-# INLINE foldlOf' #-}
+
+-- -- foldMap1Of :: Getting r s a -> (a -> r) -> s -> r
+
+
+-- foldrOfX :: Getting (Endo a) s a -> (a -> a -> a) -> a -> s -> a
+-- foldrOfX l f z = flip appEndo z . foldMapOf l (Endo #. f)
+-- {-# INLINE foldrOf #-}
+
+
+-- -- type Getting r s a = (a -> Const r a) -> s -> Const r s
+
+-- foldrMap1Of          :: Getting _ s a -> (a -> b) -> (a -> b -> b) -> s -> b
+-- foldrMap1Of l f0 k s =
+--   -- I guess generally, we want to maintain some function :: b -> b
+--   -- that we in the end apply to (f0 x0)
+
+
+
+
+-- foldr1Of   :: Getting _ s a -> (a -> a -> a) -> s -> a
+-- foldr1Of l = foldrMap1Of l id
+
+-- -- foldr1OfX :: Getting (Endo a) s a -> (a -> a -> a) -> s -> a
+-- -- foldr1OfX l f xs = fromMaybe (error "foldr1Of: empty structure")
+-- --                             (foldrOf l mf Nothing xs) where
+-- --   mf x my = Just $ case my of
+-- --     Nothing -> x
+-- --     Just y -> f x y
+-- -- {-# INLINE foldr1Of #-}

@@ -27,7 +27,7 @@ import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.LowerEnvelope.AdjListForm
 import           HGeometry.LowerEnvelope.Naive (lowerEnvelopeVertexForm)
-import           HGeometry.LowerEnvelope.VertexForm (VertexForm)
+import           HGeometry.LowerEnvelope.VertexForm (VertexForm, vertices')
 import           HGeometry.Point
 import           HGeometry.Properties
 import           Hiraffe.Graph
@@ -90,7 +90,7 @@ voronoiVertices :: ( Point_ point 2 r, Functor f, Default point, Ord point
                    , Ord r, Fractional r, Foldable f
                    ) => f point -> [Point 2 r]
 voronoiVertices = map (projectPoint . fst)
-                . itoListOf vertices
+                . itoListOf vertices'
                 . upperEnvelopeVertexForm
                 . fmap (\p -> liftPointToPlane p :+ p)
 -- FIXME: get rid of the default point constraint

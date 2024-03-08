@@ -716,7 +716,11 @@ benchmark benchmarks
 
   main-is: Benchmarks.hs
   type: exitcode-stdio-1.0
-
+  -- ghc-options:
+  --             -prof
+  --             -fprof-late-inline
+  --             -fprof-auto
+  --             -rtsopts "-with-rtsopts=-p"
   other-modules:
     ConvexHull.Bench
 

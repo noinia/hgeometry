@@ -12,7 +12,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.LowerEnvelope.VertexForm
   ( VertexForm(VertexForm)
-  , hasVertices
+  , hasVertices, vertices'
   , singleton
   , LEVertex, pattern LEVertex, Definers
   , BoundedVertexF(Vertex)
@@ -85,9 +85,15 @@ instance Ord (NumType plane) => HasVertices' (VertexForm plane) where
   type Vertex   (VertexForm plane) = Definers plane
   type VertexIx (VertexForm plane) = Point 3 (NumType plane)
   vertexAt i = _VertexFormMap . iix i
+  numVertices (VertexForm m) = Map.size m
 
-instance Ord (NumType plane) => HasVertices (VertexForm plane) (VertexForm plane) where
-  vertices = _VertexFormMap . itraversed
+-- instance Ord (NumType plane) => HasVertices (VertexForm plane) (VertexForm plane) where
+--   vertices = _VertexFormMap . itraversed
+
+-- | Traversal (rather than a traversal1) of the vertices.
+vertices' :: IndexedTraversal' (VertexIx (VertexForm plane))
+                                      (VertexForm plane) (Vertex (VertexForm plane))
+vertices' = _VertexFormMap . itraversed
 
 --------------------------------------------------------------------------------
 

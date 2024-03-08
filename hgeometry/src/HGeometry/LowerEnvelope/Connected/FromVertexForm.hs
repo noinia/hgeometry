@@ -102,7 +102,7 @@ fromVertexForm' lEnv = LowerEnvelope v0 boundedVs
     -- vertex, that does not appear on the lower envelope).
     --
     boundedVs' :: Seq.Seq ( VertexID, BoundedVertex plane, [IntermediateVertex plane])
-    boundedVs' = ifoldMapOf (indexing (vertices.withIndex)) mkVtx lEnv
+    boundedVs' = ifoldMapOf (indexing (VertexForm.vertices'.withIndex)) mkVtx lEnv
 
     mkVtx i (v,defs) = let j = i+1
                        in Seq.singleton ( j
