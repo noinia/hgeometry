@@ -9,8 +9,8 @@
 --------------------------------------------------------------------------------
 module HGeometry.Sign where
 
-import qualified Data.List as List
-import           Data.Maybe
+import Data.Foldable1
+import Data.Monoid
 
 --------------------------------------------------------------------------------
 
@@ -28,13 +28,11 @@ flipSign = \case
 -- | Given the terms, in decreasing order of significance, computes the sign
 --
 -- i.e. expects a list of terms, we base the sign on the sign of the first non-zero term.
---
--- pre: the list contains at least one such a term.
-signFromTerms :: (Num r, Eq r) => [r] -> Sign
-signFromTerms = List.head . mapMaybe signum'
+signFromTerms :: (Num r, Eq r, Foldable1 f) => f r -> Maybe Sign
+signFromTerms = getFirst . foldMap (First . signum')
   where
     signum' x = case signum x of
-                  -1    -> Just Negative
-                  0     -> Nothing
-                  1     -> Just Positive
-                  _     -> error "signum': absurd"
+                  -1 -> Just Negative
+                  0  -> Nothing
+                  1  -> Just Positive
+                  _  -> error "signum': absurd"

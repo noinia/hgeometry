@@ -109,7 +109,7 @@ apply perm x = let (c,i) = lookupIdx perm x
 
 -- | Find the cycle in the permutation starting at element s
 orbitFrom     :: Eq a => a -> (a -> a) -> NonEmpty a
-orbitFrom s p = s :| (takeWhile (/= s) . tail $ iterate p s)
+orbitFrom s p = s :| (takeWhile (/= s) . NonEmpty.tail $ NonEmpty.iterate p s)
 
 -- | Given a vector with items in the permutation, and a permutation (by its
 -- functional representation) construct the cyclic representation of the

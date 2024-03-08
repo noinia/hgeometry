@@ -8,9 +8,11 @@
 module HGeometry.CircularList.Util where
 
 import           Control.Lens
-import           Data.Tuple
 import qualified Data.CircularList as C
-import qualified Data.List as L
+import qualified Data.List as List
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.List.NonEmpty (NonEmpty(..))
+import           Data.Tuple
 
 
 --------------------------------------------------------------------------------
@@ -48,11 +50,12 @@ insertOrdBy cmp x = C.fromList . insertOrdBy' cmp x . C.rightElements
 -- | List version of insertOrdBy; i.e. the list contains the elements in
 -- cirulcar order. Again produces a list that has the items in circular order.
 insertOrdBy'         :: (a -> a -> Ordering) -> a -> [a] -> [a]
-insertOrdBy' cmp x xs = case (rest, x `cmp` head rest) of
-    ([],  _)   -> L.insertBy cmp x pref
-    (z:zs, GT) -> z : L.insertBy cmp x zs ++ pref
-    (_:_,  EQ) -> x : xs -- == x : rest ++ pref
-    (_:_,  LT) -> rest ++ L.insertBy cmp x pref
+insertOrdBy' cmp x xs = case NonEmpty.nonEmpty rest of
+    Nothing      -> List.insertBy cmp x pref
+    Just (z:|zs) -> case x `cmp` z of
+                      GT -> z : List.insertBy cmp x zs ++ pref
+                      EQ -> x : xs -- == x : rest ++ pref
+                      LT -> rest ++ List.insertBy cmp x pref
   where
     -- split the list at its maximum.
     (pref,rest) = splitIncr cmp xs
@@ -64,11 +67,11 @@ insertOrdBy' cmp x xs = case (rest, x `cmp` head rest) of
 splitIncr              :: (a -> a -> Ordering) -> [a] -> ([a],[a])
 splitIncr _   []       = ([],[])
 splitIncr cmp xs@(x:_) = swap . bimap (map snd) (map snd)
-                      . L.break (\(a,b) -> (a `cmp` b) == GT) $ zip (x:xs) xs
+                       . List.break (\(a,b) -> (a `cmp` b) == GT) $ zip (x:xs) xs
 
 -- | Test if the circular list is a cyclic shift of the second list.
 -- Running time: O(n), where n is the size of the smallest list
 isShiftOf         :: Eq a => C.CList a -> C.CList a -> Bool
-xs `isShiftOf` ys = let rest = tail . C.leftElements
+xs `isShiftOf` ys = let rest = C.leftElements
                     in maybe False (\xs' -> rest xs' == rest ys) $
                          C.focus ys >>= flip C.rotateTo xs
