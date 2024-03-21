@@ -11,6 +11,7 @@ module HGeometry.LowerEnvelope.Naive
 --------------------------------------------------------------------------------
 
 import           Control.Monad (guard)
+import           Data.Foldable1
 import qualified Data.Set as Set
 import           HGeometry.Combinatorial.Util
 import           HGeometry.HyperPlane.Class
@@ -28,11 +29,13 @@ import           HGeometry.Point
 --
 --
 -- running time: \(O(n^4 )\)
-lowerEnvelope :: ( Plane_ plane r
-                 , Ord r, Fractional r, Foldable f, Functor f, Ord plane
-                 , Show plane, Show r
-                 ) => f plane -> LowerEnvelope plane
-lowerEnvelope = fromVertexForm . lowerEnvelopeVertexForm
+lowerEnvelope    :: ( Plane_ plane r
+                    , Ord r, Fractional r, Foldable1 f, Functor f, Ord plane
+                    , Show plane, Show r
+                    ) => f plane -> LowerEnvelope plane
+lowerEnvelope hs = fromVertexForm hs $ lowerEnvelopeVertexForm hs
+
+--------------------------------------------------------------------------------
 
 
 --------------------------------------------------------------------------------

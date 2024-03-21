@@ -17,6 +17,7 @@ module HGeometry.Sequence.Alternating
   , reverse
   ) where
 
+import           Control.DeepSeq
 import           Control.Lens
 import           Data.Bifoldable
 import           Data.Bitraversable
@@ -24,18 +25,24 @@ import qualified Data.Foldable as F
 import           Data.Foldable1
 import           Data.Functor.Apply ((<.*>))
 import qualified Data.List as List
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup.Traversable
+import           GHC.Generics (Generic)
 import           Prelude hiding (reverse)
 
 --------------------------------------------------------------------------------
 
 -- | A (non-empty) alternating sequence of @a@\'s and @sep@'s.
 data Alternating f sep a = Alternating a (f (sep, a))
-                       -- deriving (Show,Eq,Ord)
+                         deriving (Generic)
 
 deriving instance (Show a, Show (f (sep, a))) => Show (Alternating f sep a)
+deriving instance (Eq a, Eq (f (sep, a)))     => Eq (Alternating f sep a)
+deriving instance (Ord a, Ord (f (sep, a)))   => Ord (Alternating f sep a)
+
+instance (NFData a, NFData (f (sep, a))) => NFData (Alternating f sep a)
+
 
 instance Functor f => Functor (Alternating f sep) where
   fmap f (Alternating x xs) = Alternating (f x) $ fmap (fmap f) xs

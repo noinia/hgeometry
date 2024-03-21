@@ -13,6 +13,7 @@
 module HGeometry.VoronoiDiagram.ViaLowerEnvelope
   ( VoronoiDiagram(..)
   , VoronoiDiagram'(..)
+  , ColinearPoint
   , voronoiDiagram
   , voronoiVertices
   , edgeGeometries
@@ -20,24 +21,28 @@ module HGeometry.VoronoiDiagram.ViaLowerEnvelope
 
 import           Control.Lens
 import           Data.Default.Class
+import           Data.Foldable1
+import           Data.Sequence (Seq)
+import qualified Data.Set as Set
 import           HGeometry.Box
 import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
+import           HGeometry.Line.PointAndVector
 import           HGeometry.LowerEnvelope.AdjListForm
 import           HGeometry.LowerEnvelope.Naive (lowerEnvelopeVertexForm)
 import           HGeometry.LowerEnvelope.VertexForm (VertexForm, vertices')
 import           HGeometry.Point
 import           HGeometry.Properties
+import           HGeometry.Sequence.Alternating (Alternating)
 import           Hiraffe.Graph
 
 --------------------------------------------------------------------------------
 
 -- | A Voronoi diagram
-data VoronoiDiagram point = AllColinear () -- TODO
-                          | ConnectedVD (VoronoiDiagram' point)
-
+data VoronoiDiagram point = AllColinear !(Set.Set (ColinearPoint point))
+                          | ConnectedVD !(VoronoiDiagram' point)
 
 deriving instance (Show point, Show (NumType point)) => Show (VoronoiDiagram point)
 deriving instance (Eq point, Eq (NumType point))     => Eq   (VoronoiDiagram point)
@@ -45,6 +50,16 @@ deriving instance (Eq point, Eq (NumType point))     => Eq   (VoronoiDiagram poi
 type instance NumType   (VoronoiDiagram point) = NumType point
 type instance Dimension (VoronoiDiagram point) = 2 -- Dimension point
 
+-- | Just a newtype around point; used to model a set of points that are all colinear in
+-- the Vornoi diagram.
+newtype ColinearPoint point = ColinearPoint point
+                       deriving (Show,Eq)
+
+instance Wrapped (ColinearPoint point) where
+  type Unwrapped (ColinearPoint point)  = point
+  _Wrapped' = coerced
+
+-- instance Rewrapped (ColinearPoint point) point
 
 --------------------------------------------------------------------------------
 
@@ -76,14 +91,15 @@ instance (Ord (NumType point), Num (NumType point)) => IsBoxable (VoronoiDiagram
 --
 -- \(O(n\log n)\)
 voronoiDiagram     :: ( Point_ point 2 r, Functor f, Default point, Ord point
-                      , Ord r, Fractional r, Foldable f
+                      , Ord r, Fractional r, Foldable1 f
                       , Show point, Show r
                       ) => f point -> VoronoiDiagram point
 voronoiDiagram pts = case lowerEnvelope' . fmap (\p -> liftPointToPlane p :+ p) $ pts of
-                       ParallelStrips strips -> AllColinear strips -- TODO
+                       ParallelStrips strips -> AllColinear $ Set.mapMonotonic getPoint strips
                        ConnectedEnvelope env -> ConnectedVD $ VoronoiDiagram env
   where
-    lowerEnvelope' = fromVertexForm . upperEnvelopeVertexForm
+    lowerEnvelope' hs = fromVertexForm hs $ upperEnvelopeVertexForm hs
+    getPoint = view (_Wrapped'.extra.to ColinearPoint)
 
 -- | Computes all voronoi vertices
 voronoiVertices :: ( Point_ point 2 r, Functor f, Default point, Ord point
