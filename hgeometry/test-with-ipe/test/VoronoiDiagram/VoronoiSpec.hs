@@ -79,17 +79,17 @@ degenerateTests = describe "degnereate inputs" $ do
   it "single point diagram" $
     voronoiDiagram (NonEmpty.singleton $ Point2 1 (2 :: R))
     `shouldBe`
-    AllColinear () -- TODO
+    AllColinear undefined  -- TODO
   it "two point diagram" $
     voronoiDiagram (NonEmpty.fromList [Point2 1 (2 :: R), Point2 3 2])
     `shouldBe`
-    AllColinear () -- TODO
+    AllColinear undefined -- TODO
   it "multiple parallel point diagram" $
     voronoiDiagram (NonEmpty.fromList [ Point2 x (2 :: R)
                                       | x <- fromInteger <$> [1..10]
                                       ])
     `shouldBe`
-    AllColinear () -- TODO
+    AllColinear undefined -- TODO
 
              -- goldenWith [osp|data/test-with-ipe/golden/|]
   --            (ipeContentGolden { name = [osp|voronoi|] })
@@ -155,9 +155,9 @@ trivialVD = VoronoiDiagram $ LowerEnvelope vInfty (Seq.fromList [bv])
 
 testIpe            :: OsPath -> OsPath -> Spec
 testIpe inFp outFp = do
-    (points :: [Point 2 R :+ _]) <- runIO $ do
+    (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
       inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
-      readAllFrom inFp'
+      NonEmpty.fromList <$> readAllFrom inFp'
     let vd = voronoiDiagram $ (view core) <$> points
         vv = voronoiVertices $ (view core) <$> points
         out = [ iO' points

@@ -14,7 +14,6 @@ module HGeometry.LowerEnvelope.Connected.FromVertexForm
   ( fromVertexForm'
   ) where
 
-import           Control.Applicative
 import           Control.Lens
 import qualified Data.Foldable as F
 import           Data.Foldable1
@@ -32,8 +31,6 @@ import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
 import           HGeometry.Foldable.Sort
 import           HGeometry.Foldable.Util
-import           HGeometry.HalfLine
-import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line
 import           HGeometry.LowerEnvelope.Connected.Type
@@ -44,7 +41,6 @@ import           HGeometry.Properties
 import           HGeometry.Vector
 import qualified HGeometry.Vector as Vec
 import           HGeometry.Vector.NonEmpty.Util ()
-import           Hiraffe.Graph
 import           Witherable
 
 import           Debug.Trace

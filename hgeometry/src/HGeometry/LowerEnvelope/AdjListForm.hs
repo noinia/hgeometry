@@ -50,8 +50,9 @@ import           HGeometry.LowerEnvelope.VertexForm (IntersectionLine(..), inter
 import qualified HGeometry.LowerEnvelope.VertexForm as VertexForm
 import           HGeometry.Point
 import           HGeometry.Properties
-import qualified HGeometry.Sequence.Alternating as Alternating
 import           HGeometry.Vector.NonEmpty.Util ()
+import Data.Ord (comparing)
+import Data.Function (on)
 
 --------------------------------------------------------------------------------
 -- * Data type defining a lower envelope
@@ -96,9 +97,9 @@ fromVertexForm hs lEnv
     strips = coerce
            $ divideAndConquer1With (mergeAndDiscardBy cmpPlanes) NonEmpty.singleton hs
 
-withBisectors :: Plane_ plane r
-              => f plane -> Alternating.Alternating Set.Set plane (IntersectionLine r)
-withBisectors = undefined
+-- withBisectors :: Plane_ plane r
+--               => f plane -> Alternating.Alternating Set.Set plane (IntersectionLine r)
+-- withBisectors = undefined
 
 -- | Orders the planes from "left to right" (or from top to bottom) for nor non-vertical ones
 cmpPlanes      :: forall plane r. (Plane_ plane r, Ord r, Fractional r)
@@ -137,3 +138,56 @@ mergeAndDiscardBy cmp = go
     goB as bs = case NonEmpty.nonEmpty as of
                   Nothing  -> bs
                   Just as' -> F.toList $ goR as' bs
+
+
+--- >>> testOrdering (1,1) (1,4)
+-- Dominates
+testOrdering               :: (Int,Int) -> (Int,Int) -> XOrdering
+testOrdering (a,b) (a',b') = case a `compare` a' of
+                               LT -> XLT
+                               GT -> XGT
+                               EQ -> case b `compare` b' of
+                                       LT -> Dominates
+                                       GT -> Dominated
+                                       EQ -> XEQ
+
+answer       :: Ord a => NonEmpty (a,a) -> NonEmpty (a,a) -> NonEmpty (a,a)
+answer lA lB =
+  fmap NonEmpty.head . NonEmpty.groupBy1 ((==) `on` fst) . NonEmpty.sort $ lA <> lB
+
+-- >>> test
+-- True
+
+-- >>> mergeAndDiscardBy testOrdering listA listB
+-- (1,1) :| [(2,2),(3,1),(4,2),(5,2),(7,1)]
+--
+
+-- >>> answer listA listB
+-- (1,1) :| [(2,2),(3,1),(4,2),(5,2),(7,1)]
+test :: Bool
+test = testMerge listA listB
+
+testMerge      :: NonEmpty (Int,Int) -> NonEmpty (Int,Int) -> Bool
+testMerge lA lB = mergeAndDiscardBy testOrdering lA lB
+                  `shouldBe`
+                  answer lA lB
+
+
+shouldBe :: NonEmpty (Int, Int) -> NonEmpty (Int, Int) -> Bool
+shouldBe = (==)
+
+
+listA = NonEmpty.fromList $ [ (1,4)
+                            , (2,3)
+                            , (2,5)
+                            , (2,7)
+                            , (4,2)
+                            , (5,2)
+                            , (7,1)
+                            ]
+listB = NonEmpty.fromList $ [ (1,1)
+                            , (2,2)
+                            , (3,1)
+                            , (4,2)
+                            , (5,10)
+                            ]

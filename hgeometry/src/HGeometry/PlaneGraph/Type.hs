@@ -19,15 +19,14 @@ module HGeometry.PlaneGraph.Type
 import           Control.Lens hiding (holes, holesOf, (.=))
 import           Data.Coerce
 import           Data.Foldable1
+import           Data.YAML
 import           GHC.Generics (Generic)
 import           HGeometry.Box
-import           HGeometry.Ext
 import           HGeometry.PlaneGraph.Class
 import           HGeometry.Point
 import           HGeometry.Properties
 import           Hiraffe.PlanarGraph
 import qualified Hiraffe.PlanarGraph as PG
-
 --------------------------------------------------------------------------------
 -- * The PlaneGraph type
 
@@ -35,7 +34,7 @@ import qualified Hiraffe.PlanarGraph as PG
 newtype PlaneGraph s v e f =
     PlaneGraph (PlanarGraph s Primal v e f)
       deriving stock (Show,Eq,Generic)
-
+      deriving newtype (ToYAML,FromYAML)
 
 type instance NumType   (PlaneGraph s v e f) = NumType v
 type instance Dimension (PlaneGraph s v e f) = 2
@@ -97,13 +96,19 @@ instance DirGraph_ (PlaneGraph s v e f) where
 
 instance BidirGraph_ (PlaneGraph s v e f) where
   twinOf d = to $ const (PG.twin d)
+  getPositiveDart (PlaneGraph g) e = getPositiveDart g e
+
 
 instance Graph_ (PlaneGraph s v e f) where
   type GraphFromAdjListExtraConstraints (PlaneGraph s v e f) h = (f ~ (), Foldable1 h)
   fromAdjacencyLists = PlaneGraph . fromAdjacencyLists
 
+  neighboursOf u = _PlanarGraph.neighboursOf u
+  incidentEdgesOf u = _PlanarGraph.incidentEdgesOf u
+
 instance PlanarGraph_ (PlaneGraph s v e f) where
   type DualGraphOf (PlaneGraph s v e f) = PlanarGraph s Dual f e v
+
 
   dualGraph = dualGraph . coerce @_ @(PlanarGraph s Primal v e f)
 
@@ -129,7 +134,6 @@ instance ( Point_ v 2 r, Point_ v' 2 r'
 instance ( Point_ v 2 r
          , Ord r, Num r
          ) => IsBoxable (PlaneGraph s v e f)
-
 
 
   -- boundingBox = boundingBoxList' . F.toList . fmap (^._2.location) . vertices

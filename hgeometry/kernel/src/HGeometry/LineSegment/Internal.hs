@@ -26,14 +26,14 @@ import Data.Functor.Apply
 import Data.Kind (Type)
 import HGeometry.Box.Boxable
 import HGeometry.Intersection
-import HGeometry.Interval.Class
 import HGeometry.Interval
+import HGeometry.Interval.Class
 import HGeometry.Line.Class
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment.Class
 import HGeometry.Point
 import HGeometry.Properties (NumType, Dimension)
--- import HGeometry.Transformation
+import HGeometry.Transformation
 import HGeometry.Vector
 import Text.Read
 
@@ -339,13 +339,13 @@ onSegmentD q seg = onSegmentDWith f q seg
       Closed -> (<=)
 
 
--- instance ( DefaultTransformByConstraints (LineSegment endPoint point) d r
---          , Point_ point d r
---          , d > 0
---          ) => IsTransformable (LineSegment endPoint point)
-
-
-
+instance ( Point_ point d r
+         , IxValue (endPoint point) ~ point
+         , EndPoint_ (endPoint point)
+         , IsTransformable point
+         ) => IsTransformable (LineSegment endPoint point) where
+  transformBy t s = s&start %~ transformBy t
+                     &end   %~ transformBy t
 
 
   -- traverse1' f xs =

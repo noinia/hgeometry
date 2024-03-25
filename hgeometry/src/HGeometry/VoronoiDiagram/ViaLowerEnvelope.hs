@@ -22,21 +22,17 @@ module HGeometry.VoronoiDiagram.ViaLowerEnvelope
 import           Control.Lens
 import           Data.Default.Class
 import           Data.Foldable1
-import           Data.Sequence (Seq)
 import qualified Data.Set as Set
 import           HGeometry.Box
 import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Line.PointAndVector
 import           HGeometry.LowerEnvelope.AdjListForm
 import           HGeometry.LowerEnvelope.Naive (lowerEnvelopeVertexForm)
 import           HGeometry.LowerEnvelope.VertexForm (VertexForm, vertices')
 import           HGeometry.Point
 import           HGeometry.Properties
-import           HGeometry.Sequence.Alternating (Alternating)
-import           Hiraffe.Graph
 
 --------------------------------------------------------------------------------
 
@@ -112,17 +108,13 @@ voronoiVertices = map (projectPoint . fst)
 -- FIXME: get rid of the default point constraint
 -- FIXME: get rid of the ord point constraint
 
-
+-- | Computes the vertex form of the upper envelope. The z-coordinates are still flipped.
 upperEnvelopeVertexForm :: ( Plane_ plane r
                            , Ord r, Fractional r, Foldable f, Functor f, Ord plane
                            ) => f plane -> VertexForm plane
 upperEnvelopeVertexForm = lowerEnvelopeVertexForm . fmap flipZ
   where
     flipZ = over (hyperPlaneCoefficients.traverse) negate
-
--- FIXME: define this in some individual module
-
-
 
 
 --------------------------------------------------------------------------------

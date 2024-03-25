@@ -17,6 +17,7 @@ import           HGeometry.Matrix
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector
+import           HGeometry.Ext
 
 --------------------------------------------------------------------------------
 
@@ -125,6 +126,10 @@ instance ( Fractional r
       f u = let (u',x) = unsnoc u
             in u' ^/ x
   {-# INLINE transformBy #-}
+
+instance IsTransformable core => IsTransformable (core :+ extra) where
+  -- ^ transforms only the core.
+  transformBy t = over core (transformBy t)
 
 --------------------------------------------------------------------------------
 -- * Common transformations

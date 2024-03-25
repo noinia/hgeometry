@@ -24,6 +24,7 @@ import qualified Data.List as List
 import           Data.Proxy
 import           Data.Semigroup.Foldable
 import           Data.These
+import           Data.YAML
 import           Data.Zip
 import           GHC.Generics (Generic)
 import           GHC.TypeNats
@@ -100,6 +101,14 @@ instance HasComponents (Vector 1 r) (Vector 1 s) where
   {-# INLINE components #-}
 
 
+instance FromYAML r => FromYAML (Vector 1 r) where
+  -- node pos -> Parser
+  parseYAML node = withSeq "Vector1" f node
+    where
+      f = \case
+        [pos] -> Vector1 <$> parseYAML pos
+        _     -> failAtNode node "expected exactly 1 element"
+
 --------------------------------------------------------------------------------
 
 newtype instance Vector 2 r = MkVector2 (Linear.V2 r)
@@ -141,6 +150,13 @@ instance Semialign (Vector 2) where
 instance Zip (Vector 2) where
   zipWith f (Vector2 x y) (Vector2 x' y') = Vector2 (f x x') (f y y')
   {-# INLINE zipWith #-}
+
+instance FromYAML r => FromYAML (Vector 2 r) where
+  parseYAML node = withSeq "Vector2" f node
+    where
+      f = \case
+        [posX,posY] -> Vector2 <$> parseYAML posX <*> parseYAML posY
+        _           -> failAtNode node "expected exactly 2 elements"
 
 --------------------------------------------------------------------------------
 
@@ -184,6 +200,15 @@ instance Semialign (Vector 3) where
 instance Zip (Vector 3) where
   zipWith f (Vector3 x y z) (Vector3 x' y' z') = Vector3 (f x x') (f y y') (f z z')
   {-# INLINE zipWith #-}
+
+instance FromYAML r => FromYAML (Vector 3 r) where
+  -- node pos -> Parser
+  parseYAML node = withSeq "Vector3" f node
+    where
+      f = \case
+        [posX,posY,posZ] -> Vector3 <$> parseYAML posX <*> parseYAML posY <*> parseYAML posZ
+        _                -> failAtNode node "expected exactly 3 elements"
+
 
 -- | cross product
 cross                            :: Num r
@@ -234,6 +259,16 @@ instance Semialign (Vector 4) where
 instance Zip (Vector 4) where
   zipWith f (Vector4 x y z w) (Vector4 x' y' z' w') = Vector4 (f x x') (f y y') (f z z') (f w w')
   {-# INLINE zipWith #-}
+
+instance FromYAML r => FromYAML (Vector 4 r) where
+  -- node pos -> Parser
+  parseYAML node = withSeq "Vector4" f node
+    where
+      f = \case
+        [posX,posY,posZ,posW] ->
+          Vector4 <$> parseYAML posX <*> parseYAML posY <*> parseYAML posZ  <*> parseYAML posW
+        _                     -> failAtNode node "expected exactly 4 elements"
+
 
 --------------------------------------------------------------------------------
 -- * Linear Instances
@@ -286,3 +321,6 @@ instance ( HasComponents (Vector d r) (Vector d r)
       unwordsS = foldr (.) id . List.intersperse (showChar ' ')
 
 --------------------------------------------------------------------------------
+
+instance (ToYAML r, HasComponents (Vector d r) (Vector d r)) => ToYAML (Vector d r) where
+  toYAML = toYAML . toListOf components

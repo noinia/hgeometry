@@ -15,6 +15,14 @@
 module HGeometry.PlaneGraph.Class
   ( PlaneGraph_(..)
   -- , HasLocation(..)
+
+
+  , dartSegmentAt
+  , edgeSegmentAt
+  , dartSegments
+  , edgeSegments
+
+  , interiorFacePolygons
   ) where
 
 import Control.Lens
