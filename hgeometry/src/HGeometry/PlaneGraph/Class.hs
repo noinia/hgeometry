@@ -77,7 +77,7 @@ class ( PlanarGraph_ planeGraph
   -- | gets the id of the outer face
   --
   outerFaceId    :: planeGraph -> FaceIx planeGraph
-  outerFaceId ps = leftFace (outerFaceDart ps) ps
+  outerFaceId ps = ps^.leftFaceOf (outerFaceDart ps).asIndex
 
   -- | gets a dart incident to the outer face (in particular, that has the
   -- outerface on its left)

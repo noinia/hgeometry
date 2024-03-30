@@ -87,9 +87,9 @@ instance HasFaces (PlaneGraph s v e f) (PlaneGraph s v e f') where
   faces = _PlanarGraph.faces
 
 ----------------------------------------
-instance DirGraph_ (PlaneGraph s v e f) where
-  type DirGraphFromAdjListExtraConstraints (PlaneGraph s v e f) h = (f ~ (), Foldable1 h)
-  dirGraphFromAdjacencyLists = PlaneGraph . dirGraphFromAdjacencyLists
+instance DiGraph_ (PlaneGraph s v e f) where
+  type DiGraphFromAdjListExtraConstraints (PlaneGraph s v e f) h = (f ~ (), Foldable1 h)
+  diGraphFromAdjacencyLists = PlaneGraph . diGraphFromAdjacencyLists
   endPoints (PlaneGraph g) = endPoints g
   twinDartOf d = twinOf d . to Just
   outgoingDartsOf v = _PlanarGraph.outgoingDartsOf v
@@ -109,17 +109,16 @@ instance Graph_ (PlaneGraph s v e f) where
 instance PlanarGraph_ (PlaneGraph s v e f) where
   type DualGraphOf (PlaneGraph s v e f) = PlanarGraph s Dual f e v
 
-
   dualGraph = dualGraph . coerce @_ @(PlanarGraph s Primal v e f)
 
-  leftFace  d = leftFace d  . coerce @_ @(PlanarGraph s Primal v e f)
-  rightFace d = rightFace d . coerce @_ @(PlanarGraph s Primal v e f)
+  leftFaceOf  d = _PlanarGraph.leftFaceOf d
+  rightFaceOf d = _PlanarGraph.rightFaceOf d
 
-  nextEdge d = nextEdge d  . coerce @_ @(PlanarGraph s Primal v e f)
-  prevEdge d = prevEdge d  . coerce @_ @(PlanarGraph s Primal v e f)
+  nextDartOf d = _PlanarGraph.nextDartOf d
+  prevDartOf d = _PlanarGraph.prevDartOf d
 
-  boundaryDart f = boundaryDart f . coerce @_ @(PlanarGraph s Primal v e f)
-  boundary f = boundary f         . coerce @_ @(PlanarGraph s Primal v e f)
+  boundaryDartOf f = _PlanarGraph.boundaryDartOf f
+  boundaryDarts f = boundaryDarts f . coerce @_ @(PlanarGraph s Primal v e f)
 
 
 instance ( Point_ v 2 (NumType v)
