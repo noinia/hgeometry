@@ -125,7 +125,7 @@ drawDart gr d s = [ iO $ ipeLineSegment (offset s)
 
 offset s = translateBy theOffset s
   where
-    theOffset = signorm v
+    theOffset = negated $ signorm v
     v = perpendicularTo (supportingLine s) ^. direction
 
 
