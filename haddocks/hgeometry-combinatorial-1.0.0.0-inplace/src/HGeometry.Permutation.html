@@ -5,13 +5,13 @@
 </span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
 </span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
 </span><span id="line-7"></span><span class="hs-comment">--</span><span>
-</span><span id="line-8"></span><span class="hs-comment">-- Data type for representing a Permutation</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Data type for representing a non-empty Permutation</span><span>
 </span><span id="line-9"></span><span class="hs-comment">--</span><span>
 </span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.Permutation</span><span>
 </span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier">Permutation</span></a></span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier">Permutation</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#orbits"><span class="hs-identifier">orbits</span></a></span><span>
-</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Indexed.html#indices"><span class="hs-identifier">indices</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-0f3fd035821e0d3b71cdf91e4e4c32d86cdf43691417829ea65cfd226a1390e0/share/doc/html/src/Control.Lens.Indexed.html#indices"><span class="hs-identifier">indices</span></a></span><span>
 </span><span id="line-15"></span><span>
 </span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Orbit"><span class="hs-identifier">Orbit</span></a></span><span>
 </span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#elems"><span class="hs-identifier">elems</span></a></span><span>
@@ -26,33 +26,35 @@
 </span><span id="line-26"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-27"></span><span>
 </span><span id="line-28"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
-</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-0f3fd035821e0d3b71cdf91e4e4c32d86cdf43691417829ea65cfd226a1390e0/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
 </span><span id="line-30"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">forM</span></span><span class="hs-special">)</span><span>
 </span><span id="line-31"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad.ST</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">runST</span></span><span class="hs-special">)</span><span>
 </span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
-</span><span id="line-33"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">catMaybes</span></span><span class="hs-special">)</span><span>
-</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Traversable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">T</span></span><span>
-</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.html"><span class="hs-identifier">Data.Vector</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">V</span></span><span>
-</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Generic.html"><span class="hs-identifier">Data.Vector.Generic</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">GV</span></span><span>
-</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Unboxed.html"><span class="hs-identifier">Data.Vector.Unboxed</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">UV</span></span><span>
-</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Unboxed.Mutable.html"><span class="hs-identifier">Data.Vector.Unboxed.Mutable</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">UMV</span></span><span>
-</span><span id="line-39"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
-</span><span id="line-40"></span><span>
-</span><span id="line-41"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">catMaybes</span></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.html"><span class="hs-identifier">Data.Vector.NonEmpty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier">NonEmptyVector</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.html"><span class="hs-identifier">Data.Vector.NonEmpty</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmptyV</span></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Unboxed.html"><span class="hs-identifier">Data.Vector.Unboxed</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">UV</span></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Unboxed.Mutable.html"><span class="hs-identifier">Data.Vector.Unboxed.Mutable</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">UMV</span></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Vector.NonEmpty.Util.html"><span class="hs-identifier">HGeometry.Vector.NonEmpty.Util</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-42"></span><span>
-</span><span id="line-43"></span><span class="annot"><span class="hs-comment">-- | Orbits (Cycles) are represented by vectors</span></span><span>
-</span><span id="line-44"></span><span class="hs-keyword">type</span><span> </span><span id="Orbit"><span class="annot"><a href="HGeometry.Permutation.html#Orbit"><span class="hs-identifier hs-var">Orbit</span></a></span></span><span> </span><span id="local-6989586621679178126"><span class="annot"><a href="#local-6989586621679178126"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.html#Vector"><span class="hs-identifier hs-type">V.Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679178126"><span class="hs-identifier hs-type">a</span></a></span><span>
-</span><span id="line-45"></span><span>
-</span><span id="line-46"></span><span class="annot"><span class="hs-comment">-- | Cyclic representation of a permutation.</span></span><span>
-</span><span id="line-47"></span><span class="hs-keyword">data</span><span> </span><span id="Permutation"><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-var">Permutation</span></a></span></span><span> </span><span id="local-6989586621679177860"><span class="annot"><a href="#local-6989586621679177860"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Permutation"><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-var">Permutation</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_orbits"><span class="annot"><span class="annottext">forall a. Permutation a -&gt; Vector (Orbit a)
-</span><a href="HGeometry.Permutation.html#_orbits"><span class="hs-identifier hs-var hs-var">_orbits</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.html#Vector"><span class="hs-identifier hs-type">V.Vector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.html#Orbit"><span class="hs-identifier hs-type">Orbit</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679177860"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-48"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span id="_indexes"><span class="annot"><span class="annottext">forall a. Permutation a -&gt; Vector (Int, Int)
+</span><span id="line-43"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="annot"><span class="hs-comment">-- | Orbits (Cycles) are represented by vectors</span></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">type</span><span> </span><span id="Orbit"><span class="annot"><a href="HGeometry.Permutation.html#Orbit"><span class="hs-identifier hs-var">Orbit</span></a></span></span><span> </span><span id="local-6989586621679187550"><span class="annot"><a href="#local-6989586621679187550"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187550"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="annot"><span class="hs-comment">-- | Cyclic representation of a non-empty permutation.</span></span><span>
+</span><span id="line-49"></span><span class="hs-keyword">data</span><span> </span><span id="Permutation"><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-var">Permutation</span></a></span></span><span> </span><span id="local-6989586621679187304"><span class="annot"><a href="#local-6989586621679187304"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Permutation"><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-var">Permutation</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_orbits"><span class="annot"><span class="annottext">forall a. Permutation a -&gt; NonEmptyVector (Orbit a)
+</span><a href="HGeometry.Permutation.html#_orbits"><span class="hs-identifier hs-var hs-var">_orbits</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.html#Orbit"><span class="hs-identifier hs-type">Orbit</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187304"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>                                 </span><span class="hs-special">,</span><span> </span><span id="_indexes"><span class="annot"><span class="annottext">forall a. Permutation a -&gt; Vector (Int, Int)
 </span><a href="HGeometry.Permutation.html#_indexes"><span class="hs-identifier hs-var hs-var">_indexes</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Unboxed.Base.html#Vector"><span class="hs-identifier hs-type">UV.Vector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span>
-</span><span id="line-49"></span><span>                                               </span><span class="hs-comment">-- ^ idxes (fromEnum a) = (i,j)</span><span>
-</span><span id="line-50"></span><span>                                               </span><span class="hs-comment">-- implies that a is the j^th</span><span>
-</span><span id="line-51"></span><span>                                               </span><span class="hs-comment">-- item in the i^th orbit</span><span>
-</span><span id="line-52"></span><span>                                 </span><span class="hs-special">}</span><span>
-</span><span id="line-53"></span><span>                   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679178131"><span id="local-6989586621679178142"><span id="local-6989586621679178146"><span class="annot"><span class="annottext">Int -&gt; Permutation a -&gt; ShowS
+</span><span id="line-51"></span><span>                                               </span><span class="hs-comment">-- ^ idxes (fromEnum a) = (i,j)</span><span>
+</span><span id="line-52"></span><span>                                               </span><span class="hs-comment">-- implies that a is the j^th</span><span>
+</span><span id="line-53"></span><span>                                               </span><span class="hs-comment">-- item in the i^th orbit</span><span>
+</span><span id="line-54"></span><span>                                 </span><span class="hs-special">}</span><span>
+</span><span id="line-55"></span><span>                   </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679187555"><span id="local-6989586621679187566"><span id="local-6989586621679187570"><span class="annot"><span class="annottext">Int -&gt; Permutation a -&gt; ShowS
 [Permutation a] -&gt; ShowS
 Permutation a -&gt; String
 (Int -&gt; Permutation a -&gt; ShowS)
@@ -70,7 +72,7 @@ $cshow :: forall a. Show a =&gt; Permutation a -&gt; String
 show :: Permutation a -&gt; String
 $cshowList :: forall a. Show a =&gt; [Permutation a] -&gt; ShowS
 showList :: [Permutation a] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679178159"><span id="local-6989586621679178168"><span class="annot"><span class="annottext">Permutation a -&gt; Permutation a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679187583"><span id="local-6989586621679187592"><span class="annot"><span class="annottext">Permutation a -&gt; Permutation a -&gt; Bool
 (Permutation a -&gt; Permutation a -&gt; Bool)
 -&gt; (Permutation a -&gt; Permutation a -&gt; Bool) -&gt; Eq (Permutation a)
 forall a. Eq a =&gt; Permutation a -&gt; Permutation a -&gt; Bool
@@ -79,7 +81,7 @@ $c== :: forall a. Eq a =&gt; Permutation a -&gt; Permutation a -&gt; Bool
 == :: Permutation a -&gt; Permutation a -&gt; Bool
 $c/= :: forall a. Eq a =&gt; Permutation a -&gt; Permutation a -&gt; Bool
 /= :: Permutation a -&gt; Permutation a -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679178179"><span id="local-6989586621679178181"><span class="annot"><span class="annottext">(forall x. Permutation a -&gt; Rep (Permutation a) x)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679187603"><span id="local-6989586621679187605"><span class="annot"><span class="annottext">(forall x. Permutation a -&gt; Rep (Permutation a) x)
 -&gt; (forall x. Rep (Permutation a) x -&gt; Permutation a)
 -&gt; Generic (Permutation a)
 forall x. Rep (Permutation a) x -&gt; Permutation a
@@ -92,35 +94,129 @@ $cfrom :: forall a x. Permutation a -&gt; Rep (Permutation a) x
 from :: forall x. Permutation a -&gt; Rep (Permutation a) x
 $cto :: forall a x. Rep (Permutation a) x -&gt; Permutation a
 to :: forall x. Rep (Permutation a) x -&gt; Permutation a
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-54"></span><span>
-</span><span id="line-55"></span><span class="annot"><span class="hs-comment">-- | Lens to access the orbits of the permutation</span></span><span>
-</span><span id="line-56"></span><span id="local-6989586621679177891"><span id="local-6989586621679177892"><span class="annot"><a href="HGeometry.Permutation.html#orbits"><span class="hs-identifier hs-type">orbits</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Type.html#Lens"><span class="hs-identifier hs-type">Lens</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679177891"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679177892"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.html#Vector"><span class="hs-identifier hs-type">V.Vector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.html#Orbit"><span class="hs-identifier hs-type">Orbit</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679177891"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.html#Vector"><span class="hs-identifier hs-type">V.Vector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.html#Orbit"><span class="hs-identifier hs-type">Orbit</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679177892"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
-</span><span id="line-57"></span><span id="orbits"><span class="annot"><span class="annottext">orbits :: forall a b (f :: * -&gt; *).
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679187609"><span id="local-6989586621679187614"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; Permutation a -&gt; Permutation b)
+-&gt; (forall a b. a -&gt; Permutation b -&gt; Permutation a)
+-&gt; Functor Permutation
+forall a b. a -&gt; Permutation b -&gt; Permutation a
+forall a b. (a -&gt; b) -&gt; Permutation a -&gt; Permutation b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall a b. (a -&gt; b) -&gt; Permutation a -&gt; Permutation b
+fmap :: forall a b. (a -&gt; b) -&gt; Permutation a -&gt; Permutation b
+$c&lt;$ :: forall a b. a -&gt; Permutation b -&gt; Permutation a
+&lt;$ :: forall a b. a -&gt; Permutation b -&gt; Permutation a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679187620"><span id="local-6989586621679187626"><span id="local-6989586621679187634"><span id="local-6989586621679187639"><span id="local-6989586621679187643"><span id="local-6989586621679187646"><span id="local-6989586621679187649"><span id="local-6989586621679187652"><span id="local-6989586621679187655"><span id="local-6989586621679187658"><span id="local-6989586621679187661"><span id="local-6989586621679187665"><span id="local-6989586621679187668"><span id="local-6989586621679187673"><span id="local-6989586621679187678"><span id="local-6989586621679187683"><span id="local-6989586621679187688"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; Permutation m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Permutation a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Permutation a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Permutation a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Permutation a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Permutation a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Permutation a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Permutation a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Permutation a -&gt; a)
+-&gt; (forall a. Permutation a -&gt; [a])
+-&gt; (forall a. Permutation a -&gt; Bool)
+-&gt; (forall a. Permutation a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; Permutation a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; Permutation a -&gt; a)
+-&gt; (forall a. Ord a =&gt; Permutation a -&gt; a)
+-&gt; (forall a. Num a =&gt; Permutation a -&gt; a)
+-&gt; (forall a. Num a =&gt; Permutation a -&gt; a)
+-&gt; Foldable Permutation
+forall a. Eq a =&gt; a -&gt; Permutation a -&gt; Bool
+forall a. Num a =&gt; Permutation a -&gt; a
+forall a. Ord a =&gt; Permutation a -&gt; a
+forall m. Monoid m =&gt; Permutation m -&gt; m
+forall a. Permutation a -&gt; Bool
+forall a. Permutation a -&gt; Int
+forall a. Permutation a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; Permutation a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Permutation a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Permutation a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Permutation a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+$cfold :: forall m. Monoid m =&gt; Permutation m -&gt; m
+fold :: forall m. Monoid m =&gt; Permutation m -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Permutation a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Permutation a -&gt; m
+$cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Permutation a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Permutation a -&gt; m
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Permutation a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Permutation a -&gt; b
+$cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Permutation a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Permutation a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Permutation a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Permutation a -&gt; b
+$cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Permutation a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Permutation a -&gt; b
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Permutation a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Permutation a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Permutation a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Permutation a -&gt; a
+$ctoList :: forall a. Permutation a -&gt; [a]
+toList :: forall a. Permutation a -&gt; [a]
+$cnull :: forall a. Permutation a -&gt; Bool
+null :: forall a. Permutation a -&gt; Bool
+$clength :: forall a. Permutation a -&gt; Int
+length :: forall a. Permutation a -&gt; Int
+$celem :: forall a. Eq a =&gt; a -&gt; Permutation a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; Permutation a -&gt; Bool
+$cmaximum :: forall a. Ord a =&gt; Permutation a -&gt; a
+maximum :: forall a. Ord a =&gt; Permutation a -&gt; a
+$cminimum :: forall a. Ord a =&gt; Permutation a -&gt; a
+minimum :: forall a. Ord a =&gt; Permutation a -&gt; a
+$csum :: forall a. Num a =&gt; Permutation a -&gt; a
+sum :: forall a. Num a =&gt; Permutation a -&gt; a
+$cproduct :: forall a. Num a =&gt; Permutation a -&gt; a
+product :: forall a. Num a =&gt; Permutation a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="annot"><span class="hs-comment">-- | Lens to access the orbits of the permutation</span></span><span>
+</span><span id="line-58"></span><span id="local-6989586621679187363"><span id="local-6989586621679187364"><span class="annot"><a href="HGeometry.Permutation.html#orbits"><span class="hs-identifier hs-type">orbits</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-0f3fd035821e0d3b71cdf91e4e4c32d86cdf43691417829ea65cfd226a1390e0/share/doc/html/src/Control.Lens.Type.html#Lens"><span class="hs-identifier hs-type">Lens</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187363"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187364"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.html#Orbit"><span class="hs-identifier hs-type">Orbit</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187363"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.html#Orbit"><span class="hs-identifier hs-type">Orbit</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187364"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-59"></span><span id="orbits"><span class="annot"><span class="annottext">orbits :: forall a b (f :: * -&gt; *).
 Functor f =&gt;
-(Vector (Orbit a) -&gt; f (Vector (Orbit b)))
+(NonEmptyVector (Orbit a) -&gt; f (NonEmptyVector (Orbit b)))
 -&gt; Permutation a -&gt; f (Permutation b)
-</span><a href="HGeometry.Permutation.html#orbits"><span class="hs-identifier hs-var hs-var">orbits</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Permutation a -&gt; Vector (Orbit a))
--&gt; (Permutation a -&gt; Vector (Orbit b) -&gt; Permutation b)
+</span><a href="HGeometry.Permutation.html#orbits"><span class="hs-identifier hs-var hs-var">orbits</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Permutation a -&gt; NonEmptyVector (Orbit a))
+-&gt; (Permutation a -&gt; NonEmptyVector (Orbit b) -&gt; Permutation b)
 -&gt; Lens
      (Permutation a)
      (Permutation b)
-     (Vector (Orbit a))
-     (Vector (Orbit b))
+     (NonEmptyVector (Orbit a))
+     (NonEmptyVector (Orbit b))
 forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">Permutation a -&gt; Vector (Orbit a)
-forall a. Permutation a -&gt; Vector (Orbit a)
-</span><a href="HGeometry.Permutation.html#_orbits"><span class="hs-identifier hs-var">_orbits</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679178187"><span class="annot"><span class="annottext">Permutation a
-</span><a href="#local-6989586621679178187"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679178188"><span class="annot"><span class="annottext">Vector (Orbit b)
-</span><a href="#local-6989586621679178188"><span class="hs-identifier hs-var">os</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Permutation a
-</span><a href="#local-6989586621679178187"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#_orbits"><span class="hs-identifier hs-var">_orbits</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679178188"><span class="hs-identifier hs-type">os</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-58"></span><span>
-</span><span id="line-59"></span><span class="hs-comment">-- | Lens to access the indexes of the permutation.</span><span>
-</span><span id="line-60"></span><span class="hs-comment">--</span><span>
-</span><span id="line-61"></span><span class="hs-comment">-- idxes (fromEnum a) = (i,j) implies that a is the j^th item in the</span><span>
-</span><span id="line-62"></span><span class="hs-comment">-- i^th orbit</span><span>
-</span><span id="line-63"></span><span id="local-6989586621679177901"><span class="annot"><a href="HGeometry.Permutation.html#indexes"><span class="hs-identifier hs-type">indexes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679177901"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Unboxed.Base.html#Vector"><span class="hs-identifier hs-type">UV.Vector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span>
-</span><span id="line-64"></span><span id="indexes"><span class="annot"><span class="annottext">indexes :: forall a (f :: * -&gt; *).
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-0f3fd035821e0d3b71cdf91e4e4c32d86cdf43691417829ea65cfd226a1390e0/share/doc/html/src/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">Permutation a -&gt; NonEmptyVector (Orbit a)
+forall a. Permutation a -&gt; NonEmptyVector (Orbit a)
+</span><a href="HGeometry.Permutation.html#_orbits"><span class="hs-identifier hs-var">_orbits</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679187696"><span class="annot"><span class="annottext">Permutation a
+</span><a href="#local-6989586621679187696"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679187697"><span class="annot"><span class="annottext">NonEmptyVector (Orbit b)
+</span><a href="#local-6989586621679187697"><span class="hs-identifier hs-var">os</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Permutation a
+</span><a href="#local-6989586621679187696"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#_orbits"><span class="hs-identifier hs-var">_orbits</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679187697"><span class="hs-identifier hs-type">os</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- | Lens to access the indexes of the permutation.</span><span>
+</span><span id="line-62"></span><span class="hs-comment">--</span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- idxes (fromEnum a) = (i,j) implies that a is the j^th item in the</span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- i^th orbit</span><span>
+</span><span id="line-65"></span><span id="local-6989586621679187373"><span class="annot"><a href="HGeometry.Permutation.html#indexes"><span class="hs-identifier hs-type">indexes</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-0f3fd035821e0d3b71cdf91e4e4c32d86cdf43691417829ea65cfd226a1390e0/share/doc/html/src/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187373"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Unboxed.Base.html#Vector"><span class="hs-identifier hs-type">UV.Vector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span>
+</span><span id="line-66"></span><span id="indexes"><span class="annot"><span class="annottext">indexes :: forall a (f :: * -&gt; *).
 Functor f =&gt;
 (Vector (Int, Int) -&gt; f (Vector (Int, Int)))
 -&gt; Permutation a -&gt; f (Permutation a)
@@ -132,132 +228,122 @@ Functor f =&gt;
      (Vector (Int, Int))
      (Vector (Int, Int))
 forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">Permutation a -&gt; Vector (Int, Int)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-0f3fd035821e0d3b71cdf91e4e4c32d86cdf43691417829ea65cfd226a1390e0/share/doc/html/src/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">Permutation a -&gt; Vector (Int, Int)
 forall a. Permutation a -&gt; Vector (Int, Int)
-</span><a href="HGeometry.Permutation.html#_indexes"><span class="hs-identifier hs-var">_indexes</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679178193"><span class="annot"><span class="annottext">Permutation a
-</span><a href="#local-6989586621679178193"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679178194"><span class="annot"><span class="annottext">Vector (Int, Int)
-</span><a href="#local-6989586621679178194"><span class="hs-identifier hs-var">ixs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Permutation a
-</span><a href="#local-6989586621679178193"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#_indexes"><span class="hs-identifier hs-var">_indexes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679178194"><span class="hs-identifier hs-type">ixs</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-65"></span><span>
-</span><span id="line-66"></span><span>
-</span><span id="line-67"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679177922"><span id="local-6989586621679178197"><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679177922"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679177922"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><a href="HGeometry.Permutation.html#_indexes"><span class="hs-identifier hs-var">_indexes</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679187702"><span class="annot"><span class="annottext">Permutation a
+</span><a href="#local-6989586621679187702"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679187703"><span class="annot"><span class="annottext">Vector (Int, Int)
+</span><a href="#local-6989586621679187703"><span class="hs-identifier hs-var">ixs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Permutation a
+</span><a href="#local-6989586621679187702"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#_indexes"><span class="hs-identifier hs-var">_indexes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679187703"><span class="hs-identifier hs-type">ixs</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-67"></span><span>
 </span><span id="line-68"></span><span>
-</span><span id="line-69"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679178220"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-70"></span><span>  </span><span id="local-6989586621679178226"><span class="annot"><span class="annottext">fmap :: forall a b. (a -&gt; b) -&gt; Permutation a -&gt; Permutation b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; Permutation a -&gt; Permutation b
-forall (t :: * -&gt; *) a b. Traversable t =&gt; (a -&gt; b) -&gt; t a -&gt; t b
-</span><span class="hs-identifier hs-var">T.fmapDefault</span></span><span>
-</span><span id="line-71"></span><span>
-</span><span id="line-72"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679178229"><span id="local-6989586621679178236"><span id="local-6989586621679178241"><span id="local-6989586621679178244"><span id="local-6989586621679178247"><span id="local-6989586621679178250"><span id="local-6989586621679178253"><span id="local-6989586621679178256"><span id="local-6989586621679178259"><span id="local-6989586621679178262"><span id="local-6989586621679178265"><span id="local-6989586621679178268"><span id="local-6989586621679178273"><span id="local-6989586621679178278"><span id="local-6989586621679178283"><span id="local-6989586621679178288"><span class="annot"><span class="hs-identifier hs-type">F.Foldable</span></span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-73"></span><span>  </span><span id="local-6989586621679178296"><span class="annot"><span class="annottext">foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Permutation a -&gt; m
-</span><a href="#local-6989586621679178296"><span class="hs-identifier hs-var hs-var hs-var hs-var">foldMap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; Permutation a -&gt; m
-forall (t :: * -&gt; *) m a.
-(Traversable t, Monoid m) =&gt;
-(a -&gt; m) -&gt; t a -&gt; m
-</span><span class="hs-identifier hs-var">T.foldMapDefault</span></span><span>
-</span><span id="line-74"></span><span>
-</span><span id="line-75"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679178305"><span id="local-6989586621679178310"><span id="local-6989586621679178315"><span class="annot"><span class="hs-identifier hs-type">T.Traversable</span></span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-76"></span><span>  </span><span id="local-6989586621679178329"><span class="annot"><span class="annottext">traverse :: forall (f :: * -&gt; *) a b.
+</span><span id="line-69"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679187394"><span id="local-6989586621679187706"><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679187394"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187394"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679187733"><span id="local-6989586621679187739"><span id="local-6989586621679187744"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-72"></span><span>  </span><span id="local-6989586621679187758"><span class="annot"><span class="annottext">traverse :: forall (f :: * -&gt; *) a b.
 Applicative f =&gt;
 (a -&gt; f b) -&gt; Permutation a -&gt; f (Permutation b)
-</span><a href="#local-6989586621679178329"><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse</span></a></span></span><span> </span><span id="local-6989586621679178331"><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679178331"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span id="local-6989586621679178332"><span class="annot"><span class="annottext">Vector (Orbit a)
-</span><a href="#local-6989586621679178332"><span class="hs-identifier hs-var">os</span></a></span></span><span> </span><span id="local-6989586621679178333"><span class="annot"><span class="annottext">Vector (Int, Int)
-</span><a href="#local-6989586621679178333"><span class="hs-identifier hs-var">is</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Vector (Orbit b) -&gt; Vector (Int, Int) -&gt; Permutation b)
--&gt; Vector (Int, Int) -&gt; Vector (Orbit b) -&gt; Permutation b
+</span><a href="#local-6989586621679187758"><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse</span></a></span></span><span> </span><span id="local-6989586621679187760"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679187760"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span id="local-6989586621679187761"><span class="annot"><span class="annottext">NonEmptyVector (Orbit a)
+</span><a href="#local-6989586621679187761"><span class="hs-identifier hs-var">os</span></a></span></span><span> </span><span id="local-6989586621679187762"><span class="annot"><span class="annottext">Vector (Int, Int)
+</span><a href="#local-6989586621679187762"><span class="hs-identifier hs-var">is</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(NonEmptyVector (Orbit b) -&gt; Vector (Int, Int) -&gt; Permutation b)
+-&gt; Vector (Int, Int) -&gt; NonEmptyVector (Orbit b) -&gt; Permutation b
 forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
-</span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">Vector (Orbit b) -&gt; Vector (Int, Int) -&gt; Permutation b
-forall a. Vector (Orbit a) -&gt; Vector (Int, Int) -&gt; Permutation a
+</span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector (Orbit b) -&gt; Vector (Int, Int) -&gt; Permutation b
+forall a.
+NonEmptyVector (Orbit a) -&gt; Vector (Int, Int) -&gt; Permutation a
 </span><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-var">Permutation</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (Int, Int)
-</span><a href="#local-6989586621679178333"><span class="hs-identifier hs-var">is</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector (Orbit b) -&gt; Permutation b)
--&gt; f (Vector (Orbit b)) -&gt; f (Permutation b)
+</span><a href="#local-6989586621679187762"><span class="hs-identifier hs-var">is</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmptyVector (Orbit b) -&gt; Permutation b)
+-&gt; f (NonEmptyVector (Orbit b)) -&gt; f (Permutation b)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Orbit a -&gt; f (Orbit b))
--&gt; Vector (Orbit a) -&gt; f (Vector (Orbit b))
+-&gt; NonEmptyVector (Orbit a) -&gt; f (NonEmptyVector (Orbit b))
 forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
 (a -&gt; f b) -&gt; t a -&gt; f (t b)
 forall (f :: * -&gt; *) a b.
 Applicative f =&gt;
-(a -&gt; f b) -&gt; Vector a -&gt; f (Vector b)
-</span><span class="hs-identifier hs-var">T.traverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; Orbit a -&gt; f (Orbit b)
+(a -&gt; f b) -&gt; NonEmptyVector a -&gt; f (NonEmptyVector b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; Orbit a -&gt; f (Orbit b)
 forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
 (Traversable t, Applicative f) =&gt;
 (a -&gt; f b) -&gt; t a -&gt; f (t b)
 forall (f :: * -&gt; *) a b.
 Applicative f =&gt;
-(a -&gt; f b) -&gt; Vector a -&gt; f (Vector b)
-</span><span class="hs-identifier hs-var">T.traverse</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679178331"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector (Orbit a)
-</span><a href="#local-6989586621679178332"><span class="hs-identifier hs-var">os</span></a></span><span>
-</span><span id="line-77"></span><span>
-</span><span id="line-78"></span><span class="annot"><span class="hs-comment">-- | Get the elements of the permutation</span></span><span>
-</span><span id="line-79"></span><span id="local-6989586621679177984"><span class="annot"><a href="HGeometry.Permutation.html#elems"><span class="hs-identifier hs-type">elems</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679177984"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.html#Vector"><span class="hs-identifier hs-type">V.Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679177984"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-80"></span><span id="elems"><span class="annot"><span class="annottext">elems :: forall a. Permutation a -&gt; Vector a
-</span><a href="HGeometry.Permutation.html#elems"><span class="hs-identifier hs-var hs-var">elems</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Vector a] -&gt; Vector a
-forall (v :: * -&gt; *) a. Vector v a =&gt; [v a] -&gt; v a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Generic.html#concat"><span class="hs-identifier hs-var">GV.concat</span></a></span><span> </span><span class="annot"><span class="annottext">([Vector a] -&gt; Vector a)
--&gt; (Permutation a -&gt; [Vector a]) -&gt; Permutation a -&gt; Vector a
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Vector (Vector a) -&gt; [Vector a]
-forall (v :: * -&gt; *) a. Vector v a =&gt; v a -&gt; [a]
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Generic.html#toList"><span class="hs-identifier hs-var">GV.toList</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector (Vector a) -&gt; [Vector a])
--&gt; (Permutation a -&gt; Vector (Vector a))
+(a -&gt; f b) -&gt; NonEmptyVector a -&gt; f (NonEmptyVector b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679187760"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector (Orbit a)
+</span><a href="#local-6989586621679187761"><span class="hs-identifier hs-var">os</span></a></span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="annot"><span class="hs-comment">-- | Get the elements of the permutation</span></span><span>
+</span><span id="line-75"></span><span id="local-6989586621679187419"><span class="annot"><a href="HGeometry.Permutation.html#elems"><span class="hs-identifier hs-type">elems</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187419"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187419"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-76"></span><span id="elems"><span class="annot"><span class="annottext">elems :: forall a. Permutation a -&gt; NonEmptyVector a
+</span><a href="HGeometry.Permutation.html#elems"><span class="hs-identifier hs-var hs-var">elems</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(NonEmptyVector a -&gt; NonEmptyVector a)
+-&gt; NonEmptyVector (NonEmptyVector a) -&gt; NonEmptyVector a
+forall a b.
+(a -&gt; NonEmptyVector b) -&gt; NonEmptyVector a -&gt; NonEmptyVector b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.html#concatMap"><span class="hs-identifier hs-var">NonEmptyV.concatMap</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; NonEmptyVector a
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span> </span><span class="annot"><span class="annottext">(NonEmptyVector (NonEmptyVector a) -&gt; NonEmptyVector a)
+-&gt; (Permutation a -&gt; NonEmptyVector (NonEmptyVector a))
 -&gt; Permutation a
--&gt; [Vector a]
+-&gt; NonEmptyVector a
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Permutation a -&gt; Vector (Vector a)
-forall a. Permutation a -&gt; Vector (Orbit a)
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Permutation a -&gt; NonEmptyVector (NonEmptyVector a)
+forall a. Permutation a -&gt; NonEmptyVector (Orbit a)
 </span><a href="HGeometry.Permutation.html#_orbits"><span class="hs-identifier hs-var">_orbits</span></a></span><span>
-</span><span id="line-81"></span><span>
-</span><span id="line-82"></span><span class="hs-comment">-- | Get the size of a permutation</span><span>
-</span><span id="line-83"></span><span class="hs-comment">--</span><span>
-</span><span id="line-84"></span><span class="hs-comment">-- running time: \(O(1)\)</span><span>
-</span><span id="line-85"></span><span id="local-6989586621679178342"><span class="annot"><a href="HGeometry.Permutation.html#size"><span class="hs-identifier hs-type">size</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679178342"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span></span><span>
-</span><span id="line-86"></span><span id="size"><span class="annot"><span class="annottext">size :: forall a. Permutation a -&gt; Int
-</span><a href="HGeometry.Permutation.html#size"><span class="hs-identifier hs-var hs-var">size</span></a></span></span><span> </span><span id="local-6989586621679178349"><span class="annot"><span class="annottext">Permutation a
-</span><a href="#local-6989586621679178349"><span class="hs-identifier hs-var">perm</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector (Int, Int) -&gt; Int
-forall (v :: * -&gt; *) a. Vector v a =&gt; v a -&gt; Int
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Generic.html#length"><span class="hs-identifier hs-var">GV.length</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Permutation a
-</span><a href="#local-6989586621679178349"><span class="hs-identifier hs-var">perm</span></a></span><span class="annot"><span class="annottext">Permutation a
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- | Get the size of a permutation</span><span>
+</span><span id="line-79"></span><span class="hs-comment">--</span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- running time: \(O(1)\)</span><span>
+</span><span id="line-81"></span><span id="local-6989586621679187768"><span class="annot"><a href="HGeometry.Permutation.html#size"><span class="hs-identifier hs-type">size</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187768"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span></span><span>
+</span><span id="line-82"></span><span id="size"><span class="annot"><span class="annottext">size :: forall a. Permutation a -&gt; Int
+</span><a href="HGeometry.Permutation.html#size"><span class="hs-identifier hs-var hs-var">size</span></a></span></span><span> </span><span id="local-6989586621679187774"><span class="annot"><span class="annottext">Permutation a
+</span><a href="#local-6989586621679187774"><span class="hs-identifier hs-var">perm</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector (Int, Int) -&gt; Int
+forall a. Unbox a =&gt; Vector a -&gt; Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Unboxed.html#length"><span class="hs-identifier hs-var">UV.length</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Permutation a
+</span><a href="#local-6989586621679187774"><span class="hs-identifier hs-var">perm</span></a></span><span class="annot"><span class="annottext">Permutation a
 -&gt; Getting (Vector (Int, Int)) (Permutation a) (Vector (Int, Int))
 -&gt; Vector (Int, Int)
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector (Int, Int)) (Permutation a) (Vector (Int, Int))
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-0f3fd035821e0d3b71cdf91e4e4c32d86cdf43691417829ea65cfd226a1390e0/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector (Int, Int)) (Permutation a) (Vector (Int, Int))
 forall a (f :: * -&gt; *).
 Functor f =&gt;
 (Vector (Int, Int) -&gt; f (Vector (Int, Int)))
 -&gt; Permutation a -&gt; f (Permutation a)
 </span><a href="HGeometry.Permutation.html#indexes"><span class="hs-identifier hs-var">indexes</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-87"></span><span>
-</span><span id="line-88"></span><span class="annot"><span class="hs-comment">-- | The cycle containing a given item</span></span><span>
-</span><span id="line-89"></span><span id="local-6989586621679178005"><span class="annot"><a href="HGeometry.Permutation.html#cycleOf"><span class="hs-identifier hs-type">cycleOf</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="annot"><a href="#local-6989586621679178005"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679178005"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679178005"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Orbit"><span class="hs-identifier hs-type">Orbit</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679178005"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-90"></span><span id="cycleOf"><span class="annot"><span class="annottext">cycleOf :: forall a. Enum a =&gt; Permutation a -&gt; a -&gt; Orbit a
-</span><a href="HGeometry.Permutation.html#cycleOf"><span class="hs-identifier hs-var hs-var">cycleOf</span></a></span></span><span> </span><span id="local-6989586621679178376"><span class="annot"><span class="annottext">Permutation a
-</span><a href="#local-6989586621679178376"><span class="hs-identifier hs-var">perm</span></a></span></span><span> </span><span id="local-6989586621679178377"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679178377"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Permutation a
-</span><a href="#local-6989586621679178376"><span class="hs-identifier hs-var">perm</span></a></span><span class="annot"><span class="annottext">Permutation a
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span class="annot"><span class="hs-comment">-- | The cycle containing a given item</span></span><span>
+</span><span id="line-85"></span><span id="local-6989586621679187434"><span class="annot"><a href="HGeometry.Permutation.html#cycleOf"><span class="hs-identifier hs-type">cycleOf</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="annot"><a href="#local-6989586621679187434"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187434"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679187434"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Orbit"><span class="hs-identifier hs-type">Orbit</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187434"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-86"></span><span id="cycleOf"><span class="annot"><span class="annottext">cycleOf :: forall a. Enum a =&gt; Permutation a -&gt; a -&gt; Orbit a
+</span><a href="HGeometry.Permutation.html#cycleOf"><span class="hs-identifier hs-var hs-var">cycleOf</span></a></span></span><span> </span><span id="local-6989586621679187801"><span class="annot"><span class="annottext">Permutation a
+</span><a href="#local-6989586621679187801"><span class="hs-identifier hs-var">perm</span></a></span></span><span> </span><span id="local-6989586621679187802"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679187802"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Permutation a
+</span><a href="#local-6989586621679187801"><span class="hs-identifier hs-var">perm</span></a></span><span class="annot"><span class="annottext">Permutation a
 -&gt; Getting (Endo (Orbit a)) (Permutation a) (Orbit a) -&gt; Orbit a
 forall s a. HasCallStack =&gt; s -&gt; Getting (Endo a) s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Fold.html#%5E%3F%21"><span class="hs-operator hs-var">^?!</span></a></span><span class="annot"><span class="annottext">(Vector (Orbit a) -&gt; Const (Endo (Orbit a)) (Vector (Orbit a)))
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-0f3fd035821e0d3b71cdf91e4e4c32d86cdf43691417829ea65cfd226a1390e0/share/doc/html/src/Control.Lens.Fold.html#%5E%3F%21"><span class="hs-operator hs-var">^?!</span></a></span><span class="annot"><span class="annottext">(NonEmptyVector (Orbit a)
+ -&gt; Const (Endo (Orbit a)) (NonEmptyVector (Orbit a)))
 -&gt; Permutation a -&gt; Const (Endo (Orbit a)) (Permutation a)
 forall a b (f :: * -&gt; *).
 Functor f =&gt;
-(Vector (Orbit a) -&gt; f (Vector (Orbit b)))
+(NonEmptyVector (Orbit a) -&gt; f (NonEmptyVector (Orbit b)))
 -&gt; Permutation a -&gt; f (Permutation b)
-</span><a href="HGeometry.Permutation.html#orbits"><span class="hs-identifier hs-var">orbits</span></a></span><span class="annot"><span class="annottext">((Vector (Orbit a) -&gt; Const (Endo (Orbit a)) (Vector (Orbit a)))
+</span><a href="HGeometry.Permutation.html#orbits"><span class="hs-identifier hs-var">orbits</span></a></span><span class="annot"><span class="annottext">((NonEmptyVector (Orbit a)
+  -&gt; Const (Endo (Orbit a)) (NonEmptyVector (Orbit a)))
  -&gt; Permutation a -&gt; Const (Endo (Orbit a)) (Permutation a))
 -&gt; ((Orbit a -&gt; Const (Endo (Orbit a)) (Orbit a))
-    -&gt; Vector (Orbit a) -&gt; Const (Endo (Orbit a)) (Vector (Orbit a)))
+    -&gt; NonEmptyVector (Orbit a)
+    -&gt; Const (Endo (Orbit a)) (NonEmptyVector (Orbit a)))
 -&gt; Getting (Endo (Orbit a)) (Permutation a) (Orbit a)
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">Index (Vector (Orbit a))
--&gt; Traversal' (Vector (Orbit a)) (IxValue (Vector (Orbit a)))
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">Index (NonEmptyVector (Orbit a))
+-&gt; Traversal'
+     (NonEmptyVector (Orbit a)) (IxValue (NonEmptyVector (Orbit a)))
 forall m. Ixed m =&gt; Index m -&gt; Traversal' m (IxValue m)
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.At.html#ix"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Permutation a
-</span><a href="#local-6989586621679178376"><span class="hs-identifier hs-var">perm</span></a></span><span class="annot"><span class="annottext">Permutation a -&gt; Getting (Endo Int) (Permutation a) Int -&gt; Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-0f3fd035821e0d3b71cdf91e4e4c32d86cdf43691417829ea65cfd226a1390e0/share/doc/html/src/Control.Lens.At.html#ix"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Permutation a
+</span><a href="#local-6989586621679187801"><span class="hs-identifier hs-var">perm</span></a></span><span class="annot"><span class="annottext">Permutation a -&gt; Getting (Endo Int) (Permutation a) Int -&gt; Int
 forall s a. HasCallStack =&gt; s -&gt; Getting (Endo a) s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Fold.html#%5E%3F%21"><span class="hs-operator hs-var">^?!</span></a></span><span class="annot"><span class="annottext">(Vector (Int, Int) -&gt; Const (Endo Int) (Vector (Int, Int)))
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-0f3fd035821e0d3b71cdf91e4e4c32d86cdf43691417829ea65cfd226a1390e0/share/doc/html/src/Control.Lens.Fold.html#%5E%3F%21"><span class="hs-operator hs-var">^?!</span></a></span><span class="annot"><span class="annottext">(Vector (Int, Int) -&gt; Const (Endo Int) (Vector (Int, Int)))
 -&gt; Permutation a -&gt; Const (Endo Int) (Permutation a)
 forall a (f :: * -&gt; *).
 Functor f =&gt;
@@ -272,10 +358,10 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">Index (Vector (Int, Int))
 -&gt; Traversal' (Vector (Int, Int)) (IxValue (Vector (Int, Int)))
 forall m. Ixed m =&gt; Index m -&gt; Traversal' m (IxValue m)
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.At.html#ix"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-0f3fd035821e0d3b71cdf91e4e4c32d86cdf43691417829ea65cfd226a1390e0/share/doc/html/src/Control.Lens.At.html#ix"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Int
 forall a. Enum a =&gt; a -&gt; Int
 </span><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679178377"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">(((Int, Int) -&gt; Const (Endo Int) (Int, Int))
+</span><a href="#local-6989586621679187802"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">(((Int, Int) -&gt; Const (Endo Int) (Int, Int))
  -&gt; Vector (Int, Int) -&gt; Const (Endo Int) (Vector (Int, Int)))
 -&gt; ((Int -&gt; Const (Endo Int) Int)
     -&gt; (Int, Int) -&gt; Const (Endo Int) (Int, Int))
@@ -287,69 +373,65 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 -&gt; (Int, Int) -&gt; Const (Endo Int) (Int, Int)
 forall s t a b. Field1 s t a b =&gt; Lens s t a b
 Lens (Int, Int) (Int, Int) Int Int
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Tuple.html#_1"><span class="hs-identifier hs-var">_1</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-91"></span><span>
-</span><span id="line-92"></span><span>
-</span><span id="line-93"></span><span class="annot"><span class="hs-comment">-- | Next item in a cyclic permutation</span></span><span>
-</span><span id="line-94"></span><span id="local-6989586621679178029"><span id="local-6989586621679178030"><span class="annot"><a href="HGeometry.Permutation.html#next"><span class="hs-identifier hs-type">next</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Generic.Base.html#Vector"><span class="hs-identifier hs-type">GV.Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679178029"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679178030"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679178029"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679178030"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679178030"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
-</span><span id="line-95"></span><span id="next"><span class="annot"><span class="annottext">next :: forall (v :: * -&gt; *) a. Vector v a =&gt; v a -&gt; Int -&gt; a
-</span><a href="HGeometry.Permutation.html#next"><span class="hs-identifier hs-var hs-var">next</span></a></span></span><span> </span><span id="local-6989586621679178392"><span class="annot"><span class="annottext">v a
-</span><a href="#local-6989586621679178392"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679178393"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178393"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679178394"><span class="annot"><span class="annottext">n :: Int
-</span><a href="#local-6989586621679178394"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">v a -&gt; Int
-forall (v :: * -&gt; *) a. Vector v a =&gt; v a -&gt; Int
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Generic.html#length"><span class="hs-identifier hs-var">GV.length</span></a></span><span> </span><span class="annot"><span class="annottext">v a
-</span><a href="#local-6989586621679178392"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">v a
-</span><a href="#local-6989586621679178392"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">v a -&gt; Int -&gt; a
-forall (v :: * -&gt; *) a.
-(HasCallStack, Vector v a) =&gt;
-v a -&gt; Int -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Generic.html#%21"><span class="hs-operator hs-var">GV.!</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178393"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-0f3fd035821e0d3b71cdf91e4e4c32d86cdf43691417829ea65cfd226a1390e0/share/doc/html/src/Control.Lens.Tuple.html#_1"><span class="hs-identifier hs-var">_1</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span class="annot"><span class="hs-comment">-- | Next item in a cyclic permutation</span></span><span>
+</span><span id="line-90"></span><span id="local-6989586621679187458"><span class="annot"><a href="HGeometry.Permutation.html#next"><span class="hs-identifier hs-type">next</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187458"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679187458"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-91"></span><span id="next"><span class="annot"><span class="annottext">next :: forall a. NonEmptyVector a -&gt; Int -&gt; a
+</span><a href="HGeometry.Permutation.html#next"><span class="hs-identifier hs-var hs-var">next</span></a></span></span><span> </span><span id="local-6989586621679187812"><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679187812"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679187813"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679187813"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679187814"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679187814"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; Int
+forall a. NonEmptyVector a -&gt; Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.html#length"><span class="hs-identifier hs-var">NonEmptyV.length</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679187812"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679187812"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; Int -&gt; a
+forall a. NonEmptyVector a -&gt; Int -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.html#%21"><span class="hs-operator hs-var">NonEmptyV.!</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679187813"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Integral a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">`mod`</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178394"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-96"></span><span>
-</span><span id="line-97"></span><span class="annot"><span class="hs-comment">-- | Previous item in a cyclic permutation</span></span><span>
-</span><span id="line-98"></span><span id="local-6989586621679178398"><span id="local-6989586621679178399"><span class="annot"><a href="HGeometry.Permutation.html#previous"><span class="hs-identifier hs-type">previous</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Generic.Base.html#Vector"><span class="hs-identifier hs-type">GV.Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679178398"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679178399"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679178398"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679178399"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679178399"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
-</span><span id="line-99"></span><span id="previous"><span class="annot"><span class="annottext">previous :: forall (v :: * -&gt; *) a. Vector v a =&gt; v a -&gt; Int -&gt; a
-</span><a href="HGeometry.Permutation.html#previous"><span class="hs-identifier hs-var hs-var">previous</span></a></span></span><span> </span><span id="local-6989586621679178408"><span class="annot"><span class="annottext">v a
-</span><a href="#local-6989586621679178408"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679178409"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178409"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679178410"><span class="annot"><span class="annottext">n :: Int
-</span><a href="#local-6989586621679178410"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">v a -&gt; Int
-forall (v :: * -&gt; *) a. Vector v a =&gt; v a -&gt; Int
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Generic.html#length"><span class="hs-identifier hs-var">GV.length</span></a></span><span> </span><span class="annot"><span class="annottext">v a
-</span><a href="#local-6989586621679178408"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">v a
-</span><a href="#local-6989586621679178408"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">v a -&gt; Int -&gt; a
-forall (v :: * -&gt; *) a.
-(HasCallStack, Vector v a) =&gt;
-v a -&gt; Int -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Generic.html#%21"><span class="hs-operator hs-var">GV.!</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178409"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679187814"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span class="annot"><span class="hs-comment">-- | Previous item in a cyclic permutation</span></span><span>
+</span><span id="line-94"></span><span id="local-6989586621679187819"><span class="annot"><a href="HGeometry.Permutation.html#previous"><span class="hs-identifier hs-type">previous</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187819"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679187819"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-95"></span><span id="previous"><span class="annot"><span class="annottext">previous :: forall a. NonEmptyVector a -&gt; Int -&gt; a
+</span><a href="HGeometry.Permutation.html#previous"><span class="hs-identifier hs-var hs-var">previous</span></a></span></span><span> </span><span id="local-6989586621679187823"><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679187823"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679187824"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679187824"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679187825"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679187825"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; Int
+forall a. NonEmptyVector a -&gt; Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.html#length"><span class="hs-identifier hs-var">NonEmptyV.length</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679187823"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679187823"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; Int -&gt; a
+forall a. NonEmptyVector a -&gt; Int -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.html#%21"><span class="hs-operator hs-var">NonEmptyV.!</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679187824"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Integral a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">`mod`</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178410"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-100"></span><span>
-</span><span id="line-101"></span><span class="hs-comment">-- | Lookup the indices of an element, i.e. in which orbit the item is, and the</span><span>
-</span><span id="line-102"></span><span class="hs-comment">-- index within the orbit.</span><span>
-</span><span id="line-103"></span><span class="hs-comment">--</span><span>
-</span><span id="line-104"></span><span class="hs-comment">-- runnign time: \(O(1)\)</span><span>
-</span><span id="line-105"></span><span id="local-6989586621679178039"><span class="annot"><a href="HGeometry.Permutation.html#lookupIdx"><span class="hs-identifier hs-type">lookupIdx</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="annot"><a href="#local-6989586621679178039"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679178039"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679178039"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span></span><span>
-</span><span id="line-106"></span><span id="lookupIdx"><span class="annot"><span class="annottext">lookupIdx :: forall a. Enum a =&gt; Permutation a -&gt; a -&gt; (Int, Int)
-</span><a href="HGeometry.Permutation.html#lookupIdx"><span class="hs-identifier hs-var hs-var">lookupIdx</span></a></span></span><span> </span><span id="local-6989586621679178422"><span class="annot"><span class="annottext">Permutation a
-</span><a href="#local-6989586621679178422"><span class="hs-identifier hs-var">perm</span></a></span></span><span> </span><span id="local-6989586621679178423"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679178423"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Permutation a
-</span><a href="#local-6989586621679178422"><span class="hs-identifier hs-var">perm</span></a></span><span class="annot"><span class="annottext">Permutation a
+</span><a href="#local-6989586621679187825"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- | Lookup the indices of an element, i.e. in which orbit the item is, and the</span><span>
+</span><span id="line-98"></span><span class="hs-comment">-- index within the orbit.</span><span>
+</span><span id="line-99"></span><span class="hs-comment">--</span><span>
+</span><span id="line-100"></span><span class="hs-comment">-- runnign time: \(O(1)\)</span><span>
+</span><span id="line-101"></span><span id="local-6989586621679187464"><span class="annot"><a href="HGeometry.Permutation.html#lookupIdx"><span class="hs-identifier hs-type">lookupIdx</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="annot"><a href="#local-6989586621679187464"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187464"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679187464"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span></span><span>
+</span><span id="line-102"></span><span id="lookupIdx"><span class="annot"><span class="annottext">lookupIdx :: forall a. Enum a =&gt; Permutation a -&gt; a -&gt; (Int, Int)
+</span><a href="HGeometry.Permutation.html#lookupIdx"><span class="hs-identifier hs-var hs-var">lookupIdx</span></a></span></span><span> </span><span id="local-6989586621679187837"><span class="annot"><span class="annottext">Permutation a
+</span><a href="#local-6989586621679187837"><span class="hs-identifier hs-var">perm</span></a></span></span><span> </span><span id="local-6989586621679187838"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679187838"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Permutation a
+</span><a href="#local-6989586621679187837"><span class="hs-identifier hs-var">perm</span></a></span><span class="annot"><span class="annottext">Permutation a
 -&gt; Getting (Endo (Int, Int)) (Permutation a) (Int, Int)
 -&gt; (Int, Int)
 forall s a. HasCallStack =&gt; s -&gt; Getting (Endo a) s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Fold.html#%5E%3F%21"><span class="hs-operator hs-var">^?!</span></a></span><span class="annot"><span class="annottext">(Vector (Int, Int) -&gt; Const (Endo (Int, Int)) (Vector (Int, Int)))
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-0f3fd035821e0d3b71cdf91e4e4c32d86cdf43691417829ea65cfd226a1390e0/share/doc/html/src/Control.Lens.Fold.html#%5E%3F%21"><span class="hs-operator hs-var">^?!</span></a></span><span class="annot"><span class="annottext">(Vector (Int, Int) -&gt; Const (Endo (Int, Int)) (Vector (Int, Int)))
 -&gt; Permutation a -&gt; Const (Endo (Int, Int)) (Permutation a)
 forall a (f :: * -&gt; *).
 Functor f =&gt;
@@ -365,215 +447,240 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">Index (Vector (Int, Int))
 -&gt; Traversal' (Vector (Int, Int)) (IxValue (Vector (Int, Int)))
 forall m. Ixed m =&gt; Index m -&gt; Traversal' m (IxValue m)
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.At.html#ix"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-0f3fd035821e0d3b71cdf91e4e4c32d86cdf43691417829ea65cfd226a1390e0/share/doc/html/src/Control.Lens.At.html#ix"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Int
 forall a. Enum a =&gt; a -&gt; Int
 </span><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679178423"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-107"></span><span>
-</span><span id="line-108"></span><span class="annot"><span class="hs-comment">-- | Apply the permutation, i.e. consider the permutation as a function.</span></span><span>
-</span><span id="line-109"></span><span id="local-6989586621679178041"><span class="annot"><a href="HGeometry.Permutation.html#apply"><span class="hs-identifier hs-type">apply</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="annot"><a href="#local-6989586621679178041"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679178041"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679178041"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679178041"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-110"></span><span id="apply"><span class="annot"><span class="annottext">apply :: forall a. Enum a =&gt; Permutation a -&gt; a -&gt; a
-</span><a href="HGeometry.Permutation.html#apply"><span class="hs-identifier hs-var hs-var">apply</span></a></span></span><span> </span><span id="local-6989586621679178433"><span class="annot"><span class="annottext">Permutation a
-</span><a href="#local-6989586621679178433"><span class="hs-identifier hs-var">perm</span></a></span></span><span> </span><span id="local-6989586621679178434"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679178434"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679178435"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178435"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679178436"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178436"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Permutation a -&gt; a -&gt; (Int, Int)
+</span><a href="#local-6989586621679187838"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span class="annot"><span class="hs-comment">-- | Apply the permutation, i.e. consider the permutation as a function.</span></span><span>
+</span><span id="line-105"></span><span id="local-6989586621679187466"><span class="annot"><a href="HGeometry.Permutation.html#apply"><span class="hs-identifier hs-type">apply</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="annot"><a href="#local-6989586621679187466"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187466"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679187466"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679187466"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-106"></span><span id="apply"><span class="annot"><span class="annottext">apply :: forall a. Enum a =&gt; Permutation a -&gt; a -&gt; a
+</span><a href="HGeometry.Permutation.html#apply"><span class="hs-identifier hs-var hs-var">apply</span></a></span></span><span> </span><span id="local-6989586621679187847"><span class="annot"><span class="annottext">Permutation a
+</span><a href="#local-6989586621679187847"><span class="hs-identifier hs-var">perm</span></a></span></span><span> </span><span id="local-6989586621679187848"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679187848"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679187849"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679187849"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679187850"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679187850"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Permutation a -&gt; a -&gt; (Int, Int)
 forall a. Enum a =&gt; Permutation a -&gt; a -&gt; (Int, Int)
 </span><a href="HGeometry.Permutation.html#lookupIdx"><span class="hs-identifier hs-var">lookupIdx</span></a></span><span> </span><span class="annot"><span class="annottext">Permutation a
-</span><a href="#local-6989586621679178433"><span class="hs-identifier hs-var">perm</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679178434"><span class="hs-identifier hs-var">x</span></a></span><span>
-</span><span id="line-111"></span><span>               </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Vector a -&gt; Int -&gt; a
-forall (v :: * -&gt; *) a. Vector v a =&gt; v a -&gt; Int -&gt; a
+</span><a href="#local-6989586621679187847"><span class="hs-identifier hs-var">perm</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679187848"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-107"></span><span>               </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; Int -&gt; a
+forall a. NonEmptyVector a -&gt; Int -&gt; a
 </span><a href="HGeometry.Permutation.html#next"><span class="hs-identifier hs-var">next</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Permutation a
-</span><a href="#local-6989586621679178433"><span class="hs-identifier hs-var">perm</span></a></span><span class="annot"><span class="annottext">Permutation a
--&gt; Getting (Endo (Vector a)) (Permutation a) (Vector a) -&gt; Vector a
+</span><a href="#local-6989586621679187847"><span class="hs-identifier hs-var">perm</span></a></span><span class="annot"><span class="annottext">Permutation a
+-&gt; Getting
+     (Endo (NonEmptyVector a)) (Permutation a) (NonEmptyVector a)
+-&gt; NonEmptyVector a
 forall s a. HasCallStack =&gt; s -&gt; Getting (Endo a) s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.Fold.html#%5E%3F%21"><span class="hs-operator hs-var">^?!</span></a></span><span class="annot"><span class="annottext">(Vector (Vector a) -&gt; Const (Endo (Vector a)) (Vector (Vector a)))
--&gt; Permutation a -&gt; Const (Endo (Vector a)) (Permutation a)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-0f3fd035821e0d3b71cdf91e4e4c32d86cdf43691417829ea65cfd226a1390e0/share/doc/html/src/Control.Lens.Fold.html#%5E%3F%21"><span class="hs-operator hs-var">^?!</span></a></span><span class="annot"><span class="annottext">(NonEmptyVector (NonEmptyVector a)
+ -&gt; Const
+      (Endo (NonEmptyVector a)) (NonEmptyVector (NonEmptyVector a)))
+-&gt; Permutation a -&gt; Const (Endo (NonEmptyVector a)) (Permutation a)
 forall a b (f :: * -&gt; *).
 Functor f =&gt;
-(Vector (Orbit a) -&gt; f (Vector (Orbit b)))
+(NonEmptyVector (Orbit a) -&gt; f (NonEmptyVector (Orbit b)))
 -&gt; Permutation a -&gt; f (Permutation b)
-</span><a href="HGeometry.Permutation.html#orbits"><span class="hs-identifier hs-var">orbits</span></a></span><span class="annot"><span class="annottext">((Vector (Vector a) -&gt; Const (Endo (Vector a)) (Vector (Vector a)))
- -&gt; Permutation a -&gt; Const (Endo (Vector a)) (Permutation a))
--&gt; ((Vector a -&gt; Const (Endo (Vector a)) (Vector a))
-    -&gt; Vector (Vector a)
-    -&gt; Const (Endo (Vector a)) (Vector (Vector a)))
--&gt; Getting (Endo (Vector a)) (Permutation a) (Vector a)
+</span><a href="HGeometry.Permutation.html#orbits"><span class="hs-identifier hs-var">orbits</span></a></span><span class="annot"><span class="annottext">((NonEmptyVector (NonEmptyVector a)
+  -&gt; Const
+       (Endo (NonEmptyVector a)) (NonEmptyVector (NonEmptyVector a)))
+ -&gt; Permutation a
+ -&gt; Const (Endo (NonEmptyVector a)) (Permutation a))
+-&gt; ((NonEmptyVector a
+     -&gt; Const (Endo (NonEmptyVector a)) (NonEmptyVector a))
+    -&gt; NonEmptyVector (NonEmptyVector a)
+    -&gt; Const
+         (Endo (NonEmptyVector a)) (NonEmptyVector (NonEmptyVector a)))
+-&gt; Getting
+     (Endo (NonEmptyVector a)) (Permutation a) (NonEmptyVector a)
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">Index (Vector (Vector a))
--&gt; Traversal' (Vector (Vector a)) (IxValue (Vector (Vector a)))
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">Index (NonEmptyVector (NonEmptyVector a))
+-&gt; Traversal'
+     (NonEmptyVector (NonEmptyVector a))
+     (IxValue (NonEmptyVector (NonEmptyVector a)))
 forall m. Ixed m =&gt; Index m -&gt; Traversal' m (IxValue m)
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-4a4b4b6212e65388c2ef0b20b55f9d73fc2078c39850450f6654fd6d7cc624b5/share/doc/html/src/Control.Lens.At.html#ix"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-Index (Vector (Vector a))
-</span><a href="#local-6989586621679178435"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178436"><span class="hs-identifier hs-var">i</span></a></span><span>
-</span><span id="line-112"></span><span>
-</span><span id="line-113"></span><span>
-</span><span id="line-114"></span><span class="annot"><span class="hs-comment">-- | Find the cycle in the permutation starting at element s</span></span><span>
-</span><span id="line-115"></span><span id="local-6989586621679178043"><span class="annot"><a href="HGeometry.Permutation.html#orbitFrom"><span class="hs-identifier hs-type">orbitFrom</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679178043"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679178043"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679178043"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679178043"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679178043"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span><span>
-</span><span id="line-116"></span><span id="orbitFrom"><span class="annot"><span class="annottext">orbitFrom :: forall a. Eq a =&gt; a -&gt; (a -&gt; a) -&gt; [a]
-</span><a href="HGeometry.Permutation.html#orbitFrom"><span class="hs-identifier hs-var hs-var">orbitFrom</span></a></span></span><span> </span><span id="local-6989586621679178441"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679178441"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679178442"><span class="annot"><span class="annottext">a -&gt; a
-</span><a href="#local-6989586621679178442"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679178441"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
-forall a. a -&gt; [a] -&gt; [a]
-</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-0f3fd035821e0d3b71cdf91e4e4c32d86cdf43691417829ea65cfd226a1390e0/share/doc/html/src/Control.Lens.At.html#ix"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+Index (NonEmptyVector (NonEmptyVector a))
+</span><a href="#local-6989586621679187849"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679187850"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-108"></span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span class="annot"><span class="hs-comment">-- | Find the cycle in the permutation starting at element s</span></span><span>
+</span><span id="line-111"></span><span id="local-6989586621679187468"><span class="annot"><a href="HGeometry.Permutation.html#orbitFrom"><span class="hs-identifier hs-type">orbitFrom</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679187468"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679187468"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679187468"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679187468"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679187468"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-112"></span><span id="orbitFrom"><span class="annot"><span class="annottext">orbitFrom :: forall a. Eq a =&gt; a -&gt; (a -&gt; a) -&gt; NonEmpty a
+</span><a href="HGeometry.Permutation.html#orbitFrom"><span class="hs-identifier hs-var hs-var">orbitFrom</span></a></span></span><span> </span><span id="local-6989586621679187853"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679187853"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679187854"><span class="annot"><span class="annottext">a -&gt; a
+</span><a href="#local-6989586621679187854"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679187853"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; NonEmpty a
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; Bool) -&gt; [a] -&gt; [a]
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">takeWhile</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679178441"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([a] -&gt; [a]) -&gt; ([a] -&gt; [a]) -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679187853"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([a] -&gt; [a]) -&gt; (NonEmpty a -&gt; [a]) -&gt; NonEmpty a -&gt; [a]
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a]
-forall a. HasCallStack =&gt; [a] -&gt; [a]
-</span><span class="hs-identifier hs-var">tail</span></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; [a]) -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty a -&gt; [a]
+forall a. NonEmpty a -&gt; [a]
+</span><span class="hs-identifier hs-var">NonEmpty.tail</span></span><span> </span><span class="annot"><span class="annottext">(NonEmpty a -&gt; [a]) -&gt; NonEmpty a -&gt; [a]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; a) -&gt; a -&gt; [a]
-forall a. (a -&gt; a) -&gt; a -&gt; [a]
-</span><span class="hs-identifier hs-var">iterate</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a
-</span><a href="#local-6989586621679178442"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679178441"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-117"></span><span>
-</span><span id="line-118"></span><span class="hs-comment">-- | Given a vector with items in the permutation, and a permutation (by its</span><span>
-</span><span id="line-119"></span><span class="hs-comment">-- functional representation) construct the cyclic representation of the</span><span>
-</span><span id="line-120"></span><span class="hs-comment">-- permutation.</span><span>
-</span><span id="line-121"></span><span id="local-6989586621679178052"><span id="local-6989586621679178053"><span class="annot"><a href="HGeometry.Permutation.html#cycleRep"><span class="hs-identifier hs-type">cycleRep</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Generic.Base.html#Vector"><span class="hs-identifier hs-type">GV.Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679178052"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679178053"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="annot"><a href="#local-6989586621679178053"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679178053"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679178052"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679178053"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679178053"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679178053"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679178053"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
-</span><span id="line-122"></span><span id="cycleRep"><span class="annot"><span class="annottext">cycleRep :: forall (v :: * -&gt; *) a.
-(Vector v a, Enum a, Eq a) =&gt;
-v a -&gt; (a -&gt; a) -&gt; Permutation a
-</span><a href="HGeometry.Permutation.html#cycleRep"><span class="hs-identifier hs-var hs-var">cycleRep</span></a></span></span><span> </span><span id="local-6989586621679178452"><span class="annot"><span class="annottext">v a
-</span><a href="#local-6989586621679178452"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679178453"><span class="annot"><span class="annottext">a -&gt; a
-</span><a href="#local-6989586621679178453"><span class="hs-identifier hs-var">perm</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [[a]] -&gt; Permutation a
-forall a. Enum a =&gt; Int -&gt; [[a]] -&gt; Permutation a
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; a) -&gt; a -&gt; NonEmpty a
+forall a. (a -&gt; a) -&gt; a -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">NonEmpty.iterate</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a
+</span><a href="#local-6989586621679187854"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679187853"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-113"></span><span>
+</span><span id="line-114"></span><span class="hs-comment">-- | Given a vector with items in the permutation, and a permutation (by its</span><span>
+</span><span id="line-115"></span><span class="hs-comment">-- functional representation) construct the cyclic representation of the</span><span>
+</span><span id="line-116"></span><span class="hs-comment">-- permutation.</span><span>
+</span><span id="line-117"></span><span id="local-6989586621679187477"><span class="annot"><a href="HGeometry.Permutation.html#cycleRep"><span class="hs-identifier hs-type">cycleRep</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="annot"><a href="#local-6989586621679187477"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679187477"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.Internal.html#NonEmptyVector"><span class="hs-identifier hs-type">NonEmptyVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187477"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679187477"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679187477"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187477"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-118"></span><span id="cycleRep"><span class="annot"><span class="annottext">cycleRep :: forall a.
+(Enum a, Eq a) =&gt;
+NonEmptyVector a -&gt; (a -&gt; a) -&gt; Permutation a
+</span><a href="HGeometry.Permutation.html#cycleRep"><span class="hs-identifier hs-var hs-var">cycleRep</span></a></span></span><span> </span><span id="local-6989586621679187863"><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679187863"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679187864"><span class="annot"><span class="annottext">a -&gt; a
+</span><a href="#local-6989586621679187864"><span class="hs-identifier hs-var">perm</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; NonEmpty (NonEmpty a) -&gt; Permutation a
+forall a. Enum a =&gt; Int -&gt; NonEmpty (NonEmpty a) -&gt; Permutation a
 </span><a href="HGeometry.Permutation.html#toCycleRep"><span class="hs-identifier hs-var">toCycleRep</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178454"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">([[a]] -&gt; Permutation a) -&gt; [[a]] -&gt; Permutation a
+</span><a href="#local-6989586621679187865"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (NonEmpty a) -&gt; Permutation a)
+-&gt; NonEmpty (NonEmpty a) -&gt; Permutation a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(forall s. ST s [[a]]) -&gt; [[a]]
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(forall s. ST s (NonEmpty (NonEmpty a))) -&gt; NonEmpty (NonEmpty a)
 forall a. (forall s. ST s a) -&gt; a
-</span><span class="hs-identifier hs-var">runST</span></span><span> </span><span class="annot"><span class="annottext">((forall s. ST s [[a]]) -&gt; [[a]])
--&gt; (forall s. ST s [[a]]) -&gt; [[a]]
+</span><span class="hs-identifier hs-var">runST</span></span><span> </span><span class="annot"><span class="annottext">((forall s. ST s (NonEmpty (NonEmpty a))) -&gt; NonEmpty (NonEmpty a))
+-&gt; (forall s. ST s (NonEmpty (NonEmpty a)))
+-&gt; NonEmpty (NonEmpty a)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-123"></span><span>    </span><span id="local-6989586621679178490"><span class="annot"><span class="annottext">MVector s Bool
-</span><a href="#local-6989586621679178490"><span class="hs-identifier hs-var">bv</span></a></span></span><span>    </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Bool -&gt; ST s (MVector (PrimState (ST s)) Bool)
+</span><span id="line-119"></span><span>    </span><span id="local-6989586621679187899"><span class="annot"><span class="annottext">MVector s Bool
+</span><a href="#local-6989586621679187899"><span class="hs-identifier hs-var">bv</span></a></span></span><span>    </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Bool -&gt; ST s (MVector (PrimState (ST s)) Bool)
 forall (m :: * -&gt; *) a.
 (PrimMonad m, Unbox a) =&gt;
 Int -&gt; a -&gt; m (MVector (PrimState m) a)
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Unboxed.Mutable.html#replicate"><span class="hs-identifier hs-var">UMV.replicate</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178454"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679187865"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span> </span><span class="hs-comment">-- bit vector of marks</span><span>
-</span><span id="line-124"></span><span>    </span><span id="local-6989586621679178492"><span class="annot"><span class="annottext">[Maybe [a]]
-</span><a href="#local-6989586621679178492"><span class="hs-identifier hs-var">morbs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Int] -&gt; (Int -&gt; ST s (Maybe [a])) -&gt; ST s [Maybe [a]]
+</span><span id="line-120"></span><span>    </span><span id="local-6989586621679187901"><span class="annot"><span class="annottext">[Maybe (NonEmpty a)]
+</span><a href="#local-6989586621679187901"><span class="hs-identifier hs-var">morbs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Int]
+-&gt; (Int -&gt; ST s (Maybe (NonEmpty a))) -&gt; ST s [Maybe (NonEmpty a)]
 forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Traversable t, Monad m) =&gt;
 t a -&gt; (a -&gt; m b) -&gt; m (t b)
 </span><span class="hs-identifier hs-var">forM</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178454"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679187865"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">((Int -&gt; ST s (Maybe [a])) -&gt; ST s [Maybe [a]])
--&gt; (Int -&gt; ST s (Maybe [a])) -&gt; ST s [Maybe [a]]
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">((Int -&gt; ST s (Maybe (NonEmpty a))) -&gt; ST s [Maybe (NonEmpty a)])
+-&gt; (Int -&gt; ST s (Maybe (NonEmpty a))) -&gt; ST s [Maybe (NonEmpty a)]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679178493"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178493"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-125"></span><span>               </span><span id="local-6989586621679178494"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679178494"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) Bool -&gt; Int -&gt; ST s Bool
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679187902"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679187902"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-121"></span><span>               </span><span id="local-6989586621679187903"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679187903"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) Bool -&gt; Int -&gt; ST s Bool
 forall (m :: * -&gt; *) a.
 (PrimMonad m, Unbox a) =&gt;
 MVector (PrimState m) a -&gt; Int -&gt; m a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Unboxed.Mutable.html#read"><span class="hs-identifier hs-var">UMV.read</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s Bool
 MVector (PrimState (ST s)) Bool
-</span><a href="#local-6989586621679178490"><span class="hs-identifier hs-var">bv</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Int
+</span><a href="#local-6989586621679187899"><span class="hs-identifier hs-var">bv</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Int
 forall a. Enum a =&gt; a -&gt; Int
 </span><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Int) -&gt; a -&gt; Int
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">v a
-</span><a href="#local-6989586621679178452"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">v a -&gt; Int -&gt; a
-forall (v :: * -&gt; *) a.
-(HasCallStack, Vector v a) =&gt;
-v a -&gt; Int -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Generic.html#%21"><span class="hs-operator hs-var">GV.!</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178493"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-126"></span><span>               </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621679178494"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Maybe [a] -&gt; ST s (Maybe [a])
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679187863"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; Int -&gt; a
+forall a. NonEmptyVector a -&gt; Int -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.html#%21"><span class="hs-operator hs-var">NonEmptyV.!</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679187902"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-122"></span><span>               </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679187903"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Maybe (NonEmpty a) -&gt; ST s (Maybe (NonEmpty a))
 forall a. a -&gt; ST s a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
-</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Maybe [a]
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">Maybe (NonEmpty a)
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-comment">-- already visited</span><span>
-</span><span id="line-127"></span><span>                    </span><span class="hs-keyword">else</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-128"></span><span>                      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679178496"><span class="annot"><span class="annottext">xs :: [a]
-</span><a href="#local-6989586621679178496"><span class="hs-identifier hs-var hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; (a -&gt; a) -&gt; [a]
-forall a. Eq a =&gt; a -&gt; (a -&gt; a) -&gt; [a]
-</span><a href="HGeometry.Permutation.html#orbitFrom"><span class="hs-identifier hs-var">orbitFrom</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">v a
-</span><a href="#local-6989586621679178452"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">v a -&gt; Int -&gt; a
-forall (v :: * -&gt; *) a.
-(HasCallStack, Vector v a) =&gt;
-v a -&gt; Int -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Generic.html#%21"><span class="hs-operator hs-var">GV.!</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178493"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; a
-</span><a href="#local-6989586621679178453"><span class="hs-identifier hs-var">perm</span></a></span><span>
-</span><span id="line-129"></span><span>                      </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) Bool -&gt; [Int] -&gt; ST s ()
+</span><span id="line-123"></span><span>                    </span><span class="hs-keyword">else</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-124"></span><span>                      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679187905"><span class="annot"><span class="annottext">xs :: NonEmpty a
+</span><a href="#local-6989586621679187905"><span class="hs-identifier hs-var hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; (a -&gt; a) -&gt; NonEmpty a
+forall a. Eq a =&gt; a -&gt; (a -&gt; a) -&gt; NonEmpty a
+</span><a href="HGeometry.Permutation.html#orbitFrom"><span class="hs-identifier hs-var">orbitFrom</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679187863"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; Int -&gt; a
+forall a. NonEmptyVector a -&gt; Int -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.html#%21"><span class="hs-operator hs-var">NonEmptyV.!</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679187902"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; a
+</span><a href="#local-6989586621679187864"><span class="hs-identifier hs-var">perm</span></a></span><span>
+</span><span id="line-125"></span><span>                      </span><span class="annot"><span class="annottext">MVector (PrimState (ST s)) Bool -&gt; NonEmpty Int -&gt; ST s ()
 forall {t :: * -&gt; *} {m :: * -&gt; *}.
 (Foldable t, PrimMonad m) =&gt;
 MVector (PrimState m) Bool -&gt; t Int -&gt; m ()
-</span><a href="#local-6989586621679178497"><span class="hs-identifier hs-var">markAll</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s Bool
+</span><a href="#local-6989586621679187906"><span class="hs-identifier hs-var">markAll</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s Bool
 MVector (PrimState (ST s)) Bool
-</span><a href="#local-6989586621679178490"><span class="hs-identifier hs-var">bv</span></a></span><span> </span><span class="annot"><span class="annottext">([Int] -&gt; ST s ()) -&gt; [Int] -&gt; ST s ()
+</span><a href="#local-6989586621679187899"><span class="hs-identifier hs-var">bv</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty Int -&gt; ST s ()) -&gt; NonEmpty Int -&gt; ST s ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Int) -&gt; [a] -&gt; [Int]
-forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Int
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Int) -&gt; NonEmpty a -&gt; NonEmpty Int
+forall a b. (a -&gt; b) -&gt; NonEmpty a -&gt; NonEmpty b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Int
 forall a. Enum a =&gt; a -&gt; Int
-</span><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679178496"><span class="hs-identifier hs-var">xs</span></a></span><span>
-</span><span id="line-130"></span><span>                      </span><span class="annot"><span class="annottext">Maybe [a] -&gt; ST s (Maybe [a])
+</span><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty a
+</span><a href="#local-6989586621679187905"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-126"></span><span>                      </span><span class="annot"><span class="annottext">Maybe (NonEmpty a) -&gt; ST s (Maybe (NonEmpty a))
 forall a. a -&gt; ST s a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
-</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Maybe [a] -&gt; ST s (Maybe [a]))
--&gt; ([a] -&gt; Maybe [a]) -&gt; [a] -&gt; ST s (Maybe [a])
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(Maybe (NonEmpty a) -&gt; ST s (Maybe (NonEmpty a)))
+-&gt; (NonEmpty a -&gt; Maybe (NonEmpty a))
+-&gt; NonEmpty a
+-&gt; ST s (Maybe (NonEmpty a))
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; Maybe [a]
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty a -&gt; Maybe (NonEmpty a)
 forall a. a -&gt; Maybe a
-</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; ST s (Maybe [a])) -&gt; [a] -&gt; ST s (Maybe [a])
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(NonEmpty a -&gt; ST s (Maybe (NonEmpty a)))
+-&gt; NonEmpty a -&gt; ST s (Maybe (NonEmpty a))
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679178496"><span class="hs-identifier hs-var">xs</span></a></span><span>
-</span><span id="line-131"></span><span>    </span><span class="annot"><span class="annottext">[[a]] -&gt; ST s [[a]]
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty a
+</span><a href="#local-6989586621679187905"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-127"></span><span>    </span><span class="annot"><span class="annottext">NonEmpty (NonEmpty a) -&gt; ST s (NonEmpty (NonEmpty a))
 forall a. a -&gt; ST s a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
-</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">([[a]] -&gt; ST s [[a]])
--&gt; ([Maybe [a]] -&gt; [[a]]) -&gt; [Maybe [a]] -&gt; ST s [[a]]
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (NonEmpty a) -&gt; ST s (NonEmpty (NonEmpty a)))
+-&gt; ([Maybe (NonEmpty a)] -&gt; NonEmpty (NonEmpty a))
+-&gt; [Maybe (NonEmpty a)]
+-&gt; ST s (NonEmpty (NonEmpty a))
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Maybe [a]] -&gt; [[a]]
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[NonEmpty a] -&gt; NonEmpty (NonEmpty a)
+forall a. HasCallStack =&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">NonEmpty.fromList</span></span><span> </span><span class="annot"><span class="annottext">([NonEmpty a] -&gt; NonEmpty (NonEmpty a))
+-&gt; ([Maybe (NonEmpty a)] -&gt; [NonEmpty a])
+-&gt; [Maybe (NonEmpty a)]
+-&gt; NonEmpty (NonEmpty a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[Maybe (NonEmpty a)] -&gt; [NonEmpty a]
 forall a. [Maybe a] -&gt; [a]
-</span><span class="hs-identifier hs-var">catMaybes</span></span><span> </span><span class="annot"><span class="annottext">([Maybe [a]] -&gt; ST s [[a]]) -&gt; [Maybe [a]] -&gt; ST s [[a]]
+</span><span class="hs-identifier hs-var">catMaybes</span></span><span> </span><span class="annot"><span class="annottext">([Maybe (NonEmpty a)] -&gt; ST s (NonEmpty (NonEmpty a)))
+-&gt; [Maybe (NonEmpty a)] -&gt; ST s (NonEmpty (NonEmpty a))
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Maybe [a]]
-</span><a href="#local-6989586621679178492"><span class="hs-identifier hs-var">morbs</span></a></span><span>
-</span><span id="line-132"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-133"></span><span>    </span><span id="local-6989586621679178454"><span class="annot"><span class="annottext">n :: Int
-</span><a href="#local-6989586621679178454"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">v a -&gt; Int
-forall (v :: * -&gt; *) a. Vector v a =&gt; v a -&gt; Int
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Generic.html#length"><span class="hs-identifier hs-var">GV.length</span></a></span><span> </span><span class="annot"><span class="annottext">v a
-</span><a href="#local-6989586621679178452"><span class="hs-identifier hs-var">v</span></a></span><span>
-</span><span id="line-134"></span><span>
-</span><span id="line-135"></span><span>    </span><span id="local-6989586621679178509"><span class="annot"><span class="annottext">mark :: MVector (PrimState m) Bool -&gt; Int -&gt; m ()
-</span><a href="#local-6989586621679178509"><span class="hs-identifier hs-var hs-var">mark</span></a></span></span><span>    </span><span id="local-6989586621679178510"><span class="annot"><span class="annottext">MVector (PrimState m) Bool
-</span><a href="#local-6989586621679178510"><span class="hs-identifier hs-var">bv</span></a></span></span><span> </span><span id="local-6989586621679178511"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178511"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) Bool -&gt; Int -&gt; Bool -&gt; m ()
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Maybe (NonEmpty a)]
+</span><a href="#local-6989586621679187901"><span class="hs-identifier hs-var">morbs</span></a></span><span>
+</span><span id="line-128"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-129"></span><span>    </span><span id="local-6989586621679187865"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679187865"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a -&gt; Int
+forall a. NonEmptyVector a -&gt; Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.html#length"><span class="hs-identifier hs-var">NonEmptyV.length</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmptyVector a
+</span><a href="#local-6989586621679187863"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span>    </span><span id="local-6989586621679187919"><span class="annot"><span class="annottext">mark :: MVector (PrimState m) Bool -&gt; Int -&gt; m ()
+</span><a href="#local-6989586621679187919"><span class="hs-identifier hs-var hs-var">mark</span></a></span></span><span>    </span><span id="local-6989586621679187920"><span class="annot"><span class="annottext">MVector (PrimState m) Bool
+</span><a href="#local-6989586621679187920"><span class="hs-identifier hs-var">bv</span></a></span></span><span> </span><span id="local-6989586621679187921"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679187921"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) Bool -&gt; Int -&gt; Bool -&gt; m ()
 forall (m :: * -&gt; *) a.
 (PrimMonad m, Unbox a) =&gt;
 MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Unboxed.Mutable.html#write"><span class="hs-identifier hs-var">UMV.write</span></a></span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) Bool
-</span><a href="#local-6989586621679178510"><span class="hs-identifier hs-var">bv</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178511"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679187920"><span class="hs-identifier hs-var">bv</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679187921"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-136"></span><span>    </span><span id="local-6989586621679178497"><span class="annot"><span class="annottext">markAll :: MVector (PrimState m) Bool -&gt; t Int -&gt; m ()
-</span><a href="#local-6989586621679178497"><span class="hs-identifier hs-var hs-var">markAll</span></a></span></span><span> </span><span id="local-6989586621679178526"><span class="annot"><span class="annottext">MVector (PrimState m) Bool
-</span><a href="#local-6989586621679178526"><span class="hs-identifier hs-var">bv</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; m ()) -&gt; t Int -&gt; m ()
+</span><span id="line-132"></span><span>    </span><span id="local-6989586621679187906"><span class="annot"><span class="annottext">markAll :: MVector (PrimState m) Bool -&gt; t Int -&gt; m ()
+</span><a href="#local-6989586621679187906"><span class="hs-identifier hs-var hs-var">markAll</span></a></span></span><span> </span><span id="local-6989586621679187936"><span class="annot"><span class="annottext">MVector (PrimState m) Bool
+</span><a href="#local-6989586621679187936"><span class="hs-identifier hs-var">bv</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; m ()) -&gt; t Int -&gt; m ()
 forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Foldable t, Monad m) =&gt;
 (a -&gt; m b) -&gt; t a -&gt; m ()
@@ -581,55 +688,65 @@ forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 forall {m :: * -&gt; *}.
 PrimMonad m =&gt;
 MVector (PrimState m) Bool -&gt; Int -&gt; m ()
-</span><a href="#local-6989586621679178509"><span class="hs-identifier hs-var">mark</span></a></span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) Bool
-</span><a href="#local-6989586621679178526"><span class="hs-identifier hs-var">bv</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-137"></span><span>
-</span><span id="line-138"></span><span>
-</span><span id="line-139"></span><span class="hs-comment">-- | Given the size n, and a list of Cycles, turns the cycles into a</span><span>
-</span><span id="line-140"></span><span class="hs-comment">-- cyclic representation of the Permutation.</span><span>
-</span><span id="line-141"></span><span id="local-6989586621679178056"><span class="annot"><a href="HGeometry.Permutation.html#toCycleRep"><span class="hs-identifier hs-type">toCycleRep</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="annot"><a href="#local-6989586621679178056"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679178056"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679178056"><span class="hs-identifier hs-type">a</span></a></span></span><span>
-</span><span id="line-142"></span><span id="toCycleRep"><span class="annot"><span class="annottext">toCycleRep :: forall a. Enum a =&gt; Int -&gt; [[a]] -&gt; Permutation a
-</span><a href="HGeometry.Permutation.html#toCycleRep"><span class="hs-identifier hs-var hs-var">toCycleRep</span></a></span></span><span> </span><span id="local-6989586621679178530"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178530"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679178531"><span class="annot"><span class="annottext">[[a]]
-</span><a href="#local-6989586621679178531"><span class="hs-identifier hs-var">os</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector (Orbit a) -&gt; Vector (Int, Int) -&gt; Permutation a
-forall a. Vector (Orbit a) -&gt; Vector (Int, Int) -&gt; Permutation a
-</span><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-var">Permutation</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Orbit a] -&gt; Vector (Orbit a)
-forall a. [a] -&gt; Vector a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.html#fromList"><span class="hs-identifier hs-var">V.fromList</span></a></span><span> </span><span class="annot"><span class="annottext">([Orbit a] -&gt; Vector (Orbit a))
--&gt; ([[a]] -&gt; [Orbit a]) -&gt; [[a]] -&gt; Vector (Orbit a)
+</span><a href="#local-6989586621679187919"><span class="hs-identifier hs-var">mark</span></a></span><span> </span><span class="annot"><span class="annottext">MVector (PrimState m) Bool
+</span><a href="#local-6989586621679187936"><span class="hs-identifier hs-var">bv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-133"></span><span>
+</span><span id="line-134"></span><span class="hs-comment">-- | Given the size n, and a list of Cycles, turns the cycles into a</span><span>
+</span><span id="line-135"></span><span class="hs-comment">-- cyclic representation of the Permutation.</span><span>
+</span><span id="line-136"></span><span id="local-6989586621679187479"><span class="annot"><a href="HGeometry.Permutation.html#toCycleRep"><span class="hs-identifier hs-type">toCycleRep</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="annot"><a href="#local-6989586621679187479"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679187479"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-type">Permutation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679187479"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-137"></span><span id="toCycleRep"><span class="annot"><span class="annottext">toCycleRep :: forall a. Enum a =&gt; Int -&gt; NonEmpty (NonEmpty a) -&gt; Permutation a
+</span><a href="HGeometry.Permutation.html#toCycleRep"><span class="hs-identifier hs-var hs-var">toCycleRep</span></a></span></span><span> </span><span id="local-6989586621679187941"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679187941"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679187942"><span class="annot"><span class="annottext">NonEmpty (NonEmpty a)
+</span><a href="#local-6989586621679187942"><span class="hs-identifier hs-var">os</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmptyVector (Orbit a) -&gt; Vector (Int, Int) -&gt; Permutation a
+forall a.
+NonEmptyVector (Orbit a) -&gt; Vector (Int, Int) -&gt; Permutation a
+</span><a href="HGeometry.Permutation.html#Permutation"><span class="hs-identifier hs-var">Permutation</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonEmpty (Orbit a) -&gt; NonEmptyVector (Orbit a)
+forall a. NonEmpty a -&gt; NonEmptyVector a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.html#fromNonEmpty"><span class="hs-identifier hs-var">NonEmptyV.fromNonEmpty</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (Orbit a) -&gt; NonEmptyVector (Orbit a))
+-&gt; (NonEmpty (NonEmpty a) -&gt; NonEmpty (Orbit a))
+-&gt; NonEmpty (NonEmpty a)
+-&gt; NonEmptyVector (Orbit a)
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; Orbit a) -&gt; [[a]] -&gt; [Orbit a]
-forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; Orbit a
-forall a. [a] -&gt; Vector a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.html#fromList"><span class="hs-identifier hs-var">V.fromList</span></a></span><span> </span><span class="annot"><span class="annottext">([[a]] -&gt; Vector (Orbit a)) -&gt; [[a]] -&gt; Vector (Orbit a)
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(NonEmpty a -&gt; Orbit a)
+-&gt; NonEmpty (NonEmpty a) -&gt; NonEmpty (Orbit a)
+forall a b. (a -&gt; b) -&gt; NonEmpty a -&gt; NonEmpty b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty a -&gt; Orbit a
+forall a. NonEmpty a -&gt; NonEmptyVector a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/nonempty-vector-0.2.3-1d5f10985073530f88472a1fe53b4d9dff0dd97bec1ab3adb009edf03359799f/share/doc/html/src/Data.Vector.NonEmpty.html#fromNonEmpty"><span class="hs-identifier hs-var">NonEmptyV.fromNonEmpty</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (NonEmpty a) -&gt; NonEmptyVector (Orbit a))
+-&gt; NonEmpty (NonEmpty a) -&gt; NonEmptyVector (Orbit a)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[[a]]
-</span><a href="#local-6989586621679178531"><span class="hs-identifier hs-var">os</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; [[a]] -&gt; Vector (Int, Int)
-forall a. Enum a =&gt; Int -&gt; [[a]] -&gt; Vector (Int, Int)
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (NonEmpty a)
+</span><a href="#local-6989586621679187942"><span class="hs-identifier hs-var">os</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-138"></span><span>                              </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; NonEmpty (NonEmpty a) -&gt; Vector (Int, Int)
+forall a.
+Enum a =&gt;
+Int -&gt; NonEmpty (NonEmpty a) -&gt; Vector (Int, Int)
 </span><a href="HGeometry.Permutation.html#genIndexes"><span class="hs-identifier hs-var">genIndexes</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178530"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">[[a]]
-</span><a href="#local-6989586621679178531"><span class="hs-identifier hs-var">os</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-143"></span><span>
-</span><span id="line-144"></span><span class="annot"><span class="hs-comment">-- | Helper function to generate the indices of a permutation</span></span><span>
-</span><span id="line-145"></span><span id="local-6989586621679178092"><span class="annot"><a href="HGeometry.Permutation.html#genIndexes"><span class="hs-identifier hs-type">genIndexes</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="annot"><a href="#local-6989586621679178092"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679178092"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Unboxed.Base.html#Vector"><span class="hs-identifier hs-type">UV.Vector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span></span><span>
-</span><span id="line-146"></span><span id="genIndexes"><span class="annot"><span class="annottext">genIndexes :: forall a. Enum a =&gt; Int -&gt; [[a]] -&gt; Vector (Int, Int)
-</span><a href="HGeometry.Permutation.html#genIndexes"><span class="hs-identifier hs-var hs-var">genIndexes</span></a></span></span><span> </span><span id="local-6989586621679178544"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178544"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679178545"><span class="annot"><span class="annottext">[[a]]
-</span><a href="#local-6989586621679178545"><span class="hs-identifier hs-var">os</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s. ST s (MVector s (Int, Int))) -&gt; Vector (Int, Int)
+</span><a href="#local-6989586621679187941"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (NonEmpty a)
+</span><a href="#local-6989586621679187942"><span class="hs-identifier hs-var">os</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-139"></span><span>
+</span><span id="line-140"></span><span class="annot"><span class="hs-comment">-- | Helper function to generate the indices of a permutation</span></span><span>
+</span><span id="line-141"></span><span id="local-6989586621679187515"><span class="annot"><a href="HGeometry.Permutation.html#genIndexes"><span class="hs-identifier hs-type">genIndexes</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="annot"><a href="#local-6989586621679187515"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679187515"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Unboxed.Base.html#Vector"><span class="hs-identifier hs-type">UV.Vector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span></span><span>
+</span><span id="line-142"></span><span id="genIndexes"><span class="annot"><span class="annottext">genIndexes :: forall a.
+Enum a =&gt;
+Int -&gt; NonEmpty (NonEmpty a) -&gt; Vector (Int, Int)
+</span><a href="HGeometry.Permutation.html#genIndexes"><span class="hs-identifier hs-var hs-var">genIndexes</span></a></span></span><span> </span><span id="local-6989586621679187958"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679187958"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679187959"><span class="annot"><span class="annottext">NonEmpty (NonEmpty a)
+</span><a href="#local-6989586621679187959"><span class="hs-identifier hs-var">os</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall s. ST s (MVector s (Int, Int))) -&gt; Vector (Int, Int)
 forall a. Unbox a =&gt; (forall s. ST s (MVector s a)) -&gt; Vector a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Unboxed.html#create"><span class="hs-identifier hs-var">UV.create</span></a></span><span> </span><span class="annot"><span class="annottext">((forall s. ST s (MVector s (Int, Int))) -&gt; Vector (Int, Int))
 -&gt; (forall s. ST s (MVector s (Int, Int))) -&gt; Vector (Int, Int)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-147"></span><span>                                </span><span id="local-6989586621679178556"><span class="annot"><span class="annottext">MVector s (Int, Int)
-</span><a href="#local-6989586621679178556"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ST s (MVector (PrimState (ST s)) (Int, Int))
+</span><span id="line-143"></span><span>                                </span><span id="local-6989586621679187970"><span class="annot"><span class="annottext">MVector s (Int, Int)
+</span><a href="#local-6989586621679187970"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ST s (MVector (PrimState (ST s)) (Int, Int))
 forall (m :: * -&gt; *) a.
 (PrimMonad m, Unbox a) =&gt;
 Int -&gt; m (MVector (PrimState m) a)
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Unboxed.Mutable.html#new"><span class="hs-identifier hs-var">UMV.new</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679178544"><span class="hs-identifier hs-var">n</span></a></span><span>
-</span><span id="line-148"></span><span>                                </span><span class="annot"><span class="annottext">((Int, (Int, Int)) -&gt; ST s ()) -&gt; [(Int, (Int, Int))] -&gt; ST s ()
+</span><a href="#local-6989586621679187958"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-144"></span><span>                                </span><span class="annot"><span class="annottext">((Int, (Int, Int)) -&gt; ST s ()) -&gt; [(Int, (Int, Int))] -&gt; ST s ()
 forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Foldable t, Monad m) =&gt;
 (a -&gt; m b) -&gt; t a -&gt; m ()
@@ -645,43 +762,49 @@ forall (m :: * -&gt; *) a.
 MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-2b99997072bd260ba138710cabe0d4835c7b8b1105e183e3a07e0df4c70a6760/share/doc/html/src/Data.Vector.Unboxed.Mutable.html#write"><span class="hs-identifier hs-var">UMV.write</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s (Int, Int)
 MVector (PrimState (ST s)) (Int, Int)
-</span><a href="#local-6989586621679178556"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Int, (Int, Int))]
-</span><a href="#local-6989586621679178559"><span class="hs-identifier hs-var">ixes'</span></a></span><span>
-</span><span id="line-149"></span><span>                                </span><span class="annot"><span class="annottext">MVector s (Int, Int) -&gt; ST s (MVector s (Int, Int))
+</span><a href="#local-6989586621679187970"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Int, (Int, Int))]
+</span><a href="#local-6989586621679187973"><span class="hs-identifier hs-var">ixes'</span></a></span><span>
+</span><span id="line-145"></span><span>                                </span><span class="annot"><span class="annottext">MVector s (Int, Int) -&gt; ST s (MVector s (Int, Int))
 forall a. a -&gt; ST s a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">MVector s (Int, Int)
-</span><a href="#local-6989586621679178556"><span class="hs-identifier hs-var">v</span></a></span><span>
-</span><span id="line-150"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-151"></span><span>    </span><span id="local-6989586621679178566"><span class="annot"><span class="annottext">f :: a -&gt; [a] -&gt; [(Int, (a, b))]
-</span><a href="#local-6989586621679178566"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679178567"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679178567"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679178568"><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679178568"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; b -&gt; (Int, (a, b))) -&gt; [a] -&gt; [b] -&gt; [(Int, (a, b))]
+</span><a href="#local-6989586621679187970"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-146"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-147"></span><span>    </span><span id="local-6989586621679187982"><span class="annot"><span class="annottext">f :: a -&gt; t a -&gt; [(Int, (a, b))]
+</span><a href="#local-6989586621679187982"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679187983"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679187983"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679187984"><span class="annot"><span class="annottext">t a
+</span><a href="#local-6989586621679187984"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; b -&gt; (Int, (a, b))) -&gt; [a] -&gt; [b] -&gt; [(Int, (a, b))]
 forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
-</span><span class="hs-identifier hs-var">zipWith</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679178570"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679178570"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679178571"><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679178571"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Int
+</span><span class="hs-identifier hs-var">zipWith</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679187986"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679187986"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679187987"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679187987"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Int
 forall a. Enum a =&gt; a -&gt; Int
 </span><span class="hs-identifier hs-var">fromEnum</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679178570"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679178567"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679178571"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679178568"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679187986"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679187983"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679187987"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">t a -&gt; [a]
+forall a. t a -&gt; [a]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">t a
+</span><a href="#local-6989586621679187984"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">b
 </span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span>
-</span><span id="line-152"></span><span>    </span><span id="local-6989586621679178559"><span class="annot"><span class="annottext">ixes' :: [(Int, (Int, Int))]
-</span><a href="#local-6989586621679178559"><span class="hs-identifier hs-var hs-var">ixes'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[[(Int, (Int, Int))]] -&gt; [(Int, (Int, Int))]
+</span><span id="line-148"></span><span>    </span><span id="local-6989586621679187973"><span class="annot"><span class="annottext">ixes' :: [(Int, (Int, Int))]
+</span><a href="#local-6989586621679187973"><span class="hs-identifier hs-var hs-var">ixes'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[[(Int, (Int, Int))]] -&gt; [(Int, (Int, Int))]
 forall (t :: * -&gt; *) a. Foldable t =&gt; t [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">concat</span></span><span> </span><span class="annot"><span class="annottext">([[(Int, (Int, Int))]] -&gt; [(Int, (Int, Int))])
 -&gt; [[(Int, (Int, Int))]] -&gt; [(Int, (Int, Int))]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; [a] -&gt; [(Int, (Int, Int))])
--&gt; [Int] -&gt; [[a]] -&gt; [[(Int, (Int, Int))]]
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; NonEmpty a -&gt; [(Int, (Int, Int))])
+-&gt; [Int] -&gt; [NonEmpty a] -&gt; [[(Int, (Int, Int))]]
 forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
-</span><span class="hs-identifier hs-var">zipWith</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [a] -&gt; [(Int, (Int, Int))]
-forall {b} {a} {a}.
-(Num b, Enum a, Enum b) =&gt;
-a -&gt; [a] -&gt; [(Int, (a, b))]
-</span><a href="#local-6989586621679178566"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
-</span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[[a]]
-</span><a href="#local-6989586621679178545"><span class="hs-identifier hs-var">os</span></a></span><span>
-</span><span id="line-153"></span></pre></body></html>
+</span><span class="hs-identifier hs-var">zipWith</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; NonEmpty a -&gt; [(Int, (Int, Int))]
+forall {t :: * -&gt; *} {b} {a} {a}.
+(Foldable t, Num b, Enum a, Enum b) =&gt;
+a -&gt; t a -&gt; [(Int, (a, b))]
+</span><a href="#local-6989586621679187982"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span class="hs-glyph">..</span><span class="hs-special">]</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonEmpty (NonEmpty a) -&gt; [NonEmpty a]
+forall a. NonEmpty a -&gt; [a]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (NonEmpty a)
+</span><a href="#local-6989586621679187959"><span class="hs-identifier hs-var">os</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-149"></span></pre></body></html>

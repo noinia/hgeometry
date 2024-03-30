@@ -1,0 +1,544 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  HGeometry.Sequence.Alternating</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- A Type representing Alternating sequences. The sequence type itself is parameterized.</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.Sequence.Alternating</span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier">Alternating</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#withNeighbours"><span class="hs-identifier">withNeighbours</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#mergeAlternating"><span class="hs-identifier">mergeAlternating</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#insertBreakPoints"><span class="hs-identifier">insertBreakPoints</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#reverse"><span class="hs-identifier">reverse</span></a></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-0f3fd035821e0d3b71cdf91e4e4c32d86cdf43691417829ea65cfd226a1390e0/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Bifoldable</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Bitraversable</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.0.1-356be75409d717e3750faf13ba0deb2d7b06e43cebfb4639fd624bf0ee7023c9/share/doc/html/src/Data.Functor.Apply.html"><span class="hs-identifier">Data.Functor.Apply</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.0.1-356be75409d717e3750faf13ba0deb2d7b06e43cebfb4639fd624bf0ee7023c9/share/doc/html/src/Data.Functor.Bind.Class.html#%3C.%2A%3E"><span class="hs-operator">(&lt;.*&gt;)</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">List</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.0.1-356be75409d717e3750faf13ba0deb2d7b06e43cebfb4639fd624bf0ee7023c9/share/doc/html/src/Data.Semigroup.Traversable.html"><span class="hs-identifier">Data.Semigroup.Traversable</span></a></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">reverse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="annot"><span class="hs-comment">-- | A (non-empty) alternating sequence of @a@\'s and @sep@'s.</span></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">data</span><span> </span><span id="Alternating"><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-var">Alternating</span></a></span></span><span> </span><span id="local-6989586621679179989"><span class="annot"><a href="#local-6989586621679179989"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621679179990"><span class="annot"><a href="#local-6989586621679179990"><span class="hs-identifier hs-type">sep</span></a></span></span><span> </span><span id="local-6989586621679179988"><span class="annot"><a href="#local-6989586621679179988"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Alternating"><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-var">Alternating</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679179988"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679179989"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679179990"><span class="hs-identifier hs-type">sep</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679179988"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span>                         </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679180199"><span id="local-6989586621679180201"><span class="annot"><span class="annottext">(forall x. Alternating f sep a -&gt; Rep (Alternating f sep a) x)
+-&gt; (forall x. Rep (Alternating f sep a) x -&gt; Alternating f sep a)
+-&gt; Generic (Alternating f sep a)
+forall x. Rep (Alternating f sep a) x -&gt; Alternating f sep a
+forall x. Alternating f sep a -&gt; Rep (Alternating f sep a) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall (f :: * -&gt; *) sep a x.
+Rep (Alternating f sep a) x -&gt; Alternating f sep a
+forall (f :: * -&gt; *) sep a x.
+Alternating f sep a -&gt; Rep (Alternating f sep a) x
+$cfrom :: forall (f :: * -&gt; *) sep a x.
+Alternating f sep a -&gt; Rep (Alternating f sep a) x
+from :: forall x. Alternating f sep a -&gt; Rep (Alternating f sep a) x
+$cto :: forall (f :: * -&gt; *) sep a x.
+Rep (Alternating f sep a) x -&gt; Alternating f sep a
+to :: forall x. Rep (Alternating f sep a) x -&gt; Alternating f sep a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span id="local-6989586621679179938"><span id="local-6989586621679179939"><span id="local-6989586621679179940"><span id="local-6989586621679180207"><span id="local-6989586621679180213"><span id="local-6989586621679180217"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679179938"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679179939"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679179940"><span class="hs-identifier hs-type">sep</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679179938"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679179939"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679179940"><span class="hs-identifier hs-type">sep</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679179938"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span>
+</span><span id="line-41"></span><span id="local-6989586621679179945"><span id="local-6989586621679179946"><span id="local-6989586621679179947"><span id="local-6989586621679180223"><span id="local-6989586621679180227"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679179945"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679179946"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679179947"><span class="hs-identifier hs-type">sep</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679179945"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679179946"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679179947"><span class="hs-identifier hs-type">sep</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679179945"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-42"></span><span id="local-6989586621679179952"><span id="local-6989586621679179953"><span id="local-6989586621679179954"><span id="local-6989586621679180238"><span id="local-6989586621679180242"><span id="local-6989586621679180246"><span id="local-6989586621679180250"><span id="local-6989586621679180253"><span id="local-6989586621679180256"><span id="local-6989586621679180259"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679179952"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679179953"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679179954"><span class="hs-identifier hs-type">sep</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679179952"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679179953"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679179954"><span class="hs-identifier hs-type">sep</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679179952"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span></span></span></span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679179973"><span id="local-6989586621679179974"><span id="local-6989586621679179975"><span id="local-6989586621679180266"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679179973"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679179974"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679179975"><span class="hs-identifier hs-type">sep</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679179973"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679179974"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679179975"><span class="hs-identifier hs-type">sep</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679179973"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679179983"><span id="local-6989586621679179984"><span id="local-6989586621679180285"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679179983"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679179983"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679179984"><span class="hs-identifier hs-type">sep</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-48"></span><span>  </span><span id="local-6989586621679180292"><span class="annot"><span class="annottext">fmap :: forall a b. (a -&gt; b) -&gt; Alternating f sep a -&gt; Alternating f sep b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span id="local-6989586621679180293"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679180293"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span id="local-6989586621679180294"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180294"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679180295"><span class="annot"><span class="annottext">f (sep, a)
+</span><a href="#local-6989586621679180295"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; f (sep, b) -&gt; Alternating f sep b
+forall (f :: * -&gt; *) sep a. a -&gt; f (sep, a) -&gt; Alternating f sep a
+</span><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-var">Alternating</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679180293"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180294"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(f (sep, b) -&gt; Alternating f sep b)
+-&gt; f (sep, b) -&gt; Alternating f sep b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">((sep, a) -&gt; (sep, b)) -&gt; f (sep, a) -&gt; f (sep, b)
+forall a b. (a -&gt; b) -&gt; f a -&gt; f b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; (sep, a) -&gt; (sep, b)
+forall a b. (a -&gt; b) -&gt; (sep, a) -&gt; (sep, b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679180293"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">f (sep, a)
+</span><a href="#local-6989586621679180295"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-49"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679180018"><span id="local-6989586621679180019"><span id="local-6989586621679180298"><span id="local-6989586621679180305"><span id="local-6989586621679180310"><span id="local-6989586621679180313"><span id="local-6989586621679180316"><span id="local-6989586621679180319"><span id="local-6989586621679180322"><span id="local-6989586621679180325"><span id="local-6989586621679180328"><span id="local-6989586621679180331"><span id="local-6989586621679180334"><span id="local-6989586621679180337"><span id="local-6989586621679180342"><span id="local-6989586621679180347"><span id="local-6989586621679180352"><span id="local-6989586621679180357"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679180018"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180018"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180019"><span class="hs-identifier hs-type">sep</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-50"></span><span>  </span><span id="local-6989586621679180368"><span class="annot"><span class="annottext">foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Alternating f sep a -&gt; m
+</span><a href="#local-6989586621679180368"><span class="hs-identifier hs-var hs-var hs-var hs-var">foldMap</span></a></span></span><span> </span><span id="local-6989586621679180370"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679180370"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span id="local-6989586621679180371"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180371"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679180372"><span class="annot"><span class="annottext">f (sep, a)
+</span><a href="#local-6989586621679180372"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679180370"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180371"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; m -&gt; m
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">((sep, a) -&gt; m) -&gt; f (sep, a) -&gt; m
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; f a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable t, Monoid m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679180370"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; ((sep, a) -&gt; a) -&gt; (sep, a) -&gt; m
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(sep, a) -&gt; a
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">f (sep, a)
+</span><a href="#local-6989586621679180372"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-51"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679180045"><span id="local-6989586621679180046"><span id="local-6989586621679180384"><span id="local-6989586621679180390"><span id="local-6989586621679180395"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="annot"><a href="#local-6989586621679180045"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180045"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180046"><span class="hs-identifier hs-type">sep</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-52"></span><span>  </span><span id="local-6989586621679180412"><span class="annot"><span class="annottext">traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Alternating f sep a -&gt; f (Alternating f sep b)
+</span><a href="#local-6989586621679180412"><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse</span></a></span></span><span> </span><span id="local-6989586621679180414"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679180414"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span id="local-6989586621679180415"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180415"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679180416"><span class="annot"><span class="annottext">f (sep, a)
+</span><a href="#local-6989586621679180416"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; f (sep, b) -&gt; Alternating f sep b
+forall (f :: * -&gt; *) sep a. a -&gt; f (sep, a) -&gt; Alternating f sep a
+</span><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-var">Alternating</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; f (sep, b) -&gt; Alternating f sep b)
+-&gt; f b -&gt; f (f (sep, b) -&gt; Alternating f sep b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679180414"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180415"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">f (f (sep, b) -&gt; Alternating f sep b)
+-&gt; f (f (sep, b)) -&gt; f (Alternating f sep b)
+forall a b. f (a -&gt; b) -&gt; f a -&gt; f b
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">((sep, a) -&gt; f (sep, b)) -&gt; f (sep, a) -&gt; f (f (sep, b))
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; f a -&gt; f (f b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; (sep, a) -&gt; f (sep, b)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; (sep, a) -&gt; f (sep, b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679180414"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">f (sep, a)
+</span><a href="#local-6989586621679180416"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679180075"><span id="local-6989586621679180076"><span id="local-6989586621679180422"><span id="local-6989586621679180429"><span id="local-6989586621679180434"><span id="local-6989586621679180437"><span id="local-6989586621679180442"><span id="local-6989586621679180447"><span id="local-6989586621679180450"><span id="local-6989586621679180453"><span id="local-6989586621679180456"><span id="local-6989586621679180459"><span id="local-6989586621679180462"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679180075"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180075"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180076"><span class="hs-identifier hs-type">sep</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-55"></span><span>  </span><span id="local-6989586621679180470"><span class="annot"><span class="annottext">foldMap1 :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; Alternating f sep a -&gt; m
+</span><a href="#local-6989586621679180470"><span class="hs-identifier hs-var hs-var hs-var hs-var">foldMap1</span></a></span></span><span> </span><span id="local-6989586621679180472"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679180472"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span id="local-6989586621679180473"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180473"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679180474"><span class="annot"><span class="annottext">f (sep, a)
+</span><a href="#local-6989586621679180474"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">((sep, a) -&gt; Maybe m) -&gt; f (sep, a) -&gt; Maybe m
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; f a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable t, Monoid m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">m -&gt; Maybe m
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(m -&gt; Maybe m) -&gt; ((sep, a) -&gt; m) -&gt; (sep, a) -&gt; Maybe m
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679180472"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; ((sep, a) -&gt; a) -&gt; (sep, a) -&gt; m
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(sep, a) -&gt; a
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">f (sep, a)
+</span><a href="#local-6989586621679180474"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-56"></span><span>                                    </span><span class="annot"><span class="annottext">Maybe m
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679180472"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180473"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-57"></span><span>                                    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679180475"><span class="annot"><span class="annottext">m
+</span><a href="#local-6989586621679180475"><span class="hs-identifier hs-var">r</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679180472"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180473"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; m -&gt; m
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">m
+</span><a href="#local-6989586621679180475"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679180092"><span id="local-6989586621679180093"><span id="local-6989586621679180484"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="annot"><a href="#local-6989586621679180092"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.0.1-356be75409d717e3750faf13ba0deb2d7b06e43cebfb4639fd624bf0ee7023c9/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180092"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180093"><span class="hs-identifier hs-type">sep</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>  </span><span id="local-6989586621679180500"><span class="annot"><span class="annottext">traverse1 :: forall (f :: * -&gt; *) a b.
+Apply f =&gt;
+(a -&gt; f b) -&gt; Alternating f sep a -&gt; f (Alternating f sep b)
+</span><a href="#local-6989586621679180500"><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse1</span></a></span></span><span> </span><span id="local-6989586621679180502"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679180502"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span id="local-6989586621679180503"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180503"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679180504"><span class="annot"><span class="annottext">f (sep, a)
+</span><a href="#local-6989586621679180504"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; f (sep, b) -&gt; Alternating f sep b
+forall (f :: * -&gt; *) sep a. a -&gt; f (sep, a) -&gt; Alternating f sep a
+</span><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-var">Alternating</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; f (sep, b) -&gt; Alternating f sep b)
+-&gt; f b -&gt; f (f (sep, b) -&gt; Alternating f sep b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679180502"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180503"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">f (f (sep, b) -&gt; Alternating f sep b)
+-&gt; MaybeApply f (f (sep, b)) -&gt; f (Alternating f sep b)
+forall (f :: * -&gt; *) a b.
+Apply f =&gt;
+f (a -&gt; b) -&gt; MaybeApply f a -&gt; f b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.0.1-356be75409d717e3750faf13ba0deb2d7b06e43cebfb4639fd624bf0ee7023c9/share/doc/html/src/Data.Functor.Bind.Class.html#%3C.%2A%3E"><span class="hs-operator hs-var">&lt;.*&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">((sep, a) -&gt; f (sep, b)) -&gt; f (sep, a) -&gt; MaybeApply f (f (sep, b))
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Apply f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; MaybeApply f (t b)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.0.1-356be75409d717e3750faf13ba0deb2d7b06e43cebfb4639fd624bf0ee7023c9/share/doc/html/src/Data.Functor.Bind.Class.html#traverse1Maybe"><span class="hs-identifier hs-var">traverse1Maybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; (sep, a) -&gt; f (sep, b)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable1 t, Apply f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Apply f =&gt;
+(a -&gt; f b) -&gt; (sep, a) -&gt; f (sep, b)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.0.1-356be75409d717e3750faf13ba0deb2d7b06e43cebfb4639fd624bf0ee7023c9/share/doc/html/src/Data.Semigroup.Traversable.Class.html#traverse1"><span class="hs-identifier hs-var">traverse1</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679180502"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">f (sep, a)
+</span><a href="#local-6989586621679180504"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679180121"><span id="local-6989586621679180511"><span id="local-6989586621679180515"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679180121"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180121"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-63"></span><span>  </span><span id="local-6989586621679180521"><span class="annot"><span class="annottext">bimap :: forall a b c d.
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; Alternating f a c -&gt; Alternating f b d
+</span><a href="#local-6989586621679180521"><span class="hs-identifier hs-var hs-var hs-var hs-var">bimap</span></a></span></span><span> </span><span id="local-6989586621679180523"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679180523"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679180524"><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679180524"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span id="local-6989586621679180525"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679180525"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679180526"><span class="annot"><span class="annottext">f (a, c)
+</span><a href="#local-6989586621679180526"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">d -&gt; f (b, d) -&gt; Alternating f b d
+forall (f :: * -&gt; *) sep a. a -&gt; f (sep, a) -&gt; Alternating f sep a
+</span><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-var">Alternating</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679180524"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679180525"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(f (b, d) -&gt; Alternating f b d) -&gt; f (b, d) -&gt; Alternating f b d
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">((a, c) -&gt; (b, d)) -&gt; f (a, c) -&gt; f (b, d)
+forall a b. (a -&gt; b) -&gt; f a -&gt; f b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; (c -&gt; d) -&gt; (a, c) -&gt; (b, d)
+forall a b c d. (a -&gt; b) -&gt; (c -&gt; d) -&gt; (a, c) -&gt; (b, d)
+forall (p :: * -&gt; * -&gt; *) a b c d.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
+</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679180523"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679180524"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">f (a, c)
+</span><a href="#local-6989586621679180526"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679180140"><span id="local-6989586621679180529"><span id="local-6989586621679180536"><span id="local-6989586621679180539"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679180140"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bifoldable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180140"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-66"></span><span>  </span><span id="local-6989586621679180550"><span class="annot"><span class="annottext">bifoldMap :: forall m a b.
+Monoid m =&gt;
+(a -&gt; m) -&gt; (b -&gt; m) -&gt; Alternating f a b -&gt; m
+</span><a href="#local-6989586621679180550"><span class="hs-identifier hs-var hs-var hs-var hs-var">bifoldMap</span></a></span></span><span> </span><span id="local-6989586621679180552"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679180552"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679180553"><span class="annot"><span class="annottext">b -&gt; m
+</span><a href="#local-6989586621679180553"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span id="local-6989586621679180554"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180554"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679180555"><span class="annot"><span class="annottext">f (a, b)
+</span><a href="#local-6989586621679180555"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; m
+</span><a href="#local-6989586621679180553"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180554"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; m -&gt; m
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">((a, b) -&gt; m) -&gt; f (a, b) -&gt; m
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; f a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable t, Monoid m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; (b -&gt; m) -&gt; (a, b) -&gt; m
+forall m a b. Monoid m =&gt; (a -&gt; m) -&gt; (b -&gt; m) -&gt; (a, b) -&gt; m
+forall (p :: * -&gt; * -&gt; *) m a b.
+(Bifoldable p, Monoid m) =&gt;
+(a -&gt; m) -&gt; (b -&gt; m) -&gt; p a b -&gt; m
+</span><span class="hs-identifier hs-var">bifoldMap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679180552"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">b -&gt; m
+</span><a href="#local-6989586621679180553"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">f (a, b)
+</span><a href="#local-6989586621679180555"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679180152"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="annot"><a href="#local-6989586621679180152"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bitraversable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180152"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-69"></span><span>  </span><span id="local-6989586621679180575"><span class="annot"><span class="annottext">bitraverse :: forall (f :: * -&gt; *) a c b d.
+Applicative f =&gt;
+(a -&gt; f c)
+-&gt; (b -&gt; f d) -&gt; Alternating f a b -&gt; f (Alternating f c d)
+</span><a href="#local-6989586621679180575"><span class="hs-identifier hs-var hs-var hs-var hs-var">bitraverse</span></a></span></span><span> </span><span id="local-6989586621679180577"><span class="annot"><span class="annottext">a -&gt; f c
+</span><a href="#local-6989586621679180577"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679180578"><span class="annot"><span class="annottext">b -&gt; f d
+</span><a href="#local-6989586621679180578"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span id="local-6989586621679180579"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180579"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679180580"><span class="annot"><span class="annottext">f (a, b)
+</span><a href="#local-6989586621679180580"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">d -&gt; f (c, d) -&gt; Alternating f c d
+forall (f :: * -&gt; *) sep a. a -&gt; f (sep, a) -&gt; Alternating f sep a
+</span><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-var">Alternating</span></a></span><span> </span><span class="annot"><span class="annottext">(d -&gt; f (c, d) -&gt; Alternating f c d)
+-&gt; f d -&gt; f (f (c, d) -&gt; Alternating f c d)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; f d
+</span><a href="#local-6989586621679180578"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180579"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">f (f (c, d) -&gt; Alternating f c d)
+-&gt; f (f (c, d)) -&gt; f (Alternating f c d)
+forall a b. f (a -&gt; b) -&gt; f a -&gt; f b
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">((a, b) -&gt; f (c, d)) -&gt; f (a, b) -&gt; f (f (c, d))
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; f a -&gt; f (f b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; f c) -&gt; (b -&gt; f d) -&gt; (a, b) -&gt; f (c, d)
+forall (f :: * -&gt; *) a c b d.
+Applicative f =&gt;
+(a -&gt; f c) -&gt; (b -&gt; f d) -&gt; (a, b) -&gt; f (c, d)
+forall (t :: * -&gt; * -&gt; *) (f :: * -&gt; *) a c b d.
+(Bitraversable t, Applicative f) =&gt;
+(a -&gt; f c) -&gt; (b -&gt; f d) -&gt; t a b -&gt; f (t c d)
+</span><span class="hs-identifier hs-var">bitraverse</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f c
+</span><a href="#local-6989586621679180577"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">b -&gt; f d
+</span><a href="#local-6989586621679180578"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">f (a, b)
+</span><a href="#local-6989586621679180580"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- | Computes a b with all its neighbours</span><span>
+</span><span id="line-72"></span><span class="hs-comment">--</span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- &gt;&gt;&gt; withNeighbours (Alternating 0 [('a', 1), ('b', 2), ('c',3)])</span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- [(0,'a',1),(1,'b',2),(2,'c',3)]</span><span>
+</span><span id="line-75"></span><span id="local-6989586621679180158"><span id="local-6989586621679180159"><span id="local-6989586621679180160"><span class="annot"><a href="HGeometry.Sequence.Alternating.html#withNeighbours"><span class="hs-identifier hs-type">withNeighbours</span></a></span><span>                       </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679180158"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180158"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180159"><span class="hs-identifier hs-type">sep</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180160"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679180160"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679180159"><span class="hs-identifier hs-type">sep</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679180160"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span></span></span></span><span>
+</span><span id="line-76"></span><span id="withNeighbours"><span class="annot"><span class="annottext">withNeighbours :: forall (f :: * -&gt; *) sep a.
+Foldable f =&gt;
+Alternating f sep a -&gt; [(a, sep, a)]
+</span><a href="HGeometry.Sequence.Alternating.html#withNeighbours"><span class="hs-identifier hs-var hs-var">withNeighbours</span></a></span></span><span> </span><span id="local-6989586621679180584"><span class="annot"><span class="annottext">xs :: Alternating f sep a
+</span><a href="#local-6989586621679180584"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679180585"><span class="annot"><span class="annottext">f (sep, a)
+</span><a href="#local-6989586621679180585"><span class="hs-identifier hs-var">ys</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-77"></span><span>  </span><span class="annot"><span class="annottext">(a -&gt; (sep, a) -&gt; (a, sep, a))
+-&gt; [a] -&gt; [(sep, a)] -&gt; [(a, sep, a)]
+forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
+</span><span class="hs-identifier hs-var">zipWith</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679180587"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180587"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679180588"><span class="annot"><span class="annottext">sep
+</span><a href="#local-6989586621679180588"><span class="hs-identifier hs-var">s</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679180589"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180589"><span class="hs-identifier hs-var">a'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180587"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">sep
+</span><a href="#local-6989586621679180588"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180589"><span class="hs-identifier hs-var">a'</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Alternating f sep a -&gt; [a]
+forall a. Alternating f sep a -&gt; [a]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">Alternating f sep a
+</span><a href="#local-6989586621679180584"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">f (sep, a) -&gt; [(sep, a)]
+forall a. f a -&gt; [a]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">f (sep, a)
+</span><a href="#local-6989586621679180585"><span class="hs-identifier hs-var">ys</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- | Generic merging scheme that merges two Alternating Lists and applies the function</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- '@f@', with the current/new value at every event. So note that if the alternating</span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- consists of 'Alternating a0 [(t1,a2)]' then the function is applied to a1, not to a0</span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- (i.e. every value ai is considered alive on the interval [ti,t(i+1))</span><span>
+</span><span id="line-84"></span><span class="hs-comment">--</span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- &gt;&gt;&gt; let odds  = Alternating &quot;a&quot; [(3,&quot;c&quot;), (5,&quot;e&quot;), (7,&quot;g&quot;)]</span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- &gt;&gt;&gt; let evens = Alternating &quot;b&quot; [(4,&quot;d&quot;), (6,&quot;f&quot;), (8,&quot;h&quot;)]</span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- &gt;&gt;&gt; mergeAlternating (\_ a b -&gt; a &lt;&gt; b) odds evens</span><span>
+</span><span id="line-88"></span><span class="hs-comment">-- [(3,&quot;cb&quot;),(4,&quot;cd&quot;),(5,&quot;ed&quot;),(6,&quot;ef&quot;),(7,&quot;gf&quot;),(8,&quot;gh&quot;)]</span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- &gt;&gt;&gt; mergeAlternating (\t a b -&gt; if t `mod` 2 == 0 then a else b) odds evens</span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- [(3,&quot;b&quot;),(4,&quot;c&quot;),(5,&quot;d&quot;),(6,&quot;e&quot;),(7,&quot;f&quot;),(8,&quot;g&quot;)]</span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- &gt;&gt;&gt; mergeAlternating (\_ a b -&gt; a &lt;&gt; b) odds (Alternating &quot;b&quot; [(0,&quot;d&quot;), (5,&quot;e&quot;), (8,&quot;h&quot;)])</span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- [(0,&quot;ad&quot;),(3,&quot;cd&quot;),(5,&quot;ee&quot;),(7,&quot;ge&quot;),(8,&quot;gh&quot;)]</span><span>
+</span><span id="line-93"></span><span id="local-6989586621679180167"><span id="local-6989586621679180168"><span id="local-6989586621679180169"><span id="local-6989586621679180170"><span class="annot"><a href="HGeometry.Sequence.Alternating.html#mergeAlternating"><span class="hs-identifier hs-type">mergeAlternating</span></a></span><span>                         </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679180167"><span class="hs-identifier hs-type">t</span></a></span><span>
+</span><span id="line-94"></span><span>                                         </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679180167"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679180168"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679180169"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679180170"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-95"></span><span>                                         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><a href="#local-6989586621679180167"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180168"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><a href="#local-6989586621679180167"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180169"><span class="hs-identifier hs-type">b</span></a></span><span>
+</span><span id="line-96"></span><span>                                         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679180167"><span class="hs-identifier hs-type">t</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679180170"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span></span></span></span></span><span>
+</span><span id="line-97"></span><span id="mergeAlternating"><span class="annot"><span class="annottext">mergeAlternating :: forall t a b c.
+Ord t =&gt;
+(t -&gt; a -&gt; b -&gt; c)
+-&gt; Alternating [] t a -&gt; Alternating [] t b -&gt; [(t, c)]
+</span><a href="HGeometry.Sequence.Alternating.html#mergeAlternating"><span class="hs-identifier hs-var hs-var">mergeAlternating</span></a></span></span><span> </span><span id="local-6989586621679180594"><span class="annot"><span class="annottext">t -&gt; a -&gt; b -&gt; c
+</span><a href="#local-6989586621679180594"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span id="local-6989586621679180595"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180595"><span class="hs-identifier hs-var">a00</span></a></span></span><span> </span><span id="local-6989586621679180596"><span class="annot"><span class="annottext">[(t, a)]
+</span><a href="#local-6989586621679180596"><span class="hs-identifier hs-var">as0</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-98"></span><span>                   </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span id="local-6989586621679180597"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180597"><span class="hs-identifier hs-var">b00</span></a></span></span><span> </span><span id="local-6989586621679180598"><span class="annot"><span class="annottext">[(t, b)]
+</span><a href="#local-6989586621679180598"><span class="hs-identifier hs-var">bs0</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; [(t, a)] -&gt; [(t, b)] -&gt; [(t, c)]
+</span><a href="#local-6989586621679180599"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180595"><span class="hs-identifier hs-var">a00</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180597"><span class="hs-identifier hs-var">b00</span></a></span><span> </span><span class="annot"><span class="annottext">[(t, a)]
+</span><a href="#local-6989586621679180596"><span class="hs-identifier hs-var">as0</span></a></span><span> </span><span class="annot"><span class="annottext">[(t, b)]
+</span><a href="#local-6989586621679180598"><span class="hs-identifier hs-var">bs0</span></a></span><span>
+</span><span id="line-99"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-100"></span><span>    </span><span id="local-6989586621679180599"><span class="annot"><span class="annottext">go :: a -&gt; b -&gt; [(t, a)] -&gt; [(t, b)] -&gt; [(t, c)]
+</span><a href="#local-6989586621679180599"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679180600"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180600"><span class="hs-identifier hs-var">a</span></a></span></span><span>  </span><span class="annot"><span class="annottext">b
+</span><span class="hs-identifier">_</span></span><span>  </span><span class="hs-special">[</span><span class="hs-special">]</span><span>              </span><span id="local-6989586621679180601"><span class="annot"><span class="annottext">[(t, b)]
+</span><a href="#local-6989586621679180601"><span class="hs-identifier hs-var">bs</span></a></span></span><span>               </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((t, b) -&gt; (t, c)) -&gt; [(t, b)] -&gt; [(t, c)]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679180602"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679180602"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679180603"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180603"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679180602"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">t -&gt; a -&gt; b -&gt; c
+</span><a href="#local-6989586621679180594"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679180602"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180600"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180603"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(t, b)]
+</span><a href="#local-6989586621679180601"><span class="hs-identifier hs-var">bs</span></a></span><span>
+</span><span id="line-101"></span><span>    </span><span class="annot"><a href="#local-6989586621679180599"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span>  </span><span id="local-6989586621679180604"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180604"><span class="hs-identifier hs-var">b</span></a></span></span><span>  </span><span id="local-6989586621679180605"><span class="annot"><span class="annottext">[(t, a)]
+</span><a href="#local-6989586621679180605"><span class="hs-keyword hs-var">as</span></a></span></span><span>              </span><span class="hs-special">[</span><span class="hs-special">]</span><span>               </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((t, a) -&gt; (t, c)) -&gt; [(t, a)] -&gt; [(t, c)]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679180606"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679180606"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679180607"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180607"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679180606"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">t -&gt; a -&gt; b -&gt; c
+</span><a href="#local-6989586621679180594"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679180606"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180607"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180604"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(t, a)]
+</span><a href="#local-6989586621679180605"><span class="hs-keyword hs-var">as</span></a></span><span>
+</span><span id="line-102"></span><span>    </span><span class="annot"><a href="#local-6989586621679180599"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679180608"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180608"><span class="hs-identifier hs-var">a0</span></a></span></span><span> </span><span id="local-6989586621679180609"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180609"><span class="hs-identifier hs-var">b0</span></a></span></span><span> </span><span id="local-6989586621679180610"><span class="annot"><span class="annottext">as :: [(t, a)]
+</span><a href="#local-6989586621679180610"><span class="hs-keyword hs-var">as</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="hs-special">(</span><span id="local-6989586621679180611"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679180611"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679180612"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180612"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679180613"><span class="annot"><span class="annottext">[(t, a)]
+</span><a href="#local-6989586621679180613"><span class="hs-identifier hs-var">as'</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679180614"><span class="annot"><span class="annottext">bs :: [(t, b)]
+</span><a href="#local-6989586621679180614"><span class="hs-identifier hs-var">bs</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="hs-special">(</span><span id="local-6989586621679180615"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679180615"><span class="hs-identifier hs-var">t'</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679180616"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180616"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679180617"><span class="annot"><span class="annottext">[(t, b)]
+</span><a href="#local-6989586621679180617"><span class="hs-identifier hs-var">bs'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679180611"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">t -&gt; t -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679180615"><span class="hs-identifier hs-var">t'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-103"></span><span>                                                      </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679180611"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">t -&gt; a -&gt; b -&gt; c
+</span><a href="#local-6989586621679180594"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679180611"><span class="hs-identifier hs-var">t</span></a></span><span>  </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180612"><span class="hs-identifier hs-var">a</span></a></span><span>  </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180609"><span class="hs-identifier hs-var">b0</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(t, c) -&gt; [(t, c)] -&gt; [(t, c)]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; [(t, a)] -&gt; [(t, b)] -&gt; [(t, c)]
+</span><a href="#local-6989586621679180599"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180612"><span class="hs-identifier hs-var">a</span></a></span><span>  </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180609"><span class="hs-identifier hs-var">b0</span></a></span><span> </span><span class="annot"><span class="annottext">[(t, a)]
+</span><a href="#local-6989586621679180613"><span class="hs-identifier hs-var">as'</span></a></span><span> </span><span class="annot"><span class="annottext">[(t, b)]
+</span><a href="#local-6989586621679180614"><span class="hs-identifier hs-var">bs</span></a></span><span>
+</span><span id="line-104"></span><span>                                                      </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679180611"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">t -&gt; a -&gt; b -&gt; c
+</span><a href="#local-6989586621679180594"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679180611"><span class="hs-identifier hs-var">t</span></a></span><span>  </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180612"><span class="hs-identifier hs-var">a</span></a></span><span>  </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180616"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>  </span><span class="annot"><span class="annottext">(t, c) -&gt; [(t, c)] -&gt; [(t, c)]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; [(t, a)] -&gt; [(t, b)] -&gt; [(t, c)]
+</span><a href="#local-6989586621679180599"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180612"><span class="hs-identifier hs-var">a</span></a></span><span>  </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180616"><span class="hs-identifier hs-var">b</span></a></span><span>  </span><span class="annot"><span class="annottext">[(t, a)]
+</span><a href="#local-6989586621679180613"><span class="hs-identifier hs-var">as'</span></a></span><span> </span><span class="annot"><span class="annottext">[(t, b)]
+</span><a href="#local-6989586621679180617"><span class="hs-identifier hs-var">bs'</span></a></span><span>
+</span><span id="line-105"></span><span>                                                      </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679180615"><span class="hs-identifier hs-var">t'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">t -&gt; a -&gt; b -&gt; c
+</span><a href="#local-6989586621679180594"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679180615"><span class="hs-identifier hs-var">t'</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180608"><span class="hs-identifier hs-var">a0</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180616"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>  </span><span class="annot"><span class="annottext">(t, c) -&gt; [(t, c)] -&gt; [(t, c)]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; [(t, a)] -&gt; [(t, b)] -&gt; [(t, c)]
+</span><a href="#local-6989586621679180599"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180608"><span class="hs-identifier hs-var">a0</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180616"><span class="hs-identifier hs-var">b</span></a></span><span>  </span><span class="annot"><span class="annottext">[(t, a)]
+</span><a href="#local-6989586621679180610"><span class="hs-keyword hs-var">as</span></a></span><span>  </span><span class="annot"><span class="annottext">[(t, b)]
+</span><a href="#local-6989586621679180617"><span class="hs-identifier hs-var">bs'</span></a></span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span class="hs-comment">-- | Adds additional t-values in the alternating, (in sorted order). I.e. if we insert a</span><span>
+</span><span id="line-108"></span><span class="hs-comment">-- &quot;breakpoint&quot; at time t the current '@a@' value is used at that time.</span><span>
+</span><span id="line-109"></span><span class="hs-comment">--</span><span>
+</span><span id="line-110"></span><span class="hs-comment">-- &gt;&gt;&gt; insertBreakPoints [0,2,4,6,8,10] $ Alternating &quot;a&quot; [(3, &quot;c&quot;), (5, &quot;e&quot;), (7,&quot;g&quot;)]</span><span>
+</span><span id="line-111"></span><span class="hs-comment">-- Alternating &quot;a&quot; [(0,&quot;a&quot;),(2,&quot;a&quot;),(3,&quot;c&quot;),(4,&quot;c&quot;),(5,&quot;e&quot;),(6,&quot;e&quot;),(7,&quot;g&quot;),(8,&quot;g&quot;),(10,&quot;g&quot;)]</span><span>
+</span><span id="line-112"></span><span id="local-6989586621679180177"><span id="local-6989586621679180178"><span class="annot"><a href="HGeometry.Sequence.Alternating.html#insertBreakPoints"><span class="hs-identifier hs-type">insertBreakPoints</span></a></span><span>                         </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679180177"><span class="hs-identifier hs-type">t</span></a></span><span>
+</span><span id="line-113"></span><span>                                          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679180177"><span class="hs-identifier hs-type">t</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><a href="#local-6989586621679180177"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180178"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><a href="#local-6989586621679180177"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180178"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-114"></span><span id="insertBreakPoints"><span class="annot"><span class="annottext">insertBreakPoints :: forall t a.
+Ord t =&gt;
+[t] -&gt; Alternating [] t a -&gt; Alternating [] t a
+</span><a href="HGeometry.Sequence.Alternating.html#insertBreakPoints"><span class="hs-identifier hs-var hs-var">insertBreakPoints</span></a></span></span><span> </span><span id="local-6989586621679180623"><span class="annot"><span class="annottext">[t]
+</span><a href="#local-6989586621679180623"><span class="hs-identifier hs-var">ts</span></a></span></span><span> </span><span id="local-6989586621679180624"><span class="annot"><span class="annottext">a :: Alternating [] t a
+</span><a href="#local-6989586621679180624"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span id="local-6989586621679180625"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180625"><span class="hs-identifier hs-var">a0</span></a></span></span><span> </span><span class="annot"><span class="annottext">[(t, a)]
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-115"></span><span>  </span><span class="annot"><span class="annottext">a -&gt; [(t, a)] -&gt; Alternating [] t a
+forall (f :: * -&gt; *) sep a. a -&gt; f (sep, a) -&gt; Alternating f sep a
+</span><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-var">Alternating</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180625"><span class="hs-identifier hs-var">a0</span></a></span><span> </span><span class="annot"><span class="annottext">([(t, a)] -&gt; Alternating [] t a) -&gt; [(t, a)] -&gt; Alternating [] t a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(t -&gt; () -&gt; a -&gt; a)
+-&gt; Alternating [] t () -&gt; Alternating [] t a -&gt; [(t, a)]
+forall t a b c.
+Ord t =&gt;
+(t -&gt; a -&gt; b -&gt; c)
+-&gt; Alternating [] t a -&gt; Alternating [] t b -&gt; [(t, c)]
+</span><a href="HGeometry.Sequence.Alternating.html#mergeAlternating"><span class="hs-identifier hs-var">mergeAlternating</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">t
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">()
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679180626"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180626"><span class="hs-identifier hs-var">a'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180626"><span class="hs-identifier hs-var">a'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">() -&gt; [(t, ())] -&gt; Alternating [] t ()
+forall (f :: * -&gt; *) sep a. a -&gt; f (sep, a) -&gt; Alternating f sep a
+</span><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-var">Alternating</span></a></span><span> </span><span class="annot"><span class="annottext">()
+forall a. HasCallStack =&gt; a
+</span><span class="hs-identifier hs-var">undefined</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(t -&gt; (t, ())) -&gt; [t] -&gt; [(t, ())]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">,</span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[t]
+</span><a href="#local-6989586621679180623"><span class="hs-identifier hs-var">ts</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Alternating [] t a
+</span><a href="#local-6989586621679180624"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span class="hs-comment">-- | Reverses an alternating list.</span><span>
+</span><span id="line-119"></span><span class="hs-comment">--</span><span>
+</span><span id="line-120"></span><span class="hs-comment">-- &gt;&gt;&gt; reverse $ Alternating &quot;a&quot; [(3, &quot;c&quot;), (5, &quot;e&quot;), (7, &quot;g&quot;)]</span><span>
+</span><span id="line-121"></span><span class="hs-comment">-- Alternating &quot;g&quot; [(7,&quot;e&quot;),(5,&quot;c&quot;),(3,&quot;a&quot;)]</span><span>
+</span><span id="line-122"></span><span id="local-6989586621679180184"><span id="local-6989586621679180185"><span class="annot"><a href="HGeometry.Sequence.Alternating.html#reverse"><span class="hs-identifier hs-type">reverse</span></a></span><span>                      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><a href="#local-6989586621679180184"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180185"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><a href="#local-6989586621679180184"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679180185"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-123"></span><span id="reverse"><span class="annot"><span class="annottext">reverse :: forall b a. Alternating [] b a -&gt; Alternating [] b a
+</span><a href="HGeometry.Sequence.Alternating.html#reverse"><span class="hs-identifier hs-var hs-var">reverse</span></a></span></span><span> </span><span id="local-6989586621679180628"><span class="annot"><span class="annottext">p :: Alternating [] b a
+</span><a href="#local-6989586621679180628"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span id="local-6989586621679180629"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180629"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679180630"><span class="annot"><span class="annottext">[(b, a)]
+</span><a href="#local-6989586621679180630"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[(b, a)] -&gt; Maybe (NonEmpty (b, a))
+forall a. [a] -&gt; Maybe (NonEmpty a)
+</span><span class="hs-identifier hs-var">NonEmpty.nonEmpty</span></span><span> </span><span class="annot"><span class="annottext">[(b, a)]
+</span><a href="#local-6989586621679180630"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-124"></span><span>    </span><span class="annot"><span class="annottext">Maybe (NonEmpty (b, a))
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Alternating [] b a
+</span><a href="#local-6989586621679180628"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-125"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679180632"><span class="annot"><span class="annottext">xs1 :: NonEmpty (b, a)
+</span><a href="#local-6989586621679180632"><span class="hs-identifier hs-var">xs1</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="hs-special">(</span><span id="local-6989586621679180633"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180633"><span class="hs-identifier hs-var">e1</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span id="local-6989586621679180635"><span class="annot"><span class="annottext">[(b, a)]
+</span><a href="#local-6989586621679180635"><span class="hs-identifier hs-var">tl</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679180636"><span class="annot"><span class="annottext">ys :: [(b, a)]
+</span><a href="#local-6989586621679180636"><span class="hs-identifier hs-var hs-var">ys</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180633"><span class="hs-identifier hs-var">e1</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180629"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(b, a) -&gt; [(b, a)] -&gt; [(b, a)]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">((b, a) -&gt; (b, a) -&gt; (b, a)) -&gt; [(b, a)] -&gt; [(b, a)] -&gt; [(b, a)]
+forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
+</span><span class="hs-identifier hs-var">List.zipWith</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="annottext">b
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679180637"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180637"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679180638"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180638"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679180638"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180637"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(b, a)]
+</span><a href="#local-6989586621679180630"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">[(b, a)]
+</span><a href="#local-6989586621679180635"><span class="hs-identifier hs-var">tl</span></a></span><span>
+</span><span id="line-126"></span><span>                                 </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span id="local-6989586621679180639"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180639"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (b, a) -&gt; (b, a)
+forall a. NonEmpty a -&gt; a
+</span><span class="hs-identifier hs-var">NonEmpty.last</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (b, a)
+</span><a href="#local-6989586621679180632"><span class="hs-identifier hs-var">xs1</span></a></span><span>
+</span><span id="line-127"></span><span>                             </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">a -&gt; [(b, a)] -&gt; Alternating [] b a
+forall (f :: * -&gt; *) sep a. a -&gt; f (sep, a) -&gt; Alternating f sep a
+</span><a href="HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-var">Alternating</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679180639"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[(b, a)] -&gt; [(b, a)]
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">List.reverse</span></span><span> </span><span class="annot"><span class="annottext">[(b, a)]
+</span><a href="#local-6989586621679180636"><span class="hs-identifier hs-var">ys</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-128"></span></pre></body></html>
