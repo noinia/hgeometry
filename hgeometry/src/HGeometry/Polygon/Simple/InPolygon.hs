@@ -116,11 +116,11 @@ q `inSimplePolygon` pg = case ifoldMapOf outerBoundaryEdges countAbove pg of
   -- (e.g. the <=> does not hold in that case). If we discover q lies
   -- on an edge e, we actually report that.
   where
-    countAbove i (u,v) = case (u^.xCoord) `compare` (v^.xCoord) of
-                           EQ | onVerticalEdge u v -> OnEdge i
-                              | otherwise          -> mempty
-                           LT                      -> countAbove' i (AnClosedE u) (AnOpenE v)
-                           GT                      -> countAbove' i (AnOpenE v)   (AnClosedE u)
+    countAbove (i,_) (u,v) = case (u^.xCoord) `compare` (v^.xCoord) of
+                               EQ | onVerticalEdge u v -> OnEdge i
+                                  | otherwise          -> mempty
+                               LT                      -> countAbove' i (AnClosedE u) (AnOpenE v)
+                               GT                      -> countAbove' i (AnOpenE v)   (AnClosedE u)
     -- count the edge if q
     countAbove' i l r
       | (Point1 $ q^.xCoord) `intersects` (view xCoord <$> Interval l r)

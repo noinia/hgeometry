@@ -74,13 +74,15 @@ class HasVertices polygon polygon => HasOuterBoundary polygon where
   --
   --
   -- running time :: \(O(n)\)
-  outerBoundaryEdges :: IndexedFold1 (VertexIx polygon) polygon (Vertex polygon, Vertex polygon)
+  outerBoundaryEdges :: IndexedFold1 (VertexIx polygon,VertexIx polygon) polygon
+                                     (Vertex polygon, Vertex polygon)
   default outerBoundaryEdges
     :: Enum (VertexIx polygon)
-    => IndexedFold1 (VertexIx polygon) polygon (Vertex polygon, Vertex polygon)
+    => IndexedFold1 (VertexIx polygon,VertexIx polygon) polygon (Vertex polygon, Vertex polygon)
   outerBoundaryEdges = ifolding1 $
-    \pg -> ( \(i,u) -> (i,(u, pg ^.outerBoundaryVertexAt (succ i))) )
-         <$> itoNonEmptyOf outerBoundary pg
+    \pg -> ( \(i,u) -> let (j,v) = pg ^.outerBoundaryVertexAt (succ i).withIndex
+                       in ((i,j) , (u,v))
+           ) <$> itoNonEmptyOf outerBoundary pg
     -- \pg -> fmap ( \(i,u) -> (i,(u, pg ^.outerBoundaryVertexAt (succ i))) )
     --      . NonEmpty.fromList
     --      $ itoListOf outerBoundary pg
@@ -91,16 +93,17 @@ class HasVertices polygon polygon => HasOuterBoundary polygon where
   --
   -- running time: \(O(1)\)
   outerBoundaryEdgeAt   :: VertexIx polygon
-                        -> IndexedGetter (VertexIx polygon) polygon
+                        -> IndexedGetter (VertexIx polygon, VertexIx polygon) polygon
                                          (Vertex polygon, Vertex polygon)
   -- default implementation of outerBoundaryEdge. It achieves the
   -- desired running time when indexing is indeed constant.
   default outerBoundaryEdgeAt :: Enum (VertexIx polygon)
                               => VertexIx polygon
-                              -> IndexedGetter (VertexIx polygon) polygon
+                              -> IndexedGetter (VertexIx polygon, VertexIx polygon) polygon
                                                (Vertex polygon, Vertex polygon)
   outerBoundaryEdgeAt i = ito $
-    \pg -> (i, (pg^.outerBoundaryVertexAt i, pg^.outerBoundaryVertexAt (succ i)))
+    \pg -> let (j,v) = pg^.outerBoundaryVertexAt (succ i).withIndex
+           in ( (i,j), (pg^.outerBoundaryVertexAt i, v))
 
 
 --------------------------------------------------------------------------------
@@ -170,8 +173,9 @@ outerBoundaryEdgeSegmentAt   :: ( HasOuterBoundary polygon
                                 , Point_ point 2 r
                                 )
                              => VertexIx polygon
-                             -> IndexedGetter (VertexIx polygon) polygon
-                                                                 (ClosedLineSegment point)
+                             -> IndexedGetter (VertexIx polygon, VertexIx polygon)
+                                              polygon
+                                              (ClosedLineSegment point)
 outerBoundaryEdgeSegmentAt i = outerBoundaryEdgeAt i. to (uncurry ClosedLineSegment)
 
 -- | Get the line segments representing the outer boundary of the polygon.
@@ -180,7 +184,9 @@ outerBoundaryEdgeSegments :: forall polygon point r.
                              , Vertex polygon ~ point
                              , Point_ point 2 r
                              )
-                          => IndexedFold1 (VertexIx polygon) polygon (ClosedLineSegment point)
+                          => IndexedFold1 (VertexIx polygon,VertexIx polygon)
+                                          polygon
+                                          (ClosedLineSegment point)
 outerBoundaryEdgeSegments = outerBoundaryEdges . to (uncurry ClosedLineSegment)
 
 

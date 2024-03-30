@@ -10,9 +10,13 @@ module HGeometry.Polygon.Triangulation.Types where
 import           Control.Lens
 import           Control.Monad (forM_)
 import qualified Data.Foldable as F
+import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Map as Map
+import           Data.Maybe (fromMaybe)
 import qualified Data.Vector as V
+import           HGeometry.Lens.Util
 -- import qualified Data.Vector.Mutable as MV
 import           HGeometry.Ext
 import           HGeometry.LineSegment
@@ -21,9 +25,11 @@ import           HGeometry.LineSegment
 import           Hiraffe.Graph.Class
 import           HGeometry.PlaneGraph
 import           HGeometry.Polygon.Class
+import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Point
 import           HGeometry.Vector
 import           Hiraffe.PlanarGraph as PlanarGraph
+import           Data.Coerce
 
 --------------------------------------------------------------------------------
 
@@ -90,48 +96,77 @@ constructSubdivision e origs diags = fromPlaneGraph $ constructGraph e origs dia
 -}
 
 
+-- fromConnectedSegments       :: ( Foldable1 f
+--                                , LineSegment_ lineSegment vertex
+--                                , Point_ vertex 2 r, Ord r, Num r
+--                                )
+--                             => f lineSegment -> PlaneGraph s (NonEmpty vertex) lineSegment ()
+-- fromConnectedSegments segs = fromAdjacencyLists adjLists
+--   where
+--     adjLists = Map.fromListWith (<>) . concatMap f . zipWith g [0..] . F.toList $ ss
+
+--     mkVertex
+
+
+
+--   fromadjacencylists
+--   where
+-- planarGraph dts & PG.vertexData .~ vxData
+--   where
+--     pts         = M.fromListWith (<>) . concatMap f . zipWith g [0..] . F.toList $ ss
+--     f (s :+ e)  = [ ( s^.start.core
+--                     , SP (sing $ s^.start.extra) [(s^.end.core)   :+ h Positive e])
+--                   , ( s^.end.core
+--                     , SP (sing $ s^.end.extra)   [(s^.start.core) :+ h Negative e])
+--                   ]
+--     g i (s :+ e) = s :+ (Arc i :+ e)
+--     h d (a :+ e) = (Dart a d, e)
+
+--     sing x = x NonEmpty.:| []
+
+--     vts    = map (\(p,sp) -> (p,map (^.extra) . sortAround' (ext p) <$> sp))
+--            . M.assocs $ pts
+--     -- vertex Data
+--     vxData = V.fromList . map (\(p,sp) -> VertexData p (sp^._1)) $ vts
+--     -- The darts
+--     dts    = map (^._2._2) vts
+
+
 
 -- | Given a list of original edges and a list of diagonals, creates a
 -- planar-subdivision
 --
 --
 -- running time: \(O(n\log n)\)
-constructGraph          :: (Polygon_ polygon point r, Point_ point 2 r
+constructGraph          :: forall s polygon point r f.
+                           ( SimplePolygon_ polygon point r, Point_ point 2 r
+                           , Foldable f
+                           , VertexIx polygon ~ Int
                            )
                         => polygon
                         -> f (Diagonal polygon)
                         -> PlaneGraph s point PolygonEdgeType PolygonFaceData
-constructGraph pg diags = undefined
-{-
-e origs diags =
-    subdiv & PG.vertexData.traverse  %~ NonEmpty.head
-           & PG.faceData             .~ faceData'
-           & PG.rawDartData.traverse %~ snd
+constructGraph pg diags = gr&faces %@~ computeFaceLabel
   where
-    subdiv :: PG.PlaneGraph s (NonEmpty p) (Bool,PolygonEdgeType) () r
-    subdiv = PG.fromConnectedSegments $ e' : origs' <> diags'
+    gr = fromAdjacencyLists adjLists :: PlaneGraph s point PolygonEdgeType ()
+    adjLists = collectDiags <$> itoNonEmptyOf outerBoundaryEdges pg
 
-    diags' = (:+ (True, Diagonal)) <$> diags
-    origs' = (:+ (False,Original)) <$> origs
-    e'     = e :+ (True, Original)
+    collectDiags                :: ((VertexIx polygon,VertexIx polygon), (point, point))
+                                -> ( VertexIdIn Primal s
+                                   , point, NonEmpty (VertexIdIn Primal s,PolygonEdgeType)
+                                   )
+    collectDiags ((u,v), (p,_)) = (coerce u,p, (coerce v, Original) :| diagonalsOf u)
 
-    -- the darts incident to internal faces
-    queryDarts = concatMap shouldQuery . F.toList . PG.edges' $ subdiv
-    shouldQuery d = case subdiv^.dataOf d of
-                      (True, Original) -> [d]
-                      (True, Diagonal) -> [d, twin d]
-                      _                -> []
+    diagonalsOf u = fromMaybe [] $ Map.lookup u diags'
 
-    -- the interior faces
-    intFaces = flip PG.leftFace subdiv <$> queryDarts
+    -- the diagonals
+    diags' :: Map.Map (VertexIx polygon) [(VertexIdIn Primal s, PolygonEdgeType)]
+    diags' = Map.fromList [ (u, [(coerce v, Diagonal)]) | Vector2 u v <- F.toList diags ]
 
-    faceData' :: V.Vector PolygonFaceData
-    faceData' = V.create $ do
-                  v' <- MV.replicate (PG.numFaces subdiv) Outside
-                  forM_ intFaces $ \(PG.FaceId (PG.VertexId f)) ->
-                    MV.write v' f Inside
-                  pure v'
--}
+    -- computeFaceLabel     :: FaceIx _ -> () -> PolygonFaceData
+    computeFaceLabel _ _ = Inside -- FIXME: this is wrong; but sos that we can test
+
+
 
 -- -constructSubdivision px e origs diags =
 -- -    subdiv & planeGraph.PG.vertexData.traverse        %~ NonEmpty.head
@@ -160,3 +195,6 @@ e origs diags =
 -- -                  forM_ intFaces $ \(PG.FaceId (PG.VertexId f)) ->
 -- -                    MV.write v' f (FaceData [] Inside)
 -- -                  pure v'
+
+
+--------------------------------------------------------------------------------
