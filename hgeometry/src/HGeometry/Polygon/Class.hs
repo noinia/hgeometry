@@ -195,16 +195,16 @@ outerBoundaryEdgeSegments = outerBoundaryEdges . to (uncurry ClosedLineSegment)
 outerBoundaryWithNeighbours :: ( HasOuterBoundary polygon
                                , Enum (VertexIx polygon)
                                )
-                            =>  IndexedFold1 (VertexIx polygon)
+                            =>  IndexedFold1 (VertexIx polygon,
+                                                  (VertexIx polygon, VertexIx polygon))
                                         polygon
                                         (Vertex polygon, (Vertex polygon, Vertex polygon))
 outerBoundaryWithNeighbours = ifolding1 $
-    \pg -> (\(i,u) -> (i, f pg i u)) <$> itoNonEmptyOf outerBoundary pg
+    \pg -> f pg <$> itoNonEmptyOf outerBoundary pg
   where
-    f pg i u = let v = pg^.outerBoundaryVertexAt (pred i)
-                   w = pg^.outerBoundaryVertexAt (succ i)
-               in (u, (v, w))
-
+    f pg (i,u) = let (j,v) = pg^.outerBoundaryVertexAt (pred i).withIndex
+                     (k,w) = pg^.outerBoundaryVertexAt (succ i).withIndex
+                 in ( (i, (j,k)) , (u, (v, w)) )
 
 --------------------------------------------------------------------------------
 

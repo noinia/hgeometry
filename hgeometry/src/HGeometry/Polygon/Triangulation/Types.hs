@@ -140,31 +140,37 @@ constructSubdivision e origs diags = fromPlaneGraph $ constructGraph e origs dia
 -- running time: \(O(n\log n)\)
 constructGraph          :: forall s polygon point r f.
                            ( SimplePolygon_ polygon point r, Point_ point 2 r
-                           , Foldable f
-                           , VertexIx polygon ~ Int
+                           , Foldable f, Ord r, Num r
                            )
                         => polygon
                         -> f (Diagonal polygon)
                         -> PlaneGraph s point PolygonEdgeType PolygonFaceData
 constructGraph pg diags = gr&faces %@~ computeFaceLabel
   where
+    -- | Note that we use fromAdjacencyLists
     gr = fromAdjacencyLists adjLists :: PlaneGraph s point PolygonEdgeType ()
-    adjLists = collectDiags <$> itoNonEmptyOf outerBoundaryEdges pg
+    adjLists = uncurry collectDiags <$> itoNonEmptyOf outerBoundaryWithNeighbours pg
 
-    collectDiags                :: ((VertexIx polygon,VertexIx polygon), (point, point))
-                                -> ( VertexIdIn Primal s
-                                   , point, NonEmpty (VertexIdIn Primal s,PolygonEdgeType)
-                                   )
-    collectDiags ((u,v), (p,_)) = (coerce u,p, (coerce v, Original) :| diagonalsOf u)
+    collectDiags                  :: (VertexIx polygon, (VertexIx polygon, VertexIx polygon))
+                                  -> (point,            (point,            point))
+                                  -> ( VertexIdIn Primal s
+                                     , point, NonEmpty (VertexIdIn Primal s,PolygonEdgeType)
+                                     )
+    collectDiags (u, (v,w)) (p,_) = coerce (u,p, (v, Original) :| (w, Original) : diagonalsOf u)
 
+    -- get the diagonals incident to vertex u
     diagonalsOf u = fromMaybe [] $ Map.lookup u diags'
+    -- associate every diagonal with its endpoints
+    diags' :: Map.Map (VertexIx polygon) [(VertexIx polygon, PolygonEdgeType)]
+    diags' = foldMap (\(Vector2 u v) -> Map.fromList [ (u, [(v, Diagonal)])
+                                                     , (v, [(u, Diagonal)])
+                                                     ]
+                     ) diags
 
-    -- the diagonals
-    diags' :: Map.Map (VertexIx polygon) [(VertexIdIn Primal s, PolygonEdgeType)]
-    diags' = Map.fromList [ (u, [(coerce v, Diagonal)]) | Vector2 u v <- F.toList diags ]
-
-    -- computeFaceLabel     :: FaceIx _ -> () -> PolygonFaceData
-    computeFaceLabel _ _ = Inside -- FIXME: this is wrong; but sos that we can test
+    theOuterFaceId = outerFaceId gr
+    computeFaceLabel fi _
+      | fi == theOuterFaceId = Outside
+      | otherwise            = Inside
 
 
 
