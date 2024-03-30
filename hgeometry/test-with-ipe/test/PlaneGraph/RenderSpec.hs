@@ -79,7 +79,7 @@ type R = Double
 
 spec :: Spec
 spec = describe "render planegraph tests" $ do
-         goldenWith [osp|data/golden|]
+         goldenWith [osp|data/test-with-ipe/golden/PlaneGraph|]
                     (ipeContentGolden { name = [osp|smallPlaneGraph|]})
                     (drawGraph smallGraph)
          -- eg <- runIO $ decodeYAMLFile [osp|myPlaneGraph.yaml|]
