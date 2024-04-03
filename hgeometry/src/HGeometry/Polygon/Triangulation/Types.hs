@@ -8,18 +8,11 @@
 module HGeometry.Polygon.Triangulation.Types where
 
 import           Control.Lens
-import           Control.Monad (forM_)
-import qualified Data.Foldable as F
-import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import           Data.Maybe (fromMaybe)
-import qualified Data.Vector as V
 import           HGeometry.Lens.Util
 -- import qualified Data.Vector.Mutable as MV
-import           HGeometry.Ext
-import           HGeometry.LineSegment
 -- import           HGeometry.PlanarSubdivision.Basic
 -- import qualified HGeometry.PlaneGraph as PG
 import           Hiraffe.Graph.Class
@@ -134,7 +127,7 @@ constructSubdivision e origs diags = fromPlaneGraph $ constructGraph e origs dia
 
 
 -- | Given a list of original edges and a list of diagonals, creates a
--- planar-subdivision
+-- planar-subdivision. The vertexId's will remain unchanged.
 --
 --
 -- running time: \(O(n\log n)\)

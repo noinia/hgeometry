@@ -22,15 +22,18 @@ module HGeometry.PlaneGraph.Class
   , dartSegments
   , edgeSegments
 
+  , interiorFacePolygonAt
   , interiorFacePolygons
   ) where
 
 import Control.Lens
+import Data.Coerce
+import Data.Default.Class
 import Data.Functor.Apply
-import Data.Kind (Constraint)
 import Data.Maybe (fromMaybe)
 import Data.Monoid (Endo(..))
 import Data.Ord (comparing)
+import HGeometry.Ext
 import HGeometry.LineSegment
 import HGeometry.Point
 import HGeometry.Polygon.Simple
@@ -191,22 +194,66 @@ interiorFacePolygons :: forall planeGraph vertex r.
                         , Ord r, Num r
                         , Eq (FaceIx planeGraph)
                         )
-                     => IndexedFold (FaceIx planeGraph) planeGraph (SimplePolygon vertex)
+                     => IndexedFold (FaceIx planeGraph)
+                                    planeGraph
+                                    (SimplePolygon (vertex :+ VertexIx planeGraph))
 interiorFacePolygons = theFold
   where
     theFold              :: forall p f.
-                            ( Indexable (FaceIx planeGraph) p, Applicative f, Contravariant f)
-                         => p (SimplePolygon vertex) (f (SimplePolygon vertex))
+                            ( PlaneGraph_ planeGraph vertex
+                            , Indexable (FaceIx planeGraph) p, Applicative f, Contravariant f)
+                         => p (SimplePolygon (vertex :+ VertexIx planeGraph))
+                              (f (SimplePolygon (vertex :+ VertexIx planeGraph)))
                          -> planeGraph
                          -> f planeGraph
     theFold pPolyFPoly g = interiorFaces (Indexed draw) g
       where
         draw      :: FaceIx planeGraph -> Face planeGraph -> f (Face planeGraph)
-        draw fi _ = let poly = uncheckedFromCCWPoints . fmap (\vi -> g^?!vertexAt vi)
-                             $ boundaryVertices fi g
+        draw fi _ = let poly = polygonFromFace g fi
                     in poly >$ indexed pPolyFPoly fi poly
+
+polygonFromFace      :: forall planeGraph vertex r.( PlaneGraph_ planeGraph vertex
+                        , Point_ vertex 2 r
+                        )
+                     => planeGraph -> FaceIx planeGraph
+                     -> SimplePolygon (vertex :+ VertexIx planeGraph)
+polygonFromFace gr fi = poly'&vertices.extra %~ coerce
+  where
+    poly' :: SimplePolygon (vertex :+ NoDefault (VertexIx planeGraph))
+    poly' = uncheckedFromCCWPoints
+         . fmap (\vi -> gr^?!vertexAt vi :+ NoDefault vi)
+         $ boundaryVertices fi gr
         -- note that this is safe, since boundaryVerticesOf guarantees that for
         -- interior faces, the vertices are returned in CCW order.
+
+    -- TODO: why can't I just coerce poyl' to the right type?
+
+
+-- | Renders a single interior face as a simple polygon.
+--
+-- Note that this is a fold rather than a getter for the same reason faceAt is a traversal
+-- rather than a lens: i.e. if you pass some nonsensical FaceIx the face may not exist.
+interiorFacePolygonAt    :: forall planeGraph vertex.
+                            ( PlaneGraph_ planeGraph vertex
+                            , Point_ vertex 2 (NumType vertex)
+                            )
+                         => FaceIx planeGraph
+                         -> IndexedFold (FaceIx planeGraph)
+                                        planeGraph
+                                        (SimplePolygon (vertex :+ VertexIx planeGraph))
+interiorFacePolygonAt fi = theFold
+  where
+    theFold pPolyFPoly gr = faceAt fi draw gr
+      where
+        -- draw   :: Face planeGraph -> f (Face planeGraph)
+        draw _ = let poly =  polygonFromFace gr fi
+                 in poly >$ indexed pPolyFPoly fi poly
+
+
+newtype NoDefault e = NoDefault e
+
+instance Default (NoDefault e) where
+  def = undefined
 
 
 --------------------------------------------------------------------------------

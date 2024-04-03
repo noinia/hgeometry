@@ -6,7 +6,8 @@
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
 module HGeometry.Polygon.Triangulation.MakeMonotone
-  ( computeDiagonals
+  ( makeMonotone
+  , computeDiagonals
   , classifyVertices
   , VertexType(..)
 
@@ -22,8 +23,10 @@ import qualified Data.Vector as Vector
 import           HGeometry.Ext
 import           HGeometry.Foldable.Sort
 import           HGeometry.LineSegment
+import           HGeometry.PlaneGraph
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
+import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Triangulation.Types
 import qualified HGeometry.Set.Util as SS
 import           HGeometry.Vector
@@ -31,6 +34,17 @@ import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.Vector as Builder
 
 ----------------------------------------------------------------------------------
+
+-- | Given a polygon, computes a plane subdivision representing a split of the polygon
+-- into y-monotone subpolygons.
+--
+-- running time: \(O(n\log n)\)
+makeMonotone    :: forall s polygon point r.
+                   (SimplePolygon_ polygon point r, Ord r, Num r)
+                => polygon
+                -> PlaneGraph s point PolygonEdgeType PolygonFaceData
+makeMonotone pg = constructGraph pg (computeDiagonals pg)
+
 
 -- | Given a polygon, find a set of non-intersecting diagonals that partition
 -- the polygon into y-monotone pieces.

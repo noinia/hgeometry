@@ -1,24 +1,43 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Polygon.TriangulateSpec (spec) where
 
--- import           Control.Lens
--- import qualified Data.Vector as V
--- import           HGeometry
--- import           HGeometry.Ext
--- import           HGeometry.PlanarSubdivision (PolygonFaceData)
--- import           HGeometry.PlaneGraph
--- import           HGeometry.PolygonSpec ()
--- import           HGeometry.PolygonTriangulation.Triangulate
--- import           HGeometry.PolygonTriangulation.Types
-import           Test.Hspec
--- import           Test.Hspec.QuickCheck
-import           Test.QuickCheck.Instances ()
+import Control.Lens
+import HGeometry
+import HGeometry.Ext
+import HGeometry.Number.Real.Rational
+import HGeometry.PlaneGraph
+import HGeometry.Polygon.Class
+import HGeometry.Polygon.Instances ()
+import HGeometry.Polygon.Simple
+import HGeometry.Polygon.Triangulation
+import Test.Hspec
+import Test.Hspec.QuickCheck
+import Test.QuickCheck
+import Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
 
+type R = RealNumber 5
+
 spec :: Spec
 spec = do
-  pure ()
+  prop "sum (map area (triangulate polygon)) == area polygon" $
+    \(poly :: SimplePolygon (Point 2 R)) ->
+      let g = triangulate @() poly
+          trigs = graphPolygons g
+      in sum (map area trigs) === area poly
+  prop "all isTriangle . triangulate" $
+    \(poly :: SimplePolygon (Point 2 R)) ->
+      let g = triangulate @() poly
+          trigs = graphPolygons g
+      in all isTriangle trigs
+
+isTriangle = (== 3) . numVertices
+
+graphPolygons    :: (Ord r, Num r, Point_ point 2 r)
+                 => PlaneGraph s point PolygonEdgeType PolygonFaceData
+                 -> [SimplePolygon (Point 2 r)]
+graphPolygons gr = map (&vertices %~ view (core.asPoint)) $ gr^..interiorFacePolygons
 
 --   prop "sum (map area (triangulate polygon)) == area polygon" $
 --     \(poly :: SimplePolygon () Rational) ->

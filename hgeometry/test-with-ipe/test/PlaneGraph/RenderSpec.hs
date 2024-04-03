@@ -134,12 +134,13 @@ offset s = translateBy theOffset s
 
 drawFace         :: ( PlaneGraph_ planeGraph vertex, Point_ vertex 2 r
                     , Show (Face planeGraph), Ord r, Fractional r)
-                 => planeGraph -> FaceIx planeGraph -> SimplePolygon vertex -> [IpeObject r]
-drawFace gr f pg = [ iO $ ipePolygon (pg&vertices %~ (^.asPoint)) ! attr SLayer "face"
+                 => planeGraph -> FaceIx planeGraph -> SimplePolygon (vertex :+ VertexIx planeGraph) -> [IpeObject r]
+drawFace gr f pg = [ iO $ ipePolygon pg' ! attr SLayer "face"
                    , iO $ ipeLabel (tshow (gr^?!faceAt f) :+ c) ! attr SLayer "faceLabel"
                    ]
   where
-    c = centroid pg ^.asPoint
+    pg' = pg&vertices %~ (^.core.asPoint)
+    c = centroid pg'
 
 
 tshow :: Show a => a -> Text.Text
