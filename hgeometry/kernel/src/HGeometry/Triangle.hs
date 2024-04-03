@@ -15,22 +15,22 @@ module HGeometry.Triangle
   ) where
 
 import Control.Lens
+import GHC.Generics (Generic)
 import HGeometry.Box.Boxable
--- import HGeometry.HalfSpace
--- import HGeometry.HyperPlane
-import HGeometry.Point
 import HGeometry.Intersection
+import HGeometry.Point
 import HGeometry.Properties
--- import HGeometry.Transformation
+import HGeometry.Transformation
 import HGeometry.Triangle.Class
 import HGeometry.Vector
-import Text.Read
 import Hiraffe.Graph
+import Text.Read
 
 --------------------------------------------------------------------------------
 
 -- | Triangles in d-dimensional space
 newtype Triangle point = MkTriangle (Vector 3 point)
+  deriving (Generic)
 
 -- | Construct a triangle from its three points
 pattern Triangle       :: point -> point -> point -> Triangle point
@@ -64,11 +64,9 @@ instance HasVertices (Triangle point) (Triangle point') where
 instance HasPoints (Triangle point) (Triangle point') point point' where
   allPoints = _TriangleVector.components
 
--- instance ( DefaultTransformByConstraints (Triangle point) d r
---          , Point_ point d r
---          , d > 0
---          ) => IsTransformable (Triangle point)
-
+instance ( DefaultTransformByConstraints (Triangle point) d r
+         , Point_ point d r
+         ) => IsTransformable (Triangle point)
 
 instance (Show point) => Show (Triangle point) where
   showsPrec k (Triangle a b c ) = showParen (k > appPrec) $

@@ -27,7 +27,6 @@ import Data.Kind (Type)
 import HGeometry.Box.Boxable
 import HGeometry.Intersection
 import HGeometry.Interval
-import HGeometry.Interval.Class
 import HGeometry.Line.Class
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment.Class

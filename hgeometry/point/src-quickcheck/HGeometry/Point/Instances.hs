@@ -19,3 +19,4 @@ import Test.QuickCheck
 
 instance Arbitrary v => Arbitrary (PointF v) where
   arbitrary = Point <$> arbitrary
+  shrink (Point v) = Point <$> shrink v
