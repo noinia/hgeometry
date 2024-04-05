@@ -25,12 +25,21 @@ spec = do
     \(poly :: SimplePolygon (Point 2 R)) ->
       let g = triangulate @() poly
           trigs = graphPolygons g
-      in sum (map area trigs) === area poly
+      in counterexample (show g) $ sum (map area trigs) === area poly
   prop "all isTriangle . triangulate" $
     \(poly :: SimplePolygon (Point 2 R)) ->
       let g = triangulate @() poly
           trigs = graphPolygons g
       in all isTriangle trigs
+
+  -- prop "creating the graph does not create additional diagionals" $
+  --   \poly ->
+  --     let gr     = triangulate @() poly
+  --         algSol = extractDiagonals gr
+  --     in naiveSet algoSol `shouldBe` naiveSet (computeDiagionals poly)
+
+
+
 
 isTriangle = (== 3) . numVertices
 

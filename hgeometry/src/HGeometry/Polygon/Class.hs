@@ -193,18 +193,18 @@ outerBoundaryEdgeSegments = outerBoundaryEdges . to (uncurry ClosedLineSegment)
 -- | A fold that associates each vertex on the boundary with its
 -- predecessor and successor (in that order) along the boundary.
 outerBoundaryWithNeighbours :: ( HasOuterBoundary polygon
-                               , Enum (VertexIx polygon)
+                               , VertexIx polygon ~ Int
                                )
                             =>  IndexedFold1 (VertexIx polygon,
                                                   (VertexIx polygon, VertexIx polygon))
                                         polygon
                                         (Vertex polygon, (Vertex polygon, Vertex polygon))
 outerBoundaryWithNeighbours = ifolding1 $
-    \pg -> f pg <$> itoNonEmptyOf outerBoundary pg
+    \pg -> f pg (numVertices pg) <$> itoNonEmptyOf outerBoundary pg
   where
-    f pg (i,u) = let (j,v) = pg^.outerBoundaryVertexAt (pred i).withIndex
-                     (k,w) = pg^.outerBoundaryVertexAt (succ i).withIndex
-                 in ( (i, (j,k)) , (u, (v, w)) )
+    f pg n (i,u) = let (j,v) = pg^.outerBoundaryVertexAt ((i-1) `mod` n).withIndex
+                       (k,w) = pg^.outerBoundaryVertexAt ((i+1) `mod` n).withIndex
+                   in ( (i, (j,k)) , (u, (v, w)) )
 
 --------------------------------------------------------------------------------
 

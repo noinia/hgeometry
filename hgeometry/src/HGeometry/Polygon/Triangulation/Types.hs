@@ -24,6 +24,7 @@ import           HGeometry.Vector
 import           Hiraffe.PlanarGraph as PlanarGraph
 import           Data.Coerce
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | After triangulation, edges are either from the original polygon or a new diagonal.
@@ -134,15 +135,23 @@ constructSubdivision e origs diags = fromPlaneGraph $ constructGraph e origs dia
 constructGraph          :: forall s polygon point r f.
                            ( SimplePolygon_ polygon point r, Point_ point 2 r
                            , Foldable f, Ord r, Num r
+                           , Show point
                            )
                         => polygon
                         -> f (Diagonal polygon)
                         -> PlaneGraph s point PolygonEdgeType PolygonFaceData
-constructGraph pg diags = gr&faces %@~ computeFaceLabel
+constructGraph pg diags
+  | traceShow ("constructGraph",foldMap (:[]) diags) False = undefined
+  | otherwise = gr&faces %@~ computeFaceLabel
+-- constructGraph pg diags = gr&faces %@~ computeFaceLabel
   where
     -- | Note that we use fromAdjacencyLists
-    gr = fromAdjacencyLists adjLists :: PlaneGraph s point PolygonEdgeType ()
-    adjLists = uncurry collectDiags <$> itoNonEmptyOf outerBoundaryWithNeighbours pg
+    gr = traceShowWith ("Gr",) $
+      fromAdjacencyLists adjLists :: PlaneGraph s point PolygonEdgeType ()
+
+
+    adjLists = traceShowWith ("adjLists",) $
+      uncurry collectDiags <$> itoNonEmptyOf outerBoundaryWithNeighbours pg
 
     collectDiags                  :: (VertexIx polygon, (VertexIx polygon, VertexIx polygon))
                                   -> (point,            (point,            point))
@@ -155,10 +164,9 @@ constructGraph pg diags = gr&faces %@~ computeFaceLabel
     diagonalsOf u = fromMaybe [] $ Map.lookup u diags'
     -- associate every diagonal with its endpoints
     diags' :: Map.Map (VertexIx polygon) [(VertexIx polygon, PolygonEdgeType)]
-    diags' = foldMap (\(Vector2 u v) -> Map.fromList [ (u, [(v, Diagonal)])
-                                                     , (v, [(u, Diagonal)])
-                                                     ]
-                     ) diags
+    diags' = foldr (\(Vector2 u v) -> Map.insertWith (<>) u [(v, Diagonal)]
+                                    . Map.insertWith (<>) v [(u, Diagonal)]
+                   ) Map.empty diags
 
     theOuterFaceId = outerFaceId gr
     computeFaceLabel fi _

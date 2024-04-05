@@ -40,7 +40,8 @@ import qualified VectorBuilder.Vector as Builder
 --
 -- running time: \(O(n\log n)\)
 makeMonotone    :: forall s polygon point r.
-                   (SimplePolygon_ polygon point r, Ord r, Num r)
+                   (SimplePolygon_ polygon point r, Ord r, Num r -- )
+                   , Show point)
                 => polygon
                 -> PlaneGraph s point PolygonEdgeType PolygonFaceData
 makeMonotone pg = constructGraph pg (computeDiagonals pg)

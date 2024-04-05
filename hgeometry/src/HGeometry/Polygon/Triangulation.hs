@@ -35,7 +35,8 @@ import           Hiraffe.PlanarGraph
 --
 -- running time: \(O(n \log n)\)
 triangulate    :: forall s polygon point r.
-                  (SimplePolygon_ polygon point r, Ord r, Num r)
+                  (SimplePolygon_ polygon point r, Ord r, Num r -- )
+                   , Show point)
                => polygon
                -> PlaneGraph s point PolygonEdgeType PolygonFaceData
 triangulate pg = constructGraph pg (computeDiagonals pg)
@@ -45,7 +46,9 @@ triangulate pg = constructGraph pg (computeDiagonals pg)
 --
 -- running time: \(O(n \log n)\)
 computeDiagonals    :: forall polygon point r.
-                       (SimplePolygon_ polygon point r, Ord r, Num r)
+                       (SimplePolygon_ polygon point r, Ord r, Num r
+                   , Show point)
+                       -- )
                     => polygon -> [Diagonal polygon]
 computeDiagonals pg = monotoneDiags <> extraDiags
   where

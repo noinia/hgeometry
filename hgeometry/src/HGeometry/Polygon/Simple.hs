@@ -14,7 +14,7 @@
 module HGeometry.Polygon.Simple
   ( SimplePolygon_(..)
   , SimplePolygon
-  , SimplePolygonF
+  , SimplePolygonF(..)
   , toCyclic
   , VertexContainer
   , HasInPolygon(..)
