@@ -70,15 +70,14 @@ computeDiagonals pg = monotoneDiags <> extraDiags
                   $ filter ((== Inside) . snd)
                   $ monotoneSubdiv^..interiorFaces.withIndex
 
-    collectDiags _i = []
+    -- collectDiags   :: FaceIx planeGraph -> [Diagonal polygon]
+    collectDiags i = let yMonotonePoly  = monotoneSubdiv ^?! interiorFacePolygonAt i
+                     in map (coerce . withOriginalId yMonotonePoly)
+                        $ TM.computeDiagonals yMonotonePoly
 
---     -- collectDiags   :: FaceIx planeGraph -> [Diagonal polygon]
---     collectDiags i = let yMonotonePoly  = monotoneSubdiv ^?! interiorFacePolygonAt i
---                      in map (withOriginalId yMonotonePoly) $ TM.computeDiagonals yMonotonePoly
+withOriginalId               :: ( TM.YMonotonePolygon_ yMonotonePolygon (point :+ i) r
+                                ) => yMonotonePolygon -> Diagonal yMonotonePolygon -> Vector 2 i
+withOriginalId yMonotonePoly = fmap (\j -> yMonotonePoly^?!vertexAt j.extra)
 
--- withOriginalId :: ( TM.YMonotonePolygon_ yMonotonePolygon
---                                          ((point :+ i) :+ vectorIxPlaneGraph) r
---                   ) => yMonotonePolygon -> Diagonal yMonotonePolygon -> Vector 2 i
--- withOriginalId yMonotonePoly = fmap (\j -> yMonotonePoly^?!vertexAt j.core.extra)
 
     -- getOriginalID :: VertexId monotonePolygon -> VertexId polygon

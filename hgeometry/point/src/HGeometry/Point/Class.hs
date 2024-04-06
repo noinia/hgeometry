@@ -24,6 +24,7 @@ module HGeometry.Point.Class
   -- , projectPoint
   -- , PointFor
   , HasPoints(..), HasPoints'
+  , NoDefault(..)
   ) where
 
 import           Control.Lens
@@ -31,15 +32,12 @@ import           Data.Default.Class
 import           Data.Function (on)
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Proxy (Proxy(..))
+import           GHC.Generics (Generic)
 import           GHC.TypeNats
 import           HGeometry.Ext
 import           HGeometry.Properties
 import           HGeometry.Vector
 import qualified Linear.Affine as Linear
--- import           Linear.V2 (V2(..))
--- import           Linear.V3 (V3(..))
--- import           Linear.V4 (V4(..))
-
 
 -- $setup
 -- >>> import HGeometry.Point
@@ -361,3 +359,12 @@ instance Affine_ point d r => Affine_ (point :+ extra) d r where
 instance (Point_ point d r, Default extra) => Point_ (point :+ extra) d r where
   {-# SPECIALIZE instance Point_ point d r => Point_ (point :+ ()) d r #-}
   fromVector v = fromVector v :+ def
+
+
+-- | A newtype that can discharge the Default constraint in an unsafe way, if you really
+-- sure that you'll never actually need the default
+newtype NoDefault extra = NoDefault extra
+  deriving newtype (Show,Read,Eq,Ord,Enum,Num,Bounded,Real,Fractional,RealFrac,Generic)
+
+instance Default (NoDefault extra) where
+  def = error "NoDefault does not have an actual default. So something went wrong"

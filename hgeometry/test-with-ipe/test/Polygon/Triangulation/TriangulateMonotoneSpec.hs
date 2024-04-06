@@ -31,42 +31,51 @@ spec = do it "triangulate triangle"   $ do
                 tri = uncheckedFromCCWPoints $ [origin, Point2 10 0, Point2 10 10]
                 gr  = TM.triangulate @() tri
             extractDiagonals gr `shouldBe` []
-          testCases [osp|test-with-ipe/Polygon/Triangulation/monotone.ipe|]
-          -- testCases [osp|test-with-ipe/Polygon/Triangulation/simplepolygon6.ipe|]
+          testCases toMonotoneSpec [osp|test-with-ipe/Polygon/Triangulation/monotone.ipe|]
+          testCases toSpec [osp|test-with-ipe/Polygon/Triangulation/monotone.ipe|]
+          testCases toSpec [osp|test-with-ipe/Polygon/Triangulation/simplepolygon6.ipe|]
 
-testCases    :: OsPath -> Spec
-testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
+
+testCases            :: (TestCase R -> Spec) -> OsPath -> Spec
+testCases toSpec' fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
     Left e    -> it "reading TriangulateMonotone file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
-    Right tcs -> mapM_ toSpec tcs
-
+    Right tcs -> mapM_ toSpec' tcs
 
 data TestCase r = TestCase { _polygon  :: SimplePolygon (Point 2 r) :+ IpeColor r
                            , _solution :: [ClosedLineSegment (Point 2 r)]
                            }
                   deriving (Show,Eq)
 
-
-toSpec                            :: (Num r, Ord r, Show r) => TestCase r -> Spec
-toSpec (TestCase (poly :+ c) sol) = do
-    describe ("testing polygons of color " ++ show c) $ do
+toMonotoneSpec                             :: (Num r, Ord r, Show r) => TestCase r -> Spec
+toMonotoneSpec (TestCase (poly :+ c) sol) = do
+    describe ("testing monotone polygons of color " ++ show c) $ do
       it "comparing monotone diagonals with manual solution" $ do
         let algSol = TM.computeDiagonals poly
         (naiveSet . map toSeg $ algSol) `shouldBe` naiveSet sol
-      -- it "comparing diagonals with manual solution" $ do
-      --   let algSol = computeDiagonals poly
-      --   (naiveSet . map toSeg $ algSol) `shouldBe` naiveSet sol
-
-      it "comparing diagonals from the triangualtion with manual solution" $ do
+      it "comparing monotone diagonals from the triangualtion with manual solution" $ do
         let gr     = TM.triangulate @() poly
             algSol = traceShow ("edges", gr^..edges.withIndex)
                    $ extractDiagonals gr
         (naiveSet algSol) `shouldBe` naiveSet sol
   where
-    naiveSet = NaiveSet . map S
     toSeg (Vector2 i j) = ClosedLineSegment (poly^?!vertexAt i) (poly^?!vertexAt j)
 
+toSpec                            :: (Num r, Ord r, Show r) => TestCase r -> Spec
+toSpec (TestCase (poly :+ c) sol) = do
+    describe ("testing polygons of color " ++ show c) $ do
+      it "comparing diagonals with manual solution" $ do
+        let algSol = computeDiagonals poly
+        (naiveSet . map toSeg $ algSol) `shouldBe` naiveSet sol
+      it "comparing diagonals from the triangualtion with manual solution" $ do
+        let gr     = triangulate @() poly
+            algSol = traceShow ("edges", gr^..edges.withIndex)
+                   $ extractDiagonals gr
+        (naiveSet algSol) `shouldBe` naiveSet sol
+  where
+    toSeg (Vector2 i j) = ClosedLineSegment (poly^?!vertexAt i) (poly^?!vertexAt j)
 
+naiveSet = NaiveSet . map S
 
 
 
