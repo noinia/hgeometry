@@ -25,8 +25,10 @@ import           HGeometry.Box
 import           HGeometry.PlaneGraph.Class
 import           HGeometry.Point
 import           HGeometry.Properties
+import           HGeometry.Transformation
 import           Hiraffe.PlanarGraph
 import qualified Hiraffe.PlanarGraph as PG
+
 --------------------------------------------------------------------------------
 -- * The PlaneGraph type
 
@@ -133,6 +135,11 @@ instance ( Point_ v 2 r, Point_ v' 2 r'
 instance ( Point_ v 2 r
          , Ord r, Num r
          ) => IsBoxable (PlaneGraph s v e f)
+
+instance ( Point_ v 2 r
+         , DefaultTransformByConstraints (PlaneGraph s v e f) 2 r
+         ) => IsTransformable (PlaneGraph s v e f)
+
 
 
   -- boundingBox = boundingBoxList' . F.toList . fmap (^._2.location) . vertices

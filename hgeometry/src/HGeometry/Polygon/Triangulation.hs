@@ -17,7 +17,6 @@ module HGeometry.Polygon.Triangulation
 
 import           Control.Lens
 import           Data.Coerce
-import           Data.Either (lefts)
 import qualified Data.Foldable as F
 import           HGeometry.Ext
 import           HGeometry.LineSegment
