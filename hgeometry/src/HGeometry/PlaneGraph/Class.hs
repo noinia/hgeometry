@@ -29,6 +29,7 @@ module HGeometry.PlaneGraph.Class
 import Control.Lens
 import Data.Coerce
 import Data.Default.Class
+import Data.Foldable1
 import Data.Functor.Apply
 import Data.Maybe (fromMaybe)
 import Data.Monoid (Endo(..))
@@ -52,7 +53,21 @@ class ( PlanarGraph_ planeGraph
       , NumType vertex ~ NumType planeGraph
       ) => PlaneGraph_ planeGraph vertex | planeGraph -> vertex where
 
-  {-# MINIMAL #-}
+  {-# MINIMAL fromEmbedding #-}
+
+  -- | Build a graph from its embedding; i.e. for each vertex we expect its adjacencies in
+  -- CCW order.
+  --
+  -- If the, in the list of neighbours of vertex u we see a vertex v
+  -- that itself does not appear in the adjacencylist, we may drop
+  -- it. In other words if u has a neighbour v, then v better have a
+  -- specification of its neighbours somewhere.
+  fromEmbedding :: ( Foldable1 f, Functor f, Foldable h, Functor h
+                   , vi ~ VertexIx planeGraph
+                   , v ~ Vertex planeGraph
+                   , e ~ Edge planeGraph
+                   , GraphFromAdjListExtraConstraints planeGraph h
+                   ) => f (vi, v, h (vi, e)) -> planeGraph
 
   -- | Getter to access the outer face
   outerFace :: Eq (FaceIx planeGraph)

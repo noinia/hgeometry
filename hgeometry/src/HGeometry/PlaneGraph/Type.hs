@@ -19,9 +19,12 @@ module HGeometry.PlaneGraph.Type
 import           Control.Lens hiding (holes, holesOf, (.=))
 import           Data.Coerce
 import           Data.Foldable1
+import qualified Data.Map as Map
+import qualified Data.Vector.NonEmpty as Vector
 import           Data.YAML
 import           GHC.Generics (Generic)
 import           HGeometry.Box
+import           HGeometry.Foldable.Sort (sortBy )
 import           HGeometry.PlaneGraph.Class
 import           HGeometry.Point
 import           HGeometry.Properties
@@ -91,7 +94,11 @@ instance HasFaces (PlaneGraph s v e f) (PlaneGraph s v e f') where
 ----------------------------------------
 instance DiGraph_ (PlaneGraph s v e f) where
   type DiGraphFromAdjListExtraConstraints (PlaneGraph s v e f) h = (f ~ (), Foldable1 h)
+
+  -- | The vertices are expected to have their adjacencies in CCW order.
   diGraphFromAdjacencyLists = PlaneGraph . diGraphFromAdjacencyLists
+  -- TODO: we should probably use some toEmbedding here as well I think
+
   endPoints (PlaneGraph g) = endPoints g
   twinDartOf d = twinOf d . to Just
   outgoingDartsOf v = _PlanarGraph.outgoingDartsOf v
@@ -101,14 +108,37 @@ instance BidirGraph_ (PlaneGraph s v e f) where
   getPositiveDart (PlaneGraph g) e = getPositiveDart g e
 
 
-instance Graph_ (PlaneGraph s v e f) where
+-- | Computes the cyclic order of adjacencies around each vertex.
+--
+-- \(O(n \log n)\)
+toEmbedding :: ( Foldable1 g, Functor g, Foldable h, Functor h
+               , vi ~ VertexIx (PlaneGraph s v e f)
+               , v ~ Vertex (PlaneGraph s v e f)
+               , e ~ Edge (PlaneGraph s v e f)
+               , GraphFromAdjListExtraConstraints (PlaneGraph s v e f) h
+               , Point_ v 2 r, Ord r, Num r
+               ) => g (vi, v, h (vi, e)) -> g (vi, v, Vector.NonEmptyVector (vi, e))
+toEmbedding vs = fmap sortAround' vs
+  where
+    vertexLocs             = foldMap (\(vi,v,_) -> Map.singleton vi v) vs
+    sortAround' (vi,v,adjs) = (vi,v, Vector.unsafeFromVector $ sortBy (ccwCmpAround' v) adjs)
+    ccwCmpAround' v (ui,_) (wi,_) = ccwCmpAround v (vertexLocs Map.! ui) (vertexLocs Map.! wi)
+
+
+
+instance ( Point_ v 2 (NumType v)
+         , Ord (NumType v), Num (NumType v)
+         ) => Graph_ (PlaneGraph s v e f) where
   type GraphFromAdjListExtraConstraints (PlaneGraph s v e f) h = (f ~ (), Foldable1 h)
-  fromAdjacencyLists = PlaneGraph . fromAdjacencyLists
+
+  fromAdjacencyLists = fromEmbedding . toEmbedding
 
   neighboursOf u = _PlanarGraph.neighboursOf u
   incidentEdgesOf u = _PlanarGraph.incidentEdgesOf u
 
-instance PlanarGraph_ (PlaneGraph s v e f) where
+instance ( Point_ v 2 (NumType v)
+         , Ord (NumType v), Num (NumType v)
+         ) => PlanarGraph_ (PlaneGraph s v e f) where
   type DualGraphOf (PlaneGraph s v e f) = PlanarGraph s Dual f e v
 
   dualGraph = dualGraph . coerce @_ @(PlanarGraph s Primal v e f)
@@ -125,7 +155,8 @@ instance PlanarGraph_ (PlaneGraph s v e f) where
 
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
-         ) => PlaneGraph_ (PlaneGraph s v e f) v
+         ) => PlaneGraph_ (PlaneGraph s v e f) v where
+  fromEmbedding = PlaneGraph . fromAdjacencyLists
 
 instance ( Point_ v 2 r, Point_ v' 2 r'
          ) => HasPoints (PlaneGraph s v e f)
