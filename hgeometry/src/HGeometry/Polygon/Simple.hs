@@ -126,8 +126,15 @@ instance ( Point_ point 2 r
          , VertexContainer f point
          ) => Polygon_ (SimplePolygonF f point) point r where
   area = areaSimplePolygon
-  ccwPredecessorOf u = singular $ vertexAt (pred u)
-  ccwSuccessorOf   u = singular $ vertexAt (succ u)
+  ccwPredecessorOf u = \pvFv pg -> let n = numVertices pg
+                                       p = (pred u) `mod` n
+                                       l = singular $ vertexAt p
+                                   in l pvFv pg
+  -- make sure to wrap the index to make sure we report the right index.
+  ccwSuccessorOf   u = \pvFv pg -> let n = numVertices pg
+                                       s = (succ u) `mod` n
+                                       l = singular $ vertexAt s
+                                   in l pvFv pg
 
 instance ( Point_ point 2 r
          , VertexContainer f point

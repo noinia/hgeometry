@@ -53,8 +53,7 @@ data LR = L | R deriving (Show,Eq)
 -- running time: \(O(n \log n)\)
 triangulate    :: forall s yMonotonePolygon point r.
                   (YMonotonePolygon_ yMonotonePolygon point r, Ord r, Num r
-                   , Show point)
-                  -- )
+                  )
                => yMonotonePolygon
                -> PlaneGraph s point PolygonEdgeType PolygonFaceData
 triangulate pg = constructGraph pg (computeDiagonals pg)

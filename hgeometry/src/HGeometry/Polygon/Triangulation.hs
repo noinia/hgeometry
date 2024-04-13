@@ -17,9 +17,7 @@ module HGeometry.Polygon.Triangulation
 
 import           Control.Lens
 import           Data.Coerce
-import qualified Data.Foldable as F
 import           HGeometry.Ext
-import           HGeometry.LineSegment
 import           HGeometry.PlaneGraph
 import           HGeometry.Polygon.Simple
 import qualified HGeometry.Polygon.Triangulation.MakeMonotone as MM
@@ -34,8 +32,7 @@ import           Hiraffe.PlanarGraph
 --
 -- running time: \(O(n \log n)\)
 triangulate    :: forall s polygon point r.
-                  (SimplePolygon_ polygon point r, Ord r, Num r -- )
-                   , Show point)
+                  (SimplePolygon_ polygon point r, Ord r, Num r)
                => polygon
                -> PlaneGraph s point PolygonEdgeType PolygonFaceData
 triangulate pg = constructGraph pg (computeDiagonals pg)
@@ -45,9 +42,7 @@ triangulate pg = constructGraph pg (computeDiagonals pg)
 --
 -- running time: \(O(n \log n)\)
 computeDiagonals    :: forall polygon point r.
-                       (SimplePolygon_ polygon point r, Ord r, Num r
-                   , Show point)
-                       -- )
+                       (SimplePolygon_ polygon point r, Ord r, Num r)
                     => polygon -> [Diagonal polygon]
 computeDiagonals pg = monotoneDiags <> extraDiags
   where
@@ -71,8 +66,8 @@ computeDiagonals pg = monotoneDiags <> extraDiags
 
     -- collectDiags   :: FaceIx planeGraph -> [Diagonal polygon]
     collectDiags i = let yMonotonePoly  = monotoneSubdiv ^?! interiorFacePolygonAt i
-                     in map (coerce . withOriginalId yMonotonePoly)
-                        $ TM.computeDiagonals yMonotonePoly
+                     in map (coerce . withOriginalId yMonotonePoly) $
+                            TM.computeDiagonals yMonotonePoly
 
 withOriginalId               :: ( TM.YMonotonePolygon_ yMonotonePolygon (point :+ i) r
                                 ) => yMonotonePolygon -> Diagonal yMonotonePolygon -> Vector 2 i

@@ -8,23 +8,21 @@
 module HGeometry.Polygon.Triangulation.Types where
 
 import           Control.Lens
+import           Data.Coerce
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Map as Map
 import           Data.Maybe (fromMaybe)
 import           HGeometry.Lens.Util
--- import qualified Data.Vector.Mutable as MV
--- import           HGeometry.PlanarSubdivision.Basic
--- import qualified HGeometry.PlaneGraph as PG
-import           Hiraffe.Graph.Class
 import           HGeometry.PlaneGraph
+import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple.Class
-import           HGeometry.Point
 import           HGeometry.Vector
+import           Hiraffe.Graph.Class
 import           Hiraffe.PlanarGraph as PlanarGraph
-import           Data.Coerce
 
-import Debug.Trace
+-- import qualified Data.Foldable as F
+-- import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | After triangulation, edges are either from the original polygon or a new diagonal.
@@ -135,23 +133,17 @@ constructSubdivision e origs diags = fromPlaneGraph $ constructGraph e origs dia
 constructGraph          :: forall s polygon point r f.
                            ( SimplePolygon_ polygon point r, Point_ point 2 r
                            , Foldable f, Ord r, Num r
-                           , Show point
                            )
                         => polygon
                         -> f (Diagonal polygon)
                         -> PlaneGraph s point PolygonEdgeType PolygonFaceData
-constructGraph pg diags
-  | traceShow ("constructGraph",foldMap (:[]) diags) False = undefined
-  | otherwise = gr&faces %@~ computeFaceLabel
+constructGraph pg diags = gr&faces %@~ computeFaceLabel
 -- constructGraph pg diags = gr&faces %@~ computeFaceLabel
   where
     -- | Note that we use fromAdjacencyLists
-    gr = traceShowWith ("Gr",) $
-      fromAdjacencyLists adjLists :: PlaneGraph s point PolygonEdgeType ()
+    gr = fromAdjacencyLists adjLists :: PlaneGraph s point PolygonEdgeType ()
 
-
-    adjLists = traceShowWith ("adjLists",) $
-      uncurry collectDiags <$> itoNonEmptyOf outerBoundaryWithNeighbours pg
+    adjLists = uncurry collectDiags <$> itoNonEmptyOf outerBoundaryWithNeighbours pg
 
     collectDiags                  :: (VertexIx polygon, (VertexIx polygon, VertexIx polygon))
                                   -> (point,            (point,            point))

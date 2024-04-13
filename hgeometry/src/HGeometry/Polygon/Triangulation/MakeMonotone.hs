@@ -40,8 +40,7 @@ import qualified VectorBuilder.Vector as Builder
 --
 -- running time: \(O(n\log n)\)
 makeMonotone    :: forall s polygon point r.
-                   (SimplePolygon_ polygon point r, Ord r, Num r -- )
-                   , Show point)
+                   (SimplePolygon_ polygon point r, Ord r, Num r)
                 => polygon
                 -> PlaneGraph s point PolygonEdgeType PolygonFaceData
 makeMonotone pg = constructGraph pg (computeDiagonals pg)
@@ -92,7 +91,8 @@ p `cmpSweep` q = comparing (^.yCoord) p q <> comparing (Down . (^.xCoord)) p q
 -- | Handle an event
 handle :: forall polygon point r. ( Polygon_ polygon point r
                                   , Point_ point 2 r, Num r, Ord r
-                                  , Default (VertexIx polygon), Ord (VertexIx polygon)
+                                  , Default (VertexIx polygon)
+                                  , Ord (VertexIx polygon)
                                   )
        => polygon
        -> (StatusSruct polygon, [Diagonal polygon]) -> Event polygon
