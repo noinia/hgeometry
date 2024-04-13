@@ -7,8 +7,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Polygon.Triangulation.TriangulateMonotone
   ( YMonotonePolygon_
-  -- , triangulate
-  -- , triangulate'
+  , triangulate
   , computeDiagonals
   -- , LR(..)
   -- , P
@@ -32,7 +31,7 @@ import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
 import           HGeometry.Vector (Vector(Vector2))
 -- import           HGeometry.PlanarSubdivision.Basic (PlanarSubdivision, PolygonFaceData)
--- import           HGeometry.PlaneGraph (PlaneGraph)
+import           HGeometry.PlaneGraph (PlaneGraph)
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple.Class
@@ -48,34 +47,17 @@ import           HGeometry.Polygon.Triangulation.Types
 type YMonotonePolygon_ = SimplePolygon_
 
 data LR = L | R deriving (Show,Eq)
-{-
-
-type PlanarSubdivision s point e f r = ()
 
 -- | Triangulates a polygon of \(n\) vertices
 --
 -- running time: \(O(n \log n)\)
-triangulate    :: ( YMonotonePolygon_ yMonotonePolygon point r
-                  , Ord r, Fractional r)
+triangulate    :: forall s yMonotonePolygon point r.
+                  (YMonotonePolygon_ yMonotonePolygon point r, Ord r, Num r
+                  )
                => yMonotonePolygon
-               -> PlanarSubdivision s point PolygonEdgeType PolygonFaceData r
-triangulate pg = constructSubdivision e es (computeDiagonals pg)
-  where
-    (e:es) = listEdges pg
+               -> PlaneGraph s point PolygonEdgeType PolygonFaceData
+triangulate pg = constructGraph pg (computeDiagonals pg)
   -- TODO: Find a way to construct the graph in O(n) time.
-
--- | Triangulates a polygon of \(n\) vertices
---
--- running time: \(O(n \log n)\)
-triangulate'     :: forall s p r. (Ord r, Fractional r)
-                 => yMonotonePolygon-> PlaneGraph s p PolygonEdgeType PolygonFaceData r
-triangulate' pg' = constructGraph e es (computeDiagonals pg)
-  where
-    pg     = toCounterClockWiseOrder pg'
-    (e:es) = listEdges pg
-  -- TODO: Find a way to construct the graph in O(n) time.
-
--}
 
 -- | Given a y-monotone polygon in counter clockwise order computes the diagonals
 -- to add to triangulate the polygon

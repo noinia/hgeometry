@@ -33,7 +33,6 @@ module HGeometry.LineSegment.Intersection.BentleyOttmann
 
 import           Control.Lens hiding (contains)
 import           Data.Coerce
-import           Data.Default.Class
 import qualified Data.Foldable as F
 import           Data.Function (on)
 import qualified Data.List as List
@@ -49,9 +48,8 @@ import qualified Data.Vector as Vector
 import           HGeometry.Foldable.Sort
 import           HGeometry.Intersection
 import           HGeometry.Interval.Class
-import           HGeometry.Interval.EndPoint
+-- import           HGeometry.Interval.EndPoint
 import           HGeometry.LineSegment
-import           HGeometry.LineSegment.Class
 import           HGeometry.LineSegment.Intersection.Types
 import           HGeometry.Point
 import           HGeometry.Properties (NumType, Dimension)

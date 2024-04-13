@@ -133,7 +133,7 @@
 <textstyle name="center" begin="\begin{center}" end="\end{center}"/>
 <textstyle name="itemize" begin="\begin{itemize}" end="\end{itemize}"/>
 <textstyle name="item" begin="\begin{itemize}\item{}" end="\end{itemize}"/>
-</ipestyle><page><layer name="alpha"/><layer name="dartLabel"/><layer name="darts"/><layer name="face"/><layer name="faceLabel"/><layer name="vertex"/><layer name="vertexLabel"/><view layers="alpha dartLabel darts face faceLabel vertex vertexLabel" active="alpha"/><use layer="vertex" pos="0.0 0.0" name="mark/disk(sx)"/><text layer="vertexLabel" pos="0.0 0.0" type="label">Point2 0.0 0.0 :+ 0</text><use layer="vertex" pos="200.0 200.0" name="mark/disk(sx)"/><text layer="vertexLabel" pos="200.0 200.0" type="label">Point2 200.0 200.0 :+ 1</text><use layer="vertex" pos="200.0 0.0" name="mark/disk(sx)"/><text layer="vertexLabel" pos="200.0 0.0" type="label">Point2 200.0 0.0 :+ 2</text><use layer="vertex" pos="-100.0 400.0" name="mark/disk(sx)"/><text layer="vertexLabel" pos="-100.0 400.0" type="label">Point2 (-100.0) 400.0 :+ 3</text><path layer="darts" stroke="purple" arrow="normal/normal">0.0 1.0 m
+</ipestyle><page><layer name="alpha"/><layer name="dartLabel"/><layer name="darts"/><layer name="edgeLabel"/><layer name="edges"/><layer name="face"/><layer name="faceLabel"/><layer name="vertex"/><layer name="vertexLabel"/><view layers="alpha dartLabel darts edgeLabel edges face faceLabel vertex vertexLabel" active="alpha"/><use layer="vertex" pos="0.0 0.0" name="mark/disk(sx)"/><text layer="vertexLabel" pos="0.0 0.0" type="label">Point2 0.0 0.0 :+ 0</text><use layer="vertex" pos="200.0 200.0" name="mark/disk(sx)"/><text layer="vertexLabel" pos="200.0 200.0" type="label">Point2 200.0 200.0 :+ 1</text><use layer="vertex" pos="200.0 0.0" name="mark/disk(sx)"/><text layer="vertexLabel" pos="200.0 0.0" type="label">Point2 200.0 0.0 :+ 2</text><use layer="vertex" pos="-100.0 400.0" name="mark/disk(sx)"/><text layer="vertexLabel" pos="-100.0 400.0" type="label">Point2 (-100.0) 400.0 :+ 3</text><path layer="darts" stroke="purple" arrow="normal/normal">0.0 1.0 m
 200.0 1.0 l
 </path><text layer="dartLabel" pos="100.0 0.0" type="label">&quot;0-&gt;2&quot;</text><path layer="darts" stroke="purple" arrow="normal/normal">200.0 -1.0 m
 0.0 -1.0 l
@@ -153,7 +153,17 @@
 201.0 0.0 l
 </path><text layer="dartLabel" pos="200.0 100.0" type="label">&quot;1-&gt;2&quot;</text><path layer="darts" stroke="purple" arrow="normal/normal">199.0 0.0 m
 199.0 200.0 l
-</path><text layer="dartLabel" pos="200.0 100.0" type="label">&quot;2-&gt;1&quot;</text><path layer="face">0.0 0.0 m
+</path><text layer="dartLabel" pos="200.0 100.0" type="label">&quot;2-&gt;1&quot;</text><path layer="edges">0.0 0.0 m
+200.0 0.0 l
+</path><text layer="edgeLabel" pos="100.0 0.0" type="label">Dart (Arc 0) +1</text><path layer="edges">0.0 0.0 m
+200.0 200.0 l
+</path><text layer="edgeLabel" pos="100.0 100.0" type="label">Dart (Arc 1) +1</text><path layer="edges">0.0 0.0 m
+-100.0 400.0 l
+</path><text layer="edgeLabel" pos="-50.0 200.0" type="label">Dart (Arc 2) +1</text><path layer="edges">200.0 200.0 m
+-100.0 400.0 l
+</path><text layer="edgeLabel" pos="50.0 300.0" type="label">Dart (Arc 3) +1</text><path layer="edges">200.0 200.0 m
+200.0 0.0 l
+</path><text layer="edgeLabel" pos="200.0 100.0" type="label">Dart (Arc 4) +1</text><path layer="face">0.0 0.0 m
 200.0 0.0 l
 200.0 200.0 l
 h

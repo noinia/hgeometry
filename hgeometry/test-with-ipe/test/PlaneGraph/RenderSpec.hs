@@ -2,6 +2,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 module PlaneGraph.RenderSpec
   ( spec
+  , drawGraph
+  , drawVertex
+  , drawDart
+  , drawFace
+  , drawEdge
   ) where
 
 import           Control.Lens
@@ -14,7 +19,6 @@ import           HGeometry.Boundary
 import           HGeometry.Ext
 import           HGeometry.Line
 import           HGeometry.LineSegment
-import           HGeometry.Number.Radical
 import           HGeometry.PlaneGraph
 import           HGeometry.PlaneGraph.Class
 import           HGeometry.Point
@@ -94,13 +98,16 @@ spec = describe "render planegraph tests" $ do
 
 drawGraph    :: ( PlaneGraph_ planeGraph vertex
                 , IsTransformable vertex
-                , Point_ vertex 2 r, Ord r, Radical r, Fractional r, Show r, Eq (FaceIx planeGraph)
+                , Point_ vertex 2 r, Ord r, Real r
+                , Fractional r, Show r, Eq (FaceIx planeGraph)
                 , Show (Vertex planeGraph), Show (Dart planeGraph), Show (Face planeGraph)
+                , Show (EdgeIx planeGraph)
                 ) => planeGraph -> [IpeObject r]
 drawGraph gr = theVertices <> theEdges <> theFaces
   where
     theVertices = ifoldMapOf vertices             drawVertex    gr
     theEdges    = ifoldMapOf dartSegments         (drawDart gr) gr
+               <> ifoldMapOf edgeSegments         (drawEdge gr) gr
     theFaces    = ifoldMapOf interiorFacePolygons (drawFace gr) gr
 
 drawVertex     :: ( Point_ vertex 2 r, Show vertex)
@@ -110,8 +117,18 @@ drawVertex _ v = [ iO $ ipeDiskMark (v^.asPoint) ! attr SLayer "vertex"
                                                          -- ! attr SStroke Ipe.red
                  ]
 
+drawEdge        :: ( PlaneGraph_ planeGraph vertex, Point_ vertex 2 r, IsTransformable vertex
+                   , Show (EdgeIx planeGraph), Fractional r, Real r)
+                => planeGraph -> EdgeIx planeGraph -> ClosedLineSegment vertex -> [IpeObject r]
+drawEdge gr d s = [ iO $ ipeLineSegment s ! attr SLayer "edges"
+                  , iO $ ipeLabel (tshow d :+ c) ! attr SLayer "edgeLabel"
+                  ]
+  where
+    c = interpolate 0.5 s ^. asPoint
+
+
 drawDart        :: ( PlaneGraph_ planeGraph vertex, Point_ vertex 2 r, IsTransformable vertex
-                   , Show (Dart planeGraph), Radical r, Fractional r)
+                   , Show (Dart planeGraph), Fractional r, Real r)
                 => planeGraph -> DartIx planeGraph -> ClosedLineSegment vertex -> [IpeObject r]
 drawDart gr d s = [ iO $ ipeLineSegment (offset s)
                          ! attr SArrow normalArrow
@@ -123,23 +140,27 @@ drawDart gr d s = [ iO $ ipeLineSegment (offset s)
     c = interpolate 0.5 s ^. asPoint
     -- computes the midpoint of the segment.
 
+offset   :: forall lineSegment point r.
+            (LineSegment_ lineSegment point, IsTransformable lineSegment
+            , HasSupportingLine lineSegment
+            , Point_ point 2 r, Real r, Fractional r)
+         => lineSegment -> lineSegment
 offset s = translateBy theOffset s
   where
-    theOffset = negated $ signorm v
+    theOffset :: Vector 2 r
+    theOffset = fmap realToFrac . negated $ signorm (realToFrac @_ @Double <$> v)
+    v :: Vector 2 r
     v = perpendicularTo (supportingLine s) ^. direction
-
-
-
-
 
 drawFace         :: ( PlaneGraph_ planeGraph vertex, Point_ vertex 2 r
                     , Show (Face planeGraph), Ord r, Fractional r)
-                 => planeGraph -> FaceIx planeGraph -> SimplePolygon vertex -> [IpeObject r]
-drawFace gr f pg = [ iO $ ipePolygon (pg&vertices %~ (^.asPoint)) ! attr SLayer "face"
+                 => planeGraph -> FaceIx planeGraph -> SimplePolygon (vertex :+ VertexIx planeGraph) -> [IpeObject r]
+drawFace gr f pg = [ iO $ ipePolygon pg' ! attr SLayer "face"
                    , iO $ ipeLabel (tshow (gr^?!faceAt f) :+ c) ! attr SLayer "faceLabel"
                    ]
   where
-    c = centroid pg ^.asPoint
+    pg' = pg&vertices %~ (^.core.asPoint)
+    c = centroid pg'
 
 
 tshow :: Show a => a -> Text.Text

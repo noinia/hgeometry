@@ -22,15 +22,19 @@ module HGeometry.PlaneGraph.Class
   , dartSegments
   , edgeSegments
 
+  , interiorFacePolygonAt
   , interiorFacePolygons
   ) where
 
 import Control.Lens
+import Data.Coerce
+import Data.Default.Class
+import Data.Foldable1
 import Data.Functor.Apply
-import Data.Kind (Constraint)
 import Data.Maybe (fromMaybe)
 import Data.Monoid (Endo(..))
 import Data.Ord (comparing)
+import HGeometry.Ext
 import HGeometry.LineSegment
 import HGeometry.Point
 import HGeometry.Polygon.Simple
@@ -49,7 +53,21 @@ class ( PlanarGraph_ planeGraph
       , NumType vertex ~ NumType planeGraph
       ) => PlaneGraph_ planeGraph vertex | planeGraph -> vertex where
 
-  {-# MINIMAL #-}
+  {-# MINIMAL fromEmbedding #-}
+
+  -- | Build a graph from its embedding; i.e. for each vertex we expect its adjacencies in
+  -- CCW order.
+  --
+  -- If the, in the list of neighbours of vertex u we see a vertex v
+  -- that itself does not appear in the adjacencylist, we may drop
+  -- it. In other words if u has a neighbour v, then v better have a
+  -- specification of its neighbours somewhere.
+  fromEmbedding :: ( Foldable1 f, Functor f, Foldable h, Functor h
+                   , vi ~ VertexIx planeGraph
+                   , v ~ Vertex planeGraph
+                   , e ~ Edge planeGraph
+                   , GraphFromAdjListExtraConstraints planeGraph h
+                   ) => f (vi, v, h (vi, e)) -> planeGraph
 
   -- | Getter to access the outer face
   outerFace :: Eq (FaceIx planeGraph)
@@ -191,22 +209,66 @@ interiorFacePolygons :: forall planeGraph vertex r.
                         , Ord r, Num r
                         , Eq (FaceIx planeGraph)
                         )
-                     => IndexedFold (FaceIx planeGraph) planeGraph (SimplePolygon vertex)
+                     => IndexedFold (FaceIx planeGraph)
+                                    planeGraph
+                                    (SimplePolygon (vertex :+ VertexIx planeGraph))
 interiorFacePolygons = theFold
   where
     theFold              :: forall p f.
-                            ( Indexable (FaceIx planeGraph) p, Applicative f, Contravariant f)
-                         => p (SimplePolygon vertex) (f (SimplePolygon vertex))
+                            ( PlaneGraph_ planeGraph vertex
+                            , Indexable (FaceIx planeGraph) p, Applicative f, Contravariant f)
+                         => p (SimplePolygon (vertex :+ VertexIx planeGraph))
+                              (f (SimplePolygon (vertex :+ VertexIx planeGraph)))
                          -> planeGraph
                          -> f planeGraph
     theFold pPolyFPoly g = interiorFaces (Indexed draw) g
       where
         draw      :: FaceIx planeGraph -> Face planeGraph -> f (Face planeGraph)
-        draw fi _ = let poly = uncheckedFromCCWPoints . fmap (\vi -> g^?!vertexAt vi)
-                             $ boundaryVertices fi g
+        draw fi _ = let poly = polygonFromFace g fi
                     in poly >$ indexed pPolyFPoly fi poly
+
+polygonFromFace      :: forall planeGraph vertex r.( PlaneGraph_ planeGraph vertex
+                        , Point_ vertex 2 r
+                        )
+                     => planeGraph -> FaceIx planeGraph
+                     -> SimplePolygon (vertex :+ VertexIx planeGraph)
+polygonFromFace gr fi = poly'&vertices.extra %~ coerce
+  where
+    poly' :: SimplePolygon (vertex :+ NoDefault (VertexIx planeGraph))
+    poly' = uncheckedFromCCWPoints
+         . fmap (\vi -> gr^?!vertexAt vi :+ NoDefault vi)
+         $ boundaryVertices fi gr
         -- note that this is safe, since boundaryVerticesOf guarantees that for
         -- interior faces, the vertices are returned in CCW order.
+
+    -- TODO: why can't I just coerce poyl' to the right type?
+
+
+-- | Renders a single interior face as a simple polygon.
+--
+-- Note that this is a fold rather than a getter for the same reason faceAt is a traversal
+-- rather than a lens: i.e. if you pass some nonsensical FaceIx the face may not exist.
+interiorFacePolygonAt    :: forall planeGraph vertex.
+                            ( PlaneGraph_ planeGraph vertex
+                            , Point_ vertex 2 (NumType vertex)
+                            )
+                         => FaceIx planeGraph
+                         -> IndexedFold (FaceIx planeGraph)
+                                        planeGraph
+                                        (SimplePolygon (vertex :+ VertexIx planeGraph))
+interiorFacePolygonAt fi = theFold
+  where
+    theFold pPolyFPoly gr = faceAt fi draw gr
+      where
+        -- draw   :: Face planeGraph -> f (Face planeGraph)
+        draw _ = let poly =  polygonFromFace gr fi
+                 in poly >$ indexed pPolyFPoly fi poly
+
+
+newtype NoDefault e = NoDefault e
+
+instance Default (NoDefault e) where
+  def = undefined
 
 
 --------------------------------------------------------------------------------

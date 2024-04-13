@@ -13,16 +13,18 @@
 --------------------------------------------------------------------------------
 module HGeometry.Vector.Instances where
 
--- import Control.Lens
--- import D
--- import HGeometry.Vector.Class
-import Test.QuickCheck
+import Control.Lens
 import HGeometry.Vector
+import Test.QuickCheck
 
 --------------------------------------------------------------------------------
 
 instance (Arbitrary r, Vector_ (Vector d r) d r) => Arbitrary (Vector d r) where
   arbitrary = generateA (const arbitrary)
+  shrink v = [ v&component' i .~ x'
+             | (i,x) <- v^..components.withIndex
+             , x' <- shrink x
+             ]
 
 -- instance ( forall r. VectorLike_ (Vector d r)
 --          ) => Arbitrary1 (Vector d) where

@@ -2,53 +2,90 @@
 {-# LANGUAGE QuasiQuotes #-}
 module Polygon.Triangulation.TriangulateMonotoneSpec (spec) where
 
-import Control.Lens
-import Data.Maybe
-import Golden
-import HGeometry
-import HGeometry.Ext
-import HGeometry.Number.Real.Rational
-import HGeometry.Polygon.Class
-import HGeometry.Polygon.Simple
-import HGeometry.Polygon.Triangulation.TriangulateMonotone
-import Ipe
-import System.OsPath
-import Test.Hspec
-import Test.Util
+import           Control.Lens
+import           Data.Maybe
+import           Golden
+import           HGeometry
+import           HGeometry.Ext
+import           HGeometry.Number.Real.Rational
+import           HGeometry.Polygon.Class
+import           HGeometry.Polygon.Simple
+import           HGeometry.PlaneGraph
+import           HGeometry.Polygon.Triangulation
+import           Ipe
+import           System.OsPath
+import           Test.Hspec
+import           Test.Util
 
+import qualified HGeometry.Polygon.Triangulation.TriangulateMonotone as TM
+
+import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
 
 spec :: Spec
-spec = do testCases [osp|test-with-ipe/Polygon/Triangulation/monotone.ipe|]
-          testCases [osp|test-with-ipe/Polygon/Triangulation/simplepolygon6.ipe|]
+spec = do it "triangulate triangle"   $ do
+            let tri :: SimplePolygon (Point 2 R)
+                tri = uncheckedFromCCWPoints $ [origin, Point2 10 0, Point2 10 10]
+                gr  = TM.triangulate @() tri
+            extractDiagonals gr `shouldBe` []
+          testCases toMonotoneSpec [osp|test-with-ipe/Polygon/Triangulation/monotone.ipe|]
+          testCases toSpec [osp|test-with-ipe/Polygon/Triangulation/monotone.ipe|]
+          testCases toSpec [osp|test-with-ipe/Polygon/Triangulation/simplepolygon6.ipe|]
 
-testCases    :: OsPath -> Spec
-testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
+
+testCases            :: (TestCase R -> Spec) -> OsPath -> Spec
+testCases toSpec' fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
     Left e    -> it "reading TriangulateMonotone file" $
                    expectationFailure $ "Failed to read ipe file " ++ show e
-    Right tcs -> mapM_ toSpec tcs
-
+    Right tcs -> mapM_ toSpec' tcs
 
 data TestCase r = TestCase { _polygon  :: SimplePolygon (Point 2 r) :+ IpeColor r
                            , _solution :: [ClosedLineSegment (Point 2 r)]
                            }
                   deriving (Show,Eq)
 
-
-toSpec                            :: (Num r, Ord r, Show r) => TestCase r -> Spec
-toSpec (TestCase (poly :+ c) sol) =
-    describe ("testing polygions of color " ++ show c) $ do
-      it "comparing with manual solution" $ do
-        let algSol = computeDiagonals poly
+toMonotoneSpec                             :: (Num r, Ord r, Show r) => TestCase r -> Spec
+toMonotoneSpec (TestCase (poly :+ c) sol) = do
+    describe ("testing monotone polygons of color " ++ show c) $ do
+      it "comparing monotone diagonals with manual solution" $ do
+        let algSol = TM.computeDiagonals poly
         (naiveSet . map toSeg $ algSol) `shouldBe` naiveSet sol
+      it "comparing monotone diagonals from the triangualtion with manual solution" $ do
+        let gr     = TM.triangulate @() poly
+            algSol = traceShow ("edges", gr^..edges.withIndex)
+                   $ extractDiagonals gr
+        (naiveSet algSol) `shouldBe` naiveSet sol
   where
-    naiveSet = NaiveSet . map S
     toSeg (Vector2 i j) = ClosedLineSegment (poly^?!vertexAt i) (poly^?!vertexAt j)
 
-newtype S r = S (ClosedLineSegment (Point 2 r)) deriving (Show)
+toSpec                            :: (Num r, Ord r, Show r) => TestCase r -> Spec
+toSpec (TestCase (poly :+ c) sol) = do
+    describe ("testing polygons of color " ++ show c) $ do
+      it "comparing diagonals with manual solution" $ do
+        let algSol = computeDiagonals poly
+        (naiveSet . map toSeg $ algSol) `shouldBe` naiveSet sol
+      it "comparing diagonals from the triangualtion with manual solution" $ do
+        let gr     = triangulate @() poly
+            algSol = traceShow ("edges", gr^..edges.withIndex)
+                   $ extractDiagonals gr
+        (naiveSet algSol) `shouldBe` naiveSet sol
+  where
+    toSeg (Vector2 i j) = ClosedLineSegment (poly^?!vertexAt i) (poly^?!vertexAt j)
+
+naiveSet = NaiveSet . map S
+
+
+
+extractDiagonals gr = mapMaybe (\(d,edgeType) -> case edgeType of
+                                   Diagonal -> gr^?edgeSegmentAt d
+                                   _        -> Nothing
+                               ) $ gr^..edges.withIndex
+
+
+newtype S r = S (ClosedLineSegment (Point 2 r)) deriving newtype (Show)
 
 instance (Eq r) => Eq (S r) where
   (S s) == (S y) =  (s^.start == y^.start && s^.end == y^.end)

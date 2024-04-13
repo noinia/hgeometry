@@ -14,11 +14,12 @@
 module HGeometry.Polygon.Simple
   ( SimplePolygon_(..)
   , SimplePolygon
-  , SimplePolygonF
+  , SimplePolygonF(..)
   , toCyclic
   , VertexContainer
   , HasInPolygon(..)
   , inSimplePolygon
+  , hasNoSelfIntersections
   ) where
 
 import           Control.DeepSeq (NFData)
@@ -26,6 +27,7 @@ import           Control.Lens
 import qualified Data.Foldable as F
 import           Data.Functor.Classes
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Map as Map
 import           Data.Semigroup.Foldable
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
 import           GHC.Generics
@@ -34,6 +36,7 @@ import           HGeometry.Box
 import           HGeometry.Cyclic
 import           HGeometry.Foldable.Util
 import           HGeometry.Intersection
+import           HGeometry.LineSegment.Intersection.BentleyOttmann
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple.Class
@@ -123,8 +126,15 @@ instance ( Point_ point 2 r
          , VertexContainer f point
          ) => Polygon_ (SimplePolygonF f point) point r where
   area = areaSimplePolygon
-  ccwPredecessorOf u = singular $ vertexAt (pred u)
-  ccwSuccessorOf   u = singular $ vertexAt (succ u)
+  ccwPredecessorOf u = \pvFv pg -> let n = numVertices pg
+                                       p = (pred u) `mod` n
+                                       l = singular $ vertexAt p
+                                   in l pvFv pg
+  -- make sure to wrap the index to make sure we report the right index.
+  ccwSuccessorOf   u = \pvFv pg -> let n = numVertices pg
+                                       s = (succ u) `mod` n
+                                       l = singular $ vertexAt s
+                                   in l pvFv pg
 
 instance ( Point_ point 2 r
          , VertexContainer f point
@@ -197,3 +207,16 @@ instance ( SimplePolygon_ (SimplePolygonF f point) point r
   q `intersect` pg | q `intersects` pg = Just q
                    | otherwise         = Nothing
   -- this implementation is a bit silly but ok
+
+
+--------------------------------------------------------------------------------
+
+-- | verify that some sequence of points has no self intersecting edges.
+hasNoSelfIntersections    :: forall f point r.
+                             (Foldable f, Functor f, Point_ point 2 r, Ord r, Real r)
+                          => f point -> Bool
+hasNoSelfIntersections vs = let vs' = (\p -> (p^.asPoint)&coordinates %~ toRational) <$> vs
+                                pg :: SimplePolygon (Point 2 Rational)
+                                pg = uncheckedFromCCWPoints vs'
+                            in Map.null $ interiorIntersections $ pg^..outerBoundaryEdgeSegments
+  -- outerBoundaryEdgeSegments interiorIntersections pg

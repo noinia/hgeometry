@@ -118,6 +118,11 @@ instance Arbitrary (SimplePolygon (Point 2 (RealNumber (p::Nat)))) where
 -- instance Arbitrary (MultiPolygon () Rational) where
 --   arbitrary = elements allMultiPolygons'
 
+
+
+
+
+
 simplifyP :: SimplePolygon (Point  2 Rational) -> [SimplePolygon (Point 2 Rational)]
 simplifyP pg
       -- Scale up polygon such that each coordinate is a whole number.
@@ -127,13 +132,12 @@ simplifyP pg
       -- Scale down polygon maintaining each coordinate as a whole number
     | gcdP /= 1 = [ pg&vertices %~ divP gcdP ]
 
-        -- unsafeFromCircularVector $ CV.map (over core (divP gcdP)) vs]
     | minX /= 0 || minY /= 0 = [ pg&vertices %~ align ]
       -- = [unsafeFromCircularVector $ CV.map (over core align) vs]
     | otherwise =
       let pg' = pg&vertices %~ _div2
             -- unsafeFromCircularVector $ CV.map (over core _div2) vs
-      in [ pg' | not (hasSelfIntersections pg') ]
+      in [ pg' | hasNoSelfIntersections $ pg'^..vertices ]
     -- otherwise = []
   where
     minX = first1Of (minimumVertexBy (comparing (^.xCoord)).xCoord) pg
@@ -154,8 +158,6 @@ simplifyP pg
     divP v (Point2 c d) = Point2 (c/v) (d/v)
     _div2 (Point2 a b) = Point2 (numerator a `div` 2 % 1) (numerator b `div` 2 % 1)
 
-hasSelfIntersections = const True
--- FIXME!
 
 lcmPoint :: SimplePolygon (Point 2 Rational) -> Rational
 lcmPoint p = realToFrac t

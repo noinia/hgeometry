@@ -27,7 +27,7 @@ import           HGeometry.Tree.Binary.Static
 
 instance (Arbitrary c, Arbitrary e) => Arbitrary (c :+ e) where
   arbitrary = (:+) <$> arbitrary <*> arbitrary
-
+  shrink = genericShrink
 
 --------------------------------------------------------------------------------
 
@@ -38,9 +38,15 @@ instance (Arbitrary c, Arbitrary e) => Arbitrary (c :+ e) where
 
 instance (Arbitrary a, Num a, Eq a) => Arbitrary (GRatio a) where
   arbitrary = (/) <$> arbitrary <*> (arbitrary `suchThat` (/= 0))
+  shrink r = 0 : 1 : [ a' % b'
+                     | a' <- shrink $ numerator r
+                     , b' <- fromInteger 1 : shrink (denominator r)
+                     , b' /= 0
+                     ]
 
 instance KnownNat p => Arbitrary (RealNumber p) where
   arbitrary = fromFixed <$> arbitrary
+  shrink = genericShrink
 
 instance Arbitrary Sign.Sign where
   arbitrary = (\b -> if b then Sign.Positive else Sign.Negative) <$> arbitrary
@@ -69,6 +75,7 @@ instance (Arbitrary a, Arbitrary v) => Arbitrary (BinLeafTree v a) where
               | otherwise = do
                               l <- choose (0,n-1)
                               Node <$> f l <*> arbitrary <*> f (n-l-1)
+  -- shrink = genericShrink
 
 instance Arbitrary a => Arbitrary (BinaryTree a) where
   arbitrary = sized f
@@ -76,3 +83,4 @@ instance Arbitrary a => Arbitrary (BinaryTree a) where
               | otherwise = do
                               l <- choose (0,n-1)
                               Internal <$> f l <*> arbitrary <*> f (n-l-1)
+  -- shrink = genericShrink
