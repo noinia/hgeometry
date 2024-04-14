@@ -39,11 +39,16 @@ spec = describe "halfspace Tests" $ do
          it "on boundary of non-vertical Negative hyperplane 2" $
            (Point2 0 (-1) `intersects` HalfSpace Negative (HyperPlane2 (-1) (-1) (-1)))
            `shouldBe` True
-         prop "normal vector points into negative halfspace" $
+         prop "normal vector points into positive halfspace" $
            \(h :: HyperPlane 2 Rational) ->
              let n = normalVector h
                  p = pointOn h
-             in (p .+^ n) `intersects` HalfSpace Negative h
+             in (p .+^ n) `intersects` HalfSpace Positive h
+         prop "normal vector points into positive halfspace (LineEQ)" $
+           \(h :: LineEQ Rational) ->
+             let n = normalVector h
+                 p = pointOn h
+             in (p .+^ n) `intersects` HalfSpace Positive h
          -- it "intersect tests" $ do
          --   let h = HalfSpace Positive $ horizontalLine (4 % 1 :: Rational)
          --       l = LinePV origin (Vector2 (1 % 1) (1 % 1 :: Rational))
