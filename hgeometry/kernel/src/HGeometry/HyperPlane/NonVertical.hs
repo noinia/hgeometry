@@ -18,6 +18,7 @@ module HGeometry.HyperPlane.NonVertical
   , Plane_, pattern Plane_
   ) where
 
+import           Control.DeepSeq
 import           Control.Lens hiding (snoc, uncons, unsnoc)
 import qualified Data.Foldable as F
 import           Data.Functor.Classes
@@ -29,7 +30,6 @@ import           HGeometry.Properties
 import           HGeometry.Vector
 import           Prelude hiding (last)
 import           Text.Read (Read (..), readListPrecDefault)
-
 --------------------------------------------------------------------------------
 
 -- $setup
@@ -53,12 +53,15 @@ newtype NonVerticalHyperPlane d r = NonVerticalHyperPlane (Vector d r)
 type instance NumType   (NonVerticalHyperPlane d r) = r
 type instance Dimension (NonVerticalHyperPlane d r) = d
 
-deriving stock instance Eq  (Vector d r) => Eq (NonVerticalHyperPlane d r)
-deriving stock instance Ord (Vector d r) => Ord (NonVerticalHyperPlane d r)
+deriving newtype instance Eq     (Vector d r) => Eq     (NonVerticalHyperPlane d r)
+deriving newtype instance Ord    (Vector d r) => Ord    (NonVerticalHyperPlane d r)
+deriving newtype instance NFData (Vector d r) => NFData (NonVerticalHyperPlane d r)
 
 deriving stock instance Functor     (Vector d) => Functor     (NonVerticalHyperPlane d)
 deriving stock instance Foldable    (Vector d) => Foldable    (NonVerticalHyperPlane d)
 deriving stock instance Traversable (Vector d) => Traversable (NonVerticalHyperPlane d)
+
+
 
 instance (Show r, Foldable (Vector d)) => Show (NonVerticalHyperPlane d r) where
   showsPrec k (NonVerticalHyperPlane v) = showParen (k > app_prec) $

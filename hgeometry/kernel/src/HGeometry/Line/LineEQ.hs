@@ -18,10 +18,13 @@ module HGeometry.Line.LineEQ
   , module HGeometry.Line.NonVertical.Class
   ) where
 
+import Control.DeepSeq
 import Control.Lens((^.), coerced)
+import GHC.Generics(Generic)
 import HGeometry.HyperPlane
 import HGeometry.HyperPlane.NonVertical
 import HGeometry.Intersection
+import HGeometry.Line.Class
 import HGeometry.Line.Intersection
 import HGeometry.Line.NonVertical.Class
 import HGeometry.Point
@@ -33,7 +36,8 @@ import Text.Read
 
 -- | A Line by its equation
 newtype LineEQ r = MkLineEQ (NonVerticalHyperPlane 2 r)
-  deriving newtype (Eq,Ord)
+  deriving newtype (Eq,Ord,NFData)
+  deriving stock (Generic)
 
 -- | Constructs a line in R^2, i.e. a line for the equation \(y = ax + b\)
 pattern LineEQ     :: r -> r -> LineEQ r
@@ -76,6 +80,7 @@ instance (Read r) => Read (LineEQ r) where
 
 instance ( MkHyperPlaneConstraints 2 r
          ) => HyperPlane_ (LineEQ r) 2 r where
+  onHyperPlane = onLine
 
 instance ( MkHyperPlaneConstraints 2 r
          ) => ConstructableHyperPlane_ (LineEQ r) 2 r where
@@ -92,6 +97,10 @@ instance ( MkHyperPlaneConstraints 2 r, Num r
          ) => NonVerticalHyperPlane_ (LineEQ r) 2 r where
   evalAt p = evalAt' $ p^.xCoord
   hyperPlaneCoefficients = coerced
+
+instance HasOnLine (LineEQ r) 2 where
+  onLine q l = evalAt' (q^.xCoord) l == q^.yCoord
+  {-# INLINE onLine #-}
 
 -- instance Fractional r => Line_ (LineEQ r) 2 r where
 --   fromPointAndVec (Point2_ px py) (Vector2 vx vy) = let a = vy/vx
@@ -192,3 +201,7 @@ evalAt' x (LineEQ a b) = a*x + b
 --     where
 --       p' = transformBy t (Point2 0 b)
 --       q' = transformBy t (Point2 1 (a + b))
+
+
+
+--------------------------------------------------------------------------------
