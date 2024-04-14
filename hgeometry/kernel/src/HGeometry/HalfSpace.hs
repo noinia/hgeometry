@@ -11,9 +11,9 @@
 --------------------------------------------------------------------------------
 module HGeometry.HalfSpace
   ( HalfSpaceF(..)
-  , halfspaceSign, boundingHyperPlane
   , HalfSpace
   , Sign(..)
+  , module HGeometry.HalfSpace.Class
   ) where
 
 import Control.Lens
@@ -23,6 +23,7 @@ import HGeometry.Point
 import HGeometry.Properties (NumType,Dimension)
 import HGeometry.Sign
 import HGeometry.Vector
+import HGeometry.HalfSpace.Class
 
 --------------------------------------------------------------------------------
 
@@ -36,17 +37,19 @@ data HalfSpaceF boundingHyperPlane =
     HalfSpace {-# UNPACK #-} !Sign boundingHyperPlane
   deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
 
--- | Lens to access the sign of the halfspace
-halfspaceSign :: Lens' (HalfSpaceF boundingHyperPlane) Sign
-halfspaceSign = lens (\(HalfSpace s _) -> s) (\(HalfSpace _ h) s -> HalfSpace s h)
-{-# INLINE halfspaceSign #-}
+instance ( HyperPlane_ boundingHyperPlane d r
+         ) => HalfSpace_ (HalfSpaceF boundingHyperPlane) d r where
+  type BoundingHyperPlane (HalfSpaceF boundingHyperPlane) d r = boundingHyperPlane
+
+  halfSpaceSign = lens (\(HalfSpace s _) -> s) (\(HalfSpace _ h) s -> HalfSpace s h)
+  {-# INLINE halfSpaceSign #-}
+  boundingHyperPlane = boundingHyperPlaneLens
 
 -- | Lens to access the hyperplane bounding the halfspace
-boundingHyperPlane :: Lens (HalfSpaceF boundingHyperPlane) (HalfSpaceF boundingHyperPlane')
+boundingHyperPlaneLens :: Lens (HalfSpaceF boundingHyperPlane) (HalfSpaceF boundingHyperPlane')
                            boundingHyperPlane              boundingHyperPlane'
-boundingHyperPlane = lens (\(HalfSpace _ h) -> h) (\(HalfSpace s _) h -> HalfSpace s h)
-{-# INLINE boundingHyperPlane #-}
-
+boundingHyperPlaneLens = lens (\(HalfSpace _ h) -> h) (\(HalfSpace s _) h -> HalfSpace s h)
+{-# INLINE boundingHyperPlaneLens #-}
 
 -- | Arbitrary halfspaces in r^d.
 type HalfSpace d r = HalfSpaceF (HyperPlane d r)
