@@ -111,8 +111,12 @@ instance ( Arbitrary point
                  b <- arbitrary `suchThat` (/= a)
                  c <- arbitrary `suchThat` (\c' -> c' /= a && c' /= b && ccw a b c' /= CoLinear)
                  pure $ Triangle a b c
-  shrink = genericShrink
-
+  shrink (Triangle a b c) = [ Triangle a' b' c'
+                            | a' <- shrink a
+                            , b' <- shrink b
+                            , c' <- shrink c
+                            , b' /= a', c' /= a', c' /= b', ccw a' b' c' /= CoLinear
+                            ]
 
 instance Arbitrary r => Arbitrary (LineEQ r) where
   arbitrary = LineEQ <$> arbitrary <*> arbitrary
