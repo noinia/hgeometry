@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings          #-}
-{-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TupleSections              #-}
 module HGeometry.Miso.Svg.ICanvas(
     module HGeometry.Miso.Svg.StaticCanvas
@@ -50,10 +49,26 @@ data ICanvas r = ICanvas { _canvas           :: Canvas r
                            -- ^ point where we started panning from
                          , _capabilities     :: Set Capability
                          } deriving (Show,Eq)
-makeLenses ''ICanvas
 
+-- | Lens to access the canvas
+canvas :: Lens' (ICanvas r) (Canvas r)
+canvas = lens _canvas (\ic c -> ic { _canvas = c })
+{-# INLINE canvas #-}
 
+-- | Lens to access the mouse position
+mousePosition :: Lens' (ICanvas r) (Maybe (Point 2 Int))
+mousePosition = lens _mousePosition (\ic mp -> ic { _mousePosition = mp })
+{-# INLINE mousePosition #-}
 
+-- | Lens to access the pan status
+panStatus :: Lens' (ICanvas r) (PanStatus r)
+panStatus = lens _panStatus (\ic ps -> ic { _panStatus = ps })
+{-# INLINE panStatus #-}
+
+-- | Lens to access the canvas capabilities
+capabilities :: Lens' (ICanvas r) (Set Capability)
+capabilities = lens _capabilities (\ic c -> ic { _capabilities = c })
+{-# INLINE capabilities#-}
 
 hasCapability   :: Capability -> ICanvas r -> Bool
 hasCapability c = Set.member c . _capabilities
