@@ -94,8 +94,9 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
-import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
+import           Data.Vector.NonEmpty (NonEmptyVector)
+import qualified Data.Vector.NonEmpty as NonEmptyV
 import           GHC.Generics (Generic)
 import           HGeometry.Box
 import           HGeometry.Ext
@@ -106,7 +107,7 @@ import           HGeometry.PlaneGraph
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Properties
-import           Hiraffe.PlanarGraph (FaceId, VertexId)
+import           Hiraffe.PlanarGraph (FaceId, VertexId, VertexIdIn(..), FaceIdIn(..))
 import qualified Hiraffe.PlanarGraph.Dart as Dart
 -- import           Hiraffe.PlanarGraph (allDarts,isPositive)
 
@@ -122,33 +123,33 @@ import qualified Hiraffe.PlanarGraph.Dart as Dart
 --
 -- invariant: the outerface has faceId 0
 data PlanarSubdivision s v e f =
-  PlanarSubdivision { _components    :: V.Vector (Component s)
-                    , _rawVertexData :: V.Vector (Raw s (VertexId  (Wrap s)) v)
-                    , _rawDartData   :: V.Vector (Raw s (Dart.Dart (Wrap s)) e)
-                    , _rawFaceData   :: V.Vector (RawFace s f)
+  PlanarSubdivision { _components    :: NonEmptyVector (Component s)
+                    , _rawVertexData :: NonEmptyVector (Raw s (VertexId  (Wrap s)) v)
+                    , _rawDartData   :: NonEmptyVector (Raw s (Dart.Dart (Wrap s)) e)
+                    , _rawFaceData   :: NonEmptyVector (RawFace s f)
                     } deriving (Show,Eq,Functor,Generic)
 
 -- makeLenses ''PlanarSubdivision
 
 -- | Lens to access the connected components of a planar subdivision.
-components :: Lens' (PlanarSubdivision s v e f) (V.Vector (Component s))
+components :: Lens' (PlanarSubdivision s v e f) (NonEmptyVector (Component s))
 components = lens _components (\ps cs -> ps { _components = cs })
 
 -- | Lens to access the raw vertex data
 rawVertexData :: Lens (PlanarSubdivision s v e f) (PlanarSubdivision s v' e f)
-                      (V.Vector (Raw s (VertexId  (Wrap s)) v))
-                      (V.Vector (Raw s (VertexId  (Wrap s)) v'))
+                      (NonEmptyVector (Raw s (VertexId  (Wrap s)) v))
+                      (NonEmptyVector (Raw s (VertexId  (Wrap s)) v'))
 rawVertexData = lens _rawVertexData (\ps vxd -> ps { _rawVertexData = vxd })
 
 -- | Lens to access the raw dart daat a
 rawDartData :: Lens (PlanarSubdivision s v e f) (PlanarSubdivision s v e' f)
-                    (V.Vector (Raw s (Dart.Dart  (Wrap s)) e))
-                    (V.Vector (Raw s (Dart.Dart  (Wrap s)) e'))
+                    (NonEmptyVector (Raw s (Dart.Dart  (Wrap s)) e))
+                    (NonEmptyVector (Raw s (Dart.Dart  (Wrap s)) e'))
 rawDartData = lens _rawDartData (\ps vxd -> ps { _rawDartData = vxd })
 
 -- | Access the raw face data
 rawFaceData :: Lens (PlanarSubdivision s v e f) (PlanarSubdivision s v e f')
-                    (V.Vector (RawFace s f))    (V.Vector (RawFace s f'))
+                    (NonEmptyVector (RawFace s f))    (NonEmptyVector (RawFace s f'))
 rawFaceData = lens _rawFaceData (\ps vxd -> ps { _rawFaceData = vxd })
 
 
@@ -157,50 +158,58 @@ rawFaceData = lens _rawFaceData (\ps vxd -> ps { _rawFaceData = vxd })
 type instance NumType   (PlanarSubdivision s v e f) = NumType v
 type instance Dimension (PlanarSubdivision s v e f) = 2
 
--- instance IsBoxable v => IsBoxable (PlanarSubdivision s v e f) where
---   boundingBox = boundingBox . toNonEmptyOf vertices
-
-  -- (allPoints.asPoint)
-
-  --   boundingBoxList' . V.toList . _components
-
+instance (IsBoxable v, Dimension v ~ 2) => IsBoxable (PlanarSubdivision s v e f) where
+  boundingBox = boundingBox . toNonEmptyOf vertices
 
 -- | Lens to access a particular component of the planar subdivision.
 component    :: ComponentId s -> Lens' (PlanarSubdivision s v e f) (Component s)
 component ci = components.singular (ix $ unCI ci)
 
 
-
-
 -- instance (ToJSON v, ToJSON v, ToJSON e, ToJSON f, ToJSON r)
 --          => ToJSON (PlanarSubdivision s v e f) where
 --   toEncoding = genericToEncoding defaultOptions
-
-
 
 --------------------------------------------------------------------------------
 
 instance HasVertices' (PlanarSubdivision s v e f) where
   type Vertex   (PlanarSubdivision s v e f) = v
   type VertexIx (PlanarSubdivision s v e f) = VertexId s
-  vertexAt = undefined
+  vertexAt u@(VertexId ui) = reindexed (const u) $ rawVertexData.iix ui <. dataVal
 
--- instance HasVertices (PlanarSubdivision s v e f) (PlanarSubdivision s v' e f)  where
+instance HasVertices (PlanarSubdivision s v e f) (PlanarSubdivision s v' e f)  where
+  vertices = reindexed (VertexId :: Int -> VertexIx (PlanarSubdivision s v e f))
+           $ rawVertexData .> traversed1 <. dataVal
+instance HasDarts' (PlanarSubdivision s v e f) where
 
--- instance HasEdges' (PlanarSubdivision s v e f) where
---   type Edge   (PlanarSubdivision s v e f) = e
---   type EdgeIx (PlanarSubdivision s v e f) = Dart.Darts
+  type Dart   (PlanarSubdivision s v e f) = e
+  type DartIx (PlanarSubdivision s v e f) = Dart.Dart s
+  dartAt d = reindexed (const d) $ rawDartData.iix (fromEnum d) <. dataVal
 
--- instance HasEdges (PlanarSubdivision s v e f) (PlanarSubdivision s v e' f)  where
+instance HasDarts (PlanarSubdivision s v e f) (PlanarSubdivision s v e' f)  where
+  darts = reindexed (toEnum :: Int -> DartIx (PlanarSubdivision s v e f))
+        $ rawDartData .> itraversed <. dataVal
 
--- instance HasFaces' (PlanarSubdivision s v e f) where
---   type Face   (PlanarSubdivision s v e f) = f
---   type FaceIx (PlanarSubdivision s v e f) = FaceId s
+instance HasEdges' (PlanarSubdivision s v e f) where
+  type Edge   (PlanarSubdivision s v e f) = e
+  type EdgeIx (PlanarSubdivision s v e f) = Dart.Dart s
+  edgeAt d = reindexed (const d) $ rawDartData.iix (fromEnum d) <. dataVal
 
---   -- faceAt =
+instance HasEdges (PlanarSubdivision s v e f) (PlanarSubdivision s v e' f)  where
+  -- edges = undefined
+    -- reindexed (VertexId :: Int -> VertexIx (PlanarSubdivision s v e f))
+    --        $ rawDartData .> traversed1 <. dataVal
+  -- TODO: we need some careful filtering like in planarGraph here as well
 
--- instance HasFaces (PlanarSubdivision s v e f) (PlanarSubdivision s v e f')  where
---   -- faces =
+instance HasFaces' (PlanarSubdivision s v e f) where
+  type Face   (PlanarSubdivision s v e f) = f
+  type FaceIx (PlanarSubdivision s v e f) = FaceId s
+  faceAt fi = reindexed (const fi)
+            $ rawFaceData .> iix (coerce fi) <. faceDataVal.fData
+
+instance HasFaces (PlanarSubdivision s v e f) (PlanarSubdivision s v e f')  where
+  faces = reindexed (coerce :: Int -> FaceIx (PlanarSubdivision s v e f))
+        $ rawFaceData .> traversed1 <. faceDataVal.fData
 
 -- instance DiGraph_ (PlanarSubdivision s v e f) where
 
@@ -245,7 +254,7 @@ fromPlaneGraph' g ofD = PlanarSubdivision (V.singleton . coerce $ g') vd ed fd
           &PG.vertexData  %~ V.imap (\i _ -> VertexId i)
           &PG.rawDartData .~ allDarts''
 
-    allDarts'' :: forall s'. V.Vector (Dart s')
+    allDarts'' :: forall s'. NonEmptyVector (Dart s')
     allDarts'' = allDarts' (PG.numDarts g)
 
     -- make sure the outerFaceId is 0
@@ -361,7 +370,7 @@ numFaces = V.length . _rawFaceData
 --
 -- >>> vertices' myGraph
 -- [VertexId 0,VertexId 1,VertexId 2,VertexId 3]
-vertices'   :: PlanarSubdivision s v e f  -> V.Vector (VertexId' s)
+vertices'   :: PlanarSubdivision s v e f  -> NonEmptyVector (VertexId' s)
 vertices' ps = let n = numVertices ps
                in V.fromList $ map VertexId [0..n-1]
 
@@ -369,19 +378,19 @@ vertices' ps = let n = numVertices ps
 
 -- >>> vertices myGraph
 -- [(VertexId 0,()),(VertexId 1,()),(VertexId 2,()),(VertexId 3,())]
-vertices    :: PlanarSubdivision s v e f  -> V.Vector (VertexId' s, VertexData r v)
+vertices    :: PlanarSubdivision s v e f  -> NonEmptyVector (VertexId' s, VertexData r v)
 vertices ps = (\vi -> (vi,ps^.vertexDataOf vi)) <$> vertices' ps
 
 -- | Enumerate all darts
-darts' :: PlanarSubdivision s v e f  -> V.Vector (Dart s)
+darts' :: PlanarSubdivision s v e f  -> NonEmptyVector (Dart s)
 darts' = allDarts' . numDarts
 
-allDarts'   :: forall s'. Int -> V.Vector (Dart s')
+allDarts'   :: forall s'. Int -> NonEmptyVector (Dart s')
 allDarts' n = V.fromList $ take n allDarts
 
 
 -- | Enumerate all edges. We report only the Positive darts
-edges' :: PlanarSubdivision s v e f  -> V.Vector (Dart s)
+edges' :: PlanarSubdivision s v e f  -> NonEmptyVector (Dart s)
 edges' = V.filter isPositive . darts'
 
 -- | Enumerate all edges with their edge data. We report only the Positive
@@ -394,20 +403,20 @@ edges' = V.filter isPositive . darts'
 -- (Dart (Arc 5) +1,"g+")
 -- (Dart (Arc 4) +1,"e+")
 -- (Dart (Arc 3) +1,"d+")
-edges    :: PlanarSubdivision s v e f  -> V.Vector (Dart s, e)
+edges    :: PlanarSubdivision s v e f  -> NonEmptyVector (Dart s, e)
 edges ps = (\e -> (e,ps^.dataOf e)) <$> edges' ps
 
 -- | \( O(n) \). Vector of all primal faces.
-faces'    :: PlanarSubdivision s v e f -> V.Vector (FaceId' s)
+faces'    :: PlanarSubdivision s v e f -> NonEmptyVector (FaceId' s)
 faces' ps = let n = numFaces ps
             in V.fromList $ map (FaceId . VertexId) [0..n-1]
 
 -- | \( O(n) \). Vector of all primal faces.
-internalFaces'    :: PlanarSubdivision s v e f -> V.Vector (FaceId' s)
+internalFaces'    :: PlanarSubdivision s v e f -> NonEmptyVector (FaceId' s)
 internalFaces' = V.tail . faces'
 
 -- | \( O(n) \). Vector of all primal faces with associated data.
-faces    :: PlanarSubdivision s v e f -> V.Vector (FaceId' s, FaceData (Dart s) f)
+faces    :: PlanarSubdivision s v e f -> NonEmptyVector (FaceId' s, FaceData (Dart s) f)
 faces ps = (\fi -> (fi,ps^.faceDataOf fi)) <$> faces' ps
 
 
@@ -415,13 +424,13 @@ faces ps = (\fi -> (fi,ps^.faceDataOf fi)) <$> faces' ps
 
 -- | Enumerates all faces with their face data exlcluding  the outer face
 internalFaces    :: PlanarSubdivision s v e f
-                 -> V.Vector (FaceId' s, FaceData (Dart s) f)
+                 -> NonEmptyVector (FaceId' s, FaceData (Dart s) f)
 internalFaces ps = V.tail $ faces ps
   -- this uses that the outerfaceId is 0, and thus it is the first face in the vector.
 
 -- | lens to access the Dart Data
 dartData :: Lens (PlanarSubdivision s v e f) (PlanarSubdivision s v e' f)
-                 (V.Vector (Dart s, e))        (V.Vector (Dart s, e'))
+                 (NonEmptyVector (Dart s, e))        (NonEmptyVector (Dart s, e'))
 dartData = lens getF setF
   where
     getF     = V.imap (\i x -> (toEnum i, x^.dataVal)) . _rawDartData
@@ -440,7 +449,7 @@ dartData = lens getF setF
 
 -- | Lens to the facedata of the faces themselves. The indices correspond to the faceIds
 faceData :: Lens (PlanarSubdivision s v e f) (PlanarSubdivision s v e f' r)
-                 (V.Vector f)                  (V.Vector f')
+                 (NonEmptyVector f)                  (NonEmptyVector f')
 faceData = lens getF setF
   where
     getF = fmap (^.faceDataVal.fData) . _rawFaceData
@@ -448,7 +457,7 @@ faceData = lens getF setF
 
 -- | Lens to the facedata of the vertexdata themselves. The indices correspond to the vertexId's
 vertexData :: Lens (PlanarSubdivision s v e f) (PlanarSubdivision s v' e f)
-                   (V.Vector v)                  (V.Vector v')
+                   (NonEmptyVector v)                  (NonEmptyVector v')
 vertexData = lens getF setF
   where
     getF = fmap (^.dataVal) . _rawVertexData
@@ -483,7 +492,7 @@ endPoints d ps = (tailOf d ps, headOf d ps)
 --
 -- running time: \(O(k)\), where \(k\) is the number of edges reported.
 incidentEdges                 :: VertexId' s -> PlanarSubdivision s v e f
-                              -> V.Vector (Dart s)
+                              -> NonEmptyVector (Dart s)
 incidentEdges v ps=  let (_,v',g) = asLocalV v ps
                          ds       = PG.incidentEdges v' g
                      in (\d -> g^.dataOf d) <$> ds
@@ -536,7 +545,7 @@ prevIncidentEdgeFrom d ps = let (_,d',g) = asLocalD d ps
 -- (i.e. pointing into v) in counterclockwise order around v.
 --
 -- running time: \(O(k)\), where \(k) is the total number of incident edges of v
-incomingEdges      :: VertexId' s -> PlanarSubdivision s v e f -> V.Vector (Dart s)
+incomingEdges      :: VertexId' s -> PlanarSubdivision s v e f -> NonEmptyVector (Dart s)
 incomingEdges v ps = orient <$> incidentEdges v ps
   where
     orient d = if headOf d ps == v then d else twin d
@@ -545,7 +554,7 @@ incomingEdges v ps = orient <$> incidentEdges v ps
 -- (i.e. pointing away from v) in counterclockwise order around v.
 --
 -- running time: \(O(k)\), where \(k) is the total number of incident edges of v
-outgoingEdges      :: VertexId' s -> PlanarSubdivision s v e f  -> V.Vector (Dart s)
+outgoingEdges      :: VertexId' s -> PlanarSubdivision s v e f  -> NonEmptyVector (Dart s)
 outgoingEdges v ps = orient <$> incidentEdges v ps
   where
     orient d = if tailOf d ps == v then d else twin d
@@ -555,7 +564,7 @@ outgoingEdges v ps = orient <$> incidentEdges v ps
 -- around the vertex.
 --
 -- running time: \(O(k)\), where \(k\) is the output size
-neighboursOf      :: VertexId' s -> PlanarSubdivision s v e f -> V.Vector (VertexId' s)
+neighboursOf      :: VertexId' s -> PlanarSubdivision s v e f -> NonEmptyVector (VertexId' s)
 neighboursOf v ps = flip tailOf ps <$> incomingEdges v ps
 
 -- | The face to the left of the dart
@@ -581,7 +590,7 @@ rightFace d ps = let (_,d',g) = asLocalD d ps
 -- counter clockwise order.
 --
 -- running time: \(O(k)\), where \(k\) is the output size.
-outerBoundaryDarts      :: FaceId' s -> PlanarSubdivision s v e f  -> V.Vector (Dart s)
+outerBoundaryDarts      :: FaceId' s -> PlanarSubdivision s v e f  -> NonEmptyVector (Dart s)
 outerBoundaryDarts f ps = V.concatMap single . V.fromList . NonEmpty.toList $ asLocalF f ps
   where
     single (_,f',g) = (\d -> g^.dataOf d) <$> PG.boundary f' g
@@ -603,7 +612,7 @@ asLocalF (FaceId (VertexId f)) ps = case ps^?!rawFaceData.ix f of
 --
 -- running time: \(O(k)\), where \(k\) is the output size.
 boundaryVertices      :: FaceId' s -> PlanarSubdivision s v e f
-                      -> V.Vector (VertexId' s)
+                      -> NonEmptyVector (VertexId' s)
 boundaryVertices f ps = (`headOf` ps) <$> outerBoundaryDarts f ps
 
 
@@ -707,8 +716,8 @@ traverseFaces h = traverseOfawFaceData (traverseFaces' h)
 traverseWith         :: Applicative g
                      => (Int -> w s)
                      -> (w s -> v -> g v')
-                     -> V.Vector (Raw ci i v)
-                     -> g (V.Vector (Raw ci i v'))
+                     -> NonEmptyVector (Raw ci i v)
+                     -> g (NonEmptyVector (Raw ci i v'))
 traverseWith mkIdx h = itraverse (\i -> traverse (h $ mkIdx i))
 
 --------------------------------------------------------------------------------
@@ -771,7 +780,7 @@ outerFaceId = const . FaceId . VertexId $ 0
 --------------------------------------------------------------------------------
 
 -- | Reports all edges as line segments
-edgeSegments    :: PlanarSubdivision s v e f -> V.Vector (Dart s, LineSegment 2 v r :+ e)
+edgeSegments    :: PlanarSubdivision s v e f -> NonEmptyVector (Dart s, LineSegment 2 v r :+ e)
 edgeSegments ps = (\d -> (d,edgeSegment d ps)) <$> edges' ps
 
 
@@ -799,7 +808,7 @@ edgeSegment d ps = let (p,q) = bimap PG.vtxDataToExt PG.vtxDataToExt $ ps^.endPo
 -- of the outer face are reported in counter clockwise order.
 --
 -- \(O(k)\), where \(k\) is the number of darts reported
-boundary'     :: Dart s -> PlanarSubdivision s v e f -> V.Vector (Dart s)
+boundary'     :: Dart s -> PlanarSubdivision s v e f -> NonEmptyVector (Dart s)
 boundary' d ps = let (_,d',g) = asLocalD d ps
                  in (\d'' -> g^.dataOf d'') <$> PG.boundary' d' g
 
@@ -864,14 +873,14 @@ outerFacePolygon' outer ps = MultiPolygon (first Left outer) holePgs :+ ps^.data
 -- | Procuces a polygon for each *internal* face of the planar
 -- subdivision.
 internalFacePolygons    :: PlanarSubdivision s v e f
-                        -> V.Vector (FaceId' s, SomePolygon v r :+ f)
+                        -> NonEmptyVector (FaceId' s, SomePolygon v r :+ f)
 internalFacePolygons ps = fmap (\(i,_) -> (i,internalFacePolygon i ps)) . internalFaces $ ps
 
 
 -- | Procuces a polygon for each face of the planar subdivision.
 facePolygons    :: (Num r, Ord r)
                 => PlanarSubdivision s v e f
-                -> V.Vector (FaceId' s, SomePolygon (Maybe v) r :+ f)
+                -> NonEmptyVector (FaceId' s, SomePolygon (Maybe v) r :+ f)
 facePolygons ps = V.cons (outerFaceId ps, first Right $ outerFacePolygon ps) ifs
   where
     ifs = wrapJust <$> internalFacePolygons ps
@@ -885,7 +894,7 @@ facePolygons ps = V.cons (outerFaceId ps, first Right $ outerFacePolygon ps) ifs
 
 
 -- | Mapping between the internal and extenral darts
-dartMapping    :: PlanarSubdivision s v e f -> V.Vector (Dart (Wrap s), Dart s)
+dartMapping    :: PlanarSubdivision s v e f -> NonEmptyVector  (Dart (Wrap s), Dart s)
 dartMapping ps = ps^.component (ComponentId 0).PG.dartData
 
 

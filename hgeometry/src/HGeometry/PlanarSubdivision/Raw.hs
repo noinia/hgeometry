@@ -8,9 +8,15 @@
 -- Description :  The 'Raw' building block used in a Planar Subdivision
 --
 --------------------------------------------------------------------------------
-module HGeometry.PlanarSubdivision.Raw where
+module HGeometry.PlanarSubdivision.Raw
+  ( Wrap
+  , ComponentId(..)
+  , Raw(Raw), dataVal
+  , RawFace(RawFace), faceIdx, faceDataVal
+  , FaceData(FaceData), holes, fData
+  ) where
 
-import           Control.Lens
+import           Control.Lens hiding (holes)
 import           Data.Aeson
 import           Data.Kind (Type)
 import qualified Data.Sequence as Seq
