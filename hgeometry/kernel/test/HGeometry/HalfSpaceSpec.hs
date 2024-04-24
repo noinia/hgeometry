@@ -3,11 +3,11 @@ module HGeometry.HalfSpaceSpec
 
 import HGeometry.HalfSpace
 import HGeometry.HyperPlane
+import HGeometry.HyperPlane.NonVertical
 import HGeometry.Intersection
 import HGeometry.Kernel.Instances ()
 import HGeometry.Line
 import HGeometry.Point
--- import HGeometry.Vector hiding (head)
 import Test.Hspec
 import Test.Hspec.QuickCheck
 
@@ -41,6 +41,11 @@ spec = describe "halfspace Tests" $ do
            `shouldBe` True
          prop "normal vector points into positive halfspace" $
            \(h :: HyperPlane 2 Rational) ->
+             let n = normalVector h
+                 p = pointOn h
+             in (p .+^ n) `intersects` HalfSpace Positive h
+         prop "normal vector points into positive halfspace (NonVertical HyperPlane)" $
+           \(h :: NonVerticalHyperPlane 3 Rational) ->
              let n = normalVector h
                  p = pointOn h
              in (p .+^ n) `intersects` HalfSpace Positive h

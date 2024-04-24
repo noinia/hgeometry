@@ -9,27 +9,33 @@ module HGeometry.HalfPlane.CommonIntersection
 
 import           Control.Lens
 import           Data.Default.Class
+import qualified Data.Foldable as F
+import           Data.Foldable1
+import qualified Data.List as List
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ord (comparing)
 import           Data.Sequence (Seq(..))
 import qualified Data.Sequence as Seq
-import qualified Data.Vector as V
+import qualified Data.Vector as Vector
 import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.Foldable.Sort
+import           HGeometry.HalfSpace
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
-
+import           HGeometry.Vector
 --------------------------------------------------------------------------------
 
 -- | Common intersection of a bunch of halfplanes
 data CommonIntersection halfPlane r =
     EmptyIntersection
   | Bounded (ConvexPolygon (Point 2 r :+ halfPlane))
+  | Slab halfPlane () -- TODO needs a boundingLLine
     -- ^ each vertex stores the interior halfplane of the CCW-edge it is incident to.
   | Unbounded (LowerChain halfPlane r)
   deriving (Show,Eq)
@@ -56,72 +62,40 @@ bimap' f g (LowerChain hs h) = LowerChain (fmap (bimap f g) hs) (f h)
 -- | Computes the common intersection of a \(n\) halfplanes.
 --
 -- running time: \(O(n\log n)\)
-commonIntersection     :: ( Foldable f, Functor f
+commonIntersection     :: ( Foldable1 f, Functor f
                           , HyperPlane_ halfPlane 2 r  -- this is not quite right yet
                           , Fractional r, Ord r
                           )
                        => f halfPlane -> CommonIntersection halfPlane r
-commonIntersection hs0 = undefined
-  where
-    hs = partitionHalfPlanes hs0
-    lb = fromMaybe . minimumByOf traverse (comparing (^.core)) $ lefts hs
-      -- common intersection of the left halfplanes
-    rb = fromMaybe . maximumByOf traverse (comparing (^.core)) $ rights hs
-      -- common intersection of the right halfplanes
-    fromMaybe = maybe EntirePlane BoundedBy
+commonIntersection hs0 = case NonEmpty.nonEmpty <$> foldMap partitionHalfPlanes hs0 of
+  Vector2 Nothing       Nothing       -> error "commonIntersection: absurd, cannot happen"
+  Vector2 Nothing       (Just aboves) -> Unbounded $ lowerBoundary aboves
+  Vector2 (Just belows) Nothing       -> Unbounded $ upperBoundary belows
+  Vector2 (Just belows) (Just aboves) -> let bb = lowerBoundary aboves
+                                             ub = upperBoundary belows
+                                         in undefined
 
-    bb = lowerBoundary $ aboves hs
-    ub = upperBoundary $ belows hs
-
-
-
-
-
-
-
-data HalfPlanes verticals nonVerticals = HalfPlanes { lefts  :: !verticals
-                                                    , rights :: !verticals
-                                                    , aboves :: !nonVerticals
-                                                    , belows :: !nonVerticals
-                                                    }
-                                       deriving (Show,Read,Eq,Ord,Functor,Foldable,Traversable)
-instance (Semigroup verticals, Semigroup nonVerticals)
-         => Semigroup (HalfPlanes verticals nonVerticals) where
-  (HalfPlanes ls rs as bs) <> (HalfPlanes ls' rs' as' bs') =
-    HalfPlanes (ls <> ls') (rs <> rs') (as <> as') (bs <> bs')
-instance (Monoid verticals, Monoid nonVerticals)
-         => Monoid (HalfPlanes verticals nonVerticals) where
-  mempty = HalfPlanes mempty mempty mempty mempty
-
-
--- | Partition the halfplanes into left halfplanes (bounded from the right), right
--- halfplanes, aboves, and belows.
-partitionHalfPlanes :: (Foldable f
-                       )
-                    => f halfPlane -> HalfPlanes [r :+ halfPlane] [LineEQ r :+ halfPlane]
-partitionHalfPlanes = foldMap f mempty
-  where
-    f hl = undefined
+-- | partitions the halfplanes into those with a negative sign (the first component of the
+-- result) and positive signs.
+partitionHalfPlanes :: (Foldable f, HalfSpace_ halfPlane d r
+                       ) => f halfPlane -> Vector 2 [halfPlane]
+partitionHalfPlanes = uncurry Vector2
+                    . List.partition (\hl -> hl^.halfSpaceSign == Negative) . F.toList
 
 --------------------------------------------------------------------------------
-
-data LowerBoundary chain = EntirePlane | BoundedBy chain deriving (Show,Eq,Functor)
 
 -- | Given the bounding lines of a bunch of halfplanes that are all bounded from below,
 -- computes their common intersection.
 --
---
 -- running time: O(n\log n)
-lowerBoundary :: ( NonVerticalHyperPlane_ boundingLine 2 r
-                 , Foldable f, Fractional r, Ord r
+lowerBoundary :: ( HalfPlane_ halfSpace r
+                 , Foldable1 f, Fractional r, Ord r
                  )
-              => f boundingLine -> LowerBoundary (LowerChain boundingLine r)
-lowerBoundary = initialize . dropParallel . sortOnCheap @V.Vector dualPoint
+              => f halfSpace -> LowerChain (BoundingHyperPlane halfSpace 2 r) r
+lowerBoundary = initialize . dropParallel . sortOnCheap @Vector.Vector increasingSlope
                 -- we sort lexicographically on increasing slope and decreasing intercept
   where
-    initialize = \case
-      []   -> EntirePlane
-      h:hs -> BoundedBy $ go (LowerChain mempty h) hs
+    initialize (h :| hs) = go (LowerChain mempty h) hs
 
     -- we go through the halfplanes by increasing slope. That means the newest bounding
     -- line is the steepest, and therefore is guaranteed to appear as the rightmost
@@ -142,6 +116,15 @@ lowerBoundary = initialize . dropParallel . sortOnCheap @V.Vector dualPoint
       where
         toLineEQ = MkLineEQ . NonVerticalHyperPlane . view hyperPlaneCoefficients
 
+-- | computes the slope of the bounding line of the halfplane; vertical lines are
+-- represented first (in left to right order) ,and then lines are ordered
+-- lexicographically on increasing slope. (Hence the slightly weird return type).
+increasingSlope ::  ( HalfPlane_ halfSpace r, Fractional r, Ord r
+                    ) => halfSpace -> Either r (Vector 2 r)
+increasingSlope hl = undefined -- case hl^.boundingHyperPlane
+  -- to dualPoint.vector of
+  --                      Vector2
+
 
 -- | Drop the edges whose left-endpoint lies below h'
 dropFrom                        :: (HyperPlane_ boundingLine 2 r, Ord r, Num r)
@@ -159,15 +142,17 @@ dropFrom (LowerChain hs0 h0) h' = go h0 hs0
 
 --------------------------------------------------------------------------------
 
--- | Given the bounding lines of a bunch of halfplanes that are all bounded from above,
--- computes their common intersection.
---
--- running time: O(n\log n)
-upperBoundary :: ( NonVerticalHyperPlane_ boundingLine 2 r
-                 , Fractional r, Ord r, Foldable f, Functor f
-                 )
-              => f boundingLine -> LowerBoundary (LowerChain boundingLine r)
-upperBoundary = fmap (bimap' flipY (over yCoord negate)) . lowerBoundary . fmap flipY
-                -- by flipping the plane, and using the existing lowerBoundary machinery
-  where
-    flipY = over (hyperPlaneCoefficients.traverse) negate
+upperBoundary = undefined
+
+-- -- | Given the bounding lines of a bunch of halfplanes that are all bounded from above,
+-- -- computes their common intersection.
+-- --
+-- -- running time: O(n\log n)
+-- upperBoundary :: ( NonVerticalHyperPlane_ boundingLine 2 r
+--                  , Fractional r, Ord r, Foldable f, Functor f
+--                  )
+--               => f boundingLine -> LowerBoundary (LowerChain boundingLine r)
+-- upperBoundary = fmap (bimap' flipY (over yCoord negate)) . lowerBoundary . fmap flipY
+--                 -- by flipping the plane, and using the existing lowerBoundary machinery
+--   where
+--     flipY = over (hyperPlaneCoefficients.traverse) negate

@@ -259,6 +259,7 @@ library kernel
         HGeometry.Line.Class
         HGeometry.Line.PointAndVector
 
+        HGeometry.Line.General
         HGeometry.Line.LineEQ
         HGeometry.Line.NonVertical.Class
 
@@ -269,6 +270,7 @@ library kernel
         HGeometry.Duality
 
         HGeometry.HalfSpace
+        HGeometry.HalfSpace.Class
         HGeometry.HalfLine
 
         -- HGeometry.HalfPlane
@@ -378,7 +380,7 @@ library
 
         HGeometry.IntervalTree
 
-        -- HGeometry.HalfPlane.CommonIntersection
+        HGeometry.HalfPlane.CommonIntersection
 
         HGeometry.Polygon.Triangulation
         HGeometry.Polygon.Triangulation.TriangulateMonotone
@@ -667,6 +669,7 @@ test-suite with-ipe-hspec
       Polygon.Triangulation.TriangulateSpec
       LineSegment.Intersection.BentleyOttmannSpec
       PlaneGraph.RenderSpec
+      HalfPlane.CommonIntersectionSpec
 
   hs-source-dirs:   test-with-ipe/test
   build-depends:

@@ -157,22 +157,22 @@ spec = describe "HyperPlane Tests" $ do
 
          prop "fromPointAnNormal and sideTest consistent for HyperPlane " $
            \(p :: Point 2 R) n ->
-             n /= Vector2 0 0 ==>
+             allOf components (>0) n ==>
              ((p .+^ n) `onSideTest` (fromPointAndNormal p n :: HyperPlane 2 R))
              `shouldBe` GT
          prop "fromPointAnNormal and sideTest consistent for NonVerticalHyperPlane " $
            \(p :: Point 2 R) n ->
-             n /= Vector2 0 0 ==>
+             allOf components (>0) n ==>
              ((p .+^ n) `onSideTest` (fromPointAndNormal p n :: NonVerticalHyperPlane 2 R))
              `shouldBe` GT
          prop "fromPointAnNormal and sideTest consistent for LineEQ" $
            \(p :: Point 2 R) n ->
-             n /= Vector2 0 0 ==>
+             allOf components (>0) n ==>
              ((p .+^ n) `onSideTest` (fromPointAndNormal p n :: LineEQ R))
              `shouldBe` GT
          prop "normalVector and fromPointAndNormal consistent (HyperPlane 2 R)" $
            \(p :: Point 2 R) n ->
-             n /= Vector2 0 0 ==>
+             allOf components (>0) n ==>
              normalVector (fromPointAndNormal p n :: HyperPlane 2 R) `shouldBe` n
 
          prop "nonVertical sidetest means above (NonVHyperplane 2)" $

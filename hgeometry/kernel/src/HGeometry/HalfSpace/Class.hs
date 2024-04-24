@@ -12,8 +12,8 @@ import HGeometry.Sign
 
 -- | Types modelling halfspaces.
 class ( HyperPlane_ (BoundingHyperPlane halfSpace d r) d r
-      , Dimension halfSpace ~ d
-      , NumType halfSpace ~ r
+      , Dimension halfSpace ~ d, Dimension (BoundingHyperPlane halfSpace d r) ~ d
+      , NumType halfSpace ~ r,   NumType (BoundingHyperPlane halfSpace d r) ~ r
       )
        => HalfSpace_ halfSpace d r | halfSpace -> d,
                                      halfSpace -> r where

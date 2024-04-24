@@ -19,6 +19,10 @@ data GHalfPlane line r = LeftOf  !r
 type HalfPlane r = GHalfPlane (LineEQ r) r
 type instance NumType (HalfPlane r) = r
 
+
+instance HalfPlane_ (GHalfPlane line r) r where
+  type
+
 -- type HalfPlane r = HalfSpace 2 r
 
 -- class
