@@ -134,6 +134,25 @@ data PlanarSubdivision s v e f =
 components :: Lens' (PlanarSubdivision s v e f) (V.Vector (Component s))
 components = lens _components (\ps cs -> ps { _components = cs })
 
+-- | Lens to access the raw vertex data
+rawVertexData :: Lens (PlanarSubdivision s v e f) (PlanarSubdivision s v' e f)
+                      (V.Vector (Raw s (VertexId  (Wrap s)) v))
+                      (V.Vector (Raw s (VertexId  (Wrap s)) v'))
+rawVertexData = lens _rawVertexData (\ps vxd -> ps { _rawVertexData = vxd })
+
+-- | Lens to access the raw dart daat a
+rawDartData :: Lens (PlanarSubdivision s v e f) (PlanarSubdivision s v e' f)
+                    (V.Vector (Raw s (Dart.Dart  (Wrap s)) e))
+                    (V.Vector (Raw s (Dart.Dart  (Wrap s)) e'))
+rawDartData = lens _rawDartData (\ps vxd -> ps { _rawDartData = vxd })
+
+-- | Access the raw face data
+rawFaceData :: Lens (PlanarSubdivision s v e f) (PlanarSubdivision s v e f')
+                    (V.Vector (RawFace s f))    (V.Vector (RawFace s f'))
+rawFaceData = lens _rawFaceData (\ps vxd -> ps { _rawFaceData = vxd })
+
+
+
 
 type instance NumType   (PlanarSubdivision s v e f) = NumType v
 type instance Dimension (PlanarSubdivision s v e f) = 2
@@ -150,14 +169,55 @@ type instance Dimension (PlanarSubdivision s v e f) = 2
 component    :: ComponentId s -> Lens' (PlanarSubdivision s v e f) (Component s)
 component ci = components.singular (ix $ unCI ci)
 
+
+
+
 -- instance (ToJSON v, ToJSON v, ToJSON e, ToJSON f, ToJSON r)
 --          => ToJSON (PlanarSubdivision s v e f) where
 --   toEncoding = genericToEncoding defaultOptions
 
-{-
 
 
 --------------------------------------------------------------------------------
+
+instance HasVertices' (PlanarSubdivision s v e f) where
+  type Vertex   (PlanarSubdivision s v e f) = v
+  type VertexIx (PlanarSubdivision s v e f) = VertexId s
+  vertexAt = undefined
+
+-- instance HasVertices (PlanarSubdivision s v e f) (PlanarSubdivision s v' e f)  where
+
+-- instance HasEdges' (PlanarSubdivision s v e f) where
+--   type Edge   (PlanarSubdivision s v e f) = e
+--   type EdgeIx (PlanarSubdivision s v e f) = Dart.Darts
+
+-- instance HasEdges (PlanarSubdivision s v e f) (PlanarSubdivision s v e' f)  where
+
+-- instance HasFaces' (PlanarSubdivision s v e f) where
+--   type Face   (PlanarSubdivision s v e f) = f
+--   type FaceIx (PlanarSubdivision s v e f) = FaceId s
+
+--   -- faceAt =
+
+-- instance HasFaces (PlanarSubdivision s v e f) (PlanarSubdivision s v e f')  where
+--   -- faces =
+
+-- instance DiGraph_ (PlanarSubdivision s v e f) where
+
+-- instance BidirGraph_ (PlanarSubdivision s v e f) where
+
+-- instance Graph_ (PlanarSubdivision s v e f) where
+
+-- instance PlanarGraph_ (PlanarSubdivision s v e f) v where
+--   -- dualGraph, (incidentFaceOf | leftFaceOf), rightFaceOf, prevDartOf, nextDartOf, boundaryDartOf, boundaryDartOf, boundaryDarts
+
+-- instance PlaneGraph_ (PlanarSubdivision s v e f) v where
+--   -- TODO: fromEmbedding
+
+-- instance PlanarSubdivision_ (PlanarSubdivision s v e f) v where
+
+--------------------------------------------------------------------------------
+{-
 
 -- | Constructs a planarsubdivision from a PlaneGraph
 --
