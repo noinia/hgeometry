@@ -260,7 +260,7 @@ class HyperPlane_ hyperPlane d r
   -- | Construct a Hyperplane from a point and a normal. The normal points into the halfplane
   -- for which the side-test is positive.
   --
-  -- >>> myVerticalLine == fromPointAndNormal (Point2 5 30) (Vector2 (-1) 0)
+  -- >>> myVerticalLine == fromPointAndNormal (Point2 5 30) (Vector2 1 0)
   -- True
   fromPointAndNormal     :: ( Point_ point d r, Num r)
                          => point -> Vector d r -> hyperPlane
@@ -270,7 +270,7 @@ class HyperPlane_ hyperPlane d r
                                 , Has_ Metric_ d r
                                 )
                              => point -> Vector d r -> hyperPlane
-  fromPointAndNormal q n = hyperPlaneFromEquation $ cons a0 n
+  fromPointAndNormal q n = hyperPlaneFromEquation $ cons a0 (negated n)
     where
       a0 = (q^.vector) `dot` n
   {-# INLINE fromPointAndNormal #-}

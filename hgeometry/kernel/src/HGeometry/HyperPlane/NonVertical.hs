@@ -119,10 +119,9 @@ instance ( MkHyperPlaneConstraints d r
 
 
 instance ( MkHyperPlaneConstraints d r
+         , Fractional r, Eq r
          , 2 <= d
          ) => ConstructableHyperPlane_ (NonVerticalHyperPlane d r) d r where
-
-  type HyperPlaneFromEquationConstraint (NonVerticalHyperPlane d r) d r = (Fractional r, Eq r)
 
   -- | pre: the last component is not zero
   --
@@ -133,17 +132,6 @@ instance ( MkHyperPlaneConstraints d r
       Just h  -> h
       Nothing -> error "hyperPlaneFromEquation: Hyperplane is vertical!"
   {-# INLINE hyperPlaneFromEquation #-}
-
-  fromPointAndNormal _ n = NonVerticalHyperPlane n
-  -- see https://en.wikipedia.org/wiki/Normal_(geometry)
-  --
-  -- i.e. Alternatively, if the hyperplane is defined as the solution set of a single
-  -- linear equation a_1 x_1 + ⋯ + a_n x_n = c , then the vector n = ( a_1 , .. , a_n ) is
-  -- a normal.
-  --
-  -- FIXME: this seems fishy; don't we need the point?
-
-  --
 
 
 instance ( MkHyperPlaneConstraints d r, 1 + (d-1) ~ d

@@ -83,9 +83,8 @@ instance ( MkHyperPlaneConstraints 2 r
   onHyperPlane = onLine
 
 instance ( MkHyperPlaneConstraints 2 r
+         , Fractional r, Eq r
          ) => ConstructableHyperPlane_ (LineEQ r) 2 r where
-  type HyperPlaneFromEquationConstraint (LineEQ r) 2 r =
-       HyperPlaneFromEquationConstraint (NonVerticalHyperPlane 2 r) 2 r
   -- | pre: the last component is not zero
   hyperPlaneFromEquation = MkLineEQ
                          . hyperPlaneFromEquation @(NonVerticalHyperPlane 2 r)
