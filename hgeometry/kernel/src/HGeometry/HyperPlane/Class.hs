@@ -123,9 +123,9 @@ class ( NumType hyperPlane ~ r
   -- the positive halfspace.
   --
   -- >>> normalVector myVerticalLine
-  -- Vector2 (-1.0) 0.0
+  -- Vector2 1.0 (-0.0)
   -- >>> normalVector myLine
-  -- Vector2 1.0 (-1.0)
+  -- Vector2 (-1.0) 1.0
   normalVector :: (Num r, Eq r, 1 <= d) => hyperPlane -> Vector d r
   default normalVector :: (KnownNat d, Num r, Eq r, 1 <= d)
                        => hyperPlane -> Vector d r
