@@ -60,7 +60,10 @@ common setup
       , array                     >= 0.5
       , aeson                     >= 2.0
       , colour                    >= 2.3.6
-      -- , miso-bulma                >= 0.1.0.0   && < 1
+      , bytestring                >= 0.11
+      , miso-bulma                >= 0.1.0.0       && < 1
+      , file-embed                >= 0.0.15        && < 0.1
+
 
       , ghc-typelits-natnormalise >= 0.7.7
       , ghc-typelits-knownnat     >= 0.7.6
@@ -88,8 +91,8 @@ common setup
 common miso-setup
   build-depends:
         miso
-      , jsaddle
-      , jsaddle-warp
+      , jsaddle                   >= 0.9.9.0       && < 0.10
+      , jsaddle-warp              >= 0.9.9.0       && < 0.10
 
 common quickcheck-setup
     ghc-options:
@@ -172,3 +175,13 @@ executable hgeometry-polyLineDrawing
   main-is:        Main.hs
   other-modules:
        Miso.Event.Extra
+
+--------------------------------------------------------------------------------
+-- * Polyline Drawing
+
+executable hgeometry-skia
+  import:         setup, miso-setup
+  hs-source-dirs: skia
+  main-is:        Main.hs
+  other-modules:
+        Options

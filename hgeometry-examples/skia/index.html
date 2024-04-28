@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html class="has-navbar-fixed-top has-navbar-fixed-bottom">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/bulmaswatch/sandstone/bulmaswatch.min.css">
+    <script type="text/javascript"
+            src="https://unpkg.com/canvaskit-wasm@0.39.1/bin/canvaskit.js"></script>
+  </head>
+  <body>
+    <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+      <div class="navbar-brand">
+        <a class="navbar-item" href="https://bulma.io">
+          thebrand
+        </a>
+
+        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+
+      <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-start">
+          <a class="navbar-item">
+            Home
+          </a>
+
+          <a class="navbar-item">
+            Documentation
+          </a>
+
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">
+              More
+            </a>
+
+            <div class="navbar-dropdown">
+              <a class="navbar-item">
+                About
+              </a>
+              <a class="navbar-item is-selected">
+                Jobs
+              </a>
+              <a class="navbar-item">
+                Contact
+              </a>
+              <hr class="navbar-divider">
+              <a class="navbar-item">
+                Report an issue
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="navbar-end">
+          <div class="navbar-item">
+            <div class="buttons">
+              <a class="button is-primary">
+                <strong>Sign up</strong>
+              </a>
+              <a class="button is-light">
+                Log in
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+
+
+    <section class="columns">
+      <div class="column is-narrow has-background-light is-full-height-with-navbar">
+        left
+      </div>
+      <div class="column">
+
+        <canvas id=foo
+                style="border: 1px solid black;
+                   width:100%;
+                   height:100%;
+                   "
+        ></canvas>
+
+      </div>
+      <div class="column is-2">
+
+          <nav class="panel">
+            <p class="panel-heading">Info</p>
+            <div class="panel-block">
+              <p class="control has-icons-left">
+                <input class="input" type="text" placeholder="Search" />
+                <span class="icon is-left">
+                  <i class="fas fa-search" aria-hidden="true"></i>
+                </span>
+              </p>
+            </div>
+            <p class="panel-tabs">
+              <a class="is-active">All</a>
+              <a>Public</a>
+              <a>Private</a>
+              <a>Sources</a>
+
+            </p>
+            <a class="panel-block is-active">
+              <span class="panel-icon">
+                <i class="fas fa-book" aria-hidden="true"></i>
+              </span>
+              bulma
+            </a>
+            <a class="panel-block">
+              <span class="panel-icon">
+                <i class="fas fa-book" aria-hidden="true"></i>
+              </span>
+              marksheet
+            </a>
+            <a class="panel-block">
+              <span class="panel-icon">
+                <i class="fas fa-book" aria-hidden="true"></i>
+              </span>
+              minireset.css
+            </a>
+            <a class="panel-block">
+              <span class="panel-icon">
+                <i class="fas fa-book" aria-hidden="true"></i>
+              </span>
+              jgthms.github.io
+            </a>
+            <a class="panel-block">
+              <span class="panel-icon">
+                <i class="fas fa-code-branch" aria-hidden="true"></i>
+              </span>
+              daniellowtw/infboard
+            </a>
+            <a class="panel-block">
+              <span class="panel-icon">
+                <i class="fas fa-code-branch" aria-hidden="true"></i>
+              </span>
+              mojs
+            </a>
+            <label class="panel-block">
+              <input type="checkbox" />
+              remember me
+            </label>
+            <div class="panel-block">
+              <button class="button is-link is-outlined is-fullwidth">
+                Reset all filters
+              </button>
+            </div>
+          </nav>
+
+          <nav class="panel">
+            <p class="panel-heading">Layers</p>
+            <a class="panel-block is-active">
+              <span class="panel-icon">
+                <i class="fas fa-book" aria-hidden="true"></i>
+              </span>
+              bulma
+            </a>
+            <a class="panel-block">
+              <span class="panel-icon">
+                <i class="fas fa-book" aria-hidden="true"></i>
+              </span>
+              marksheet
+            </a>
+            <a class="panel-block">
+              <span class="panel-icon">
+                <i class="fas fa-book" aria-hidden="true"></i>
+              </span>
+              minireset.css
+            </a>
+            <a class="panel-block">
+              <span class="panel-icon">
+                <i class="fas fa-book" aria-hidden="true"></i>
+              </span>
+              jgthms.github.io
+            </a>
+            <a class="panel-block">
+              <span class="panel-icon">
+                <i class="fas fa-code-branch" aria-hidden="true"></i>
+              </span>
+              daniellowtw/infboard
+            </a>
+            <a class="panel-block">
+              <span class="panel-icon">
+                <i class="fas fa-code-branch" aria-hidden="true"></i>
+              </span>
+              mojs
+            </a>
+            <label class="panel-block">
+              <input type="checkbox" />
+              remember me
+            </label>
+            <div class="panel-block">
+              <button class="button is-link is-outlined is-fullwidth">
+                Reset all filters
+              </button>
+            </div>
+          </nav>
+
+
+
+      </div>
+
+      </div>
+
+
+
+    </section>
+
+
+
+    <script type="text/javascript"
+            src="https://unpkg.com/canvaskit-wasm@0.39.1/bin/canvaskit.js"></script>
+    <script type="text/javascript">
+
+     const canvas = document.querySelector('canvas');
+     fitToContainer(canvas);
+
+     function fitToContainer(canvas){
+       // ...then set the internal size to match
+       canvas.width  = canvas.offsetWidth;
+       canvas.height = canvas.offsetHeight;
+     }
+
+
+     const ckLoaded = CanvasKitInit({
+       locateFile: (file) => 'https://unpkg.com/canvaskit-wasm@0.39.1/bin/'+file});
+     ckLoaded.then((CanvasKit) => {
+       const surface = CanvasKit.MakeCanvasSurface('foo');
+
+       const paint = new CanvasKit.Paint();
+       paint.setColor(CanvasKit.Color4f(0.9, 0.5, 0, 0.2));
+       paint.setStyle(CanvasKit.PaintStyle.Fill);
+       /* paint.setStyle(CanvasKit.PaintStyle.); */
+       paint.setAntiAlias(true);
+
+       const paint2 = new CanvasKit.Paint();
+       paint2.setColor(CanvasKit.Color4f(0.9, 0.0, 0.5, 1.0));
+       paint2.setStyle(CanvasKit.PaintStyle.Stroke);
+       paint2.setAntiAlias(true);
+
+       const rr = CanvasKit.RRectXY(CanvasKit.LTRBRect(10, 60, 210, 260), 0, 0);
+
+       const cmds = [
+         [CanvasKit.MOVE_VERB, 0, 10],
+         [CanvasKit.LINE_VERB, 30, 40],
+         [CanvasKit.QUAD_VERB, 20, 50, 45, 60],
+       ];
+
+       /* const path = new CanvasKit.Path.FromCmds(cmds); */
+       const path = new CanvasKit.Path();
+       path.moveTo(200, 50);
+       path.lineTo(300, 200);
+       path.lineTo(400, 100);
+       path.lineTo(500, 200);
+       path.lineTo(600, 0);
+       path.lineTo(200, 50);
+
+       /* path.moveTo(20, 80);
+        * path.cubicTo(90, 10, 160, 150, 190, 10);
+
+        * path.moveTo(36, 148);
+        * path.quadTo(66, 188, 120, 136);
+        * path.lineTo(36, 148);
+
+        * path.moveTo(150, 180);
+        * path.arcToTangent(150, 100, 50, 200, 20);
+        * path.lineTo(160, 160);
+
+        * path.moveTo(20, 120);
+        * path.lineTo(20, 120); */
+       /* const path2 = CanvasKit.Path(cmds); */
+
+       function draw(canvas) {
+         canvas.clear(CanvasKit.WHITE);
+         canvas.drawRRect(rr, paint);
+         canvas.drawRRect(rr, paint2);
+         canvas.drawPath(path, paint2);
+         path.delete();
+       }
+       surface.drawOnce(draw);
+
+
+     });
+    </script>
+
+
+    <footer class="navbar is-fixed-bottom">
+      <a class="navbar-item" href="https://bulma.io">
+        thebrand
+      </a>
+      <a class="navbar-item" href="https://bulma.io">
+        thebrand2
+      </a>
+    </footer>
+
+
+  </body>
+</html>
