@@ -3,6 +3,7 @@
 module Main(main) where
 
 import           Control.Lens hiding (view, element)
+import           Control.Monad.IO.Class
 import           Data.Default.Class
 import qualified Data.IntMap as IntMap
 import qualified Data.List.NonEmpty as NonEmpty
@@ -21,16 +22,52 @@ import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Options
 import qualified SkiaCanvas
 import           SkiaCanvas (mouseCoordinates, dimensions)
-
+import           Miso.Bulma.Generic
+import           GHCJS.Types
+import           GHCJS.Marshal
+import           Language.Javascript.JSaddle.Object (jsg1, jsf)
+import qualified Language.Javascript.JSaddle.Object as JS
 --------------------------------------------------------------------------------
-
 type R = RealNumber 5
 
-data Model = Model { _canvas   :: (SkiaCanvas.Canvas R)
-                   , _points   :: IntMap.IntMap (Point 2 R)
-                   , _diagram  :: Maybe [Point 2 R]
+data LayerStatus = Hidden | Visible
+  deriving (Show,Eq)
+
+toggleStatus = \case
+  Hidden  -> Visible
+  Visible -> Hidden
+
+data Layer = Layer { _name :: MisoString
+                   , _status :: LayerStatus
+                   }
+             deriving (Show,Eq)
+makeClassy ''Layer
+
+data Layers = Layers { _beforeActive :: [Layer] -- stored in reverse, so a zipper
+                     , _activeLayer  :: Layer
+                     , _afterActive  :: [Layer]
+                     }
+            deriving (Show,Eq)
+
+allLayers                              :: Layers -> [Layer]
+allLayers (Layers before active after) = reverse before <> [active] <> after
+
+makeClassy ''Layers
+
+initialLayers :: Layers
+initialLayers = Layers [] (Layer "alpha" Visible) [ Layer "beta" Hidden
+                                                  , Layer "foo" Visible
+                                                  ]
+
+data Model = Model { _canvas      :: (SkiaCanvas.Canvas R)
+                   , _points      :: IntMap.IntMap (Point 2 R)
+                   , _diagram     :: Maybe [Point 2 R]
+                   , __layers     :: Layers
                    } deriving (Eq,Show)
 makeLenses ''Model
+
+instance HasLayers Model where
+  layers = _layers -- lens __layers (\m lrs -> m { __layers = lrs })
 
 --------------------------------------------------------------------------------
 
@@ -43,7 +80,7 @@ instance Default (Point 2 R :+ Int) where
 ----------------------------------------
 
 initialModel :: Model
-initialModel = Model (SkiaCanvas.blankCanvas 1024 768) mempty Nothing
+initialModel = Model (SkiaCanvas.blankCanvas 1024 768) mempty Nothing initialLayers
 
 --------------------------------------------------------------------------------
 
@@ -52,8 +89,8 @@ data Action = Id
             | AddPoint
             | Draw
             | OnLoad
+            -- | ToggleLayerStatus (Lens' Model Status)
             | SetCanvasDimensions !(Vector 2 Int)
-            deriving (Show,Eq)
 
 
 updateModel   :: Model -> Action -> Effect Action Model
@@ -64,6 +101,7 @@ updateModel m = \case
     Draw                  -> noEff m
     SetCanvasDimensions v -> noEff $ m&canvas.dimensions .~ v
     OnLoad                -> m <# initializeCanvas theMainCanvasId
+    -- ToggleLayerStatus lr  -> noEff $ m&lr %~ toggleStatus
   where
     addPoint = noEff $ recomputeDiagram m'
       where
@@ -74,10 +112,19 @@ updateModel m = \case
 
 initializeCanvas             :: MisoString -> JSM Action
 initializeCanvas theCanvasId = do
-  let w = 100 -- TODO
-      h = 200
-  pure $ SetCanvasDimensions (Vector2 w h)
-
+    theCanvasElem <- getElementById theMainCanvasId
+    wVal <- theCanvasElem JS.! ("offsetWidth"  :: MisoString)
+    hVal <- theCanvasElem JS.! ("offsetHeight" :: MisoString)
+    (theCanvasElem JS.<# ("width"  :: MisoString))  wVal
+    (theCanvasElem JS.<# ("height" :: MisoString)) hVal
+    jsInitializeSkiaCanvas theMainCanvasId
+    w <- fromJSVal wVal
+    h <- fromJSVal hVal
+    case Vector2 <$> w <*> h of
+      Nothing -> pure Id -- TODO: something went wrong
+      Just v  -> do
+        liftIO $ print v -- somehting goes wrong here still
+        pure $ SetCanvasDimensions v
 
 recomputeDiagram   :: Model -> Model
 recomputeDiagram m
@@ -101,7 +148,7 @@ viewModel   :: Model -> View Action
 viewModel m =
     div_ []
          [ menuBar_ m
-         , columns_ []
+         , columns_ [ ]
                     [ leftPanel
                     , mainCanvas
                     , rightPanels
@@ -117,12 +164,11 @@ viewModel m =
                       [ either CanvasAction id <$>
                         SkiaCanvas.skiaCanvas_
                                     theMainCanvasId
-                                    [ style_ $ Map.fromAscList
-                                               [ ("width",      "100%")
-                                               , ("height",     "100%")
-                                               , ("min-width",  w <> "px")
-                                               , ("min-height", h <> "px")
-                                               ]
+                                    [ styleM_ [ "width"      =: "100%"
+                                              , "height"     =: "100%"
+                                              , "min-width"  =: (w <> "px" :: MisoString)
+                                              , "min-height" =: (h <> "px" :: MisoString)
+                                              ]
                                     , onClick AddPoint
                                     ]
                       ]
@@ -132,22 +178,38 @@ viewModel m =
                        , layersPanel
                        ]
     overviewPanel = panel_ [text "Model"]
-                           [text . ms . show $ m]
+                           [text . ms . show $ m
+                           , message_ Nothing        [] [text "foo"]
+                           , message_ (Just Warning) [] [text "warning :)"]
+                           ]
 
     layersPanel = panel_ [text "Layers"]
-                         [ label_ [class_ "panel-block"]
-                                  [ input_ [type_ "checkbox"]
-                                  , text "the layer name goes here"
-                                  ]
-                         ]
+                         (map layer_ $ m^.layers.to allLayers)
+
+    layer_   :: Layer -> View action
+    layer_ l = label_ [class_ "panel-block"]
+                      [ input_ [ type_ "checkbox"
+                               , name_    $ l^.name
+                               , checked_ $ l^.status == Visible
+                               ]
+                      , text $ l^.name
+                      ]
 
 
     footer = footer_ [class_ "navbar is-fixed-bottom"]
-                     [ p_ [class_ "navbar-item"]
-                          [text $ m^.canvas.mouseCoordinates.to show.to ms]
+                     [ navBarEnd_ [ p_ [class_ "navbar-item"]
+                                       [ icon "fas fa-mouse-pointer"
+                                       , text $ case over coordinates ms <$>
+                                                     m^.canvas.mouseCoordinates of
+                                           Nothing           -> "-"
+                                           Just (Point2 x y) -> " (" <> x <> ", " <> y <> ")"
+                                       ]
+                                  ]
                      ]
 
     Vector2 w h = ms <$> m^.canvas.dimensions
+
+
 
 
 columns_     :: [Attribute action] -> [View action] -> View action
@@ -199,7 +261,7 @@ main = JSaddle.runWith Options.jsAddleOptions 8080 $
                 , view          = viewModel
                 , subs          = mempty
                 , events        = SkiaCanvas.withCanvasEvents defaultEvents
-                , initialAction = Id
+                , initialAction = OnLoad
                 , mountPoint    = Nothing
                 , logLevel      = Off
                 }
@@ -225,8 +287,7 @@ navBar_ = let theMainMenuId = "theMainMenuId"
          , textProp "role"       "navigation"
          , textProp "aria-label" "main navigation"
          ]
-         [ navBarBrand_ ["brand"]
-         , navBarBurger_  theMainMenuId
+         [ navBarBurger_  theMainMenuId
                           [navBarBurgerItem_ ] -- not sure why we need these?
          , navBarMenu_ theMainMenuId
              [ navBarStart_ [ navBarItemA_ [onClick Draw ]
@@ -394,3 +455,52 @@ panelBlockActiveA_ = a_ [class_ "panel-block"]
           --     </button>
           --   </div>
           -- </nav>
+
+
+--------------------------------------------------------------------------------
+
+
+data BulmaColor = Primary
+                | Secondary
+                | Dark
+                | Link
+                | Info
+                | Success
+                | Warning
+                | Danger
+                deriving (Show,Read,Eq)
+
+colorClass :: BulmaColor -> MisoString
+colorClass = \case
+  Primary   -> "is-primary"
+  Secondary -> "is-seconary"
+  Dark      -> "is-dark"
+  Link      -> "is-link"
+  Info      -> "is-info"
+  Success   -> "is-success"
+  Warning   -> "is-warning"
+  Danger    -> "is-danger"
+
+-- | Renders a message
+message_            :: Maybe BulmaColor -> [Attribute action] -> [View action] -> View action
+message_ mc ats bdy = article_ ([class_ $ "message" `withColor` mc] <> ats)
+                               [div_ [class_ "meddage-body"]
+                                     bdy
+                               ]
+  where
+    withColor m = \case
+      Nothing -> m
+      Just c  -> m <> " " <> colorClass c
+
+
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+
+-- foreign import javascript unsafe "$r = initializeSkiaCanvas($1);"
+--   jsInitializeSkiaCanvas :: MisoString -> JSM JSVal
+jsInitializeSkiaCanvas :: MisoString -> JSM JSVal
+jsInitializeSkiaCanvas = jsg1 ("initializeSkiaCanvas" :: MisoString)
+
+-- moveTo = js0
