@@ -16,7 +16,7 @@ import           HGeometry.Point
 import           HGeometry.Vector
 import           HGeometry.VoronoiDiagram
 import           Miso
-import qualified Miso.Bulma.JSAddle as JSaddle
+import qualified Miso.Bulma.JSAddle as Run
 -- import           Miso.Bulma.Panel
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Options
@@ -25,8 +25,10 @@ import           SkiaCanvas (mouseCoordinates, dimensions)
 import           Miso.Bulma.Generic
 import           GHCJS.Types
 import           GHCJS.Marshal
-import           Language.Javascript.JSaddle.Object (jsg1, jsf)
+import           Language.Javascript.JSaddle.Object (jsg1, jsg2, jsf, js1, jsg)
 import qualified Language.Javascript.JSaddle.Object as JS
+import qualified Language.Javascript.JSaddle as JSAddle
+
 --------------------------------------------------------------------------------
 type R = RealNumber 5
 
@@ -59,10 +61,40 @@ initialLayers = Layers [] (Layer "alpha" Visible) [ Layer "beta" Hidden
                                                   , Layer "foo" Visible
                                                   ]
 
-data Model = Model { _canvas      :: (SkiaCanvas.Canvas R)
-                   , _points      :: IntMap.IntMap (Point 2 R)
-                   , _diagram     :: Maybe [Point 2 R]
-                   , __layers     :: Layers
+--------------------------------------------------------------------------------
+-- * The CanvasKit object
+
+ -- ^ the CanvasKit object
+newtype CanvasKit = MkCanvasKit JSVal
+  deriving newtype (JS.MakeObject,JSAddle.ToJSVal)
+
+instance Show CanvasKit where
+  show _ = "CanvasKitObj"
+instance Eq CanvasKit where
+  a == b = True
+  -- we should only have one
+
+--------------------------------------------------------------------------------
+-- * Surface
+
+ -- ^ the Surface object
+newtype Surface = MkSurface JSVal
+  deriving newtype (JS.MakeObject, JSAddle.ToJSVal)
+
+instance Show Surface where
+  show _ = "SurfaceObj"
+instance Eq Surface where
+  a == b = True
+  -- we should only have one
+--------------------------------------------------------------------------------
+
+
+data Model = Model { _canvas       :: (SkiaCanvas.Canvas R)
+                   , _points       :: IntMap.IntMap (Point 2 R)
+                   , _diagram      :: Maybe [Point 2 R]
+                   , __layers      :: Layers
+                   , _canvasKitObj :: Maybe CanvasKit
+                   , _surface   :: Maybe Surface
                    } deriving (Eq,Show)
 makeLenses ''Model
 
@@ -80,51 +112,86 @@ instance Default (Point 2 R :+ Int) where
 ----------------------------------------
 
 initialModel :: Model
-initialModel = Model (SkiaCanvas.blankCanvas 1024 768) mempty Nothing initialLayers
+initialModel = (Model {})&canvas       .~ SkiaCanvas.blankCanvas 1024 768
+                         &points       .~ mempty
+                         &diagram      .~ Nothing
+                         &layers       .~ initialLayers
+                         &canvasKitObj .~ Nothing
+                         &surface      .~ Nothing
 
 --------------------------------------------------------------------------------
 
 data Action = Id
+            | OnLoad
+            | InitializeSkCanvas CanvasKit Surface
+            | SetCanvasSize !(Vector 2 Int)
             | CanvasAction SkiaCanvas.InternalCanvasAction
             | AddPoint
             | Draw
-            | OnLoad
             -- | ToggleLayerStatus (Lens' Model Status)
-            | SetCanvasDimensions !(Vector 2 Int)
-
 
 updateModel   :: Model -> Action -> Effect Action Model
 updateModel m = \case
-    Id                    -> noEff m
+    Id                            -> noEff m
+    OnLoad                        -> m <# initializeCanvas theMainCanvasId
+    InitializeSkCanvas ckObj surf -> noEff $ m&canvasKitObj ?~ ckObj
+                                              &surface      ?~ surf
+    SetCanvasSize v       -> noEff $ m&canvas.dimensions   .~ v
     CanvasAction ca       -> m&canvas %%~ flip SkiaCanvas.handleInternalCanvasAction ca
     AddPoint              -> addPoint
-    Draw                  -> noEff m
-    SetCanvasDimensions v -> noEff $ m&canvas.dimensions .~ v
-    OnLoad                -> m <# initializeCanvas theMainCanvasId
+    Draw                  -> m <# case m^.canvasKitObj of
+                                    Nothing -> pure Id -- TODO; error no canvasKit obj
+                                    Just ck -> case m^.surface of
+                                      Nothing   -> pure Id -- TODO: no surf
+                                      Just surf -> do jsDraw ck surf
+                                                      pure Id
     -- ToggleLayerStatus lr  -> noEff $ m&lr %~ toggleStatus
   where
-    addPoint = noEff $ recomputeDiagram m'
+    addPoint = recomputeDiagram m' <# pure Draw
       where
         m' = case m^.canvas.mouseCoordinates of
                Nothing -> m
                Just p  -> m&points %~ insertPoint p
 
+runDraw               :: JSVal -> JS.JSCallAsFunction
+runDraw canvasKit _ _ = \case
+  [canvas] -> do jsg2 ("draw" :: MisoString) canvasKit canvas
+                 pure ()
+  _        -> pure ()
+
+
+storeCanvasKitAndSurface                         :: MisoString -> JS.JSCallAsFunction
+storeCanvasKitAndSurface theCanvasId _fObj _this = \case
+  [canvasKit] -> do surface <- canvasKit ^.js1 ("MakeCanvasSurface" :: MisoString) theMainCanvasId
+                               -- someshow store the canvasKit and the surface
+                    runDraw' <- JS.function $ runDraw canvasKit
+                    surface ^.js1 ("drawOnce" :: MisoString) runDraw'
+                    pure ()
+  _              -> pure ()
 
 initializeCanvas             :: MisoString -> JSM Action
 initializeCanvas theCanvasId = do
-    theCanvasElem <- getElementById theMainCanvasId
+    theCanvasElem <- getElementById theCanvasId
     wVal <- theCanvasElem JS.! ("offsetWidth"  :: MisoString)
     hVal <- theCanvasElem JS.! ("offsetHeight" :: MisoString)
-    (theCanvasElem JS.<# ("width"  :: MisoString))  wVal
+    (theCanvasElem JS.<# ("width"  :: MisoString)) wVal
     (theCanvasElem JS.<# ("height" :: MisoString)) hVal
-    jsInitializeSkiaCanvas theMainCanvasId
+    -- withCKFunction is the callback; i.e. the thing that we do with the given CanvasKit
+    -- value
+    withCKFunction <- JS.function $ storeCanvasKitAndSurface theCanvasId
+    --  We grab the ckLoaded value,
+    ckLoaded <- jsg ("ckLoaded" :: MisoString)
+    jsg ("console" :: MisoString) ^. JS.js1 ("log" :: MisoString) ckLoaded
+    -- liftIO $ print ckLoaded
+    -- and call it with the '
+    ckLoaded ^.js1 ("then" :: MisoString) withCKFunction
     w <- fromJSVal wVal
     h <- fromJSVal hVal
     case Vector2 <$> w <*> h of
-      Nothing -> pure Id -- TODO: something went wrong
-      Just v  -> do
-        liftIO $ print v -- somehting goes wrong here still
-        pure $ SetCanvasDimensions v
+      Nothing -> pure Id -- TODO: if we are here, something went wrong
+      Just v  -> pure $ SetCanvasSize v
+
+
 
 recomputeDiagram   :: Model -> Model
 recomputeDiagram m
@@ -138,6 +205,8 @@ insertPoint p m = let k = case IntMap.lookupMax m of
                             Nothing    -> 0
                             Just (i,_) -> succ i
                   in IntMap.insert k p m
+
+
 
 --------------------------------------------------------------------------------
 
@@ -254,7 +323,7 @@ menuBar_ _ = navBar_
 --------------------------------------------------------------------------------
 
 main :: IO ()
-main = JSaddle.runWith Options.jsAddleOptions 8080 $
+main = Run.runWith Options.jsAddleOptions 8080 $
          startApp $
             App { model         = initialModel
                 , update        = flip updateModel
@@ -503,4 +572,23 @@ message_ mc ats bdy = article_ ([class_ $ "message" `withColor` mc] <> ats)
 jsInitializeSkiaCanvas :: MisoString -> JSM JSVal
 jsInitializeSkiaCanvas = jsg1 ("initializeSkiaCanvas" :: MisoString)
 
--- moveTo = js0
+jsDraw         :: CanvasKit -> Surface -> JSM ()
+jsDraw ck surf = () <$ jsg2 ("draw" :: MisoString) (toJSVal ck) (toJSVal surf)
+
+withPaint           :: CanvasKit -> (JSVal -> JSM a) -> JSM a
+withPaint canvasKit =
+    JSAddle.bracket (JS.new (canvasKit JS.! ("Paint" :: MisoString)) ())
+                    (\paint -> paint ^. JS.js0 ("delete" :: MisoString))
+
+withPath           :: CanvasKit -> (JSVal -> JSM a) -> JSM a
+withPath canvasKit =
+    JSAddle.bracket (JS.new (canvasKit JS.! ("Path" :: MisoString)) ())
+                    (\path -> path ^. JS.js0 ("delete" :: MisoString))
+
+
+-- data Cmd = Cmd OP
+
+-- withPathFromCmds           :: CanvasKit -> [Cmd] -> (JSVal -> JSM a) -> JSM a
+-- withPathFromCmds canvasKit =
+--     JSAddle.bracket (JS.new (canvasKit JS.! ("Path.MakeFromCMDs" :: MisoString)) cmds)
+--                     (\path -> path ^. JS.js0 ("delete" :: MisoString))

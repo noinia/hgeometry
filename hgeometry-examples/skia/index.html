@@ -12,71 +12,69 @@
   </head>
   <body>
     <script type="text/javascript">
-     /* function fitToContainer(canvas){
-      *   canvas.width  = canvas.offsetWidth;
-      *   canvas.height = canvas.offsetHeight;
-      *   return (canvas.offsetWidth, canvas.offsetHeight)
-      * } */
+     var ckLoaded = CanvasKitInit({
+       locateFile: (file) => 'https://unpkg.com/canvaskit-wasm@0.39.1/bin/'+file});
+     console.log("ckLoaded defined");
+     console.log(ckLoaded);
 
-     /* initializeSkiaCanvas('mainCanvas'); */
+     function draw(CanvasKit, canvas) {
 
-     function initializeSkiaCanvas(theCanvasId) {
-       /* const canvasSize = fitToContainer(document.getElementById(theCanvasId));
-        * console.log(canvasSize); */
-       const ckLoaded = CanvasKitInit({
-         locateFile: (file) => 'https://unpkg.com/canvaskit-wasm@0.39.1/bin/'+file});
-       ckLoaded.then((CanvasKit) => {
+       canvas.clear(CanvasKit.WHITE);
 
-         const surface = CanvasKit.MakeCanvasSurface(theCanvasId);
 
-         let withPaint = (f) => {
-           const paint = new CanvasKit.Paint();
+       let withPaint = (f) => {
+         const paint = new CanvasKit.Paint();
+         f(paint);
+         paint.delete();
+       }
+       let withPath = (f) => {
+         const path = new CanvasKit.Path();
+         f(path);
+         path.delete();
+       }
+       let withAntiAliassedPaint = (f) => {
+         withPaint((paint) => {
+           paint.setAntiAlias(true);
            f(paint);
-           paint.delete();
-         }
-         let withPath = (f) => {
-           const path = new CanvasKit.Path();
-           f(path);
-           path.delete();
-         }
-         let withAntiAliassedPaint = (f) => {
-           withPaint((paint) => {
-             paint.setAntiAlias(true);
-             f(paint);
+         });
+       }
+
+       const rr = CanvasKit.RRectXY(CanvasKit.LTRBRect(10, 60, 210, 260), 0, 0);
+
+       withAntiAliassedPaint( (paint) => {
+         paint.setColor(CanvasKit.Color4f(0.9, 0.5, 0, 0.2));
+         paint.setStyle(CanvasKit.PaintStyle.Fill);
+
+         withAntiAliassedPaint( (paint2) => {
+           paint2.setColor(CanvasKit.Color4f(0.9, 0.0, 0.5, 1.0));
+           paint2.setStyle(CanvasKit.PaintStyle.Stroke);
+
+           canvas.drawRRect(rr, paint);
+           canvas.drawRRect(rr, paint2);
+
+           withPath((path) => {
+             path.moveTo(200, 50);
+             path.lineTo(300, 200);
+             path.lineTo(400, 100);
+             path.lineTo(500, 200);
+             path.lineTo(600, 0);
+             path.lineTo(200, 50);
+             canvas.drawCircle(128, 128, 90, paint);
+
+             let cmds = [
+               CanvasKit.MOVE_VERB, 0, 10,
+               CanvasKit.LINE_VERB, 30, 40,
+               CanvasKit.QUAD_VERB, 20, 50, 45, 60,
+             ];
+             let path2 = CanvasKit.Path.MakeFromCmds(cmds);
+
+             canvas.drawPath(path, paint2);
+             canvas.drawPath(path2, paint2);
+
+             /* canvas.drawParagraph(paragraph, 10, 10); */
+
            });
-         }
-
-         function draw(canvas) {
-           canvas.clear(CanvasKit.WHITE);
-
-           const rr = CanvasKit.RRectXY(CanvasKit.LTRBRect(10, 60, 210, 260), 0, 0);
-
-           withAntiAliassedPaint( (paint) => {
-             paint.setColor(CanvasKit.Color4f(0.9, 0.5, 0, 0.2));
-             paint.setStyle(CanvasKit.PaintStyle.Fill);
-
-             withAntiAliassedPaint( (paint2) => {
-               paint2.setColor(CanvasKit.Color4f(0.9, 0.0, 0.5, 1.0));
-               paint2.setStyle(CanvasKit.PaintStyle.Stroke);
-
-               canvas.drawRRect(rr, paint);
-               canvas.drawRRect(rr, paint2);
-
-               withPath((path) => {
-                 path.moveTo(200, 50);
-                 path.lineTo(300, 200);
-                 path.lineTo(400, 100);
-                 path.lineTo(500, 200);
-                 path.lineTo(600, 0);
-                 path.lineTo(200, 50);
-
-                 canvas.drawPath(path, paint2);
-               });
-             });
-           });
-         }
-         surface.drawOnce(draw);
-
+         });
        });
      }
 
