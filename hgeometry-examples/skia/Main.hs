@@ -121,6 +121,9 @@ initialModel = (Model {})&canvas       .~ SkiaCanvas.blankCanvas 1024 768
 
 --------------------------------------------------------------------------------
 
+
+
+
 data Action = Id
             | OnLoad
             | InitializeSkCanvas CanvasKit Surface
@@ -133,7 +136,10 @@ data Action = Id
 updateModel   :: Model -> Action -> Effect Action Model
 updateModel m = \case
     Id                            -> noEff m
-    OnLoad                        -> m <# initializeCanvas theMainCanvasId
+    OnLoad                        -> let Effect m' subs' = m <# initializeCanvas theMainCanvasId
+                                     in Effect m' ( initializeCanvasKitSub theMainCanvasId
+                                                  : subs'
+                                                  )
     InitializeSkCanvas ckObj surf -> noEff $ m&canvasKitObj ?~ ckObj
                                               &surface      ?~ surf
     SetCanvasSize v       -> noEff $ m&canvas.dimensions   .~ v
@@ -153,22 +159,6 @@ updateModel m = \case
                Nothing -> m
                Just p  -> m&points %~ insertPoint p
 
-runDraw               :: JSVal -> JS.JSCallAsFunction
-runDraw canvasKit _ _ = \case
-  [canvas] -> do jsg2 ("draw" :: MisoString) canvasKit canvas
-                 pure ()
-  _        -> pure ()
-
-
-storeCanvasKitAndSurface                         :: MisoString -> JS.JSCallAsFunction
-storeCanvasKitAndSurface theCanvasId _fObj _this = \case
-  [canvasKit] -> do surface <- canvasKit ^.js1 ("MakeCanvasSurface" :: MisoString) theMainCanvasId
-                               -- someshow store the canvasKit and the surface
-                    runDraw' <- JS.function $ runDraw canvasKit
-                    surface ^.js1 ("drawOnce" :: MisoString) runDraw'
-                    pure ()
-  _              -> pure ()
-
 initializeCanvas             :: MisoString -> JSM Action
 initializeCanvas theCanvasId = do
     theCanvasElem <- getElementById theCanvasId
@@ -176,15 +166,6 @@ initializeCanvas theCanvasId = do
     hVal <- theCanvasElem JS.! ("offsetHeight" :: MisoString)
     (theCanvasElem JS.<# ("width"  :: MisoString)) wVal
     (theCanvasElem JS.<# ("height" :: MisoString)) hVal
-    -- withCKFunction is the callback; i.e. the thing that we do with the given CanvasKit
-    -- value
-    withCKFunction <- JS.function $ storeCanvasKitAndSurface theCanvasId
-    --  We grab the ckLoaded value,
-    ckLoaded <- jsg ("ckLoaded" :: MisoString)
-    jsg ("console" :: MisoString) ^. JS.js1 ("log" :: MisoString) ckLoaded
-    -- liftIO $ print ckLoaded
-    -- and call it with the '
-    ckLoaded ^.js1 ("then" :: MisoString) withCKFunction
     w <- fromJSVal wVal
     h <- fromJSVal hVal
     case Vector2 <$> w <*> h of
@@ -192,6 +173,38 @@ initializeCanvas theCanvasId = do
       Just v  -> pure $ SetCanvasSize v
 
 
+
+runDraw               :: JSVal -> JS.JSCallAsFunction
+runDraw canvasKit _ _ = \case
+  [canvas] -> do jsg2 ("draw" :: MisoString) canvasKit canvas
+                 pure ()
+  _        -> pure ()
+
+
+storeCanvasKitAndSurface                              :: MisoString -> Sink Action
+                                                      -> JS.JSCallAsFunction
+storeCanvasKitAndSurface theCanvasId sink _fObj _this = \case
+  [canvasKit] -> do surface <- canvasKit ^.js1 ("MakeCanvasSurface" :: MisoString) theMainCanvasId
+                               -- someshow store the canvasKit and the surface
+                    liftIO $ sink $ InitializeSkCanvas (MkCanvasKit canvasKit) (MkSurface surface)
+                    runDraw' <- JS.function $ runDraw canvasKit
+                    surface ^.js1 ("drawOnce" :: MisoString) runDraw'
+                    pure ()
+  _              -> pure ()
+
+
+initializeCanvasKitSub             :: MisoString -> Sub Action
+initializeCanvasKitSub theCanvasId = \sink -> do
+   liftIO $ print "go"
+   -- withCKFunction is the callback; i.e. the thing that we do with the given CanvasKit
+   -- value
+   withCKFunction <- JS.function $ storeCanvasKitAndSurface theCanvasId sink
+    --  We grab the ckLoaded value,
+   ckLoaded <- jsg ("ckLoaded" :: MisoString)
+   jsg ("console" :: MisoString) ^. JS.js1 ("log" :: MisoString) ckLoaded
+   -- and call it with the '
+   ckLoaded ^.js1 ("then" :: MisoString) withCKFunction
+   pure ()
 
 recomputeDiagram   :: Model -> Model
 recomputeDiagram m
@@ -225,8 +238,8 @@ viewModel m =
          , footer
          ]
   where
-    leftPanel  = div_ [class_ "column is-narrow has-background-light"]
-                      [ text "woei"
+    leftPanel  = div_ [class_ "column is-narrow"]
+                      [ menuButtons
                       ]
     mainCanvas = div_ [ class_ "column"
                       ]
@@ -267,7 +280,7 @@ viewModel m =
 
     footer = footer_ [class_ "navbar is-fixed-bottom"]
                      [ navBarEnd_ [ p_ [class_ "navbar-item"]
-                                       [ icon "fas fa-mouse-pointer"
+                                       [ icon "fas fa-mouse-pointer" []
                                        , text $ case over coordinates ms <$>
                                                      m^.canvas.mouseCoordinates of
                                            Nothing           -> "-"
@@ -592,3 +605,89 @@ withPath canvasKit =
 -- withPathFromCmds canvasKit =
 --     JSAddle.bracket (JS.new (canvasKit JS.! ("Path.MakeFromCMDs" :: MisoString)) cmds)
 --                     (\path -> path ^. JS.js0 ("delete" :: MisoString))
+
+
+
+
+--------------------------------------------------------------------------------
+
+menuButtons = aside_ [class_ "menu"]
+                     [ menuList_ [ selectButton
+                                 , panButton
+                                 ]
+                     , zoomButtons_
+                     , colorButtons
+                     , toolButtons_
+                     ]
+
+  where
+    selectButton = menuButton_ "fas fa-mouse-pointer" [title_ "Select"]
+    panButton = menuButton_ "fas fa-hand-pointer" [title_ "Pan"]
+
+    colorButtons = menuList_ [ strokeButton
+                             , fillButton
+                             ]
+    strokeButton = menuButton_ "fas fa-paint-brush"
+                               [ title_ "Stroke color"
+                               , styleM_ ["color" =: "black"]
+                               ]
+    fillButton   = menuButton_ "fas fa-fill"
+                               [ title_ "Fill color"
+                               , styleM_ ["color" =: "blue"]
+                               ]
+
+toolButtons_ = menuList_ [ pointButton
+                         , penButton
+                         , lineButton
+                         , polyLineButton
+                         , polygonButton
+                         , rectangleButton
+                         , circleButton
+                         , textButton
+                         , mathButton
+                         ]
+  where
+    pointButton     = menuButton_ "fas fa-circle"
+                        [title_ "Point"]
+    penButton       = menuButton_ "fas fa-pen"
+                        [title_ "Pen"]
+    lineButton      = menuButton_ "fas fa-slash"
+                        [title_ "Line"]
+    polyLineButton  = menuButton_ "fas fa-wave-square"
+                        [title_ "Polyline"]
+    polygonButton   = menuButton_ "fas fa-draw-polygon"
+                        [title_ "Polygon"]
+    rectangleButton = menuButton_ "far fa-square"
+                        [title_ "Rectangle"]
+    circleButton    = menuButton_ "far fa-circle"
+                        [title_ "Circle"]
+    textButton      = menuButton_ "fas fa-font"
+                        [title_ "Text"]
+    mathButton      = menuButton_ "fas fa-square-root-alt"
+                        [title_ "Math Text"]
+
+
+
+
+
+
+
+
+menuList_ = ul_ [class_ "menu-list"]
+
+menuButton_ i ats = li_ []
+                        [ button_ [ class_ "button is-medium"]
+                                  [ icon i ats
+                                  ]
+                        ]
+
+zoomButtons_ = menuList_ [ menuButton_ "fas fa-plus-square"
+                                       [ title_ "Zoom in"
+                                       ]
+                        , menuButton_ "fas fa-equals"
+                                       [ title_ "Zoom 1:1"
+                                       ]
+                        , menuButton_ "fas fa-minus-square"
+                                       [ title_ "Zoom out"
+                                       ]
+                        ]
