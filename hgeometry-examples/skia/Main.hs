@@ -3,6 +3,7 @@
 module Main(main) where
 
 import           Control.Lens hiding (view, element)
+import           Control.Monad (forM_)
 import           Control.Monad.Error.Class
 import           Control.Monad.Except
 import           Control.Monad.IO.Class
@@ -152,7 +153,7 @@ maybeToM msg = maybe (throwError msg) pure
 handleDraw   :: Model -> ExceptT MisoString JSM Action
 handleDraw m = do canvasKit <- maybeToM "Loading CanvasKit failed"  $ m^.canvasKitObj
                   surface'  <- maybeToM "Ackquiring surface failed" $ m^.surface
-                  lift $ requestAnimationFrame canvasKit surface' jsDraw
+                  lift $ requestAnimationFrame canvasKit surface' (myDraw m)
                   pure Id
 
 notifyOnError :: ExceptT MisoString JSM Action -> JSM Action
@@ -179,9 +180,6 @@ onLoad m = Effect m [ initializeCanvas
     initializeCanvasKit :: Sub Action
     initializeCanvasKit = mapSub CanvasKitAction $ initializeCanvasKitSub theMainCanvasId
 
-  -- case m <# SkiaCanvas.acquireCanvasSize theMainCanvasId of
-  --            Effect m' subs' -> let subs'' = initializeCanvasKitSub theMainCanvasId : subs'
-  --                               in Effect m' subs''
 
 handleCanvasKitAction   :: Model -> InitializeSkCanvasAction -> Effect Action Model
 handleCanvasKitAction m = \case
@@ -489,16 +487,12 @@ jsInitializeSkiaCanvas = jsg1 ("initializeSkiaCanvas" :: MisoString)
 jsDraw               :: CanvasKit -> SkCanvasRef -> JSM ()
 jsDraw ck ckCanvasRef = () <$ jsg2 ("draw" :: MisoString) (toJSVal ck) (toJSVal ckCanvasRef)
 
-withPaint           :: CanvasKit -> (JSVal -> JSM a) -> JSM a
-withPaint canvasKit =
-    JSAddle.bracket (JS.new (canvasKit JS.! ("Paint" :: MisoString)) ())
-                    (\paint -> paint ^. JS.js0 ("delete" :: MisoString))
-
-withPath           :: CanvasKit -> (JSVal -> JSM a) -> JSM a
-withPath canvasKit =
-    JSAddle.bracket (JS.new (canvasKit JS.! ("Path" :: MisoString)) ())
-                    (\path -> path ^. JS.js0 ("delete" :: MisoString))
-
+myDraw                       :: Model -> CanvasKit -> SkCanvasRef -> JSM ()
+myDraw m canvasKit canvasRef = do clear canvasKit canvasRef
+                                  withPaint canvasKit $ \paint ->
+                                    forM_ (m^.points) $ \p ->
+                                      drawPoint canvasRef p paint
+                                  pure ()
 
 -- data Cmd = Cmd OP
 
