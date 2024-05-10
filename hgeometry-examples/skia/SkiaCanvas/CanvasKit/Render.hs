@@ -1,29 +1,22 @@
+{-# LANGUAGE OverloadedStrings          #-}
 module SkiaCanvas.CanvasKit.Render
   ( point
   , circle
   , polyLine
+  , simplePolygon
   ) where
 
 import           Control.Lens
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
-import           GHCJS.Marshal (fromJSVal)
 import           HGeometry.Ball
-import           HGeometry.Miso.Svg.Canvas (HasMousePosition(..))
-import           HGeometry.Miso.Svg.StaticCanvas (HasDimensions(..))
 import           HGeometry.Point
 import           HGeometry.PolyLine
-import           HGeometry.Vector
-import           HGeometry.Viewport
-import qualified Language.Javascript.JSaddle.Object as JS
-import           Miso (Attribute, View, Effect, noEff, onMouseLeave, canvas_, id_, getElementById, JSM)
-import           Miso.String (MisoString)
-import           MouseExtra
+import           HGeometry.Polygon.Simple
+import           Miso (JSM)
 import           SkiaCanvas.CanvasKit
-import           SkiaCanvas.CanvasKit.Core (CanvasKit, SkCanvasRef, SkPaintRef)
+import           SkiaCanvas.CanvasKit.Core (SkPaintRef)
 import qualified SkiaCanvas.CanvasKit.Core as CKCore
-import           SkiaCanvas.Core
+
 --------------------------------------------------------------------------------
 
 -- | Renders a Point
@@ -61,3 +54,16 @@ polyLine canvasKit canvas poly paint = let (p :| pts) = toNonEmptyOf (vertices.a
                                            cmds       = CKCore.MoveTo p :| map (CKCore.LineTo) pts
                                        in CKCore.withPathFromCmds canvasKit cmds $ \path ->
                                             CKCore.drawPath canvas path paint
+
+-- | Renders a polyLine
+simplePolygon                             :: ( SimplePolygon_ simplePolygon point r
+                                             , Real r
+                                             )
+                                          => CanvasKit -> SkCanvasRef
+                                          -> simplePolygon -> SkPaintRef
+                                          -> JSM ()
+simplePolygon canvasKit canvas poly paint =
+  let (p :| pts) = toNonEmptyOf (vertices.asPoint) poly
+      cmds       = CKCore.MoveTo p :| foldr (\q cs -> CKCore.LineTo q : cs) [CKCore.Close] pts
+  in CKCore.withPathFromCmds canvasKit cmds $ \path -> do
+       CKCore.drawPath canvas path paint

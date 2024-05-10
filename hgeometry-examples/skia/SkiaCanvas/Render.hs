@@ -3,27 +3,19 @@ module SkiaCanvas.Render
   , point
   -- , circle
   , polyLine
+  , simplePolygon
   ) where
 
 import           Control.Lens
-import qualified Data.Map as Map
-import           GHCJS.Marshal (fromJSVal)
-import           HGeometry.Ball
-import           HGeometry.Miso.Svg.Canvas (HasMousePosition(..))
-import           HGeometry.Miso.Svg.StaticCanvas (HasDimensions(..))
 import           HGeometry.Point
 import           HGeometry.PolyLine
+import           HGeometry.Polygon.Simple
 import           HGeometry.Properties
 import           HGeometry.Transformation
-import           HGeometry.Vector
 import           HGeometry.Viewport
-import qualified Language.Javascript.JSaddle.Object as JS
-import           Miso (Attribute, View, Effect, noEff, onMouseLeave, canvas_, id_, getElementById, JSM)
-import           Miso.String (MisoString)
-import           MouseExtra
+import           Miso (JSM)
 import           SkiaCanvas.CanvasKit
-import           SkiaCanvas.CanvasKit.Core (CanvasKit, SkCanvasRef, SkPaintRef)
-import qualified SkiaCanvas.CanvasKit.Core as CKCore
+import           SkiaCanvas.CanvasKit.Core (SkPaintRef)
 import qualified SkiaCanvas.CanvasKit.Render as Render
 import           SkiaCanvas.Core
 
@@ -77,3 +69,11 @@ polyLine :: ( PolyLine_ polyLine point
             )
          => Canvas r -> SkCanvasRef -> polyLine -> SkPaintRef -> JSM ()
 polyLine = drawTransform Render.polyLine
+
+-- | Renders a simple polygon
+simplePolygon :: ( SimplePolygon_ simplePolygon point r
+                 , IsTransformable simplePolygon
+                 , RealFrac r
+                 )
+              => Canvas r -> SkCanvasRef -> simplePolygon -> SkPaintRef -> JSM ()
+simplePolygon = drawTransform Render.simplePolygon

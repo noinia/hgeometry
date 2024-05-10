@@ -10,30 +10,31 @@ import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
 import           Data.Default.Class
 import qualified Data.IntMap as IntMap
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import           GHC.TypeNats
+import           GHCJS.Marshal
+import           GHCJS.Types
 import           HGeometry.Ext
 import           HGeometry.Miso.OrphanInstances ()
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
+import           HGeometry.PolyLine
 import           HGeometry.Vector
 import           HGeometry.VoronoiDiagram
+import qualified Language.Javascript.JSaddle as JSAddle
+import           Language.Javascript.JSaddle.Object (jsg1, jsg2, jsf, js1, jsg)
+import qualified Language.Javascript.JSaddle.Object as JS
 import           Miso
+import           Miso.Bulma.Color
+import           Miso.Bulma.Columns
+import           Miso.Bulma.Generic
 import qualified Miso.Bulma.JSAddle as Run
--- import           Miso.Bulma.Panel
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Options
 import qualified SkiaCanvas
 import           SkiaCanvas (mouseCoordinates, dimensions, canvasKitRef, surfaceRef)
-import           Miso.Bulma.Generic
-import           GHCJS.Types
-import           GHCJS.Marshal
-import           Language.Javascript.JSaddle.Object (jsg1, jsg2, jsf, js1, jsg)
-import qualified Language.Javascript.JSaddle.Object as JS
-import qualified Language.Javascript.JSaddle as JSAddle
-import           Miso.Bulma.Color
-import           Miso.Bulma.Columns
 import           SkiaCanvas.CanvasKit
 import qualified SkiaCanvas.CanvasKit as CanvasKit
 import qualified SkiaCanvas.Render as Render
@@ -232,7 +233,7 @@ viewModel   :: Model -> View Action
 viewModel m =
     div_ []
          [ menuBar_ m
-         , columns_ [ ]
+         , columns_ [ styleInline_ "height: calc(100vh - 92px)"]
                     [ leftPanel
                     , mainCanvas
                     , rightPanels
@@ -260,13 +261,16 @@ viewModel m =
                        [ overviewPanel
                        , layersPanel
                        ]
-    overviewPanel = panel_ [text "Model"]
+    overviewPanel = panel_ [ styleInline_ "max-height: 60vh"]
+                           [ text "Model"
+                           ]
                            [text . ms . show $ m
                            , message_ Nothing        [] [text "foo"]
                            , message_ (Just Warning) [] [text "warning :)"]
                            ]
 
-    layersPanel = panel_ [text "Layers"]
+    layersPanel = panel_ []
+                         [text "Layers"]
                          (map layer_ $ m^.layers.to allLayers)
 
     layer_   :: Layer -> View action
@@ -436,11 +440,16 @@ navBarEnd_ = div_ [class_ "navbar-end"]
 --------------------------------------------------------------------------------
 -- * The Right Panel
 
-panel_             :: [View action] -> [View action] -> View action
-panel_ heading chs =
-    nav_ [class_ "panel"]
-         ([ p_ [class_ "panel-heading"] heading]
-          <> chs
+panel_                 :: [Attribute action]
+                       -> [View action] -> [View action] -> View action
+panel_ ats heading chs =
+    nav_ ([class_ "panel"] <> ats)
+         ([ p_ [class_ "panel-heading"] heading
+          , div_ [ class_ "container"
+                 , styleInline_ "overflow: hidden"
+                 ]
+                 chs
+          ]
          )
 
 panelBlock_ = div_ [class_ "panel-block"]
@@ -481,9 +490,15 @@ jsDraw ck ckCanvasRef = () <$ jsg2 ("draw" :: MisoString) (toJSVal ck) (toJSVal 
 
 myDraw                       :: Model -> CanvasKit -> SkCanvasRef -> JSM ()
 myDraw m canvasKit canvasRef = do clear canvasKit canvasRef
-                                  withPaint canvasKit $ \paint ->
+                                  withPaint canvasKit $ \paint -> do
                                     forM_ (m^.points) $ \p ->
                                       Render.point (m^.canvas) canvasRef p paint
+                                    case NonEmpty.nonEmpty $ m^..points.traverse of
+                                      Just pts@(_ :| _ : _) -> do
+                                        let poly :: PolyLine (Point 2 R)
+                                            poly = polyLineFromPoints pts
+                                        Render.polyLine (m^.canvas) canvasRef poly paint
+                                      _                     -> pure ()
                                   pure ()
 
 -- data Cmd = Cmd OP
