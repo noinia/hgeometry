@@ -1,13 +1,9 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
-module CanvasKit
-  ( CanvasKit
-  , ckAsJSVal
-
-
-  , Surface
-  , SkCanvasRef
-
+module SkiaCanvas.CanvasKit.Core
+  ( CanvasKit(..)
+  , Surface(..)
+  , SkCanvasRef(..)
 
   , InitializeSkCanvasAction(..)
   , initializeCanvasKitSub
@@ -17,14 +13,19 @@ module CanvasKit
 
   , mkWhite
 
-  , clear, clearWith
-  , drawPoint
-  , drawCircle
+  , SkPaintRef
+  , SkPathRef
+  , SkInputColor
 
-
+  , clear
+  , clearWith
   , circle
+
+  , Cmd(..)
   , withPath
+  , withPathFromCmds
   , withPaint
+  , drawPath
   ) where
 
 import           Control.Lens
@@ -39,9 +40,8 @@ import           HGeometry.Number.Radical (Radical)
 import           HGeometry.Point
 import           HGeometry.Vector
 import           HGeometry.Viewport
--- import qualified JavaScript.Array as JSArray
 import qualified Language.Javascript.JSaddle as JSAddle
-import           Language.Javascript.JSaddle.Object (jsg1, jsg2, jsf, js1, js4, jsg)
+import           Language.Javascript.JSaddle.Object (jsg1, jsg2, jsf, js1, js2, js4, jsg)
 import qualified Language.Javascript.JSaddle.Object as JS
 import           Miso
 import           Miso.String (MisoString)
@@ -90,8 +90,8 @@ instance Eq SkCanvasRef where
 
 -- | Action to initailize the CanvasKit there is nohandler; i..e. your model should
 -- somehow store this CanvasKit object and th surface.
-data InitializeSkCanvasAction =
-    InitializeSkCanvas CanvasKit Surface
+data InitializeSkCanvasAction = InitializeRefs {-# UNPACK #-} !CanvasKit
+                                               {-# UNPACK #-} !Surface
 
 --------------------------------------------------------------------------------
 
@@ -119,7 +119,7 @@ storeCanvasKitAndSurface theCanvasId sink _fObj _this = \case
                   let canvasKit = MkCanvasKit ckJSVal
                       surface'  = MkSurface surfJSVal
                   -- someshow store the canvasKit and the surface
-                  liftIO $ sink $ InitializeSkCanvas canvasKit surface'
+                  liftIO . sink $ InitializeRefs canvasKit surface'
                   requestAnimationFrame canvasKit surface' clear
   _         -> pure () -- TODO this should probably be some error?
 
@@ -159,6 +159,7 @@ clear canvasKit canvas = do white <- mkWhite canvasKit
 clearWith              :: SkCanvasRef -> SkInputColor -> JSM ()
 clearWith canvas color = void $ canvas ^.js1 ("clear" :: MisoString) color
 
+-- | A color, in Skia's setup
 newtype SkInputColor = SkInputColor JSVal
   deriving (ToJSVal)
 
@@ -175,26 +176,6 @@ withPaint           :: CanvasKit -> (SkPaintRef -> JSM a) -> JSM a
 withPaint canvasKit =
     JSAddle.bracket (SkPaintRef <$> (JS.new (canvasKit JS.! ("Paint" :: MisoString)) ()))
                     (\paint -> paint ^. JS.js0 ("delete" :: MisoString))
-
-
-drawPoint          :: ( Point_ point 2 r
-                      , HasCoordinates point (Point 2 Float)
-                      , Real r
-                      )
-                   => SkCanvasRef -> point -> SkPaintRef -> JSM ()
-drawPoint canvas p = let toFloat = realToFrac :: Real r => r -> Float
-                     in circle canvas (Disk (p&coordinates %~ toFloat) 3)
-
-drawCircle             :: forall circle point r.
-                          ( Ball_ circle point
-                          , Point_ point 2 r
-                          , HasCoordinates point (Point 2 Float)
-                          , Real r
-                          ) => SkCanvasRef -> circle -> SkPaintRef -> JSM ()
-drawCircle canvas c = let ctr = c^.center
-                          c'  = Disk (ctr&coordinates %~ toFloat) (toFloat $ c^.squaredRadius)
-                          toFloat = realToFrac :: r -> Float
-                       in circle canvas c'
 
 --------------------------------------------------------------------------------
 -- * Simple objects (Rectangles, Circles)
@@ -259,6 +240,11 @@ fromFloatCmd _ = \case
     moveVerb = 0 :: Int -- CanvasKit.MOVE_VERB
     lineVerb = 1 :: Int -- CanvasKit.LINE_VERB
     quadVerb = 2 :: Int -- CanvasKit.QUAD_VERB
+
+-- |  call drawPath
+drawPath                   :: SkCanvasRef -> SkPathRef -> SkPaintRef -> JSM ()
+drawPath canvas path paint =
+  void $ canvas ^.js2 ("drawPath" :: MisoString) path paint
 
 --------------------------------------------------------------------------------
 

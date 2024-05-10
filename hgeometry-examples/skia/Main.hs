@@ -25,7 +25,7 @@ import qualified Miso.Bulma.JSAddle as Run
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Options
 import qualified SkiaCanvas
-import           SkiaCanvas (mouseCoordinates, dimensions)
+import           SkiaCanvas (mouseCoordinates, dimensions, canvasKitRef, surfaceRef)
 import           Miso.Bulma.Generic
 import           GHCJS.Types
 import           GHCJS.Marshal
@@ -34,7 +34,9 @@ import qualified Language.Javascript.JSaddle.Object as JS
 import qualified Language.Javascript.JSaddle as JSAddle
 import           Miso.Bulma.Color
 import           Miso.Bulma.Columns
-import           CanvasKit
+import           SkiaCanvas.CanvasKit
+import qualified SkiaCanvas.CanvasKit as CanvasKit
+import qualified SkiaCanvas.Render as Render
 
 --------------------------------------------------------------------------------
 type R = RealNumber 5
@@ -100,8 +102,6 @@ data Model = Model { _canvas       :: (SkiaCanvas.Canvas R)
                    , _points       :: IntMap.IntMap (Point 2 R)
                    , _diagram      :: Maybe [Point 2 R]
                    , __layers      :: Layers
-                   , _canvasKitObj :: Maybe CanvasKit
-                   , _surface      :: Maybe Surface
                    , _strokeColor  :: Stroke
                    , _fillColor    :: Fill
                    } deriving (Eq,Show)
@@ -125,8 +125,6 @@ initialModel = (Model {})&canvas       .~ SkiaCanvas.blankCanvas 1024 768
                          &points       .~ mempty
                          &diagram      .~ Nothing
                          &layers       .~ initialLayers
-                         &canvasKitObj .~ Nothing
-                         &surface      .~ Nothing
                          &strokeColor  .~ defaultStroke
                          &fillColor    .~ defaultFill
 
@@ -151,8 +149,8 @@ maybeToM     :: MonadError e m => e -> Maybe a -> m a
 maybeToM msg = maybe (throwError msg) pure
 
 handleDraw   :: Model -> ExceptT MisoString JSM Action
-handleDraw m = do canvasKit <- maybeToM "Loading CanvasKit failed"  $ m^.canvasKitObj
-                  surface'  <- maybeToM "Ackquiring surface failed" $ m^.surface
+handleDraw m = do canvasKit <- maybeToM "Loading CanvasKit failed"  $ m^.canvas.canvasKitRef
+                  surface'  <- maybeToM "Ackquiring surface failed" $ m^.canvas.surfaceRef
                   lift $ requestAnimationFrame canvasKit surface' (myDraw m)
                   pure Id
 
@@ -180,17 +178,11 @@ onLoad m = Effect m [ initializeCanvas
     initializeCanvasKit :: Sub Action
     initializeCanvasKit = mapSub CanvasKitAction $ initializeCanvasKitSub theMainCanvasId
 
-
-handleCanvasKitAction   :: Model -> InitializeSkCanvasAction -> Effect Action Model
-handleCanvasKitAction m = \case
-    InitializeSkCanvas ckObj surf -> noEff $ m&canvasKitObj ?~ ckObj
-                                              &surface      ?~ surf
-
 updateModel   :: Model -> Action -> Effect Action Model
 updateModel m = \case
     Id                     -> noEff m
     OnLoad                 -> onLoad m
-    CanvasKitAction act    -> handleCanvasKitAction m act
+    CanvasKitAction act    -> m&canvas %%~ flip SkiaCanvas.handleCanvasKitAction act
     CanvasResizeAction act -> m&canvas %%~ flip SkiaCanvas.handleCanvasResize act
     -- SetCanvasSize v       -> noEff $ m&canvas.dimensions   .~ v
     CanvasAction ca       -> m&canvas %%~ flip SkiaCanvas.handleInternalCanvasAction ca
@@ -491,7 +483,7 @@ myDraw                       :: Model -> CanvasKit -> SkCanvasRef -> JSM ()
 myDraw m canvasKit canvasRef = do clear canvasKit canvasRef
                                   withPaint canvasKit $ \paint ->
                                     forM_ (m^.points) $ \p ->
-                                      drawPoint canvasRef p paint
+                                      Render.point (m^.canvas) canvasRef p paint
                                   pure ()
 
 -- data Cmd = Cmd OP

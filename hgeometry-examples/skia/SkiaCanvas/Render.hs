@@ -1,0 +1,79 @@
+module SkiaCanvas.Render
+  ( Drawable(..)
+  , point
+  -- , circle
+  , polyLine
+  ) where
+
+import           Control.Lens
+import qualified Data.Map as Map
+import           GHCJS.Marshal (fromJSVal)
+import           HGeometry.Ball
+import           HGeometry.Miso.Svg.Canvas (HasMousePosition(..))
+import           HGeometry.Miso.Svg.StaticCanvas (HasDimensions(..))
+import           HGeometry.Point
+import           HGeometry.PolyLine
+import           HGeometry.Properties
+import           HGeometry.Transformation
+import           HGeometry.Vector
+import           HGeometry.Viewport
+import qualified Language.Javascript.JSaddle.Object as JS
+import           Miso (Attribute, View, Effect, noEff, onMouseLeave, canvas_, id_, getElementById, JSM)
+import           Miso.String (MisoString)
+import           MouseExtra
+import           SkiaCanvas.CanvasKit
+import           SkiaCanvas.CanvasKit.Core (CanvasKit, SkCanvasRef, SkPaintRef)
+import qualified SkiaCanvas.CanvasKit.Core as CKCore
+import qualified SkiaCanvas.CanvasKit.Render as Render
+import           SkiaCanvas.Core
+
+--------------------------------------------------------------------------------
+
+class Drawable geom where
+  -- | Draw the given geometry, take care of using the right viewport transform
+  draw :: Canvas r -> SkCanvasRef -> geom -> SkPaintRef -> JSM ()
+
+-- instance ( Point_ point 2 r
+--          , HasCoordinates point (Point 2 Float)
+--          , Real r
+--          ) => Drawable (Point 2 r)
+
+
+
+drawTransform              :: ( IsTransformable geom
+                              , NumType geom ~ r, Dimension geom ~ 2, Fractional r
+                              )
+                           => (CanvasKit -> SkCanvasRef -> geom -> SkPaintRef -> JSM ())
+                              -- ^ raw render function
+                           -> Canvas r -> SkCanvasRef -> geom -> SkPaintRef -> JSM ()
+drawTransform draw' c ckRef geom =
+  draw' (c^?!canvasKitRef._Just) ckRef (toHostFrom (c^.theViewport) geom)
+  -- TODO: parameterize canvas with an f
+
+
+-- | Renders a Point
+point   :: ( Point_ point 2 r
+           , HasCoordinates point (Point 2 Float)
+           , RealFrac r
+           , IsTransformable point
+           )
+        => Canvas r -> SkCanvasRef -> point -> SkPaintRef -> JSM ()
+point = drawTransform Render.point
+
+-- | Renders a circle
+-- circle :: forall circle point r.
+--           ( Ball_ circle point
+--           , Point_ point 2 r
+--           , HasCoordinates point (Point 2 Float)
+--           , RealFrac r
+--           ) => Canvas r -> SkCanvasRef -> circle -> SkPaintRef -> JSM ()
+-- circle = drawTransform Render.circle
+
+-- | Renders a polyLine
+polyLine :: ( PolyLine_ polyLine point
+            , IsTransformable polyLine
+            , Point_ point 2 r
+            , RealFrac r
+            )
+         => Canvas r -> SkCanvasRef -> polyLine -> SkPaintRef -> JSM ()
+polyLine = drawTransform Render.polyLine
