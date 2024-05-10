@@ -63,7 +63,8 @@ common setup
       , bytestring                >= 0.11
       , miso-bulma                >= 0.1.0.0       && < 1
       , file-embed                >= 0.0.15        && < 0.1
-
+      , mtl                       >= 2.3.1
+      , transformers              >= 0.6.0.0
 
       , ghc-typelits-natnormalise >= 0.7.7
       , ghc-typelits-knownnat     >= 0.7.6
@@ -186,5 +187,6 @@ executable hgeometry-skia
   other-modules:
         Options
         SkiaCanvas
+        CanvasKit
         Extra
         MouseExtra

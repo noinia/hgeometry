@@ -3,7 +3,10 @@
 module Main(main) where
 
 import           Control.Lens hiding (view, element)
+import           Control.Monad.Error.Class
+import           Control.Monad.Except
 import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
 import           Data.Default.Class
 import qualified Data.IntMap as IntMap
 import qualified Data.List.NonEmpty as NonEmpty
@@ -28,6 +31,9 @@ import           GHCJS.Marshal
 import           Language.Javascript.JSaddle.Object (jsg1, jsg2, jsf, js1, jsg)
 import qualified Language.Javascript.JSaddle.Object as JS
 import qualified Language.Javascript.JSaddle as JSAddle
+import           Miso.Bulma.Color
+import           Miso.Bulma.Columns
+import           CanvasKit
 
 --------------------------------------------------------------------------------
 type R = RealNumber 5
@@ -62,39 +68,41 @@ initialLayers = Layers [] (Layer "alpha" Visible) [ Layer "beta" Hidden
                                                   ]
 
 --------------------------------------------------------------------------------
--- * The CanvasKit object
+type Color = MisoString
 
- -- ^ the CanvasKit object
-newtype CanvasKit = MkCanvasKit JSVal
-  deriving newtype (JS.MakeObject,JSAddle.ToJSVal)
+data Status = InActive | Active
+  deriving (Show,Read,Eq,Ord)
 
-instance Show CanvasKit where
-  show _ = "CanvasKitObj"
-instance Eq CanvasKit where
-  a == b = True
-  -- we should only have one
+makePrisms ''Status
 
---------------------------------------------------------------------------------
--- * Surface
+data Stroke = Stroke { _strokeStatus       :: {-# UNPACK #-}!Status
+                     , _currentStrokeColor :: !Color
+                     }
+  deriving (Show,Eq)
 
- -- ^ the Surface object
-newtype Surface = MkSurface JSVal
-  deriving newtype (JS.MakeObject, JSAddle.ToJSVal)
+makeLenses ''Stroke
 
-instance Show Surface where
-  show _ = "SurfaceObj"
-instance Eq Surface where
-  a == b = True
-  -- we should only have one
---------------------------------------------------------------------------------
+data Fill = Fill { _fillStatus        :: {-# UNPACK #-}!Status
+                 , _currentFillColor  :: !Color
+                 }
+  deriving (Show,Eq)
 
+makeLenses ''Fill
+
+defaultStroke :: Stroke
+defaultStroke = Stroke Active "black"
+
+defaultFill :: Fill
+defaultFill = Fill InActive "blue"
 
 data Model = Model { _canvas       :: (SkiaCanvas.Canvas R)
                    , _points       :: IntMap.IntMap (Point 2 R)
                    , _diagram      :: Maybe [Point 2 R]
                    , __layers      :: Layers
                    , _canvasKitObj :: Maybe CanvasKit
-                   , _surface   :: Maybe Surface
+                   , _surface      :: Maybe Surface
+                   , _strokeColor  :: Stroke
+                   , _fillColor    :: Fill
                    } deriving (Eq,Show)
 makeLenses ''Model
 
@@ -118,40 +126,90 @@ initialModel = (Model {})&canvas       .~ SkiaCanvas.blankCanvas 1024 768
                          &layers       .~ initialLayers
                          &canvasKitObj .~ Nothing
                          &surface      .~ Nothing
+                         &strokeColor  .~ defaultStroke
+                         &fillColor    .~ defaultFill
 
 --------------------------------------------------------------------------------
 
-
-
-
 data Action = Id
             | OnLoad
-            | InitializeSkCanvas CanvasKit Surface
-            | SetCanvasSize !(Vector 2 Int)
+            | CanvasKitAction InitializeSkCanvasAction
+            | CanvasResizeAction SkiaCanvas.CanvasResizeAction
+            -- | InitializeSkCanvas CanvasKit Surface
+            -- | SetCanvasSize !(Vector 2 Int)
             | CanvasAction SkiaCanvas.InternalCanvasAction
             | AddPoint
             | Draw
+            | SetStrokeColor (Maybe Color)
+            | SetFillColor   (Maybe Color)
+            | NotifyError !MisoString
             -- | ToggleLayerStatus (Lens' Model Status)
+
+
+maybeToM     :: MonadError e m => e -> Maybe a -> m a
+maybeToM msg = maybe (throwError msg) pure
+
+handleDraw   :: Model -> ExceptT MisoString JSM Action
+handleDraw m = do canvasKit <- maybeToM "Loading CanvasKit failed"  $ m^.canvasKitObj
+                  surface'  <- maybeToM "Ackquiring surface failed" $ m^.surface
+                  lift $ requestAnimationFrame canvasKit surface' jsDraw
+                  pure Id
+
+notifyOnError :: ExceptT MisoString JSM Action -> JSM Action
+notifyOnError = fmap (\case
+                         Left err  -> NotifyError err
+                         Right act -> act
+                     ) . runExceptT
+
+
+onLoad   :: Model -> Effect Action Model
+onLoad m = Effect m [ initializeCanvas
+                    , initializeCanvasKit
+                    ]
+  where
+    initializeCanvas :: Sub Action
+    initializeCanvas = \sink -> acquireCanvasSize >>= liftIO . sink
+
+    -- wrap the ackquireCanvasSize action in our Action type
+    acquireCanvasSize :: JSM Action
+    acquireCanvasSize = SkiaCanvas.acquireCanvasSize  theMainCanvasId <&> \case
+      Left (SkiaCanvas.ErrorAction err) -> NotifyError err
+      Right act                         -> CanvasResizeAction act
+
+    initializeCanvasKit :: Sub Action
+    initializeCanvasKit = mapSub CanvasKitAction $ initializeCanvasKitSub theMainCanvasId
+
+  -- case m <# SkiaCanvas.acquireCanvasSize theMainCanvasId of
+  --            Effect m' subs' -> let subs'' = initializeCanvasKitSub theMainCanvasId : subs'
+  --                               in Effect m' subs''
+
+handleCanvasKitAction   :: Model -> InitializeSkCanvasAction -> Effect Action Model
+handleCanvasKitAction m = \case
+    InitializeSkCanvas ckObj surf -> noEff $ m&canvasKitObj ?~ ckObj
+                                              &surface      ?~ surf
 
 updateModel   :: Model -> Action -> Effect Action Model
 updateModel m = \case
-    Id                            -> noEff m
-    OnLoad                        -> let Effect m' subs' = m <# initializeCanvas theMainCanvasId
-                                     in Effect m' ( initializeCanvasKitSub theMainCanvasId
-                                                  : subs'
-                                                  )
-    InitializeSkCanvas ckObj surf -> noEff $ m&canvasKitObj ?~ ckObj
-                                              &surface      ?~ surf
-    SetCanvasSize v       -> noEff $ m&canvas.dimensions   .~ v
+    Id                     -> noEff m
+    OnLoad                 -> onLoad m
+    CanvasKitAction act    -> handleCanvasKitAction m act
+    CanvasResizeAction act -> m&canvas %%~ flip SkiaCanvas.handleCanvasResize act
+    -- SetCanvasSize v       -> noEff $ m&canvas.dimensions   .~ v
     CanvasAction ca       -> m&canvas %%~ flip SkiaCanvas.handleInternalCanvasAction ca
     AddPoint              -> addPoint
-    Draw                  -> m <# case m^.canvasKitObj of
-                                    Nothing -> pure Id -- TODO; error no canvasKit obj
-                                    Just ck -> case m^.surface of
-                                      Nothing   -> pure Id -- TODO: no surf
-                                      Just surf -> do jsDraw ck surf
-                                                      pure Id
+    Draw                  -> m <# notifyOnError (handleDraw m)
     -- ToggleLayerStatus lr  -> noEff $ m&lr %~ toggleStatus
+    SetStrokeColor mc     -> noEff $ m&strokeColor %~ \cs ->
+                               case mc of
+                                 Nothing -> cs&strokeStatus       .~ InActive
+                                 Just c  -> cs&strokeStatus       .~ Active
+                                              &currentStrokeColor .~ c
+    SetFillColor mc     -> noEff $ m&fillColor %~ \cs ->
+                               case mc of
+                                 Nothing -> cs&fillStatus       .~ InActive
+                                 Just c  -> cs&fillStatus       .~ Active
+                                              &currentFillColor .~ c
+    NotifyError err -> noEff m -- TODO
   where
     addPoint = recomputeDiagram m' <# pure Draw
       where
@@ -159,52 +217,6 @@ updateModel m = \case
                Nothing -> m
                Just p  -> m&points %~ insertPoint p
 
-initializeCanvas             :: MisoString -> JSM Action
-initializeCanvas theCanvasId = do
-    theCanvasElem <- getElementById theCanvasId
-    wVal <- theCanvasElem JS.! ("offsetWidth"  :: MisoString)
-    hVal <- theCanvasElem JS.! ("offsetHeight" :: MisoString)
-    (theCanvasElem JS.<# ("width"  :: MisoString)) wVal
-    (theCanvasElem JS.<# ("height" :: MisoString)) hVal
-    w <- fromJSVal wVal
-    h <- fromJSVal hVal
-    case Vector2 <$> w <*> h of
-      Nothing -> pure Id -- TODO: if we are here, something went wrong
-      Just v  -> pure $ SetCanvasSize v
-
-
-
-runDraw               :: JSVal -> JS.JSCallAsFunction
-runDraw canvasKit _ _ = \case
-  [canvas] -> do jsg2 ("draw" :: MisoString) canvasKit canvas
-                 pure ()
-  _        -> pure ()
-
-
-storeCanvasKitAndSurface                              :: MisoString -> Sink Action
-                                                      -> JS.JSCallAsFunction
-storeCanvasKitAndSurface theCanvasId sink _fObj _this = \case
-  [canvasKit] -> do surface <- canvasKit ^.js1 ("MakeCanvasSurface" :: MisoString) theMainCanvasId
-                               -- someshow store the canvasKit and the surface
-                    liftIO $ sink $ InitializeSkCanvas (MkCanvasKit canvasKit) (MkSurface surface)
-                    runDraw' <- JS.function $ runDraw canvasKit
-                    surface ^.js1 ("drawOnce" :: MisoString) runDraw'
-                    pure ()
-  _              -> pure ()
-
-
-initializeCanvasKitSub             :: MisoString -> Sub Action
-initializeCanvasKitSub theCanvasId = \sink -> do
-   liftIO $ print "go"
-   -- withCKFunction is the callback; i.e. the thing that we do with the given CanvasKit
-   -- value
-   withCKFunction <- JS.function $ storeCanvasKitAndSurface theCanvasId sink
-    --  We grab the ckLoaded value,
-   ckLoaded <- jsg ("ckLoaded" :: MisoString)
-   jsg ("console" :: MisoString) ^. JS.js1 ("log" :: MisoString) ckLoaded
-   -- and call it with the '
-   ckLoaded ^.js1 ("then" :: MisoString) withCKFunction
-   pure ()
 
 recomputeDiagram   :: Model -> Model
 recomputeDiagram m
@@ -239,10 +251,9 @@ viewModel m =
          ]
   where
     leftPanel  = div_ [class_ "column is-narrow"]
-                      [ menuButtons
+                      [ menuButtons_ m
                       ]
-    mainCanvas = div_ [ class_ "column"
-                      ]
+    mainCanvas = column_ []
                       [ either CanvasAction id <$>
                         SkiaCanvas.skiaCanvas_
                                     theMainCanvasId
@@ -255,7 +266,7 @@ viewModel m =
                                     ]
                       ]
 
-    rightPanels = div_ [class_ "column is-2"]
+    rightPanels = div_ [ class_ "column is-2"]
                        [ overviewPanel
                        , layersPanel
                        ]
@@ -273,12 +284,13 @@ viewModel m =
                       [ input_ [ type_ "checkbox"
                                , name_    $ l^.name
                                , checked_ $ l^.status == Visible
+                               -- , onClick  $ ToggleLayer l
                                ]
                       , text $ l^.name
                       ]
 
 
-    footer = footer_ [class_ "navbar is-fixed-bottom"]
+    footer = footer_ [ class_ "navbar is-fixed-bottom"]
                      [ navBarEnd_ [ p_ [class_ "navbar-item"]
                                        [ icon "fas fa-mouse-pointer" []
                                        , text $ case over coordinates ms <$>
@@ -293,35 +305,9 @@ viewModel m =
 
 
 
-
-columns_     :: [Attribute action] -> [View action] -> View action
-columns_ ats = section_ ([class_ "columns"] <> ats)
-
 menuBar_   :: Model -> View Action
 menuBar_ _ = navBar_
 
-  -- div_ [] [text "woei"]
-
-
-  -- div_ []
-  --                  [ text "woei"]
-
-
-  -- div_ [ ]
-  --                  [ either CanvasAction id <$>
-  --                    Canvas.svgCanvas_ (m^.canvas)
-  --                                      [ onClick AddPoint
-  --                                      , styleInline_ "border: 1px solid black"
-  --                                      ]
-  --                                      canvasBody
-  --                  , div_ [ onClick AddPoint ]
-  --                         [text "add point" ]
-  --                  , div_ []
-  --                         [text . ms . show $ m^.canvas.mouseCoordinates ]
-  --                  , div_ []
-  --                         [text . ms . show $ m^.points ]
-  --                   ]
-  -- where
   --   canvasBody = [ g_ [] [ draw v [ fill_ "red"
   --                                 ]
   --                        ]
@@ -471,98 +457,13 @@ panelBlock_ = div_ [class_ "panel-block"]
 
 panelTabs_ = p_ [class_ "panel-tabs"]
 
-          -- <nav class="panel">
-          --   <p class="panel-heading">Info</p>
-          --   <div class="panel-block">
-          --     <p class="control has-icons-left">
-          --       <input class="input" type="text" placeholder="Search" />
-          --       <span class="icon is-left">
-          --         <i class="fas fa-search" aria-hidden="true"></i>
-          --       </span>
-          --     </p>
-          --   </div>
-          --   <p class="panel-tabs">
-          --     <a class="is-active">All</a>
-          --     <a>Public</a>
-          --     <a>Private</a>
-          --     <a>Sources</a>
-
-          --   </p>
 
 panelBlockActiveA_ = a_ [class_ "panel-block"]
 
-          --   <a class="panel-block is-active">
-          --     <span class="panel-icon">
-          --       <i class="fas fa-book" aria-hidden="true"></i>
-          --     </span>
-          --     bulma
-          --   </a>
-          --   <a class="panel-block">
-          --     <span class="panel-icon">
-          --       <i class="fas fa-book" aria-hidden="true"></i>
-          --     </span>
-          --     marksheet
-          --   </a>
-          --   <a class="panel-block">
-          --     <span class="panel-icon">
-          --       <i class="fas fa-book" aria-hidden="true"></i>
-          --     </span>
-          --     minireset.css
-          --   </a>
-          --   <a class="panel-block">
-          --     <span class="panel-icon">
-          --       <i class="fas fa-book" aria-hidden="true"></i>
-          --     </span>
-          --     jgthms.github.io
-          --   </a>
-          --   <a class="panel-block">
-          --     <span class="panel-icon">
-          --       <i class="fas fa-code-branch" aria-hidden="true"></i>
-          --     </span>
-          --     daniellowtw/infboard
-          --   </a>
-          --   <a class="panel-block">
-          --     <span class="panel-icon">
-          --       <i class="fas fa-code-branch" aria-hidden="true"></i>
-          --     </span>
-          --     mojs
-          --   </a>
-          --   <label class="panel-block">
-          --     <input type="checkbox" />
-          --     remember me
-          --   </label>
-          --   <div class="panel-block">
-          --     <button class="button is-link is-outlined is-fullwidth">
-          --       Reset all filters
-          --     </button>
-          --   </div>
-          -- </nav>
+
 
 
 --------------------------------------------------------------------------------
-
-
-data BulmaColor = Primary
-                | Secondary
-                | Dark
-                | Link
-                | Info
-                | Success
-                | Warning
-                | Danger
-                deriving (Show,Read,Eq)
-
-colorClass :: BulmaColor -> MisoString
-colorClass = \case
-  Primary   -> "is-primary"
-  Secondary -> "is-seconary"
-  Dark      -> "is-dark"
-  Link      -> "is-link"
-  Info      -> "is-info"
-  Success   -> "is-success"
-  Warning   -> "is-warning"
-  Danger    -> "is-danger"
-
 -- | Renders a message
 message_            :: Maybe BulmaColor -> [Attribute action] -> [View action] -> View action
 message_ mc ats bdy = article_ ([class_ $ "message" `withColor` mc] <> ats)
@@ -585,8 +486,8 @@ message_ mc ats bdy = article_ ([class_ $ "message" `withColor` mc] <> ats)
 jsInitializeSkiaCanvas :: MisoString -> JSM JSVal
 jsInitializeSkiaCanvas = jsg1 ("initializeSkiaCanvas" :: MisoString)
 
-jsDraw         :: CanvasKit -> Surface -> JSM ()
-jsDraw ck surf = () <$ jsg2 ("draw" :: MisoString) (toJSVal ck) (toJSVal surf)
+jsDraw               :: CanvasKit -> SkCanvasRef -> JSM ()
+jsDraw ck ckCanvasRef = () <$ jsg2 ("draw" :: MisoString) (toJSVal ck) (toJSVal ckCanvasRef)
 
 withPaint           :: CanvasKit -> (JSVal -> JSM a) -> JSM a
 withPaint canvasKit =
@@ -611,30 +512,46 @@ withPath canvasKit =
 
 --------------------------------------------------------------------------------
 
-menuButtons = aside_ [class_ "menu"]
-                     [ menuList_ [ selectButton
-                                 , panButton
-                                 ]
-                     , zoomButtons_
-                     , colorButtons
-                     , toolButtons_
-                     ]
+menuButtons_   :: Model -> View Action
+menuButtons_ m = aside_ [class_ "menu"]
+                        [ menuList_ [ selectButton
+                                    , panButton
+                                    ]
+                        , zoomButtons_
+                        , colorButtons
+                        , toolButtons_
+                        ]
 
   where
-    selectButton = menuButton_ "fas fa-mouse-pointer" [title_ "Select"]
-    panButton = menuButton_ "fas fa-hand-pointer" [title_ "Pan"]
+    selectButton = menuButton_  "fas fa-mouse-pointer"
+                                [ title_ "Select"
+                                ]
+                                Nothing
+                                []
+    panButton = menuButton_  "fas fa-hand-pointer"
+                             [title_ "Pan"
+                             ]
+                             Nothing
+                             []
 
     colorButtons = menuList_ [ strokeButton
                              , fillButton
                              ]
-    strokeButton = menuButton_ "fas fa-paint-brush"
-                               [ title_ "Stroke color"
-                               , styleM_ ["color" =: "black"]
-                               ]
-    fillButton   = menuButton_ "fas fa-fill"
-                               [ title_ "Fill color"
-                               , styleM_ ["color" =: "blue"]
-                               ]
+
+    strokeButton = menuButton_  "fas fa-paint-brush"
+                                [ title_ "Stroke color"
+                                , styleM_ ["color" =: (m^.strokeColor.currentStrokeColor)]
+                                ]
+                                (m^?strokeColor.strokeStatus._Active)
+                                [ onClick $ SetStrokeColor Nothing
+                                ]
+    fillButton   = menuButton_  "fas fa-fill"
+                                [ title_ "Fill color"
+                                , styleM_ ["color" =: (m^.fillColor.currentFillColor)]
+                                ]
+                                (m^?fillColor.fillStatus._Active)
+                                [ onClick $ SetFillColor Nothing -- todo
+                                ]
 
 toolButtons_ = menuList_ [ pointButton
                          , penButton
@@ -649,45 +566,76 @@ toolButtons_ = menuList_ [ pointButton
   where
     pointButton     = menuButton_ "fas fa-circle"
                         [title_ "Point"]
+                        Nothing
+                        []
     penButton       = menuButton_ "fas fa-pen"
                         [title_ "Pen"]
+                        Nothing
+                        []
     lineButton      = menuButton_ "fas fa-slash"
                         [title_ "Line"]
+                        Nothing
+                        []
     polyLineButton  = menuButton_ "fas fa-wave-square"
                         [title_ "Polyline"]
+                        Nothing
+                        []
     polygonButton   = menuButton_ "fas fa-draw-polygon"
                         [title_ "Polygon"]
+                        Nothing
+                        []
     rectangleButton = menuButton_ "far fa-square"
                         [title_ "Rectangle"]
+                        Nothing
+                        []
     circleButton    = menuButton_ "far fa-circle"
                         [title_ "Circle"]
+                        Nothing
+                        []
     textButton      = menuButton_ "fas fa-font"
                         [title_ "Text"]
+                        Nothing
+                        []
     mathButton      = menuButton_ "fas fa-square-root-alt"
                         [title_ "Math Text"]
+                        Nothing
+                        []
 
 
-
-
-
-
-
-
+menuList_ :: [View action] -> View action
 menuList_ = ul_ [class_ "menu-list"]
 
-menuButton_ i ats = li_ []
-                        [ button_ [ class_ "button is-medium"]
-                                  [ icon i ats
-                                  ]
-                        ]
+menuButton_                         :: MisoString -> [Attribute action]
+                                    -> Maybe a -> [Attribute action]
+                                    -> View action
+menuButton_ i ats mActive buttonAts =
+    li_ []
+        [ button_ ( [class_ $ withActive "button is-medium"]
+                  <> buttonAts
+                  )
+                  [ icon i ats
+                  ]
+        ]
+  where
+    withActive = case mActive of
+                   Nothing -> id
+                   Just _  -> (<> " is-active")
+
 
 zoomButtons_ = menuList_ [ menuButton_ "fas fa-plus-square"
                                        [ title_ "Zoom in"
                                        ]
+                                       Nothing
+                                       []
+
                         , menuButton_ "fas fa-equals"
                                        [ title_ "Zoom 1:1"
                                        ]
+                                       Nothing
+                                       []
                         , menuButton_ "fas fa-minus-square"
                                        [ title_ "Zoom out"
                                        ]
+                                       Nothing
+                                       []
                         ]

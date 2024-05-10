@@ -1,7 +1,9 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
 module SkiaCanvas
-  ( Canvas
+  (
+  -- * Model
+    Canvas
   , theViewport
   , blankCanvas
   , HasDimensions(..)
@@ -9,21 +11,33 @@ module SkiaCanvas
   , HasMousePosition(..)
   , mouseCoordinates
 
-  , InternalCanvasAction
+  -- * Controller
+  , InternalCanvasAction(..)
   , handleInternalCanvasAction
+
+  , CanvasResizeAction(..)
+  , handleCanvasResize
+
+  , ErrorAction(..)
+
+  , acquireCanvasSize
+
   , withCanvasEvents
 
+  -- * View
   , skiaCanvas_
   ) where
 
 import           Control.Lens
 import qualified Data.Map as Map
+import           GHCJS.Marshal (fromJSVal)
 import           HGeometry.Miso.Svg.Canvas (HasMousePosition(..))
 import           HGeometry.Miso.Svg.StaticCanvas (HasDimensions(..))
 import           HGeometry.Point
 import           HGeometry.Vector
 import           HGeometry.Viewport
-import           Miso (Attribute, View, Effect, noEff, onMouseLeave, canvas_, id_)
+import qualified Language.Javascript.JSaddle.Object as JS
+import           Miso (Attribute, View, Effect, noEff, onMouseLeave, canvas_, id_, getElementById, JSM)
 import           Miso.String (MisoString)
 import           MouseExtra
 
@@ -84,12 +98,44 @@ data InternalCanvasAction = MouseEnter !(Point 2 Int)
 -- | Handles InternalCanvas Actions
 handleInternalCanvasAction        :: Canvas r -> InternalCanvasAction -> Effect action (Canvas r)
 handleInternalCanvasAction canvas = noEff . \case
-  MouseEnter p  -> canvas&mousePosition ?~ p
-  MouseMove  p  -> canvas&mousePosition ?~ p
-  MouseLeave    -> canvas&mousePosition .~ Nothing
-  TouchStart p  -> canvas&mousePosition ?~ p
-  TouchMove p   -> canvas&mousePosition ?~ p
-  TouchEnd      -> canvas&mousePosition .~ Nothing
+  MouseEnter p    -> canvas&mousePosition ?~ p
+  MouseMove  p    -> canvas&mousePosition ?~ p
+  MouseLeave      -> canvas&mousePosition .~ Nothing
+  TouchStart p    -> canvas&mousePosition ?~ p
+  TouchMove p     -> canvas&mousePosition ?~ p
+  TouchEnd        -> canvas&mousePosition .~ Nothing
+
+
+
+newtype CanvasResizeAction = SetCanvasSize (Vector 2 Int )
+  deriving (Show,Read,Eq)
+
+handleCanvasResize        :: Canvas r -> CanvasResizeAction -> Effect action (Canvas r)
+handleCanvasResize canvas = noEff . \case
+  SetCanvasSize v -> canvas&dimensions    .~ v
+
+-- | Possible error
+newtype ErrorAction = ErrorAction MisoString
+  deriving (Show,Read,Eq,Ord)
+
+--------------------------------------------------------------------------------
+-- * Initializing/Binding to CanvasKit
+
+-- | Acquire the current canvas size.
+--
+acquireCanvasSize             :: MisoString -> JSM (Either ErrorAction CanvasResizeAction)
+acquireCanvasSize theCanvasId = do
+    theCanvasElem <- getElementById theCanvasId
+    wVal <- theCanvasElem JS.! ("offsetWidth"  :: MisoString)
+    hVal <- theCanvasElem JS.! ("offsetHeight" :: MisoString)
+    (theCanvasElem JS.<# ("width"  :: MisoString)) wVal
+    (theCanvasElem JS.<# ("height" :: MisoString)) hVal
+    w <- fromJSVal wVal
+    h <- fromJSVal hVal
+    case Vector2 <$> w <*> h of
+      Nothing -> pure . Left  $ ErrorAction "acquireCanvasSize, something went wrong"
+      Just v  -> pure . Right $ SetCanvasSize v
+
 
 --------------------------------------------------------------------------------
 -- * The View
@@ -107,7 +153,7 @@ skiaCanvas_ theId ats = canvas_ ([ id_ theId
 
 
 --------------------------------------------------------------------------------
--- * Canvas events that we should isten to
+-- * Canvas events that we should listen to
 
 -- | Events a canvas wants to listen to
 withCanvasEvents :: Map.Map MisoString Bool -> Map.Map MisoString Bool

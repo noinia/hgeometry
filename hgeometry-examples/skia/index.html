@@ -9,8 +9,14 @@
     <script type="text/javascript"
             src="https://unpkg.com/canvaskit-wasm@0.39.1/bin/canvaskit.js"></script>
     <title>Skia</title>
+    <style>
+     html { overscroll-behavior: none; }
+     html body { overflow: hidden; }
+    </style>
   </head>
-  <body>
+  <body class="has-background-light">
+
+
     <script type="text/javascript">
      var ckLoaded = CanvasKitInit({
        locateFile: (file) => 'https://unpkg.com/canvaskit-wasm@0.39.1/bin/'+file});
