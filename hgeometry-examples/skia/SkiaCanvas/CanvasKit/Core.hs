@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings          #-}
-{-# LANGUAGE TemplateHaskell            #-}
 module SkiaCanvas.CanvasKit.Core
   ( CanvasKit(..)
   , Surface(..)
@@ -24,14 +23,32 @@ module SkiaCanvas.CanvasKit.Core
   , Cmd(..)
   , withPath
   , withPathFromCmds
-  , withPaint
   , drawPath
+
+  , withPaint
+  , setAntiAlias
+  , setStyle
+  , setColor
+
+  , mkPaintStyle
+  , SkPaintStyle
+  , Style(..)
+
+  , Alpha(..)
+  , Color4F
+  , ColorInt
+  , mkColor4f
+  , mkColor
+  -- , mkColorInt
   ) where
 
 import           Control.Lens
 import           Control.Monad (void)
 import           Control.Monad.IO.Class
+import           Data.Colour (AlphaColour)
+import           Data.Colour.SRGB
 import           Data.Functor.Apply (Apply(..))
+import           Data.Word (Word8)
 import           GHCJS.Marshal (ToJSVal(..))
 import           GHCJS.Types
 import           HGeometry.Ball
@@ -42,6 +59,7 @@ import           Language.Javascript.JSaddle.Object (js1, js2, js4, jsg)
 import qualified Language.Javascript.JSaddle.Object as JS
 import           Miso
 import           Miso.String (MisoString)
+import Data.Maybe (fromMaybe)
 
 --------------------------------------------------------------------------------
 -- * The CanvasKit object
@@ -140,9 +158,23 @@ requestAnimationFrame canvasKit surface draw = do
 --------------------------------------------------------------------------------
 -- * The drawing functions
 
+-- | Class indicating that something is an SkInput Color
+class ToJSVal color => SkInputColor_ color
+  -- there is no implementation since all these things are just newtype's over JsVals
+  -- anyway.
+
+instance SkInputColor_ SkInputColor
+instance SkInputColor_ SkColor
+
 mkWhite           :: CanvasKit -> JSM SkInputColor
 mkWhite canvasKit = SkInputColor <$> canvasKit JS.! ("WHITE" :: MisoString)
 -- white = SkInputColor ("white" :: MisoString)
+
+
+-- an InputColor is apparently either an MallocObj | Color | number[];
+-- CanvasKit APIs accept normal arrays, typed arrays, or Malloc'd memory as colors.
+-- Length 4.
+
 
 -- black = SkInputColor "black"
 
@@ -155,7 +187,13 @@ clear canvasKit canvas = do white <- mkWhite canvasKit
 clearWith              :: SkCanvasRef -> SkInputColor -> JSM ()
 clearWith canvas color = void $ canvas ^.js1 ("clear" :: MisoString) color
 
+
 -- | A color, in Skia's setup
+newtype SkColor = SkColor JSVal
+  deriving (ToJSVal)
+
+
+-- | An input color, in Skia's setup
 newtype SkInputColor = SkInputColor JSVal
   deriving (ToJSVal)
 
@@ -262,6 +300,82 @@ fromFloatCmd _ = \case
 drawPath                   :: SkCanvasRef -> SkPathRef -> SkPaintRef -> JSM ()
 drawPath canvas path paint =
   void $ canvas ^.js2 ("drawPath" :: MisoString) path paint
+
+--------------------------------------------------------------------------------
+
+-- | Set antialias
+setAntiAlias                :: SkPaintRef -> Bool -> JSM ()
+setAntiAlias paint shouldAA = void $ paint ^.js1 ("setAntiAlias" :: MisoString) shouldAA
+
+data Style = FillOnly | StrokeOnly
+  deriving (Show,Read,Eq,Ord,Enum)
+
+-- | Get the paintStyle
+mkPaintStyle             :: CanvasKit -> Style -> JSM SkPaintStyle
+mkPaintStyle canvasKit s = do
+                             paintStyle <- canvasKit JS.! ("PaintStyle" :: MisoString)
+                             SkPaintStyle <$> paintStyle JS.! symb
+  where
+    symb = case s of
+             FillOnly   -> "Fill"   :: MisoString
+             StrokeOnly -> "Stroke"
+
+-- | A Paint style
+newtype SkPaintStyle = SkPaintStyle JSVal
+  deriving (ToJSVal)
+
+
+setStyle         :: SkPaintRef -> SkPaintStyle -> JSM ()
+setStyle paint s = void $ paint ^.js1 ("setStyle" :: MisoString) s
+
+
+setColor         :: SkInputColor_ skInputColor => SkPaintRef -> skInputColor -> JSM ()
+setColor paint c = void $ paint ^.js1 ("setColor" :: MisoString) c
+
+-- setColorInt         :: SkInputColor_ skInputColor => SkPaintRef -> skInputColor -> JSM ()
+-- setColorInt paint c = void $ paint ^.js1 ("setColorInt" :: MisoString) c
+
+--------------------------------------------------------------------------------
+
+type Color = AlphaColour Float
+
+
+data Alpha a = Alpha a | Opaque
+  deriving (Show,Eq,Ord,Functor)
+
+fromAlpha        :: a -> Alpha a -> a
+fromAlpha opaque = \case
+  Alpha x -> x
+  Opaque -> opaque
+
+type Color4F  = (RGB Float, Alpha Float)
+type ColorInt = (RGB Word8, Alpha Float)
+
+mkColor4f                              :: CanvasKit -> Color4F -> JSM SkColor
+mkColor4f canvasKit (RGB r g b, alpha) = let a = fromAlpha 1 alpha in
+  SkColor <$> canvasKit ^.js4 ("Color4f" :: MisoString) r g b a
+
+mkColor                              :: CanvasKit -> ColorInt -> JSM SkColor
+mkColor canvasKit (RGB r g b, alpha) = let a = fromAlpha 1 alpha in
+  SkColor <$> canvasKit ^.js4 ("Color" :: MisoString) r g b a
+
+mkColorInt                              :: CanvasKit -> ColorInt -> JSM SkColor
+mkColorInt canvasKit (RGB r g b, alpha) = let a = fromAlpha 1 alpha in
+  SkColor <$> canvasKit ^.js4 ("ColorAsInt" :: MisoString) r g b a
+
+
+-- data SkPaint = SkPaint { _antiAlias  :: {-# UNPACK #-}!Bool
+--                        , _color      :: Color
+--                        , _style      :: {-# UNPACK #-}!Style
+--                        , _strokeWith :: {-# UNPACK #-}!Int -- float?
+--                        }
+--                deriving (Show,Eq,Ord)
+
+ -- paint2.setAntiAlias(true);
+ --    paint2.setColor(SkColorSetRGB(0, 136, 0));
+ --    paint2.setStyle(SkPaint::kStroke_Style);
+ --    paint2.setStrokeWidth(SkIntToScalar(3));
+
 
 --------------------------------------------------------------------------------
 

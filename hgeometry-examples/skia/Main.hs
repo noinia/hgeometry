@@ -8,6 +8,7 @@ import           Control.Monad.Error.Class
 import           Control.Monad.Except
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
+import           Data.Colour.SRGB
 import           Data.Default.Class
 import qualified Data.IntMap as IntMap
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -490,9 +491,14 @@ jsDraw ck ckCanvasRef = () <$ jsg2 ("draw" :: MisoString) (toJSVal ck) (toJSVal 
 
 myDraw                       :: Model -> CanvasKit -> SkCanvasRef -> JSM ()
 myDraw m canvasKit canvasRef = do clear canvasKit canvasRef
+                                  strokeOnly <- mkPaintStyle canvasKit StrokeOnly
+                                  myColor <- mkColor canvasKit (RGB 192 40  27, Opaque)
                                   withPaint canvasKit $ \paint -> do
                                     forM_ (m^.points) $ \p ->
                                       Render.point (m^.canvas) canvasRef p paint
+                                    setAntiAlias paint True
+                                    setColor paint myColor
+                                    setStyle paint strokeOnly
                                     case NonEmpty.nonEmpty $ m^..points.traverse of
                                       Just pts@(_ :| _ : _) -> do
                                         let poly :: PolyLine (Point 2 R)
