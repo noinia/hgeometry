@@ -233,11 +233,12 @@ viewModel   :: Model -> View Action
 viewModel m =
     div_ []
          [ menuBar_ m
-         , columns_ [ styleInline_ "height: calc(100vh - 92px)"]
-                    [ leftPanel
-                    , mainCanvas
-                    , rightPanels
-                    ]
+         , hero_ [ columns_ [ styleInline_ "height: calc(100vh - 102px)"]
+                            [ leftPanel
+                            , mainCanvas
+                            , rightPanels
+                            ]
+                 ]
          , footer
          ]
   where
@@ -261,15 +262,17 @@ viewModel m =
                        [ overviewPanel
                        , layersPanel
                        ]
-    overviewPanel = panel_ [ styleInline_ "max-height: 60vh"]
+    overviewPanel = panel_ [ styleInline_ "height: 60%"]
                            [ text "Model"
                            ]
                            [text . ms . show $ m
-                           , message_ Nothing        [] [text "foo"]
-                           , message_ (Just Warning) [] [text "warning :)"]
+                           -- , message_ Nothing        [] [text "foo"]
+                           -- , message_ (Just Warning) [] [text "warning :)"]
                            ]
 
-    layersPanel = panel_ []
+    layersPanel = panel_ [ styleInline_ "height: 35%"
+
+                         ]
                          [text "Layers"]
                          (map layer_ $ m^.layers.to allLayers)
 
@@ -446,7 +449,8 @@ panel_ ats heading chs =
     nav_ ([class_ "panel"] <> ats)
          ([ p_ [class_ "panel-heading"] heading
           , div_ [ class_ "container"
-                 , styleInline_ "overflow: hidden"
+                 , styleM_ [ "height" =: "100%"
+                           ]
                  ]
                  chs
           ]
@@ -625,3 +629,19 @@ zoomButtons_ = menuList_ [ menuButton_ "fas fa-plus-square"
                                        Nothing
                                        []
                         ]
+
+
+
+
+--------------------------------------------------------------------------------
+
+hero_ chs = section_ [ class_ "hero"
+                     , styleInline_ "height: calc(100vh - 92px)"
+                     ]
+                     [ div_ [ class_ "hero-body"
+                            , styleM_ [ "padding-top"    =: "1rem"
+                                      , "padding-bottom" =: "1rem"
+                                      ]
+                            ]
+                            chs
+                     ]
