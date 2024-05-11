@@ -123,12 +123,13 @@ instance Default (Point 2 R :+ Int) where
 ----------------------------------------
 
 initialModel :: Model
-initialModel = (Model {})&canvas       .~ SkiaCanvas.blankCanvas 1024 768
-                         &points       .~ mempty
-                         &diagram      .~ Nothing
-                         &layers       .~ initialLayers
-                         &strokeColor  .~ defaultStroke
-                         &fillColor    .~ defaultFill
+initialModel = Model { _canvas      = SkiaCanvas.blankCanvas 1024 768
+                     , _points      = mempty
+                     , _diagram     = Nothing
+                     , __layers     = initialLayers
+                     , _strokeColor = defaultStroke
+                     , _fillColor   = defaultFill
+                     }
 
 --------------------------------------------------------------------------------
 
@@ -136,8 +137,6 @@ data Action = Id
             | OnLoad
             | CanvasKitAction InitializeSkCanvasAction
             | CanvasResizeAction SkiaCanvas.CanvasResizeAction
-            -- | InitializeSkCanvas CanvasKit Surface
-            -- | SetCanvasSize !(Vector 2 Int)
             | CanvasAction SkiaCanvas.InternalCanvasAction
             | AddPoint
             | Draw
@@ -479,16 +478,6 @@ message_ mc ats bdy = article_ ([class_ $ "message" `withColor` mc] <> ats)
 --------------------------------------------------------------------------------
 
 
---------------------------------------------------------------------------------
-
--- foreign import javascript unsafe "$r = initializeSkiaCanvas($1);"
---   jsInitializeSkiaCanvas :: MisoString -> JSM JSVal
-jsInitializeSkiaCanvas :: MisoString -> JSM JSVal
-jsInitializeSkiaCanvas = jsg1 ("initializeSkiaCanvas" :: MisoString)
-
-jsDraw               :: CanvasKit -> SkCanvasRef -> JSM ()
-jsDraw ck ckCanvasRef = () <$ jsg2 ("draw" :: MisoString) (toJSVal ck) (toJSVal ckCanvasRef)
-
 myDraw                       :: Model -> CanvasKit -> SkCanvasRef -> JSM ()
 myDraw m canvasKit canvasRef = do clear canvasKit canvasRef
                                   strokeOnly <- mkPaintStyle canvasKit StrokeOnly
@@ -506,16 +495,6 @@ myDraw m canvasKit canvasRef = do clear canvasKit canvasRef
                                         Render.polyLine (m^.canvas) canvasRef poly paint
                                       _                     -> pure ()
                                   pure ()
-
--- data Cmd = Cmd OP
-
--- withPathFromCmds           :: CanvasKit -> [Cmd] -> (JSVal -> JSM a) -> JSM a
--- withPathFromCmds canvasKit =
---     JSAddle.bracket (JS.new (canvasKit JS.! ("Path.MakeFromCMDs" :: MisoString)) cmds)
---                     (\path -> path ^. JS.js0 ("delete" :: MisoString))
-
-
-
 
 --------------------------------------------------------------------------------
 
