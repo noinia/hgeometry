@@ -2,6 +2,8 @@ module Modes
   ( Mode(..)
   ) where
 
+
+
 data Mode = SelectMode
           | PanMode
           | PointMode

@@ -3,6 +3,7 @@ module SkiaCanvas.CanvasKit.Render
   ( point
   , circle
   , polyLine
+  , lineSegment
   , simplePolygon
   ) where
 
@@ -11,6 +12,7 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import           HGeometry.Ball
 import           HGeometry.Point
 import           HGeometry.PolyLine
+import           HGeometry.LineSegment.Class
 import           HGeometry.Polygon.Simple
 import           Miso (JSM)
 import           SkiaCanvas.CanvasKit
@@ -42,6 +44,18 @@ circle _ canvas c = let ctr = c^.center
                         c'  = Disk (ctr&coordinates %~ toFloat) (toFloat $ c^.squaredRadius)
                         toFloat = realToFrac :: r -> Float
                     in CKCore.circle canvas c'
+
+-- | Renders a line segment
+lineSegment ::                         ( LineSegment_ lineSegment point
+                                       , Point_ point 2 r
+                                       , Real r
+                                       ) => CanvasKit -> SkCanvasRef -> lineSegment -> SkPaintRef
+                                       -> JSM ()
+lineSegment canvasKit canvas seg paint = let cmds = [ CKCore.MoveTo $ seg^.start.asPoint
+                                                    , CKCore.LineTo $ seg^.end.asPoint
+                                                    ]
+                                         in CKCore.withPathFromCmds canvasKit cmds $ \path ->
+                                              CKCore.drawPath canvas path paint
 
 -- | Renders a polyLine
 polyLine                             :: ( PolyLine_ polyLine point

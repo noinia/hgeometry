@@ -3,10 +3,12 @@ module SkiaCanvas.Render
   , point
   -- , circle
   , polyLine
+  , lineSegment
   , simplePolygon
   ) where
 
 import           Control.Lens
+import           HGeometry.LineSegment
 import           HGeometry.Point
 import           HGeometry.PolyLine
 import           HGeometry.Polygon.Simple
@@ -60,6 +62,14 @@ point = drawTransform Render.point
 --           , RealFrac r
 --           ) => Canvas r -> SkCanvasRef -> circle -> SkPaintRef -> JSM ()
 -- circle = drawTransform Render.circle
+
+
+lineSegment :: ( LineSegment_ lineSegment point
+               , Point_ point 2 r
+               , IsTransformable lineSegment
+               , RealFrac r
+               ) => Canvas r -> SkCanvasRef -> lineSegment -> SkPaintRef -> JSM ()
+lineSegment = drawTransform Render.lineSegment
 
 -- | Renders a polyLine
 polyLine :: ( PolyLine_ polyLine point

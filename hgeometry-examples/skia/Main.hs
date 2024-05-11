@@ -18,11 +18,13 @@ import           GHC.TypeNats
 import           GHCJS.Marshal
 import           GHCJS.Types
 import           HGeometry.Ext
+import           HGeometry.Interval
 import           HGeometry.Miso.OrphanInstances ()
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.PolyLine
 import           HGeometry.Vector
+import           HGeometry.Viewport (ZoomConfig(..), currentLevel, range)
 import           HGeometry.VoronoiDiagram
 import qualified Language.Javascript.JSaddle as JSAddle
 import           Language.Javascript.JSaddle.Object (jsg1, jsg2, jsf, js1, jsg)
@@ -56,6 +58,7 @@ initialLayers = Layers [] (Layer "alpha" Visible) [ Layer "beta" Hidden
 
 
 data Model = Model { _canvas       :: (SkiaCanvas.Canvas R)
+                   , _zoomConfig   :: ZoomConfig Double
                    , _points       :: IntMap.IntMap (Point 2 R)
                    , _diagram      :: Maybe [Point 2 R]
                    , __layers      :: Layers
@@ -80,6 +83,7 @@ instance Default (Point 2 R :+ Int) where
 
 initialModel :: Model
 initialModel = Model { _canvas      = SkiaCanvas.blankCanvas 1024 768
+                     , _zoomConfig  = ZoomConfig (ClosedInterval 0.1 4) 1
                      , _points      = mempty
                      , _diagram     = Nothing
                      , __layers     = initialLayers
@@ -102,6 +106,7 @@ data Action = Id
             | SetStrokeColor (Maybe Color)
             | SetFillColor   (Maybe Color)
             | NotifyError !MisoString
+            | SwitchMode !Mode
             -- | ToggleLayerStatus (Lens' Model Status)
 
 
@@ -144,7 +149,7 @@ updateModel m = \case
     OnLoad                 -> onLoad m
     CanvasKitAction act    -> m&canvas %%~ flip SkiaCanvas.handleCanvasKitAction act
     CanvasResizeAction act -> m&canvas %%~ flip SkiaCanvas.handleCanvasResize act
-    -- SetCanvasSize v       -> noEff $ m&canvas.dimensions   .~ v
+
     CanvasAction ca       -> m&canvas %%~ flip SkiaCanvas.handleInternalCanvasAction ca
 
     CanvasClicked         -> case m^.mode of
@@ -161,12 +166,18 @@ updateModel m = \case
                                  Nothing -> cs&strokeStatus       .~ InActive
                                  Just c  -> cs&strokeStatus       .~ Active
                                               &currentStrokeColor .~ c
+
     SetFillColor mc     -> noEff $ m&fillColor %~ \cs ->
                                case mc of
                                  Nothing -> cs&fillStatus       .~ InActive
                                  Just c  -> cs&fillStatus       .~ Active
                                               &currentFillColor .~ c
     NotifyError err -> noEff m -- TODO
+
+
+    SwitchMode mode' -> noEff $ m&mode .~ mode'
+
+
   where
     addPoint = recomputeDiagram m' <# pure Draw
       where
@@ -473,22 +484,16 @@ menuButtons_ m = aside_ [class_ "menu"]
                         [ menuList_ [ selectButton
                                     , panButton
                                     ]
-                        , zoomButtons_
+                        , zoomButtons_ m
                         , colorButtons
-                        , toolButtons_
+                        , toolButtons_ m
                         ]
 
   where
-    selectButton = menuButton_  "fas fa-mouse-pointer"
-                                [ title_ "Select"
-                                ]
-                                Nothing
-                                []
-    panButton = menuButton_  "fas fa-hand-pointer"
-                             [title_ "Pan"
-                             ]
-                             Nothing
-                             []
+    selectButton = menuModeButton_ m SelectMode  "fas fa-mouse-pointer"
+                                   [ title_ "Select" ]
+    panButton    = menuModeButton_ m PanMode "fas fa-hand-pointer"
+                                   [title_ "Pan"]
 
     colorButtons = menuList_ [ strokeButton
                              , fillButton
@@ -498,103 +503,116 @@ menuButtons_ m = aside_ [class_ "menu"]
                                 [ title_ "Stroke color"
                                 , styleM_ ["color" =: (m^.strokeColor.currentStrokeColor)]
                                 ]
-                                (m^?strokeColor.strokeStatus._Active)
+                                (m^.strokeColor.strokeStatus)
+                                NotSelected
                                 [ onClick $ SetStrokeColor Nothing
                                 ]
     fillButton   = menuButton_  "fas fa-fill"
                                 [ title_ "Fill color"
                                 , styleM_ ["color" =: (m^.fillColor.currentFillColor)]
                                 ]
-                                (m^?fillColor.fillStatus._Active)
+                                (m^.fillColor.fillStatus)
+                                NotSelected
                                 [ onClick $ SetFillColor Nothing -- todo
                                 ]
 
-toolButtons_ = menuList_ [ pointButton
-                         , penButton
-                         , lineButton
-                         , polyLineButton
-                         , polygonButton
-                         , rectangleButton
-                         , circleButton
-                         , textButton
-                         , mathButton
-                         ]
+toolButtons_   :: Model -> View Action
+toolButtons_ m = menuList_ [ pointButton
+                           , penButton
+                           , lineButton
+                           , polyLineButton
+                           , polygonButton
+                           , rectangleButton
+                           , circleButton
+                           , textButton
+                           , mathButton
+                           ]
   where
-    pointButton     = menuButton_ "fas fa-circle"
-                        [title_ "Point"]
-                        Nothing
-                        []
-    penButton       = menuButton_ "fas fa-pen"
-                        [title_ "Pen"]
-                        Nothing
-                        []
-    lineButton      = menuButton_ "fas fa-slash"
-                        [title_ "Line"]
-                        Nothing
-                        []
-    polyLineButton  = menuButton_ "fas fa-wave-square"
-                        [title_ "Polyline"]
-                        Nothing
-                        []
-    polygonButton   = menuButton_ "fas fa-draw-polygon"
-                        [title_ "Polygon"]
-                        Nothing
-                        []
-    rectangleButton = menuButton_ "far fa-square"
-                        [title_ "Rectangle"]
-                        Nothing
-                        []
-    circleButton    = menuButton_ "far fa-circle"
-                        [title_ "Circle"]
-                        Nothing
-                        []
-    textButton      = menuButton_ "fas fa-font"
-                        [title_ "Text"]
-                        Nothing
-                        []
-    mathButton      = menuButton_ "fas fa-square-root-alt"
-                        [title_ "Math Text"]
-                        Nothing
-                        []
+    pointButton     = menuButton' PointMode "fas fa-circle"
+                                  [title_ "Point"]
+    penButton       = menuButton' PenMode "fas fa-pen"
+                                  [title_ "Pen"]
+    lineButton      = menuButton' LineMode  "fas fa-slash"
+                                  [title_ "Line"]
 
+    polyLineButton  = menuButton' PolyLineMode "fas fa-wave-square"
+                                  [title_ "Polyline"]
+    polygonButton   = menuButton' PolygonMode "fas fa-draw-polygon"
+                                  [title_ "Polygon"]
+    rectangleButton = menuButton' RectangleMode "far fa-square"
+                                  [title_ "Rectangle"]
+    circleButton    = menuButton' CircleMode "far fa-circle"
+                                  [title_ "Circle"]
+    textButton      = menuButton' TextMode "fas fa-font"
+                                  [title_ "Text"]
+    mathButton      = menuButton' MathMode "fas fa-square-root-alt"
+                                  [title_ "Math Text"]
+
+    menuButton' = menuModeButton_ m
+
+menuModeButton_   :: Model -> Mode -> MisoString -> [Attribute Action] -> View Action
+menuModeButton_ m mode' i ats = menuButton_ i
+                                           ats
+                                           (if m^.mode == mode' then Active else InActive)
+                                           (if m^.mode == mode' then Selected else NotSelected)
+                                           [ onClick $ SwitchMode mode'
+                                           ]
 
 menuList_ :: [View action] -> View action
 menuList_ = ul_ [class_ "menu-list"]
 
-menuButton_                         :: MisoString -> [Attribute action]
-                                    -> Maybe a -> [Attribute action]
-                                    -> View action
-menuButton_ i ats mActive buttonAts =
+
+data Selected = NotSelected | Selected
+  deriving (Show,Read,Eq,Ord)
+
+
+-- | Renders a menu button
+menuButton_                                 :: MisoString -- ^ icon to use
+                                            -> [Attribute action] -- ^ attributes of the icon
+                                            -> Status -- ^ whether the button is active or not
+                                            -> Selected -- ^ whether the button is selected or not
+                                            -> [Attribute action] -- ^ attributes of the button
+                                            -> View action
+menuButton_ i ats status selected buttonAts =
     li_ []
-        [ button_ ( [class_ $ withActive "button is-medium"]
+        [ button_ ( [ class_ "button is-medium"
+                    , class_ $ case selected of
+                                 NotSelected -> ""
+                                 Selected    -> "is-selected is-primary"
+                    , class_ $ case status of
+                                 InActive   -> ""
+                                 Active     -> "is-active"
+                    ]
                   <> buttonAts
                   )
-                  [ icon i ats
-                  ]
+                  [ icon i ([styleInline_ "pointer-events: none;"] <> ats)
+                  ] -- we need the style-Inline to make sure we can click the actual button.
         ]
-  where
-    withActive = case mActive of
-                   Nothing -> id
-                   Just _  -> (<> " is-active")
+  -- where
+  --   withActive = case
 
+  --     | isActive  = (<> " is-active")
+  --              | otherwise = id
 
-zoomButtons_ = menuList_ [ menuButton_ "fas fa-plus-square"
-                                       [ title_ "Zoom in"
-                                       ]
-                                       Nothing
-                                       []
+zoomButtons_ m = menuList_ [ menuButton_ "fas fa-plus-square"
+                                         [ title_ "Zoom in"
+                                         ]
+                                         InActive NotSelected
+                                         []
 
-                        , menuButton_ "fas fa-equals"
-                                       [ title_ "Zoom 1:1"
-                                       ]
-                                       Nothing
-                                       []
-                        , menuButton_ "fas fa-minus-square"
-                                       [ title_ "Zoom out"
-                                       ]
-                                       Nothing
-                                       []
-                        ]
+                           , menuButton_ "fas fa-equals"
+                                         [ title_ "Zoom 1:1"
+                                         ]
+                                         (if m^.zoomConfig.currentLevel == 1
+                                           then Active else InActive)
+                                         NotSelected
+                                         []
+                           , menuButton_ "fas fa-minus-square"
+                                         [ title_ "Zoom out"
+                                         ]
+                                         InActive NotSelected
+                                         []
+                           ]
 
 
 
