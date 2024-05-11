@@ -27,45 +27,25 @@ import           HGeometry.VoronoiDiagram
 import qualified Language.Javascript.JSaddle as JSAddle
 import           Language.Javascript.JSaddle.Object (jsg1, jsg2, jsf, js1, jsg)
 import qualified Language.Javascript.JSaddle.Object as JS
+import           Layers
 import           Miso
 import           Miso.Bulma.Color
 import           Miso.Bulma.Columns
 import           Miso.Bulma.Generic
 import qualified Miso.Bulma.JSAddle as Run
 import           Miso.String (MisoString,ToMisoString(..), ms)
+import           Modes
 import           Options
 import qualified SkiaCanvas
 import           SkiaCanvas (mouseCoordinates, dimensions, canvasKitRef, surfaceRef)
 import           SkiaCanvas.CanvasKit
 import qualified SkiaCanvas.CanvasKit as CanvasKit
 import qualified SkiaCanvas.Render as Render
+import           StrokeAndFill
 
 --------------------------------------------------------------------------------
+
 type R = RealNumber 5
-
-data LayerStatus = Hidden | Visible
-  deriving (Show,Eq)
-
-toggleStatus = \case
-  Hidden  -> Visible
-  Visible -> Hidden
-
-data Layer = Layer { _name :: MisoString
-                   , _status :: LayerStatus
-                   }
-             deriving (Show,Eq)
-makeClassy ''Layer
-
-data Layers = Layers { _beforeActive :: [Layer] -- stored in reverse, so a zipper
-                     , _activeLayer  :: Layer
-                     , _afterActive  :: [Layer]
-                     }
-            deriving (Show,Eq)
-
-allLayers                              :: Layers -> [Layer]
-allLayers (Layers before active after) = reverse before <> [active] <> after
-
-makeClassy ''Layers
 
 initialLayers :: Layers
 initialLayers = Layers [] (Layer "alpha" Visible) [ Layer "beta" Hidden
@@ -73,37 +53,13 @@ initialLayers = Layers [] (Layer "alpha" Visible) [ Layer "beta" Hidden
                                                   ]
 
 --------------------------------------------------------------------------------
-type Color = MisoString
 
-data Status = InActive | Active
-  deriving (Show,Read,Eq,Ord)
-
-makePrisms ''Status
-
-data Stroke = Stroke { _strokeStatus       :: {-# UNPACK #-}!Status
-                     , _currentStrokeColor :: !Color
-                     }
-  deriving (Show,Eq)
-
-makeLenses ''Stroke
-
-data Fill = Fill { _fillStatus        :: {-# UNPACK #-}!Status
-                 , _currentFillColor  :: !Color
-                 }
-  deriving (Show,Eq)
-
-makeLenses ''Fill
-
-defaultStroke :: Stroke
-defaultStroke = Stroke Active "black"
-
-defaultFill :: Fill
-defaultFill = Fill InActive "blue"
 
 data Model = Model { _canvas       :: (SkiaCanvas.Canvas R)
                    , _points       :: IntMap.IntMap (Point 2 R)
                    , _diagram      :: Maybe [Point 2 R]
                    , __layers      :: Layers
+                   , _mode         :: Mode
                    , _strokeColor  :: Stroke
                    , _fillColor    :: Fill
                    } deriving (Eq,Show)
@@ -127,6 +83,7 @@ initialModel = Model { _canvas      = SkiaCanvas.blankCanvas 1024 768
                      , _points      = mempty
                      , _diagram     = Nothing
                      , __layers     = initialLayers
+                     , _mode        = PointMode
                      , _strokeColor = defaultStroke
                      , _fillColor   = defaultFill
                      }
@@ -138,6 +95,8 @@ data Action = Id
             | CanvasKitAction InitializeSkCanvasAction
             | CanvasResizeAction SkiaCanvas.CanvasResizeAction
             | CanvasAction SkiaCanvas.InternalCanvasAction
+            | CanvasClicked
+            | CanvasRightClicked
             | AddPoint
             | Draw
             | SetStrokeColor (Maybe Color)
@@ -187,6 +146,13 @@ updateModel m = \case
     CanvasResizeAction act -> m&canvas %%~ flip SkiaCanvas.handleCanvasResize act
     -- SetCanvasSize v       -> noEff $ m&canvas.dimensions   .~ v
     CanvasAction ca       -> m&canvas %%~ flip SkiaCanvas.handleInternalCanvasAction ca
+
+    CanvasClicked         -> case m^.mode of
+      PointMode -> addPoint
+      _         -> noEff m
+
+    CanvasRightClicked    -> noEff m
+
     AddPoint              -> addPoint
     Draw                  -> m <# notifyOnError (handleDraw m)
     -- ToggleLayerStatus lr  -> noEff $ m&lr %~ toggleStatus
