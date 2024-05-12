@@ -9,17 +9,22 @@ module StrokeAndFill
   , fillStatus, currentFillColor
   , defaultStroke
   , defaultFill
-
-  , Color
   ) where
 
 import Control.Lens hiding (view, element)
-import Miso.String (MisoString)
+import Data.Colour (black)
+import Data.Colour.Names (blue)
+import SkiaCanvas.CanvasKit.Core (Color, ColorF(..), Alpha(..))
 
 --------------------------------------------------------------------------------
 
-type Color = MisoString
 
+-- deriving instance Show (ColorF Float)
+
+-- instance Show Color where
+--   showsPrec k (Color c a) = showsPrec k $ Color (colourConvert c :: Colour Float) a
+
+--------------------------------------------------------------------------------
 
 data Status = InActive | Active
   deriving (Show,Read,Eq,Ord)
@@ -27,21 +32,21 @@ data Status = InActive | Active
 makePrisms ''Status
 
 data Stroke = Stroke { _strokeStatus       :: {-# UNPACK #-}!Status
-                     , _currentStrokeColor :: !Color
+                     , _currentStrokeColor :: {-# UNPACK #-}!Color
                      }
   deriving (Show,Eq)
 
 makeLenses ''Stroke
 
 data Fill = Fill { _fillStatus        :: {-# UNPACK #-}!Status
-                 , _currentFillColor  :: !Color
+                 , _currentFillColor  :: {-# UNPACK #-}!Color
                  }
   deriving (Show,Eq)
 
 makeLenses ''Fill
 
 defaultStroke :: Stroke
-defaultStroke = Stroke Active "black"
+defaultStroke = Stroke Active (Color black Opaque)
 
 defaultFill :: Fill
-defaultFill = Fill InActive "blue"
+defaultFill = Fill InActive (Color blue Opaque)

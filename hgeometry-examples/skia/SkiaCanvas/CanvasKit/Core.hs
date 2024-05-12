@@ -1,4 +1,5 @@
-{-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE OverloadedStrings      #-}
+{-# LANGUAGE UndecidableInstances   #-}
 module SkiaCanvas.CanvasKit.Core
   ( CanvasKit(..)
   , Surface(..)
@@ -34,8 +35,10 @@ module SkiaCanvas.CanvasKit.Core
   , SkPaintStyle
   , Style(..)
 
+  , Color, ColorF(..)
+  , fromRGB24
+  , rgba
   , Alpha(..)
-  , Color4F
   , ColorInt
   , mkColor4f
   , mkColor
@@ -45,7 +48,6 @@ module SkiaCanvas.CanvasKit.Core
 import           Control.Lens
 import           Control.Monad (void)
 import           Control.Monad.IO.Class
-import           Data.Colour (AlphaColour)
 import           Data.Colour.SRGB
 import           Data.Functor.Apply (Apply(..))
 import           Data.Word (Word8)
@@ -59,7 +61,8 @@ import           Language.Javascript.JSaddle.Object (js1, js2, js4, jsg)
 import qualified Language.Javascript.JSaddle.Object as JS
 import           Miso
 import           Miso.String (MisoString)
-import Data.Maybe (fromMaybe)
+import Miso.String (ToMisoString(..), ms)
+
 
 --------------------------------------------------------------------------------
 -- * The CanvasKit object
@@ -337,7 +340,23 @@ setColor paint c = void $ paint ^.js1 ("setColor" :: MisoString) c
 
 --------------------------------------------------------------------------------
 
-type Color = AlphaColour Float
+data ColorF a = Color (Colour a) (Alpha Float)
+           deriving (Eq)
+deriving instance Show (Colour a) => Show (ColorF a)
+
+type Color = ColorF Float
+
+fromRGB24       :: Word8 -> Word8 -> Word8 -> Color
+fromRGB24 r g b = Color (sRGB24 r g b) Opaque
+
+-- | render as rgba(r,g,b,a)
+rgba              :: Color -> MisoString
+rgba (Color c al) = let RGB r g b = ms <$> toSRGB24 c
+                        a         = ms $ fromAlpha 1 al
+                    in "rgba(" <> r <> ", " <> g <> ", " <> b <> ", " <> a <> ")"
+
+instance ToMisoString Word8 where
+  toMisoString = toMisoString . show
 
 
 data Alpha a = Alpha a | Opaque
@@ -348,11 +367,13 @@ fromAlpha opaque = \case
   Alpha x -> x
   Opaque -> opaque
 
-type Color4F  = (RGB Float, Alpha Float)
+
 type ColorInt = (RGB Word8, Alpha Float)
 
-mkColor4f                              :: CanvasKit -> Color4F -> JSM SkColor
-mkColor4f canvasKit (RGB r g b, alpha) = let a = fromAlpha 1 alpha in
+mkColor4f                                     :: CanvasKit -> Color -> JSM SkColor
+mkColor4f canvasKit (Color c alpha) = let RGB r g b = toSRGB c
+                                          a         = fromAlpha 1 alpha
+                                      in
   SkColor <$> canvasKit ^.js4 ("Color4f" :: MisoString) r g b a
 
 mkColor                              :: CanvasKit -> ColorInt -> JSM SkColor

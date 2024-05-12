@@ -466,7 +466,7 @@ message_ mc ats bdy = article_ ([class_ $ "message" `withColor` mc] <> ats)
 myDraw                       :: Model -> CanvasKit -> SkCanvasRef -> JSM ()
 myDraw m canvasKit canvasRef = do clear canvasKit canvasRef
                                   strokeOnly <- mkPaintStyle canvasKit StrokeOnly
-                                  myColor <- mkColor canvasKit (RGB 192 40  27, Opaque)
+                                  myColor <- mkColor4f canvasKit (fromRGB24 192 40  27)
                                   withPaint canvasKit $ \paint -> do
                                     forM_ (m^.points) $ \p ->
                                       Render.point (m^.canvas) canvasRef p paint
@@ -505,7 +505,7 @@ menuButtons_ m = aside_ [class_ "menu"]
 
     strokeButton = menuButton_  "fas fa-paint-brush"
                                 [ title_ "Stroke color"
-                                , styleM_ ["color" =: (m^.strokeColor.currentStrokeColor)]
+                                , styleM_ ["color" =: rgba (m^.strokeColor.currentStrokeColor)]
                                 ]
                                 (m^.strokeColor.strokeStatus)
                                 NotSelected
@@ -513,7 +513,7 @@ menuButtons_ m = aside_ [class_ "menu"]
                                 ]
     fillButton   = menuButton_  "fas fa-fill"
                                 [ title_ "Fill color"
-                                , styleM_ ["color" =: (m^.fillColor.currentFillColor)]
+                                , styleM_ ["color" =: rgba (m^.fillColor.currentFillColor)]
                                 ]
                                 (m^.fillColor.fillStatus)
                                 NotSelected
