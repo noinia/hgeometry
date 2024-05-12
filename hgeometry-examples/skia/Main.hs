@@ -14,6 +14,7 @@ import qualified Data.IntMap as IntMap
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
+import qualified Data.Sequence as Seq
 import           GHC.TypeNats
 import           GHCJS.Marshal
 import           GHCJS.Types
@@ -50,9 +51,9 @@ import           StrokeAndFill
 type R = RealNumber 5
 
 initialLayers :: Layers
-initialLayers = Layers [] (Layer "alpha" Visible) [ Layer "beta" Hidden
-                                                  , Layer "foo" Visible
-                                                  ]
+initialLayers = Layers mempty (Layer "alpha" Visible) mempty
+
+
 
 --------------------------------------------------------------------------------
 
@@ -107,7 +108,7 @@ data Action = Id
             | SetFillColor   (Maybe Color)
             | NotifyError !MisoString
             | SwitchMode !Mode
-            -- | ToggleLayerStatus (Lens' Model Status)
+            | ToggleLayerStatus !(Index Layers)
 
 
 maybeToM     :: MonadError e m => e -> Maybe a -> m a
@@ -160,7 +161,10 @@ updateModel m = \case
 
     AddPoint              -> addPoint
     Draw                  -> m <# notifyOnError (handleDraw m)
-    -- ToggleLayerStatus lr  -> noEff $ m&lr %~ toggleStatus
+
+    ToggleLayerStatus lr  -> (m&layers.ix lr.status %~ toggleStatus)
+                             <# pure Draw
+
     SetStrokeColor mc     -> noEff $ m&strokeColor %~ \cs ->
                                case mc of
                                  Nothing -> cs&strokeStatus       .~ InActive
@@ -251,14 +255,14 @@ viewModel m =
 
                          ]
                          [text "Layers"]
-                         (map layer_ $ m^.layers.to allLayers)
+                         (map layer_ $ m^..layers.to theLayers.traverse)
 
-    layer_   :: Layer -> View action
+    layer_   :: Layer -> View Action
     layer_ l = label_ [class_ "panel-block"]
                       [ input_ [ type_ "checkbox"
                                , name_    $ l^.name
                                , checked_ $ l^.status == Visible
-                               -- , onClick  $ ToggleLayer l
+                               , onClick  $ ToggleLayerStatus (l^.name)
                                ]
                       , text $ l^.name
                       ]
