@@ -11,10 +11,10 @@ module StrokeAndFill
   , defaultFill
   ) where
 
+import Color
 import Control.Lens hiding (view, element)
 import Data.Colour (black)
 import Data.Colour.Names (blue)
-import SkiaCanvas.CanvasKit.Core (Color, ColorF(..), Alpha(..))
 
 --------------------------------------------------------------------------------
 

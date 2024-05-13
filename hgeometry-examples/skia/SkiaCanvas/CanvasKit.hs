@@ -24,10 +24,6 @@ module SkiaCanvas.CanvasKit
   , SkPaintStyle
   , Style(..)
 
-  , Color, ColorF(..)
-  , fromRGB24
-  , rgba
-  , Alpha(..)
   , ColorInt
   , mkColor4f
   , mkColor

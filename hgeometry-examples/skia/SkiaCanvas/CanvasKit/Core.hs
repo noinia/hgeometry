@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings      #-}
-{-# LANGUAGE UndecidableInstances   #-}
 module SkiaCanvas.CanvasKit.Core
   ( CanvasKit(..)
   , Surface(..)
@@ -35,16 +34,13 @@ module SkiaCanvas.CanvasKit.Core
   , SkPaintStyle
   , Style(..)
 
-  , Color, ColorF(..)
-  , fromRGB24
-  , rgba
-  , Alpha(..)
   , ColorInt
   , mkColor4f
   , mkColor
   -- , mkColorInt
   ) where
 
+import           Color
 import           Control.Lens
 import           Control.Monad (void)
 import           Control.Monad.IO.Class
@@ -60,8 +56,7 @@ import qualified Language.Javascript.JSaddle as JSAddle
 import           Language.Javascript.JSaddle.Object (js1, js2, js4, jsg)
 import qualified Language.Javascript.JSaddle.Object as JS
 import           Miso
-import           Miso.String (MisoString)
-import Miso.String (ToMisoString(..), ms)
+import           Miso.String (MisoString, ToMisoString(..), ms)
 
 
 --------------------------------------------------------------------------------
@@ -339,33 +334,6 @@ setColor paint c = void $ paint ^.js1 ("setColor" :: MisoString) c
 -- setColorInt paint c = void $ paint ^.js1 ("setColorInt" :: MisoString) c
 
 --------------------------------------------------------------------------------
-
-data ColorF a = Color (Colour a) (Alpha Float)
-           deriving (Eq)
-deriving instance Show (Colour a) => Show (ColorF a)
-
-type Color = ColorF Float
-
-fromRGB24       :: Word8 -> Word8 -> Word8 -> Color
-fromRGB24 r g b = Color (sRGB24 r g b) Opaque
-
--- | render as rgba(r,g,b,a)
-rgba              :: Color -> MisoString
-rgba (Color c al) = let RGB r g b = ms <$> toSRGB24 c
-                        a         = ms $ fromAlpha 1 al
-                    in "rgba(" <> r <> ", " <> g <> ", " <> b <> ", " <> a <> ")"
-
-instance ToMisoString Word8 where
-  toMisoString = toMisoString . show
-
-
-data Alpha a = Alpha a | Opaque
-  deriving (Show,Eq,Ord,Functor)
-
-fromAlpha        :: a -> Alpha a -> a
-fromAlpha opaque = \case
-  Alpha x -> x
-  Opaque -> opaque
 
 
 type ColorInt = (RGB Word8, Alpha Float)

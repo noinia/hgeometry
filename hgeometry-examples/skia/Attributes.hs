@@ -1,16 +1,20 @@
+{-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
 module Attributes
-  ( Coloring(..)
-  , Attributes(..)
+  ( Attributes(..)
+
+
+  , Coloring(..)
+  , Thickness(..)
   ) where
 
+import           Color
 import           Control.Lens hiding (view, element)
 import           Control.Monad (forM_)
 import           Control.Monad.Error.Class
 import           Control.Monad.Except
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
-import           Data.Colour (black)
 import           Data.Colour.SRGB
 import           Data.Default.Class
 import qualified Data.IntMap as IntMap
@@ -49,11 +53,11 @@ import           SkiaCanvas.CanvasKit hiding (Style(..))
 import qualified SkiaCanvas.Render as Render
 import           StrokeAndFill
 
-
-
 --------------------------------------------------------------------------------
 
 data family Attributes geom
+
+--------------------------------------------------------------------------------
 
 -- | Coloring type; we should have a stroke, a fill, or both
 data Coloring = StrokeOnly    !Color
@@ -62,11 +66,40 @@ data Coloring = StrokeOnly    !Color
               deriving (Show,Eq)
 
 instance Default Coloring where
-  def = StrokeOnly (Color black Opaque)
+  def = StrokeOnly def
 
-data instance Attributes (Point 2 r) = PointAttributes { _coloring :: Coloring
-                                                       }
-                                     deriving (Show,Eq)
+--------------------------------------------------------------------------------
+
+data Thickness = Thin | Normal | Thick deriving (Show,Read,Eq,Ord)
+
+toInt :: Thickness -> MisoString
+toInt = ms @Int . \case
+  Thin   -> 1
+  Normal -> 2
+  Thick  -> 3
+
+instance Default Thickness where
+  def = Normal
+
+--------------------------------------------------------------------------------
+-- * Point Attributes
+
+data instance Attributes (Point 2 r) =
+  PointAttributes { _coloring :: Coloring
+                  } deriving (Show,Eq)
 
 instance Default (Attributes (Point 2 r)) where
   def = PointAttributes def
+
+--------------------------------------------------------------------------------
+-- * PolyLine Attributes
+
+data instance Attributes (PolyLineF f (Point 2 r)) =
+  PolyLineAttributes { _polylineStrokeColor :: {-# UNPACK #-} !Color
+                     , _thickness           :: {-# UNPACK #-} !Thickness
+                     } deriving (Show,Eq)
+
+
+
+instance Default (Attributes (PolyLineF f (Point 2 r))) where
+  def = PolyLineAttributes def def
