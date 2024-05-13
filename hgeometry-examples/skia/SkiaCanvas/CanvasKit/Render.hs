@@ -10,9 +10,9 @@ module SkiaCanvas.CanvasKit.Render
 import           Control.Lens
 import           Data.List.NonEmpty (NonEmpty(..))
 import           HGeometry.Ball
+import           HGeometry.LineSegment.Class
 import           HGeometry.Point
 import           HGeometry.PolyLine
-import           HGeometry.LineSegment.Class
 import           HGeometry.Polygon.Simple
 import           Miso (JSM)
 import           SkiaCanvas.CanvasKit
@@ -24,23 +24,21 @@ import qualified SkiaCanvas.CanvasKit.Core as CKCore
 -- | Renders a Point
 point             :: forall point r canvasKit.
                      ( Point_ point 2 r
-                     , HasCoordinates point (Point 2 Float)
                      , Real r
                      )
                   => canvasKit -> SkCanvasRef -> point -> SkPaintRef -> JSM ()
-point ck canvas p = circle ck canvas $ Disk (f p) 3
+point ck canvas p = circle ck canvas $ Disk (f $ p^.asPoint) 3
   where
-    f :: point -> Point 2 Float
+    f :: Point 2 r -> Point 2 Float
     f = over coordinates realToFrac
 
 -- | Renders a circle
 circle            :: forall circle point r canvasKit.
                      ( Ball_ circle point
                      , Point_ point 2 r
-                     , HasCoordinates point (Point 2 Float)
                      , Real r
                      ) => canvasKit -> SkCanvasRef -> circle -> SkPaintRef -> JSM ()
-circle _ canvas c = let ctr = c^.center
+circle _ canvas c = let ctr = c^.center.asPoint
                         c'  = Disk (ctr&coordinates %~ toFloat) (toFloat $ c^.squaredRadius)
                         toFloat = realToFrac :: r -> Float
                     in CKCore.circle canvas c'

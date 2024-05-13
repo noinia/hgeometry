@@ -47,7 +47,7 @@ drawTransform draw' c ckRef geom =
 
 -- | Renders a Point
 point   :: ( Point_ point 2 r
-           , HasCoordinates point (Point 2 Float)
+           -- , HasCoordinates point (Point 2 Float)
            , RealFrac r
            , IsTransformable point
            )
@@ -58,7 +58,6 @@ point = drawTransform Render.point
 -- circle :: forall circle point r.
 --           ( Ball_ circle point
 --           , Point_ point 2 r
---           , HasCoordinates point (Point 2 Float)
 --           , RealFrac r
 --           ) => Canvas r -> SkCanvasRef -> circle -> SkPaintRef -> JSM ()
 -- circle = drawTransform Render.circle

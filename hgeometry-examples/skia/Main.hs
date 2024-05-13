@@ -2,6 +2,7 @@
 {-# LANGUAGE TemplateHaskell            #-}
 module Main(main) where
 
+import           Attributes
 import           Control.Lens hiding (view, element)
 import           Control.Monad (forM_)
 import           Control.Monad.Error.Class
@@ -41,11 +42,10 @@ import           Modes
 import           Options
 import qualified SkiaCanvas
 import           SkiaCanvas (mouseCoordinates, dimensions, canvasKitRef, surfaceRef)
-import           SkiaCanvas.CanvasKit
 import qualified SkiaCanvas.CanvasKit as CanvasKit
+import           SkiaCanvas.CanvasKit hiding (Style(..))
 import qualified SkiaCanvas.Render as Render
 import           StrokeAndFill
-
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -60,7 +60,7 @@ initialLayers = Layers mempty (Layer "alpha" Visible) mempty
 
 data Model = Model { _canvas       :: (SkiaCanvas.Canvas R)
                    , _zoomConfig   :: ZoomConfig Double
-                   , _points       :: IntMap.IntMap (Point 2 R)
+                   , _points       :: IntMap.IntMap (Point 2 R :+ Attributes (Point 2 R))
                    , _diagram      :: Maybe [Point 2 R]
                    , __layers      :: Layers
                    , _mode         :: Mode
@@ -187,14 +187,25 @@ updateModel m = \case
       where
         m' = case m^.canvas.mouseCoordinates of
                Nothing -> m
-               Just p  -> m&points %~ insertPoint p
+               Just p  -> let ats = PointAttributes $ toColoring (m^.strokeColor) (m^.fillColor)
+                          in m&points %~ insertPoint (p :+ ats)
+
+-- | Given a stroke and a fill, computes a coloring
+--
+-- if neither stroke or fill are set, we use the default (which is stroke using black)
+toColoring     :: Stroke -> Fill -> Coloring
+toColoring s f = case (s^.strokeStatus, f^.fillStatus) of
+  (InActive, InActive) -> def -- this case is kind of weird
+  (InActive, Active)   -> FillOnly   (f^.currentFillColor)
+  (Active,   InActive) -> StrokeOnly (s^.currentStrokeColor)
+  (Active,   Active)   -> StrokeAndFill (s^.currentStrokeColor) (f^.currentFillColor)
 
 
 recomputeDiagram   :: Model -> Model
 recomputeDiagram m
   | m^.points.to length <= 2  = m&diagram .~ Nothing
   | otherwise                 = let pts = NonEmpty.nonEmpty
-                                          [ p :+ i | (i,p) <- IntMap.assocs (m^.points)]
+                                          [ p :+ i | (i,p :+ _) <- IntMap.assocs (m^.points)]
                                 in m&diagram .~ fmap voronoiVertices pts
 
 insertPoint     :: p -> IntMap.IntMap p -> IntMap.IntMap p
@@ -465,7 +476,7 @@ message_ mc ats bdy = article_ ([class_ $ "message" `withColor` mc] <> ats)
 
 myDraw                       :: Model -> CanvasKit -> SkCanvasRef -> JSM ()
 myDraw m canvasKit canvasRef = do clear canvasKit canvasRef
-                                  strokeOnly <- mkPaintStyle canvasKit StrokeOnly
+                                  strokeOnly <- mkPaintStyle canvasKit CanvasKit.StrokeOnly
                                   myColor <- mkColor4f canvasKit (fromRGB24 192 40  27)
                                   withPaint canvasKit $ \paint -> do
                                     forM_ (m^.points) $ \p ->
@@ -476,7 +487,7 @@ myDraw m canvasKit canvasRef = do clear canvasKit canvasRef
                                     case NonEmpty.nonEmpty $ m^..points.traverse of
                                       Just pts@(_ :| _ : _) -> do
                                         let poly :: PolyLine (Point 2 R)
-                                            poly = polyLineFromPoints pts
+                                            poly = polyLineFromPoints $ (^.core) <$> pts
                                         Render.polyLine (m^.canvas) canvasRef poly paint
                                       _                     -> pure ()
                                   pure ()

@@ -10,6 +10,7 @@ import           Control.Monad.Error.Class
 import           Control.Monad.Except
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
+import           Data.Colour (black)
 import           Data.Colour.SRGB
 import           Data.Default.Class
 import qualified Data.IntMap as IntMap
@@ -43,10 +44,11 @@ import           Modes
 import           Options
 import qualified SkiaCanvas
 import           SkiaCanvas (mouseCoordinates, dimensions, canvasKitRef, surfaceRef)
-import           SkiaCanvas.CanvasKit
 import qualified SkiaCanvas.CanvasKit as CanvasKit
+import           SkiaCanvas.CanvasKit hiding (Style(..))
 import qualified SkiaCanvas.Render as Render
 import           StrokeAndFill
+
 
 
 --------------------------------------------------------------------------------
@@ -59,6 +61,12 @@ data Coloring = StrokeOnly    !Color
               | StrokeAndFill !Color !Color  -- ^ stroke and fill
               deriving (Show,Eq)
 
+instance Default Coloring where
+  def = StrokeOnly (Color black Opaque)
+
 data instance Attributes (Point 2 r) = PointAttributes { _coloring :: Coloring
                                                        }
                                      deriving (Show,Eq)
+
+instance Default (Attributes (Point 2 r)) where
+  def = PointAttributes def
