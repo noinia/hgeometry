@@ -40,7 +40,7 @@ module SkiaCanvas.CanvasKit.Core
   -- , mkColorInt
   ) where
 
-import           Color
+import           Color(Color, ColorF(..), Alpha(..), fromAlpha)
 import           Control.Lens
 import           Control.Monad (void)
 import           Control.Monad.IO.Class

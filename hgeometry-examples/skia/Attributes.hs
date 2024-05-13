@@ -3,8 +3,6 @@
 module Attributes
   ( Attributes(..)
 
-
-  , Coloring(..)
   , Thickness(..)
   ) where
 
@@ -56,17 +54,6 @@ import           StrokeAndFill
 --------------------------------------------------------------------------------
 
 data family Attributes geom
-
---------------------------------------------------------------------------------
-
--- | Coloring type; we should have a stroke, a fill, or both
-data Coloring = StrokeOnly    !Color
-              | FillOnly             !Color
-              | StrokeAndFill !Color !Color  -- ^ stroke and fill
-              deriving (Show,Eq)
-
-instance Default Coloring where
-  def = StrokeOnly def
 
 --------------------------------------------------------------------------------
 

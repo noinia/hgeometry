@@ -6,13 +6,15 @@ module Color
   , rgba
   , Alpha(..)
   , fromAlpha
+
+
+  , Coloring(..)
   ) where
 
 import Data.Colour (black)
 import Data.Colour.SRGB
 import Data.Default.Class
 import Data.Word (Word8)
--- import Miso
 import Miso.String (MisoString, ToMisoString(..), ms)
 
 --------------------------------------------------------------------------------
@@ -47,3 +49,15 @@ fromAlpha        :: a -> Alpha a -> a
 fromAlpha opaque = \case
   Alpha x -> x
   Opaque -> opaque
+
+
+--------------------------------------------------------------------------------
+
+-- | Coloring type; we should have a stroke, a fill, or both
+data Coloring = StrokeOnly    !Color
+              | FillOnly             !Color
+              | StrokeAndFill !Color !Color  -- ^ stroke and fill
+              deriving (Show,Eq)
+
+instance Default Coloring where
+  def = StrokeOnly def

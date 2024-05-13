@@ -39,6 +39,7 @@ import           Miso.Bulma.Color
 import           Miso.Bulma.Columns
 import           Miso.Bulma.Generic
 import qualified Miso.Bulma.JSAddle as Run
+import           Miso.Bulma.NavBar
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Model
 import           Modes
@@ -138,16 +139,6 @@ updateModel m = \case
                Just p  -> let ats = PointAttributes $ toColoring (m^.strokeColor) (m^.fillColor)
                           in m&points %~ insertPoint (p :+ ats)
 
--- | Given a stroke and a fill, computes a coloring
---
--- if neither stroke or fill are set, we use the default (which is stroke using black)
-toColoring     :: Stroke -> Fill -> Coloring
-toColoring s f = case (s^.strokeStatus, f^.fillStatus) of
-  (InActive, InActive) -> def -- this case is kind of weird
-  (InActive, Active)   -> FillOnly   (f^.currentFillColor)
-  (Active,   InActive) -> StrokeOnly (s^.currentStrokeColor)
-  (Active,   Active)   -> StrokeAndFill (s^.currentStrokeColor) (f^.currentFillColor)
-
 
 recomputeDiagram   :: Model -> Model
 recomputeDiagram m
@@ -240,6 +231,18 @@ viewModel m =
 
     Vector2 w h = ms <$> m^.canvas.dimensions
 
+-- | Our "main", full width/full height, hero section
+hero_     :: [View action] -> View action
+hero_ chs = section_ [ class_ "hero"
+                     , styleInline_ "height: calc(100vh - 92px)"
+                     ]
+                     [ div_ [ class_ "hero-body"
+                            , styleM_ [ "padding-top"    =: "1rem"
+                                      , "padding-bottom" =: "1rem"
+                                      ]
+                            ]
+                            chs
+                     ]
 
 
 menuBar_   :: Model -> View Action
@@ -309,35 +312,7 @@ navBar_ = let theMainMenuId = "theMainMenuId"
 
 
 
-navBarBurgerItem_ :: View action
-navBarBurgerItem_ = span_ [boolProp "aria-hidden" True] []
 
-navBarBrand_ :: [View action] -> View action
-navBarBrand_ = div_ [class_ "navbar-brand"]
-
-navBarBurger_           :: MisoString -> [View action] -> View action
-navBarBurger_ theMenuId = a_ [class_ "navbar-burger"
-                             , textProp "role"          "button"
-                             , textProp "aria-label"    "menu"
-                             , boolProp "aria-expanded" False
-                             , textProp "data-target"   theMenuId
-                             ]
-
-navBarItemA_     :: [Attribute action] -> [View action] -> View action
-navBarItemA_ ats = a_ ([class_ "navbar-item"] <> ats)
-
-
-navBarSelectedItemA_     :: [Attribute action] ->  [View action] -> View action
-navBarSelectedItemA_ ats = a_ ([class_ "navbar-item is-selected"] <> ats)
-
-
-navBarMenu_       :: MisoString -> [View action] -> View action
-navBarMenu_ theId = div_ [ class_ "navbar-menu"
-                         , id_    theId
-                         ]
-
-navBarStart_ :: [View action] -> View action
-navBarStart_ = div_ [class_ "navbar-start"]
 
     -- <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
     --   <div class="navbar-brand">
@@ -376,9 +351,6 @@ navBarSubMenu_ theItem chs =
                 chs
          ])
 
-navBarDivider_ = hr_ [class_ "navbar-divider"]
-
-navBarEnd_ = div_ [class_ "navbar-end"]
 
 --------------------------------------------------------------------------------
 -- * The Right Panel
@@ -444,14 +416,3 @@ myDraw m canvasKit canvasRef = do clear canvasKit canvasRef
 
 
 --------------------------------------------------------------------------------
-
-hero_ chs = section_ [ class_ "hero"
-                     , styleInline_ "height: calc(100vh - 92px)"
-                     ]
-                     [ div_ [ class_ "hero-body"
-                            , styleM_ [ "padding-top"    =: "1rem"
-                                      , "padding-bottom" =: "1rem"
-                                      ]
-                            ]
-                            chs
-                     ]
