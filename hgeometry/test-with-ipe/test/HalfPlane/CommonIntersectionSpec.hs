@@ -3,8 +3,9 @@ module HalfPlane.CommonIntersectionSpec(spec) where
 
 import           Control.Lens hiding (below)
 import           Control.Monad ((>=>))
-import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Default.Class
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Sequence (Seq(..))
 import qualified Data.Sequence as Seq
 import           Data.Vinyl
@@ -72,4 +73,6 @@ rightOf = HalfSpace Positive . VerticalLineThrough
 
 --------------------------------------------------------------------------------
 
--- instance Default
+-- FIXME: this instance does not really make sene I think, but whatever
+instance Num r => Default (HalfPlane r) where
+  def = HalfSpace Negative (VerticalLineThrough 0)

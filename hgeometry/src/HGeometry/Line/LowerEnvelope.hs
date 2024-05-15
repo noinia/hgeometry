@@ -12,6 +12,8 @@
 --------------------------------------------------------------------------------
 module HGeometry.Line.LowerEnvelope
   ( LowerEnvelopeF(..)
+  , asAlternating
+
   , lowerEnvelope
   ) where
 
@@ -46,6 +48,9 @@ import           HGeometry.Vector
 -- | The lower envelope of a set of lines
 newtype LowerEnvelopeF f vertex line = LowerEnvelope (Alternating f vertex line)
 
+asAlternating                     :: LowerEnvelopeF f vertex line -> Alternating f vertex line
+asAlternating (LowerEnvelope alt) = alt
+
 deriving instance ( Show line, Show (f (vertex, line))
                   ) => Show (LowerEnvelopeF f vertex line)
 
@@ -54,6 +59,14 @@ deriving instance ( Eq line, Eq (f (vertex, line))
 
 deriving instance ( Ord line, Ord (f (vertex, line))
                   ) => Ord (LowerEnvelopeF f vertex line)
+
+instance Functor f => Functor (LowerEnvelopeF f r) where
+  fmap f = bimap id f
+
+instance Functor f => Bifunctor (LowerEnvelopeF f) where
+  bimap f g (LowerEnvelope alt) = LowerEnvelope $ bimap f g alt
+
+
 
 --------------------------------------------------------------------------------
 

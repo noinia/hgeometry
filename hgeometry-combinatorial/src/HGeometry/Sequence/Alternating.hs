@@ -11,6 +11,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Sequence.Alternating
   ( Alternating(..)
+  , mapF
   , withNeighbours
   , mergeAlternating
   , insertBreakPoints
@@ -67,6 +68,12 @@ instance Foldable f => Bifoldable (Alternating f) where
 
 instance Traversable f => Bitraversable (Alternating f) where
   bitraverse f g (Alternating x xs) = Alternating <$> g x <*> traverse (bitraverse f g) xs
+
+-- | map some function changing the f into a g.
+mapF                      :: (f (sep, a) -> g (sep', a))
+                          -> Alternating f sep a -> Alternating g sep' a
+mapF f (Alternating x xs) = Alternating x $ f xs
+
 
 -- | Computes a b with all its neighbours
 --

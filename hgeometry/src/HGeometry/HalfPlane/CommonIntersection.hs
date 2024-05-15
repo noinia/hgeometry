@@ -9,14 +9,23 @@ module HGeometry.HalfPlane.CommonIntersection
 
 import           Control.Lens
 import           Data.Foldable1
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (fromMaybe)
+import           Data.Ord (comparing)
 import           Data.Sequence (Seq(..))
+import qualified Data.Sequence as Seq
+import           Data.These
 import           HGeometry.Ext
 import           HGeometry.HalfSpace
+import           HGeometry.HyperPlane.Class
+import           HGeometry.Line.General
+import           HGeometry.Line.LowerEnvelope
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
 import           HGeometry.Sequence.Alternating
 import           HGeometry.Vector
+
 --------------------------------------------------------------------------------
 
 -- | Common intersection of a bunch of halfplanes
@@ -61,29 +70,48 @@ commonIntersection     :: ( Foldable1 f, Functor f
                           , Fractional r, Ord r
                           )
                        => f halfPlane -> CommonIntersection halfPlane r
-commonIntersection hs0 = case NonEmpty.nonEmpty <$> foldr classifyHalfPlane (Vector2 [] []) hs0 of
-    Vector2 Nothing       Nothing       -> error "commonIntersection: absurd, cannot happen"
-    Vector2 Nothing       (Just aboves) -> Unbounded $ lowerBoundary aboves
-    Vector2 (Just belows) Nothing       -> Unbounded $ upperBoundary belows
-    Vector2 (Just belows) (Just aboves) -> let bb = lowerBoundary aboves
-                                               ub = upperBoundary belows
-                                           in undefined
+commonIntersection hs0 = case partitionEithersNE . fmap classifyHalfPlane $ toNonEmpty hs0 of
+    This onlyBelows     -> Unbounded $ upperBoundary onlyBelows
+    That onlyAboves     -> Unbounded $ lowerBoundary onlyAboves
+    These belows aboves -> let bb = lowerBoundary aboves
+                               ub = upperBoundary belows
+                           in undefined -- somehow combine them
   where
-    classifyHalfPlane h (Vector2 belows aboves) = case h^.halfSpaceSign of
-                                                    Negative -> Vector2 (h:belows) aboves
-                                                    Positive -> Vector2 belows     (h:aboves)
+    classifyHalfPlane h = case h^.halfSpaceSign of
+                            Negative -> Left  h
+                            Positive -> Right h
 
 --------------------------------------------------------------------------------
+
+
+
+-- type instance IntersectionOf (geom :+ extra) (geom :+ extra)
 
 -- | Given the bounding lines of a bunch of halfplanes that are all bounded from below,
 -- computes their common intersection.
 --
 -- running time: O(n\log n)
-lowerBoundary :: ( HalfPlane_ halfPlane r
-                 , Foldable1 f, Fractional r, Ord r
-                 )
-              => f halfPlane -> Chain Seq halfPlane r
-lowerBoundary = undefined
+lowerBoundary     :: ( HalfPlane_ halfPlane r
+                     , Foldable1 f, Fractional r, Ord r
+                     )
+                  => f halfPlane -> Chain Seq halfPlane r
+lowerBoundary hs0 = Chain $ case partitionEithersNE . fmap classifyHalfPlane $ toNonEmpty hs0 of
+    This onlyVerticals           -> let (_ :+ h) = leftMostPlane onlyVerticals
+                                    in Alternating h mempty
+    That onlyNonVerticals        -> let env = view extra <$> lowerEnvelope onlyNonVerticals
+                                    in mapF Seq.fromList $ asAlternating env
+    These verticals nonVerticals -> let (x :+ h)         = leftMostPlane verticals
+                                        env = view extra <$> lowerEnvelope nonVerticals
+                                        Alternating h0 hs = mapF Seq.fromList $ asAlternating env
+                                    in undefined -- clip the env from the right by h
+  where
+    classifyHalfPlane h = case h^.boundingHyperPlane.to asGeneralLine of
+      VerticalLineThrough x -> Left  (x :+ h)
+      NonVertical l         -> Right (l :+ h)
+
+    asGeneralLine = hyperPlaneFromEquation . hyperPlaneEquation
+
+    leftMostPlane = minimumBy (comparing (^.core))
 
 
 -- lowerBoundary = initialize . dropParallel . sortOnCheap @Vector.Vector increasingSlope
@@ -150,3 +178,7 @@ upperBoundary = undefined
 --                 -- by flipping the plane, and using the existing lowerBoundary machinery
 --   where
 --     flipY = over (hyperPlaneCoefficients.traverse) negate
+
+
+
+--------------------------------------------------------------------------------
