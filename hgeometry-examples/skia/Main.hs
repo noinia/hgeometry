@@ -185,7 +185,8 @@ viewModel m =
                                               , "min-width"  =: (w <> "px" :: MisoString)
                                               , "min-height" =: (h <> "px" :: MisoString)
                                               ]
-                                    , onClick AddPoint
+                                    , onClick      CanvasClicked
+                                    -- , onRightClick CanvasRightClicked
                                     ]
                       ]
 
@@ -298,13 +299,25 @@ navBar_ = let theMainMenuId = "theMainMenuId"
          [ navBarBurger_  theMainMenuId
                           [navBarBurgerItem_ ] -- not sure why we need these?
          , navBarMenu_ theMainMenuId
-             [ navBarStart_ [ navBarItemA_ [onClick Draw ]
-                                           [ text "foo" ]
-                            , navBarSubMenu_ [ navBarItemA_ [] [text "bar"]]
-                                             [ navBarItemA_ [] [text "child 1"]
-                                             , navBarDivider_
-                                             , navBarSelectedItemA_ [] [text "child 2"]
+             [ navBarStart_ [ navBarSubMenu_ [ navBarItemA_ []
+                                                            [text "File"]
                                              ]
+                                             [ navBarItemA_ []
+                                                            [text "Open"]
+                                             , navBarDivider_
+                                             , navBarSelectedItemA_ []
+                                                                    [text "Save"]
+                                             ]
+                            , navBarSubMenu_ [ navBarItemA_ []
+                                                            [text "Run"]
+                                             ]
+                                             [ navBarItemA_ []
+                                                            [text "Convex Hull"]
+                                             , navBarSelectedItemA_ []
+                                                                    [text "Voronoi Diagram"]
+                                             ]
+                            , navBarItemA_ [onClick Draw ]
+                                           [ text "Draw" ]
                             ]
              ]
          ]

@@ -90,3 +90,6 @@ data instance Attributes (PolyLineF f (Point 2 r)) =
 
 instance Default (Attributes (PolyLineF f (Point 2 r))) where
   def = PolyLineAttributes def def
+
+
+--------------------------------------------------------------------------------

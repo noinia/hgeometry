@@ -56,7 +56,7 @@ import qualified Language.Javascript.JSaddle as JSAddle
 import           Language.Javascript.JSaddle.Object (js1, js2, js4, jsg)
 import qualified Language.Javascript.JSaddle.Object as JS
 import           Miso
-import           Miso.String (MisoString, ToMisoString(..), ms)
+import           Miso.String (MisoString)
 
 
 --------------------------------------------------------------------------------

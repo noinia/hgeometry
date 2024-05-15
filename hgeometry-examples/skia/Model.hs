@@ -11,6 +11,7 @@ module Model
   ) where
 
 import           Attributes
+import           Base
 import           Color
 import           Control.Lens hiding (view, element)
 import           Control.Monad (forM_)
@@ -25,13 +26,11 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
-import           GHC.TypeNats
 import           GHCJS.Marshal
 import           GHCJS.Types
 import           HGeometry.Ext
 import           HGeometry.Interval
 import           HGeometry.Miso.OrphanInstances ()
-import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.PolyLine
 import           HGeometry.Vector
@@ -60,7 +59,6 @@ import           StrokeAndFill
 
 --------------------------------------------------------------------------------
 
-type R = RealNumber 5
 
 initialLayers :: Layers
 initialLayers = Layers mempty (Layer "alpha" Visible) mempty
@@ -69,11 +67,12 @@ initialLayers = Layers mempty (Layer "alpha" Visible) mempty
 
 data Model = Model { _canvas       :: (SkiaCanvas.Canvas R)
                    , _zoomConfig   :: ZoomConfig Double
+                   , _mode         :: Mode
+                   -- , _modeData     :: ModeData
                    , _points       :: IntMap.IntMap (Point 2 R :+ Attributes (Point 2 R))
                    , _polyLines    :: IntMap.IntMap (PolyLine' R :+ Attributes (PolyLine' R))
                    , _diagram      :: Maybe [Point 2 R]
                    , __layers      :: Layers
-                   , _mode         :: Mode
                    , _strokeColor  :: Stroke
                    , _fillColor    :: Fill
                    } deriving (Eq,Show)
@@ -84,8 +83,6 @@ instance HasLayers Model where
 
 --------------------------------------------------------------------------------
 
-instance KnownNat p => ToMisoString (RealNumber p) where
-  toMisoString = toMisoString . toFixed
 
 instance Default (Point 2 R :+ Int) where
   def = origin :+ 0
