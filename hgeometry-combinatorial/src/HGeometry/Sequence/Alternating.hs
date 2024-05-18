@@ -16,6 +16,8 @@ module HGeometry.Sequence.Alternating
   , mergeAlternating
   , insertBreakPoints
   , reverse
+
+  , snocElemWith
   ) where
 
 import           Control.DeepSeq
@@ -132,3 +134,18 @@ reverse p@(Alternating s xs) = case NonEmpty.nonEmpty xs of
     Just xs1@((e1,_):|tl) -> let ys    = (e1, s) : List.zipWith (\(_, v) (e, _) -> (e, v)) xs tl
                                  (_,t) = NonEmpty.last xs1
                              in Alternating t (List.reverse ys)
+
+
+-- | Given a function f that takes the (current) last element x, and the new element y,
+-- and computes the new separating element s, snocs the separator and y onto the
+-- alternating list.
+snocElemWith                         :: Snoc (f (sep,a)) (f (sep,a)) (sep,a) (sep,a)
+                                     => (a -> a -> sep)
+                                     -> Alternating f sep a -> a -> Alternating f sep a
+snocElemWith f (Alternating x0 xs) y = Alternating x0 $ view (re _Snoc) (xs, (s,y))
+  -- a 're _Snoc' is essentially something that when given a tuple (zs,z) turns it into a
+  -- zs `snoc` z
+  where
+    s = case xs^?_last of
+          Nothing    -> f x0 y
+          Just (_,x) -> f x  y
