@@ -49,7 +49,7 @@ myHalfPlanes = NonEmpty.fromList
 theAnswer :: CommonIntersection (HalfPlane R) R
 theAnswer = Unbounded . Chain
           $ Alternating (myHalfPlanes NonEmpty.!! 0)
-                        (Seq.fromList $ [ (Point2 1 1, myHalfPlanes NonEmpty.!! 1)
+                        (Seq.fromList $ [ (Point2 (1/2) (3/2), myHalfPlanes NonEmpty.!! 1)
                                         ]
                         )
 

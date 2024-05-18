@@ -13,19 +13,14 @@ module HGeometry.Line.General
   ) where
 
 import Control.DeepSeq
-import Control.Lens ((^.), coerced)
+import Control.Lens ((^.))
 import GHC.Generics
 import HGeometry.HyperPlane
-import HGeometry.HyperPlane.NonVertical
-import HGeometry.Intersection
 import HGeometry.Line.Class
-import HGeometry.Line.Intersection
 import HGeometry.Line.LineEQ
-import HGeometry.Line.NonVertical.Class
 import HGeometry.Point
 import HGeometry.Properties (NumType, Dimension)
 import HGeometry.Vector
-import Text.Read
 
 --------------------------------------------------------------------------------
 

@@ -12,6 +12,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Line.LowerEnvelope
   ( LowerEnvelopeF(..)
+  , LowerEnvelope
   , _Alternating
   , lowerEnvelope
   ) where
@@ -21,7 +22,9 @@ import           Data.Default.Class
 import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Type.Ord
+import qualified Data.Vector as Vector
 import           HGeometry.Algorithms.BinarySearch
 import qualified HGeometry.ConvexHull.GrahamScan as CH
 import           HGeometry.Duality
@@ -33,10 +36,14 @@ import           HGeometry.Line
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Sequence.Alternating
+
 --------------------------------------------------------------------------------
 
 -- | The lower envelope of a set of lines
 newtype LowerEnvelopeF f vertex line = LowerEnvelope (Alternating f vertex line)
+
+-- | A lower envelope, where the data structure is a vector.
+type LowerEnvelope = LowerEnvelopeF Vector.Vector
 
 -- | projection function that turns a lower envelope into an alternating "list" of lines
 -- and vertices.
@@ -84,7 +91,7 @@ lowerEnvelope    :: forall g f line r.
                     , Default line -- TODO hack
                     )
                  => f line -> LowerEnvelopeF g (Point 2 r) line
-lowerEnvelope = construct . fmap (view extra)
+lowerEnvelope = construct . fmap (view extra) . NonEmpty.reverse
               . CH.upperHull'
               . fmap (\l -> dualPoint l :+ l)
   where
