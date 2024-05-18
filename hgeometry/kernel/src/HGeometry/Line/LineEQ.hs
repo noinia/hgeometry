@@ -21,9 +21,11 @@ module HGeometry.Line.LineEQ
 import Control.DeepSeq
 import Control.Lens((^.), coerced)
 import GHC.Generics(Generic)
+import HGeometry.Ext
 import HGeometry.HyperPlane
 import HGeometry.HyperPlane.NonVertical
 import HGeometry.Intersection
+import HGeometry.Intersection()
 import HGeometry.Line.Class
 import HGeometry.Line.Intersection
 import HGeometry.Line.NonVertical.Class
@@ -128,6 +130,21 @@ instance (Eq r, Fractional r)
     | a == a'   = if b == b' then Just (Line_x_Line_Line l) else Nothing
     | otherwise = let x = (b'-b) / (a-a')
                   in Just . Line_x_Line_Point $ Point2 x (evalAt' x l)
+
+
+type instance Intersection (LineEQ r :+ extra) (LineEQ r :+ extra') =
+  Maybe (LineLineIntersection (LineEQ r :+ extra))
+
+-- instance (Eq r) => HasIntersectionWith (LineEQ r :+ extra) (LineEQ r :+ extra') where
+--   l `intersects` m = (l^.core) `intersects` (m^.core)
+
+instance (HasIntersectionWith (LineEQ r :+ extra) (LineEQ r :+ extra'), Fractional r, Eq r)
+          => IsIntersectableWith (LineEQ r :+ extra) (LineEQ r :+ extra') where
+  l `intersect` m = tag <$> (l^.core) `intersect` (m^.core)
+    where
+      tag = \case
+        Line_x_Line_Point p     -> Line_x_Line_Point p
+        Line_x_Line_Line _lCore -> Line_x_Line_Line l -- the line we return is the left line
 
 ----------------------------------------
 
