@@ -65,9 +65,10 @@ instance HyperPlane_ (VerticalOrLineEQ r) 2 r where
 
 instance (Fractional r, Eq r) => ConstructableHyperPlane_ (VerticalOrLineEQ r) 2 r where
   type HyperPlaneFromEquationConstraint (VerticalOrLineEQ r) 2 r = ()
-  hyperPlaneFromEquation (Vector3 c a b)
-    | b == 0   = VerticalLineThrough (-c)
-    | otherwise = NonVertical undefined
-  -- | The
+  hyperPlaneFromEquation v@(Vector3 c _ b)
+    | b == 0    = VerticalLineThrough (-c)
+    | otherwise = NonVertical $ hyperPlaneFromEquation v
+
+
   fromPointAndNormal p (Vector2 vx vy) = fromPointAndVec p $ Vector2 vy (-vx)
     -- rotate the normal vector 90 degrees clockwise
