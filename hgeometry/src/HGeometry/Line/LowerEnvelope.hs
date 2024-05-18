@@ -12,44 +12,37 @@
 --------------------------------------------------------------------------------
 module HGeometry.Line.LowerEnvelope
   ( LowerEnvelopeF(..)
-  , asAlternating
-
+  , _Alternating
   , lowerEnvelope
   ) where
 
-
 import           Control.Lens
 import           Data.Default.Class
-import qualified Data.Foldable as F
 import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Ord (comparing)
-import           Data.Sequence (Seq(..))
-import qualified Data.Sequence as Seq
-import qualified Data.Vector as Vector
+import           Data.Type.Ord
+import           HGeometry.Algorithms.BinarySearch
 import qualified HGeometry.ConvexHull.GrahamScan as CH
 import           HGeometry.Duality
 import           HGeometry.Ext
-import           HGeometry.Foldable.Sort
-import           HGeometry.HalfSpace
+import           HGeometry.Foldable.Util
 import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.Point
-import           HGeometry.Polygon.Convex
+import           HGeometry.Properties
 import           HGeometry.Sequence.Alternating
-import           HGeometry.Vector
-
 --------------------------------------------------------------------------------
 
 -- | The lower envelope of a set of lines
 newtype LowerEnvelopeF f vertex line = LowerEnvelope (Alternating f vertex line)
 
-asAlternating                     :: LowerEnvelopeF f vertex line -> Alternating f vertex line
-asAlternating (LowerEnvelope alt) = alt
+-- | projection function that turns a lower envelope into an alternating "list" of lines
+-- and vertices.
+_Alternating  :: Iso (LowerEnvelopeF f vertex line)  (LowerEnvelopeF f' vertex' line')
+                     (Alternating f vertex line)     (Alternating f' vertex' line')
+_Alternating = coerced
 
 deriving instance ( Show line, Show (f (vertex, line))
                   ) => Show (LowerEnvelopeF f vertex line)
@@ -67,6 +60,12 @@ instance Functor f => Bifunctor (LowerEnvelopeF f) where
   bimap f g (LowerEnvelope alt) = LowerEnvelope $ bimap f g alt
 
 
+-- -- | change the functor type of the Lower envelope
+-- mapF                       :: (f (vertex, line) -> g (vertex, line))
+--                            -> LowerEnvelopeF f vertex line -> LowerEnvelopeF g vertex line
+-- mapF f = _Alternating %~ Alternating.mapF f
+
+-- (LowerEnvelope alt) = LowerEnvelope (Alternating.mapF f alt)
 
 --------------------------------------------------------------------------------
 
@@ -75,21 +74,22 @@ instance Functor f => Bifunctor (LowerEnvelopeF f) where
 -- pre: the input is a set (so no duplicates)
 --
 -- running time: \(O(n\log n)\)
-lowerEnvelope    :: forall f line r.
+lowerEnvelope    :: forall g f line r.
                     ( NonVerticalHyperPlane_ line 2 r
                     , Fractional r, Ord r
                     , Foldable1 f, Functor f
                     , IsIntersectableWith line line
                     , Intersection line line ~ Maybe (LineLineIntersection line)
-
+                    , HasFromFoldable g
                     , Default line -- TODO hack
                     )
-                 => f line -> LowerEnvelopeF [] (Point 2 r) line
+                 => f line -> LowerEnvelopeF g (Point 2 r) line
 lowerEnvelope = construct . fmap (view extra)
               . CH.upperHull'
               . fmap (\l -> dualPoint l :+ l)
   where
-    construct (l0 :| ls) = LowerEnvelope $ Alternating l0 $ computeVertices l0 ls
+    construct (l0 :| ls) = let vertices' = computeVertices l0 ls
+                           in LowerEnvelope $ Alternating l0 $ fromList vertices'
 
     computeVertices    :: line -> [line] -> [(Point 2 r, line)]
     computeVertices l0 = snd . List.mapAccumL (\l l' -> (l', (pt $ l `intersect` l', l'))) l0
@@ -100,3 +100,28 @@ lowerEnvelope = construct . fmap (view extra)
     pt = \case
       Just (Line_x_Line_Point p) -> p
       _                          -> error "lowerEnvelope: absurd: lines don't intersect"
+
+--------------------------------------------------------------------------------
+
+-- | Commputes the line directly above the query point x
+lineAt                                          :: ( Ord r
+                                                   , Point_ vertex d r
+                                                   , 1 <= d
+                                                   , BinarySearch (f (vertex, line))
+                                                   , Elem (f (vertex, line)) ~ (vertex, line)
+                                                   ) => r -> LowerEnvelopeF f vertex line -> line
+lineAt x env@(LowerEnvelope (Alternating l0 _)) = case lookupLEVertex x env of
+    Nothing     -> l0
+    Just (_, l) -> l
+
+-- | returns the rightmost vertex v for which v_x < x.
+lookupLEVertex                                      :: ( Ord r
+                                                       , Point_ vertex d r
+                                                       , 1 <= d
+                                                       , BinarySearch (f (vertex, line))
+                                                       , Elem (f (vertex, line)) ~ (vertex, line)
+                                                       )
+                                                    => r -> LowerEnvelopeF f vertex line
+                                                    -> Maybe (vertex, line)
+lookupLEVertex x (LowerEnvelope (Alternating _ ls)) =
+  binarySearchLastIn (not . \(v,_) -> v^.xCoord <= x) ls
