@@ -60,8 +60,8 @@ instance HyperPlane_ (VerticalOrLineEQ r) 2 r where
 
 instance (Fractional r, Eq r) => ConstructableHyperPlane_ (VerticalOrLineEQ r) 2 r where
   type HyperPlaneFromEquationConstraint (VerticalOrLineEQ r) 2 r = ()
-  hyperPlaneFromEquation v@(Vector3 c _ b)
-    | b == 0    = VerticalLineThrough (-c)
+  hyperPlaneFromEquation v@(Vector3 a b c)
+    | b == 0    = VerticalLineThrough ((-c)/a)
     | otherwise = NonVertical $ hyperPlaneFromEquation v
 
 

@@ -28,6 +28,7 @@ import           HGeometry.Polygon.Convex
 import           HGeometry.Sequence.Alternating
 import           HGeometry.Vector
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | Common intersection of a bunch of halfplanes
@@ -73,6 +74,7 @@ commonIntersection     :: ( Foldable1 f, Functor f
                           , Fractional r, Ord r
 
                           , Default (LineEQ r :+ halfPlane), Default halfPlane -- FIXME
+                          , Show halfPlane, Show r
                           )
                        => f halfPlane -> CommonIntersection halfPlane r
 commonIntersection hs0 = case partitionEithersNE . fmap classifyHalfPlane $ toNonEmpty hs0 of
@@ -132,9 +134,12 @@ lowerBoundary = undefined
 upperBoundary     :: ( HalfPlane_ halfPlane r
                      , Foldable1 f, Fractional r, Ord r
                      , Default (LineEQ r :+ halfPlane), Default halfPlane -- FIXME
+
+                     , Show halfPlane, Show r
                      )
                   => f halfPlane -> Chain Seq halfPlane r
-upperBoundary hs0 = Chain $ case partitionEithersNE . fmap classifyHalfPlane $ toNonEmpty hs0 of
+upperBoundary hs0 = Chain $ case traceShowWith ("partitioning",) $
+  partitionEithersNE . fmap classifyHalfPlane $ toNonEmpty hs0 of
     This onlyVerticals           -> let (_ :+ h) = leftMostPlane onlyVerticals
                                     in Alternating h mempty
     That onlyNonVerticals        -> let env = view extra <$> lowerEnvelope' onlyNonVerticals
@@ -143,15 +148,18 @@ upperBoundary hs0 = Chain $ case partitionEithersNE . fmap classifyHalfPlane $ t
                                         env         = clipRight maxX $ lowerEnvelope' nonVerticals
                                         -- we clip the env at the leftmost vertical plane, throwing
                                         -- away any vertices whose x-coord is at most maxX
-                                        alt         = snocElemWith (intersectVertical maxX)
+                                        alt         = traceShowWith ("alt",env,) $
+                                                      snocElemWith (intersectVertical maxX)
                                                                    (env^._Alternating)
-                                                                   (undefined :+ h)
+                                                                   (dummy :+ h)
                                         -- we snoc the new element onto the alternating list.
-                                        -- we use undefined to create a dummy non-vertical
+                                        -- we create a dummy non-vertical
                                         -- line (that we will next immediately) throw away
                                         -- anyway
                                     in view extra <$> alt
   where
+    dummy = LineEQ 0 0
+
     classifyHalfPlane h = case h^.boundingHyperPlane.to asGeneralLine of
       VerticalLineThrough x -> Left  (x :+ h)
       NonVertical l         -> Right (l :+ h)

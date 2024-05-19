@@ -11,6 +11,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Sequence.Alternating
   ( Alternating(..)
+  , fromNonEmptyWith
   , mapF
   , withNeighbours
   , mergeAlternating
@@ -32,6 +33,7 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup.Traversable
 import           GHC.Generics (Generic)
+import           HGeometry.Foldable.Util
 import           Prelude hiding (reverse)
 
 --------------------------------------------------------------------------------
@@ -70,6 +72,13 @@ instance Foldable f => Bifoldable (Alternating f) where
 
 instance Traversable f => Bitraversable (Alternating f) where
   bitraverse f g (Alternating x xs) = Alternating <$> g x <*> traverse (bitraverse f g) xs
+
+
+-- | Given a separator, and some foldable structure, constructs an Alternating.
+fromNonEmptyWith        :: (HasFromFoldable g, Foldable1 f) => sep -> f a -> Alternating g sep a
+fromNonEmptyWith sep xs = let (x0 :| xs') = toNonEmpty xs
+                          in Alternating x0 $ fromList (map (sep,) xs')
+
 
 -- | map some function changing the f into a g.
 mapF                      :: (f (sep, a) -> g (sep', a))
@@ -139,6 +148,11 @@ reverse p@(Alternating s xs) = case NonEmpty.nonEmpty xs of
 -- | Given a function f that takes the (current) last element x, and the new element y,
 -- and computes the new separating element s, snocs the separator and y onto the
 -- alternating list.
+--
+-- >>> snocElemWith (\_ _ -> ".") (fromNonEmptyWith @[] "," (NonEmpty.fromList [1..5])) 6
+-- Alternating 1 [(",",2),(",",3),(",",4),(",",5),(".",6)]
+-- >>> snocElemWith (\_ _ -> ".") (fromNonEmptyWith @[] "," (NonEmpty.fromList [1])) 6
+-- Alternating 1 [(".",6)]
 snocElemWith                         :: Snoc (f (sep,a)) (f (sep,a)) (sep,a) (sep,a)
                                      => (a -> a -> sep)
                                      -> Alternating f sep a -> a -> Alternating f sep a
