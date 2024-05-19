@@ -23,6 +23,5 @@ spec = do
       hyperPlaneEquation (VerticalLineThrough 5) `shouldBe` (Vector3 1 0 (-5))
 
 
-asGeneralLine :: HyperPlane_ hyperPlane 2 R
-              => hyperPlane -> VerticalOrLineEQ R
+asGeneralLine :: HyperPlane_ hyperPlane 2 R => hyperPlane -> VerticalOrLineEQ R
 asGeneralLine = hyperPlaneFromEquation . hyperPlaneEquation

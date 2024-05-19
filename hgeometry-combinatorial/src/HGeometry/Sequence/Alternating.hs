@@ -18,6 +18,7 @@ module HGeometry.Sequence.Alternating
   , insertBreakPoints
   , reverse
 
+  , consElemWith
   , snocElemWith
   ) where
 
@@ -143,6 +144,27 @@ reverse p@(Alternating s xs) = case NonEmpty.nonEmpty xs of
     Just xs1@((e1,_):|tl) -> let ys    = (e1, s) : List.zipWith (\(_, v) (e, _) -> (e, v)) xs tl
                                  (_,t) = NonEmpty.last xs1
                              in Alternating t (List.reverse ys)
+
+
+-- | Given a function f that takes the new element y and the (current) first element x and
+-- computes the new separating element s, conses y and the the separator onto alternating
+-- list.
+--
+-- >>> consElemWith (\_ _ -> ".") (fromNonEmptyWith @[] "," (NonEmpty.fromList [1..5])) 0
+-- Alternating 0 [(".",1),(",",2),(",",3),(",",4),(",",5)]
+-- >>> consElemWith (\_ _ -> ".") (fromNonEmptyWith @[] "," (NonEmpty.fromList [1])) 0
+-- Alternating 0 [(".",1)]
+consElemWith                         :: Cons (f (sep,a)) (f (sep,a)) (sep,a) (sep,a)
+                                     => (a -> a -> sep)
+                                     -> a
+                                     -> Alternating f sep a -> Alternating f sep a
+consElemWith f y (Alternating x0 xs) = Alternating y $ view (re _Cons) ((s,x0), xs)
+  -- a 're _Cons' is essentially something that when given a tuple (z,zs) turns it into a
+  -- z `cons` zs
+  where
+    s = case xs^?_head of
+          Nothing    -> f x0 y
+          Just (_,x) -> f x  y
 
 
 -- | Given a function f that takes the (current) last element x, and the new element y,
