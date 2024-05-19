@@ -15,6 +15,9 @@ module HGeometry.Line.LowerEnvelope
   , LowerEnvelope
   , _Alternating
   , lowerEnvelope
+
+  , lineAt
+  , lookupLEVertex
   ) where
 
 import           Control.Lens

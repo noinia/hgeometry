@@ -23,6 +23,7 @@ import HGeometry.HyperPlane (HyperPlane(..))
 import HGeometry.HyperPlane.NonVertical (NonVerticalHyperPlane(..))
 import HGeometry.Interval
 import HGeometry.Interval.EndPoint ()
+import HGeometry.Line.General
 import HGeometry.Line.LineEQ
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment
@@ -120,6 +121,12 @@ instance ( Arbitrary point
 
 instance Arbitrary r => Arbitrary (LineEQ r) where
   arbitrary = LineEQ <$> arbitrary <*> arbitrary
+
+instance Arbitrary r => Arbitrary (VerticalOrLineEQ r) where
+  arbitrary = frequency [ (5,  VerticalLineThrough <$> arbitrary)
+                        , (95, NonVertical <$> arbitrary)
+                        ]
+
 
 instance ( Arbitrary r
          , Has_ Additive_ d r

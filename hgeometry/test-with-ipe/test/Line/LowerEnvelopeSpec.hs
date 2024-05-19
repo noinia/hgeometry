@@ -4,8 +4,10 @@ module Line.LowerEnvelopeSpec(spec) where
 import           Control.Lens hiding (below)
 import           Control.Monad ((>=>))
 import           Data.Default.Class
+import           Data.Foldable (minimumBy)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Ord (comparing)
 import           Data.Sequence (Seq(..))
 import qualified Data.Sequence as Seq
 import qualified Data.Vector as Vector
@@ -16,6 +18,7 @@ import           HGeometry.Ext
 import           HGeometry.HalfSpace
 import           HGeometry.HyperPlane.Class
 import           HGeometry.Intersection
+import           HGeometry.Kernel.Instances ()
 import           HGeometry.Line
 import           HGeometry.Line.General
 import           HGeometry.Line.LineEQ
@@ -29,6 +32,8 @@ import           Ipe.Color
 import           Paths_hgeometry
 import           System.OsPath
 import           Test.Hspec
+import           Test.Hspec.QuickCheck
+import           Test.QuickCheck ((===))
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
@@ -41,6 +46,18 @@ spec = describe "lower envelope of lines tests" $ do
            lowerEnvelope myLines `shouldBe` theAnswer
          it "myLines 2 test" $
            lowerEnvelope myLines2 `shouldBe` theAnswer2
+         prop "lower envelope correct" $
+           \(lines' :: NonEmpty (LineEQ R)) (queries :: NonEmpty R) ->
+             let env = lowerEnvelope lines' :: LowerEnvelope (Point 2 R) (LineEQ R)
+             in fmap (flip lineAt env) queries === fmap (naiveQuery lines') queries
+
+
+-- | naively answer a query by trying every line.
+naiveQuery          :: NonEmpty (LineEQ R) -> R -> LineEQ R
+naiveQuery lines' q = minimumBy (comparing (evalAt' q)) lines'
+
+--------------------------------------------------------------------------------
+-- * Some manual testcases
 
 
 myLines :: NonEmpty (LineEQ R)
