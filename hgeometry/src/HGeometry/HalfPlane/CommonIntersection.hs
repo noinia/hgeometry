@@ -100,6 +100,7 @@ lowerBoundary     :: forall f halfPlane r.
                      ( HalfPlane_ halfPlane r
                      , Foldable1 f, Functor f, Fractional r, Ord r
                      , Default (LineEQ r :+ halfPlane), Default halfPlane -- FIXME
+                     , Show r, Show halfPlane
                      )
                   => f halfPlane -> Chain Seq halfPlane r
 lowerBoundary hs0 = Chain $ case partitionEithersNE . fmap classifyHalfPlane $ toNonEmpty hs0 of
@@ -237,7 +238,7 @@ clipRight maxX = over _Alternating $
 clipLeft      :: (Ord r, Point_ vertex 2 r)
                => r -> UpperEnvelopeF Seq vertex line -> UpperEnvelopeF Seq vertex line
 clipLeft minX = over _Alternating $
-                 \alt@(Alternating h0 hs) -> case Seq.spanl clip hs of
+                 \alt@(Alternating _ hs) -> case Seq.spanl clip hs of
                    (Empty,         _)    -> alt
                    (_ :|> (_,h0'), kept) -> Alternating h0' kept
   where

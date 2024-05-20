@@ -39,6 +39,8 @@ spec :: Spec
 spec = describe "common halfplane intersection tests" $ do
          it "myHalfplanes test" $
            commonIntersection myHalfPlanes `shouldBe` theAnswer
+         it "myHalfplanes2 test" $
+           commonIntersection myHalfPlanes2 `shouldBe` theAnswer2
 
 myHalfPlanes :: NonEmpty (HalfPlane R)
 myHalfPlanes = NonEmpty.fromList
@@ -54,6 +56,24 @@ theAnswer = Unbounded . Chain
                                         , (Point2 10    (-8),  myHalfPlanes NonEmpty.!! 2)
                                         ]
                         )
+
+
+
+myHalfPlanes2 :: NonEmpty (HalfPlane R)
+myHalfPlanes2 = NonEmpty.fromList
+                [ above $ LineEQ 1    1
+                , above $ LineEQ (-1) 2
+                , rightOf $ (-2)
+                ]
+
+theAnswer2 :: CommonIntersection (HalfPlane R) R
+theAnswer2 = Unbounded . Chain
+          $ Alternating (myHalfPlanes2 NonEmpty.!! 2)
+                        (Seq.fromList $ [ (Point2 (-2) 4,      myHalfPlanes2 NonEmpty.!! 1)
+                                        , (Point2 (1/2) (3/2), myHalfPlanes2 NonEmpty.!! 0)
+                                        ]
+                        )
+
 
 
 --------------------------------------------------------------------------------

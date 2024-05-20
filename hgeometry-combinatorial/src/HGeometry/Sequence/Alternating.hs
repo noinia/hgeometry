@@ -158,14 +158,10 @@ consElemWith                         :: Cons (f (sep,a)) (f (sep,a)) (sep,a) (se
                                      => (a -> a -> sep)
                                      -> a
                                      -> Alternating f sep a -> Alternating f sep a
-consElemWith f y (Alternating x0 xs) = Alternating y $ view (re _Cons) ((s,x0), xs)
-  -- a 're _Cons' is essentially something that when given a tuple (z,zs) turns it into a
-  -- z `cons` zs
-  where
-    s = case xs^?_head of
-          Nothing    -> f x0 y
-          Just (_,x) -> f x  y
-
+consElemWith f y (Alternating x0 xs) = let s = f y x0 in
+    Alternating y $ view (re _Cons) ((s,x0), xs)
+    -- a 're _Cons' is essentially something that when given a tuple (z,zs) turns it into a
+    -- z `cons` zs
 
 -- | Given a function f that takes the (current) last element x, and the new element y,
 -- and computes the new separating element s, snocs the separator and y onto the
