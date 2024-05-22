@@ -19,6 +19,7 @@ module HGeometry.Sequence.Alternating
   , reverse
 
   , consElemWith
+  , unconsAlt
   , snocElemWith
   ) where
 
@@ -146,6 +147,8 @@ reverse p@(Alternating s xs) = case NonEmpty.nonEmpty xs of
                              in Alternating t (List.reverse ys)
 
 
+--------------------------------------------------------------------------------
+
 -- | Given a function f that takes the new element y and the (current) first element x and
 -- computes the new separating element s, conses y and the the separator onto alternating
 -- list.
@@ -162,6 +165,16 @@ consElemWith f y (Alternating x0 xs) = let s = f y x0 in
     Alternating y $ view (re _Cons) ((s,x0), xs)
     -- a 're _Cons' is essentially something that when given a tuple (z,zs) turns it into a
     -- z `cons` zs
+
+-- | Uncons the Alternating, getting either just the first element (if there was only one),
+-- or the first element, the first separator, and the remaining alternating.
+unconsAlt                     :: Cons (f (sep,a)) (f (sep,a)) (sep,a) (sep,a)
+                              => Alternating f sep a -> Either a ((a,sep), Alternating f sep a)
+unconsAlt (Alternating x0 xs) = case xs^?_Cons of
+  Nothing           -> Left x0
+  Just ((s,x1),xs') -> Right ((x0,s), Alternating x1 xs')
+
+--------------------------------------------------------------------------------
 
 -- | Given a function f that takes the (current) last element x, and the new element y,
 -- and computes the new separating element s, snocs the separator and y onto the
