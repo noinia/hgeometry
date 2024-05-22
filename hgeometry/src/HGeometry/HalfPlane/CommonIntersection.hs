@@ -37,9 +37,10 @@ import           Debug.Trace
 data CommonIntersection halfPlane r =
     EmptyIntersection
   | Bounded (ConvexPolygon (Point 2 r :+ halfPlane))
-  | Slab halfPlane () -- TODO needs a boundingLLine
-    -- ^ each vertex stores the interior halfplane of the CCW-edge it is incident to.
+  | Slab halfPlane halfPlane
+    -- ^ two parallel halfPlanes l and u that form a slab;
   | Unbounded (Chain Seq halfPlane r)
+    -- ^ each vertex stores the interior halfplane of the CCW-edge it is incident to.
   deriving (Show,Eq)
 
 -- | A polygonal chain bounding an unbounded convex region, in CCW order.
@@ -89,6 +90,167 @@ commonIntersection hs0 = case partitionEithersNE . fmap classifyHalfPlane' $ toN
     classifyHalfPlane' h = case h^.halfSpaceSign of
                              Negative -> Left  h
                              Positive -> Right h
+
+data HalfPlaneCategory halfPlane r = LeftVertical  r halfPlane
+                                   | RightVertical r halfPlane
+                                   | Lower (LineEQ r) halfPlane
+                                   | Upper (LineEQ r) halfPlane
+                                   deriving (Show)
+
+partitionhalfPlanes :: (Foldable1 f
+                       , HalfPlane_ halfPlane r, Ord r, Fractional r
+                       ) => f halfPlane -> NonEmpty (HalfPlaneCategory halfPlane r)
+partitionhalfPlanes = undefined
+
+
+
+
+
+--------------------------------------------------------------------------------
+
+combine                :: Maybe (r, halfPlane) -- ^ rightmost vertical positive haflplane (left vertical boundary)
+                       -> Maybe (r, halfPlane) -- ^ left vertical negative haflplane (right vertical boundary)
+                       -> Chain Seq halfPlane r -- ^ upper boundary of the (non-vertical) negative halfplanes
+                       -> Chain Seq halfPlane r -- ^ lower boundary of the (non-vertical) positive halfplanes
+                       -> CommonIntersection halfPlane r
+combine ml mr mup mlow = undefined
+
+
+-- lowerBelowUpper :: r
+--                 -> Chain Seq halfPlane r -- ^ lower boundary of the (non-vertical) positive halfplanes
+--                 -> Chain Seq halfPlane r -- ^ upper boundary of the (non-vertical) negative halfplanes
+--                 -> Bool
+-- lowerBelowUpper x lower upper = case evalChain x lower
+
+
+
+-- clipLowerLeft :: VerticalOrLineEQ r
+--               -> Chain Seq halfPlane r -- ^ lower boundary of the (non-vertical) positive halfplanes
+--               ->
+
+-- (Chain lower) (Chain upper) =  case (unconsAlt lowerB, unconsAlt upperB) of
+--       (Left (l :+ hl),            Left (u :+ hu))             -> undefined
+--       (Left (l :+ hl),            Right ((u :+ hu,q), upper)) -> case l `intersect` u of
+--         Nothing ->
+
+
+--           | evalAt' 0 l <= evalAt' 0 u -> Slab hl hu
+--                 | otherwise                  -> EmptyIntersection
+--         Just (Line_x_Line_Line _)            -> Slab hl hu -- degenerate slab
+--         Just (Line_x_Line_Point p)
+
+
+
+--       (Right ((l :+ hl,p),lower), Left (u :+ hu))             -> undefined
+--       (Right ((l :+ hl,p),lower), Right ((u :+ hu,q), upper)) -> undefined
+
+
+
+-- -- |
+-- combineNonV :: ( Fractional r, Ord r
+--                ) => Chain Seq (LineEQ r :+ halfPlane) r
+--                -- ^ lower boundary of the (non-vertical) positive halfplanes
+--             -> Chain Seq (LineEQ r :+ halfPlane) r
+--             -- ^ upper boundary of the (non-vertical) negative halfplanes
+--             -> CommonIntersection halfPlane r
+-- combineNonV (Chain lower0) (Chain upper0) = go0 lower0 upper0
+--   where
+--     go0 lowerB upperB = case (unconsAlt lowerB, unconsAlt upperB) of
+--       (Left (l :+ hl), Left (u :+ hu)) -> case l `intersect` u of
+--         Nothing | evalAt' 0 l <= evalAt' 0 u -> Slab hl hu
+--                 | otherwise                  -> EmptyIntersection
+--         Just (Line_x_Line_Line _)            -> Slab hl hu -- degenerate slab
+--         Just (Line_x_Line_Point p)
+--                 | evalAt' x l < evalAt' x u   -> Unbounded . Chain $
+--                                                  Alternating hl $ Seq.singleton (p,hu)
+--                                               -- diverging
+--                 | otherwise                   -> Unbounded . Chain $
+--                                                  Alternating hu $ Seq.singleton (p,hl)
+--                                           -- converging
+--           where x = p^.xCoord + 1
+--       (lower, upper) -> trimLeft (lower,upper)
+
+--     -- recursive case
+--     trimLeft = \case
+--       (Left (l :+ hl),            Left (u :+ hu))             -> undefined
+--       (Left (l :+ hl),            Right ((u :+ hu,q), upper)) -> case l `intersect` u of
+--         Nothing ->
+
+
+--           | evalAt' 0 l <= evalAt' 0 u -> Slab hl hu
+--                 | otherwise                  -> EmptyIntersection
+--         Just (Line_x_Line_Line _)            -> Slab hl hu -- degenerate slab
+--         Just (Line_x_Line_Point p)
+
+
+
+--       (Right ((l :+ hl,p),lower), Left (u :+ hu))             -> undefined
+--       (Right ((l :+ hl,p),lower), Right ((u :+ hu,q), upper)) -> undefined
+
+
+-- case
+-- l `intersect` u of
+--         Nothing ->
+
+
+--           | evalAt' 0 l <= evalAt' 0 u -> Slab hl hu
+--                 | otherwise                  -> EmptyIntersection
+--         Just (Line_x_Line_Line _)            -> Slab hl hu -- degenerate slab
+--         Just (Line_x_Line_Point p)
+--                 | evalAt' x l < evalAt' x u   -> Unbounded . Chain $
+--                                                  Alternating hl $ Seq.singleton (p,hu)
+--                                               -- diverging
+--                 | otherwise                   -> Unbounded . Chain $
+--                                                  Alternating hu $ Seq.singleton (p,hl)
+--                                           -- converging
+--           where x = p^.xCoord + 1
+
+
+
+--         undefined
+
+
+
+-- data ConvergingOrDiversing = Converging | Diverging
+--                            deriving (Show,Eq)
+
+-- combine                               :: Chain Seq halfPlane r -> Chain Seq halfPlane r
+--                                       -> CommonIntersection halfPlane r
+-- combine (Chain lowerB0) (Chain upperB0) = go lowerB0 upperB0
+--   where
+
+
+
+--   case (lowerB, upperB) of
+--    (Alternating l Empty) (Alternating u Empty) ->
+--        case (asGeneralLine $ l^.boundingHyperPlane, asGeneralLine $ u^.boundingHyperPlane) of
+--          (VerticalLineThrough lx , VerticalLineThrough ux)
+--                                         | lx > ux   -> EmptyIntersection
+--                                         | otherwise -> Slab l u
+--          (VerticalLineThrough lx, NonVertical ul)         ->
+--          (NonVertical ll,         VerticalLineThrough ux) ->
+--          (NonVertical ll,         NonVertical ul)         ->
+
+
+--          (VerticalLineThrouy lx)
+
+--        case (l^.boundingHyperPlane) `intersect` (u^.boundingHyperPlane) of
+--          Nothing                    -> Slab l u
+--              -- the two bounding lines don't intersect, so they form a slab
+--          Just (Line_x_Line_Line _)  -> Slab l u -- degenerate slab
+--          Just (Line_x_Line_Point p) -> Unbounded $ case classify (p^.xCoord + 1) l u of
+--            Converting -> Alternating u $ Seq.singleton (p,l)
+--            Diverging  -> Alternating l $ Seq.singleton (p,u)
+--    _                                           -> undefined
+
+-- classify x l u = case (evalAt'' x l > evalAt'' x u)  of
+--     False -> Converging
+--     True  ->  Diverging
+--  where
+--    evalAt'' q h =
+--      VerticalLineThrough x' ->                     evalAt' q $
+
+
 
 --------------------------------------------------------------------------------
 
@@ -226,22 +388,47 @@ asGeneralLine = hyperPlaneFromEquation . hyperPlaneEquation
 --------------------------------------------------------------------------------
 
 
+--clipLower
+
+
+--------------------------------------------------------------------------------
+
 -- | Given a value x, Clip the lower envelope to the interval \((-\infty,x]\)
 clipRight      :: (Ord r, Point_ vertex 2 r)
-               => r -> LowerEnvelopeF Seq vertex line -> LowerEnvelopeF Seq vertex line
-clipRight maxX = over _Alternating $
-                 \(Alternating h0 hs) -> Alternating h0 $ Seq.dropWhileR clip hs
-  where
-    clip (v, _) = v^.xCoord >= maxX
+                => r -> LowerEnvelopeF Seq vertex line -> LowerEnvelopeF Seq vertex line
+clipRight maxX = clipRightWhen $ \(v, _) -> v^.xCoord >= maxX
 
 -- | Given a value x, Clip the lower envelope to the interval \([x,\infty)\)
 clipLeft      :: (Ord r, Point_ vertex 2 r)
-               => r -> UpperEnvelopeF Seq vertex line -> UpperEnvelopeF Seq vertex line
-clipLeft minX = over _Alternating $
-                 \alt@(Alternating _ hs) -> case Seq.spanl clip hs of
+               => r -> LowerEnvelopeF Seq vertex line -> LowerEnvelopeF Seq vertex line
+clipLeft minX = clipLeftWhen $ \(v, _) -> v^.xCoord <= minX
+
+-- | Clip on the right by a line
+clipRightLine       :: (Ord r, Num r, Point_ vertex 2 r)
+                    => LineEQ r -> LowerEnvelopeF Seq vertex line -> LowerEnvelopeF Seq vertex line
+clipRightLine right = clipRightWhen (above right)
+
+-- | Clip the left by a line
+clipLeftLine      :: (Ord r, Num r, Point_ vertex 2 r)
+                  => LineEQ r -> LowerEnvelopeF Seq vertex line -> LowerEnvelopeF Seq vertex line
+clipLeftLine left = clipLeftWhen (above left)
+
+-- | Test if the given vertex lies above the line
+above            :: (Ord r, Num r, Point_ vertex 2 r) => LineEQ r -> (vertex,a) -> Bool
+above line (v,_) = (v^.yCoord) >= evalAt' (v^.xCoord) line
+
+-- | Clip the lower envelope on the right
+clipRightWhen   :: ((vertex, line) -> Bool)
+                -> LowerEnvelopeF Seq vertex line -> LowerEnvelopeF Seq vertex line
+clipRightWhen p = over _Alternating $
+                 \(Alternating h0 hs) -> Alternating h0 $ Seq.dropWhileR p hs
+
+-- | Clip the lower envelope on the left
+clipLeftWhen   :: ((vertex, line) -> Bool)
+               -> LowerEnvelopeF Seq vertex line -> LowerEnvelopeF Seq vertex line
+clipLeftWhen p = over _Alternating $
+                 \alt@(Alternating _ hs) -> case Seq.spanl p hs of
                    (Empty,         _)    -> alt
                    (_ :|> (_,h0'), kept) -> Alternating h0' kept
-  where
-    clip (v, _) = v^.xCoord <= minX
 
 --------------------------------------------------------------------------------

@@ -153,9 +153,9 @@ reverse p@(Alternating s xs) = case NonEmpty.nonEmpty xs of
 -- computes the new separating element s, conses y and the the separator onto alternating
 -- list.
 --
--- >>> consElemWith (\_ _ -> ".") (fromNonEmptyWith @[] "," (NonEmpty.fromList [1..5])) 0
+-- >>> consElemWith (\_ _ -> ".") 0 (fromNonEmptyWith @[] "," (NonEmpty.fromList [1..5]))
 -- Alternating 0 [(".",1),(",",2),(",",3),(",",4),(",",5)]
--- >>> consElemWith (\_ _ -> ".") (fromNonEmptyWith @[] "," (NonEmpty.fromList [1])) 0
+-- >>> consElemWith (\_ _ -> ".") 0 (fromNonEmptyWith @[] "," (NonEmpty.fromList [1]))
 -- Alternating 0 [(".",1)]
 consElemWith                         :: Cons (f (sep,a)) (f (sep,a)) (sep,a) (sep,a)
                                      => (a -> a -> sep)
