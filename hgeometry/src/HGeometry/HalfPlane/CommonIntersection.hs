@@ -1,50 +1,69 @@
 {-# LANGUAGE UndecidableInstances #-}
 module HGeometry.HalfPlane.CommonIntersection
   ( CommonIntersection(..)
+  , SubLine(..)
   , Chain(..)
   , commonIntersection
-  , lowerBoundary
+  -- , lowerBoundary
   -- , LowerBoundary(..)
   ) where
 
 import           Control.Lens hiding (Empty)
+import           Data.Bifunctor (first)
 import           Data.Default.Class
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (fromMaybe)
 import           Data.Ord (comparing)
-import           Data.Sequence (Seq(..), ViewL(..))
+import           Data.Sequence (Seq(..))
 import qualified Data.Sequence as Seq
 import           Data.These
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
+import           HGeometry.HalfLine
 import           HGeometry.HalfSpace
 import           HGeometry.HyperPlane.Class
 import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.Line.General
 import           HGeometry.Line.LowerEnvelope
+import           HGeometry.LineSegment
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
 import           HGeometry.Sequence.Alternating
 import           HGeometry.Vector
-
-import           Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | Common intersection of a bunch of halfplanes
 data CommonIntersection halfPlane r =
     EmptyIntersection
-  | Bounded (ConvexPolygon (Point 2 r :+ halfPlane))
+  | SingletonPoint    (Point 2 r)                     (Vector 3 halfPlane)
+  -- ^ Common intersection is a singleton point, defined by the three given halfplanes
+  | InSubLine (VerticalOrLineEQ r) (Vector 2 halfPlane) (SubLine halfPlane r)
+  -- ^ The two halfPlanes that define the line, and the other halfplanes furthe
+  -- restricitng the line.
   | Slab halfPlane halfPlane
     -- ^ two parallel halfPlanes l and u that form a slab;
-  | Unbounded (Chain Seq halfPlane r)
+  | BoundedRegion (ConvexPolygon (Point 2 r :+ halfPlane))
+  | UnboundedRegion (Chain Seq halfPlane r)
     -- ^ each vertex stores the interior halfplane of the CCW-edge it is incident to.
   deriving (Show,Eq)
 
+-- | Part of the line
+data SubLine halfPlane r = EntireLine
+                         | InHalfLine (HalfLine (Point 2 r)) halfPlane -- ^ the third halfPlane
+                         | InSegment (ClosedLineSegment (Point 2 r)) halfPlane halfPlane
+                           -- ^ the remaining two halfplanes
+                         deriving (Show,Eq)
+
 -- | A polygonal chain bounding an unbounded convex region, in CCW order.
 newtype Chain f halfPlane r = Chain (Alternating f (Point 2 r) halfPlane)
+
+-- | Iso to convert to just an Alternating
+_ChainAlternating :: Iso (Chain f halfPlane r)
+                         (Chain f' halfPlane' r')
+                         (Alternating f  (Point 2 r)  halfPlane)
+                         (Alternating f' (Point 2 r') halfPlane')
+_ChainAlternating = coerced
 
 deriving instance ( Show halfPlane, Show (f (Point 2 r, halfPlane))
                   ) => Show (Chain f halfPlane r)
@@ -72,7 +91,8 @@ bimap' f g (Chain alt) = Chain $ bimap g f alt
 -- | Computes the common intersection of a \(n\) halfplanes.
 --
 -- running time: \(O(n\log n)\)
-commonIntersection     :: ( Foldable1 f, Functor f
+commonIntersection     :: forall f halfPlane r.
+                          ( Foldable1 f, Functor f
                           , HalfPlane_ halfPlane r
                           , Fractional r, Ord r
 
@@ -80,47 +100,227 @@ commonIntersection     :: ( Foldable1 f, Functor f
                           , Show halfPlane, Show r
                           )
                        => f halfPlane -> CommonIntersection halfPlane r
-commonIntersection hs0 = case partitionEithersNE . fmap classifyHalfPlane' $ toNonEmpty hs0 of
-    This onlyBelows     -> Unbounded $ upperBoundary onlyBelows
-    That onlyAboves     -> Unbounded $ lowerBoundary onlyAboves
-    These belows aboves -> let bb = lowerBoundary aboves
-                               ub = upperBoundary belows
-                           in undefined -- somehow combine them
+commonIntersection hs0 = case bimap extremes boundaries $ partitionhalfPlanes hs0 of
+    -- we only have vertical halfpalnes planes
+    This verticals               -> case verticals of
+            Negatives (_ :+ l)            -> UnboundedRegion $ Chain (Alternating l mempty)
+            Positives (_ :+ u)            -> UnboundedRegion $ Chain (Alternating u mempty)
+            BothSigns (x :+ l) (x' :+ u)  -> case x `compare` x' of
+              LT -> EmptyIntersection
+              EQ -> InSubLine (VerticalLineThrough x) (Vector2 l u) EntireLine
+              GT -> Slab l u
+
+    -- we only have non-vertical halfpalnes planes
+    That nonVerticals            -> withNonVerticals nonVerticals
+
+    -- we have both vertical, and non-vertical halfPlanes
+    These verticals nonVerticals -> case nonVerticals of
+      -- all non-vertical halfplanes are negative halfplanes though. So we can
+       Negatives upperBoundary               -> upperBoundary `clipAndPushBy` verticals
+
+      -- all non-vertical halfplanes are postiive halfplanes though
+       Positives lowerBoundary               -> lowerBoundary `clipAndPushBy` verticals
+
+       -- We have both positive and negative non-vertical halfplanes. So compute their
+       -- common intersection, and then clip the result to the vertical slab determined by
+       -- the verticals
+       BothSigns upperBoundary lowerBoundary ->
+         undefined -- TODO: somehow combine them, and clip
+         -- withNonVerticals nonVerticals `clipBy` verticals
   where
-    classifyHalfPlane' h = case h^.halfSpaceSign of
-                             Negative -> Left  h
-                             Positive -> Right h
+    withNonVerticals              :: These2 (Chain Seq (LineEQ r :+ halfPlane) r)
+                                  -> CommonIntersection halfPlane r
+    withNonVerticals nonVerticals = case nonVerticals of
+      -- we only have halfplanes with negative signs
+       Negatives upperBoundary               -> unboundedRegion upperBoundary
+      -- we only have halfplanes with positives signs
+       Positives lowerBoundary               -> unboundedRegion lowerBoundary
+       -- we have both positive and negative halfplanes
+       BothSigns upperBoundary lowerBoundary -> undefined -- TODO: somehow combine them.
 
-data HalfPlaneCategory halfPlane r = LeftVertical  r halfPlane
-                                   | RightVertical r halfPlane
-                                   | Lower (LineEQ r) halfPlane
-                                   | Upper (LineEQ r) halfPlane
-                                   deriving (Show)
-
-partitionhalfPlanes :: (Foldable1 f
-                       , HalfPlane_ halfPlane r, Ord r, Fractional r
-                       ) => f halfPlane -> NonEmpty (HalfPlaneCategory halfPlane r)
-partitionhalfPlanes = undefined
+    -- -- clip the chain by the vertical boundaries
+    -- clipBy inters = \case
+    --   Negatives (x  :+ l)             -> undefined
+    --   Positives (x' :+ u)             -> undefined
+    --   BothSigns (x :+ l)  (x' :+ u)
+    --     | x < x'                 -> EmptyIntersection
+    --     | otherwise              -> undefined
 
 
+-- | Helper function to construct an unbounded region
+unboundedRegion :: Chain Seq (core :+ halfPlane) r -> CommonIntersection halfPlane r
+unboundedRegion = UnboundedRegion . first (view extra)
+
+-- | clip the chain by the given vertical halfplanes, and add the clipping halfPlanes to
+-- the chains.
+clipAndPushBy        :: (Ord r, Num r, HalfPlane_ halfPlane r)
+                     => Chain Seq (LineEQ r :+ halfPlane) r
+                     -> These2 (r :+ halfPlane)
+                     -> CommonIntersection halfPlane r
+clipAndPushBy inters = \case
+    Negatives hl    -> unboundedRegion . clipRight' hl $ inters
+    Positives hu    -> unboundedRegion . clipLeft'  hu $ inters
+    BothSigns hl hu -> case (hl^.core) `compare` (hu^.core) of
+      LT -> EmptyIntersection
+      EQ -> let x           = hl^.core
+                verticals   = Vector2 (hl^.extra) (hu^.extra)
+                  -- the two vertical halfplanes defining x
+                theHalfLine = HalfLine (Point2 x y) (Vector2 0 vy)
+                (y :+ h)    = evalChainAt x inters
+                  -- the non-vertical halfplane bounding the intersection
+                vy          = case h^.halfSpaceSign of
+                                Positive -> 1
+                                Negative -> -1
+            in InSubLine (VerticalLineThrough x) verticals (InHalfLine theHalfLine h)
+      GT -> unboundedRegion . clipLeft' hl . clipRight' hu $ inters
+  where
+
+    dummy = LineEQ 0 0
+
+    clipLeft' (x' :+ u) inters' = let env   = clipLeft x' inters'
+                                      cons' = consElemWith (flip $ intersectVertical x')
+                                 in env&_ChainAlternating %~ cons' (dummy :+ u)
+
+    clipRight' (x :+ l) inters' = let env   = clipRight x inters'
+                                      snoc' = flip (snocElemWith (intersectVertical x))
+                                  in env&_ChainAlternating %~ snoc' (dummy :+ l)
+
+-- | Evaluates the chain at the given x-coordinate. Returns the value (y-coordinate) y at
+-- the given x-coordinate x, and the halfplane containing the point (x,y)
+evalChainAt               :: (Num r, Ord r)
+                          => r -> Chain Seq (LineEQ r :+ halfPlane) r -> (r :+ halfPlane)
+evalChainAt x chain = let chain'   = clipLeft x chain
+                          (l :+ h) = chain'^._ChainAlternating.head1
+                      in evalAt' x l :+ h
 
 
+
+data LeftIntersection halfPlane r =
+    LowerAboveUpper
+  | Intersection (Point 2 r) (Chain Seq (LineEQ r :+ halfPlane) r)
+                             (Chain Seq (LineEQ r :+ halfPlane) r)
+  | NoIntersection (Chain Seq (LineEQ r :+ halfPlane) r)
+                                       (Chain Seq (LineEQ r :+ halfPlane) r)
+
+-- | Given the lower  chain and the upper chain, computes the first intersection as seen from the left; i.e. the first point where the remainder of the lower chain indeed lies below the remainder of the upper chain
+leftIntersection               :: (Ord  r, Fractional r
+                                  )
+                               => Chain Seq (LineEQ r :+ halfPlane) r
+                               -> Chain Seq (LineEQ r :+ halfPlane) r
+                               -> LeftIntersection halfPlane r
+leftIntersection lower0 upper0 = case dropWhile lowerAboveUpper $ zipLR lower0 upper0 of
+    []                     -> LowerAboveUpper
+    (_, lower, upper) : _  -> case leftMost lower `intersect` leftMost upper of
+      Nothing                    -> NoIntersection lower upper -- parallel
+      Just (Line_x_Line_Point p) -> Intersection p lower upper
+      Just (Line_x_Line_Line _)  -> undefined -- TODO: think about this....
+       -- should be a degenerate slab, which is just a line (segment?) I guess
+  where
+    lowerAboveUpper (x, lower, upper) = evalAt' x (leftMost lower) > evalAt' x (leftMost upper)
+
+leftMost :: Chain Seq (line :+ halfPlane) r -> line
+leftMost = view (_ChainAlternating.head1.core)
+
+
+-- | simultaneously scan the chains, zipping up their remainders. i.e.  returns a list of
+-- triples (x_i,lower_i,upper_i), so that on (x_{i-1},x_i] lower_i and upper_i are the
+-- remaining alternating chains. (x_{-1} = -\infty).
+zipLR             :: Ord r
+                  => Chain Seq halfPlane r -> Chain Seq halfPlane r
+                  -> [(r, Chain Seq halfPlane r, Chain Seq halfPlane r )]
+zipLR lower upper = case firstIntersection lower upper of
+    None                           -> []
+    Upper p upper'                 -> (p^.xCoord, lower, upper) : zipLR lower  upper'
+    Lower p lower'                 -> (p^.xCoord, lower, upper) : zipLR lower' upper
+    Simultaneous p _ lower' upper' -> (p^.xCoord, lower, upper) : zipLR lower' upper'
+
+data FirstVertex halfPlane r = None
+                 | Upper (Point 2 r) (Chain Seq  halfPlane r)
+                 -- ^ first vertex in the upper chain, and the rest of the upper chain
+                 | Lower (Point 2 r) (Chain Seq  halfPlane r)
+                 | Simultaneous (Point 2 r)  -- ^ point in the lower chian
+                                (Point 2 r) -- ^ point in the upper chain
+                                (Chain Seq  halfPlane r) -- ^ remainder of the lower chain
+                                (Chain Seq  halfPlane r) -- ^ remainder of the upper chain
+                 deriving (Show,Eq)
+
+firstIntersection             :: Ord r
+                              => Chain Seq halfPlane r -> Chain Seq halfPlane r
+                              -> FirstVertex halfPlane r
+firstIntersection (Chain lower) (Chain upper) = case unconsAlt lower of
+  Left _               -> case unconsAlt upper of
+                            Left _               -> None
+                            Right ((_,q),upper') -> Upper q (Chain upper')
+  Right ((_,p),lower') -> case unconsAlt upper of
+    Left _               -> Lower p (Chain lower')
+    Right ((_,q),upper') -> case (p^.xCoord) `compare` (q^.xCoord) of
+                              LT -> Lower p (Chain lower')
+                              EQ -> Simultaneous p q (Chain lower') (Chain upper')
+                              GT -> Upper q (Chain upper')
+
+
+
+
+-- | A these where both values just have the same type.  in particular, we will use This:
+-- for Negative signs halfplanes, and That for Positive signed half planes.
+type These2 a = These a a
+-- Some pattern synonyms so that the rest is easier to read
+pattern Negatives :: a -> These a b
+pattern Negatives x = This x
+pattern Positives :: b -> These a b
+pattern Positives x = That x
+pattern BothSigns :: a -> b -> These a b
+pattern BothSigns x y = These x y
+{-# COMPLETE Negatives, Positives, BothSigns #-}
+
+-- | Vertical halfplanes
+type Verticals halfPlane r    = These2 (NonEmpty (r        :+ halfPlane))
+-- | Non-vertical halfplanes
+type NonVerticals halfPlane r = These2 (NonEmpty (LineEQ r :+ halfPlane))
+
+-- | Classify the halfplanes by their bounding lines into Vertical/NonVertical,
+-- and then on their Sign
+partitionhalfPlanes     :: forall f halfPlane r.
+                           ( Foldable1 f
+                           , HalfPlane_ halfPlane r, Ord r, Fractional r
+                           ) => f halfPlane
+                        -> These (Verticals halfPlane r) (NonVerticals halfPlane r)
+partitionhalfPlanes = bimap partition' partition'
+                    . partitionEithersNE . fmap classifyHalfPlane
+                    . toNonEmpty
+  where
+    -- partition the halfplanes by their sign.
+    partition' :: NonEmpty (core :+ halfPlane) -> These2 (NonEmpty (core :+ halfPlane))
+    partition' = partitionEithersNE . fmap classifyBySign
+
+    classifyBySign h = case h^.extra.halfSpaceSign of
+                         Negative -> Left  h
+                         Positive -> Right h
+
+-- | From all the vertical halfplanes with negative sign we compute the leftmost one,
+-- and from the positive halfplanes we compute the rightmost one.
+extremes :: Ord r => Verticals halfPlane r -> These2 (r :+ halfPlane)
+extremes = bimap leftMostPlane rightMostPlane
+  where
+    rightMostPlane = maximumBy (comparing (^.core))
+    leftMostPlane  = minimumBy (comparing (^.core))
+
+-- | Computes the upper boundary of the halfplanes that have negative sign, and the upper
+-- boundary of the halfplanes that have negative sign
+boundaries :: ( HalfPlane_ halfPlane r
+              , Ord r, Fractional r
+
+
+              , Default (LineEQ r :+ halfPlane), Default halfPlane -- FIXME
+              , Show r, Show halfPlane
+              ) => NonVerticals halfPlane r -> These2 (Chain Seq (LineEQ r :+ halfPlane) r)
+boundaries = bimap upperBoundary lowerBoundary
+  where
+    upperBoundary hs = let LowerEnvelope alt = lowerEnvelope hs in Chain alt
+    lowerBoundary hs = let LowerEnvelope alt = upperEnvelope hs in Chain alt
 
 --------------------------------------------------------------------------------
 
-combine                :: Maybe (r, halfPlane) -- ^ rightmost vertical positive haflplane (left vertical boundary)
-                       -> Maybe (r, halfPlane) -- ^ left vertical negative haflplane (right vertical boundary)
-                       -> Chain Seq halfPlane r -- ^ upper boundary of the (non-vertical) negative halfplanes
-                       -> Chain Seq halfPlane r -- ^ lower boundary of the (non-vertical) positive halfplanes
-                       -> CommonIntersection halfPlane r
-combine ml mr mup mlow = undefined
-
-
--- lowerBelowUpper :: r
---                 -> Chain Seq halfPlane r -- ^ lower boundary of the (non-vertical) positive halfplanes
---                 -> Chain Seq halfPlane r -- ^ upper boundary of the (non-vertical) negative halfplanes
---                 -> Bool
--- lowerBelowUpper x lower upper = case evalChain x lower
 
 
 
@@ -254,37 +454,6 @@ combine ml mr mup mlow = undefined
 
 --------------------------------------------------------------------------------
 
--- | Given the bounding lines of a bunch of halfplanes that are all bounded from below,
--- i.e. all halfplanes have positive sign, computes their common intersection.
---
--- running time: O(n\log n)
-lowerBoundary     :: forall f halfPlane r.
-                     ( HalfPlane_ halfPlane r
-                     , Foldable1 f, Functor f, Fractional r, Ord r
-                     , Default (LineEQ r :+ halfPlane), Default halfPlane -- FIXME
-                     , Show r, Show halfPlane
-                     )
-                  => f halfPlane -> Chain Seq halfPlane r
-lowerBoundary hs0 = Chain $ case partitionEithersNE . fmap classifyHalfPlane $ toNonEmpty hs0 of
-    This onlyVerticals           -> let (_ :+ h) = rightMostPlane onlyVerticals
-                                    in Alternating h mempty
-    That onlyNonVerticals        -> let env = view extra <$> upperEnvelope' onlyNonVerticals
-                                    in env^._Alternating
-    These verticals nonVerticals -> let (minX :+ h) = rightMostPlane verticals
-                                        env         = clipLeft minX $ upperEnvelope' nonVerticals
-                                        alt         = consElemWith (flip $ intersectVertical minX)
-                                                                   (dummy :+ h)
-                                                                   (env^._Alternating)
-                                    in view extra <$> alt
-       -- Generally a symmetric implementation to 'upperBoundary'.
-  where
-    dummy = LineEQ 0 0
-
-    -- finds the leftMost vertical halfplane
-    rightMostPlane = maximumBy (comparing (^.core))
-
-    upperEnvelope' = over _Alternating (mapF Seq.fromList) . upperEnvelope
-
 
 -- | We use the same type as the lower envelope
 type UpperEnvelopeF = LowerEnvelopeF
@@ -307,61 +476,6 @@ upperEnvelope = bimap (over yCoord negate) flipY . lowerEnvelope . fmap flipY
   where
     flipY :: line -> line
     flipY = over (hyperPlaneCoefficients.traverse) negate
-
-
-  -- = undefined -- bimap' flipY (over yCoord negate) . lowerBoundary . fmap flipY
-  -- --               -- by flipping the plane, and using the existing lowerBoundary machinery
-
--- -- | Given the bounding lines of a bunch of halfplanes that are all bounded from above,
--- -- computes their common intersection.
--- --
--- -- running time: O(n\log n)
--- upperBoundary :: ( NonVerticalHyperPlane_ boundingLine 2 r
---                  , Fractional r, Ord r, Foldable f, Functor f
---                  )
---               => f boundingLine -> LowerBoundary (LowerChain boundingLine r)
--- upperBoundary =
-
-
-
---------------------------------------------------------------------------------
-
--- | Given the bounding lines of a bunch of halfplanes that are all bounded from above,
--- i.e. all halfplanes have negative sign, computes their common intersection.
---
--- running time: O(n\log n)
-upperBoundary     :: ( HalfPlane_ halfPlane r
-                     , Foldable1 f, Fractional r, Ord r
-                     , Default (LineEQ r :+ halfPlane), Default halfPlane -- FIXME
-
-                     , Show halfPlane, Show r
-                     )
-                  => f halfPlane -> Chain Seq halfPlane r
-upperBoundary hs0 = Chain $ case partitionEithersNE . fmap classifyHalfPlane $ toNonEmpty hs0 of
-    This onlyVerticals           -> let (_ :+ h) = leftMostPlane onlyVerticals
-                                    in Alternating h mempty
-    That onlyNonVerticals        -> let env = view extra <$> lowerEnvelope' onlyNonVerticals
-                                    in env^._Alternating
-    These verticals nonVerticals -> let (maxX :+ h) = leftMostPlane verticals
-                                        env         = clipRight maxX $ lowerEnvelope' nonVerticals
-                                        alt         = snocElemWith (intersectVertical maxX)
-                                                                   (env^._Alternating)
-                                                                   (dummy :+ h)
-                                    in view extra <$> alt
-       -- We clip the lower envelope of the non-vertical planes at the leftmost
-       -- vertical plane, throwing away any vertices whose x-coord is at most maxX
-       --
-       -- We then snoc the new element onto the alternating list. We create a dummy
-       -- non-vertical line (thatwe will next immediately) throw away anyway. To construct
-       -- the separator we will simply evaluate the bounding line at the rightmost
-       -- position.
-  where
-    dummy = LineEQ 0 0
-
-    -- finds the leftMost vertical halfplane
-    leftMostPlane = minimumBy (comparing (^.core))
-
-    lowerEnvelope' = over _Alternating (mapF Seq.fromList) . lowerEnvelope
 
 --------------------------------------------------------------------------------
 
@@ -393,40 +507,40 @@ asGeneralLine = hyperPlaneFromEquation . hyperPlaneEquation
 
 --------------------------------------------------------------------------------
 
--- | Given a value x, Clip the lower envelope to the interval \((-\infty,x]\)
-clipRight      :: (Ord r, Point_ vertex 2 r)
-                => r -> LowerEnvelopeF Seq vertex line -> LowerEnvelopeF Seq vertex line
+-- | Given a value x, Clip the chain to the interval \((-\infty,x]\)
+clipRight      :: Ord r
+               => r -> Chain Seq halfPlane r -> Chain Seq halfPlane r
 clipRight maxX = clipRightWhen $ \(v, _) -> v^.xCoord >= maxX
 
--- | Given a value x, Clip the lower envelope to the interval \([x,\infty)\)
-clipLeft      :: (Ord r, Point_ vertex 2 r)
-               => r -> LowerEnvelopeF Seq vertex line -> LowerEnvelopeF Seq vertex line
+-- | Given a value x, Clip the chain to the interval \([x,\infty)\)
+clipLeft      :: Ord r
+               => r -> Chain Seq halfPlane r -> Chain Seq halfPlane r
 clipLeft minX = clipLeftWhen $ \(v, _) -> v^.xCoord <= minX
 
 -- | Clip on the right by a line
-clipRightLine       :: (Ord r, Num r, Point_ vertex 2 r)
-                    => LineEQ r -> LowerEnvelopeF Seq vertex line -> LowerEnvelopeF Seq vertex line
+clipRightLine       :: (Ord r, Num r)
+                    => LineEQ r -> Chain Seq halfPlane r -> Chain Seq halfPlane r
 clipRightLine right = clipRightWhen (above right)
 
 -- | Clip the left by a line
-clipLeftLine      :: (Ord r, Num r, Point_ vertex 2 r)
-                  => LineEQ r -> LowerEnvelopeF Seq vertex line -> LowerEnvelopeF Seq vertex line
+clipLeftLine      :: (Ord r, Num r)
+                  => LineEQ r -> Chain Seq halfPlane r -> Chain Seq halfPlane r
 clipLeftLine left = clipLeftWhen (above left)
 
--- | Test if the given vertex lies above the line
-above            :: (Ord r, Num r, Point_ vertex 2 r) => LineEQ r -> (vertex,a) -> Bool
+-- | Test if the given (Point 2 r) lies above the line
+above            :: (Ord r, Num r) => LineEQ r -> (Point 2 r,a) -> Bool
 above line (v,_) = (v^.yCoord) >= evalAt' (v^.xCoord) line
 
--- | Clip the lower envelope on the right
-clipRightWhen   :: ((vertex, line) -> Bool)
-                -> LowerEnvelopeF Seq vertex line -> LowerEnvelopeF Seq vertex line
-clipRightWhen p = over _Alternating $
+-- | Clip the chain on the right
+clipRightWhen   :: ((Point 2 r, halfPlane) -> Bool)
+                -> Chain Seq halfPlane r -> Chain Seq halfPlane r
+clipRightWhen p = over _ChainAlternating $
                  \(Alternating h0 hs) -> Alternating h0 $ Seq.dropWhileR p hs
 
--- | Clip the lower envelope on the left
-clipLeftWhen   :: ((vertex, line) -> Bool)
-               -> LowerEnvelopeF Seq vertex line -> LowerEnvelopeF Seq vertex line
-clipLeftWhen p = over _Alternating $
+-- | Clip the chain on the left
+clipLeftWhen   :: ((Point 2 r, halfPlane) -> Bool)
+               -> Chain Seq halfPlane r -> Chain Seq halfPlane r
+clipLeftWhen p = over _ChainAlternating $
                  \alt@(Alternating _ hs) -> case Seq.spanl p hs of
                    (Empty,         _)    -> alt
                    (_ :|> (_,h0'), kept) -> Alternating h0' kept

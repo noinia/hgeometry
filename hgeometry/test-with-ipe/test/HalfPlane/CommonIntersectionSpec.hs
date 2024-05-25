@@ -50,7 +50,7 @@ myHalfPlanes = NonEmpty.fromList
                ]
 
 theAnswer :: CommonIntersection (HalfPlane R) R
-theAnswer = Unbounded . Chain
+theAnswer = UnboundedRegion . Chain
           $ Alternating (myHalfPlanes NonEmpty.!! 0)
                         (Seq.fromList $ [ (Point2 (1/2) (3/2), myHalfPlanes NonEmpty.!! 1)
                                         , (Point2 10    (-8),  myHalfPlanes NonEmpty.!! 2)
@@ -67,7 +67,7 @@ myHalfPlanes2 = NonEmpty.fromList
                 ]
 
 theAnswer2 :: CommonIntersection (HalfPlane R) R
-theAnswer2 = Unbounded . Chain
+theAnswer2 = UnboundedRegion . Chain
           $ Alternating (myHalfPlanes2 NonEmpty.!! 2)
                         (Seq.fromList $ [ (Point2 (-2) 4,      myHalfPlanes2 NonEmpty.!! 1)
                                         , (Point2 (1/2) (3/2), myHalfPlanes2 NonEmpty.!! 0)
