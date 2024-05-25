@@ -49,12 +49,13 @@ spec = describe "lower envelope of lines tests" $ do
          prop "lower envelope correct" $
            \(lines' :: NonEmpty (LineEQ R)) (queries :: NonEmpty R) ->
              let env = lowerEnvelope lines' :: LowerEnvelope (Point 2 R) (LineEQ R)
-             in fmap (flip lineAt env) queries === fmap (naiveQuery lines') queries
-
+             in fmap (\q -> evalAt' q $ lineAt q env) queries
+                ===
+                fmap (naiveQuery lines') queries
 
 -- | naively answer a query by trying every line.
-naiveQuery          :: NonEmpty (LineEQ R) -> R -> LineEQ R
-naiveQuery lines' q = minimumBy (comparing (evalAt' q)) lines'
+naiveQuery          :: NonEmpty (LineEQ R) -> R -> R
+naiveQuery lines' q = minimum $ fmap (evalAt' q) lines'
 
 --------------------------------------------------------------------------------
 -- * Some manual testcases
