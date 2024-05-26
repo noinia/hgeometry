@@ -5,7 +5,7 @@ module HGeometry.HalfPlane.CommonIntersection.Chain
   , bimap'
   , evalChainAt
   , leftMost
-  , clipleft
+  , clipLeft
   , clipRight
   ) where
 
