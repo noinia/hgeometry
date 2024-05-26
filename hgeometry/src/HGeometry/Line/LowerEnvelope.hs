@@ -21,7 +21,6 @@ module HGeometry.Line.LowerEnvelope
   ) where
 
 import           Control.Lens
-import           Data.Default.Class
 import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -91,7 +90,6 @@ lowerEnvelope    :: forall g f line r.
                     , IsIntersectableWith line line
                     , Intersection line line ~ Maybe (LineLineIntersection line)
                     , HasFromFoldable g
-                    , Default line -- TODO hack
                     )
                  => f line -> LowerEnvelopeF g (Point 2 r) line
 lowerEnvelope = construct . fmap (view extra) . NonEmpty.reverse

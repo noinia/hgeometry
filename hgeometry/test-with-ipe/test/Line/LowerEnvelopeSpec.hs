@@ -3,7 +3,6 @@ module Line.LowerEnvelopeSpec(spec) where
 
 import           Control.Lens hiding (below)
 import           Control.Monad ((>=>))
-import           Data.Default.Class
 import           Data.Foldable (minimumBy)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
@@ -88,7 +87,3 @@ theAnswer2 = LowerEnvelope
                          )
 
 --------------------------------------------------------------------------------
-
--- FIXME: hack
-instance Num r => Default (LineEQ r) where
-  def = LineEQ 1 0
