@@ -1,6 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DefaultSignatures #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Point.Class
@@ -25,7 +26,6 @@ module HGeometry.Point.Class
   -- , projectPoint
   -- , PointFor
   , HasPoints(..), HasPoints'
-  , NoDefault(..)
   ) where
 
 import           Control.Lens
@@ -33,7 +33,6 @@ import           Data.Default.Class
 import           Data.Function (on)
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Proxy (Proxy(..))
-import           GHC.Generics (Generic)
 import           GHC.TypeNats
 import           HGeometry.Ext
 import           HGeometry.Properties
@@ -373,11 +372,3 @@ instance (ConstructablePoint_ point d r, Default extra)
   {-# SPECIALIZE instance ConstructablePoint_ point d r
                           => ConstructablePoint_ (point :+ ()) d r #-}
   fromVector v = fromVector v :+ def
-
--- | A newtype that can discharge the Default constraint in an unsafe way, if you really
--- sure that you'll never actually need the default
-newtype NoDefault extra = NoDefault extra
-  deriving newtype (Show,Read,Eq,Ord,Enum,Num,Bounded,Real,Fractional,RealFrac,Generic)
-
-instance Default (NoDefault extra) where
-  def = error "NoDefault does not have an actual default. So something went wrong"
