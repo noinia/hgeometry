@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.HalfSpace.Class
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Class for modelling Halfspaces
+--
+--------------------------------------------------------------------------------
 module HGeometry.HalfSpace.Class
   ( HalfSpace_(..)
   , HalfPlane_

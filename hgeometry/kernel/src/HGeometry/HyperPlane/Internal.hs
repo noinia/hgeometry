@@ -1,6 +1,16 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.HyperPlane.Internal
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Canonical implementation for Hyperplanes as a vector of coefficients.
+--
+--------------------------------------------------------------------------------
 module HGeometry.HyperPlane.Internal
   ( HyperPlane(..,HyperPlane2, HyperPlane3)
   , MkHyperPlaneConstraints
