@@ -20,7 +20,6 @@ module HGeometry.VoronoiDiagram.ViaLowerEnvelope
   ) where
 
 import           Control.Lens
--- import           Data.Default.Class
 import           Data.Foldable1
 import qualified Data.Set as Set
 import           HGeometry.Box

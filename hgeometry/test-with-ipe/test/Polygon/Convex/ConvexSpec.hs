@@ -6,7 +6,6 @@ module Polygon.Convex.ConvexSpec
 
 import           Control.Arrow ((&&&))
 import           Control.Lens
-import           Data.Default.Class
 import qualified Data.List.NonEmpty as NonEmpty
 import           Golden
 import           HGeometry.ConvexHull.GrahamScan (convexHull)
@@ -28,12 +27,6 @@ import           Test.Hspec.WithTempFile
 --------------------------------------------------------------------------------
 
 type R = RealNumber 10
-
-instance Default (Point 2 R) where
-  def = origin
-
-instance Default (Point 2 Rational) where
-  def = origin
 
 --------------------------------------------------------------------------------
 
@@ -113,7 +106,7 @@ centerAtOrigin pg = translateBy (origin .-. (centroid pg :: Point 2 r)) pg
 
 --------------------------------------------------------------------------------
 
-minkowskiTests       ::  (Fractional r, Ord r, Show r, Default (Point 2 r)
+minkowskiTests       ::  (Fractional r, Ord r, Show r
                          , IpeWriteText r
                          )
                      => String -> [ConvexPolygon (Point 2 r)] -> Spec
@@ -122,7 +115,7 @@ minkowskiTests s pgs = describe ("Minkowskisums on " ++ s) $
       zip [0..]
           [ (p,centerAtOrigin q) | p <- pgs, q <- pgs ]
 
-minkowskiTest       ::  ( Fractional r, Ord r, Show r, Default (Point 2 r)
+minkowskiTest       ::  ( Fractional r, Ord r, Show r
                         , IpeWriteText r
                         )
                     => Int -> ConvexPolygon (Point 2 r) -> ConvexPolygon (Point 2 r) -> Spec
@@ -161,7 +154,6 @@ instance (ShiftedEq b, Eq (ElemCyclic b)) => Eq (F a b) where
 naiveMinkowski     :: ( Ord r, Num r
                       , ConvexPolygon_ convexPolygon  point r
                       , ConvexPolygon_ convexPolygon' point' r
-                      , Default point'
                       )
                    => convexPolygon -> convexPolygon'
                    -> ConvexPolygon (point :+ point')

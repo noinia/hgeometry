@@ -231,10 +231,10 @@ yCoordAt x (LineSegment_ (Point2_ px py) (Point2_ qx qy))
 instance ( LineSegment_ segment point
          ) => LineSegment_ (segment :+ extra) point where
 
--- instance ( ConstructableLineSegment_ segment point
---          , Default extra
---          ) => ConstructableLineSegment_ (segment :+ extra) point where
---   uncheckedLineSegment p q = uncheckedLineSegment p q :+ def
+instance ( ConstructableLineSegment_ segment point
+         , Default extra
+         ) => ConstructableLineSegment_ (segment :+ extra) point where
+  uncheckedLineSegment p q = uncheckedLineSegment p q :+ def
 
 instance ( ClosedLineSegment_ segment point
          ) => ClosedLineSegment_ (segment :+ extra) point where

@@ -4,7 +4,6 @@ module Polygon.Convex.ConvexSpec
 
 import           Control.Lens hiding (elements)
 import           Control.Monad.State
-import           Data.Default.Class
 import qualified Data.List.NonEmpty as NonEmpty
 import           HGeometry.Boundary
 import           HGeometry.Box
@@ -34,8 +33,6 @@ import           Test.QuickCheck.Instances ()
 
 -- type R = RealNumber 10
 
-instance Default (Point 2 Rational) where
-  def = origin
 instance Arbitrary (ConvexPolygon (Point 2 Rational)) where
   arbitrary = let granularity = 1000000 in
     sized $ \n -> do
@@ -159,7 +156,6 @@ centerAtOrigin pg = translateBy (origin .-. (centroid pg :: Point 2 r)) pg
 naiveMinkowski     :: ( Ord r, Num r
                       , ConvexPolygon_ convexPolygon  point r
                       , ConvexPolygon_ convexPolygon' point' r
-                      , Default point'
                       )
                    => convexPolygon -> convexPolygon'
                    -> ConvexPolygon (point :+ point')

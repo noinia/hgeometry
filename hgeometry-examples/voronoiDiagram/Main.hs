@@ -20,8 +20,6 @@ import           Miso
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Miso.Svg hiding (height_, id_, style_, width_)
 
--- import Data.Default.Class
-
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5

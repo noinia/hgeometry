@@ -8,7 +8,6 @@ module HGeometry.HalfPlane.CommonIntersection
   ) where
 
 import           Control.Lens
-import           Data.Default.Class
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ord (comparing)
 import           Data.Sequence (Seq(..))

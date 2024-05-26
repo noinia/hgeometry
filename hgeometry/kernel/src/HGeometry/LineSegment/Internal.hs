@@ -63,10 +63,10 @@ import Text.Read
 type LineSegment :: (Type -> Type) -> Type -> Type
 newtype LineSegment endPoint point = MkLineSegment (Interval endPoint point)
 
--- | Default implementation of Closed LineSegments
+-- | A type representing Closed LineSegments
 type ClosedLineSegment point = LineSegment (EndPoint Closed) point
 
--- | Default implementation of Open LineSegments
+-- | A type representing Open LineSegments
 type OpenLineSegment point   = LineSegment (EndPoint Open) point
 
 -- | Construct a line Segment
