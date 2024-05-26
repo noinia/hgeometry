@@ -72,6 +72,7 @@ common all-setup
       , vector-builder            >= 0.3.8         && < 1
       , HsYAML                    >= 0.2           && < 1
       , semialign                 >= 1.3           && < 1.4
+      , these                     >= 1.0.1         && < 1.3
 
       , ghc-typelits-natnormalise >= 0.7.7         && < 1
       , ghc-typelits-knownnat     >= 0.7.6         && < 1
@@ -259,6 +260,7 @@ library kernel
         HGeometry.Line.Class
         HGeometry.Line.PointAndVector
 
+        HGeometry.Line.General
         HGeometry.Line.LineEQ
         HGeometry.Line.NonVertical.Class
 
@@ -269,6 +271,7 @@ library kernel
         HGeometry.Duality
 
         HGeometry.HalfSpace
+        HGeometry.HalfSpace.Class
         HGeometry.HalfLine
 
         -- HGeometry.HalfPlane
@@ -378,11 +381,13 @@ library
 
         HGeometry.IntervalTree
 
-        -- HGeometry.HalfPlane.CommonIntersection
+        HGeometry.HalfPlane.CommonIntersection
 
         HGeometry.Polygon.Triangulation
         HGeometry.Polygon.Triangulation.TriangulateMonotone
         HGeometry.Polygon.Triangulation.MakeMonotone
+
+        HGeometry.Line.LowerEnvelope
 
         HGeometry.LineSegment.Intersection.Naive
         HGeometry.LineSegment.Intersection.BentleyOttmann
@@ -392,6 +397,7 @@ library
         HGeometry.LowerEnvelope.VertexForm
         HGeometry.LowerEnvelope.AdjListForm
         HGeometry.LowerEnvelope.Connected
+
 
         HGeometry.VoronoiDiagram
 
@@ -408,28 +414,29 @@ library
         HGeometry.VerticalRayShooting.PersistentSweep
 
     other-modules:
-       HGeometry.Polygon.Simple.Implementation
-       HGeometry.Polygon.Simple.InPolygon
+        HGeometry.HalfPlane.CommonIntersection.Chain
 
-       HGeometry.Polygon.Convex.Implementation
-       HGeometry.Polygon.Convex.MinkowskiSum
-       HGeometry.Polygon.Triangulation.Types
+        HGeometry.Polygon.Simple.Implementation
+        HGeometry.Polygon.Simple.InPolygon
 
-       HGeometry.PlaneGraph.Type
+        HGeometry.Polygon.Convex.Implementation
+        HGeometry.Polygon.Convex.MinkowskiSum
+        HGeometry.Polygon.Triangulation.Types
 
-       HGeometry.LineSegment.Intersection.Types
+        HGeometry.PlaneGraph.Type
 
-       HGeometry.LowerEnvelope.Type
-       HGeometry.LowerEnvelope.Connected.Type
-       HGeometry.LowerEnvelope.Connected.FromVertexForm
-       -- HGeometry.LowerEnvelope.Sample
+        HGeometry.LineSegment.Intersection.Types
+
+        HGeometry.LowerEnvelope.Type
+        HGeometry.LowerEnvelope.Connected.Type
+        HGeometry.LowerEnvelope.Connected.FromVertexForm
+        -- HGeometry.LowerEnvelope.Sample
 
 
-       -- HGeometry.LowerEnvelope.AtMostThree
-       -- HGeometry.LowerEnvelope.Triangulate
+        -- HGeometry.LowerEnvelope.AtMostThree
+        -- HGeometry.LowerEnvelope.Triangulate
 
-       HGeometry.VoronoiDiagram.ViaLowerEnvelope
-
+        HGeometry.VoronoiDiagram.ViaLowerEnvelope
 
 
 
@@ -593,6 +600,7 @@ test-suite kernel-hspec
       Spec
       Point2Spec
       HGeometry.Line.PointAndVectorSpec
+      HGeometry.Line.GeneralSpec
       HGeometry.LineSegmentSpec
       HGeometry.BallSpec
       HGeometry.BoxSpec
@@ -667,11 +675,14 @@ test-suite with-ipe-hspec
       Polygon.Triangulation.TriangulateSpec
       LineSegment.Intersection.BentleyOttmannSpec
       PlaneGraph.RenderSpec
+      HalfPlane.CommonIntersectionSpec
+      Line.LowerEnvelopeSpec
 
   hs-source-dirs:   test-with-ipe/test
   build-depends:
         hspec-with-tempfile >= 0.1
       , hgeometry:ipe
+      , hgeometry:quickcheck
 
 --------------------------------------------------------------------------------
 -- ** Ipe Tests
