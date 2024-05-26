@@ -1,0 +1,1190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Matrix.Class</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- A class of types representing matrices</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.Matrix.Class</span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#Matrix_"><span class="hs-identifier">Matrix_</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#HasElements"><span class="hs-identifier">HasElements</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#HasDeterminant"><span class="hs-identifier">HasDeterminant</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#Invertible"><span class="hs-identifier">Invertible</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Cons.html#cons"><span class="hs-identifier">cons</span></a></span><span class="hs-special">,</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Cons.html#snoc"><span class="hs-identifier">snoc</span></a></span><span class="hs-special">,</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Cons.html#uncons"><span class="hs-identifier">uncons</span></a></span><span class="hs-special">,</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Cons.html#unsnoc"><span class="hs-identifier">unsnoc</span></a></span><span class="hs-special">,</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Traversal.html#elements"><span class="hs-identifier">elements</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Kind</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">List</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">fromMaybe</span></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Proxy</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">GHC.TypeNats</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Properties.html"><span class="hs-identifier">HGeometry.Properties</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.html"><span class="hs-identifier">HGeometry.Vector</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- import           HGeometry.Vector.List (ListVector(..))</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">zipWith</span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- &gt;&gt;&gt; import HGeometry.Point</span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- &gt;&gt;&gt; import HGeometry.Matrix</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- &gt;&gt;&gt; let printMatrix = mapMOf_ (rows.traverse) print</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- &gt;&gt;&gt; :{</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- let matrixFromList' :: ( Matrix_ matrix n m r</span><span>
+</span><span id="line-36"></span><span class="hs-comment">--                        , KnownNat n, KnownNat m</span><span>
+</span><span id="line-37"></span><span class="hs-comment">--                        , Has_ Vector_  m r</span><span>
+</span><span id="line-38"></span><span class="hs-comment">--                        , Has_ Vector_  n (Vector m r)</span><span>
+</span><span id="line-39"></span><span class="hs-comment">--                        ) =&gt; [r] -&gt; matrix</span><span>
+</span><span id="line-40"></span><span class="hs-comment">--     matrixFromList' = fromMaybe (error &quot;&quot;) . matrixFromList</span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- :}</span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="annot"><span class="hs-comment">-- | Types that have an 'elements' field lens.</span></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">class</span><span> </span><span id="HasElements"><span class="annot"><a href="HGeometry.Matrix.Class.html#HasElements"><span class="hs-identifier hs-var">HasElements</span></a></span></span><span> </span><span id="local-6989586621679335010"><span class="annot"><a href="#local-6989586621679335010"><span class="hs-identifier hs-type">matrix</span></a></span></span><span> </span><span id="local-6989586621679335011"><span class="annot"><a href="#local-6989586621679335011"><span class="hs-identifier hs-type">matrix'</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-comment">-- | IndexedTraversal over the elements of the matrix, each index is</span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-comment">-- a (row,column) index pair.</span><span>
+</span><span id="line-48"></span><span>  </span><span id="elements"><span class="annot"><a href="HGeometry.Matrix.Class.html#elements"><span class="hs-identifier hs-type">elements</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Type.html#IndexedTraversal1"><span class="hs-identifier hs-type">IndexedTraversal1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679335010"><span class="hs-identifier hs-type">matrix</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679335011"><span class="hs-identifier hs-type">matrix'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679335010"><span class="hs-identifier hs-type">matrix</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679335011"><span class="hs-identifier hs-type">matrix'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="annot"><span class="hs-comment">-- | A matrix of n rows, each of m columns, storing values of type r.</span></span><span>
+</span><span id="line-51"></span><span class="hs-keyword">type</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#Matrix_"><span class="hs-identifier hs-type">Matrix_</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Type</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Type</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Constraint</span></span><span>
+</span><span id="line-52"></span><span class="hs-keyword">class</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Properties.html#NumType"><span class="hs-identifier hs-type">NumType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span>
+</span><span id="line-53"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.At.html#Ixed"><span class="hs-identifier hs-type">Ixed</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span>
+</span><span id="line-54"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.At.html#IxValue"><span class="hs-identifier hs-type">IxValue</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-55"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.At.html#Index"><span class="hs-identifier hs-type">Index</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- ^ row, col</span><span>
+</span><span id="line-56"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#HasElements"><span class="hs-identifier hs-type">HasElements</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span>
+</span><span id="line-57"></span><span>      </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span id="Matrix_"><span class="annot"><a href="HGeometry.Matrix.Class.html#Matrix_"><span class="hs-identifier hs-var">Matrix_</span></a></span></span><span> </span><span id="local-6989586621679334907"><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span></span><span> </span><span id="local-6989586621679334908"><span class="annot"><a href="#local-6989586621679334908"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span id="local-6989586621679334909"><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span></span><span> </span><span id="local-6989586621679334910"><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334908"><span class="hs-identifier hs-type">n</span></a></span><span>
+</span><span id="line-58"></span><span>                                </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span>
+</span><span id="line-59"></span><span>                                </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-pragma">{-# MINIMAL</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#generateMatrix"><span class="hs-pragma hs-type">generateMatrix</span></a></span><span class="hs-pragma">,</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#matrixFromRows"><span class="hs-pragma hs-type">matrixFromRows</span></a></span><span class="hs-pragma">,</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#rows"><span class="hs-pragma hs-type">rows</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-comment">-- | Produces the Identity Matrix.</span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-comment">-- &gt;&gt;&gt; printMatrix $ identityMatrix @(Matrix 3 3 Int)</span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-comment">-- Vector3 1 0 0</span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-comment">-- Vector3 0 1 0</span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-comment">-- Vector3 0 0 1</span><span>
+</span><span id="line-68"></span><span>  </span><span id="identityMatrix"><span class="annot"><a href="HGeometry.Matrix.Class.html#identityMatrix"><span class="hs-identifier hs-type">identityMatrix</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span>
+</span><span id="line-69"></span><span>  </span><span id="local-6989586621679335075"><span class="annot"><a href="HGeometry.Matrix.Class.html#identityMatrix"><span class="hs-identifier hs-var hs-var">identityMatrix</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Int, Int) -&gt; r) -&gt; matrix
+forall matrix (n :: Nat) (m :: Nat) r.
+Matrix_ matrix n m r =&gt;
+((Int, Int) -&gt; r) -&gt; matrix
+</span><a href="HGeometry.Matrix.Class.html#generateMatrix"><span class="hs-identifier hs-var">generateMatrix</span></a></span><span> </span><span class="annot"><span class="annottext">(((Int, Int) -&gt; r) -&gt; matrix) -&gt; ((Int, Int) -&gt; r) -&gt; matrix
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679335082"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335082"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679335083"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335083"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335082"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335083"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">0</span></span></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-comment">-- | Given a function that specifies the values, generate the matrix</span><span>
+</span><span id="line-72"></span><span>  </span><span id="generateMatrix"><span class="annot"><a href="HGeometry.Matrix.Class.html#generateMatrix"><span class="hs-identifier hs-type">generateMatrix</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span>  </span><span class="hs-comment">-- | Given a list of the elements in the matrix, in row by row</span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-comment">-- order, constructs the matrix.</span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-comment">-- requires that there are exactly n*m elements.</span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-78"></span><span>  </span><span class="hs-comment">-- &gt;&gt;&gt; matrixFromList @(Matrix 2 3 Int) [1,2,3,4,5,6]</span><span>
+</span><span id="line-79"></span><span>  </span><span class="hs-comment">-- Just (Matrix (Vector2 (Vector3 1 2 3) (Vector3 4 5 6)))</span><span>
+</span><span id="line-80"></span><span>  </span><span class="hs-comment">-- &gt;&gt;&gt; matrixFromList @(Matrix 2 3 Int) [1,2,3,4,5,6,7]</span><span>
+</span><span id="line-81"></span><span>  </span><span class="hs-comment">-- Nothing</span><span>
+</span><span id="line-82"></span><span>  </span><span id="matrixFromList"><span class="annot"><a href="HGeometry.Matrix.Class.html#matrixFromList"><span class="hs-identifier hs-type">matrixFromList</span></a></span></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679334908"><span class="hs-identifier hs-type">n</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">KnownNat</span></span><span> </span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span>
+</span><span id="line-83"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Has_"><span class="hs-identifier hs-type">Has_</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Vector_"><span class="hs-identifier hs-type">Vector_</span></a></span><span>  </span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-84"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Has_"><span class="hs-identifier hs-type">Has_</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Vector_"><span class="hs-identifier hs-type">Vector_</span></a></span><span>  </span><span class="annot"><a href="#local-6989586621679334908"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>                       </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span>
+</span><span id="line-86"></span><span>  </span><span id="local-6989586621679335085"><span class="annot"><a href="HGeometry.Matrix.Class.html#matrixFromList"><span class="hs-identifier hs-var hs-var">matrixFromList</span></a></span><span> </span><span id="local-6989586621679335152"><span class="annot"><span class="annottext">[r]
+</span><a href="#local-6989586621679335152"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621679335153"><span class="annot"><span class="annottext">[Vector m r]
+</span><a href="#local-6989586621679335153"><span class="hs-identifier hs-var">rs</span></a></span></span><span>  </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; [r] -&gt; Maybe [Vector m r]
+</span><a href="#local-6989586621679335154"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679335155"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">[r]
+</span><a href="#local-6989586621679335152"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-87"></span><span>                         </span><span id="local-6989586621679335156"><span class="annot"><span class="annottext">Vector n (Vector m r)
+</span><a href="#local-6989586621679335156"><span class="hs-identifier hs-var">rs'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall vector (d :: Nat) r.
+Vector_ vector d r =&gt;
+[r] -&gt; Maybe vector
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#vectorFromList"><span class="hs-identifier hs-var">vectorFromList</span></a></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334908"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Vector m r]
+</span><a href="#local-6989586621679335153"><span class="hs-identifier hs-var">rs</span></a></span><span>
+</span><span id="line-88"></span><span>                         </span><span class="annot"><span class="annottext">matrix -&gt; Maybe matrix
+forall a. a -&gt; Maybe a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(matrix -&gt; Maybe matrix) -&gt; matrix -&gt; Maybe matrix
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector n (Vector m r) -&gt; matrix
+forall rowVector.
+Vector_ rowVector n (Vector m r) =&gt;
+rowVector -&gt; matrix
+forall matrix (n :: Nat) (m :: Nat) r rowVector.
+(Matrix_ matrix n m r, Vector_ rowVector n (Vector m r)) =&gt;
+rowVector -&gt; matrix
+</span><a href="HGeometry.Matrix.Class.html#matrixFromRows"><span class="hs-identifier hs-var">matrixFromRows</span></a></span><span> </span><span class="annot"><span class="annottext">Vector n (Vector m r)
+</span><a href="#local-6989586621679335156"><span class="hs-identifier hs-var">rs'</span></a></span><span>
+</span><span id="line-89"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-90"></span><span>      </span><span id="local-6989586621679335158"><span class="annot"><span class="annottext">m :: Int
+</span><a href="#local-6989586621679335158"><span class="hs-identifier hs-var hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Nat -&gt; Int
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">(Nat -&gt; Int) -&gt; Nat -&gt; Int
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Proxy m -&gt; Nat
+forall (n :: Nat) (proxy :: Nat -&gt; *). KnownNat n =&gt; proxy n -&gt; Nat
+</span><span class="hs-identifier hs-var">natVal</span></span><span> </span><span class="annot"><span class="annottext">(Proxy m -&gt; Nat) -&gt; Proxy m -&gt; Nat
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: Nat). Proxy t
+forall {k} (t :: k). Proxy t
+</span><span class="hs-identifier hs-var">Proxy</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span>
+</span><span id="line-91"></span><span>      </span><span id="local-6989586621679335155"><span class="annot"><span class="annottext">n :: Integer
+</span><a href="#local-6989586621679335155"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Nat -&gt; Integer
+forall a b. (Integral a, Num b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">(Nat -&gt; Integer) -&gt; Nat -&gt; Integer
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Proxy n -&gt; Nat
+forall (n :: Nat) (proxy :: Nat -&gt; *). KnownNat n =&gt; proxy n -&gt; Nat
+</span><span class="hs-identifier hs-var">natVal</span></span><span> </span><span class="annot"><span class="annottext">(Proxy n -&gt; Nat) -&gt; Proxy n -&gt; Nat
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">forall (t :: Nat). Proxy t
+forall {k} (t :: k). Proxy t
+</span><span class="hs-identifier hs-var">Proxy</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="#local-6989586621679334908"><span class="hs-identifier hs-type">n</span></a></span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span>      </span><span id="local-6989586621679335154"><span class="annot"><span class="annottext">go :: Integer -&gt; [r] -&gt; Maybe [Vector m r]
+</span><a href="#local-6989586621679335154"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><span class="hs-number">0</span></span><span>  </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Vector m r] -&gt; Maybe [Vector m r]
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-94"></span><span>      </span><span class="annot"><a href="#local-6989586621679335154"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Integer
+</span><span class="hs-number">0</span></span><span>  </span><span class="annot"><span class="annottext">[r]
+</span><span class="hs-identifier">_</span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe [Vector m r]
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-95"></span><span>      </span><span class="annot"><a href="#local-6989586621679335154"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679335161"><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679335161"><span class="hs-identifier hs-var">n'</span></a></span></span><span> </span><span id="local-6989586621679335162"><span class="annot"><span class="annottext">[r]
+</span><a href="#local-6989586621679335162"><span class="hs-identifier hs-var">ys</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679335163"><span class="annot"><span class="annottext">[r]
+</span><a href="#local-6989586621679335163"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679335164"><span class="annot"><span class="annottext">[r]
+</span><a href="#local-6989586621679335164"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [r] -&gt; ([r], [r])
+forall a. Int -&gt; [a] -&gt; ([a], [a])
+</span><span class="hs-identifier hs-var">List.splitAt</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335158"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">[r]
+</span><a href="#local-6989586621679335162"><span class="hs-identifier hs-var">ys</span></a></span><span>
+</span><span id="line-96"></span><span>                 </span><span class="hs-keyword">in</span><span> </span><span class="hs-keyword">do</span><span> </span><span id="local-6989586621679335166"><span class="annot"><span class="annottext">Vector m r
+</span><a href="#local-6989586621679335166"><span class="hs-identifier hs-var">r'</span></a></span></span><span>    </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">forall vector (d :: Nat) r.
+Vector_ vector d r =&gt;
+[r] -&gt; Maybe vector
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#vectorFromList"><span class="hs-identifier hs-var">vectorFromList</span></a></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[r]
+</span><a href="#local-6989586621679335163"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-97"></span><span>                       </span><span id="local-6989586621679335167"><span class="annot"><span class="annottext">[Vector m r]
+</span><a href="#local-6989586621679335167"><span class="hs-identifier hs-var">rest'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; [r] -&gt; Maybe [Vector m r]
+</span><a href="#local-6989586621679335154"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Integer
+</span><a href="#local-6989586621679335161"><span class="hs-identifier hs-var">n'</span></a></span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Integer
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[r]
+</span><a href="#local-6989586621679335164"><span class="hs-identifier hs-var">rest</span></a></span><span>
+</span><span id="line-98"></span><span>                       </span><span class="annot"><span class="annottext">[Vector m r] -&gt; Maybe [Vector m r]
+forall a. a -&gt; Maybe a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector m r
+</span><a href="#local-6989586621679335166"><span class="hs-identifier hs-var">r'</span></a></span><span class="annot"><span class="annottext">Vector m r -&gt; [Vector m r] -&gt; [Vector m r]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[Vector m r]
+</span><a href="#local-6989586621679335167"><span class="hs-identifier hs-var">rest'</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-99"></span><span>
+</span><span id="line-100"></span><span>  </span><span class="hs-comment">-- | Given a list of the elements in the matrix, in row by row</span><span>
+</span><span id="line-101"></span><span>  </span><span class="hs-comment">-- order, constructs the matrix.</span><span>
+</span><span id="line-102"></span><span>  </span><span class="hs-comment">-- requires that there are exactly n*m elements.</span><span>
+</span><span id="line-103"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-104"></span><span>  </span><span class="hs-comment">-- &gt;&gt;&gt; matrixFromRows @(Matrix 2 3 Int) (Vector2 (Vector3 1 2 3) (Vector3 4 5 6))</span><span>
+</span><span id="line-105"></span><span>  </span><span class="hs-comment">-- Matrix (Vector2 (Vector3 1 2 3) (Vector3 4 5 6))</span><span>
+</span><span id="line-106"></span><span>  </span><span id="matrixFromRows"><span class="annot"><a href="HGeometry.Matrix.Class.html#matrixFromRows"><span class="hs-identifier hs-type">matrixFromRows</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679334943"><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Vector_"><span class="hs-identifier hs-type">Vector_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334943"><span class="hs-identifier hs-type">rowVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334908"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-107"></span><span>                    </span><span class="hs-comment">-- , OptVector_ m r</span><span>
+</span><span id="line-108"></span><span>                    </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334943"><span class="hs-identifier hs-type">rowVector</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span></span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span>  </span><span class="hs-comment">-- | Matrix multiplication</span><span>
+</span><span id="line-111"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-112"></span><span>  </span><span class="hs-comment">-- &gt;&gt;&gt; let m1  = matrixFromRows @(Matrix 2 3 Int) (Vector2 (Vector3 1 2 3) (Vector3 4 5 6))</span><span>
+</span><span id="line-113"></span><span>  </span><span class="hs-comment">-- &gt;&gt;&gt; let r i = Vector4 i (i*10) (i*100) (i*1000)</span><span>
+</span><span id="line-114"></span><span>  </span><span class="hs-comment">-- &gt;&gt;&gt; let m2  = matrixFromRows @(Matrix 3 4 Int) (Vector3 (r 1) (r 2) (r 3))</span><span>
+</span><span id="line-115"></span><span>  </span><span class="hs-comment">-- &gt;&gt;&gt; printMatrix $ (m1 !*! m2 :: Matrix 2 4 Int)</span><span>
+</span><span id="line-116"></span><span>  </span><span class="hs-comment">-- Vector4 14 140 1400 14000</span><span>
+</span><span id="line-117"></span><span>  </span><span class="hs-comment">-- Vector4 32 320 3200 32000</span><span>
+</span><span id="line-118"></span><span>  </span><span id="%21%2A%21"><span class="annot"><a href="HGeometry.Matrix.Class.html#%21%2A%21"><span class="hs-operator hs-type">(!*!)</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679334953"><span id="local-6989586621679334954"><span id="local-6989586621679334955"><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#Matrix_"><span class="hs-identifier hs-type">Matrix_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334953"><span class="hs-identifier hs-type">matrix'</span></a></span><span>  </span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334954"><span class="hs-identifier hs-type">m'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-119"></span><span>               </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#Matrix_"><span class="hs-identifier hs-type">Matrix_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334955"><span class="hs-identifier hs-type">matrix''</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334908"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334954"><span class="hs-identifier hs-type">m'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-120"></span><span>               </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-121"></span><span>               </span><span class="hs-comment">-- , OptVector_ m r, KnownNat m</span><span>
+</span><span id="line-122"></span><span>               </span><span class="hs-comment">-- , OptVector_ n r, KnownNat n</span><span>
+</span><span id="line-123"></span><span>               </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Has_"><span class="hs-identifier hs-type">Has_</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Additive_"><span class="hs-identifier hs-type">Additive_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-comment">-- (Vector m r)</span><span>
+</span><span id="line-124"></span><span>               </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334953"><span class="hs-identifier hs-type">matrix'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334955"><span class="hs-identifier hs-type">matrix''</span></a></span></span></span></span><span>
+</span><span id="line-125"></span><span>  </span><span id="local-6989586621679335169"><span id="local-6989586621679335193"><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335193"><span class="hs-identifier hs-var">ma</span></a></span></span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#%21%2A%21"><span class="hs-operator hs-var hs-var">!*!</span></a></span><span> </span><span id="local-6989586621679335194"><span class="annot"><span class="annottext">matrix'
+</span><a href="#local-6989586621679335194"><span class="hs-identifier hs-var">mb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((Int, Int) -&gt; IxValue (Vector m r)) -&gt; matrix''
+forall matrix (n :: Nat) (m :: Nat) r.
+Matrix_ matrix n m r =&gt;
+((Int, Int) -&gt; r) -&gt; matrix
+</span><a href="HGeometry.Matrix.Class.html#generateMatrix"><span class="hs-identifier hs-var">generateMatrix</span></a></span><span> </span><span class="annot"><span class="annottext">(((Int, Int) -&gt; IxValue (Vector m r)) -&gt; matrix'')
+-&gt; ((Int, Int) -&gt; IxValue (Vector m r)) -&gt; matrix''
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679335195"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335195"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679335196"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335196"><span class="hs-identifier hs-var">j</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; matrix -&gt; Vector m (NumType matrix)
+forall {a} {n :: Nat} {m :: Nat}.
+(Matrix_ a n m (NumType a),
+ Vector_ (Vector m (NumType a)) m (NumType a)) =&gt;
+Int -&gt; a -&gt; Vector m (NumType a)
+</span><a href="#local-6989586621679335197"><span class="hs-identifier hs-var">row'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335195"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335193"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="annot"><span class="annottext">Vector m r -&gt; Vector m r -&gt; IxValue (Vector m r)
+forall {s}.
+(Additive_ s (Dimension s) (IxValue s), Num (IxValue s)) =&gt;
+s -&gt; s -&gt; IxValue s
+</span><a href="#local-6989586621679335198"><span class="hs-operator hs-var">`dot'`</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; matrix' -&gt; Vector m (NumType matrix')
+forall {a} {n :: Nat} {m :: Nat}.
+(Matrix_ a n m (NumType a),
+ Vector_ (Vector n (NumType a)) n (NumType a)) =&gt;
+Int -&gt; a -&gt; Vector n (NumType a)
+</span><a href="#local-6989586621679335199"><span class="hs-identifier hs-var">column'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335196"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="annot"><span class="annottext">matrix'
+</span><a href="#local-6989586621679335194"><span class="hs-identifier hs-var">mb</span></a></span><span>
+</span><span id="line-126"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-127"></span><span>      </span><span id="local-6989586621679335197"><span class="annot"><span class="annottext">row' :: Int -&gt; a -&gt; Vector m (NumType a)
+</span><a href="#local-6989586621679335197"><span class="hs-identifier hs-var hs-var">row'</span></a></span></span><span> </span><span id="local-6989586621679335232"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335232"><span class="hs-identifier hs-var">i</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector m (NumType a)
+-&gt; Maybe (Vector m (NumType a)) -&gt; Vector m (NumType a)
+forall a. a -&gt; Maybe a -&gt; a
+</span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Char] -&gt; Vector m (NumType a)
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;absurd: row i out of range&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Maybe (Vector m (NumType a)) -&gt; Vector m (NumType a))
+-&gt; (a -&gt; Maybe (Vector m (NumType a))) -&gt; a -&gt; Vector m (NumType a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; Maybe (Vector m (NumType a))
+forall matrix (n :: Nat) (m :: Nat) r.
+(Matrix_ matrix n m r, Has_ Vector_ m r) =&gt;
+Int -&gt; matrix -&gt; Maybe (Vector m r)
+</span><a href="HGeometry.Matrix.Class.html#row"><span class="hs-identifier hs-var">row</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335232"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-128"></span><span>      </span><span id="local-6989586621679335199"><span class="annot"><span class="annottext">column' :: Int -&gt; a -&gt; Vector n (NumType a)
+</span><a href="#local-6989586621679335199"><span class="hs-identifier hs-var hs-var">column'</span></a></span></span><span> </span><span id="local-6989586621679335266"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335266"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector n (NumType a)
+-&gt; Maybe (Vector n (NumType a)) -&gt; Vector n (NumType a)
+forall a. a -&gt; Maybe a -&gt; a
+</span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Char] -&gt; Vector n (NumType a)
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;absurd: column j out of range&quot;</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Maybe (Vector n (NumType a)) -&gt; Vector n (NumType a))
+-&gt; (a -&gt; Maybe (Vector n (NumType a))) -&gt; a -&gt; Vector n (NumType a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; Maybe (Vector n (NumType a))
+forall matrix (n :: Nat) (m :: Nat) r.
+(Matrix_ matrix n m r, Has_ Vector_ n r) =&gt;
+Int -&gt; matrix -&gt; Maybe (Vector n r)
+</span><a href="HGeometry.Matrix.Class.html#column"><span class="hs-identifier hs-var">column</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335266"><span class="hs-identifier hs-var">j</span></a></span><span>
+</span><span id="line-129"></span><span>
+</span><span id="line-130"></span><span>      </span><span id="local-6989586621679335198"><span class="annot"><span class="annottext">dot' :: s -&gt; s -&gt; IxValue s
+</span><a href="#local-6989586621679335198"><span class="hs-identifier hs-var hs-var">dot'</span></a></span></span><span> </span><span id="local-6989586621679335292"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679335292"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span id="local-6989586621679335293"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679335293"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting (Endo (Endo (IxValue s))) s (IxValue s) -&gt; s -&gt; IxValue s
+forall a s. Num a =&gt; Getting (Endo (Endo a)) s a -&gt; s -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Fold.html#sumOf"><span class="hs-identifier hs-var">sumOf</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Endo (Endo (IxValue s))) s (IxValue s)
+forall vector vector'.
+HasComponents vector vector' =&gt;
+IndexedTraversal1
+  Int vector vector' (IxValue vector) (IxValue vector')
+IndexedTraversal1 Int s s (IxValue s) (IxValue s)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#components"><span class="hs-identifier hs-var">components</span></a></span><span> </span><span class="annot"><span class="annottext">(s -&gt; IxValue s) -&gt; s -&gt; IxValue s
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(IxValue s -&gt; IxValue s -&gt; IxValue s) -&gt; s -&gt; s -&gt; s
+forall vector (d :: Nat) r.
+Additive_ vector d r =&gt;
+(r -&gt; r -&gt; r) -&gt; vector -&gt; vector -&gt; vector
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#liftI2"><span class="hs-identifier hs-var">liftI2</span></a></span><span> </span><span class="annot"><span class="annottext">IxValue s -&gt; IxValue s -&gt; IxValue s
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(*)</span></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679335292"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679335293"><span class="hs-identifier hs-var">v</span></a></span></span><span>
+</span><span id="line-131"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="hs-pragma">(</span><span class="hs-pragma">!*!</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-132"></span><span>
+</span><span id="line-133"></span><span>  </span><span class="hs-comment">-- | Multiply a matrix and a vector.</span><span>
+</span><span id="line-134"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-135"></span><span>  </span><span class="hs-comment">-- &gt;&gt;&gt; let m = matrixFromRows @(Matrix 2 3 Int) (Vector2 (Vector3 1 2 3) (Vector3 4 5 6))</span><span>
+</span><span id="line-136"></span><span>  </span><span class="hs-comment">-- &gt;&gt;&gt; m !* Vector3 2 3 1</span><span>
+</span><span id="line-137"></span><span>  </span><span class="hs-comment">-- Vector2 11 29</span><span>
+</span><span id="line-138"></span><span>  </span><span id="%21%2A"><span class="annot"><a href="HGeometry.Matrix.Class.html#%21%2A"><span class="hs-operator hs-type">(!*)</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Has_"><span class="hs-identifier hs-type">Has_</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Vector_"><span class="hs-identifier hs-type">Vector_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334908"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-139"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#HasComponents"><span class="hs-identifier hs-type">HasComponents</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334908"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334908"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-140"></span><span>           </span><span class="hs-comment">-- , Additive_</span><span>
+</span><span id="line-141"></span><span>           </span><span class="hs-comment">-- , OptVector_ n r, OptVector_ m r</span><span>
+</span><span id="line-142"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Has_"><span class="hs-identifier hs-type">Has_</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Additive_"><span class="hs-identifier hs-type">Additive_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-143"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-144"></span><span>           </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334908"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-145"></span><span>  </span><span id="local-6989586621679335299"><span id="local-6989586621679335342"><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335342"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#%21%2A"><span class="hs-operator hs-var hs-var">!*</span></a></span><span> </span><span id="local-6989586621679335343"><span class="annot"><span class="annottext">Vector m r
+</span><a href="#local-6989586621679335343"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector n (Vector m r)
+</span><a href="#local-6989586621679335344"><span class="hs-identifier hs-var">rows'</span></a></span><span class="annot"><span class="annottext">Vector n (Vector m r)
+-&gt; (Vector n (Vector m r) -&gt; Vector n r) -&gt; Vector n r
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Vector m r -&gt; Identity r)
+-&gt; Vector n (Vector m r) -&gt; Identity (Vector n r)
+(IxValue (Vector n (Vector m r))
+ -&gt; Identity (IxValue (Vector n r)))
+-&gt; Vector n (Vector m r) -&gt; Identity (Vector n r)
+forall vector vector'.
+HasComponents vector vector' =&gt;
+IndexedTraversal1
+  Int vector vector' (IxValue vector) (IxValue vector')
+IndexedTraversal1
+  Int
+  (Vector n (Vector m r))
+  (Vector n r)
+  (IxValue (Vector n (Vector m r)))
+  (IxValue (Vector n r))
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#components"><span class="hs-identifier hs-var">components</span></a></span><span> </span><span class="annot"><span class="annottext">((Vector m r -&gt; Identity r)
+ -&gt; Vector n (Vector m r) -&gt; Identity (Vector n r))
+-&gt; (Vector m r -&gt; r) -&gt; Vector n (Vector m r) -&gt; Vector n r
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="annot"><span class="annottext">Vector m r -&gt; r
+</span><a href="#local-6989586621679335347"><span class="hs-identifier hs-var">dotWithV</span></a></span><span>
+</span><span id="line-146"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-147"></span><span>      </span><span class="annot"><a href="#local-6989586621679335344"><span class="hs-identifier hs-type">rows'</span></a></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334908"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-148"></span><span>      </span><span id="local-6989586621679335344"><span class="annot"><span class="annottext">rows' :: Vector n (Vector m r)
+</span><a href="#local-6989586621679335344"><span class="hs-identifier hs-var hs-var">rows'</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335342"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">matrix
+-&gt; Getting (Vector n (Vector m r)) matrix (Vector n (Vector m r))
+-&gt; Vector n (Vector m r)
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector n (Vector m r)) matrix (Vector n (Vector m r))
+forall matrix (n :: Nat) (m :: Nat) r.
+Matrix_ matrix n m r =&gt;
+Lens' matrix (Vector n (Vector m r))
+Lens' matrix (Vector n (Vector m r))
+</span><a href="HGeometry.Matrix.Class.html#rows"><span class="hs-identifier hs-var">rows</span></a></span><span>
+</span><span id="line-149"></span><span>      </span><span class="annot"><a href="#local-6989586621679335347"><span class="hs-identifier hs-type">dotWithV</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-150"></span><span>      </span><span id="local-6989586621679335347"><span class="annot"><span class="annottext">dotWithV :: Vector m r -&gt; r
+</span><a href="#local-6989586621679335347"><span class="hs-identifier hs-var hs-var">dotWithV</span></a></span></span><span> </span><span id="local-6989586621679335349"><span class="annot"><span class="annottext">Vector m r
+</span><a href="#local-6989586621679335349"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting (Endo (Endo r)) (Vector m r) r -&gt; Vector m r -&gt; r
+forall a s. Num a =&gt; Getting (Endo (Endo a)) s a -&gt; s -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Fold.html#sumOf"><span class="hs-identifier hs-var">sumOf</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Endo (Endo r)) (Vector m r) r
+(IxValue (Vector m r)
+ -&gt; Const (Endo (Endo r)) (IxValue (Vector m r)))
+-&gt; Vector m r -&gt; Const (Endo (Endo r)) (Vector m r)
+forall vector vector'.
+HasComponents vector vector' =&gt;
+IndexedTraversal1
+  Int vector vector' (IxValue vector) (IxValue vector')
+IndexedTraversal1
+  Int
+  (Vector m r)
+  (Vector m r)
+  (IxValue (Vector m r))
+  (IxValue (Vector m r))
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#components"><span class="hs-identifier hs-var">components</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector m r -&gt; r) -&gt; Vector m r -&gt; r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(r -&gt; r -&gt; r) -&gt; Vector m r -&gt; Vector m r -&gt; Vector m r
+forall vector (d :: Nat) r.
+Additive_ vector d r =&gt;
+(r -&gt; r -&gt; r) -&gt; vector -&gt; vector -&gt; vector
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#liftI2"><span class="hs-identifier hs-var">liftI2</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(*)</span></span><span> </span><span class="annot"><span class="annottext">Vector m r
+</span><a href="#local-6989586621679335349"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector m r
+</span><a href="#local-6989586621679335343"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">Vector m r
+-&gt; Getting (Vector m r) (Vector m r) (Vector m r) -&gt; Vector m r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector m r) (Vector m r) (Vector m r)
+forall vector vector' (d :: Nat) r s.
+AsVector_ vector vector' d r s =&gt;
+Iso vector vector' (Vector d r) (Vector d s)
+Iso (Vector m r) (Vector m r) (Vector m r) (Vector m r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#_Vector"><span class="hs-identifier hs-var">_Vector</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-151"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="hs-pragma">(</span><span class="hs-pragma">!*</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-152"></span><span>
+</span><span id="line-153"></span><span>  </span><span class="hs-comment">-- | Multiply a scalar and a matrix</span><span>
+</span><span id="line-154"></span><span>  </span><span id="%2A%21%21"><span class="annot"><a href="HGeometry.Matrix.Class.html#%2A%21%21"><span class="hs-operator hs-type">(*!!)</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span>
+</span><span id="line-155"></span><span>  </span><span id="local-6989586621679335352"><span id="local-6989586621679335362"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335362"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#%2A%21%21"><span class="hs-operator hs-var hs-var">*!!</span></a></span><span> </span><span id="local-6989586621679335363"><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335363"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335363"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">matrix -&gt; (matrix -&gt; matrix) -&gt; matrix
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(r -&gt; Identity r) -&gt; matrix -&gt; Identity matrix
+(NumType matrix -&gt; Identity (NumType matrix))
+-&gt; matrix -&gt; Identity matrix
+forall matrix matrix'.
+HasElements matrix matrix' =&gt;
+IndexedTraversal1
+  (Int, Int) matrix matrix' (NumType matrix) (NumType matrix')
+IndexedTraversal1
+  (Int, Int) matrix matrix (NumType matrix) (NumType matrix)
+</span><a href="HGeometry.Matrix.Class.html#elements"><span class="hs-identifier hs-var">elements</span></a></span><span> </span><span class="annot"><span class="annottext">((r -&gt; Identity r) -&gt; matrix -&gt; Identity matrix)
+-&gt; r -&gt; matrix -&gt; matrix
+forall a s t. Num a =&gt; ASetter s t a a -&gt; a -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Setter.html#%2A~"><span class="hs-operator hs-var">*~</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335362"><span class="hs-identifier hs-var">s</span></a></span></span><span>
+</span><span id="line-156"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="hs-pragma">(</span><span class="hs-pragma">*!!</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-157"></span><span>
+</span><span id="line-158"></span><span>  </span><span class="hs-comment">-- | Multiply a matrix and a scalar</span><span>
+</span><span id="line-159"></span><span>  </span><span id="%21%21%2A"><span class="annot"><a href="HGeometry.Matrix.Class.html#%21%21%2A"><span class="hs-operator hs-type">(!!*)</span></a></span></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span>
+</span><span id="line-160"></span><span>  </span><span id="local-6989586621679335366"><span id="local-6989586621679335376"><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335376"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#%21%21%2A"><span class="hs-operator hs-var hs-var">!!*</span></a></span><span> </span><span id="local-6989586621679335377"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335377"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335376"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">matrix -&gt; (matrix -&gt; matrix) -&gt; matrix
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(r -&gt; Identity r) -&gt; matrix -&gt; Identity matrix
+(NumType matrix -&gt; Identity (NumType matrix))
+-&gt; matrix -&gt; Identity matrix
+forall matrix matrix'.
+HasElements matrix matrix' =&gt;
+IndexedTraversal1
+  (Int, Int) matrix matrix' (NumType matrix) (NumType matrix')
+IndexedTraversal1
+  (Int, Int) matrix matrix (NumType matrix) (NumType matrix)
+</span><a href="HGeometry.Matrix.Class.html#elements"><span class="hs-identifier hs-var">elements</span></a></span><span> </span><span class="annot"><span class="annottext">((r -&gt; Identity r) -&gt; matrix -&gt; Identity matrix)
+-&gt; r -&gt; matrix -&gt; matrix
+forall a s t. Num a =&gt; ASetter s t a a -&gt; a -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Setter.html#%2A~"><span class="hs-operator hs-var">*~</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335377"><span class="hs-identifier hs-var">s</span></a></span></span><span>
+</span><span id="line-161"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="hs-pragma">(</span><span class="hs-pragma">!!*</span><span class="hs-pragma">)</span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-162"></span><span>
+</span><span id="line-163"></span><span>  </span><span class="hs-comment">-- | Lens to access all rows</span><span>
+</span><span id="line-164"></span><span>  </span><span id="rows"><span class="annot"><a href="HGeometry.Matrix.Class.html#rows"><span class="hs-identifier hs-type">rows</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334908"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-165"></span><span>  </span><span class="hs-comment">-- rows :: IndexedTraversal' Int matrix (Vector m r)</span><span>
+</span><span id="line-166"></span><span>
+</span><span id="line-167"></span><span class="hs-comment">--  -- | Traversal over all columns</span><span>
+</span><span id="line-168"></span><span class="hs-comment">--  columns :: IndexedTraversal' Int matrix (Vector n r)</span><span>
+</span><span id="line-169"></span><span>
+</span><span id="line-170"></span><span>
+</span><span id="line-171"></span><span>
+</span><span id="line-172"></span><span>  </span><span class="hs-comment">-- | Access the i^th row in the matrix.</span><span>
+</span><span id="line-173"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-174"></span><span>  </span><span id="row"><span class="annot"><a href="HGeometry.Matrix.Class.html#row"><span class="hs-identifier hs-type">row</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Has_"><span class="hs-identifier hs-type">Has_</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Vector_"><span class="hs-identifier hs-type">Vector_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334909"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-175"></span><span>  </span><span id="local-6989586621679335378"><span class="annot"><a href="HGeometry.Matrix.Class.html#row"><span class="hs-identifier hs-var hs-var">row</span></a></span><span> </span><span id="local-6989586621679335411"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335411"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679335412"><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335412"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Maybe r) -&gt; Maybe (Vector m r)
+forall vector (d :: Nat) r (f :: * -&gt; *).
+(Vector_ vector d r, Applicative f) =&gt;
+(Int -&gt; f r) -&gt; f vector
+forall (f :: * -&gt; *).
+Applicative f =&gt;
+(Int -&gt; f r) -&gt; f (Vector m r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#generateA"><span class="hs-identifier hs-var">generateA</span></a></span><span> </span><span class="annot"><span class="annottext">((Int -&gt; Maybe r) -&gt; Maybe (Vector m r))
+-&gt; (Int -&gt; Maybe r) -&gt; Maybe (Vector m r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679335414"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335414"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335412"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">matrix -&gt; Getting (First r) matrix r -&gt; Maybe r
+forall s a. s -&gt; Getting (First a) s a -&gt; Maybe a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Fold.html#%5E%3F"><span class="hs-operator hs-var">^?</span></a></span><span> </span><span class="annot"><span class="annottext">Index matrix -&gt; Traversal' matrix (IxValue matrix)
+forall m. Ixed m =&gt; Index m -&gt; Traversal' m (IxValue m)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.At.html#ix"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335411"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335414"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-176"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#row"><span class="hs-pragma hs-type">row</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-177"></span><span>
+</span><span id="line-178"></span><span>  </span><span class="hs-comment">-- row'   :: (OptVector_ m r, KnownNat m) =&gt; Int -&gt; Traversal' matrix (Vector m r)</span><span>
+</span><span id="line-179"></span><span>  </span><span class="hs-comment">-- row' i = traversal go</span><span>
+</span><span id="line-180"></span><span>  </span><span class="hs-comment">--   where</span><span>
+</span><span id="line-181"></span><span>  </span><span class="hs-comment">--     go focus m =</span><span>
+</span><span id="line-182"></span><span>    </span><span class="hs-comment">-- generate $ \j -&gt; m ^?! ix (i,j)</span><span>
+</span><span id="line-183"></span><span>
+</span><span id="line-184"></span><span>  </span><span class="hs-comment">-- | Access the j^th column in the matrix.</span><span>
+</span><span id="line-185"></span><span>  </span><span id="column"><span class="annot"><a href="HGeometry.Matrix.Class.html#column"><span class="hs-identifier hs-type">column</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Has_"><span class="hs-identifier hs-type">Has_</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Vector_"><span class="hs-identifier hs-type">Vector_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334908"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679334907"><span class="hs-identifier hs-type">matrix</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector"><span class="hs-identifier hs-type">Vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334908"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679334910"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-186"></span><span>  </span><span id="local-6989586621679335417"><span class="annot"><a href="HGeometry.Matrix.Class.html#column"><span class="hs-identifier hs-var hs-var">column</span></a></span><span> </span><span id="local-6989586621679335448"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335448"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span id="local-6989586621679335449"><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335449"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Maybe r) -&gt; Maybe (Vector n r)
+forall vector (d :: Nat) r (f :: * -&gt; *).
+(Vector_ vector d r, Applicative f) =&gt;
+(Int -&gt; f r) -&gt; f vector
+forall (f :: * -&gt; *).
+Applicative f =&gt;
+(Int -&gt; f r) -&gt; f (Vector n r)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#generateA"><span class="hs-identifier hs-var">generateA</span></a></span><span> </span><span class="annot"><span class="annottext">((Int -&gt; Maybe r) -&gt; Maybe (Vector n r))
+-&gt; (Int -&gt; Maybe r) -&gt; Maybe (Vector n r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679335450"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335450"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335449"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="annot"><span class="annottext">matrix -&gt; Getting (First r) matrix r -&gt; Maybe r
+forall s a. s -&gt; Getting (First a) s a -&gt; Maybe a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Fold.html#%5E%3F"><span class="hs-operator hs-var">^?</span></a></span><span> </span><span class="annot"><span class="annottext">Index matrix -&gt; Traversal' matrix (IxValue matrix)
+forall m. Ixed m =&gt; Index m -&gt; Traversal' m (IxValue m)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.At.html#ix"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335450"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679335448"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-187"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#column"><span class="hs-pragma hs-type">column</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-188"></span><span>
+</span><span id="line-189"></span><span>
+</span><span id="line-190"></span><span class="hs-keyword">infixl</span><span> </span><span class="hs-number">7</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#%21%2A%21"><span class="hs-operator hs-type">!*!</span></a></span><span>
+</span><span id="line-191"></span><span class="hs-keyword">infixl</span><span> </span><span class="hs-number">7</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#%21%2A"><span class="hs-operator hs-type">!*</span></a></span><span>
+</span><span id="line-192"></span><span class="hs-keyword">infixl</span><span> </span><span class="hs-number">7</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#%2A%21%21"><span class="hs-operator hs-type">*!!</span></a></span><span>
+</span><span id="line-193"></span><span class="hs-keyword">infixl</span><span> </span><span class="hs-number">7</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#%21%21%2A"><span class="hs-operator hs-type">!!*</span></a></span><span>
+</span><span id="line-194"></span><span>
+</span><span id="line-195"></span><span class="hs-comment">-- class Matrix_ matrix n m r =&gt; ConstructableMatrix_ matrix n m r where</span><span>
+</span><span id="line-196"></span><span class="hs-comment">--   fromList</span><span>
+</span><span id="line-197"></span><span>
+</span><span id="line-198"></span><span>
+</span><span id="line-199"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-200"></span><span class="annot"><span class="hs-comment">-- * Determinants</span></span><span>
+</span><span id="line-201"></span><span>
+</span><span id="line-202"></span><span class="annot"><span class="hs-comment">-- | Dimensions for which we can compute the determinant of a matrix</span></span><span>
+</span><span id="line-203"></span><span class="hs-keyword">class</span><span> </span><span id="HasDeterminant"><span class="annot"><a href="HGeometry.Matrix.Class.html#HasDeterminant"><span class="hs-identifier hs-var">HasDeterminant</span></a></span></span><span> </span><span id="local-6989586621679335026"><span class="annot"><a href="#local-6989586621679335026"><span class="hs-identifier hs-type">d</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-204"></span><span>  </span><span id="det"><span class="annot"><a href="HGeometry.Matrix.Class.html#det"><span class="hs-identifier hs-type">det</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679335023"><span id="local-6989586621679335024"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679335023"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#Matrix_"><span class="hs-identifier hs-type">Matrix_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679335024"><span class="hs-identifier hs-type">matrix</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679335026"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679335026"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679335023"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679335024"><span class="hs-identifier hs-type">matrix</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679335023"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-205"></span><span>
+</span><span id="line-206"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#HasDeterminant"><span class="hs-identifier hs-type">HasDeterminant</span></a></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-207"></span><span>  </span><span id="local-6989586621679335472"><span class="annot"><span class="annottext">det :: forall r matrix. (Num r, Matrix_ matrix 1 1 r) =&gt; matrix -&gt; r
+</span><a href="HGeometry.Matrix.Class.html#det"><span class="hs-identifier hs-var hs-var hs-var hs-var">det</span></a></span></span><span> </span><span id="local-6989586621679335473"><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335473"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335473"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">matrix -&gt; Getting (Endo r) matrix r -&gt; r
+forall s a. HasCallStack =&gt; s -&gt; Getting (Endo a) s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Fold.html#%5E%3F%21"><span class="hs-operator hs-var">^?!</span></a></span><span class="annot"><span class="annottext">Index matrix -&gt; Traversal' matrix (IxValue matrix)
+forall m. Ixed m =&gt; Index m -&gt; Traversal' m (IxValue m)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.At.html#ix"><span class="hs-identifier hs-var">ix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-208"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#det"><span class="hs-pragma hs-type">det</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-209"></span><span>
+</span><span id="line-210"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#HasDeterminant"><span class="hs-identifier hs-type">HasDeterminant</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-211"></span><span>  </span><span id="local-6989586621679335490"><span class="annot"><span class="annottext">det :: forall r matrix. (Num r, Matrix_ matrix 2 2 r) =&gt; matrix -&gt; r
+</span><a href="HGeometry.Matrix.Class.html#det"><span class="hs-identifier hs-var hs-var hs-var hs-var">det</span></a></span></span><span> </span><span id="local-6989586621679335491"><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335491"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335491"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">matrix -&gt; Getting (Endo [r]) matrix r -&gt; [r]
+forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Fold.html#%5E.."><span class="hs-operator hs-var">^..</span></a></span><span class="annot"><span class="annottext">Getting (Endo [r]) matrix r
+(NumType matrix -&gt; Const (Endo [r]) (NumType matrix))
+-&gt; matrix -&gt; Const (Endo [r]) matrix
+forall matrix matrix'.
+HasElements matrix matrix' =&gt;
+IndexedTraversal1
+  (Int, Int) matrix matrix' (NumType matrix) (NumType matrix')
+IndexedTraversal1
+  (Int, Int) matrix matrix (NumType matrix) (NumType matrix)
+</span><a href="HGeometry.Matrix.Class.html#elements"><span class="hs-identifier hs-var">elements</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-212"></span><span>            </span><span class="hs-special">[</span><span> </span><span id="local-6989586621679335493"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335493"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335494"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335494"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span>
+</span><span id="line-213"></span><span>              </span><span id="local-6989586621679335495"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335495"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335496"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335496"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; r
+forall r. Num r =&gt; r -&gt; r -&gt; r -&gt; r -&gt; r
+</span><a href="HGeometry.Matrix.Class.html#det22"><span class="hs-identifier hs-var">det22</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335493"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335494"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335495"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335496"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="hs-comment">-- a*d - b*c</span><span>
+</span><span id="line-214"></span><span>            </span><span class="annot"><span class="annottext">[r]
+</span><span class="hs-identifier">_</span></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; r
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;det: 2x2, absurd&quot;</span></span><span>
+</span><span id="line-215"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#det"><span class="hs-pragma hs-type">det</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-216"></span><span>
+</span><span id="line-217"></span><span class="annot"><span class="hs-comment">-- | determinant of a 2x2 matrix [[a,b], [c,d]]</span></span><span>
+</span><span id="line-218"></span><span id="local-6989586621679335036"><span class="annot"><a href="HGeometry.Matrix.Class.html#det22"><span class="hs-identifier hs-type">det22</span></a></span><span>         </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679335036"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679335036"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679335036"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679335036"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679335036"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679335036"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-219"></span><span id="det22"><span class="annot"><span class="annottext">det22 :: forall r. Num r =&gt; r -&gt; r -&gt; r -&gt; r -&gt; r
+</span><a href="HGeometry.Matrix.Class.html#det22"><span class="hs-identifier hs-var hs-var">det22</span></a></span></span><span> </span><span id="local-6989586621679335502"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335502"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679335503"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335503"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679335504"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335504"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679335505"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335505"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335502"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335505"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335503"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335504"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><span id="line-220"></span><span>
+</span><span id="line-221"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#HasDeterminant"><span class="hs-identifier hs-type">HasDeterminant</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-222"></span><span>  </span><span id="local-6989586621679335537"><span class="annot"><span class="annottext">det :: forall r matrix. (Num r, Matrix_ matrix 3 3 r) =&gt; matrix -&gt; r
+</span><a href="HGeometry.Matrix.Class.html#det"><span class="hs-identifier hs-var hs-var hs-var hs-var">det</span></a></span></span><span> </span><span id="local-6989586621679335538"><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335538"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335538"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">matrix -&gt; Getting (Endo [r]) matrix r -&gt; [r]
+forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Fold.html#%5E.."><span class="hs-operator hs-var">^..</span></a></span><span class="annot"><span class="annottext">Getting (Endo [r]) matrix r
+(NumType matrix -&gt; Const (Endo [r]) (NumType matrix))
+-&gt; matrix -&gt; Const (Endo [r]) matrix
+forall matrix matrix'.
+HasElements matrix matrix' =&gt;
+IndexedTraversal1
+  (Int, Int) matrix matrix' (NumType matrix) (NumType matrix')
+IndexedTraversal1
+  (Int, Int) matrix matrix (NumType matrix) (NumType matrix)
+</span><a href="HGeometry.Matrix.Class.html#elements"><span class="hs-identifier hs-var">elements</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-223"></span><span>            </span><span class="hs-special">[</span><span> </span><span id="local-6989586621679335539"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335539"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335540"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335540"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335541"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335541"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span>
+</span><span id="line-224"></span><span>              </span><span id="local-6989586621679335542"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335542"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335543"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335543"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335544"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335544"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">,</span><span>
+</span><span id="line-225"></span><span>              </span><span id="local-6989586621679335545"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335545"><span class="hs-identifier hs-var">g</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335546"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335546"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335547"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335547"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335539"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335543"><span class="hs-identifier hs-var">e</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335547"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335540"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335544"><span class="hs-identifier hs-var">f</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335545"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335541"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335542"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335546"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335541"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335543"><span class="hs-identifier hs-var">e</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335545"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335540"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335542"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335547"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335539"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335544"><span class="hs-identifier hs-var">f</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335546"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-226"></span><span>            </span><span class="annot"><span class="annottext">[r]
+</span><span class="hs-identifier">_</span></span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; r
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;det: 3x3, absurd&quot;</span></span><span>
+</span><span id="line-227"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#det"><span class="hs-pragma hs-type">det</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-228"></span><span>
+</span><span id="line-229"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#HasDeterminant"><span class="hs-identifier hs-type">HasDeterminant</span></a></span><span> </span><span class="annot"><span class="hs-number">4</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-230"></span><span>  </span><span id="local-6989586621679335610"><span class="annot"><span class="annottext">det :: forall r matrix. (Num r, Matrix_ matrix 4 4 r) =&gt; matrix -&gt; r
+</span><a href="HGeometry.Matrix.Class.html#det"><span class="hs-identifier hs-var hs-var hs-var hs-var">det</span></a></span></span><span> </span><span id="local-6989586621679335611"><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335611"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335611"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">matrix -&gt; Getting (Endo [r]) matrix r -&gt; [r]
+forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Fold.html#%5E.."><span class="hs-operator hs-var">^..</span></a></span><span class="annot"><span class="annottext">Getting (Endo [r]) matrix r
+(NumType matrix -&gt; Const (Endo [r]) (NumType matrix))
+-&gt; matrix -&gt; Const (Endo [r]) matrix
+forall matrix matrix'.
+HasElements matrix matrix' =&gt;
+IndexedTraversal1
+  (Int, Int) matrix matrix' (NumType matrix) (NumType matrix')
+IndexedTraversal1
+  (Int, Int) matrix matrix (NumType matrix) (NumType matrix)
+</span><a href="HGeometry.Matrix.Class.html#elements"><span class="hs-identifier hs-var">elements</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-231"></span><span>    </span><span class="hs-special">[</span><span> </span><span id="local-6989586621679335612"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335612"><span class="hs-identifier hs-var">i00</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335613"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335613"><span class="hs-identifier hs-var">i01</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335614"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335614"><span class="hs-identifier hs-var">i02</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335615"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335615"><span class="hs-identifier hs-var">i03</span></a></span></span><span class="hs-special">,</span><span>
+</span><span id="line-232"></span><span>      </span><span id="local-6989586621679335616"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335616"><span class="hs-identifier hs-var">i10</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335617"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335617"><span class="hs-identifier hs-var">i11</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335618"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335618"><span class="hs-identifier hs-var">i12</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335619"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335619"><span class="hs-identifier hs-var">i13</span></a></span></span><span class="hs-special">,</span><span>
+</span><span id="line-233"></span><span>      </span><span id="local-6989586621679335620"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335620"><span class="hs-identifier hs-var">i20</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335621"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335621"><span class="hs-identifier hs-var">i21</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335622"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335622"><span class="hs-identifier hs-var">i22</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335623"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335623"><span class="hs-identifier hs-var">i23</span></a></span></span><span class="hs-special">,</span><span>
+</span><span id="line-234"></span><span>      </span><span id="local-6989586621679335624"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335624"><span class="hs-identifier hs-var">i30</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335625"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335625"><span class="hs-identifier hs-var">i31</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335626"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335626"><span class="hs-identifier hs-var">i32</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335627"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335627"><span class="hs-identifier hs-var">i33</span></a></span></span><span> </span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679335628"><span class="annot"><span class="annottext">s0 :: r
+</span><a href="#local-6989586621679335628"><span class="hs-identifier hs-var hs-var">s0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335612"><span class="hs-identifier hs-var">i00</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335617"><span class="hs-identifier hs-var">i11</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335616"><span class="hs-identifier hs-var">i10</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335613"><span class="hs-identifier hs-var">i01</span></a></span><span>
+</span><span id="line-235"></span><span>                                  </span><span id="local-6989586621679335629"><span class="annot"><span class="annottext">s1 :: r
+</span><a href="#local-6989586621679335629"><span class="hs-identifier hs-var hs-var">s1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335612"><span class="hs-identifier hs-var">i00</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335618"><span class="hs-identifier hs-var">i12</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335616"><span class="hs-identifier hs-var">i10</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335614"><span class="hs-identifier hs-var">i02</span></a></span><span>
+</span><span id="line-236"></span><span>                                  </span><span id="local-6989586621679335630"><span class="annot"><span class="annottext">s2 :: r
+</span><a href="#local-6989586621679335630"><span class="hs-identifier hs-var hs-var">s2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335612"><span class="hs-identifier hs-var">i00</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335619"><span class="hs-identifier hs-var">i13</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335616"><span class="hs-identifier hs-var">i10</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335615"><span class="hs-identifier hs-var">i03</span></a></span><span>
+</span><span id="line-237"></span><span>                                  </span><span id="local-6989586621679335631"><span class="annot"><span class="annottext">s3 :: r
+</span><a href="#local-6989586621679335631"><span class="hs-identifier hs-var hs-var">s3</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335613"><span class="hs-identifier hs-var">i01</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335618"><span class="hs-identifier hs-var">i12</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335617"><span class="hs-identifier hs-var">i11</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335614"><span class="hs-identifier hs-var">i02</span></a></span><span>
+</span><span id="line-238"></span><span>                                  </span><span id="local-6989586621679335632"><span class="annot"><span class="annottext">s4 :: r
+</span><a href="#local-6989586621679335632"><span class="hs-identifier hs-var hs-var">s4</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335613"><span class="hs-identifier hs-var">i01</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335619"><span class="hs-identifier hs-var">i13</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335617"><span class="hs-identifier hs-var">i11</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335615"><span class="hs-identifier hs-var">i03</span></a></span><span>
+</span><span id="line-239"></span><span>                                  </span><span id="local-6989586621679335633"><span class="annot"><span class="annottext">s5 :: r
+</span><a href="#local-6989586621679335633"><span class="hs-identifier hs-var hs-var">s5</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335614"><span class="hs-identifier hs-var">i02</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335619"><span class="hs-identifier hs-var">i13</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335618"><span class="hs-identifier hs-var">i12</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335615"><span class="hs-identifier hs-var">i03</span></a></span><span>
+</span><span id="line-240"></span><span>
+</span><span id="line-241"></span><span>                                  </span><span id="local-6989586621679335634"><span class="annot"><span class="annottext">c5 :: r
+</span><a href="#local-6989586621679335634"><span class="hs-identifier hs-var hs-var">c5</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335622"><span class="hs-identifier hs-var">i22</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335627"><span class="hs-identifier hs-var">i33</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335626"><span class="hs-identifier hs-var">i32</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335623"><span class="hs-identifier hs-var">i23</span></a></span><span>
+</span><span id="line-242"></span><span>                                  </span><span id="local-6989586621679335635"><span class="annot"><span class="annottext">c4 :: r
+</span><a href="#local-6989586621679335635"><span class="hs-identifier hs-var hs-var">c4</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335621"><span class="hs-identifier hs-var">i21</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335627"><span class="hs-identifier hs-var">i33</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335625"><span class="hs-identifier hs-var">i31</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335623"><span class="hs-identifier hs-var">i23</span></a></span><span>
+</span><span id="line-243"></span><span>                                  </span><span id="local-6989586621679335636"><span class="annot"><span class="annottext">c3 :: r
+</span><a href="#local-6989586621679335636"><span class="hs-identifier hs-var hs-var">c3</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335621"><span class="hs-identifier hs-var">i21</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335626"><span class="hs-identifier hs-var">i32</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335625"><span class="hs-identifier hs-var">i31</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335622"><span class="hs-identifier hs-var">i22</span></a></span><span>
+</span><span id="line-244"></span><span>                                  </span><span id="local-6989586621679335637"><span class="annot"><span class="annottext">c2 :: r
+</span><a href="#local-6989586621679335637"><span class="hs-identifier hs-var hs-var">c2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335620"><span class="hs-identifier hs-var">i20</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335627"><span class="hs-identifier hs-var">i33</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335624"><span class="hs-identifier hs-var">i30</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335623"><span class="hs-identifier hs-var">i23</span></a></span><span>
+</span><span id="line-245"></span><span>                                  </span><span id="local-6989586621679335638"><span class="annot"><span class="annottext">c1 :: r
+</span><a href="#local-6989586621679335638"><span class="hs-identifier hs-var hs-var">c1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335620"><span class="hs-identifier hs-var">i20</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335626"><span class="hs-identifier hs-var">i32</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335624"><span class="hs-identifier hs-var">i30</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335622"><span class="hs-identifier hs-var">i22</span></a></span><span>
+</span><span id="line-246"></span><span>                                  </span><span id="local-6989586621679335639"><span class="annot"><span class="annottext">c0 :: r
+</span><a href="#local-6989586621679335639"><span class="hs-identifier hs-var hs-var">c0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335620"><span class="hs-identifier hs-var">i20</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335625"><span class="hs-identifier hs-var">i31</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335624"><span class="hs-identifier hs-var">i30</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335621"><span class="hs-identifier hs-var">i21</span></a></span><span>
+</span><span id="line-247"></span><span>                              </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335628"><span class="hs-identifier hs-var">s0</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335634"><span class="hs-identifier hs-var">c5</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335629"><span class="hs-identifier hs-var">s1</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335635"><span class="hs-identifier hs-var">c4</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335630"><span class="hs-identifier hs-var">s2</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335636"><span class="hs-identifier hs-var">c3</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335631"><span class="hs-identifier hs-var">s3</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335637"><span class="hs-identifier hs-var">c2</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335632"><span class="hs-identifier hs-var">s4</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335638"><span class="hs-identifier hs-var">c1</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335633"><span class="hs-identifier hs-var">s5</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335639"><span class="hs-identifier hs-var">c0</span></a></span><span>
+</span><span id="line-248"></span><span>     </span><span class="hs-comment">-- adapted from the implementation in the Linear package.</span><span>
+</span><span id="line-249"></span><span>    </span><span class="annot"><span class="annottext">[r]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; r
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;det: 4x4 absurd&quot;</span></span><span>
+</span><span id="line-250"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#det"><span class="hs-pragma hs-type">det</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-251"></span><span>  </span><span class="hs-comment">-- TODO: verify that GHC unrolls the list</span><span>
+</span><span id="line-252"></span><span>  </span><span class="hs-comment">-- TODO verify that GHC specializes this for the most relevant types</span><span>
+</span><span id="line-253"></span><span>
+</span><span id="line-254"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-255"></span><span class="annot"><span class="hs-comment">-- * Invertible matrices</span></span><span>
+</span><span id="line-256"></span><span>
+</span><span id="line-257"></span><span>
+</span><span id="line-258"></span><span class="annot"><span class="hs-comment">-- | Class of matrices that are invertible.</span></span><span>
+</span><span id="line-259"></span><span class="hs-keyword">class</span><span> </span><span id="Invertible"><span class="annot"><a href="HGeometry.Matrix.Class.html#Invertible"><span class="hs-identifier hs-var">Invertible</span></a></span></span><span> </span><span id="local-6989586621679335045"><span class="annot"><a href="#local-6989586621679335045"><span class="hs-identifier hs-type">n</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-260"></span><span>  </span><span class="hs-comment">-- | given an invertable square \(n \times n\) matrix A, computes</span><span>
+</span><span id="line-261"></span><span>  </span><span class="hs-comment">-- the \(n \times n\) matrix B such that A !*! B = identityMatrix</span><span>
+</span><span id="line-262"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-263"></span><span>  </span><span id="inverseMatrix"><span class="annot"><a href="HGeometry.Matrix.Class.html#inverseMatrix"><span class="hs-identifier hs-type">inverseMatrix</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679335042"><span id="local-6989586621679335043"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679335042"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-264"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#Matrix_"><span class="hs-identifier hs-type">Matrix_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679335043"><span class="hs-identifier hs-type">matrix</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679335045"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679335045"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679335042"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-265"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Has_"><span class="hs-identifier hs-type">Has_</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#Vector_"><span class="hs-identifier hs-type">Vector_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679335045"><span class="hs-identifier hs-type">n</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679335042"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-266"></span><span>                   </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679335043"><span class="hs-identifier hs-type">matrix</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679335043"><span class="hs-identifier hs-type">matrix</span></a></span></span></span><span>
+</span><span id="line-267"></span><span>
+</span><span id="line-268"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#Invertible"><span class="hs-identifier hs-type">Invertible</span></a></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-269"></span><span>  </span><span id="local-6989586621679335658"><span class="annot"><span class="annottext">inverseMatrix :: forall r matrix.
+(Fractional r, Matrix_ matrix 1 1 r, Has_ Vector_ 1 r) =&gt;
+matrix -&gt; matrix
+</span><a href="HGeometry.Matrix.Class.html#inverseMatrix"><span class="hs-identifier hs-var hs-var hs-var hs-var">inverseMatrix</span></a></span></span><span> </span><span id="local-6989586621679335659"><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335659"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335659"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">matrix -&gt; (matrix -&gt; matrix) -&gt; matrix
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(r -&gt; Identity r) -&gt; matrix -&gt; Identity matrix
+(NumType matrix -&gt; Identity (NumType matrix))
+-&gt; matrix -&gt; Identity matrix
+forall matrix matrix'.
+HasElements matrix matrix' =&gt;
+IndexedTraversal1
+  (Int, Int) matrix matrix' (NumType matrix) (NumType matrix')
+IndexedTraversal1
+  (Int, Int) matrix matrix (NumType matrix) (NumType matrix)
+</span><a href="HGeometry.Matrix.Class.html#elements"><span class="hs-identifier hs-var">elements</span></a></span><span> </span><span class="annot"><span class="annottext">((r -&gt; Identity r) -&gt; matrix -&gt; Identity matrix)
+-&gt; (r -&gt; r) -&gt; matrix -&gt; matrix
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679335660"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335660"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">1</span></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335660"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-270"></span><span>  </span><span class="hs-comment">-- slightly weird way of writing this, since there is only one element, but whatever</span><span>
+</span><span id="line-271"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#inverseMatrix"><span class="hs-pragma hs-type">inverseMatrix</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-272"></span><span>
+</span><span id="line-273"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#Invertible"><span class="hs-identifier hs-type">Invertible</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-274"></span><span>  </span><span class="hs-comment">-- &gt;&gt;&gt; printMatrix $ inverseMatrix $ matrixFromList' @(Matrix 2 2 Double) [1,2, 3,4]</span><span>
+</span><span id="line-275"></span><span>  </span><span class="hs-comment">-- (Vector2 (-2.0) 1.0)</span><span>
+</span><span id="line-276"></span><span>  </span><span class="hs-comment">-- (Vector2 1.5 (-0.5))</span><span>
+</span><span id="line-277"></span><span>  </span><span id="local-6989586621679335690"><span class="annot"><span class="annottext">inverseMatrix :: forall r matrix.
+(Fractional r, Matrix_ matrix 2 2 r, Has_ Vector_ 2 r) =&gt;
+matrix -&gt; matrix
+</span><a href="HGeometry.Matrix.Class.html#inverseMatrix"><span class="hs-identifier hs-var hs-var hs-var hs-var">inverseMatrix</span></a></span></span><span> </span><span id="local-6989586621679335691"><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335691"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335691"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">matrix -&gt; Getting (Endo [r]) matrix r -&gt; [r]
+forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Fold.html#%5E.."><span class="hs-operator hs-var">^..</span></a></span><span class="annot"><span class="annottext">Getting (Endo [r]) matrix r
+(NumType matrix -&gt; Const (Endo [r]) (NumType matrix))
+-&gt; matrix -&gt; Const (Endo [r]) matrix
+forall matrix matrix'.
+HasElements matrix matrix' =&gt;
+IndexedTraversal1
+  (Int, Int) matrix matrix' (NumType matrix) (NumType matrix')
+IndexedTraversal1
+  (Int, Int) matrix matrix (NumType matrix) (NumType matrix)
+</span><a href="HGeometry.Matrix.Class.html#elements"><span class="hs-identifier hs-var">elements</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-278"></span><span>                      </span><span class="hs-special">[</span><span id="local-6989586621679335692"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335692"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679335693"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335693"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span>
+</span><span id="line-279"></span><span>                       </span><span id="local-6989586621679335694"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335694"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679335695"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335695"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679335696"><span class="annot"><span class="annottext">s :: r
+</span><a href="#local-6989586621679335696"><span class="hs-identifier hs-var hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">matrix -&gt; r
+forall (d :: Nat) r matrix.
+(HasDeterminant d, Num r, Matrix_ matrix d d r) =&gt;
+matrix -&gt; r
+forall r matrix. (Num r, Matrix_ matrix 2 2 r) =&gt; matrix -&gt; r
+</span><a href="HGeometry.Matrix.Class.html#det"><span class="hs-identifier hs-var">det</span></a></span><span> </span><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335691"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-280"></span><span>                               </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335696"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; matrix -&gt; matrix
+forall matrix (n :: Nat) (m :: Nat) r.
+(Matrix_ matrix n m r, Num r) =&gt;
+r -&gt; matrix -&gt; matrix
+</span><a href="HGeometry.Matrix.Class.html#%2A%21%21"><span class="hs-operator hs-var">*!!</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector 2 (Vector 2 r) -&gt; matrix
+forall rowVector.
+Vector_ rowVector 2 (Vector 2 r) =&gt;
+rowVector -&gt; matrix
+forall matrix (n :: Nat) (m :: Nat) r rowVector.
+(Matrix_ matrix n m r, Vector_ rowVector n (Vector m r)) =&gt;
+rowVector -&gt; matrix
+</span><a href="HGeometry.Matrix.Class.html#matrixFromRows"><span class="hs-identifier hs-var">matrixFromRows</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector 2 (Vector 2 r) -&gt; matrix)
+-&gt; Vector 2 (Vector 2 r) -&gt; matrix
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; Vector 2 r -&gt; Vector 2 (Vector 2 r)
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="hs-comment">-- @(ListVector 2 _)</span><span>
+</span><span id="line-281"></span><span>                                  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; Vector 2 r
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335695"><span class="hs-identifier hs-var">d</span></a></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">negate</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335693"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-282"></span><span>                                  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; Vector 2 r
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector2"><span class="hs-identifier hs-var">Vector2</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r
+forall a. Num a =&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">negate</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335694"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335692"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-283"></span><span>                      </span><span class="annot"><span class="annottext">[r]
+</span><span class="hs-identifier">_</span></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; matrix
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;inverseMatrix 2x2: absurd&quot;</span></span><span>
+</span><span id="line-284"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#inverseMatrix"><span class="hs-pragma hs-type">inverseMatrix</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-285"></span><span>  </span><span class="hs-comment">-- it is a bit silly we are using the list vectors here.</span><span>
+</span><span id="line-286"></span><span>
+</span><span id="line-287"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#Invertible"><span class="hs-identifier hs-type">Invertible</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-288"></span><span>  </span><span class="hs-comment">-- &gt;&gt;&gt; printMatrix $ inverseMatrix $ matrixFromList' @(Matrix 3 3 Double) [1,2,4,     4,2,2,    1,1,1]</span><span>
+</span><span id="line-289"></span><span>  </span><span class="hs-comment">-- (Vector3 0.0 0.5 (-1.0))</span><span>
+</span><span id="line-290"></span><span>  </span><span class="hs-comment">-- (Vector3 (-0.5) (-0.75) 3.5)</span><span>
+</span><span id="line-291"></span><span>  </span><span class="hs-comment">-- (Vector3 0.5 0.25 (-1.5))</span><span>
+</span><span id="line-292"></span><span>  </span><span id="local-6989586621679335733"><span class="annot"><span class="annottext">inverseMatrix :: forall r matrix.
+(Fractional r, Matrix_ matrix 3 3 r, Has_ Vector_ 3 r) =&gt;
+matrix -&gt; matrix
+</span><a href="HGeometry.Matrix.Class.html#inverseMatrix"><span class="hs-identifier hs-var hs-var hs-var hs-var">inverseMatrix</span></a></span></span><span> </span><span id="local-6989586621679335734"><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335734"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335734"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">matrix -&gt; Getting (Endo [r]) matrix r -&gt; [r]
+forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Fold.html#%5E.."><span class="hs-operator hs-var">^..</span></a></span><span class="annot"><span class="annottext">Getting (Endo [r]) matrix r
+(NumType matrix -&gt; Const (Endo [r]) (NumType matrix))
+-&gt; matrix -&gt; Const (Endo [r]) matrix
+forall matrix matrix'.
+HasElements matrix matrix' =&gt;
+IndexedTraversal1
+  (Int, Int) matrix matrix' (NumType matrix) (NumType matrix')
+IndexedTraversal1
+  (Int, Int) matrix matrix (NumType matrix) (NumType matrix)
+</span><a href="HGeometry.Matrix.Class.html#elements"><span class="hs-identifier hs-var">elements</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-293"></span><span>      </span><span class="hs-special">[</span><span> </span><span id="local-6989586621679335735"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335735"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335736"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335736"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335737"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335737"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">,</span><span>
+</span><span id="line-294"></span><span>        </span><span id="local-6989586621679335738"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335738"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335739"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335739"><span class="hs-identifier hs-var">e</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335740"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335740"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">,</span><span>
+</span><span id="line-295"></span><span>        </span><span id="local-6989586621679335741"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335741"><span class="hs-identifier hs-var">g</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335742"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335742"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679335743"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335743"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679335744"><span class="annot"><span class="annottext">lambda :: r
+</span><a href="#local-6989586621679335744"><span class="hs-identifier hs-var hs-var">lambda</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">matrix -&gt; r
+forall (d :: Nat) r matrix.
+(HasDeterminant d, Num r, Matrix_ matrix d d r) =&gt;
+matrix -&gt; r
+forall r matrix. (Num r, Matrix_ matrix 3 3 r) =&gt; matrix -&gt; r
+</span><a href="HGeometry.Matrix.Class.html#det"><span class="hs-identifier hs-var">det</span></a></span><span> </span><span class="annot"><span class="annottext">matrix
+</span><a href="#local-6989586621679335734"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-296"></span><span>                        </span><span id="local-6989586621679335745"><span class="annot"><span class="annottext">aa :: r
+</span><a href="#local-6989586621679335745"><span class="hs-identifier hs-var hs-var">aa</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; r
+forall r. Num r =&gt; r -&gt; r -&gt; r -&gt; r -&gt; r
+</span><a href="HGeometry.Matrix.Class.html#det22"><span class="hs-identifier hs-var">det22</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335739"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335740"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335742"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335743"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-297"></span><span>                        </span><span id="local-6989586621679335746"><span class="annot"><span class="annottext">bb :: r
+</span><a href="#local-6989586621679335746"><span class="hs-identifier hs-var hs-var">bb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; r
+forall r. Num r =&gt; r -&gt; r -&gt; r -&gt; r -&gt; r
+</span><a href="HGeometry.Matrix.Class.html#det22"><span class="hs-identifier hs-var">det22</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335737"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335736"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335743"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335742"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-298"></span><span>                        </span><span id="local-6989586621679335747"><span class="annot"><span class="annottext">cc :: r
+</span><a href="#local-6989586621679335747"><span class="hs-identifier hs-var hs-var">cc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; r
+forall r. Num r =&gt; r -&gt; r -&gt; r -&gt; r -&gt; r
+</span><a href="HGeometry.Matrix.Class.html#det22"><span class="hs-identifier hs-var">det22</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335736"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335737"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335739"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335740"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-299"></span><span>                        </span><span id="local-6989586621679335748"><span class="annot"><span class="annottext">dd :: r
+</span><a href="#local-6989586621679335748"><span class="hs-identifier hs-var hs-var">dd</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; r
+forall r. Num r =&gt; r -&gt; r -&gt; r -&gt; r -&gt; r
+</span><a href="HGeometry.Matrix.Class.html#det22"><span class="hs-identifier hs-var">det22</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335740"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335738"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335743"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335741"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-300"></span><span>                        </span><span id="local-6989586621679335749"><span class="annot"><span class="annottext">ee :: r
+</span><a href="#local-6989586621679335749"><span class="hs-identifier hs-var hs-var">ee</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; r
+forall r. Num r =&gt; r -&gt; r -&gt; r -&gt; r -&gt; r
+</span><a href="HGeometry.Matrix.Class.html#det22"><span class="hs-identifier hs-var">det22</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335735"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335737"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335741"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335743"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-301"></span><span>                        </span><span id="local-6989586621679335750"><span class="annot"><span class="annottext">ff :: r
+</span><a href="#local-6989586621679335750"><span class="hs-identifier hs-var hs-var">ff</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; r
+forall r. Num r =&gt; r -&gt; r -&gt; r -&gt; r -&gt; r
+</span><a href="HGeometry.Matrix.Class.html#det22"><span class="hs-identifier hs-var">det22</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335737"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335735"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335740"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335738"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-302"></span><span>                        </span><span id="local-6989586621679335751"><span class="annot"><span class="annottext">gg :: r
+</span><a href="#local-6989586621679335751"><span class="hs-identifier hs-var hs-var">gg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; r
+forall r. Num r =&gt; r -&gt; r -&gt; r -&gt; r -&gt; r
+</span><a href="HGeometry.Matrix.Class.html#det22"><span class="hs-identifier hs-var">det22</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335738"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335739"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335741"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335742"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-303"></span><span>                        </span><span id="local-6989586621679335752"><span class="annot"><span class="annottext">hh :: r
+</span><a href="#local-6989586621679335752"><span class="hs-identifier hs-var hs-var">hh</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; r
+forall r. Num r =&gt; r -&gt; r -&gt; r -&gt; r -&gt; r
+</span><a href="HGeometry.Matrix.Class.html#det22"><span class="hs-identifier hs-var">det22</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335736"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335735"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335742"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335741"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><span id="line-304"></span><span>                        </span><span id="local-6989586621679335753"><span class="annot"><span class="annottext">ii :: r
+</span><a href="#local-6989586621679335753"><span class="hs-identifier hs-var hs-var">ii</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; r
+forall r. Num r =&gt; r -&gt; r -&gt; r -&gt; r -&gt; r
+</span><a href="HGeometry.Matrix.Class.html#det22"><span class="hs-identifier hs-var">det22</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335735"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335736"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335738"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335739"><span class="hs-identifier hs-var">e</span></a></span><span>
+</span><span id="line-305"></span><span>                    </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335744"><span class="hs-identifier hs-var">lambda</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; matrix -&gt; matrix
+forall matrix (n :: Nat) (m :: Nat) r.
+(Matrix_ matrix n m r, Num r) =&gt;
+r -&gt; matrix -&gt; matrix
+</span><a href="HGeometry.Matrix.Class.html#%2A%21%21"><span class="hs-operator hs-var">*!!</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector 3 (Vector 3 r) -&gt; matrix
+forall rowVector.
+Vector_ rowVector 3 (Vector 3 r) =&gt;
+rowVector -&gt; matrix
+forall matrix (n :: Nat) (m :: Nat) r rowVector.
+(Matrix_ matrix n m r, Vector_ rowVector n (Vector m r)) =&gt;
+rowVector -&gt; matrix
+</span><a href="HGeometry.Matrix.Class.html#matrixFromRows"><span class="hs-identifier hs-var">matrixFromRows</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector 3 (Vector 3 r) -&gt; matrix)
+-&gt; Vector 3 (Vector 3 r) -&gt; matrix
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector 3 r -&gt; Vector 3 r -&gt; Vector 3 r -&gt; Vector 3 (Vector 3 r)
+forall r. r -&gt; r -&gt; r -&gt; Vector 3 r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector3"><span class="hs-identifier hs-var">Vector3</span></a></span><span> </span><span class="hs-comment">-- _ @(ListVector 3 _)</span><span>
+</span><span id="line-306"></span><span>                                     </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; Vector 3 r
+forall r. r -&gt; r -&gt; r -&gt; Vector 3 r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector3"><span class="hs-identifier hs-var">Vector3</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335745"><span class="hs-identifier hs-var">aa</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335746"><span class="hs-identifier hs-var">bb</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335747"><span class="hs-identifier hs-var">cc</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-307"></span><span>                                     </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; Vector 3 r
+forall r. r -&gt; r -&gt; r -&gt; Vector 3 r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector3"><span class="hs-identifier hs-var">Vector3</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335748"><span class="hs-identifier hs-var">dd</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335749"><span class="hs-identifier hs-var">ee</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335750"><span class="hs-identifier hs-var">ff</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-308"></span><span>                                     </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; Vector 3 r
+forall r. r -&gt; r -&gt; r -&gt; Vector 3 r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Type.html#Vector3"><span class="hs-identifier hs-var">Vector3</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335751"><span class="hs-identifier hs-var">gg</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335752"><span class="hs-identifier hs-var">hh</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679335753"><span class="hs-identifier hs-var">ii</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-309"></span><span>      </span><span class="annot"><span class="annottext">[r]
+</span><span class="hs-identifier">_</span></span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; matrix
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;inverseMatrix 3x3: absurd&quot;</span></span><span>
+</span><span id="line-310"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.Matrix.Class.html#inverseMatrix"><span class="hs-pragma hs-type">inverseMatrix</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-311"></span><span>
+</span><span id="line-312"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-313"></span></pre></body></html>

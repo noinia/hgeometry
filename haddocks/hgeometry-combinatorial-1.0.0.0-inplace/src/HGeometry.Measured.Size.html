@@ -1,0 +1,386 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Measured.Size</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.Measured.Size</span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Measured.Size.html#Count"><span class="hs-identifier">Count</span></a></span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Size.html#Count"><span class="hs-identifier">Count</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-10"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier">Sized</span></a></span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier">Sized</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Coerce</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Sum</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Measured.Class.html"><span class="hs-identifier">HGeometry.Measured.Class</span></a></span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="annot"><span class="hs-comment">-- | Measured size or count. The result is always non-negative.</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">newtype</span><span> </span><span id="Count"><span class="annot"><a href="HGeometry.Measured.Size.html#Count"><span class="hs-identifier hs-var">Count</span></a></span></span><span> </span><span id="local-6989586621679181405"><span class="annot"><a href="#local-6989586621679181405"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Count"><span class="annot"><a href="HGeometry.Measured.Size.html#Count"><span class="hs-identifier hs-var">Count</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word</span></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679181505"><span id="local-6989586621679181511"><span id="local-6989586621679181515"><span class="annot"><span class="annottext">Int -&gt; Count a -&gt; ShowS
+[Count a] -&gt; ShowS
+Count a -&gt; String
+(Int -&gt; Count a -&gt; ShowS)
+-&gt; (Count a -&gt; String) -&gt; ([Count a] -&gt; ShowS) -&gt; Show (Count a)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall k (a :: k). Int -&gt; Count a -&gt; ShowS
+forall k (a :: k). [Count a] -&gt; ShowS
+forall k (a :: k). Count a -&gt; String
+$cshowsPrec :: forall k (a :: k). Int -&gt; Count a -&gt; ShowS
+showsPrec :: Int -&gt; Count a -&gt; ShowS
+$cshow :: forall k (a :: k). Count a -&gt; String
+show :: Count a -&gt; String
+$cshowList :: forall k (a :: k). [Count a] -&gt; ShowS
+showList :: [Count a] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679181519"><span id="local-6989586621679181523"><span id="local-6989586621679181526"><span id="local-6989586621679181534"><span class="annot"><span class="annottext">ReadPrec [Count a]
+ReadPrec (Count a)
+Int -&gt; ReadS (Count a)
+ReadS [Count a]
+(Int -&gt; ReadS (Count a))
+-&gt; ReadS [Count a]
+-&gt; ReadPrec (Count a)
+-&gt; ReadPrec [Count a]
+-&gt; Read (Count a)
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+forall k (a :: k). ReadPrec [Count a]
+forall k (a :: k). ReadPrec (Count a)
+forall k (a :: k). Int -&gt; ReadS (Count a)
+forall k (a :: k). ReadS [Count a]
+$creadsPrec :: forall k (a :: k). Int -&gt; ReadS (Count a)
+readsPrec :: Int -&gt; ReadS (Count a)
+$creadList :: forall k (a :: k). ReadS [Count a]
+readList :: ReadS [Count a]
+$creadPrec :: forall k (a :: k). ReadPrec (Count a)
+readPrec :: ReadPrec (Count a)
+$creadListPrec :: forall k (a :: k). ReadPrec [Count a]
+readListPrec :: ReadPrec [Count a]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679181538"><span id="local-6989586621679181542"><span class="annot"><span class="annottext">Count a -&gt; Count a -&gt; Bool
+(Count a -&gt; Count a -&gt; Bool)
+-&gt; (Count a -&gt; Count a -&gt; Bool) -&gt; Eq (Count a)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall k (a :: k). Count a -&gt; Count a -&gt; Bool
+$c== :: forall k (a :: k). Count a -&gt; Count a -&gt; Bool
+== :: Count a -&gt; Count a -&gt; Bool
+$c/= :: forall k (a :: k). Count a -&gt; Count a -&gt; Bool
+/= :: Count a -&gt; Count a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679181549"><span id="local-6989586621679181553"><span id="local-6989586621679181556"><span id="local-6989586621679181560"><span id="local-6989586621679181563"><span id="local-6989586621679181566"><span id="local-6989586621679181569"><span class="annot"><span class="annottext">Eq (Count a)
+Eq (Count a) =&gt;
+(Count a -&gt; Count a -&gt; Ordering)
+-&gt; (Count a -&gt; Count a -&gt; Bool)
+-&gt; (Count a -&gt; Count a -&gt; Bool)
+-&gt; (Count a -&gt; Count a -&gt; Bool)
+-&gt; (Count a -&gt; Count a -&gt; Bool)
+-&gt; (Count a -&gt; Count a -&gt; Count a)
+-&gt; (Count a -&gt; Count a -&gt; Count a)
+-&gt; Ord (Count a)
+Count a -&gt; Count a -&gt; Bool
+Count a -&gt; Count a -&gt; Ordering
+Count a -&gt; Count a -&gt; Count a
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall k (a :: k). Eq (Count a)
+forall k (a :: k). Count a -&gt; Count a -&gt; Bool
+forall k (a :: k). Count a -&gt; Count a -&gt; Ordering
+forall k (a :: k). Count a -&gt; Count a -&gt; Count a
+$ccompare :: forall k (a :: k). Count a -&gt; Count a -&gt; Ordering
+compare :: Count a -&gt; Count a -&gt; Ordering
+$c&lt; :: forall k (a :: k). Count a -&gt; Count a -&gt; Bool
+&lt; :: Count a -&gt; Count a -&gt; Bool
+$c&lt;= :: forall k (a :: k). Count a -&gt; Count a -&gt; Bool
+&lt;= :: Count a -&gt; Count a -&gt; Bool
+$c&gt; :: forall k (a :: k). Count a -&gt; Count a -&gt; Bool
+&gt; :: Count a -&gt; Count a -&gt; Bool
+$c&gt;= :: forall k (a :: k). Count a -&gt; Count a -&gt; Bool
+&gt;= :: Count a -&gt; Count a -&gt; Bool
+$cmax :: forall k (a :: k). Count a -&gt; Count a -&gt; Count a
+max :: Count a -&gt; Count a -&gt; Count a
+$cmin :: forall k (a :: k). Count a -&gt; Count a -&gt; Count a
+min :: Count a -&gt; Count a -&gt; Count a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679181573"><span id="local-6989586621679181575"><span class="annot"><span class="annottext">(forall x. Count a -&gt; Rep (Count a) x)
+-&gt; (forall x. Rep (Count a) x -&gt; Count a) -&gt; Generic (Count a)
+forall x. Rep (Count a) x -&gt; Count a
+forall x. Count a -&gt; Rep (Count a) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall k (a :: k) x. Rep (Count a) x -&gt; Count a
+forall k (a :: k) x. Count a -&gt; Rep (Count a) x
+$cfrom :: forall k (a :: k) x. Count a -&gt; Rep (Count a) x
+from :: forall x. Count a -&gt; Rep (Count a) x
+$cto :: forall k (a :: k) x. Rep (Count a) x -&gt; Count a
+to :: forall x. Rep (Count a) x -&gt; Count a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">newtype</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679181579"><span class="annot"><span class="annottext">Count a -&gt; ()
+(Count a -&gt; ()) -&gt; NFData (Count a)
+forall a. (a -&gt; ()) -&gt; NFData a
+forall k (a :: k). Count a -&gt; ()
+$crnf :: forall k (a :: k). Count a -&gt; ()
+rnf :: Count a -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">NFData</span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679181586"><span id="local-6989586621679181592"><span id="local-6989586621679181599"><span class="annot"><span class="annottext">NonEmpty (Count a) -&gt; Count a
+Count a -&gt; Count a -&gt; Count a
+(Count a -&gt; Count a -&gt; Count a)
+-&gt; (NonEmpty (Count a) -&gt; Count a)
+-&gt; (forall b. Integral b =&gt; b -&gt; Count a -&gt; Count a)
+-&gt; Semigroup (Count a)
+forall b. Integral b =&gt; b -&gt; Count a -&gt; Count a
+forall a.
+(a -&gt; a -&gt; a)
+-&gt; (NonEmpty a -&gt; a)
+-&gt; (forall b. Integral b =&gt; b -&gt; a -&gt; a)
+-&gt; Semigroup a
+forall k (a :: k). NonEmpty (Count a) -&gt; Count a
+forall k (a :: k). Count a -&gt; Count a -&gt; Count a
+forall k (a :: k) b. Integral b =&gt; b -&gt; Count a -&gt; Count a
+$c&lt;&gt; :: forall k (a :: k). Count a -&gt; Count a -&gt; Count a
+&lt;&gt; :: Count a -&gt; Count a -&gt; Count a
+$csconcat :: forall k (a :: k). NonEmpty (Count a) -&gt; Count a
+sconcat :: NonEmpty (Count a) -&gt; Count a
+$cstimes :: forall k (a :: k) b. Integral b =&gt; b -&gt; Count a -&gt; Count a
+stimes :: forall b. Integral b =&gt; b -&gt; Count a -&gt; Count a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Semigroup</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679181611"><span id="local-6989586621679181617"><span id="local-6989586621679181622"><span class="annot"><span class="annottext">Semigroup (Count a)
+Count a
+Semigroup (Count a) =&gt;
+Count a
+-&gt; (Count a -&gt; Count a -&gt; Count a)
+-&gt; ([Count a] -&gt; Count a)
+-&gt; Monoid (Count a)
+[Count a] -&gt; Count a
+Count a -&gt; Count a -&gt; Count a
+forall a.
+Semigroup a =&gt;
+a -&gt; (a -&gt; a -&gt; a) -&gt; ([a] -&gt; a) -&gt; Monoid a
+forall k (a :: k). Semigroup (Count a)
+forall k (a :: k). Count a
+forall k (a :: k). [Count a] -&gt; Count a
+forall k (a :: k). Count a -&gt; Count a -&gt; Count a
+$cmempty :: forall k (a :: k). Count a
+mempty :: Count a
+$cmappend :: forall k (a :: k). Count a -&gt; Count a -&gt; Count a
+mappend :: Count a -&gt; Count a -&gt; Count a
+$cmconcat :: forall k (a :: k). [Count a] -&gt; Count a
+mconcat :: [Count a] -&gt; Count a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Monoid</span></span></span></span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">via</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Sum</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Word</span></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679181398"><span class="annot"><a href="HGeometry.Measured.Class.html#Measured"><span class="hs-identifier hs-type">Measured</span></a></span><span> </span><span class="annot"><a href="HGeometry.Measured.Size.html#Count"><span class="hs-identifier hs-type">Count</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679181398"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-28"></span><span>  </span><span id="local-6989586621679181631"><span class="annot"><span class="annottext">measure :: a -&gt; Count a
+</span><a href="#local-6989586621679181631"><span class="hs-identifier hs-var hs-var hs-var hs-var">measure</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Count a -&gt; a -&gt; Count a
+forall a b. a -&gt; b -&gt; a
+</span><span class="hs-identifier hs-var">const</span></span><span> </span><span class="annot"><span class="annottext">(Count a -&gt; a -&gt; Count a) -&gt; Count a -&gt; a -&gt; Count a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Word -&gt; Count a
+forall {k} (a :: k). Word -&gt; Count a
+</span><a href="HGeometry.Measured.Size.html#Count"><span class="hs-identifier hs-var">Count</span></a></span><span> </span><span class="annot"><span class="annottext">Word
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679181410"><span class="annot"><a href="HGeometry.Measured.Class.html#CanInsert"><span class="hs-identifier hs-type">CanInsert</span></a></span><span> </span><span class="annot"><a href="HGeometry.Measured.Size.html#Count"><span class="hs-identifier hs-type">Count</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679181410"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-31"></span><span>  </span><span id="local-6989586621679181641"><span class="annot"><span class="annottext">insertMeasure :: a -&gt; Count a -&gt; Count a
+</span><a href="#local-6989586621679181641"><span class="hs-identifier hs-var hs-var hs-var hs-var">insertMeasure</span></a></span></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Size.html#Count"><span class="hs-identifier hs-type">Count</span></a></span><span> </span><span id="local-6989586621679181643"><span class="annot"><span class="annottext">Word
+</span><a href="#local-6989586621679181643"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Word -&gt; Count a
+forall {k} (a :: k). Word -&gt; Count a
+</span><a href="HGeometry.Measured.Size.html#Count"><span class="hs-identifier hs-var">Count</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word
+</span><a href="#local-6989586621679181643"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Word -&gt; Word -&gt; Word
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Word
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679181416"><span class="annot"><a href="HGeometry.Measured.Class.html#CanDelete"><span class="hs-identifier hs-type">CanDelete</span></a></span><span> </span><span class="annot"><a href="HGeometry.Measured.Size.html#Count"><span class="hs-identifier hs-type">Count</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679181416"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-34"></span><span>  </span><span id="local-6989586621679181654"><span class="annot"><span class="annottext">deleteMeasure :: a -&gt; Count a -&gt; Maybe (Count a)
+</span><a href="#local-6989586621679181654"><span class="hs-identifier hs-var hs-var hs-var hs-var">deleteMeasure</span></a></span></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Size.html#Count"><span class="hs-identifier hs-type">Count</span></a></span><span> </span><span id="local-6989586621679181656"><span class="annot"><span class="annottext">Word
+</span><a href="#local-6989586621679181656"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Count a -&gt; Maybe (Count a)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Count a -&gt; Maybe (Count a))
+-&gt; (Word -&gt; Count a) -&gt; Word -&gt; Maybe (Count a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Word -&gt; Count a
+forall {k} (a :: k). Word -&gt; Count a
+</span><a href="HGeometry.Measured.Size.html#Count"><span class="hs-identifier hs-var">Count</span></a></span><span> </span><span class="annot"><span class="annottext">(Word -&gt; Maybe (Count a)) -&gt; Word -&gt; Maybe (Count a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Word -&gt; Word -&gt; Word
+forall a. Ord a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">max</span></span><span> </span><span class="annot"><span class="annottext">Word
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word
+</span><a href="#local-6989586621679181656"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Word -&gt; Word -&gt; Word
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Word
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- -- | Newtype wrapper for things for which we can measure the size</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- newtype Elem a = Elem { _unElem :: a }</span><span>
+</span><span id="line-40"></span><span class="hs-comment">--                deriving (Show,Read,Eq,Ord,Functor,Foldable,Traversable)</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- instance Measured Size (Elem a) where</span><span>
+</span><span id="line-43"></span><span class="hs-comment">--   measure _ = 1</span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="annot"><span class="hs-comment">-- | Things that have a size</span></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">data</span><span> </span><span id="Sized"><span class="annot"><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier hs-var">Sized</span></a></span></span><span> </span><span id="local-6989586621679181451"><span class="annot"><a href="#local-6989586621679181451"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Sized"><span class="annot"><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier hs-var">Sized</span></a></span></span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Size.html#Count"><span class="hs-identifier hs-type">Count</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679181451"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679181451"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-49"></span><span>             </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679181661"><span id="local-6989586621679181666"><span id="local-6989586621679181670"><span class="annot"><span class="annottext">Int -&gt; Sized a -&gt; ShowS
+[Sized a] -&gt; ShowS
+Sized a -&gt; String
+(Int -&gt; Sized a -&gt; ShowS)
+-&gt; (Sized a -&gt; String) -&gt; ([Sized a] -&gt; ShowS) -&gt; Show (Sized a)
+forall a. Show a =&gt; Int -&gt; Sized a -&gt; ShowS
+forall a. Show a =&gt; [Sized a] -&gt; ShowS
+forall a. Show a =&gt; Sized a -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: forall a. Show a =&gt; Int -&gt; Sized a -&gt; ShowS
+showsPrec :: Int -&gt; Sized a -&gt; ShowS
+$cshow :: forall a. Show a =&gt; Sized a -&gt; String
+show :: Sized a -&gt; String
+$cshowList :: forall a. Show a =&gt; [Sized a] -&gt; ShowS
+showList :: [Sized a] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679181674"><span id="local-6989586621679181678"><span class="annot"><span class="annottext">Sized a -&gt; Sized a -&gt; Bool
+(Sized a -&gt; Sized a -&gt; Bool)
+-&gt; (Sized a -&gt; Sized a -&gt; Bool) -&gt; Eq (Sized a)
+forall a. Eq a =&gt; Sized a -&gt; Sized a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: forall a. Eq a =&gt; Sized a -&gt; Sized a -&gt; Bool
+== :: Sized a -&gt; Sized a -&gt; Bool
+$c/= :: forall a. Eq a =&gt; Sized a -&gt; Sized a -&gt; Bool
+/= :: Sized a -&gt; Sized a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679181686"><span id="local-6989586621679181690"><span id="local-6989586621679181694"><span id="local-6989586621679181698"><span id="local-6989586621679181701"><span id="local-6989586621679181704"><span id="local-6989586621679181707"><span class="annot"><span class="annottext">Eq (Sized a)
+Eq (Sized a) =&gt;
+(Sized a -&gt; Sized a -&gt; Ordering)
+-&gt; (Sized a -&gt; Sized a -&gt; Bool)
+-&gt; (Sized a -&gt; Sized a -&gt; Bool)
+-&gt; (Sized a -&gt; Sized a -&gt; Bool)
+-&gt; (Sized a -&gt; Sized a -&gt; Bool)
+-&gt; (Sized a -&gt; Sized a -&gt; Sized a)
+-&gt; (Sized a -&gt; Sized a -&gt; Sized a)
+-&gt; Ord (Sized a)
+Sized a -&gt; Sized a -&gt; Bool
+Sized a -&gt; Sized a -&gt; Ordering
+Sized a -&gt; Sized a -&gt; Sized a
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall a. Ord a =&gt; Eq (Sized a)
+forall a. Ord a =&gt; Sized a -&gt; Sized a -&gt; Bool
+forall a. Ord a =&gt; Sized a -&gt; Sized a -&gt; Ordering
+forall a. Ord a =&gt; Sized a -&gt; Sized a -&gt; Sized a
+$ccompare :: forall a. Ord a =&gt; Sized a -&gt; Sized a -&gt; Ordering
+compare :: Sized a -&gt; Sized a -&gt; Ordering
+$c&lt; :: forall a. Ord a =&gt; Sized a -&gt; Sized a -&gt; Bool
+&lt; :: Sized a -&gt; Sized a -&gt; Bool
+$c&lt;= :: forall a. Ord a =&gt; Sized a -&gt; Sized a -&gt; Bool
+&lt;= :: Sized a -&gt; Sized a -&gt; Bool
+$c&gt; :: forall a. Ord a =&gt; Sized a -&gt; Sized a -&gt; Bool
+&gt; :: Sized a -&gt; Sized a -&gt; Bool
+$c&gt;= :: forall a. Ord a =&gt; Sized a -&gt; Sized a -&gt; Bool
+&gt;= :: Sized a -&gt; Sized a -&gt; Bool
+$cmax :: forall a. Ord a =&gt; Sized a -&gt; Sized a -&gt; Sized a
+max :: Sized a -&gt; Sized a -&gt; Sized a
+$cmin :: forall a. Ord a =&gt; Sized a -&gt; Sized a -&gt; Sized a
+min :: Sized a -&gt; Sized a -&gt; Sized a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679181711"><span id="local-6989586621679181713"><span class="annot"><span class="annottext">(forall x. Sized a -&gt; Rep (Sized a) x)
+-&gt; (forall x. Rep (Sized a) x -&gt; Sized a) -&gt; Generic (Sized a)
+forall x. Rep (Sized a) x -&gt; Sized a
+forall x. Sized a -&gt; Rep (Sized a) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall a x. Rep (Sized a) x -&gt; Sized a
+forall a x. Sized a -&gt; Rep (Sized a) x
+$cfrom :: forall a x. Sized a -&gt; Rep (Sized a) x
+from :: forall x. Sized a -&gt; Rep (Sized a) x
+$cto :: forall a x. Rep (Sized a) x -&gt; Sized a
+to :: forall x. Rep (Sized a) x -&gt; Sized a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679181443"><span id="local-6989586621679181717"><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="annot"><a href="#local-6989586621679181443"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NFData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679181443"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679181735"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-53"></span><span>  </span><span id="local-6989586621679181740"><span class="annot"><span class="annottext">fmap :: forall a b. (a -&gt; b) -&gt; Sized a -&gt; Sized b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span id="local-6989586621679181741"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679181741"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span><span> </span><span id="local-6989586621679181742"><span class="annot"><span class="annottext">Count a
+</span><a href="#local-6989586621679181742"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679181743"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679181743"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Count b -&gt; b -&gt; Sized b
+forall a. Count a -&gt; a -&gt; Sized a
+</span><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier hs-var">Sized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Count a -&gt; Count b
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="annot"><span class="annottext">Count a
+</span><a href="#local-6989586621679181742"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679181741"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679181743"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679181745"><span id="local-6989586621679181752"><span id="local-6989586621679181757"><span id="local-6989586621679181760"><span id="local-6989586621679181763"><span id="local-6989586621679181766"><span id="local-6989586621679181769"><span id="local-6989586621679181772"><span id="local-6989586621679181775"><span id="local-6989586621679181778"><span id="local-6989586621679181781"><span id="local-6989586621679181784"><span id="local-6989586621679181789"><span id="local-6989586621679181794"><span id="local-6989586621679181799"><span id="local-6989586621679181804"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-55"></span><span>  </span><span id="local-6989586621679181810"><span class="annot"><span class="annottext">foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Sized a -&gt; m
+</span><a href="#local-6989586621679181810"><span class="hs-identifier hs-var hs-var hs-var hs-var">foldMap</span></a></span></span><span> </span><span id="local-6989586621679181812"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679181812"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span><span> </span><span class="annot"><span class="annottext">Count a
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679181813"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679181813"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679181812"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679181813"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-56"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679181820"><span id="local-6989586621679181826"><span id="local-6989586621679181831"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="annot"><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-57"></span><span>  </span><span id="local-6989586621679181841"><span class="annot"><span class="annottext">traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Sized a -&gt; f (Sized b)
+</span><a href="#local-6989586621679181841"><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse</span></a></span></span><span> </span><span id="local-6989586621679181843"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679181843"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span><span> </span><span id="local-6989586621679181844"><span class="annot"><span class="annottext">Count a
+</span><a href="#local-6989586621679181844"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679181845"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679181845"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Count b -&gt; b -&gt; Sized b
+forall a. Count a -&gt; a -&gt; Sized a
+</span><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier hs-var">Sized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Count a -&gt; Count b
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="annot"><span class="annottext">Count a
+</span><a href="#local-6989586621679181844"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(b -&gt; Sized b) -&gt; f b -&gt; f (Sized b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679181843"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679181845"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679181499"><span id="local-6989586621679181850"><span id="local-6989586621679181854"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="#local-6989586621679181499"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679181499"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span><span> </span><span id="local-6989586621679181860"><span class="annot"><span class="annottext">Count a
+</span><a href="#local-6989586621679181860"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679181861"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679181861"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679181862"><span class="annot"><span class="annottext">&lt;&gt; :: Sized a -&gt; Sized a -&gt; Sized a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span><span> </span><span id="local-6989586621679181863"><span class="annot"><span class="annottext">Count a
+</span><a href="#local-6989586621679181863"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span id="local-6989586621679181864"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679181864"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Count a -&gt; a -&gt; Sized a
+forall a. Count a -&gt; a -&gt; Sized a
+</span><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier hs-var">Sized</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Count a
+</span><a href="#local-6989586621679181860"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Count a -&gt; Count a -&gt; Count a
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Count a
+</span><a href="#local-6989586621679181863"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679181861"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679181864"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679181501"><span id="local-6989586621679181871"><span id="local-6989586621679181875"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="#local-6989586621679181501"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier hs-type">Sized</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679181501"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-63"></span><span>  </span><span id="local-6989586621679181880"><span class="annot"><span class="annottext">mempty :: Sized a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Count a -&gt; a -&gt; Sized a
+forall a. Count a -&gt; a -&gt; Sized a
+</span><a href="HGeometry.Measured.Size.html#Sized"><span class="hs-identifier hs-var">Sized</span></a></span><span> </span><span class="annot"><span class="annottext">Count a
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="annot"><span class="annottext">a
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- instance Semigroup a =&gt; Measured Size (Sized a) where</span><span>
+</span><span id="line-66"></span><span class="hs-comment">--   measure (Sized i _) = i</span><span>
+</span><span id="line-67"></span></pre></body></html>

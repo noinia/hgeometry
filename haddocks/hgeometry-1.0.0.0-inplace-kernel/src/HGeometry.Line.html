@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# OPTIONS_GHC -Wno-orphans #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  HGeometry.Line</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Lines in d-dimensional space.</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.Line</span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Line.Class.html"><span class="hs-identifier">HGeometry.Line.Class</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Line.LineEQ.html"><span class="hs-identifier">HGeometry.Line.LineEQ</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Line.PointAndVector.html"><span class="hs-identifier">HGeometry.Line.PointAndVector</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Line.Intersection.html#LineLineIntersection"><span class="hs-identifier">LineLineIntersection</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html"><span class="hs-identifier">HGeometry.Intersection</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Line.Class.html"><span class="hs-identifier">HGeometry.Line.Class</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Line.Intersection.html"><span class="hs-identifier">HGeometry.Line.Intersection</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Line.LineEQ.html"><span class="hs-identifier">HGeometry.Line.LineEQ</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Line.PointAndVector.html"><span class="hs-identifier">HGeometry.Line.PointAndVector</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.html"><span class="hs-identifier">HGeometry.Point</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.html"><span class="hs-identifier">HGeometry.Vector</span></a></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Intersection"><span class="annot"><a href="HGeometry.Intersection.html#Intersection"><span class="hs-identifier hs-var">Intersection</span></a></span></span><span> </span><span id="local-6989586621679333003"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LineEQ.html#LineEQ"><span class="hs-identifier hs-type">LineEQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679333003"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-type">LinePV</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679333003"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-32"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.Intersection.html#LineLineIntersection"><span class="hs-identifier hs-type">LineLineIntersection</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LineEQ.html#LineEQ"><span class="hs-identifier hs-type">LineEQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679333003"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679332930"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679332930"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679332930"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#HasIntersectionWith"><span class="hs-identifier hs-type">HasIntersectionWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LineEQ.html#LineEQ"><span class="hs-identifier hs-type">LineEQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679332930"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-type">LinePV</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679332930"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LineEQ.html#LineEQ"><span class="hs-identifier hs-type">LineEQ</span></a></span><span> </span><span id="local-6989586621679333117"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679333117"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679333118"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679333118"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679333119"><span class="annot"><span class="annottext">intersects :: LineEQ r -&gt; LinePV 2 r -&gt; Bool
+</span><a href="#local-6989586621679333119"><span class="hs-operator hs-var hs-var hs-var hs-var">`intersects`</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-type">LinePV</span></a></span><span> </span><span id="local-6989586621679333122"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679333122"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679333123"><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679333123"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679333124"><span class="hs-identifier hs-var">differentSlopes</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679333126"><span class="hs-identifier hs-var">sameLine</span></a></span><span>
+</span><span id="line-36"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-37"></span><span>      </span><span id="local-6989586621679333124"><span class="annot"><span class="annottext">differentSlopes :: Bool
+</span><a href="#local-6989586621679333124"><span class="hs-identifier hs-var hs-var">differentSlopes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679333117"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679333123"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">Vector 2 r -&gt; Getting r (Vector 2 r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Vector 2 r) r
+forall vector (d :: Natural) r.
+(Vector_ vector d r, 1 &lt;= d) =&gt;
+IndexedLens' Int vector r
+IndexedLens' Int (Vector 2 r) r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#xComponent"><span class="hs-identifier hs-var">xComponent</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679333123"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">Vector 2 r -&gt; Getting r (Vector 2 r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Vector 2 r) r
+forall vector (d :: Natural) r.
+(Vector_ vector d r, 2 &lt;= d) =&gt;
+IndexedLens' Int vector r
+IndexedLens' Int (Vector 2 r) r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/vector/doc/html/hgeometry/src/HGeometry.Vector.Class.html#yComponent"><span class="hs-identifier hs-var">yComponent</span></a></span><span>
+</span><span id="line-38"></span><span>      </span><span id="local-6989586621679333126"><span class="annot"><span class="annottext">sameLine :: Bool
+</span><a href="#local-6989586621679333126"><span class="hs-identifier hs-var hs-var">sameLine</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679333117"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679333122"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Point 2 r -&gt; Getting r (Point 2 r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
+forall (d :: Natural) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int (Point 2 r) r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679333118"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679333122"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Point 2 r -&gt; Getting r (Point 2 r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
+forall (d :: Natural) point r.
+(2 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int (Point 2 r) r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span>
+</span><span id="line-39"></span><span>      </span><span class="hs-comment">-- if the slopes are equal, but lines go through the same point so they are the same</span><span>
+</span><span id="line-40"></span><span>      </span><span class="hs-comment">-- line, and thus they intersect</span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#intersects"><span class="hs-pragma hs-type">intersects</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679332986"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679332986"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679332986"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>         </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#IsIntersectableWith"><span class="hs-identifier hs-type">IsIntersectableWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LineEQ.html#LineEQ"><span class="hs-identifier hs-type">LineEQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679332986"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-type">LinePV</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679332986"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-45"></span><span>  </span><span id="local-6989586621679333184"><span class="annot"><span class="annottext">LineEQ r
+</span><a href="#local-6989586621679333184"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679333185"><span class="annot"><span class="annottext">intersect :: LineEQ r -&gt; LinePV 2 r -&gt; Intersection (LineEQ r) (LinePV 2 r)
+</span><a href="#local-6989586621679333185"><span class="hs-operator hs-var hs-var hs-var hs-var">`intersect`</span></a></span></span><span> </span><span id="local-6989586621679333187"><span class="annot"><span class="annottext">LinePV 2 r
+</span><a href="#local-6989586621679333187"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">LinePV 2 r -&gt; Maybe (LineEQ r)
+forall r. (Fractional r, Ord r) =&gt; LinePV 2 r -&gt; Maybe (LineEQ r)
+</span><a href="HGeometry.Line.PointAndVector.html#toLinearFunction"><span class="hs-identifier hs-var">toLinearFunction</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV 2 r
+</span><a href="#local-6989586621679333187"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-46"></span><span>    </span><span class="annot"><span class="annottext">Maybe (LineEQ r)
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679333189"><span class="annot"><span class="annottext">x :: r
+</span><a href="#local-6989586621679333189"><span class="hs-identifier hs-var hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LinePV 2 r
+</span><a href="#local-6989586621679333187"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">LinePV 2 r -&gt; Getting r (LinePV 2 r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.2.3-e0c36df638d35bfb84086fc0b55640100aca91af654b7bd5e183750d8d59ce6e/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const r (Point 2 r))
+-&gt; LinePV 2 r -&gt; Const r (LinePV 2 r)
+forall (d :: Natural) r (f :: * -&gt; *).
+Functor f =&gt;
+(Point d r -&gt; f (Point d r)) -&gt; LinePV d r -&gt; f (LinePV d r)
+</span><a href="HGeometry.Line.PointAndVector.html#anchorPoint"><span class="hs-identifier hs-var">anchorPoint</span></a></span><span class="annot"><span class="annottext">((Point 2 r -&gt; Const r (Point 2 r))
+ -&gt; LinePV 2 r -&gt; Const r (LinePV 2 r))
+-&gt; ((r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r))
+-&gt; Getting r (LinePV 2 r) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; Point 2 r -&gt; Const r (Point 2 r)
+forall (d :: Natural) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int (Point 2 r) r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span>
+</span><span id="line-47"></span><span>                  </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">LineLineIntersection (LineEQ r)
+-&gt; Maybe (LineLineIntersection (LineEQ r))
+LineLineIntersection (LineEQ r)
+-&gt; Intersection (LineEQ r) (LinePV 2 r)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(LineLineIntersection (LineEQ r)
+ -&gt; Intersection (LineEQ r) (LinePV 2 r))
+-&gt; (Point 2 r -&gt; LineLineIntersection (LineEQ r))
+-&gt; Point 2 r
+-&gt; Intersection (LineEQ r) (LinePV 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; LineLineIntersection (LineEQ r)
+Point 2 (NumType (LineEQ r)) -&gt; LineLineIntersection (LineEQ r)
+forall line. Point 2 (NumType line) -&gt; LineLineIntersection line
+</span><a href="HGeometry.Line.Intersection.html#Line_x_Line_Point"><span class="hs-identifier hs-var">Line_x_Line_Point</span></a></span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Intersection (LineEQ r) (LinePV 2 r))
+-&gt; Point 2 r -&gt; Intersection (LineEQ r) (LinePV 2 r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Point 2 r
+forall r. r -&gt; r -&gt; Point 2 r
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/point/doc/html/hgeometry/src/HGeometry.Point.html#Point2"><span class="hs-identifier hs-var">Point2</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679333189"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; LineEQ r -&gt; r
+forall r. Num r =&gt; r -&gt; LineEQ r -&gt; r
+</span><a href="HGeometry.Line.LineEQ.html#evalAt%27"><span class="hs-identifier hs-var">evalAt'</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679333189"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">LineEQ r
+</span><a href="#local-6989586621679333184"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-48"></span><span>                  </span><span class="hs-comment">-- m is vertical, l is not, so they intersect in a point</span><span>
+</span><span id="line-49"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679333195"><span class="annot"><span class="annottext">LineEQ r
+</span><a href="#local-6989586621679333195"><span class="hs-identifier hs-var">m'</span></a></span></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LineEQ r
+</span><a href="#local-6989586621679333184"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">LineEQ r -&gt; LineEQ r -&gt; Intersection (LineEQ r) (LineEQ r)
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><a href="HGeometry.Intersection.html#intersect"><span class="hs-operator hs-var">`intersect`</span></a></span><span> </span><span class="annot"><span class="annottext">LineEQ r
+</span><a href="#local-6989586621679333195"><span class="hs-identifier hs-var">m'</span></a></span><span>
+</span><span id="line-50"></span></pre></body></html>
