@@ -15,7 +15,6 @@ module HGeometry.Polygon.Triangulation.MakeMonotone
   ) where
 
 import           Control.Lens
-import           Data.Default.Class
 import qualified Data.Map as Map
 import           Data.Ord (Down (..), comparing)
 import qualified Data.Set as Set
@@ -51,7 +50,7 @@ makeMonotone pg = constructGraph pg (computeDiagonals pg)
 --
 -- running time: \(O(n\log n)\)
 computeDiagonals    :: ( Polygon_ polygon point r, Point_ point 2 r
-                       , Ord r, Num r, Ord (VertexIx polygon), Default (VertexIx polygon)
+                       , Ord r, Num r, Ord (VertexIx polygon)
                        )
                     => polygon -> [Diagonal polygon]
 computeDiagonals pg =
@@ -91,7 +90,6 @@ p `cmpSweep` q = comparing (^.yCoord) p q <> comparing (Down . (^.xCoord)) p q
 -- | Handle an event
 handle :: forall polygon point r. ( Polygon_ polygon point r
                                   , Point_ point 2 r, Num r, Ord r
-                                  , Default (VertexIx polygon)
                                   , Ord (VertexIx polygon)
                                   )
        => polygon

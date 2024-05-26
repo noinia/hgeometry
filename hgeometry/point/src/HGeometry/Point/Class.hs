@@ -365,7 +365,7 @@ instance Affine_ point d r => Affine_ (point :+ extra) d r where
   p .+^ v = p&core %~ (.+^ v)
   {-# INLINE (.+^) #-}
 
-instance (Point_ point d r, Default extra) => Point_ (point :+ extra) d r where
+instance (Point_ point d r) => Point_ (point :+ extra) d r where
   {-# SPECIALIZE instance Point_ point d r => Point_ (point :+ ()) d r #-}
 
 instance (ConstructablePoint_ point d r, Default extra)

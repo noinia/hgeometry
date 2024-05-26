@@ -83,15 +83,19 @@ type instance EndPointOf   (Interval endPoint r) = endPoint r
 
 instance ( EndPoint_ (endPoint r), IxValue (endPoint r) ~ r
          ) => IntervalLike_ (Interval endPoint r) r where
-  mkInterval = Interval
 
 instance ( EndPoint_ (endPoint r), IxValue (endPoint r) ~ r
          ) => Interval_ (Interval endPoint r) r where
 
+instance ( EndPoint_ (endPoint r), IxValue (endPoint r) ~ r
+         ) => ConstructableInterval_ (Interval endPoint r) r where
+  mkInterval = Interval
 
 instance ClosedInterval_ (ClosedInterval r) r
+instance ConstructableClosedInterval_ (ClosedInterval r) r
 
 instance OpenInterval_ (OpenInterval r) r
+instance ConstructableOpenInterval_ (OpenInterval r) r
 
 --------------------------------------------------------------------------------
 

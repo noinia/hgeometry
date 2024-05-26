@@ -52,9 +52,11 @@ instance HasEndPoint (HalfOpenInterval r) (EndPoint Closed r) where
   endPoint = lens _right (\ai x -> ai { _right = x})
 
 instance IntervalLike_ (HalfOpenInterval r) r where
-  mkInterval = HalfOpenInterval
 
 instance Interval_ (HalfOpenInterval r) r where
+
+instance ConstructableInterval_ (HalfOpenInterval r) r where
+  mkInterval = HalfOpenInterval
 
 instance (Ord r) => Point 1 r `HasIntersectionWith` HalfOpenInterval r where
   (Point1 q) `intersects` i = q `stabsInterval` i

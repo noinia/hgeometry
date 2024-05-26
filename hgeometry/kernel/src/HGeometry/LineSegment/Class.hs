@@ -11,6 +11,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.LineSegment.Class
   ( LineSegment_(..), pattern LineSegment_
+  , ConstructableLineSegment_(..)
   , ClosedLineSegment_
   , OpenLineSegment_
 
@@ -57,14 +58,18 @@ class HasOnSegment lineSegment d | lineSegment -> d where
 class ( IntervalLike_ lineSegment point
       , Point_ point (Dimension lineSegment) (NumType lineSegment)
       ) => LineSegment_ lineSegment point | lineSegment -> point where
-  {-# MINIMAL uncheckedLineSegment #-}
+  {-# MINIMAL  #-}
 
+-- | A class representing line segments
+class ( LineSegment_ lineSegment point
+      ) => ConstructableLineSegment_ lineSegment point where
+  {-# MINIMAL uncheckedLineSegment #-}
 
   -- | Create a segment
   --
   -- pre: the points are disjoint
   uncheckedLineSegment     :: point -> point -> lineSegment
-  uncheckedLineSegment s t = mkInterval (mkEndPoint s) (mkEndPoint t)
+  -- uncheckedLineSegment s t = mkInterval (mkEndPoint s) (mkEndPoint t)
 
   -- | smart constructor that creates a valid segment, i.e. it
   -- validates that the endpoints are disjoint.
@@ -73,6 +78,9 @@ class ( IntervalLike_ lineSegment point
   mkLineSegment s t
     | s^.vector /= t^.vector = Just $ uncheckedLineSegment s t
     | otherwise              = Nothing
+
+
+
 
 -- | A class representing Closed Linesegments
 class ( LineSegment_ lineSegment point
@@ -87,12 +95,10 @@ class ( LineSegment_ lineSegment point
       ) => OpenLineSegment_ lineSegment point where
 
 
--- | Constructs a line segment from the start and end point
+-- | Deconstructs a line segment from the start and end point
 pattern LineSegment_     :: forall lineSegment point. LineSegment_ lineSegment point
                          => point -> point -> lineSegment
 pattern LineSegment_ s t <- (startAndEnd -> (s,t))
-  where
-    LineSegment_ s t = uncheckedLineSegment s t
 {-# COMPLETE LineSegment_ #-}
 
 --------------------------------------------------------------------------------
@@ -223,16 +229,17 @@ yCoordAt x (LineSegment_ (Point2_ px py) (Point2_ qx qy))
 --------------------------------------------------------------------------------
 
 instance ( LineSegment_ segment point
-         , Default extra
          ) => LineSegment_ (segment :+ extra) point where
-  uncheckedLineSegment p q = uncheckedLineSegment p q :+ def
+
+-- instance ( ConstructableLineSegment_ segment point
+--          , Default extra
+--          ) => ConstructableLineSegment_ (segment :+ extra) point where
+--   uncheckedLineSegment p q = uncheckedLineSegment p q :+ def
 
 instance ( ClosedLineSegment_ segment point
-         , Default extra
          ) => ClosedLineSegment_ (segment :+ extra) point where
 
 instance ( OpenLineSegment_ segment point
-         , Default extra
          ) => OpenLineSegment_ (segment :+ extra) point where
 
 instance HasOnSegment lineSegment d =>  HasOnSegment (lineSegment :+ extra) d where

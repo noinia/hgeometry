@@ -18,25 +18,21 @@ module HGeometry.PolyLine
   ) where
 
 
-import           Control.DeepSeq (NFData)
-import           Control.Lens
--- import qualified Data.Foldable as F
-import           Data.Functor.Classes
--- import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Semigroup.Foldable
-import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
--- import qualified Data.Vector.NonEmpty as NV
-import           GHC.Generics
-import           HGeometry.Box
-import           HGeometry.Point
-import           HGeometry.Foldable.Util
-import           HGeometry.PolyLine.Class
-import           HGeometry.Interval.Class
-import           HGeometry.Properties
-import           HGeometry.Transformation
--- import           HGeometry.Vector
-import           HGeometry.Vector.NonEmpty.Util ()
-import           Hiraffe.Graph
+import Control.DeepSeq (NFData)
+import Control.Lens
+import Data.Functor.Classes
+import Data.Semigroup.Foldable
+import Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
+import GHC.Generics
+import HGeometry.Box
+import HGeometry.Foldable.Util
+import HGeometry.Interval.Class
+import HGeometry.Point
+import HGeometry.PolyLine.Class
+import HGeometry.Properties
+import HGeometry.Transformation
+import HGeometry.Vector.NonEmpty.Util ()
+import Hiraffe.Graph
 
 --------------------------------------------------------------------------------
 
@@ -124,4 +120,12 @@ instance ( Traversable1 f
          , Point_ point d r
          , TraversableWithIndex Int f
          ) => PolyLine_ (PolyLineF f point) point where
+
+instance ( Traversable1 f
+         , IxValue (f point) ~ point, Index (f point) ~ Int
+         , Ixed (f point)
+         , HasFromFoldable1 f
+         , Point_ point d r
+         , TraversableWithIndex Int f
+         ) => ConstructablePolyLine_ (PolyLineF f point) point where
   polyLineFromPoints = PolyLine . fromFoldable1

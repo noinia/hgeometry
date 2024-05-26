@@ -133,12 +133,16 @@ type instance EndPointOf   (LineSegment endPoint point) = endPoint point
 instance ( IxValue (endPoint point) ~ point
          , EndPoint_ (endPoint point)
          ) => IntervalLike_ (LineSegment endPoint point) point where
-  mkInterval = LineSegment
 
 instance ( IxValue (endPoint point) ~ point
          , EndPoint_ (endPoint point)
          , Point_ point (Dimension point) (NumType point)
          ) => LineSegment_ (LineSegment endPoint point) point where
+
+instance ( IxValue (endPoint point) ~ point
+         , EndPoint_ (endPoint point)
+         , Point_ point (Dimension point) (NumType point)
+         ) => ConstructableLineSegment_ (LineSegment endPoint point) point where
   uncheckedLineSegment s t = LineSegment (mkEndPoint s) (mkEndPoint t)
 
 instance ( Point_ point (Dimension point) (NumType point)
