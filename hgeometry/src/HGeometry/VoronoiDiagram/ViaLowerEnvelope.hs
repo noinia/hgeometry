@@ -27,9 +27,9 @@ import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.LowerEnvelope.AdjListForm
-import           HGeometry.LowerEnvelope.Naive (lowerEnvelopeVertexForm)
-import           HGeometry.LowerEnvelope.VertexForm (VertexForm, vertices')
+import           HGeometry.Plane.LowerEnvelope.AdjListForm
+import           HGeometry.Plane.LowerEnvelope.Naive (lowerEnvelopeVertexForm)
+import           HGeometry.Plane.LowerEnvelope.VertexForm (VertexForm, vertices')
 import           HGeometry.Point
 import           HGeometry.Properties
 

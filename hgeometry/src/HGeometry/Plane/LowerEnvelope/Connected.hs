@@ -10,7 +10,7 @@
 -- form.
 --
 --------------------------------------------------------------------------------
-module HGeometry.LowerEnvelope.Connected
+module HGeometry.Plane.LowerEnvelope.Connected
   ( LowerEnvelope'(LowerEnvelope)
   , theUnboundedVertex, boundedVertices
 
@@ -28,9 +28,9 @@ module HGeometry.LowerEnvelope.Connected
   , projectedEdgeGeometries, projectedEdgeGeometry
   ) where
 
-import           HGeometry.LowerEnvelope.Type
-import           HGeometry.LowerEnvelope.Connected.Type
-import           HGeometry.LowerEnvelope.Connected.FromVertexForm
+import           HGeometry.Plane.LowerEnvelope.Type
+import           HGeometry.Plane.LowerEnvelope.Connected.Type
+import           HGeometry.Plane.LowerEnvelope.Connected.FromVertexForm
 import           HGeometry.Vector.NonEmpty.Util ()
 
 

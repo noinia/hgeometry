@@ -1,5 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
-module HGeometry.LowerEnvelope.Naive
+module HGeometry.Plane.LowerEnvelope.Naive
   ( lowerEnvelope
   , lowerEnvelopeVertexForm
   -- , triangulatedLowerEnvelope
@@ -16,8 +16,8 @@ import qualified Data.Set as Set
 import           HGeometry.Combinatorial.Util
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.LowerEnvelope.AdjListForm (LowerEnvelope, fromVertexForm)
-import           HGeometry.LowerEnvelope.VertexForm
+import           HGeometry.Plane.LowerEnvelope.AdjListForm (LowerEnvelope, fromVertexForm)
+import           HGeometry.Plane.LowerEnvelope.VertexForm
 import           HGeometry.Point
 
 --------------------------------------------------------------------------------

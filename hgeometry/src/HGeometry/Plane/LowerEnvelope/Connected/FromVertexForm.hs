@@ -1,7 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  HGeometry.LowerEnvelope.FromVertexForm
+-- Module      :  HGeometry.Plane.LowerEnvelope.FromVertexForm
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -10,7 +10,7 @@
 -- form.
 --
 --------------------------------------------------------------------------------
-module HGeometry.LowerEnvelope.Connected.FromVertexForm
+module HGeometry.Plane.LowerEnvelope.Connected.FromVertexForm
   ( fromVertexForm'
   ) where
 
@@ -33,9 +33,9 @@ import           HGeometry.Foldable.Sort
 import           HGeometry.Foldable.Util
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line
-import           HGeometry.LowerEnvelope.Connected.Type
-import           HGeometry.LowerEnvelope.Type
-import qualified HGeometry.LowerEnvelope.VertexForm as VertexForm
+import           HGeometry.Plane.LowerEnvelope.Connected.Type
+import           HGeometry.Plane.LowerEnvelope.Type
+import qualified HGeometry.Plane.LowerEnvelope.VertexForm as VertexForm
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector

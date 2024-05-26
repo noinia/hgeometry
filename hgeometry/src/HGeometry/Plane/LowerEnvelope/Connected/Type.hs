@@ -1,7 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  HGeometry.LowerEnvelope.Connected.Type
+-- Module      :  HGeometry.Plane.LowerEnvelope.Connected.Type
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -10,7 +10,7 @@
 -- form.
 --
 --------------------------------------------------------------------------------
-module HGeometry.LowerEnvelope.Connected.Type
+module HGeometry.Plane.LowerEnvelope.Connected.Type
   ( LowerEnvelope'(LowerEnvelope)
   , theUnboundedVertex, boundedVertices
   , traverseLowerEnvelope
@@ -57,9 +57,9 @@ import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line
 import           HGeometry.LineSegment
-import           HGeometry.LowerEnvelope.Type
-import           HGeometry.LowerEnvelope.VertexForm (IntersectionLine(..),intersectionLine)
-import qualified HGeometry.LowerEnvelope.VertexForm as VertexForm
+import           HGeometry.Plane.LowerEnvelope.Type
+import           HGeometry.Plane.LowerEnvelope.VertexForm (IntersectionLine(..),intersectionLine)
+import qualified HGeometry.Plane.LowerEnvelope.VertexForm as VertexForm
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector

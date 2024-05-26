@@ -12,8 +12,8 @@ import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.LowerEnvelope
-import           HGeometry.LowerEnvelope.AdjListForm
+import           HGeometry.Plane.LowerEnvelope
+import           HGeometry.Plane.LowerEnvelope.AdjListForm
 import qualified Data.Set as Set
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Sequence as Seq
