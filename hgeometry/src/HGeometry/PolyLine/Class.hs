@@ -9,7 +9,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.PolyLine.Class
-  ( PolyLine_(..)
+  ( PolyLine_
   , ConstructablePolyLine_(..)
   , _PolyLineLineSegment
   ) where

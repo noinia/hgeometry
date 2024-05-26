@@ -10,28 +10,16 @@ module HGeometry.HalfPlane.CommonIntersection.Chain
   ) where
 
 import           Control.Lens hiding (Empty)
-import           Data.Bifunctor (first)
-import           Data.Default.Class
-import           Data.Foldable1
-import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Ord (comparing)
 import           Data.Sequence (Seq(..))
 import qualified Data.Sequence as Seq
-import           Data.These
 import           HGeometry.Ext
-import           HGeometry.Foldable.Util
-import           HGeometry.HalfLine
-import           HGeometry.HalfSpace
-import           HGeometry.HyperPlane.Class
-import           HGeometry.Intersection
+-- import           HGeometry.Foldable.Util()
+-- import           HGeometry.HalfSpace
+-- import           HGeometry.HyperPlane.Class
+-- import           HGeometry.Intersection
 import           HGeometry.Line
-import           HGeometry.Line.General
-import           HGeometry.Line.LowerEnvelope
-import           HGeometry.LineSegment
 import           HGeometry.Point
-import           HGeometry.Polygon.Convex
 import           HGeometry.Sequence.Alternating
-import           HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
@@ -94,18 +82,18 @@ clipLeft      :: Ord r
 clipLeft minX = clipLeftWhen $ \(v, _) -> v^.xCoord <= minX
 
 -- | Clip on the right by a line
-clipRightLine       :: (Ord r, Num r)
+_clipRightLine       :: (Ord r, Num r)
                     => LineEQ r -> Chain Seq halfPlane r -> Chain Seq halfPlane r
-clipRightLine right = clipRightWhen (above right)
+_clipRightLine right = clipRightWhen (_above right)
 
 -- | Clip the left by a line
-clipLeftLine      :: (Ord r, Num r)
+_clipLeftLine      :: (Ord r, Num r)
                   => LineEQ r -> Chain Seq halfPlane r -> Chain Seq halfPlane r
-clipLeftLine left = clipLeftWhen (above left)
+_clipLeftLine left = clipLeftWhen (_above left)
 
 -- | Test if the given (Point 2 r) lies above the line
-above            :: (Ord r, Num r) => LineEQ r -> (Point 2 r,a) -> Bool
-above line (v,_) = (v^.yCoord) >= evalAt' (v^.xCoord) line
+_above            :: (Ord r, Num r) => LineEQ r -> (Point 2 r,a) -> Bool
+_above line (v,_) = (v^.yCoord) >= evalAt' (v^.xCoord) line
 
 -- | Clip the chain on the right
 clipRightWhen   :: ((Point 2 r, halfPlane) -> Bool)

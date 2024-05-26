@@ -14,7 +14,6 @@ module HGeometry.Set.Util
   , queryBy
   ) where
 
-import           Data.Ord (comparing)
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Set.Internal as Internal
@@ -22,9 +21,9 @@ import           HGeometry.Ord.Dynamic
 
 --------------------------------------------------------------------------------
 
-data S = S String deriving Show
-cmpS :: S -> S -> Ordering
-cmpS = comparing (\(S s) -> length s)
+-- data S = S String deriving Show
+-- cmpS :: S -> S -> Ordering
+-- cmpS = comparing (\(S s) -> length s)
 
 
 -- $setup

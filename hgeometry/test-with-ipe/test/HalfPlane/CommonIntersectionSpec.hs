@@ -1,19 +1,15 @@
 {-# LANGUAGE QuasiQuotes #-}
+{-# OPTIONS_GHC -Wno-unused-binds #-}
 module HalfPlane.CommonIntersectionSpec(spec) where
 
 import           Control.Lens hiding (below)
-import           Control.Monad ((>=>))
 import qualified Data.Foldable as F
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromMaybe)
-import           Data.Sequence (Seq(..))
 import qualified Data.Sequence as Seq
-import           Data.Vinyl
 import           Golden
-import           HGeometry.Boundary
 import           HGeometry.Box
-import           HGeometry.Ext
 import           HGeometry.HalfPlane.CommonIntersection
 import           HGeometry.HalfSpace
 import           HGeometry.HyperPlane.Class
@@ -21,8 +17,6 @@ import           HGeometry.Instances ()
 import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.Line.General
-import           HGeometry.Line.LineEQ
-import           HGeometry.Line.PointAndVector
 import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
@@ -31,7 +25,7 @@ import           HGeometry.Sequence.Alternating
 import           HGeometry.Transformation
 import           Ipe
 import           Ipe.Color
-import           Paths_hgeometry
+-- import           Paths_hgeometry
 import           System.OsPath
 import           Test.Hspec
 import           Test.Hspec.WithTempFile
@@ -164,17 +158,17 @@ asConstraint h = ipeGroup [ iO $ defIO seg
     box = Box (Point2 (-1000) (-1000)) (Point2 1000 1000)
     -- the line segment we will d raw to represent the bounding line
     seg = case l `intersect` box of
-            Nothing                            -> undefined
-            Just (Line_x_Box_Point _)          -> undefined
-            Just (Line_x_Box_LineSegment seg') -> seg'
+            Nothing                             -> undefined
+            Just (Line_x_Box_Point _)           -> undefined
+            Just (Line_x_Box_LineSegment seg'') -> seg''
 
 
 
 draw :: IpeOut (CommonIntersection (HalfPlane r) r) Group r
 draw = \case
   EmptyIntersection     -> ipeGroup []
-  SingletonPoint p hs   -> ipeGroup []
-  InSubLine l hs sl     -> ipeGroup []
-  Slab hl hr            -> ipeGroup []
-  BoundedRegion pg      -> ipeGroup []
-  UnboundedRegion chain -> ipeGroup []
+  SingletonPoint _p _hs   -> ipeGroup []
+  InSubLine _l _hs _sl     -> ipeGroup []
+  Slab _hl _hr            -> ipeGroup []
+  BoundedRegion _pg      -> ipeGroup []
+  UnboundedRegion _chain -> ipeGroup []

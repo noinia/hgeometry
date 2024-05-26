@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# OPTIONS_GHC -Wno-unused-binds #-}
 module LineSegment.Intersection.BentleyOttmannSpec
   (spec
   ) where

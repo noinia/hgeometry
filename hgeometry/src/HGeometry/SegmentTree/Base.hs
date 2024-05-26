@@ -66,8 +66,8 @@ interval = to $ \case
   Node _ nd _ -> nd^.nodeInterval
 
 
-bmap :: (f interval -> g interval) -> SegmentTree f interval -> SegmentTree g interval
-bmap f = undefined
+-- bmap :: (f interval -> g interval) -> SegmentTree f interval -> SegmentTree g interval
+-- bmap f = undefined
 
 
 --------------------------------------------------------------------------------

@@ -10,25 +10,19 @@ module PlaneGraph.RenderSpec
   ) where
 
 import           Control.Lens
-import           Data.Either (fromRight)
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Proxy
 import qualified Data.Text as Text
 import           Golden
-import           HGeometry.Boundary
 import           HGeometry.Ext
 import           HGeometry.Line
 import           HGeometry.LineSegment
 import           HGeometry.PlaneGraph
-import           HGeometry.PlaneGraph.Class
 import           HGeometry.Point
 import           HGeometry.Polygon.Simple
 import           HGeometry.Transformation
 import           HGeometry.Vector
-import           HGeometry.YAML
-import           Hiraffe.Graph.Class
+-- import           HGeometry.YAML
 import qualified Hiraffe.PlanarGraph.AdjRep as AdjRep
-import           Hiraffe.PlanarGraph.Class
 import           Hiraffe.PlanarGraph.IO ()
 import qualified Hiraffe.PlanarGraph.IO as AdjRep
 import           Ipe
@@ -77,7 +71,7 @@ import           Test.QuickCheck.Instances ()
 
 
 
-data MyWorld
+-- data MyWorld
 
 type R = Double
 
@@ -120,7 +114,7 @@ drawVertex _ v = [ iO $ ipeDiskMark (v^.asPoint) ! attr SLayer "vertex"
 drawEdge        :: ( PlaneGraph_ planeGraph vertex, ConstructablePoint_ vertex 2 r, IsTransformable vertex
                    , Show (EdgeIx planeGraph), Fractional r, Real r)
                 => planeGraph -> EdgeIx planeGraph -> ClosedLineSegment vertex -> [IpeObject r]
-drawEdge gr d s = [ iO $ ipeLineSegment s ! attr SLayer "edges"
+drawEdge _g d s = [ iO $ ipeLineSegment s ! attr SLayer "edges"
                   , iO $ ipeLabel (tshow d :+ c) ! attr SLayer "edgeLabel"
                   ]
   where
