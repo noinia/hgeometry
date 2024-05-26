@@ -16,6 +16,7 @@ module HGeometry.Point.Class
   , HasCoordinates(..)
   , Affine_(..)
   , Point_(..), pattern Point1_, pattern Point2_, pattern Point3_, pattern Point4_
+  , ConstructablePoint_(..)
   , origin
   , pointFromList
   , coord
@@ -161,13 +162,7 @@ instance ( d ~ Dimension (v r)
 class ( Affine_ point d r
       , HasVector point point
       ) => Point_ point d r where
-  {-# MINIMAL fromVector #-}
-
-  -- | Construct a point from a vector
-  --
-  -- >>> fromVector (Vector4 1 2 3 4) :: Point 4 Int
-  -- Point4 1 2 3 4
-  fromVector :: Vector d r -> point
+  {-# MINIMAL #-}
 
   -- | Get the coordinate in a given dimension. This operation is unsafe in the
   -- sense that no bounds are checked. Consider using `coord` instead.
@@ -182,6 +177,16 @@ class ( Affine_ point d r
                 -- vectors are 0 indexed, whereas we are 1 indexed.
   {-# INLINE coord' #-}
 
+
+-- | Type class for constructable points
+class Point_ point d r => ConstructablePoint_ point d r where
+  {-# MINIMAL fromVector #-}
+
+  -- | Construct a point from a vector
+  --
+  -- >>> fromVector (Vector4 1 2 3 4) :: Point 4 Int
+  -- Point4 1 2 3 4
+  fromVector :: Vector d r -> point
 
 
 -- | Get the coordinate in a given dimension
@@ -202,7 +207,13 @@ instance ( d ~ Dimension (v r)
          , r ~ IxValue (v r)
          , Vector_ (v r) d r
          , Additive_ (Vector d r) d r
-         ) => Point_ (Linear.Point v r) d r where
+         ) => Point_ (Linear.Point v r) d r
+
+instance ( d ~ Dimension (v r)
+         , r ~ IxValue (v r)
+         , Vector_ (v r) d r
+         , Additive_ (Vector d r) d r
+         ) => ConstructablePoint_ (Linear.Point v r) d r where
   fromVector = Linear.P . review _Vector
   {-# INLINE fromVector #-}
 
@@ -210,46 +221,44 @@ instance ( d ~ Dimension (v r)
 --
 -- >>> origin :: Point 4 Int
 -- Point4 0 0 0 0
-origin :: forall point d r. (Num r, Point_ point d r) => point
+origin :: forall point d r. (Num r, ConstructablePoint_ point d r) => point
 origin = fromVector zero
 {-# INLINE origin #-}
 
--- | A bidirectional pattern synonym for 1 dimensional points.
+-- | A pattern synonym for 1 dimensional points.
 pattern Point1_   :: Point_ point 1 r => r -> point
 pattern Point1_ x <- (view xCoord -> x)
-  where
-    Point1_ x = fromVector $ Vector1 x
-{-# INLINE Point1_ #-}
+--   where
+--     Point1_ x = fromVector $ Vector1 x
+-- {-# INLINE Point1_ #-}
 {-# COMPLETE Point1_ #-}
 
--- | A bidirectional pattern synonym for 2 dimensional points.
+-- | A pattern synonym for 2 dimensional points.
 pattern Point2_     :: ( Point_ point 2 r
                        ) => r -> r -> point
 pattern Point2_ x y <- (view vector -> Vector2 x y)
- where
-   Point2_ x y = fromVector $ Vector2 x y
-{-# INLINE Point2_ #-}
+--  where
+--    Point2_ x y = fromVector $ Vector2 x y
+-- {-# INLINE Point2_ #-}
 {-# COMPLETE Point2_ #-}
 
 
--- | A bidirectional pattern synonym for 3 dimensional points.
+-- | A pattern synonym for 3 dimensional points.
 pattern Point3_       :: ( Point_ point 3 r
-                         -- , ConstructableVector_ (Vector.VectorFamily 3 r) 3 r
                          ) => r -> r -> r -> point
 pattern Point3_ x y z <- (view vector -> Vector3 x y z)
-  where
-    Point3_ x y z = fromVector $ Vector3 x y z
-{-# INLINE Point3_ #-}
+--   where
+--     Point3_ x y z = fromVector $ Vector3 x y z
+-- {-# INLINE Point3_ #-}
 {-# COMPLETE Point3_ #-}
 
 -- | A bidirectional pattern synonym for 4 dimensional points.
 pattern Point4_         :: ( Point_ point 4 r
-                           -- , ConstructableVector_ (Vector.VectorFamily 4 r) 4 r
                            ) => r -> r -> r -> r -> point
 pattern Point4_ x y z w <- (view vector -> Vector4 x y z w)
-  where
-    Point4_ x y z w = fromVector $ Vector4 x y z w
-{-# INLINE Point4_ #-}
+--   where
+--     Point4_ x y z w = fromVector $ Vector4 x y z w
+-- {-# INLINE Point4_ #-}
 {-# COMPLETE Point4_ #-}
 
 
@@ -262,7 +271,7 @@ pattern Point4_ x y z w <- (view vector -> Vector4 x y z w)
 -- Nothing
 -- >>> pointFromList [1,2,3,4] :: Maybe (Point 3 Int)
 -- Nothing
-pointFromList :: ( Point_ point d r
+pointFromList :: ( ConstructablePoint_ point d r
                  , Vector_ (Vector d r) d r
                  ) => [r] -> Maybe point
 pointFromList = fmap fromVector . vectorFromList
@@ -358,8 +367,12 @@ instance Affine_ point d r => Affine_ (point :+ extra) d r where
 
 instance (Point_ point d r, Default extra) => Point_ (point :+ extra) d r where
   {-# SPECIALIZE instance Point_ point d r => Point_ (point :+ ()) d r #-}
-  fromVector v = fromVector v :+ def
 
+instance (ConstructablePoint_ point d r, Default extra)
+          => ConstructablePoint_ (point :+ extra) d r where
+  {-# SPECIALIZE instance ConstructablePoint_ point d r
+                          => ConstructablePoint_ (point :+ ()) d r #-}
+  fromVector v = fromVector v :+ def
 
 -- | A newtype that can discharge the Default constraint in an unsafe way, if you really
 -- sure that you'll never actually need the default

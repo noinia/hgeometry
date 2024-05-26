@@ -148,11 +148,12 @@ spec = describe "Convex Polygon tests" $ do
 --------------------------------------------------------------------------------
 
 -- | Center the given polygon at the origin. I.e. places the centroid at the origin.
-centerAtOrigin    :: ( SimplePolygon_ polygon  point r
+centerAtOrigin    :: forall polygon point r.
+                     ( SimplePolygon_ polygon  point r
                      , Fractional r
                      , IsTransformable polygon
                      ) => polygon -> polygon
-centerAtOrigin pg = translateBy (origin .-. centroid pg) pg
+centerAtOrigin pg = translateBy (origin .-. (centroid pg :: Point 2 r)) pg
 
 
 naiveMinkowski     :: ( Ord r, Num r

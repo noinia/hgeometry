@@ -19,7 +19,7 @@ import           System.Random.Stateful
 -- | Generate an infinite list random points in a sufficiently large
 -- bounding box.
 randomPoints       :: forall point r. ( UniformRange point
-                      , Point_ point 2 r
+                      , ConstructablePoint_ point 2 r
                       , Num r
                       )
                    => StdGen -- ^ generator to use

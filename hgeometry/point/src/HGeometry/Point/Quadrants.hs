@@ -35,7 +35,7 @@ quadrantWith c p = case ( (c^.xCoord) `compare` (p^.xCoord)
                                    (LT, GT) -> BottomRight
 
 -- | Quadrants with respect to the origin
-quadrant :: (Ord r, Num r, Point_ point 2 r) => point -> Quadrant
+quadrant :: (Ord r, Num r, ConstructablePoint_ point 2 r) => point -> Quadrant
 quadrant = quadrantWith origin
 
 -- | Given a center point c, and a set of points, partition the points into

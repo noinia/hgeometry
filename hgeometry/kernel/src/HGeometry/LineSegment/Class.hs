@@ -108,7 +108,9 @@ pattern LineSegment_ s t <- (startAndEnd -> (s,t))
 -- >>> interpolate 1 $ ClosedLineSegment origin (Point2 10.0 10.0)
 -- Point2 10.0 10.0
 interpolate       :: forall lineSegment d point r
-                     . (Fractional r, LineSegment_ lineSegment point, Point_ point d r)
+                     . ( Fractional r, LineSegment_ lineSegment point
+                       , ConstructablePoint_ point d r
+                       )
                   => r -> lineSegment -> point
 interpolate lam (LineSegment_ s t) =
   fromVector $ (s^.vector ^* (1-lam)) ^+^ (t^.vector ^* lam)
