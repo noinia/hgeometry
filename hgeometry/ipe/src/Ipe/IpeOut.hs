@@ -20,6 +20,7 @@ import           Control.Lens hiding (Simple)
 import           Data.Foldable (toList)
 import           Data.Kind
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Sequence as Seq
 import           Data.Text (Text)
 import qualified Data.Text as Text
@@ -276,7 +277,10 @@ path = Path . Seq.singleton
 -- | Construct a PolyLine path segment
 pathSegment :: (LineSegment_ lineSegment point, Point_ point 2 r)
             => lineSegment -> PathSegment r
-pathSegment = PolyLineSegment . fmap (^.asPoint) . review _PolyLineLineSegment
+pathSegment = PolyLineSegment . fmap (^.asPoint) . lineSegmentToPolyLine
+  where
+    lineSegmentToPolyLine s = polyLineFromPoints . NonEmpty.fromList $ [s^.start, s^.end]
+
 
 -- | Draw a polygon
 ipePolygon    :: IpeOut (SimplePolygon (Point 2 r)) Path r

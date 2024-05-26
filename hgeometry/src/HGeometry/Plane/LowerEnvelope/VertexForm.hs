@@ -1,7 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  HGeometry.LowerEnvelope.VertexForm
+-- Module      :  HGeometry.Plane.LowerEnvelope.VertexForm
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -10,7 +10,7 @@
 -- i.e. storing only the vertices.
 --
 --------------------------------------------------------------------------------
-module HGeometry.LowerEnvelope.VertexForm
+module HGeometry.Plane.LowerEnvelope.VertexForm
   ( VertexForm(VertexForm)
   , hasVertices, vertices'
   , singleton
@@ -31,7 +31,7 @@ import           HGeometry.Combinatorial.Util
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Intersection
 import           HGeometry.Line
-import           HGeometry.LowerEnvelope.Type
+import           HGeometry.Plane.LowerEnvelope.Type
 import           HGeometry.Point
 import           HGeometry.Properties
 import           Hiraffe.Graph

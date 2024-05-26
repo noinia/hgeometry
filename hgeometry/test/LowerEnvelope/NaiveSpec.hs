@@ -8,8 +8,8 @@ import           HGeometry.Combinatorial.Util
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Instances ()
-import           HGeometry.LowerEnvelope
-import           HGeometry.LowerEnvelope.VertexForm
+import           HGeometry.Plane.LowerEnvelope
+import           HGeometry.Plane.LowerEnvelope.VertexForm
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Vector

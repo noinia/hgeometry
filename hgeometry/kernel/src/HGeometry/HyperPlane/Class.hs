@@ -346,7 +346,7 @@ class HyperPlaneFromPoints hyperPlane where
                            ) => Vector d point -> hyperPlane
 
 
-instance (HyperPlane_ hyperPlane d r, Default extra)
+instance (HyperPlane_ hyperPlane d r)
          => HyperPlane_ (hyperPlane :+ extra) d r where
   evalHyperPlaneEquation h = evalHyperPlaneEquation (h^.core)
   {-# INLINE evalHyperPlaneEquation #-}
@@ -368,7 +368,7 @@ instance (ConstructableHyperPlane_ hyperPlane d r, Default extra)
   fromPointAndNormal p v = fromPointAndNormal p v :+ def
   {-# INLINE fromPointAndNormal #-}
 
-instance (NonVerticalHyperPlane_  hyperPlane d r, Default extra)
+instance (NonVerticalHyperPlane_  hyperPlane d r)
          => NonVerticalHyperPlane_ (hyperPlane :+ extra) d r where
   evalAt p = evalAt p . view core
   {-# INLINE evalAt #-}

@@ -6,15 +6,14 @@ module VoronoiDiagram.VoronoiSpec
   ) where
 
 import           Control.Lens
-import           Data.Default.Class
 import           Golden
 -- import HGeometry.Combinatorial.Util
 import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.LowerEnvelope
-import           HGeometry.LowerEnvelope.AdjListForm
+import           HGeometry.Plane.LowerEnvelope
+import           HGeometry.Plane.LowerEnvelope.AdjListForm
 import qualified Data.Set as Set
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Sequence as Seq
@@ -104,7 +103,7 @@ grow d (Box p q) = Box (p&coordinates %~ subtract d)
                        (q&coordinates %~ (+d))
 
 
-instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r, Default point
+instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r
          , Show r, Show point
          )
          => HasDefaultIpeOut (VoronoiDiagram point) where
@@ -114,7 +113,7 @@ instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r, Default
     ConnectedVD vd  -> defIO vd
 
 
-instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r, Default point
+instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r
          , Show r, Show point
          )
          => HasDefaultIpeOut (VoronoiDiagram' point) where
@@ -125,10 +124,6 @@ instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r, Default
       render = \case
         Left hl   -> iO $ ipeHalfLineIn bRect hl
         Right seg -> iO' seg
-
-
-instance Default (Point 2 R) where
-  def = error "not def"
 
 inputs :: [Point 2 R]
 inputs = [origin, Point2 10 10, Point2 10 0]

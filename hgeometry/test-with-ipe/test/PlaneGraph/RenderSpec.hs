@@ -98,7 +98,7 @@ spec = describe "render planegraph tests" $ do
 
 drawGraph    :: ( PlaneGraph_ planeGraph vertex
                 , IsTransformable vertex
-                , Point_ vertex 2 r, Ord r, Real r
+                , ConstructablePoint_ vertex 2 r, Ord r, Real r
                 , Fractional r, Show r, Eq (FaceIx planeGraph)
                 , Show (Vertex planeGraph), Show (Dart planeGraph), Show (Face planeGraph)
                 , Show (EdgeIx planeGraph)
@@ -117,7 +117,7 @@ drawVertex _ v = [ iO $ ipeDiskMark (v^.asPoint) ! attr SLayer "vertex"
                                                          -- ! attr SStroke Ipe.red
                  ]
 
-drawEdge        :: ( PlaneGraph_ planeGraph vertex, Point_ vertex 2 r, IsTransformable vertex
+drawEdge        :: ( PlaneGraph_ planeGraph vertex, ConstructablePoint_ vertex 2 r, IsTransformable vertex
                    , Show (EdgeIx planeGraph), Fractional r, Real r)
                 => planeGraph -> EdgeIx planeGraph -> ClosedLineSegment vertex -> [IpeObject r]
 drawEdge gr d s = [ iO $ ipeLineSegment s ! attr SLayer "edges"
@@ -127,7 +127,7 @@ drawEdge gr d s = [ iO $ ipeLineSegment s ! attr SLayer "edges"
     c = interpolate 0.5 s ^. asPoint
 
 
-drawDart        :: ( PlaneGraph_ planeGraph vertex, Point_ vertex 2 r, IsTransformable vertex
+drawDart        :: ( PlaneGraph_ planeGraph vertex, ConstructablePoint_ vertex 2 r, IsTransformable vertex
                    , Show (Dart planeGraph), Fractional r, Real r)
                 => planeGraph -> DartIx planeGraph -> ClosedLineSegment vertex -> [IpeObject r]
 drawDart gr d s = [ iO $ ipeLineSegment (offset s)

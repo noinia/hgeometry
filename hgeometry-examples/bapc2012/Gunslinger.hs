@@ -1,7 +1,6 @@
 module Main where
 
 import           Control.Lens
-import           Data.Default.Class
 import           Data.Fixed
 import qualified Data.Foldable as F
 import qualified Data.List as List
@@ -82,9 +81,6 @@ instance Show Answer where
 
 
 data Kind = Luke | Hatch | Dalton deriving (Show,Eq)
-
-instance Default Kind where
-  def = Dalton -- if we have to invent a value; invent a dalton.
 
 data Input = Input { _luke    :: Point 2 Int
                    , _hatch   :: Point 2 Int

@@ -138,9 +138,6 @@ makeLenses ''Model
 instance KnownNat p => ToMisoString (RealNumber p) where
   toMisoString = toMisoString . toFixed
 
-instance Default (Point 2 R :+ Int) where
-  def = origin :+ 0
-
 ----------------------------------------
 
 initialModel :: Model

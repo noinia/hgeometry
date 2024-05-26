@@ -1,7 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  HGeometry.LowerEnvelope.AdjListForm
+-- Module      :  HGeometry.Plane.LowerEnvelope.AdjListForm
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -10,7 +10,7 @@
 -- form.
 --
 --------------------------------------------------------------------------------
-module HGeometry.LowerEnvelope.AdjListForm
+module HGeometry.Plane.LowerEnvelope.AdjListForm
   ( LowerEnvelope(..)
   , LowerEnvelope'(LowerEnvelope)
   , ParallelPlane
@@ -45,9 +45,9 @@ import           HGeometry.Algorithms.DivideAndConquer
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line.LineEQ
-import           HGeometry.LowerEnvelope.Connected
-import           HGeometry.LowerEnvelope.VertexForm (IntersectionLine(..), intersectionLine)
-import qualified HGeometry.LowerEnvelope.VertexForm as VertexForm
+import           HGeometry.Plane.LowerEnvelope.Connected
+import           HGeometry.Plane.LowerEnvelope.VertexForm (IntersectionLine(..), intersectionLine)
+import qualified HGeometry.Plane.LowerEnvelope.VertexForm as VertexForm
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector.NonEmpty.Util ()

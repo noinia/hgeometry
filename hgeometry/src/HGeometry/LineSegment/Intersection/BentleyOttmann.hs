@@ -468,11 +468,12 @@ instance ( HasEndPoint lineSegment endPoint
 type instance StartPointOf (Flipped lineSegment) = StartPointOf lineSegment
 type instance EndPointOf   (Flipped lineSegment) = EndPointOf   lineSegment
 
-instance IntervalLike_ lineSegment point => IntervalLike_ (Flipped lineSegment) point where
-  mkInterval s t = NotFlipped $ mkInterval s t
-instance LineSegment_ lineSegment point => LineSegment_ (Flipped lineSegment) point where
-  uncheckedLineSegment s t = NotFlipped $ uncheckedLineSegment s t
+instance IntervalLike_ lineSegment point => IntervalLike_ (Flipped lineSegment) point
+instance LineSegment_ lineSegment point => LineSegment_ (Flipped lineSegment) point
 
+instance ConstructableLineSegment_ lineSegment point
+         => ConstructableLineSegment_ (Flipped lineSegment) point where
+  uncheckedLineSegment s t = NotFlipped $ uncheckedLineSegment s t
 
 instance segment `HasIntersectionWith` segment
           => (Flipped segment) `HasIntersectionWith` (Flipped segment) where

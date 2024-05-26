@@ -10,23 +10,17 @@
 --------------------------------------------------------------------------------
 module HGeometry.PolyLine.Class
   ( PolyLine_(..)
+  , ConstructablePolyLine_(..)
   , _PolyLineLineSegment
   ) where
 
 import           Control.Lens
--- import Control.Lens.Internal.Fold (NonEmptyDList(..))
--- import Data.Functor.Apply (Apply)
--- import Data.Functor.Contravariant (phantom)
 import qualified Data.List.NonEmpty as NonEmpty
--- import Data.Maybe (fromMaybe)
 import           Data.Semigroup.Foldable
 import           HGeometry.LineSegment.Class
 import           HGeometry.Point.Class
 import           HGeometry.Properties
--- import HGeometry.Vector.Class
 import           Hiraffe.Graph
--- import Data.Function (on)
--- import Data.Semigroup (First(..))
 
 --------------------------------------------------------------------------------
 
@@ -41,6 +35,9 @@ class ( HasVertices polyLine polyLine
       , Dimension polyLine ~ Dimension point
       ) => PolyLine_ polyLine point | polyLine -> point where
 
+-- | Class for constructable polylglines
+class PolyLine_ polyLine point => ConstructablePolyLine_ polyLine point where
+
   -- | Constructs a polyline from a given sequence of points.
   --
   -- pre: there should be at least two distinct points
@@ -50,12 +47,13 @@ class ( HasVertices polyLine polyLine
 -- maybe make these two functions into a prism instead
 
 -- | Prism between a polyline and a line segment
-_PolyLineLineSegment :: ( LineSegment_ lineSegment point
-                        , PolyLine_ polyLine point
+_PolyLineLineSegment :: ( ConstructableLineSegment_ lineSegment point
+                        , ConstructablePolyLine_ polyLine point
                         ) => Prism' polyLine lineSegment
 _PolyLineLineSegment = prism' lineSegmentToPolyLine polyLineToLineSegment
   where
     lineSegmentToPolyLine s = polyLineFromPoints . NonEmpty.fromList $ [s^.start, s^.end]
 
     polyLineToLineSegment pl
-      | lengthOf vertices pl == 2 = Just $ uncheckedLineSegment (pl^.start) (pl^.end)                     | otherwise                 = Nothing
+      | lengthOf vertices pl == 2 = Just $ uncheckedLineSegment (pl^.start) (pl^.end)
+      | otherwise                 = Nothing

@@ -18,7 +18,6 @@ import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Vector
-import           Hiraffe.Graph.Class
 import           Hiraffe.PlanarGraph as PlanarGraph
 
 -- import qualified Data.Foldable as F

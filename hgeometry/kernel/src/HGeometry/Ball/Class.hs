@@ -49,7 +49,8 @@ class ( HasCenter ball point
   fromCenterAndSquaredRadius :: point -> NumType ball -> ball
 
   -- | A d dimensional unit ball centered at the origin.
-  unitBall :: Num (NumType ball) => ball
+  unitBall :: (r ~ NumType ball, d ~ Dimension ball
+              , Num r, ConstructablePoint_ point d r) => ball
   unitBall = fromCenterAndSquaredRadius origin 1
 
   -- | A lens to get/set the radius of a Ball

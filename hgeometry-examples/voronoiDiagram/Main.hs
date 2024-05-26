@@ -20,8 +20,6 @@ import           Miso
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Miso.Svg hiding (height_, id_, style_, width_)
 
-import Data.Default.Class
-
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -36,9 +34,6 @@ makeLenses ''Model
 
 instance KnownNat p => ToMisoString (RealNumber p) where
   toMisoString = toMisoString . toFixed
-
-instance Default (Point 2 R :+ Int) where
-  def = origin :+ 0
 
 ----------------------------------------
 

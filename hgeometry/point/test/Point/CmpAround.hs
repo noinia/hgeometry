@@ -1,14 +1,13 @@
 module Point.CmpAround where
 
 import Control.Lens ((^.))
-import Data.Default.Class
 import HGeometry.Ext
 import HGeometry.Point
 
 
 -- | Counter clockwise ordering of the points around c. Points are ordered with
 -- respect to the positive x-axis.
-ccwCmpAroundByQuadrant       :: (Num r, Ord r, Default p)
+ccwCmpAroundByQuadrant       :: (Num r, Ord r)
                              => Point 2 r :+ p -> Point 2 r :+ p -> Point 2 r :+ p -> Ordering
 ccwCmpAroundByQuadrant c q r = case (quadrantWith c q `compare` quadrantWith c r) of
                        EQ -> case ccw (c^.core) (q^.core) (r^.core) of
@@ -20,7 +19,7 @@ ccwCmpAroundByQuadrant c q r = case (quadrantWith c q `compare` quadrantWith c r
 
 
 
-cwCmpAroundByQuadrant :: (Num r, Ord r, Default p)
+cwCmpAroundByQuadrant :: (Num r, Ord r)
             => Point 2 r :+ p -> Point 2 r :+ p -> Point 2 r :+ p -> Ordering
 cwCmpAroundByQuadrant c q r = case (quadrantWith c q `compare` quadrantWith c r) of
                        EQ -> case ccw (c^.core) (q^.core) (r^.core) of
@@ -32,7 +31,7 @@ cwCmpAroundByQuadrant c q r = case (quadrantWith c q `compare` quadrantWith c r)
                                 -- specified by the quadrant.
 
 -- | Original implementation of cw with distance check
-cwCmpAroundByQuadrantWithDist       :: (Num r, Ord r, Default p)
+cwCmpAroundByQuadrantWithDist       :: (Num r, Ord r)
                                     => Point 2 r :+ p -> Point 2 r :+ p -> Point 2 r :+ p
                                     -> Ordering
 cwCmpAroundByQuadrantWithDist c q r = case (quadrantWith c q `compare` quadrantWith c r) of

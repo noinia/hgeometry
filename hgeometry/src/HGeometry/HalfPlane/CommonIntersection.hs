@@ -8,11 +8,13 @@ module HGeometry.HalfPlane.CommonIntersection
   -- , LowerBoundary(..)
   ) where
 
+
+import           Control.Lens
 import           Control.Lens hiding (Empty)
 import           Data.Bifunctor (first)
-import           Data.Default.Class
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ord (comparing)
 import           Data.Sequence (Seq(..))
 import qualified Data.Sequence as Seq
@@ -67,7 +69,6 @@ commonIntersection     :: forall f halfPlane r.
                           , HalfPlane_ halfPlane r
                           , Fractional r, Ord r
 
-                          , Default (LineEQ r :+ halfPlane), Default halfPlane -- FIXME
                           , Show halfPlane, Show r
                           )
                        => f halfPlane -> CommonIntersection halfPlane r
@@ -273,7 +274,6 @@ boundaries :: ( HalfPlane_ halfPlane r
               , Ord r, Fractional r
 
 
-              , Default (LineEQ r :+ halfPlane), Default halfPlane -- FIXME
               , Show r, Show halfPlane
               ) => NonVerticals halfPlane r -> These2 (Chain Seq (LineEQ r :+ halfPlane) r)
 boundaries = bimap upperBoundary lowerBoundary
@@ -431,7 +431,6 @@ upperEnvelope :: forall g f line r.
                     , IsIntersectableWith line line
                     , Intersection line line ~ Maybe (LineLineIntersection line)
                     , HasFromFoldable g, Functor g
-                    , Default line -- TODO hack
                     )
                  => f line -> UpperEnvelopeF g (Point 2 r) line
 upperEnvelope = bimap (over yCoord negate) flipY . lowerEnvelope . fmap flipY
