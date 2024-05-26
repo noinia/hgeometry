@@ -10,15 +10,18 @@
 --------------------------------------------------------------------------------
 {-# LANGUAGE UndecidableInstances #-}
 module HGeometry.Interval.Class
-  ( Interval_, pattern Interval_
-  , IntervalLike_(..)
+  ( Interval_
+  , pattern Interval_
+  , IntervalLike_
   , ConstructableInterval_(..)
 
-  , ClosedInterval_(..), pattern ClosedInterval_
+  , ClosedInterval_
+  , pattern ClosedInterval_
   , ConstructableClosedInterval_(..)
   , clampTo
 
-  , OpenInterval_(..), pattern OpenInterval_
+  , OpenInterval_
+  , pattern OpenInterval_
   , ConstructableOpenInterval_(..)
 
   , HasStart(..)

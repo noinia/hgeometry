@@ -91,6 +91,7 @@ class ( r ~ IxValue vector
   {-# INLINE _Vector' #-}
 -}
 
+-- | Types that can be converted to and from our canonical 'Vector d r' type
 class ( r ~ IxValue vector
       , s ~ IxValue vector'
       , d ~ Dimension vector

@@ -1,6 +1,7 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -Wno-unused-binds #-}
 module VoronoiDiagram.VoronoiSpec
   ( spec
   ) where
@@ -10,8 +11,6 @@ import           Golden
 -- import HGeometry.Combinatorial.Util
 import           HGeometry.Duality
 import           HGeometry.Ext
-import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Plane.LowerEnvelope
 import           HGeometry.Plane.LowerEnvelope.AdjListForm
 import qualified Data.Set as Set
@@ -109,7 +108,7 @@ instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r
          => HasDefaultIpeOut (VoronoiDiagram point) where
   type DefaultIpeOut (VoronoiDiagram point) = Group
   defIO = \case
-    AllColinear pts -> ipeGroup []
+    AllColinear _pts -> ipeGroup []
     ConnectedVD vd  -> defIO vd
 
 
@@ -144,7 +143,10 @@ trivialVD = VoronoiDiagram $ LowerEnvelope vInfty (Seq.fromList [bv])
                  , Edge 0 h1 h3
                  ]
                 )
-    planes@[h1,h2,h3] = map (\p -> liftPointToPlane p :+ p) inputs
+    planes = map (\p -> liftPointToPlane p :+ p) inputs
+    (h1,h2,h3) = case planes of
+                   [h1',h2',h3'] -> (h1',h2',h3')
+                   _             -> error "absurd"
   -- order of the planes is incorrect, as is the z-coord.
 
 

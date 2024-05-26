@@ -1,35 +1,17 @@
 {-# LANGUAGE QuasiQuotes #-}
 module Line.LowerEnvelopeSpec(spec) where
 
-import           Control.Lens hiding (below)
-import           Control.Monad ((>=>))
-import           Data.Foldable (minimumBy)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Ord (comparing)
-import           Data.Sequence (Seq(..))
-import qualified Data.Sequence as Seq
 import qualified Data.Vector as Vector
-import           Data.Vinyl
-import           HGeometry.Boundary
-import           HGeometry.Box
-import           HGeometry.Ext
-import           HGeometry.HalfSpace
-import           HGeometry.HyperPlane.Class
-import           HGeometry.Intersection
 import           HGeometry.Kernel.Instances ()
 import           HGeometry.Line
-import           HGeometry.Line.General
-import           HGeometry.Line.LineEQ
 import           HGeometry.Line.LowerEnvelope
-import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Sequence.Alternating
-import           Ipe
-import           Ipe.Color
-import           Paths_hgeometry
-import           System.OsPath
+-- import           Paths_hgeometry
+-- import           System.OsPath
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck ((===))

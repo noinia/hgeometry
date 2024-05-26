@@ -1,9 +1,9 @@
 module LowerEnvelope.NaiveSpec where
 
 import           Control.Lens
-import qualified Data.Map as Map
+-- import qualified Data.Map as Map
 import qualified Data.Set as Set
-import qualified Data.Vector as Boxed
+-- import qualified Data.Vector as Boxed
 import           HGeometry.Combinatorial.Util
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
@@ -12,10 +12,9 @@ import           HGeometry.Plane.LowerEnvelope
 import           HGeometry.Plane.LowerEnvelope.VertexForm
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
-import           HGeometry.Vector
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
-import           Test.QuickCheck
+-- import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
@@ -33,9 +32,10 @@ spec = describe "lowerEnvelope tests" $ do
          prop "intersection on plane" $ \h1 h2 (h3 :: Plane R) ->
            verifyOnPlane h1 h2 h3
          it "asBoundedVertex" $
-           let [h1,h2,h3] = inputs in
-           asVertex inputs (Three h1 h2 h3) `shouldBe`
-             Just (LEVertex (Point3 10 10 10) (Set.fromList inputs))
+           case inputs of
+             [h1,h2,h3] -> asVertex inputs (Three h1 h2 h3) `shouldBe`
+                           Just (LEVertex (Point3 10 10 10) (Set.fromList inputs))
+             _          -> expectationFailure "input needs 3 planes"
          prop "belowall" $ \h1 h2 h3 ->
            case asVertex [h1,h2,h3] (Three h1 h2 (h3 :: Plane R)) of
              Nothing -> True

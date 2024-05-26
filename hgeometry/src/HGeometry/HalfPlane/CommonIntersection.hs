@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -Wno-unused-binds #-} -- TODO: disable later
 module HGeometry.HalfPlane.CommonIntersection
   ( CommonIntersection(..)
   , SubLine(..)
@@ -9,15 +10,14 @@ module HGeometry.HalfPlane.CommonIntersection
   ) where
 
 
-import           Control.Lens
 import           Control.Lens hiding (Empty)
 import           Data.Bifunctor (first)
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
+-- import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ord (comparing)
 import           Data.Sequence (Seq(..))
-import qualified Data.Sequence as Seq
+-- import qualified Data.Sequence as Seq
 import           Data.These
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
@@ -96,7 +96,7 @@ commonIntersection hs0 = case bimap extremes boundaries $ partitionhalfPlanes hs
        -- We have both positive and negative non-vertical halfplanes. So compute their
        -- common intersection, and then clip the result to the vertical slab determined by
        -- the verticals
-       BothSigns upperBoundary lowerBoundary ->
+       BothSigns _upperBoundary _lowerBoundary ->
          undefined -- TODO: somehow combine them, and clip
          -- withNonVerticals nonVerticals `clipBy` verticals
   where
@@ -108,7 +108,7 @@ commonIntersection hs0 = case bimap extremes boundaries $ partitionhalfPlanes hs
       -- we only have halfplanes with positives signs
        Positives lowerBoundary               -> unboundedRegion lowerBoundary
        -- we have both positive and negative halfplanes
-       BothSigns upperBoundary lowerBoundary -> undefined -- TODO: somehow combine them.
+       BothSigns _upperBoundary _lowerBoundary -> undefined -- TODO: somehow combine them.
 
     -- -- clip the chain by the vertical boundaries
     -- clipBy inters = \case

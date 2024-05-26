@@ -10,7 +10,8 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.LineSegment.Class
-  ( LineSegment_(..), pattern LineSegment_
+  ( LineSegment_
+  , pattern LineSegment_
   , ConstructableLineSegment_(..)
   , ClosedLineSegment_
   , OpenLineSegment_

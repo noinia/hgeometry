@@ -14,22 +14,13 @@ import qualified Data.Array as Array
 import qualified Data.Foldable as F
 import           Data.Graph (Graph,buildG)
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Sequence as Seq
-import qualified Data.Sequence as Sequence
-import           Data.Tree
 import qualified Data.Vector.NonEmpty as NonEmptyVector
-import           HGeometry.Ext
 import           HGeometry.LineSegment
 import           HGeometry.Point
 import           HGeometry.PolyLine
-import           HGeometry.PolyLine.Class
-import           HGeometry.Sequence.NonEmpty
-import           HGeometry.Vector
 import           Hiraffe.BFS (bfs)
 import           Hiraffe.Graph
 import           Hiraffe.Tree (pathsTo)
-import           Witherable
 
 --------------------------------------------------------------------------------
 

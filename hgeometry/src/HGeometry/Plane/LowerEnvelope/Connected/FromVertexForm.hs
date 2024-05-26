@@ -168,7 +168,7 @@ extractEdgeDefs h u uDefs v vDefs
       = case hss of
       []   -> error "extractEdgeDefs: absurd, too few definers"
       [h'] -> h'
-      hs    -> error $ "extractEdgeDefs: unhandled degeneracy. More than 3 planes at a vertex. "
+      _hs  -> error $ "extractEdgeDefs: unhandled degeneracy. More than 3 planes at a vertex. "
                      <> show ("extractEdgeDefs",h,u,v,uOnlies,vOnlies)
              -- TODO we should either the neighbor of h in the order around the given
              -- vertex here.

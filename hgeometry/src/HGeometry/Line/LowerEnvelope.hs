@@ -36,7 +36,6 @@ import           HGeometry.HyperPlane.Class
 import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.Point
-import           HGeometry.Properties
 import           HGeometry.Sequence.Alternating
 
 --------------------------------------------------------------------------------
