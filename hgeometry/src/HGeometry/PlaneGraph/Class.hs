@@ -28,7 +28,6 @@ module HGeometry.PlaneGraph.Class
 
 import Control.Lens
 import Data.Coerce
-import Data.Default.Class
 import Data.Foldable1
 import Data.Functor.Apply
 import Data.Maybe (fromMaybe)
@@ -234,9 +233,9 @@ polygonFromFace      :: forall planeGraph vertex r.( PlaneGraph_ planeGraph vert
                      -> SimplePolygon (vertex :+ VertexIx planeGraph)
 polygonFromFace gr fi = poly'&vertices.extra %~ coerce
   where
-    poly' :: SimplePolygon (vertex :+ NoDefault (VertexIx planeGraph))
+    poly' :: SimplePolygon (vertex :+ VertexIx planeGraph)
     poly' = uncheckedFromCCWPoints
-         . fmap (\vi -> gr^?!vertexAt vi :+ NoDefault vi)
+         . fmap (\vi -> gr^?!vertexAt vi :+ vi)
          $ boundaryVertices fi gr
         -- note that this is safe, since boundaryVerticesOf guarantees that for
         -- interior faces, the vertices are returned in CCW order.
@@ -263,13 +262,6 @@ interiorFacePolygonAt fi = theFold
         -- draw   :: Face planeGraph -> f (Face planeGraph)
         draw _ = let poly =  polygonFromFace gr fi
                  in poly >$ indexed pPolyFPoly fi poly
-
-
-newtype NoDefault e = NoDefault e
-
-instance Default (NoDefault e) where
-  def = undefined
-
 
 --------------------------------------------------------------------------------
 
