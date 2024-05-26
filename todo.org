@@ -1,3 +1,5 @@
+** TODO make a constructable point class, getting rid of the Default ext constraints
+
 ** DONE make everything public sublibraries of hgeometry
 hopefully this will also make the CI story easier
 
@@ -28,6 +30,22 @@ this can't be right:
   fromPointAndNormal _ n = NonVerticalHyperPlane n
 
 we should really use the in plane point p
+
+* TODO normal vector business
+
+want:
+
+- normalVector points into the positive halfspace
+- normalVector (fromPointAnNormal p n) == n
+
+
+- onSideTest p
+
+
+
+
+
+
 
 * DONE write some tests for testing line x line intersections of the various forms
 
@@ -92,9 +110,12 @@ intersecting halflines with boxes seems to go wrong somehow.
 
 * TODO polygon triangulation
 ** DONE triangulate monotone
-** TODO triangiulate non-monotone
+** DONE triangiulate non-monotone
 *** DONE split into non-monotone parts
-*** TODO graph representation
+*** DONE graph representation
+** TODO triangulate world demo/benchmark
+** TODO polygons with holes
+*** TODO represent polygons with holes
 * DONE polyline simplification
 ** DONE imai iri
 ** DONE DP

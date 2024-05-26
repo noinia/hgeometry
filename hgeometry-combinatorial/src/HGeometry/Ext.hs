@@ -23,6 +23,7 @@ import Data.Biapplicative
 import Data.Bifoldable
 import Data.Bifunctor.Apply
 import Data.Bitraversable
+import Data.Default.Class
 import Data.Functor.Apply (liftF2)
 import Data.Semigroup.Bifoldable
 import Data.Semigroup.Bitraversable
@@ -98,8 +99,8 @@ instance (Uniform core, Uniform extra) => Uniform (core :+ extra)
 instance (UniformRange core, UniformRange extra) => UniformRange (core :+ extra) where
   uniformRM (lc :+ le, hc :+ he) g = (:+) <$> uniformRM (lc, hc) g <*> uniformRM (le,he) g
 
--- instance (Default a, Default b) => Default (a :+ b) where
---   def = def :+ def
+instance (Default core, Default extra) => Default (core :+ extra) where
+  def = def :+ def
 
 -- | Access the core of an extended value.
 _core :: (core :+ extra) -> core

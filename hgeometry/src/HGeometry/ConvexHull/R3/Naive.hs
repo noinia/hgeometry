@@ -91,7 +91,7 @@ isValidTriangle t = find (\q -> not $ (q^.asPoint) `intersects` h)
 -- | Computes the halfspace above the triangle.
 --
 -- >>> upperHalfSpaceOf (Triangle origin (Point3 10 0 0) (Point3 0 10 0))
--- HalfSpace Positive (HyperPlane [0,0,0,100])
+-- HalfSpace Positive (HyperPlane [0,0,0,-100])
 upperHalfSpaceOf                  :: (Ord r, Num r, Point_ point 3 r)
                                   => Triangle point -> HalfSpace 3 r
 upperHalfSpaceOf (Triangle p q r) = HalfSpace Positive h

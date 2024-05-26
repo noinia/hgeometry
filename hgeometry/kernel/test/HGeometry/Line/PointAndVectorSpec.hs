@@ -1,12 +1,12 @@
 module HGeometry.Line.PointAndVectorSpec(spec) where
 
 
-import Control.Lens
+-- import Control.Lens
 import HGeometry.Kernel.Instances ()
 import HGeometry.Line.PointAndVector
 import HGeometry.Number.Real.Rational (RealNumber)
 import HGeometry.Point
-import HGeometry.Vector
+-- import HGeometry.Vector
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck

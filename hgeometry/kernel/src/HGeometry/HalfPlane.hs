@@ -2,7 +2,7 @@ module HGeometry.HalfPlane
   ( HalfPlane(..)
   ) where
 
-import HGeometry.HalfPlane.Class
+import HGeometry.HalfSpace.Class
 import HGeometry.Line
 import HGeometry.Line.LineEQ
 import HGeometry.Properties
@@ -18,6 +18,10 @@ data GHalfPlane line r = LeftOf  !r
                        deriving (Show,Read,Eq)
 type HalfPlane r = GHalfPlane (LineEQ r) r
 type instance NumType (HalfPlane r) = r
+
+
+-- instance HalfPlane_ (GHalfPlane line r) r where
+--   type
 
 -- type HalfPlane r = HalfSpace 2 r
 
