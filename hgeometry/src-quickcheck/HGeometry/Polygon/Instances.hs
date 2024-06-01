@@ -10,6 +10,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Polygon.Instances
   ( allSimplePolygons
+  , shrinkPolygon
   ) where
 
 import Control.Lens hiding (elements)
@@ -86,9 +87,14 @@ instance Arbitrary (SimplePolygon (Point 2 Rational)) where
     p <- elements allSimplePolygons'
     n <- chooseInt (0, numVertices p-1)
     pure $ rotateLeft n p
-  shrink p
+  shrink = shrinkPolygon
+
+-- | Shrink a simple polygon
+shrinkPolygon      :: (Ord r, Fractional r, Real r)
+                   => SimplePolygon (Point 2 r) -> [SimplePolygon (Point 2 r)]
+shrinkPolygon p
     | isTriangle p = simplifyP p
-    | otherwise = cutEars p ++ simplifyP p
+    | otherwise    = cutEars p ++ simplifyP p
 
 instance Arbitrary (SimplePolygon (Point 2 Double)) where
   arbitrary = do
@@ -112,12 +118,19 @@ instance Arbitrary (SimplePolygon (Point 2 (RealNumber (p::Nat)))) where
 -- instance Arbitrary (MultiPolygon () Rational) where
 --   arbitrary = elements allMultiPolygons'
 
+instance (Uniform r, Ord r, Num r) => Arbitrary (MonotonePolygon (Point 2 r)) where
+  arbitrary = do
+                n <- max 3    <$> getSize
+                g <- mkStdGen <$> arbitrary
+                let (v, g') = runState randomNonZeroVector g
+                pure $ evalState (randomMonotoneDirected n v) g'
 
 
 
 
 
-simplifyP :: SimplePolygon (Point  2 Rational) -> [SimplePolygon (Point 2 Rational)]
+simplifyP     :: forall r. (Ord r, Fractional r, Real r)
+              => SimplePolygon (Point 2 r) -> [SimplePolygon (Point 2 r)]
 simplifyP pg
       -- Scale up polygon such that each coordinate is a whole number.
     | lcmP /= 1 = [ pg&vertices %~ multP lcmP  ]
@@ -145,35 +158,43 @@ simplifyP pg
 
     lcmP = lcmPoint pg
     gcdP = gcdPoint pg
-    align   :: Point 2 Rational -> Point 2 Rational
+    align   :: Point 2 r -> Point 2 r
     align v = Point (v .-. Point2 minX minY)
 
     multP v (Point2 c d) = Point2 (c*v) (d*v)
     divP v (Point2 c d) = Point2 (c/v) (d/v)
-    _div2 (Point2 a b) = Point2 (numerator a `div` 2 % 1) (numerator b `div` 2 % 1)
+    _div2 p = let (Point2 a b) = p&coordinates %~ toRational
+              in Point2 (fromRational $ numerator a `div` 2 % 1)
+                        (fromRational $ numerator b `div` 2 % 1)
 
 
-lcmPoint :: SimplePolygon (Point 2 Rational) -> Rational
+lcmPoint :: (Ord r, Fractional r, Real r) => SimplePolygon (Point 2 r) -> r
 lcmPoint p = realToFrac t
   where
     vs = p^..outerBoundary
-    lst = concatMap (\(Point2 x y) -> [denominator x, denominator y]) vs
+    lst = concatMap ((\(Point2 x y) -> [denominator x, denominator y])
+                    . over coordinates toRational
+                    ) vs
     t = foldl1 lcm lst
 
-gcdPoint :: SimplePolygon (Point 2 Rational) -> Rational
+gcdPoint :: (Ord r, Fractional r, Real r) => SimplePolygon (Point 2 r) -> r
 gcdPoint p = realToFrac t
   where
     vs = p^..outerBoundary
-    lst = concatMap (\(Point2 x y) -> [denominator x, denominator y]) vs
+    lst = concatMap ((\(Point2 x y) -> [denominator x, denominator y])
+                    . over coordinates toRational)
+                    vs
     t = foldl1 gcd lst
 
 -- remove vertex i, thereby dropping a vertex
-cutEarAt      :: SimplePolygon (Point 2 Rational) -> Int -> SimplePolygon (Point 2 Rational)
+cutEarAt      :: (Ord r, Fractional r)
+              => SimplePolygon (Point 2 r) -> Int -> SimplePolygon (Point 2 r)
 cutEarAt pg i = uncheckedFromCCWPoints vs
   where
     vs = ifoldrOf outerBoundary (\j v vs' -> if i == j then vs' else v:vs') [] pg
 
-cutEars :: SimplePolygon (Point 2 Rational) -> [SimplePolygon (Point 2 Rational)]
+cutEars :: (Ord r, Fractional r)
+  => SimplePolygon (Point 2 r) -> [SimplePolygon (Point 2 r)]
 cutEars pg | isTriangle pg = []
            | otherwise     = [ cutEarAt pg i | i <- [0 .. (n -1)], isEar i ]
   where
@@ -188,10 +209,3 @@ cutEars pg | isTriangle pg = []
                        (\pt -> pt `elem` [prev,cur,nxt] || not (pt `intersects` triangle)) pg
 
 isTriangle pg = numVertices pg == 3
-
-instance (Uniform r, Ord r, Num r) => Arbitrary (MonotonePolygon (Point 2 r)) where
-  arbitrary = do
-                n <- max 3    <$> getSize
-                g <- mkStdGen <$> arbitrary
-                let (v, g') = runState randomNonZeroVector g
-                pure $ evalState (randomMonotoneDirected n v) g'
