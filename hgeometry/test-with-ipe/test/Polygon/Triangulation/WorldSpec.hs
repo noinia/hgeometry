@@ -1,5 +1,5 @@
 {-# LANGUAGE QuasiQuotes #-}
-module Polygon.Triangulation.WorldSpec (spec) where
+module Polygon.Triangulation.WorldSpec (spec, Country) where
 
 
 import Control.Lens hiding (elements)

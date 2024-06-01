@@ -49,6 +49,8 @@ class ( Polygon_ simplePolygon point r
   -- function will make sure the polygon is a valid simple polygon,
   -- i.e. it has at least three vertices, is given in CCW order, no
   -- repeated vertices etc.
+  --
+  -- In particular, it will drop repeated vertices.
   fromPoints :: ( Foldable f
                 , ConstructableSimplePolygon simplePolygon point r
                 )

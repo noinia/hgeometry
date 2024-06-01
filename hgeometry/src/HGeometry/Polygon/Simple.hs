@@ -26,6 +26,7 @@ module HGeometry.Polygon.Simple
 
 import           Control.Lens
 import qualified Data.Foldable as F
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import           HGeometry.Boundary
@@ -110,13 +111,22 @@ instance ( Point_ point 2 r
   uncheckedFromCCWPoints = MkSimplePolygon . fromFoldable1
                          . NonEmpty.fromList . F.toList
 
-  fromPoints pts = case F.toList pts of
-    pts'@(_ : _ : _ : _ ) -> Just . toCounterClockwiseOrder . uncheckedFromCCWPoints $ pts'
-                             -- TODO: verify that:
-                              --      we have no repeated vertices,
-                             --      no self intersections, and
-                             --      not all vertices are colinear
-    _                     -> Nothing -- we need at least three vertices
+  fromPoints rawPts = toCounterClockwiseOrder . uncheckedFromCCWPoints
+                   <$> requireThree (removeRepeated rawPts)
+  -- TODO: verify that:
+  --      no self intersections, and
+  --      not all vertices are colinear
+
+-- | Makes sure there are no repeated vertices
+removeRepeated :: (Point_ point 2 r, Eq r, Foldable f)
+               => f point -> [point]
+removeRepeated = fmap NonEmpty.head . NonEmpty.groupWith (^.asPoint)
+
+-- | Make sure that we have at least three points
+requireThree     :: Foldable f => f point -> Maybe (NonEmpty point)
+requireThree pts = case F.toList pts of
+    (h : tl@(_ : _ : _)) -> Just $ h :| tl
+    _                    -> Nothing
 
 instance ( Show point
          , SimplePolygon_ (SimplePolygonF f point) point r
