@@ -133,20 +133,19 @@ simplifyP     :: forall r. (Ord r, Fractional r, Real r)
               => SimplePolygon (Point 2 r) -> [SimplePolygon (Point 2 r)]
 simplifyP pg
       -- Scale up polygon such that each coordinate is a whole number.
-    | lcmP /= 1 = [ pg&vertices %~ multP lcmP  ]
-        -- unsafeFromCircularVector $ CV.map (over core (multP lcmP)) vs]
-
+    | lcmP /= 1 = [ pg' | pg' <- fromPoints' $ multP lcmP <$> pg^..vertices ]
+                 -- we use fromPoints to make sure that we don't create repeated vertices.
       -- Scale down polygon maintaining each coordinate as a whole number
-    | gcdP /= 1 = [ pg&vertices %~ divP gcdP ]
-
-    | minX /= 0 || minY /= 0 = [ pg&vertices %~ align ]
-      -- = [unsafeFromCircularVector $ CV.map (over core align) vs]
+    | gcdP /= 1 = [ pg' | pg' <- fromPoints' $ divP gcdP <$> pg^..vertices ]
+    | minX /= 0 || minY /= 0 = [ pg' | pg' <- fromPoints' $ align <$> pg^..vertices ]
     | otherwise =
       let pg' = pg&vertices %~ _div2
-            -- unsafeFromCircularVector $ CV.map (over core _div2) vs
       in [ pg' | hasNoSelfIntersections $ pg'^..vertices ]
     -- otherwise = []
   where
+    fromPoints' = maybeToList . fromPoints
+
+
     minX = first1Of (minimumVertexBy (comparing (^.xCoord)).xCoord) pg
     minY = first1Of (minimumVertexBy (comparing (^.yCoord)).yCoord) pg
 
