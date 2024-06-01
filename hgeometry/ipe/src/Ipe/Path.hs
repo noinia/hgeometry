@@ -22,6 +22,7 @@ module Ipe.Path(
   , _SplineSegment
   , _ClosedSplineSegment
 
+  , Orientation(..)
   , Operation(..)
   , _MoveTo
   , _LineTo
@@ -50,9 +51,15 @@ import           HGeometry.Transformation
 --------------------------------------------------------------------------------
 -- | Paths
 
+-- | Polygons in ipe may be given in CCW order, or in CW order. Since simple polygon
+-- normalizes the order, we actually store the original orientation.
+data Orientation = AsIs | Reversed
+  deriving (Show,Eq,Ord)
+
 -- | Paths consist of Path Segments. PathSegments come in the following forms:
 data PathSegment r = PolyLineSegment        (PolyLine (Point 2 r))
                    | PolygonPath            (SimplePolygon (Point 2 r))
+                                            {-# UNPACK #-}!Orientation
                    | CubicBezierSegment     (CubicBezier (Point 2 r))
                    | QuadraticBezierSegment (QuadraticBezier (Point 2 r))
                    | EllipseSegment         (Ellipse r)
@@ -74,7 +81,7 @@ instance Traversable PathSegment where
   traverse f = \case
       PolyLineSegment p        -> PolyLineSegment
                                   <$> traverseOf (cloneTraversal $ vertices.coordinates) f p
-      PolygonPath p            -> PolygonPath
+      PolygonPath p o          -> flip PolygonPath o
                                   <$> traverseOf (cloneTraversal $ vertices.coordinates) f p
       CubicBezierSegment b     -> CubicBezierSegment
                                   <$> traverseOf (cloneTraversal $ vertices.coordinates) f b
@@ -89,7 +96,7 @@ instance Traversable PathSegment where
 instance Fractional r => IsTransformable (PathSegment r) where
   transformBy t = \case
     PolyLineSegment p        -> PolyLineSegment $ transformBy t p
-    PolygonPath p            -> PolygonPath $ transformBy t p
+    PolygonPath p o          -> PolygonPath (transformBy t p) o
     CubicBezierSegment b     -> CubicBezierSegment $ transformBy t b
     QuadraticBezierSegment b -> QuadraticBezierSegment $ transformBy t b
     EllipseSegment e         -> EllipseSegment $ transformBy t e

@@ -239,12 +239,13 @@ instance (Coordinate r, Fractional r, Eq r) => IpeReadText (NonEmpty.NonEmpty (P
       fromOps' _ []             = Left "Found only a MoveTo operation"
       fromOps' s (LineTo q:ops) = let (ls,xs) = span' _LineTo ops
                                       pts  = s NonEmpty.:| q:mapMaybe (^?_LineTo) ls
-                                      mPoly = Polygon.fromPoints . dropRepeats $ pts
+                                      mPoly = Polygon.fromPoints pts
                                       pl    = polyLineFromPoints pts
+                                      or    = AsIs -- TODO: this may be wrong
                                   in case xs of
                                        (ClosePath : xs') -> case mPoly of
                                          Nothing         -> Left "simple polygon failed"
-                                         Just poly       -> PolygonPath poly   <<| xs'
+                                         Just poly       -> PolygonPath poly or  <<| xs'
                                        _                 -> PolyLineSegment pl <<| xs
 
       fromOps' s [Spline [a, b]]  = Right [QuadraticBezierSegment $ Bezier2 s a b]
@@ -270,10 +271,6 @@ splineToCubicBeziers (a : b : c : d : rest) =
       r = p .+^ ((q .-. p) ^/ 2)
   in (Bezier3 a b p r) : splineToCubicBeziers (r : q : d : rest)
 splineToCubicBeziers _ = error "splineToCubicBeziers needs at least four points"
-
-
-dropRepeats :: Eq a => NonEmpty.NonEmpty a -> NonEmpty.NonEmpty a
-dropRepeats = fmap NonEmpty.head . NonEmpty.group1
 
 instance (Coordinate r, Fractional r, Eq r) => IpeReadText (Path r) where
   ipeReadText = fmap (Path . fromNonEmpty') . ipeReadText
