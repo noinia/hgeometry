@@ -14,7 +14,6 @@ import Miso.String (MisoString)
 import Model
 import Modes
 import StrokeAndFill
-
 --------------------------------------------------------------------------------
 
 
@@ -74,7 +73,7 @@ toolButtons_ m = menuList_ [ pointButton
     lineButton      = menuButton' LineMode  "fas fa-slash"
                                   [title_ "Line"]
 
-    polyLineButton  = menuButton' PolyLineMode "fas fa-wave-square"
+    polyLineButton  = menuButton' (PolyLineMode Nothing) "fas fa-wave-square"
                                   [title_ "Polyline"]
     polygonButton   = menuButton' PolygonMode "fas fa-draw-polygon"
                                   [title_ "Polygon"]
@@ -89,11 +88,13 @@ toolButtons_ m = menuList_ [ pointButton
 
     menuButton' = menuModeButton_ m
 
-menuModeButton_   :: Model -> Mode -> MisoString -> [Attribute Action] -> View Action
+menuModeButton_   :: Model
+                  -> Mode
+                  -> MisoString -> [Attribute Action] -> View Action
 menuModeButton_ m mode' i ats = menuButton_ i
                                            ats
-                                           (if m^.mode == mode' then Active else InActive)
-                                           (if m^.mode == mode' then Selected else NotSelected)
+                                           (if (m^.mode) `matches` mode' then Active else InActive)
+                                           (if (m^.mode) `matches` mode' then Selected else NotSelected)
                                            [ onClick $ SwitchMode mode'
                                            ]
 

@@ -52,6 +52,7 @@ import           SkiaCanvas.CanvasKit hiding (Style(..))
 import qualified SkiaCanvas.Render as Render
 import           StrokeAndFill
 import           ToolMenu
+import qualified SkiaCanvas.CanvasKit.Core as Core
 
 --------------------------------------------------------------------------------
 
@@ -102,13 +103,19 @@ updateModel m = \case
 
     CanvasAction ca       -> m&canvas %%~ flip SkiaCanvas.handleInternalCanvasAction ca
 
-    CanvasClicked         -> case m^.mode of
-      PointMode -> addPoint
-      _         -> noEff m
 
-    CanvasRightClicked    -> noEff m
+    CanvasClicked      -> case m^.mode of
+        PointMode      -> addPoint
+        PenMode        -> noEff m
+        PolyLineMode{} -> (m&mode._PolyLineMode.currentPoly %~ extend)
+                          <# pure Draw
+        _              -> noEff m
 
-    AddPoint              -> addPoint
+    CanvasRightClicked -> case m^.mode of
+        PolyLineMode current' -> addPoly current'
+        PenMode               -> noEff m
+        _                     -> noEff m
+
     Draw                  -> m <# notifyOnError (handleDraw m)
 
     ToggleLayerStatus lr  -> (m&layers.ix lr.status %~ toggleStatus)
@@ -132,12 +139,37 @@ updateModel m = \case
 
 
   where
+    extend = extendWith (m^.canvas.mouseCoordinates)
+
+    -- startMouseDown = case m^.mode of
+    --     PolyLineMode -> noEff m
+    --     PenMode      -> noEff $ m&currentPoly .~ extend Nothing
+    -- mouseMove      = case m^.mode of
+    --     PolyLineMode -> noEff m
+    --     PenMode      -> noEff $ m&currentPoly %~ \mp -> case mp of
+    --                                                       Nothing -> Nothing
+    --                                                       Just _  -> extend mp
+    -- stopMouseDown  = case m^.mode of
+    --     PolyLineMode -> noEff m
+    --     PenMode      -> addPoly
+
     addPoint = recomputeDiagram m' <# pure Draw
       where
         m' = case m^.canvas.mouseCoordinates of
                Nothing -> m
                Just p  -> let ats = PointAttributes $ toColoring (m^.strokeColor) (m^.fillColor)
                           in m&points %~ insertPoint (p :+ ats)
+
+    addPoly current = m' <# pure Draw
+      where
+        m' = m&polyLines                      %~ addPoly'
+              &mode._PolyLineMode.currentPoly .~ Nothing
+
+        addPoly' = case extend current of
+          Just (PartialPolyLine p) -> let ats = PolyLineAttributes (m^.strokeColor.currentStrokeColor)
+                                                                   Normal
+                                      in insertPolyLine (p :+ ats)
+          _                        -> id
 
 
 recomputeDiagram   :: Model -> Model
@@ -153,7 +185,12 @@ insertPoint p m = let k = case IntMap.lookupMax m of
                             Just (i,_) -> succ i
                   in IntMap.insert k p m
 
-
+-- | Helper to insert a new item into an IntMap
+insertPolyLine     :: p -> IntMap.IntMap p -> IntMap.IntMap p
+insertPolyLine p m = let k = case IntMap.lookupMax m of
+                            Nothing    -> 0
+                            Just (i,_) -> succ i
+                 in IntMap.insert k p m
 
 --------------------------------------------------------------------------------
 
@@ -410,22 +447,84 @@ message_ mc ats bdy = article_ ([class_ $ "message" `withColor` mc] <> ats)
 myDraw                       :: Model -> CanvasKit -> SkCanvasRef -> JSM ()
 myDraw m canvasKit canvasRef = do clear canvasKit canvasRef
                                   strokeOnly <- mkPaintStyle canvasKit CanvasKit.StrokeOnly
-                                  myColor <- mkColor4f canvasKit (fromRGB24 192 40  27)
-                                  withPaint canvasKit $ \paint -> do
-                                    forM_ (m^.points) $ \p ->
-                                      Render.point (m^.canvas) canvasRef p paint
-                                    setAntiAlias paint True
-                                    setColor paint myColor
-                                    setStyle paint strokeOnly
-                                    case NonEmpty.nonEmpty $ m^..points.traverse of
-                                      Just pts@(_ :| _ : _) -> do
-                                        let poly :: PolyLine (Point 2 R)
-                                            poly = polyLineFromPoints $ (^.core) <$> pts
-                                        Render.polyLine (m^.canvas) canvasRef poly paint
-                                      _                     -> pure ()
-                                  pure ()
+                                  fillOnly <- mkPaintStyle canvasKit CanvasKit.FillOnly
+                                  forM_ (m^.polyLines) $ \poly ->
+                                    renderPoly strokeOnly (m^.canvas) poly canvasKit canvasRef
+                                  forM_ (m^.points) $ \p ->
+                                    renderPoint strokeOnly fillOnly (m^.canvas) p canvasKit canvasRef
+                                  case m^.mode of
+                                    PolyLineMode current ->
+                                      let current' = extendWith (m^.canvas.mouseCoordinates)
+                                                                current
+                                      in renderPartialPolyLine strokeOnly
+                                                      (m^.canvas)
+                                                      current' canvasKit canvasRef
+                                    _                     -> pure ()
+
+
+                                  -- myColor <- mkColor4f canvasKit (fromRGB24 192 40  27)
+                                  -- withPaint canvasKit $ \paint -> do
+                                  --   forM_ (m^.points) $ \p ->
+                                  --     Render.point (m^.canvas) canvasRef p paint
+                                    -- setAntiAlias paint True
+                                    -- setColor paint myColor
+                                    -- setStyle paint strokeOnly
+                                    -- case NonEmpty.nonEmpty $ m^..points.traverse of
+                                    --   Just pts@(_ :| _ : _) -> do
+                                    --     let poly :: PolyLine (Point 2 R)
+                                    --         poly = polyLineFromPoints $ (^.core) <$> pts
+                                    --     Render.polyLine (m^.canvas) canvasRef poly paint
+                                    --   _                     -> pure ()
+                                  -- pure ()
 
 --------------------------------------------------------------------------------
 
+renderPoint :: SkPaintStyle
+            -> SkPaintStyle
+            -> SkiaCanvas.Canvas R
+            -> (Point 2 R :+ Attributes (Point 2 R))
+            -> CanvasKit -> SkCanvasRef -> JSM ()
+renderPoint strokeOnly fillOnly canvas' (p :+ ats) canvasKit skCanvasRef = case ats^.coloring of
+    StrokeOnly s      -> stroke s
+    FillOnly f        -> fill f
+    StrokeAndFill s f -> fill f >> stroke s
+  where
+    stroke c = withColor' c canvasKit $ \paint ->
+                 do setStyle paint strokeOnly
+                    setAntiAlias paint True
+                    Render.point canvas' skCanvasRef p paint
+    fill c = withColor' c canvasKit $ \paint ->
+                 do setStyle paint fillOnly
+                    setAntiAlias paint True
+                    Render.point canvas' skCanvasRef p paint
+
+renderPoly                             :: SkPaintStyle
+                                       -> SkiaCanvas.Canvas R
+                                       -> (PolyLine' R :+ Attributes (PolyLine' R))
+                                       -> CanvasKit -> SkCanvasRef -> JSM ()
+renderPoly strokeOnly canvas' (pl :+ ats) canvasKit skCanvasRef =
+  withColor' (ats^.polyLineStrokeColor) canvasKit $ \paint ->
+    do setStyle paint strokeOnly
+       setAntiAlias paint True
+       Render.polyLine canvas' skCanvasRef pl paint
+
+withColor'                    :: Color -> CanvasKit -> (Core.SkPaintRef -> JSM a) -> JSM a
+withColor' c canvasKit render = withPaint canvasKit $ \paint -> do
+    c' <- mkColor4f canvasKit c
+    setColor paint c'
+    render paint
+
+renderPartialPolyLine :: SkPaintStyle
+                      -> SkiaCanvas.Canvas R
+                      -> Maybe (PartialPolyLine R)
+                      -> CanvasKit
+                      -> SkCanvasRef
+                      -> JSM ()
+renderPartialPolyLine strokeOnly canvas' partialPoly canvasKit skCanvasRef = case partialPoly of
+    Just (PartialPolyLine pl) -> renderPoly strokeOnly canvas' (pl :+ ats) canvasKit skCanvasRef
+    Just (StartPoint _)       -> pure ()
+    Nothing                   -> pure ()
+  where
+    ats = def
 
 --------------------------------------------------------------------------------

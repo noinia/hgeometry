@@ -65,10 +65,9 @@ initialLayers = Layers mempty (Layer "alpha" Visible) mempty
 
 --------------------------------------------------------------------------------
 
-data Model = Model { _canvas       :: (SkiaCanvas.Canvas R)
+data Model = Model { _canvas       :: SkiaCanvas.Canvas R
                    , _zoomConfig   :: ZoomConfig Double
                    , _mode         :: Mode
-                   -- , _modeData     :: ModeData
                    , _points       :: IntMap.IntMap (Point 2 R :+ Attributes (Point 2 R))
                    , _polyLines    :: IntMap.IntMap (PolyLine' R :+ Attributes (PolyLine' R))
                    , _diagram      :: Maybe [Point 2 R]

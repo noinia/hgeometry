@@ -2,7 +2,10 @@
 {-# LANGUAGE TemplateHaskell            #-}
 module Attributes
   ( Attributes(..)
+  , coloring
 
+  , polyLineStrokeColor
+  , thickness
   , Thickness(..)
   ) where
 
@@ -78,14 +81,25 @@ data instance Attributes (Point 2 r) =
 instance Default (Attributes (Point 2 r)) where
   def = PointAttributes def
 
+-- | Lens to access the colloring attribute
+coloring :: Lens' (Attributes (Point 2 r)) Coloring
+coloring = lens _coloring (\ats c -> ats { _coloring = c })
+
 --------------------------------------------------------------------------------
 -- * PolyLine Attributes
 
 data instance Attributes (PolyLineF f (Point 2 r)) =
-  PolyLineAttributes { _polylineStrokeColor :: {-# UNPACK #-} !Color
+  PolyLineAttributes { _polyLineStrokeColor :: {-# UNPACK #-} !Color
                      , _thickness           :: {-# UNPACK #-} !Thickness
                      } deriving (Show,Eq)
 
+-- | Lens to access the stroke color
+polyLineStrokeColor :: Lens' (Attributes (PolyLineF f (Point 2 r))) Color
+polyLineStrokeColor = lens _polyLineStrokeColor (\ats c -> ats {_polyLineStrokeColor = c})
+
+-- | Lens to access the Thickness attribute
+thickness :: Lens' (Attributes (PolyLineF f (Point 2 r))) Thickness
+thickness = lens _thickness (\ats t -> ats { _thickness = t })
 
 
 instance Default (Attributes (PolyLineF f (Point 2 r))) where

@@ -60,7 +60,7 @@ data Action = Id
             | CanvasAction SkiaCanvas.InternalCanvasAction
             | CanvasClicked
             | CanvasRightClicked
-            | AddPoint
+            -- | AddPoint
             | Draw
             | SetStrokeColor (Maybe Color)
             | SetFillColor   (Maybe Color)
