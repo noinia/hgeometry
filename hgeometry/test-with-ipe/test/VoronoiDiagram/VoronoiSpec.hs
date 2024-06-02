@@ -1,20 +1,18 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -Wno-unused-binds #-}
 module VoronoiDiagram.VoronoiSpec
   ( spec
   ) where
 
 import           Control.Lens
-import           Data.Default.Class
 import           Golden
 -- import HGeometry.Combinatorial.Util
 import           HGeometry.Duality
 import           HGeometry.Ext
-import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.LowerEnvelope
-import           HGeometry.LowerEnvelope.AdjListForm
+import           HGeometry.Plane.LowerEnvelope
+import           HGeometry.Plane.LowerEnvelope.AdjListForm
 import qualified Data.Set as Set
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Sequence as Seq
@@ -104,17 +102,17 @@ grow d (Box p q) = Box (p&coordinates %~ subtract d)
                        (q&coordinates %~ (+d))
 
 
-instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r, Default point
+instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r
          , Show r, Show point
          )
          => HasDefaultIpeOut (VoronoiDiagram point) where
   type DefaultIpeOut (VoronoiDiagram point) = Group
   defIO = \case
-    AllColinear pts -> ipeGroup []
+    AllColinear _pts -> ipeGroup []
     ConnectedVD vd  -> defIO vd
 
 
-instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r, Default point
+instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r
          , Show r, Show point
          )
          => HasDefaultIpeOut (VoronoiDiagram' point) where
@@ -125,10 +123,6 @@ instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r, Default
       render = \case
         Left hl   -> iO $ ipeHalfLineIn bRect hl
         Right seg -> iO' seg
-
-
-instance Default (Point 2 R) where
-  def = error "not def"
 
 inputs :: [Point 2 R]
 inputs = [origin, Point2 10 10, Point2 10 0]
@@ -149,7 +143,10 @@ trivialVD = VoronoiDiagram $ LowerEnvelope vInfty (Seq.fromList [bv])
                  , Edge 0 h1 h3
                  ]
                 )
-    planes@[h1,h2,h3] = map (\p -> liftPointToPlane p :+ p) inputs
+    planes = map (\p -> liftPointToPlane p :+ p) inputs
+    (h1,h2,h3) = case planes of
+                   [h1',h2',h3'] -> (h1',h2',h3')
+                   _             -> error "absurd"
   -- order of the planes is incorrect, as is the z-coord.
 
 

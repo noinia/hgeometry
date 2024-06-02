@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Line.NonVertical.Class
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- A class representing non-vertical lines.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Line.NonVertical.Class
   ( NVLine2_
   , pattern NVLine2_

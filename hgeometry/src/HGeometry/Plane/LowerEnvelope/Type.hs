@@ -1,5 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
-module HGeometry.LowerEnvelope.Type
+module HGeometry.Plane.LowerEnvelope.Type
   ( VertexID
   , BoundedVertexF(Vertex)
   , location, definers, location2, incidentEdgesB

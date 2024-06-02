@@ -117,7 +117,7 @@ centeredOrigin       :: ( Fractional r
                         , Point_ point 2 r
                         ) => rectangle -> Viewport r
 centeredOrigin rect' = Viewport rect
-                                (translation $ centerPoint rect' .-. origin)
+                                (translation $ (centerPoint rect')^.vector)
   where rect = Box (rect'^.minPoint.asPoint) (rect'^.maxPoint.asPoint)
 
 

@@ -15,6 +15,7 @@ module HGeometry.ConvexHull.GrahamScan
   ) where
 
 import           Control.Lens ((^.))
+import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Vector as Vector
@@ -53,8 +54,9 @@ upperHull = NonEmpty.reverse . hull id
 --
 -- The upper hull is given from left to right
 --
-upperHull'  :: (Ord r, Num r, Point_ point 2 r) => NonEmpty point -> NonEmpty point
-upperHull' = NonEmpty.reverse . dropVertical . hull id
+upperHull'  :: (Ord r, Num r, Point_ point 2 r, Foldable1 f
+               ) => f point -> NonEmpty point
+upperHull' = NonEmpty.reverse . dropVertical . hull id . toNonEmpty
 --{-# INLINABLE upperHull' #-}
 
 -- | Helper function to remove vertical segments from the hull.
@@ -85,8 +87,8 @@ lowerHull = hull reverse
 -- | Computes the lower hull, making sure there are no vertical
 -- segments. (Note that the only such segment could be the first
 -- segment).
-lowerHull' :: (Ord r, Num r, Point_ point 2 r) => NonEmpty point -> NonEmpty point
-lowerHull' = dropVertical . hull reverse
+lowerHull' :: (Ord r, Num r, Point_ point 2 r, Foldable1 f) => f point -> NonEmpty point
+lowerHull' = dropVertical . hull reverse . toNonEmpty
 --{-# INLINABLE lowerHull' #-}
 
 -- | Helper function so that that can compute both the upper or the lower hull, depending

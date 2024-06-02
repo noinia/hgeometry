@@ -11,10 +11,16 @@
 --------------------------------------------------------------------------------
 module HGeometry.Sequence.Alternating
   ( Alternating(..)
+  , fromNonEmptyWith
+  , mapF
   , withNeighbours
   , mergeAlternating
   , insertBreakPoints
   , reverse
+
+  , consElemWith
+  , unconsAlt
+  , snocElemWith
   ) where
 
 import           Control.DeepSeq
@@ -29,6 +35,7 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup.Traversable
 import           GHC.Generics (Generic)
+import           HGeometry.Foldable.Util
 import           Prelude hiding (reverse)
 
 --------------------------------------------------------------------------------
@@ -67,6 +74,19 @@ instance Foldable f => Bifoldable (Alternating f) where
 
 instance Traversable f => Bitraversable (Alternating f) where
   bitraverse f g (Alternating x xs) = Alternating <$> g x <*> traverse (bitraverse f g) xs
+
+
+-- | Given a separator, and some foldable structure, constructs an Alternating.
+fromNonEmptyWith        :: (HasFromFoldable g, Foldable1 f) => sep -> f a -> Alternating g sep a
+fromNonEmptyWith sep xs = let (x0 :| xs') = toNonEmpty xs
+                          in Alternating x0 $ fromList (map (sep,) xs')
+
+
+-- | map some function changing the f into a g.
+mapF                      :: (f (sep, a) -> g (sep', a))
+                          -> Alternating f sep a -> Alternating g sep' a
+mapF f (Alternating x xs) = Alternating x $ f xs
+
 
 -- | Computes a b with all its neighbours
 --
@@ -125,3 +145,52 @@ reverse p@(Alternating s xs) = case NonEmpty.nonEmpty xs of
     Just xs1@((e1,_):|tl) -> let ys    = (e1, s) : List.zipWith (\(_, v) (e, _) -> (e, v)) xs tl
                                  (_,t) = NonEmpty.last xs1
                              in Alternating t (List.reverse ys)
+
+
+--------------------------------------------------------------------------------
+
+-- | Given a function f that takes the new element y and the (current) first element x and
+-- computes the new separating element s, conses y and the the separator onto alternating
+-- list.
+--
+-- >>> consElemWith (\_ _ -> ".") 0 (fromNonEmptyWith @[] "," (NonEmpty.fromList [1..5]))
+-- Alternating 0 [(".",1),(",",2),(",",3),(",",4),(",",5)]
+-- >>> consElemWith (\_ _ -> ".") 0 (fromNonEmptyWith @[] "," (NonEmpty.fromList [1]))
+-- Alternating 0 [(".",1)]
+consElemWith                         :: Cons (f (sep,a)) (f (sep,a)) (sep,a) (sep,a)
+                                     => (a -> a -> sep)
+                                     -> a
+                                     -> Alternating f sep a -> Alternating f sep a
+consElemWith f y (Alternating x0 xs) = let s = f y x0 in
+    Alternating y $ view (re _Cons) ((s,x0), xs)
+    -- a 're _Cons' is essentially something that when given a tuple (z,zs) turns it into a
+    -- z `cons` zs
+
+-- | Uncons the Alternating, getting either just the first element (if there was only one),
+-- or the first element, the first separator, and the remaining alternating.
+unconsAlt                     :: Cons (f (sep,a)) (f (sep,a)) (sep,a) (sep,a)
+                              => Alternating f sep a -> Either a ((a,sep), Alternating f sep a)
+unconsAlt (Alternating x0 xs) = case xs^?_Cons of
+  Nothing           -> Left x0
+  Just ((s,x1),xs') -> Right ((x0,s), Alternating x1 xs')
+
+--------------------------------------------------------------------------------
+
+-- | Given a function f that takes the (current) last element x, and the new element y,
+-- and computes the new separating element s, snocs the separator and y onto the
+-- alternating list.
+--
+-- >>> snocElemWith (\_ _ -> ".") (fromNonEmptyWith @[] "," (NonEmpty.fromList [1..5])) 6
+-- Alternating 1 [(",",2),(",",3),(",",4),(",",5),(".",6)]
+-- >>> snocElemWith (\_ _ -> ".") (fromNonEmptyWith @[] "," (NonEmpty.fromList [1])) 6
+-- Alternating 1 [(".",6)]
+snocElemWith                         :: Snoc (f (sep,a)) (f (sep,a)) (sep,a) (sep,a)
+                                     => (a -> a -> sep)
+                                     -> Alternating f sep a -> a -> Alternating f sep a
+snocElemWith f (Alternating x0 xs) y = Alternating x0 $ view (re _Snoc) (xs, (s,y))
+  -- a 're _Snoc' is essentially something that when given a tuple (zs,z) turns it into a
+  -- zs `snoc` z
+  where
+    s = case xs^?_last of
+          Nothing    -> f x0 y
+          Just (_,x) -> f x  y

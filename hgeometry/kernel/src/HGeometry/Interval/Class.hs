@@ -10,13 +10,19 @@
 --------------------------------------------------------------------------------
 {-# LANGUAGE UndecidableInstances #-}
 module HGeometry.Interval.Class
-  ( Interval_, pattern Interval_
-  , IntervalLike_(..)
+  ( Interval_
+  , pattern Interval_
+  , IntervalLike_
+  , ConstructableInterval_(..)
 
-  , ClosedInterval_(..), pattern ClosedInterval_
+  , ClosedInterval_
+  , pattern ClosedInterval_
+  , ConstructableClosedInterval_(..)
   , clampTo
 
-  , OpenInterval_(..), pattern OpenInterval_
+  , OpenInterval_
+  , pattern OpenInterval_
+  , ConstructableOpenInterval_(..)
 
   , HasStart(..)
   , HasEnd(..)
@@ -103,6 +109,19 @@ class ( HasStart interval point, HasStartPoint interval (StartPointOf interval)
       , EndPoint_ (EndPointOf interval), IxValue (EndPointOf interval) ~ point
       , EndPoint_ (StartPointOf interval), IxValue (StartPointOf interval) ~ point
       ) => IntervalLike_ interval point | interval -> point where
+  {-# MINIMAL  #-}
+
+-- | A class for types representing Intervals
+type Interval_ :: Type -> Type -> Constraint
+class ( IntervalLike_ interval r
+      , NumType interval ~ r
+      ) => Interval_ interval r | interval -> r where
+
+--------------------------------------------------------------------------------
+
+-- | A class for constructable intervals
+type ConstructableInterval_ :: Type -> Type -> Constraint
+class  Interval_ interval point => ConstructableInterval_ interval point where
   {-# MINIMAL mkInterval #-}
 
   -- | Construct an interval given its start and end point.
@@ -125,15 +144,6 @@ class ( HasStart interval point, HasStartPoint interval (StartPointOf interval)
 
 
 --------------------------------------------------------------------------------
-
--- | A class for types representing Intervals
-type Interval_ :: Type -> Type -> Constraint
-class ( IntervalLike_ interval r
-      , NumType interval ~ r
-      ) => Interval_ interval r | interval -> r where
-
-
---------------------------------------------------------------------------------
 -- * Closed Intervals
 
 -- | A class representing closed intervals, i.e. intervals that include their endpoints
@@ -142,6 +152,12 @@ class ( Interval_ interval r
       , StartPointOf interval ~ EndPoint Closed r
       , EndPointOf interval ~ EndPoint Closed r
       ) => ClosedInterval_ interval r where
+
+-- | A class representing constructable closed intervals
+class ( ClosedInterval_ interval r
+      , ConstructableInterval_ interval r
+      ) => ConstructableClosedInterval_ interval r where
+
   -- | Construct an interval given its start and end point.
   mkClosedInterval     :: r -> r -> interval
   mkClosedInterval s e = mkInterval (ClosedE s) (ClosedE e)
@@ -157,10 +173,10 @@ class ( Interval_ interval r
 -- | Pattern matching on an arbitrary closed interval
 pattern ClosedInterval_     :: ClosedInterval_ interval r => r -> r -> interval
 pattern ClosedInterval_ l u <- (startAndEnd -> (l,u))
-  where
-    ClosedInterval_ l u = mkClosedInterval l u
 {-# COMPLETE ClosedInterval_ #-}
-{-# INLINE ClosedInterval_ #-}
+--   where
+--     ClosedInterval_ l u = mkClosedInterval l u
+-- {-# INLINE ClosedInterval_ #-}
 
 -- | Clamps a value to an interval. I.e. if the value lies outside the range we
 -- report the closest value "in the range".
@@ -182,6 +198,11 @@ class ( Interval_ interval r
       , StartPointOf interval ~ EndPoint Open r
       , EndPointOf interval ~ EndPoint Open r
       ) => OpenInterval_ interval r | interval -> r where
+
+-- | Constructable Open intervals
+class ( OpenInterval_ interval r
+      , ConstructableInterval_ interval r
+      ) => ConstructableOpenInterval_ interval r | interval -> r where
   -- | Construct an interval given its start s and end point t.
   --
   -- pre: s < t
@@ -192,19 +213,19 @@ class ( Interval_ interval r
 -- | Pattern matching on an arbitrary open interval
 pattern OpenInterval_     :: OpenInterval_ interval r => r -> r -> interval
 pattern OpenInterval_ l u <- (startAndEnd -> (l,u))
-  where
-    OpenInterval_ l u = mkOpenInterval l u
+  -- where
+  --   OpenInterval_ l u = mkOpenInterval l u
 {-# COMPLETE OpenInterval_ #-}
 
 --------------------------------------------------------------------------------
 
--- | Pattern to match on intervals or construct them.
+-- | Pattern to match on intervals
 pattern Interval_     :: Interval_ interval r
                       => StartPointOf interval -> EndPointOf interval -> interval
 pattern Interval_ s t <- (startAndEndPoint -> (s,t))
-  where
-    Interval_ s t = mkInterval s t
 {-# COMPLETE Interval_ #-}
+  -- where
+  --   Interval_ s t = mkInterval s t
 
 
 -- | Compute where the given query value is with respect to the interval.
@@ -320,20 +341,28 @@ type instance StartPointOf (interval :+ extra) = StartPointOf interval
 type instance EndPointOf (interval :+ extra) = EndPointOf interval
 
 instance ( IntervalLike_ interval point
-         , Default extra
          ) => IntervalLike_ (interval :+ extra) point where
-  mkInterval s t = mkInterval s t :+ def
 
 instance ( Interval_ interval r
-         , Default extra
          ) => Interval_ (interval :+ extra) r
 
 instance ( ClosedInterval_ interval r
-         , Default extra
-         ) => ClosedInterval_ (interval :+ extra) r where
-  mkClosedInterval s t = mkClosedInterval s t :+ def
+         ) => ClosedInterval_ (interval :+ extra) r
 
 instance ( OpenInterval_ interval r
+         ) => OpenInterval_ (interval :+ extra) r
+
+instance ( ConstructableInterval_ interval point
          , Default extra
-         ) => OpenInterval_ (interval :+ extra) r where
+         ) => ConstructableInterval_ (interval :+ extra) point where
+  mkInterval s t = mkInterval s t :+ def
+
+instance ( ConstructableClosedInterval_ interval r
+         , Default extra
+         ) => ConstructableClosedInterval_ (interval :+ extra) r where
+  mkClosedInterval s t = mkClosedInterval s t :+ def
+
+instance ( ConstructableOpenInterval_ interval r
+         , Default extra
+         ) => ConstructableOpenInterval_ (interval :+ extra) r where
   mkOpenInterval s t = mkOpenInterval s t :+ def

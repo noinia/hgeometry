@@ -20,7 +20,6 @@ module HGeometry.VoronoiDiagram.ViaLowerEnvelope
   ) where
 
 import           Control.Lens
-import           Data.Default.Class
 import           Data.Foldable1
 import qualified Data.Set as Set
 import           HGeometry.Box
@@ -28,9 +27,9 @@ import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.LowerEnvelope.AdjListForm
-import           HGeometry.LowerEnvelope.Naive (lowerEnvelopeVertexForm)
-import           HGeometry.LowerEnvelope.VertexForm (VertexForm, vertices')
+import           HGeometry.Plane.LowerEnvelope.AdjListForm
+import           HGeometry.Plane.LowerEnvelope.Naive (lowerEnvelopeVertexForm)
+import           HGeometry.Plane.LowerEnvelope.VertexForm (VertexForm, vertices')
 import           HGeometry.Point
 import           HGeometry.Properties
 
@@ -86,7 +85,7 @@ instance (Ord (NumType point), Num (NumType point)) => IsBoxable (VoronoiDiagram
 -- the lower envelope of these planes.
 --
 -- \(O(n\log n)\)
-voronoiDiagram     :: ( Point_ point 2 r, Functor f, Default point, Ord point
+voronoiDiagram     :: ( Point_ point 2 r, Functor f, Ord point
                       , Ord r, Fractional r, Foldable1 f
                       , Show point, Show r
                       ) => f point -> VoronoiDiagram point
@@ -98,14 +97,13 @@ voronoiDiagram pts = case lowerEnvelope' . fmap (\p -> liftPointToPlane p :+ p) 
     getPoint = view (_Wrapped'.extra.to ColinearPoint)
 
 -- | Computes all voronoi vertices
-voronoiVertices :: ( Point_ point 2 r, Functor f, Default point, Ord point
+voronoiVertices :: ( Point_ point 2 r, Functor f, Ord point
                    , Ord r, Fractional r, Foldable f
                    ) => f point -> [Point 2 r]
 voronoiVertices = map (projectPoint . fst)
                 . itoListOf vertices'
                 . upperEnvelopeVertexForm
                 . fmap (\p -> liftPointToPlane p :+ p)
--- FIXME: get rid of the default point constraint
 -- FIXME: get rid of the ord point constraint
 
 -- | Computes the vertex form of the upper envelope. The z-coordinates are still flipped.
@@ -120,7 +118,7 @@ upperEnvelopeVertexForm = lowerEnvelopeVertexForm . fmap flipZ
 --------------------------------------------------------------------------------
 
 -- | Get the halflines and line segments representing the VoronoiDiagram
-edgeGeometries :: (Point_ point 2 r, Ord r, Fractional r, Default point
+edgeGeometries :: (Point_ point 2 r, Ord r, Fractional r
 
                   , Show point, Show r
                   )

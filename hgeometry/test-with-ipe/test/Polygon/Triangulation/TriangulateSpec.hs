@@ -58,7 +58,7 @@ spec = describe "triangulateSpec" $ do
 
 _drawGraph    :: ( PlaneGraph_ planeGraph vertex
                  , IsTransformable vertex
-                 , Point_ vertex 2 r, Ord r, Real r, Fractional r, Show r, Eq (FaceIx planeGraph)
+                 , ConstructablePoint_ vertex 2 r, Ord r, Real r, Fractional r, Show r, Eq (FaceIx planeGraph)
                  , Show (Vertex planeGraph), Show (Dart planeGraph), Show (Face planeGraph)
                  , Show (EdgeIx planeGraph)
                  ) => planeGraph -> [IpeObject r]

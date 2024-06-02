@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  Ipe.Layer
@@ -21,4 +20,7 @@ import           GHC.Exts
 
 -- | Defines an Layer in Ipe.
 newtype LayerName = LayerName {_layerName :: Text } deriving (Show,Read,Eq,Ord,IsString)
-makeLenses ''LayerName
+
+layerName :: Iso' LayerName Text
+layerName = iso _layerName LayerName
+{-# INLINE layerName #-}

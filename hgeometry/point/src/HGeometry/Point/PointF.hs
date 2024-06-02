@@ -108,6 +108,10 @@ instance ( Additive_ vector       d r
 instance ( Additive_ vector       d r
          , Additive_ (Vector d r) d r
          ) => Point_ (PointF vector) d r where
+
+instance ( Additive_ vector       d r
+         , Additive_ (Vector d r) d r
+         ) => ConstructablePoint_ (PointF vector) d r where
   fromVector = Point . review _Vector
   {-# INLINE fromVector #-}
 

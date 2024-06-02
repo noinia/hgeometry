@@ -27,7 +27,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Semigroup.Foldable
 import qualified Data.Set as SS -- status struct
 import qualified Data.Vector as V
-import           HGeometry.Algorithms.BinarySearch (binarySearchIn)
+import           HGeometry.Algorithms.BinarySearch (binarySearchFirstIn)
 import           HGeometry.Ext
 import           HGeometry.Line.PointAndVector
 import           HGeometry.LineSegment
@@ -184,7 +184,7 @@ findSlab  :: ( LineSegment_ lineSegment point, Point_ point 2 r
           -> Maybe (StatusStructure lineSegment)
 findSlab q ds | q^.xCoord < ds^.leftMost = Nothing
               | otherwise                = view extra
-                                        <$> binarySearchIn (q `leftOf `) (ds^.sweepStruct)
+                                        <$> binarySearchFirstIn (q `leftOf `) (ds^.sweepStruct)
   where
     q' `leftOf` (r :+ _) = q'^.xCoord <= r
 
@@ -216,7 +216,7 @@ searchInSlab   :: (LineSegment_ lineSegment point, Point_ point 2 r
                   , HasSupportingLine lineSegment, Num r)
                => (LinePV 2 r -> Bool)
                -> StatusStructure lineSegment -> Maybe lineSegment
-searchInSlab p = binarySearchIn (p . supportingLine)
+searchInSlab p = binarySearchFirstIn (p . supportingLine)
 
 
 ----------------------------------------------------------------------------------

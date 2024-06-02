@@ -55,7 +55,7 @@ class ( Polygon_ simplePolygon point r
   -- | Compute the centroid of a simple polygon.
   --
   -- running time: \(O(n)\)
-  centroid      :: Fractional r => simplePolygon -> point
+  centroid      :: (Fractional r, ConstructablePoint_ point' 2 r) => simplePolygon -> point'
   centroid poly = fromVector $ sum' xs ^/ (6 * signedArea poly)
     where
       xs = [ (p^.vector ^+^ q^.vector) ^* (p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord)

@@ -37,6 +37,7 @@ import HGeometry.HalfLine
 import HGeometry.HyperPlane.Class
 import HGeometry.Intersection
 import HGeometry.Interval
+import HGeometry.Line.General
 import HGeometry.Line.LineEQ
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment
@@ -144,6 +145,34 @@ instance (Fractional r, Ord r
       -- x-coordinate of the intersection with a horizontal line at height h
       horX h = (h-b) / a
   {-# INLINE intersect #-}
+
+----------------------------------------
+-- with general line
+
+type instance Intersection (VerticalOrLineEQ r) (Rectangle point) =
+  Maybe (LineBoxIntersection 2 r)
+
+instance (Num r, Ord r
+         , Point_ point 2 r
+         ) =>  HasIntersectionWith (VerticalOrLineEQ r) (Rectangle point) where
+  l `intersects` rect@(Rectangle p q) = case l of
+    VerticalLineThrough x -> (p^.xCoord) <= x && x <= (q^.xCoord)
+    NonVertical l'        -> l' `intersects` rect
+  {-# INLINE intersects #-}
+
+instance (Fractional r, Ord r
+         , Point_ point 2 r
+         ) =>  IsIntersectableWith (VerticalOrLineEQ r) (Rectangle point) where
+  l `intersect` rect@(Rectangle p q) = case l of
+    VerticalLineThrough x
+      | (p^.xCoord) <= x && x <= (q^.xCoord) -> Just . Line_x_Box_LineSegment
+                                              $ ClosedLineSegment (Point2 x $ p^.yCoord)
+                                                                  (Point2 x $ q^.yCoord)
+      | otherwise                            -> Nothing
+    NonVertical l'        -> l' `intersect` rect
+  {-# INLINE intersect #-}
+
+
 
 
 

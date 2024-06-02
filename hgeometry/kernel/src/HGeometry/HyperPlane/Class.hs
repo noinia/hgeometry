@@ -120,17 +120,17 @@ class ( NumType hyperPlane ~ r
   {-# INLINE hyperPlaneEquation #-}
 
   -- | Get the normal vector of the hyperplane. The vector points into
-  -- the negative halfspace.
+  -- the positive halfspace.
   --
   -- >>> normalVector myVerticalLine
-  -- Vector2 (-1.0) 0.0
+  -- Vector2 1.0 (-0.0)
   -- >>> normalVector myLine
-  -- Vector2 1.0 (-1.0)
+  -- Vector2 (-1.0) 1.0
   normalVector :: (Num r, Eq r, 1 <= d) => hyperPlane -> Vector d r
   default normalVector :: (KnownNat d, Num r, Eq r, 1 <= d)
                        => hyperPlane -> Vector d r
   normalVector h = let a = suffix $ hyperPlaneEquation h
-                   in if signum (a^.last) == 1 then negated a else a
+                   in if signum (a^.last) == 1 then a else negated a
   {-# INLINE normalVector #-}
   -- https://en.wikipedia.org/wiki/Normal_(geometry)#Hypersurfaces_in_n-dimensional_space
   -- states that: if the hyperplane is defined as the solution set of a single linear equation
@@ -159,9 +159,10 @@ class ( NumType hyperPlane ~ r
   q `onHyperPlane` h = (== 0) $ evalHyperPlaneEquation h q
   {-# INLINE onHyperPlane #-}
 
-  -- | Test if a point lies on a hyperplane. For non-vertical
-  -- hyperplanes, returns whether the point is *above* the hyperplane
-  -- or not with respect to the d^th dimension.
+  -- | Test if a point lies on a hyperplane. For non-vertical hyperplanes, returns whether
+  -- the point is *above* the hyperplane or not with respect to the d^th
+  -- dimension. (I.e. if (and only if) q lies above the hyperplane h, then q `onSideTest`
+  -- h return GT.)
   --
   -- For vertical hyperplanes (with respect to dimension d), we return 'LT' when the point
   -- is on the "left".
@@ -256,9 +257,10 @@ class HyperPlane_ hyperPlane d r
                          => Vector (d+1) r -> hyperPlane
 
 
-  -- | Construct a Hyperplane from a point and a normal.
+  -- | Construct a Hyperplane from a point and a normal. The normal points into the halfplane
+  -- for which the side-test is positive.
   --
-  -- >>> myVerticalLine == fromPointAndNormal (Point2 5 30) (Vector2 (-1) 0)
+  -- >>> myVerticalLine == fromPointAndNormal (Point2 5 30) (Vector2 1 0)
   -- True
   fromPointAndNormal     :: ( Point_ point d r, Num r)
                          => point -> Vector d r -> hyperPlane
@@ -268,9 +270,9 @@ class HyperPlane_ hyperPlane d r
                                 , Has_ Metric_ d r
                                 )
                              => point -> Vector d r -> hyperPlane
-  fromPointAndNormal q n = hyperPlaneFromEquation $ cons a0 n
+  fromPointAndNormal q n = hyperPlaneFromEquation $ cons a0 (negated n)
     where
-      a0 = negate $ (q^.vector) `dot` n
+      a0 = (q^.vector) `dot` n
   {-# INLINE fromPointAndNormal #-}
 
 
@@ -344,7 +346,7 @@ class HyperPlaneFromPoints hyperPlane where
                            ) => Vector d point -> hyperPlane
 
 
-instance (HyperPlane_ hyperPlane d r, Default extra)
+instance (HyperPlane_ hyperPlane d r)
          => HyperPlane_ (hyperPlane :+ extra) d r where
   evalHyperPlaneEquation h = evalHyperPlaneEquation (h^.core)
   {-# INLINE evalHyperPlaneEquation #-}
@@ -366,7 +368,7 @@ instance (ConstructableHyperPlane_ hyperPlane d r, Default extra)
   fromPointAndNormal p v = fromPointAndNormal p v :+ def
   {-# INLINE fromPointAndNormal #-}
 
-instance (NonVerticalHyperPlane_  hyperPlane d r, Default extra)
+instance (NonVerticalHyperPlane_  hyperPlane d r)
          => NonVerticalHyperPlane_ (hyperPlane :+ extra) d r where
   evalAt p = evalAt p . view core
   {-# INLINE evalAt #-}

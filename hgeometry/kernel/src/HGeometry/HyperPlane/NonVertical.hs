@@ -18,6 +18,7 @@ module HGeometry.HyperPlane.NonVertical
   , Plane_, pattern Plane_
   ) where
 
+import           Control.DeepSeq
 import           Control.Lens hiding (snoc, uncons, unsnoc)
 import qualified Data.Foldable as F
 import           Data.Functor.Classes
@@ -29,7 +30,6 @@ import           HGeometry.Properties
 import           HGeometry.Vector
 import           Prelude hiding (last)
 import           Text.Read (Read (..), readListPrecDefault)
-
 --------------------------------------------------------------------------------
 
 -- $setup
@@ -53,12 +53,15 @@ newtype NonVerticalHyperPlane d r = NonVerticalHyperPlane (Vector d r)
 type instance NumType   (NonVerticalHyperPlane d r) = r
 type instance Dimension (NonVerticalHyperPlane d r) = d
 
-deriving stock instance Eq  (Vector d r) => Eq (NonVerticalHyperPlane d r)
-deriving stock instance Ord (Vector d r) => Ord (NonVerticalHyperPlane d r)
+deriving newtype instance Eq     (Vector d r) => Eq     (NonVerticalHyperPlane d r)
+deriving newtype instance Ord    (Vector d r) => Ord    (NonVerticalHyperPlane d r)
+deriving newtype instance NFData (Vector d r) => NFData (NonVerticalHyperPlane d r)
 
 deriving stock instance Functor     (Vector d) => Functor     (NonVerticalHyperPlane d)
 deriving stock instance Foldable    (Vector d) => Foldable    (NonVerticalHyperPlane d)
 deriving stock instance Traversable (Vector d) => Traversable (NonVerticalHyperPlane d)
+
+
 
 instance (Show r, Foldable (Vector d)) => Show (NonVerticalHyperPlane d r) where
   showsPrec k (NonVerticalHyperPlane v) = showParen (k > app_prec) $
@@ -116,10 +119,9 @@ instance ( MkHyperPlaneConstraints d r
 
 
 instance ( MkHyperPlaneConstraints d r
+         , Fractional r, Eq r
          , 2 <= d
          ) => ConstructableHyperPlane_ (NonVerticalHyperPlane d r) d r where
-
-  type HyperPlaneFromEquationConstraint (NonVerticalHyperPlane d r) d r = (Fractional r, Eq r)
 
   -- | pre: the last component is not zero
   --
@@ -130,17 +132,6 @@ instance ( MkHyperPlaneConstraints d r
       Just h  -> h
       Nothing -> error "hyperPlaneFromEquation: Hyperplane is vertical!"
   {-# INLINE hyperPlaneFromEquation #-}
-
-  fromPointAndNormal _ n = NonVerticalHyperPlane n
-  -- see https://en.wikipedia.org/wiki/Normal_(geometry)
-  --
-  -- i.e. Alternatively, if the hyperplane is defined as the solution set of a single
-  -- linear equation a_1 x_1 + ⋯ + a_n x_n = c , then the vector n = ( a_1 , .. , a_n ) is
-  -- a normal.
-  --
-  -- FIXME: this seems fishy; don't we need the point?
-
-  --
 
 
 instance ( MkHyperPlaneConstraints d r, 1 + (d-1) ~ d

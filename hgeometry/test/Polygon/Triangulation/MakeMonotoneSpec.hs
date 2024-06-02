@@ -1,7 +1,6 @@
 module Polygon.Triangulation.MakeMonotoneSpec where
 
 import           Control.Lens
-import           Data.Default.Class
 import           Data.Maybe (fromJust)
 import qualified Data.Set as Set
 import           HGeometry.Ext
@@ -39,10 +38,6 @@ spec = describe "GeomBook Example" $ do
            let q = Point2 13 23
                seg2 = ClosedLineSegment (Point2 16 25) (Point2 13 23)
            cmpX q seg2 `shouldBe` EQ
-
-
-instance Default VertexType where
-  def = Regular
 
 sort'               :: Ord a => Vector 2 a-> Vector 2 a
 sort' (Vector2 x y) = Vector2 (min x y) (max x y)

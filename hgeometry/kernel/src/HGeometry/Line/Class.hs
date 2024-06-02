@@ -5,7 +5,7 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
--- A class of types that can act as lines in d-dimensional space.
+-- A class for types that can act as lines in d-dimensional space.
 --
 --------------------------------------------------------------------------------
 module HGeometry.Line.Class
@@ -66,6 +66,7 @@ horizontalLine   :: forall r line. (Line_ line 2 r, Num r)
 horizontalLine y = fromPointAndVec (Point $ Vector2 0 y) (Vector2 1 0)
 
 
+-- | Types that have an 'onLine' function that allows testing if a point lies on a line.
 class HasOnLine line d | line -> d where
   -- | Test if the point lies on the line
   --

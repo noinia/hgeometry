@@ -82,9 +82,10 @@ spec = do
           property $ \(PS pts) ->
             (PG $ GrahamScan.convexHull pts) == (PG $ JarvisMarch.convexHull pts)
 
-
-
-
+        prop "upper hull left to right (so in general, sorted)" $
+          \(pts :: NonEmpty (Point 2 R)) ->
+            let hull = GrahamScan.upperHull' pts
+            in hull == NonEmpty.sort hull
 
 
 newtype PG = PG (ConvexPolygon (Point 2 R)) deriving (Show)

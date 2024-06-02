@@ -3,20 +3,20 @@
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 module HGeometry.HyperPlaneSpec where
 
-import Control.Lens hiding (unsnoc)
-import Data.Maybe (isJust)
-import GHC.TypeNats
-import HGeometry.HyperPlane
-import HGeometry.HyperPlane.NonVertical
-import HGeometry.Intersection
-import HGeometry.Kernel.Instances ()
-import HGeometry.Line
-import HGeometry.Number.Real.Rational
-import HGeometry.Point
-import HGeometry.Vector
-import Test.Hspec
-import Test.Hspec.QuickCheck
-import Test.QuickCheck ((===), (==>))
+import           Control.Lens hiding (unsnoc)
+import           Data.Maybe (isJust)
+import           GHC.TypeNats
+import           HGeometry.HyperPlane
+import           HGeometry.HyperPlane.NonVertical
+import           HGeometry.Intersection
+import           HGeometry.Kernel.Instances ()
+import           HGeometry.Line
+import           HGeometry.Number.Real.Rational
+import           HGeometry.Point
+import           HGeometry.Vector
+import           Test.Hspec
+import           Test.Hspec.QuickCheck
+import           Test.QuickCheck ((===), (==>))
 
 --------------------------------------------------------------------------------
 
@@ -153,6 +153,43 @@ spec = describe "HyperPlane Tests" $ do
          prop "intersects nonvertical conistent" $
            \(l :: LineEQ R) (m :: LineEQ R) ->
              (l `intersects` m) `shouldBe` (asHyp l `intersects` asHyp m)
+
+
+         prop "fromPointAnNormal and sideTest consistent for HyperPlane " $
+           \(p :: Point 2 R) n ->
+             allOf components (>0) n ==>
+             ((p .+^ n) `onSideTest` (fromPointAndNormal p n :: HyperPlane 2 R))
+             `shouldBe` GT
+         prop "fromPointAnNormal and sideTest consistent for NonVerticalHyperPlane " $
+           \(p :: Point 2 R) n ->
+             allOf components (>0) n ==>
+             ((p .+^ n) `onSideTest` (fromPointAndNormal p n :: NonVerticalHyperPlane 2 R))
+             `shouldBe` GT
+         prop "fromPointAnNormal and sideTest consistent for LineEQ" $
+           \(p :: Point 2 R) n ->
+             allOf components (>0) n ==>
+             ((p .+^ n) `onSideTest` (fromPointAndNormal p n :: LineEQ R))
+             `shouldBe` GT
+         prop "normalVector and fromPointAndNormal consistent (HyperPlane 2 R)" $
+           \(p :: Point 2 R) n ->
+             allOf components (>0) n ==>
+             normalVector (fromPointAndNormal p n :: HyperPlane 2 R) `shouldBe` n
+
+         prop "nonVertical sidetest means above (NonVHyperplane 2)" $
+           \(q :: Point 2 R) (h :: NonVerticalHyperPlane 2 R) ->
+             let y  = evalAt (projectPoint q) h
+                 q' = q&yCoord .~ y+1
+             in (q' `onSideTest` h) `shouldBe` GT
+         prop "nonVertical sidetest means above (NonVHyperplane 3)" $
+           \(q :: Point 3 R) (h :: NonVerticalHyperPlane 3 R) ->
+             let z  = evalAt (projectPoint q) h
+                 q' = q&zCoord .~ z+1
+             in (q' `onSideTest` h) `shouldBe` GT
+         prop "nonVertical sidetest means above LineEQ " $
+           \(q :: Point 2 R) (h :: LineEQ R) ->
+             let y  = evalAt (projectPoint q) h
+                 q' = q&yCoord .~ y+1
+             in (q' `onSideTest` h) `shouldBe` GT
 
 
          -- prop "intersect nonvertical conistent" $

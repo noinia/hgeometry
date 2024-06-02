@@ -1,6 +1,16 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  Main
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Polyline drawing demo
+--
+--------------------------------------------------------------------------------
 module Main (main) where
 
 import           Control.Monad.IO.Class
@@ -64,7 +74,7 @@ switchMode = \case
 type Color = RGB Word8
 
 
--- default color presets in goodnotes
+-- | default color presets in goodnotes
 colorPresets :: NonEmpty Color
 colorPresets = NonEmpty.fromList
                [ RGB 0   0   0
@@ -137,9 +147,6 @@ makeLenses ''Model
 
 instance KnownNat p => ToMisoString (RealNumber p) where
   toMisoString = toMisoString . toFixed
-
-instance Default (Point 2 R :+ Int) where
-  def = origin :+ 0
 
 ----------------------------------------
 

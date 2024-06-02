@@ -15,7 +15,6 @@ module HGeometry.Polygon.Convex.MinkowskiSum
   ) where
 
 import Control.Lens
-import Data.Default.Class
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.Ord (comparing)
 import HGeometry.Ext
@@ -38,7 +37,6 @@ import HGeometry.Polygon.Simple.Class
 minkowskiSum     :: ( Ord r, Num r
                     , ConvexPolygon_ convexPolygon  point r
                     , ConvexPolygon_ convexPolygon' point' r
-                    , Default point'
                     )
                  => convexPolygon -> convexPolygon'
                  -> ConvexPolygon (point :+ point')
