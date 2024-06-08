@@ -2,7 +2,7 @@
 {-# LANGUAGE TemplateHaskell            #-}
 module Attributes
   ( Attributes(..)
-  , coloring
+  , HasColoring(..)
 
   , thickness
   , Thickness(..)
@@ -25,6 +25,7 @@ import qualified Data.Sequence as Seq
 import           GHC.TypeNats
 import           GHCJS.Marshal
 import           GHCJS.Types
+import           HGeometry.Box
 import           HGeometry.Ext
 import           HGeometry.Interval
 import           HGeometry.Miso.OrphanInstances ()
@@ -80,9 +81,13 @@ data instance Attributes (Point 2 r) =
 instance Default (Attributes (Point 2 r)) where
   def = PointAttributes def
 
--- | Lens to access the colloring attribute
-coloring :: Lens' (Attributes (Point 2 r)) Coloring
-coloring = lens _coloring (\ats c -> ats { _coloring = c })
+
+class HasColoring t where
+  -- | Lens to access the colloring attribute
+  coloring :: Lens' t Coloring
+
+instance HasColoring (Attributes (Point 2 r)) where
+  coloring = lens _coloring (\ats c -> ats { _coloring = c })
 
 --------------------------------------------------------------------------------
 -- * PolyLine Attributes
@@ -106,3 +111,17 @@ instance Default (Attributes (PolyLineF f (Point 2 r))) where
 
 
 --------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- * PolyLine Attributes
+
+data instance Attributes (Rectangle (Point 2 r)) =
+  RectangleAttributes { _rectColoring    :: {-# UNPACK #-} !Coloring
+                      , _rectThickness   :: {-# UNPACK #-} !Thickness
+                      } deriving (Show,Eq)
+
+instance HasColoring (Attributes (Rectangle (Point 2 r))) where
+  coloring = lens _rectColoring (\ats c -> ats { _rectColoring = c })
+
+instance Default (Attributes (Rectangle (Point 2 r))) where
+  def = RectangleAttributes def def

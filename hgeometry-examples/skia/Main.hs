@@ -24,6 +24,7 @@ import qualified Data.Sequence as Seq
 import           GHC.TypeNats
 import           GHCJS.Marshal
 import           GHCJS.Types
+import           HGeometry.Box
 import           HGeometry.Ext
 import           HGeometry.Interval
 import           HGeometry.Miso.Event.Extra
@@ -31,6 +32,7 @@ import           HGeometry.Miso.OrphanInstances ()
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.PolyLine
+import           HGeometry.Polygon.Simple
 import           HGeometry.Vector
 import           HGeometry.Viewport (ZoomConfig(..), currentLevel, range)
 import           HGeometry.VoronoiDiagram
@@ -51,6 +53,7 @@ import           Model
 import           Modes
 import           Options
 import           PolyLineMode
+import           RectangleMode
 import qualified SkiaCanvas
 import           SkiaCanvas (mouseCoordinates, dimensions, canvasKitRef, surfaceRef)
 import qualified SkiaCanvas.CanvasKit as CanvasKit
@@ -119,17 +122,27 @@ updateModel m = \case
                                  _                      -> noEff () -- otherwise just return
                                pure m'
 
-    CanvasClicked      -> case m^.mode of
-        PointMode      -> addPoint
-        PenMode        -> noEff m
-        PolyLineMode{} -> (m&mode._PolyLineMode.currentPoly %~ extend)
-                          <# pure Draw
-        _              -> noEff m
+    CanvasClicked       -> case m^.mode of
+        PointMode              -> addPoint
+        PenMode                -> noEff m
+        PolyLineMode{}         -> (m&mode._PolyLineMode.currentPoly %~ extend)
+                                  <# pure Draw
+        RectangleMode current' -> case current' of
+                                    Just _  -> noEff m
+                                    Nothing -> case m^.canvas.mouseCoordinates of
+                                                 Nothing  -> noEff m -- absurd
+                                                 Just loc ->
+                                                   let pr = PartialRectangle loc
+                                                   in (m&mode._RectangleMode.currentRect ?~ pr)
+                                                      <# pure Draw
+        _                      -> noEff m
 
     CanvasRightClicked -> case m^.mode of
-        PolyLineMode current' -> addPoly current'
-        PenMode               -> noEff m
-        _                     -> noEff m
+        PenMode                -> noEff m
+        PolyLineMode current'  -> addPoly current'
+        RectangleMode current' -> addRect current'
+        _                      -> noEff m
+
 
     Draw                  -> m <# notifyOnError (handleDraw m)
 
@@ -182,7 +195,7 @@ updateModel m = \case
         m' = case m^.canvas.mouseCoordinates of
                Nothing -> m
                Just p  -> let ats = PointAttributes $ toColoring (m^.stroke) (m^.fill)
-                          in m&points %~ insertPoint (p :+ ats)
+                          in m&points %~ insert (p :+ ats)
 
     addPoly current = m' <# pure Draw
       where
@@ -192,8 +205,22 @@ updateModel m = \case
         addPoly' = case extend current of
           Just (PartialPolyLine p) -> let ats = PolyLineAttributes (m^.stroke.color)
                                                                    Normal
-                                      in insertPolyLine (p :+ ats)
+                                      in insert (p :+ ats)
           _                        -> id
+
+    addRect current = m' <# pure Draw
+      where
+        m' = m&rectangles %~ addRect'
+              &mode._RectangleMode.currentRect .~ Nothing
+
+        addRect' = case current of
+                     Nothing -> id
+                     Just pr -> let loc = m^.canvas.mouseCoordinates
+                                    r   = extendToRectangle pr loc
+                                in insert (r :+ ats)
+
+        ats = RectangleAttributes (toColoring (m^.stroke) (m^.fill)) Normal
+
 
 -- | Updates setting a color
 handleColorAction                         :: StrokeFill
@@ -228,18 +255,12 @@ recomputeDiagram m
                                           [ p :+ i | (i,p :+ _) <- IntMap.assocs (m^.points)]
                                 in m&diagram .~ fmap voronoiVertices pts
 
-insertPoint     :: p -> IntMap.IntMap p -> IntMap.IntMap p
-insertPoint p m = let k = case IntMap.lookupMax m of
-                            Nothing    -> 0
-                            Just (i,_) -> succ i
-                  in IntMap.insert k p m
-
 -- | Helper to insert a new item into an IntMap
-insertPolyLine     :: p -> IntMap.IntMap p -> IntMap.IntMap p
-insertPolyLine p m = let k = case IntMap.lookupMax m of
-                            Nothing    -> 0
-                            Just (i,_) -> succ i
-                 in IntMap.insert k p m
+insert     :: p -> IntMap.IntMap p -> IntMap.IntMap p
+insert p m = let k = case IntMap.lookupMax m of
+                       Nothing    -> 0
+                       Just (i,_) -> succ i
+             in IntMap.insert k p m
 
 --------------------------------------------------------------------------------
 
@@ -519,6 +540,9 @@ myDraw m canvasKit canvasRef = do
     -- render all polylines
     forM_ (m^.polyLines) $ \poly ->
       renderPoly strokeOnly (m^.canvas) poly canvasKit canvasRef
+    -- render all rectangles
+    forM_ (m^.rectangles) $ \rect ->
+      renderRect strokeOnly fillOnly (m^.canvas) rect canvasKit canvasRef
       -- render all points
     forM_ (m^.points) $ \p ->
       renderPoint strokeOnly fillOnly (m^.canvas) p canvasKit canvasRef
@@ -530,6 +554,10 @@ myDraw m canvasKit canvasRef = do
         in renderPartialPolyLine strokeOnly
                         (m^.canvas)
                         current' canvasKit canvasRef
+      RectangleMode (Just current) ->
+        let current' = extendToRectangle current (m^.canvas.mouseCoordinates)
+            rect     = current' :+ RectangleAttributes def Normal
+        in renderRect strokeOnly fillOnly (m^.canvas) rect canvasKit canvasRef
       _                     -> pure ()
     -- render cursor
     case m^.canvas.mouseCoordinates of
@@ -550,7 +578,19 @@ renderPoint :: SkPaintStyle
             -> SkiaCanvas.Canvas R
             -> (Point 2 R :+ Attributes (Point 2 R))
             -> CanvasKit -> SkCanvasRef -> JSM ()
-renderPoint strokeOnly fillOnly canvas' (p :+ ats) canvasKit skCanvasRef = case ats^.coloring of
+renderPoint strokeOnly fillOnly canvas' (p :+ ats) canvasKit skCanvasRef =
+    renderColoring strokeOnly fillOnly canvas' render canvasKit skCanvasRef (ats^.coloring)
+  where
+    render paint = Render.point canvas' skCanvasRef p paint
+
+renderColoring  :: SkPaintStyle
+                -> SkPaintStyle
+                -> SkiaCanvas.Canvas R
+                -> (Core.SkPaintRef -> JSM ()) -- ^ the renderer
+                -> CanvasKit -> SkCanvasRef
+                -> Coloring
+                -> JSM ()
+renderColoring strokeOnly fillOnly canvas' render canvasKit skCanvasRef = \case
     StrokeOnly s      -> stroke' s
     FillOnly f        -> fill' f
     StrokeAndFill s f -> fill' f >> stroke' s
@@ -558,11 +598,23 @@ renderPoint strokeOnly fillOnly canvas' (p :+ ats) canvasKit skCanvasRef = case 
     stroke' c = withColor' c canvasKit $ \paint ->
                  do setStyle paint strokeOnly
                     setAntiAlias paint True
-                    Render.point canvas' skCanvasRef p paint
+                    render paint
     fill' c = withColor' c canvasKit $ \paint ->
                  do setStyle paint fillOnly
                     setAntiAlias paint True
-                    Render.point canvas' skCanvasRef p paint
+                    render paint
+
+renderRect :: SkPaintStyle
+            -> SkPaintStyle
+            -> SkiaCanvas.Canvas R
+            -> (Rectangle' R :+ Attributes (Rectangle' R))
+            -> CanvasKit -> SkCanvasRef -> JSM ()
+renderRect strokeOnly fillOnly canvas' (r :+ ats) canvasKit skCanvasRef =
+    renderColoring strokeOnly fillOnly canvas' render canvasKit skCanvasRef (ats^.coloring)
+  where
+    render paint = let poly :: SimplePolygon (Point 2 R)
+                       poly = uncheckedFromCCWPoints $ corners r
+                   in Render.simplePolygon canvas' skCanvasRef poly paint
 
 renderPoly                             :: SkPaintStyle
                                        -> SkiaCanvas.Canvas R
@@ -579,6 +631,10 @@ withColor' c canvasKit render = withPaint canvasKit $ \paint -> do
     c' <- mkColor4f canvasKit c
     setColor paint c'
     render paint
+
+
+
+
 
 renderPartialPolyLine :: SkPaintStyle
                       -> SkiaCanvas.Canvas R

@@ -81,7 +81,7 @@ toolButtons_ m = menuList_ [ pointButton
                                   [title_ "Polyline"]
     polygonButton   = menuButton' PolygonMode "fas fa-draw-polygon"
                                   [title_ "Polygon"]
-    rectangleButton = menuButton' RectangleMode "far fa-square"
+    rectangleButton = menuButton' (RectangleMode Nothing) "far fa-square"
                                   [title_ "Rectangle"]
     circleButton    = menuButton' CircleMode "far fa-circle"
                                   [title_ "Circle"]

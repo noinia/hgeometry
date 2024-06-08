@@ -16,6 +16,7 @@ module Modes
   , matches
 
   , currentPoly
+  , currentRect
   ) where
 
 
@@ -24,6 +25,7 @@ import Control.Lens
 import Control.Lens.Extras (is)
 import Data.Default.Class
 import PolyLineMode
+import RectangleMode
 
 --------------------------------------------------------------------------------
 
@@ -34,7 +36,7 @@ data Mode = SelectMode
           | LineMode
           | PolyLineMode { _currentPoly :: Maybe (PartialPolyLine R) }
           | PolygonMode
-          | RectangleMode
+          | RectangleMode { _currentRect :: Maybe (PartialRectangle R) }
           | CircleMode
           | TextMode
           | MathMode
@@ -42,24 +44,25 @@ data Mode = SelectMode
 makePrisms ''Mode
 
 
+-- | TODO, not sure what these should be exactly; I guess prisms from Mode to PartialPolyLine R or so
 currentPoly = id
-
+currentRect = id
 
 -- | Returns if the two match; i.e if the modes are the same (ignoring any specific data
 -- they may have.)
 matches    :: Mode -> Mode -> Bool
 matches m1 = \case
-  SelectMode     -> is _SelectMode    m1
-  PanMode        -> is _PanMode       m1
-  PointMode      -> is _PointMode     m1
-  PenMode        -> is _PenMode       m1
-  LineMode       -> is _LineMode      m1
-  PolyLineMode{} -> is _PolyLineMode  m1
-  PolygonMode    -> is _PolygonMode   m1
-  RectangleMode  -> is _RectangleMode m1
-  CircleMode     -> is _CircleMode    m1
-  TextMode       -> is _TextMode      m1
-  MathMode       -> is _MathMode      m1
+  SelectMode       -> is _SelectMode    m1
+  PanMode          -> is _PanMode       m1
+  PointMode        -> is _PointMode     m1
+  PenMode          -> is _PenMode       m1
+  LineMode         -> is _LineMode      m1
+  PolyLineMode{}   -> is _PolyLineMode  m1
+  PolygonMode      -> is _PolygonMode   m1
+  RectangleMode{}  -> is _RectangleMode m1
+  CircleMode       -> is _CircleMode    m1
+  TextMode         -> is _TextMode      m1
+  MathMode         -> is _MathMode      m1
 
 
 --------------------------------------------------------------------------------
