@@ -3,10 +3,11 @@
 module StrokeAndFill
   ( Status(..)
   , _InActive, _Active
-  , Stroke(Stroke)
-  , strokeStatus, currentStrokeColor
-  , Fill(Fill)
-  , fillStatus, currentFillColor
+  , StrokeFill(StrokeFill)
+  , Stroke, Fill
+  , HasColor(..)
+  , HasStatus(..)
+
   , defaultStroke
   , defaultFill
 
@@ -18,30 +19,36 @@ import Control.Lens hiding (view, element)
 import Data.Colour (black)
 import Data.Colour.Names (blue)
 import Data.Default.Class
-import Miso.Bulma.Modal (Status(..),_InActive,_Active)
+import Miso.Bulma.Modal (Status(..), HasStatus(..), _InActive,_Active)
 
 --------------------------------------------------------------------------------
 
+data StrokeFill = StrokeFill { _status :: {-# UNPACK #-}!Status
+                             , _color  :: {-# UNPACK #-}!Color
+                             } deriving (Show,Eq)
 
-data Stroke = Stroke { _strokeStatus       :: {-# UNPACK #-}!Status
-                     , _currentStrokeColor :: {-# UNPACK #-}!Color
-                     }
-  deriving (Show,Eq)
+type Stroke = StrokeFill
+type Fill = StrokeFill
 
-makeLenses ''Stroke
+instance HasStatus StrokeFill where
+  status = lens _status (\s st -> s { _status = st })
+  {-# INLINE status #-}
 
-data Fill = Fill { _fillStatus        :: {-# UNPACK #-}!Status
-                 , _currentFillColor  :: {-# UNPACK #-}!Color
-                 }
-  deriving (Show,Eq)
+class HasColor t where
+  -- | Lens to access the color
+  color :: Lens' t Color
 
-makeLenses ''Fill
+
+instance HasColor StrokeFill where
+  color= lens _color (\s c -> s { _color = c })
+  {-# INLINE color #-}
+
 
 defaultStroke :: Stroke
-defaultStroke = Stroke Active (Color black Opaque)
+defaultStroke = StrokeFill Active (Color black Opaque)
 
 defaultFill :: Fill
-defaultFill = Fill InActive (Color blue Opaque)
+defaultFill = StrokeFill InActive (Color blue Opaque)
 
 --------------------------------------------------------------------------------
 
@@ -49,8 +56,8 @@ defaultFill = Fill InActive (Color blue Opaque)
 --
 -- if neither stroke or fill are set, we use the default (which is stroke using black)
 toColoring     :: Stroke -> Fill -> Coloring
-toColoring s f = case (s^.strokeStatus, f^.fillStatus) of
+toColoring s f = case (s^.status, f^.status) of
   (InActive, InActive) -> def -- this case is kind of weird
-  (InActive, Active)   -> FillOnly   (f^.currentFillColor)
-  (Active,   InActive) -> StrokeOnly (s^.currentStrokeColor)
-  (Active,   Active)   -> StrokeAndFill (s^.currentStrokeColor) (f^.currentFillColor)
+  (InActive, Active)   -> FillOnly   (f^.color)
+  (Active,   InActive) -> StrokeOnly (s^.color)
+  (Active,   Active)   -> StrokeAndFill (s^.color) (f^.color)

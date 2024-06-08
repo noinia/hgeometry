@@ -2,7 +2,7 @@
 {-# LANGUAGE TemplateHaskell            #-}
 module Model
   ( Model(Model)
-  , canvas, zoomConfig, points, polyLines, diagram, _layers, mode, strokeColor, fillColor
+  , canvas, zoomConfig, points, polyLines, diagram, _layers, mode, stroke, fill
   , currentModal
 
   , initialModel
@@ -12,6 +12,8 @@ module Model
   , R
 
   , Selected(..)
+
+  , colorPresets
   ) where
 
 import           Attributes
@@ -93,8 +95,8 @@ data Model = Model { _canvas       :: SkiaCanvas.Canvas R
                    , _polyLines    :: IntMap.IntMap (PolyLine' R :+ Attributes (PolyLine' R))
                    , _diagram      :: Maybe [Point 2 R]
                    , __layers      :: Layers
-                   , _strokeColor  :: Stroke
-                   , _fillColor    :: Fill
+                   , _stroke       :: !StrokeFill
+                   , _fill         :: !StrokeFill
                    , _currentModal :: Maybe Modal
                    } deriving (Eq,Show)
 makeLenses ''Model
@@ -104,8 +106,6 @@ instance HasLayers Model where
 
 
 --------------------------------------------------------------------------------
-
-
 
 instance Default (Point 2 R :+ Int) where
   def = origin :+ 0
@@ -120,8 +120,8 @@ initialModel = Model { _canvas       = SkiaCanvas.blankCanvas 1024 768
                      , _diagram      = Nothing
                      , __layers      = initialLayers
                      , _mode         = PointMode
-                     , _strokeColor  = defaultStroke
-                     , _fillColor    = defaultFill
+                     , _stroke       = defaultStroke
+                     , _fill         = defaultFill
                      , _currentModal = Nothing
                      }
 
@@ -130,3 +130,29 @@ initialModel = Model { _canvas       = SkiaCanvas.blankCanvas 1024 768
 
 data Selected = NotSelected | Selected
   deriving (Show,Read,Eq,Ord)
+
+
+--------------------------------------------------------------------------------
+
+
+-- | default color presets in goodnotes
+colorPresets :: NonEmpty Color
+colorPresets = NonEmpty.fromList
+               [ fromRGB24 0   0   0
+               , fromRGB24 99  99  99
+               , fromRGB24 155 155 155
+               , fromRGB24 210 210 210
+               , fromRGB24 252 252 252
+
+               , fromRGB24 119 41  135 -- purple
+               , fromRGB24 192 40  27 -- darkish red
+               , fromRGB24 229 95  90  -- lightish red
+               , fromRGB24 241 156 153
+               , fromRGB24 232 158 66 -- orange
+
+               , fromRGB24 53  121 246 -- blue
+               , fromRGB24 28  68  138 -- darkblue
+               , fromRGB24 49  113 86 -- darkgreen
+               , fromRGB24 142 196 79 -- lightgreen
+               , fromRGB24 254 255 149
+               ]

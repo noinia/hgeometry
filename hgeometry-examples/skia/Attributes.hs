@@ -4,7 +4,6 @@ module Attributes
   ( Attributes(..)
   , coloring
 
-  , polyLineStrokeColor
   , thickness
   , Thickness(..)
   ) where
@@ -93,9 +92,9 @@ data instance Attributes (PolyLineF f (Point 2 r)) =
                      , _thickness           :: {-# UNPACK #-} !Thickness
                      } deriving (Show,Eq)
 
--- | Lens to access the stroke color
-polyLineStrokeColor :: Lens' (Attributes (PolyLineF f (Point 2 r))) Color
-polyLineStrokeColor = lens _polyLineStrokeColor (\ats c -> ats {_polyLineStrokeColor = c})
+instance HasColor (Attributes (PolyLineF f (Point 2 r))) where
+  color = lens _polyLineStrokeColor (\ats c -> ats {_polyLineStrokeColor = c})
+  {-# INLINE color #-}
 
 -- | Lens to access the Thickness attribute
 thickness :: Lens' (Attributes (PolyLineF f (Point 2 r))) Thickness

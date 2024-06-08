@@ -43,7 +43,7 @@ import           Miso.Bulma.Color
 import           Miso.Bulma.Columns
 import           Miso.Bulma.Generic
 import qualified Miso.Bulma.JSAddle as Run
-import           Miso.Bulma.Modal (ModalAction(..), handleModalAction)
+import           Miso.Bulma.Modal
 import           Miso.Bulma.NavBar
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Model
@@ -132,28 +132,35 @@ updateModel m = \case
 
     Draw                  -> m <# notifyOnError (handleDraw m)
 
-    ToggleLayerStatus lr  -> (m&layers.ix lr.status %~ toggleStatus)
+    ToggleLayerStatus lr  -> (m&layers.ix lr.layerStatus %~ toggleLayerStatus)
                              <# pure Draw
 
-    SetStrokeColor mc     -> noEff $ m&strokeColor %~ \cs ->
-                               case mc of
-                                 Nothing -> cs&strokeStatus       .~ InActive
-                                 Just c  -> cs&strokeStatus       .~ Active
-                                              &currentStrokeColor .~ c
+    -- SetStrokeColor mc     -> noEff $ m&stroke %~ \cs ->
+    --                            case mc of
+    --                              Nothing -> cs&status       .~ InActive
+    --                              Just c  -> cs&status       .~ Active
+    --                                           &color .~ c
 
-    SetFillColor mc     -> noEff $ m&fillColor %~ \cs ->
-                               case mc of
-                                 Nothing -> cs&fillStatus       .~ InActive
-                                 Just c  -> cs&fillStatus       .~ Active
-                                              &currentFillColor .~ c
+    -- SetFillColor mc     -> noEff $ m&fillColor %~ \cs ->
+    --                            case mc of
+    --                              Nothing -> cs&fillStatus       .~ InActive
+    --                              Just c  -> cs&fillStatus       .~ Active
+    --                                           &currentFillColor .~ c
+
     NotifyError err -> noEff m -- TODO
 
 
     SwitchMode mode' -> noEff $ m&mode .~ mode'
 
-    -- allow toggling the stroke and fill modals base on the strokeStatus and fillStatus
-    StrokeModalAction act -> noEff $ m&currentModal %~ flip (toggleModal StrokeModal) act
-    FillModalAction act   -> noEff $ m&currentModal %~ flip (toggleModal FillModal)   act
+    -- allow toggling the stroke and fill modals base on the status and fillStatus
+    StrokeAction act -> noEff $
+                        case handleColorAction (m^.stroke) (m^.currentModal) StrokeModal act of
+                          Left cm -> m&currentModal .~ cm
+                          Right s -> m&stroke       .~ s
+    FillAction act   -> noEff $
+                        case handleColorAction (m^.fill) (m^.currentModal) FillModal act of
+                          Left cm -> m&currentModal .~ cm
+                          Right s -> m&fill       .~ s
   where
     extend = extendWith (m^.canvas.mouseCoordinates)
 
@@ -173,7 +180,7 @@ updateModel m = \case
       where
         m' = case m^.canvas.mouseCoordinates of
                Nothing -> m
-               Just p  -> let ats = PointAttributes $ toColoring (m^.strokeColor) (m^.fillColor)
+               Just p  -> let ats = PointAttributes $ toColoring (m^.stroke) (m^.fill)
                           in m&points %~ insertPoint (p :+ ats)
 
     addPoly current = m' <# pure Draw
@@ -182,11 +189,24 @@ updateModel m = \case
               &mode._PolyLineMode.currentPoly .~ Nothing
 
         addPoly' = case extend current of
-          Just (PartialPolyLine p) -> let ats = PolyLineAttributes (m^.strokeColor.currentStrokeColor)
+          Just (PartialPolyLine p) -> let ats = PolyLineAttributes (m^.stroke.color)
                                                                    Normal
                                       in insertPolyLine (p :+ ats)
           _                        -> id
 
+-- | Updates setting a color
+handleColorAction                         :: StrokeFill
+                                          -> Maybe Modal -- ^ modal status
+                                          -> Modal -- ^ the modal to set (if any)
+                                          -> ColorAction
+                                          -> Either (Maybe Modal) StrokeFill
+handleColorAction sf modalStatus theModal = \case
+  ToggleModal -> Left $ case modalStatus of
+                          Nothing                -> Just theModal
+                          Just m | m == theModal -> Nothing
+                                 | otherwise     -> modalStatus
+  ToggleColor -> Right $ sf&status %~ toggleStatus
+  SetColor c  -> Right $ sf&color .~ c
 
 -- | Handles the given toggleModal action
 toggleModal                  :: Modal -> Maybe Modal -> ModalAction -> Maybe Modal
@@ -253,8 +273,15 @@ viewModel m =
                                     , onClick      CanvasClicked
                                     , onRightClick CanvasRightClicked
                                     ]
-                      , colorModal_ (currentStatus (m^.currentModal) StrokeModal) StrokeModalAction
-                      , colorModal_ (currentStatus (m^.currentModal) FillModal)   FillModalAction
+                      , StrokeAction <$>
+                        colorModal_ (currentStatus (m^.currentModal) StrokeModal)
+                                    (m^.stroke)
+                                    "Stroke Color"
+
+                      , FillAction <$>
+                        colorModal_ (currentStatus (m^.currentModal) FillModal)
+                                    (m^.fill)
+                                    "Fill Color"
                       ]
 
     rightPanels = div_ [ class_ "column is-2"]
@@ -279,7 +306,7 @@ viewModel m =
     layer_ l = label_ [class_ "panel-block"]
                       [ input_ [ type_ "checkbox"
                                , name_    $ l^.name
-                               , checked_ $ l^.status == Visible
+                               , checked_ $ l^.layerStatus == Visible
                                , onClick  $ ToggleLayerStatus (l^.name)
                                ]
                       , text $ l^.name
@@ -326,6 +353,8 @@ menuBar_ _ = navBar_
   --                        ]
   --                | (i,p) <- m^..points.ifolded.withIndex ]
   --             -- <> [ draw p [ fill_ "blue" ]  | Just p <- [m^.canvas.mouseCoordinates] ]
+
+
 
 --------------------------------------------------------------------------------
 
@@ -536,7 +565,7 @@ renderPoly                             :: SkPaintStyle
                                        -> (PolyLine' R :+ Attributes (PolyLine' R))
                                        -> CanvasKit -> SkCanvasRef -> JSM ()
 renderPoly strokeOnly canvas' (pl :+ ats) canvasKit skCanvasRef =
-  withColor' (ats^.polyLineStrokeColor) canvasKit $ \paint ->
+  withColor' (ats^.color) canvasKit $ \paint ->
     do setStyle paint strokeOnly
        setAntiAlias paint True
        Render.polyLine canvas' skCanvasRef pl paint

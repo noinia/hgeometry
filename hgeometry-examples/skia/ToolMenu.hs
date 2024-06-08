@@ -42,19 +42,19 @@ menuButtons_ m = aside_ [class_ "menu"]
 
     strokeButton = menuButton_  "fas fa-paint-brush"
                                 [ title_ "Stroke color"
-                                , styleM_ ["color" =: rgba (m^.strokeColor.currentStrokeColor)]
+                                , styleM_ ["color" =: rgba (m^.stroke.color)]
                                 ]
-                                (m^.strokeColor.strokeStatus)
+                                (m^.stroke.status)
                                 NotSelected
-                                [ onClick $ StrokeModalAction ToggleModalStatus
+                                [ onClick $ StrokeAction ToggleModal
                                 ]
     fillButton   = menuButton_  "fas fa-fill"
                                 [ title_ "Fill color"
-                                , styleM_ ["color" =: rgba (m^.fillColor.currentFillColor)]
+                                , styleM_ ["color" =: rgba (m^.fill.color)]
                                 ]
-                                (m^.fillColor.fillStatus)
+                                (m^.fill.status)
                                 NotSelected
-                                [ onClick $ FillModalAction ToggleModalStatus
+                                [ onClick $ FillAction ToggleModal
                                 ]
 
 
@@ -113,13 +113,13 @@ menuButton_                                 :: MisoString -- ^ icon to use
                                             -> Selected -- ^ whether the button is selected or not
                                             -> [Attribute action] -- ^ attributes of the button
                                             -> View action
-menuButton_ i ats status selected buttonAts =
+menuButton_ i ats status' selected buttonAts =
     li_ []
         [ button_ ( [ class_ "button is-medium"
                     , class_ $ case selected of
                                  NotSelected -> ""
                                  Selected    -> "is-selected is-primary"
-                    , class_ $ case status of
+                    , class_ $ case status' of
                                  InActive   -> ""
                                  Active     -> "is-active"
                     ]
@@ -159,21 +159,40 @@ zoomButtons_ m = menuList_ [ menuButton_ "fas fa-plus-square"
 
 --------------------------------------------------------------------------------
 
-colorModal_                   :: Status -> (ModalAction -> Action) -> View Action
-colorModal_ status liftAction = either liftAction id <$>
-    modal_ status
-           [ text "woei"
-           ]
-  -- where
-  --   content :: [View Action]
-  --   content =
-  --     [ text "woei"
-  --     ]
+colorModal_                           :: Status -- ^ Status of the modal
+                                      -> StrokeFill
+                                      -> MisoString -- ^ title
+                                      -> View ColorAction
+colorModal_ modalStatus current title = either (const ToggleModal) id <$>
+    modalCard_ modalStatus title bodyContent footerContent
+  where
+    theIcon = case current^.status of
+                InActive -> "fas fa-times"
+                Active   -> "fas fa-check"
 
--- <div class="modal">
---   <div class="modal-background"></div>
---   <div class="modal-content">
---     <!-- Any other Bulma elements you want -->
---   </div>
---   <button class="modal-close is-large" aria-label="close"></button>
--- </div>
+    bodyContent =
+      [ button_ [ class_ "button"
+                , class_ $ case current^.status of
+                             InActive -> ""
+                             Active   -> "is-active"
+                , styleM_ ["background-color" =: rgba (current^.color) ]
+                , onClick $ ToggleColor
+                ]
+                [ icon theIcon []
+                , span_ []
+                        [ text $ case current^.status of
+                                   InActive -> "Enable"
+                                   Active   -> "Disable"
+                        ]
+                ]
+      , div_ [class_ "buttons"]
+             (foldMap (\c -> [button_ [ class_ "button"
+                                      , styleM_ ["background-color" =: rgba c]
+                                      , onClick $ SetColor c
+                                      ]
+                                      [ ]
+                             ]
+                      ) colorPresets
+             )
+      ]
+    footerContent = []

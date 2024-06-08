@@ -1,5 +1,6 @@
 module Action
   ( Action(..)
+  , ColorAction(..)
   ) where
 
 import           Attributes
@@ -62,11 +63,17 @@ data Action = Id
             | CanvasRightClicked
             -- | AddPoint
             | Draw
-            | SetStrokeColor (Maybe Color)
-            | SetFillColor   (Maybe Color)
+            -- | SetStrokeColor (Maybe Color)
+            -- | SetFillColor   (Maybe Color)
             | NotifyError !MisoString
             | SwitchMode !Mode
             | ToggleLayerStatus !(Index Layers)
 
-            | StrokeModalAction !ModalAction
-            | FillModalAction !ModalAction
+            | StrokeAction !ColorAction
+            | FillAction !ColorAction
+
+-- | Actions one can do with the stroke or fill color
+data ColorAction = ToggleModal
+                 | ToggleColor
+                 | SetColor !Color
+                 deriving (Show,Eq)

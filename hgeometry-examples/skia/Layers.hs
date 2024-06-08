@@ -2,7 +2,7 @@
 {-# LANGUAGE TemplateHaskell            #-}
 module Layers
   ( LayerStatus(..)
-  , toggleStatus
+  , toggleLayerStatus
 
   , Layer(Layer)
   , HasLayer(..)
@@ -27,14 +27,15 @@ import           Miso.String (MisoString,ToMisoString(..), ms)
 data LayerStatus = Hidden | Visible
   deriving (Show,Eq)
 
-toggleStatus = \case
+toggleLayerStatus :: LayerStatus -> LayerStatus
+toggleLayerStatus = \case
   Hidden  -> Visible
   Visible -> Hidden
 
 type LayerIx = MisoString
 
-data Layer = Layer { _name   :: LayerIx
-                   , _status :: LayerStatus
+data Layer = Layer { _name        :: LayerIx
+                   , _layerStatus :: LayerStatus
                    }
              deriving (Show,Eq)
 makeClassy ''Layer
