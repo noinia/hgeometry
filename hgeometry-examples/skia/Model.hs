@@ -62,7 +62,6 @@ import           SkiaCanvas.CanvasKit hiding (Style(..))
 import qualified SkiaCanvas.Render as Render
 import           StrokeAndFill
 
-
 --------------------------------------------------------------------------------
 
 
@@ -150,7 +149,7 @@ colorPresets = NonEmpty.fromList
                , fromRGB24 241 156 153
                , fromRGB24 232 158 66 -- orange
 
-               , fromRGB24 53  121 246 -- blue
+               , myBlue
                , fromRGB24 28  68  138 -- darkblue
                , fromRGB24 49  113 86 -- darkgreen
                , fromRGB24 142 196 79 -- lightgreen

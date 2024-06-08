@@ -45,6 +45,7 @@ import           Miso.Bulma.Generic
 import qualified Miso.Bulma.JSAddle as Run
 import           Miso.Bulma.Modal
 import           Miso.Bulma.NavBar
+import           Miso.Bulma.Panel
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Model
 import           Modes
@@ -288,19 +289,40 @@ viewModel m =
                        [ overviewPanel
                        , layersPanel
                        ]
-    overviewPanel = panel_ [ styleInline_ "height: 60%"]
-                           [ text "Model"
-                           ]
-                           [text . ms . show $ m
+    overviewPanel = panel [ styleM_ [ "height"   =: "60%"
+                                    , "overflow" =: "scroll"
+                                    ]
+                          ]
+                          [ text "Model" ]
+                          [ panelBlock
+                              [text . ms . show $ m^.canvas ]
+                          , panelBlock
+                              [text . ms . show $ m^.zoomConfig ]
+                          , panelBlock
+                              [text . ms . show $ m^.zoomConfig ]
+                          , panelBlock
+                              [text . ms . show $ m^.mode ]
+                          , panelBlock
+                              [text . ms . show $ m^.points ]
+                          , panelBlock
+                              [text . ms . show $ m^.polyLines ]
+                          , panelBlock
+                              [text . ms . show $ m^.diagram ]
+                          , panelBlock
+                              [text . ms . show $ m^.stroke ]
+                          , panelBlock
+                              [text . ms . show $ m^.fill ]
                            -- , message_ Nothing        [] [text "foo"]
                            -- , message_ (Just Warning) [] [text "warning :)"]
-                           ]
+                          ]
 
-    layersPanel = panel_ [ styleInline_ "height: 35%"
+    layersPanel = panel [ styleM_ [ "height"   =: "35%"
+                                  , "overflow" =: "scroll"
+                                  ]
+                        ]
+                        [text "Layers"]
+                        (map layer_ $ m^..layers.to theLayers.traverse)
 
-                         ]
-                         [text "Layers"]
-                         (map layer_ $ m^..layers.to theLayers.traverse)
 
     layer_   :: Layer -> View Action
     layer_ l = label_ [class_ "panel-block"]
@@ -466,27 +488,9 @@ navBarSubMenu_ theItem chs =
 --------------------------------------------------------------------------------
 -- * The Right Panel
 
-panel_                 :: [Attribute action]
-                       -> [View action] -> [View action] -> View action
-panel_ ats heading chs =
-    nav_ ([class_ "panel"] <> ats)
-         ([ p_ [class_ "panel-heading"] heading
-          , div_ [ class_ "container"
-                 , styleM_ [ "height" =: "100%"
-                           ]
-                 ]
-                 chs
-          ]
-         )
-
-panelBlock_ = div_ [class_ "panel-block"]
-
-panelTabs_ = p_ [class_ "panel-tabs"]
 
 
 panelBlockActiveA_ = a_ [class_ "panel-block"]
-
-
 
 
 --------------------------------------------------------------------------------
@@ -547,15 +551,15 @@ renderPoint :: SkPaintStyle
             -> (Point 2 R :+ Attributes (Point 2 R))
             -> CanvasKit -> SkCanvasRef -> JSM ()
 renderPoint strokeOnly fillOnly canvas' (p :+ ats) canvasKit skCanvasRef = case ats^.coloring of
-    StrokeOnly s      -> stroke s
-    FillOnly f        -> fill f
-    StrokeAndFill s f -> fill f >> stroke s
+    StrokeOnly s      -> stroke' s
+    FillOnly f        -> fill' f
+    StrokeAndFill s f -> fill' f >> stroke' s
   where
-    stroke c = withColor' c canvasKit $ \paint ->
+    stroke' c = withColor' c canvasKit $ \paint ->
                  do setStyle paint strokeOnly
                     setAntiAlias paint True
                     Render.point canvas' skCanvasRef p paint
-    fill c = withColor' c canvasKit $ \paint ->
+    fill' c = withColor' c canvasKit $ \paint ->
                  do setStyle paint fillOnly
                     setAntiAlias paint True
                     Render.point canvas' skCanvasRef p paint

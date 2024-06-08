@@ -12,12 +12,13 @@ module StrokeAndFill
   , defaultFill
 
   , toColoring
+
+  , myBlue
   ) where
 
 import Color
 import Control.Lens hiding (view, element)
 import Data.Colour (black)
-import Data.Colour.Names (blue)
 import Data.Default.Class
 import Miso.Bulma.Modal (Status(..), HasStatus(..), _InActive,_Active)
 
@@ -48,7 +49,7 @@ defaultStroke :: Stroke
 defaultStroke = StrokeFill Active (Color black Opaque)
 
 defaultFill :: Fill
-defaultFill = StrokeFill InActive (Color blue Opaque)
+defaultFill = StrokeFill InActive myBlue
 
 --------------------------------------------------------------------------------
 
@@ -61,3 +62,10 @@ toColoring s f = case (s^.status, f^.status) of
   (InActive, Active)   -> FillOnly   (f^.color)
   (Active,   InActive) -> StrokeOnly (s^.color)
   (Active,   Active)   -> StrokeAndFill (s^.color) (f^.color)
+
+
+--------------------------------------------------------------------------------
+
+-- | My color blue
+myBlue :: Color
+myBlue = fromRGB24 53  121 246 -- blue
