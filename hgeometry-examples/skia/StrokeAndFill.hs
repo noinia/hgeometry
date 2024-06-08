@@ -18,13 +18,10 @@ import Control.Lens hiding (view, element)
 import Data.Colour (black)
 import Data.Colour.Names (blue)
 import Data.Default.Class
+import Miso.Bulma.Modal (Status(..),_InActive,_Active)
 
 --------------------------------------------------------------------------------
 
-data Status = InActive | Active
-  deriving (Show,Read,Eq,Ord)
-
-makePrisms ''Status
 
 data Stroke = Stroke { _strokeStatus       :: {-# UNPACK #-}!Status
                      , _currentStrokeColor :: {-# UNPACK #-}!Color

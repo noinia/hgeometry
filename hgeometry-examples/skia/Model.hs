@@ -3,7 +3,11 @@
 module Model
   ( Model(Model)
   , canvas, zoomConfig, points, polyLines, diagram, _layers, mode, strokeColor, fillColor
+  , currentModal
+
   , initialModel
+
+  , Modal(..), currentStatus
 
   , R
 
@@ -64,6 +68,23 @@ initialLayers :: Layers
 initialLayers = Layers mempty (Layer "alpha" Visible) mempty
 
 --------------------------------------------------------------------------------
+-- * Type representing the currently active Modal (if any)
+
+-- | Which modal is currently active (if any)
+data Modal = StrokeModal
+           | FillModal
+           deriving (Show,Read,Eq,Ord)
+
+
+
+-- | Tests if the current modal matches the given modal, and returns the appropriate status
+currentStatus       :: Maybe Modal -> Modal -> Status
+currentStatus m1 m2
+  | m1 == Just m2  = Active
+  | otherwise      = InActive
+
+--------------------------------------------------------------------------------
+-- * Data Type representing all our modal data
 
 data Model = Model { _canvas       :: SkiaCanvas.Canvas R
                    , _zoomConfig   :: ZoomConfig Double
@@ -74,13 +95,16 @@ data Model = Model { _canvas       :: SkiaCanvas.Canvas R
                    , __layers      :: Layers
                    , _strokeColor  :: Stroke
                    , _fillColor    :: Fill
+                   , _currentModal :: Maybe Modal
                    } deriving (Eq,Show)
 makeLenses ''Model
 
 instance HasLayers Model where
   layers = _layers -- lens __layers (\m lrs -> m { __layers = lrs })
 
+
 --------------------------------------------------------------------------------
+
 
 
 instance Default (Point 2 R :+ Int) where
@@ -89,17 +113,17 @@ instance Default (Point 2 R :+ Int) where
 ----------------------------------------
 
 initialModel :: Model
-initialModel = Model { _canvas      = SkiaCanvas.blankCanvas 1024 768
-                     , _zoomConfig  = ZoomConfig (ClosedInterval 0.1 4) 1
-                     , _points      = mempty
-                     , _polyLines   = mempty
-                     , _diagram     = Nothing
-                     , __layers     = initialLayers
-                     , _mode        = PointMode
-                     , _strokeColor = defaultStroke
-                     , _fillColor   = defaultFill
+initialModel = Model { _canvas       = SkiaCanvas.blankCanvas 1024 768
+                     , _zoomConfig   = ZoomConfig (ClosedInterval 0.1 4) 1
+                     , _points       = mempty
+                     , _polyLines    = mempty
+                     , _diagram      = Nothing
+                     , __layers      = initialLayers
+                     , _mode         = PointMode
+                     , _strokeColor  = defaultStroke
+                     , _fillColor    = defaultFill
+                     , _currentModal = Nothing
                      }
-
 
 --------------------------------------------------------------------------------
 

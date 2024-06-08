@@ -2,6 +2,8 @@
 module ToolMenu
   ( menuButtons_
   , menuButton_
+
+  , colorModal_
   ) where
 
 import Action
@@ -10,6 +12,7 @@ import Control.Lens hiding (view, element)
 import HGeometry.Viewport (currentLevel)
 import Miso
 import Miso.Bulma.Generic
+import Miso.Bulma.Modal
 import Miso.String (MisoString)
 import Model
 import Modes
@@ -43,7 +46,7 @@ menuButtons_ m = aside_ [class_ "menu"]
                                 ]
                                 (m^.strokeColor.strokeStatus)
                                 NotSelected
-                                [ onClick $ SetStrokeColor Nothing
+                                [ onClick $ StrokeModalAction ToggleModalStatus
                                 ]
     fillButton   = menuButton_  "fas fa-fill"
                                 [ title_ "Fill color"
@@ -51,8 +54,9 @@ menuButtons_ m = aside_ [class_ "menu"]
                                 ]
                                 (m^.fillColor.fillStatus)
                                 NotSelected
-                                [ onClick $ SetFillColor Nothing -- todo
+                                [ onClick $ FillModalAction ToggleModalStatus
                                 ]
+
 
 toolButtons_   :: Model -> View Action
 toolButtons_ m = menuList_ [ pointButton
@@ -150,3 +154,26 @@ zoomButtons_ m = menuList_ [ menuButton_ "fas fa-plus-square"
                                          InActive NotSelected
                                          []
                            ]
+
+
+
+--------------------------------------------------------------------------------
+
+colorModal_                   :: Status -> (ModalAction -> Action) -> View Action
+colorModal_ status liftAction = either liftAction id <$>
+    modal_ status
+           [ text "woei"
+           ]
+  -- where
+  --   content :: [View Action]
+  --   content =
+  --     [ text "woei"
+  --     ]
+
+-- <div class="modal">
+--   <div class="modal-background"></div>
+--   <div class="modal-content">
+--     <!-- Any other Bulma elements you want -->
+--   </div>
+--   <button class="modal-close is-large" aria-label="close"></button>
+-- </div>

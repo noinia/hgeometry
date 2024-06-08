@@ -26,7 +26,7 @@ import           GHCJS.Marshal
 import           GHCJS.Types
 import           HGeometry.Ext
 import           HGeometry.Interval
-import           HGeometry.Miso.Event.Extra (onRightClick)
+import           HGeometry.Miso.Event.Extra
 import           HGeometry.Miso.OrphanInstances ()
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
@@ -43,6 +43,7 @@ import           Miso.Bulma.Color
 import           Miso.Bulma.Columns
 import           Miso.Bulma.Generic
 import qualified Miso.Bulma.JSAddle as Run
+import           Miso.Bulma.Modal (ModalAction(..), handleModalAction)
 import           Miso.Bulma.NavBar
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Model
@@ -58,6 +59,7 @@ import qualified SkiaCanvas.Render as Render
 import           StrokeAndFill
 import           ToolMenu
 
+import           Debug.Trace
 --------------------------------------------------------------------------------
 
 
@@ -149,7 +151,9 @@ updateModel m = \case
 
     SwitchMode mode' -> noEff $ m&mode .~ mode'
 
-
+    -- allow toggling the stroke and fill modals base on the strokeStatus and fillStatus
+    StrokeModalAction act -> noEff $ m&currentModal %~ flip (toggleModal StrokeModal) act
+    FillModalAction act   -> noEff $ m&currentModal %~ flip (toggleModal FillModal)   act
   where
     extend = extendWith (m^.canvas.mouseCoordinates)
 
@@ -182,6 +186,18 @@ updateModel m = \case
                                                                    Normal
                                       in insertPolyLine (p :+ ats)
           _                        -> id
+
+
+-- | Handles the given toggleModal action
+toggleModal                  :: Modal -> Maybe Modal -> ModalAction -> Maybe Modal
+toggleModal theModal current = \case
+  ToggleModalStatus -> case current of
+                         Nothing                -> Just theModal
+                         Just m | m == theModal -> Nothing
+                         Just _                 -> current
+                           -- this is kind of weird, since the modal that is currentlyActive
+                           -- is not actually the modal that we're getting a ToggleModalAction
+                           -- for
 
 
 recomputeDiagram   :: Model -> Model
@@ -237,6 +253,8 @@ viewModel m =
                                     , onClick      CanvasClicked
                                     , onRightClick CanvasRightClicked
                                     ]
+                      , colorModal_ (currentStatus (m^.currentModal) StrokeModal) StrokeModalAction
+                      , colorModal_ (currentStatus (m^.currentModal) FillModal)   FillModalAction
                       ]
 
     rightPanels = div_ [ class_ "column is-2"]

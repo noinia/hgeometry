@@ -38,6 +38,7 @@ import           Miso.Bulma.Color
 import           Miso.Bulma.Columns
 import           Miso.Bulma.Generic
 import qualified Miso.Bulma.JSAddle as Run
+import           Miso.Bulma.Modal (ModalAction)
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Model
 import           Modes
@@ -49,7 +50,6 @@ import qualified SkiaCanvas.CanvasKit as CanvasKit
 import           SkiaCanvas.CanvasKit hiding (Style(..))
 import qualified SkiaCanvas.Render as Render
 import           StrokeAndFill
-
 
 --------------------------------------------------------------------------------
 
@@ -67,3 +67,6 @@ data Action = Id
             | NotifyError !MisoString
             | SwitchMode !Mode
             | ToggleLayerStatus !(Index Layers)
+
+            | StrokeModalAction !ModalAction
+            | FillModalAction !ModalAction
