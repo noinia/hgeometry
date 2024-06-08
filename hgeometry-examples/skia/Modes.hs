@@ -26,10 +26,13 @@ import Control.Lens.Extras (is)
 import Data.Default.Class
 import PolyLineMode
 import RectangleMode
+import SelectMode
 
 --------------------------------------------------------------------------------
 
-data Mode = SelectMode
+data Mode = SelectMode { _selectionRange :: Maybe (SelectionRange R)
+                       , _selection      :: Maybe (Selection ())
+                       }
           | PanMode
           | PointMode
           | PenMode
@@ -52,7 +55,7 @@ currentRect = id
 -- they may have.)
 matches    :: Mode -> Mode -> Bool
 matches m1 = \case
-  SelectMode       -> is _SelectMode    m1
+  SelectMode{}     -> is _SelectMode    m1
   PanMode          -> is _PanMode       m1
   PointMode        -> is _PointMode     m1
   PenMode          -> is _PenMode       m1

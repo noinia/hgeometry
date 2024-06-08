@@ -16,7 +16,9 @@ import Miso.Bulma.Modal
 import Miso.String (MisoString)
 import Model
 import Modes
+import SelectMode
 import StrokeAndFill
+
 --------------------------------------------------------------------------------
 
 
@@ -31,7 +33,7 @@ menuButtons_ m =
            , toolButtons_ m
            ]
   where
-    selectButton = menuModeButton_ m SelectMode  "fas fa-mouse-pointer"
+    selectButton = menuModeButton_ m (SelectMode Nothing Nothing)  "fas fa-mouse-pointer"
                                    [ title_ "Select" ]
     panButton    = menuModeButton_ m PanMode "fas fa-hand-pointer"
                                    [title_ "Pan"]

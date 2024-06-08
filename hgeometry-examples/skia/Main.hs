@@ -20,6 +20,7 @@ import qualified Data.IntMap as IntMap
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
+-- import           Data.Maybe (maybe)
 import qualified Data.Sequence as Seq
 import           GHC.TypeNats
 import           GHCJS.Marshal
@@ -54,6 +55,7 @@ import           Modes
 import           Options
 import           PolyLineMode
 import           RectangleMode
+import           SelectMode
 import qualified SkiaCanvas
 import           SkiaCanvas (mouseCoordinates, dimensions, canvasKitRef, surfaceRef)
 import qualified SkiaCanvas.CanvasKit as CanvasKit
@@ -164,14 +166,14 @@ updateModel m = \case
     SwitchMode mode' -> noEff $ m&mode .~ mode'
 
     -- allow toggling the stroke and fill modals base on the status and fillStatus
-    StrokeAction act -> noEff $
-                        case handleColorAction (m^.stroke) (m^.currentModal) StrokeModal act of
-                          Left cm -> m&currentModal .~ cm
-                          Right s -> m&stroke       .~ s
-    FillAction act   -> noEff $
-                        case handleColorAction (m^.fill) (m^.currentModal) FillModal act of
-                          Left cm -> m&currentModal .~ cm
-                          Right s -> m&fill       .~ s
+    StrokeAction act -> noEff $ m&currentModal .~ cm
+                                 &stroke       %~ maybe id const ms
+      where
+        (cm, ms) = handleColorAction (m^.stroke) (m^.currentModal) StrokeModal act
+    FillAction act   -> noEff $ m&currentModal .~ cm
+                                 &fill         %~ maybe id const mf
+      where
+        (cm, mf) = handleColorAction (m^.fill) (m^.currentModal) FillModal act
 
 
     AddLayer         -> noEff $ m&layers %~ addLayer
@@ -228,14 +230,23 @@ handleColorAction                         :: StrokeFill
                                           -> Maybe Modal -- ^ modal status
                                           -> Modal -- ^ the modal to set (if any)
                                           -> ColorAction
-                                          -> Either (Maybe Modal) StrokeFill
+                                          -> ( Maybe Modal
+                                             , Maybe StrokeFill
+                                             )
 handleColorAction sf modalStatus theModal = \case
-  ToggleModal -> Left $ case modalStatus of
-                          Nothing                -> Just theModal
-                          Just m | m == theModal -> Nothing
-                                 | otherwise     -> modalStatus
-  ToggleColor -> Right $ sf&status %~ toggleStatus
-  SetColor c  -> Right $ sf&color .~ c
+    ToggleModal -> ( case modalStatus of
+                            Nothing                -> Just theModal
+                            Just m | m == theModal -> Nothing
+                                   | otherwise     -> modalStatus
+                   , Nothing -- no change to the StrokeAndFill
+                   )
+    ToggleColor -> ( Nothing -- we've changed the color status, so close the modal
+                   , Just $ sf&status %~ toggleStatus
+                   )
+    SetColor c  -> ( Nothing -- we've  changed the color, so close the modal
+                   , Just $ sf&color .~ c
+                   )
+
 
 -- | Handles the given toggleModal action
 toggleModal                  :: Modal -> Maybe Modal -> ModalAction -> Maybe Modal
@@ -392,7 +403,9 @@ layersPanel m =
                       ]
             ]
             [text "Layers"]
-            ((map layer_ $ m^..layers.to theLayers.traverse)
+            (  (map (layer_ InActive) $ m^..layers.beforeActive.traverse)
+            <> [     layer_ Active    $ m^.layers.activeLayer]
+            <> (map (layer_ InActive) $ m^..layers.afterActive.traverse)
             <>
             [ panelBlock
                 [ button_ [class_ "button is-primary is-outlined is-fullwidth"
@@ -402,15 +415,20 @@ layersPanel m =
                 ]
             ])
   where
-    layer_   :: Layer -> View Action
-    layer_ l = label_ [class_ "panel-block"]
-                      [ input_ [ type_ "checkbox"
-                               , name_    $ l^.name
-                               , checked_ $ l^.layerStatus == Visible
-                               , onClick  $ ToggleLayerStatus (l^.name)
-                               ]
-                      , text $ l^.name
+    layer_           :: Status -> Layer -> View Action
+    layer_ status' l =
+      label_ [ class_ "panel-block"
+             , class_ $ case status' of
+                 InActive -> ""
+                 Active   -> "has-background-primary"
+             ]
+             [ input_ [ type_ "checkbox"
+                      , name_    $ l^.name
+                      , checked_ $ l^.layerStatus == Visible
+                      , onClick  $ ToggleLayerStatus (l^.name)
                       ]
+             , text $ l^.name
+             ]
 
 
 
