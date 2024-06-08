@@ -44,6 +44,7 @@ common setup
       , hgeometry:kernel
       , hgeometry:ipe
       , hgeometry:svg
+      , hgeometry:miso
       , hiraffe                   >= 0.1
       , containers                >= 0.6
       , vector                    >= 0.13
@@ -173,8 +174,8 @@ executable hgeometry-polyLineDrawing
   import:         setup, miso-setup
   hs-source-dirs: polyLineDrawing
   main-is:        Main.hs
-  other-modules:
-       Miso.Event.Extra
+  -- other-modules:
+  --      Miso.Event.Extra
 
 --------------------------------------------------------------------------------
 -- * Polyline Drawing
@@ -191,8 +192,6 @@ executable hgeometry-skia
         SkiaCanvas.CanvasKit
         SkiaCanvas.CanvasKit.Core
         SkiaCanvas.CanvasKit.Render
-        Extra
-        MouseExtra
         Modes
         Layers
         StrokeAndFill

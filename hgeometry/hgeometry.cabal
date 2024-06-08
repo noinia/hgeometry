@@ -477,6 +477,8 @@ library ipe
 
 library svg
     import: all-setup, svg-setup
+    build-depends:
+      hgeometry:miso
     visibility: public
     hs-source-dirs: svg/src web/src
     exposed-modules:
@@ -489,10 +491,24 @@ library svg
         HGeometry.Miso.Canvas.Zoom
 
     other-modules:
-        Miso.Subscription.MouseExtra
         HGeometry.Miso.Svg.Writer
         Miso.String.Util
-        Miso.FFI.Extra
+
+--------------------------------------------------------------------------------
+-- * miso
+
+library miso
+    import: all-setup, svg-setup
+    visibility: public
+    hs-source-dirs: miso/src
+    exposed-modules:
+        HGeometry.Miso.Event.Extra
+        HGeometry.Miso.FFI.Extra
+        HGeometry.Miso.Subscription.MouseExtra
+
+    -- other-modules:
+    --     Miso.String.Util
+
 
 --------------------------------------------------------------------------------
 -- * HGeometry-quickcheck

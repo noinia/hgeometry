@@ -17,6 +17,7 @@ module HGeometry.Miso.Svg.Canvas
 
 import           Control.Lens hiding (elements)
 import qualified Data.Map as Map
+import           HGeometry.Miso.Subscription.MouseExtra
 import           HGeometry.Miso.Svg.StaticCanvas
 import           HGeometry.Point
 import           HGeometry.Transformation
@@ -24,7 +25,6 @@ import           HGeometry.Vector
 import           HGeometry.Viewport
 import           Miso (Attribute, View, Effect, height_, width_, noEff, onMouseLeave)
 import           Miso.String (MisoString, ms)
-import           Miso.Subscription.MouseExtra
 import           Miso.Svg (svg_, g_, rect_, transform_, pointerEvents_, fill_)
 
 --------------------------------------------------------------------------------

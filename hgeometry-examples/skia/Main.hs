@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
-module Main(main) where
+module Main
+  ( main
+  , mainJSM
+  ) where
 
 import           Action
 import           Attributes
@@ -23,6 +26,7 @@ import           GHCJS.Marshal
 import           GHCJS.Types
 import           HGeometry.Ext
 import           HGeometry.Interval
+import           HGeometry.Miso.Event.Extra (onRightClick)
 import           HGeometry.Miso.OrphanInstances ()
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
@@ -49,10 +53,10 @@ import qualified SkiaCanvas
 import           SkiaCanvas (mouseCoordinates, dimensions, canvasKitRef, surfaceRef)
 import qualified SkiaCanvas.CanvasKit as CanvasKit
 import           SkiaCanvas.CanvasKit hiding (Style(..))
+import qualified SkiaCanvas.CanvasKit.Core as Core
 import qualified SkiaCanvas.Render as Render
 import           StrokeAndFill
 import           ToolMenu
-import qualified SkiaCanvas.CanvasKit.Core as Core
 
 --------------------------------------------------------------------------------
 
@@ -99,10 +103,18 @@ updateModel m = \case
     Id                     -> noEff m
     OnLoad                 -> onLoad m
     CanvasKitAction act    -> m&canvas %%~ flip SkiaCanvas.handleCanvasKitAction act
-    CanvasResizeAction act -> m&canvas %%~ flip SkiaCanvas.handleCanvasResize act
+    CanvasResizeAction act ->
 
-    CanvasAction ca       -> m&canvas %%~ flip SkiaCanvas.handleInternalCanvasAction ca
 
+      m&canvas %%~ flip SkiaCanvas.handleCanvasResize act
+
+    CanvasAction ca       -> do
+                               m' <- m&canvas %%~ flip SkiaCanvas.handleInternalCanvasAction ca
+                               -- if we moved the mouse, also redraw
+                               case ca of
+                                 SkiaCanvas.MouseMove _ -> () <# pure Draw
+                                 _                      -> noEff () -- otherwise just return
+                               pure m'
 
     CanvasClicked      -> case m^.mode of
         PointMode      -> addPoint
@@ -223,7 +235,7 @@ viewModel m =
                                               , "min-height" =: (h <> "px" :: MisoString)
                                               ]
                                     , onClick      CanvasClicked
-                                    -- , onRightClick CanvasRightClicked
+                                    , onRightClick CanvasRightClicked
                                     ]
                       ]
 
@@ -300,8 +312,10 @@ menuBar_ _ = navBar_
 --------------------------------------------------------------------------------
 
 main :: IO ()
-main = Run.runWith Options.jsAddleOptions 8080 $
-         startApp $
+main = Run.runWith Options.jsAddleOptions 8080 mainJSM
+
+mainJSM :: JSM ()
+mainJSM = startApp $
             App { model         = initialModel
                 , update        = flip updateModel
                 , view          = viewModel
@@ -445,37 +459,38 @@ message_ mc ats bdy = article_ ([class_ $ "message" `withColor` mc] <> ats)
 
 
 myDraw                       :: Model -> CanvasKit -> SkCanvasRef -> JSM ()
-myDraw m canvasKit canvasRef = do clear canvasKit canvasRef
-                                  strokeOnly <- mkPaintStyle canvasKit CanvasKit.StrokeOnly
-                                  fillOnly <- mkPaintStyle canvasKit CanvasKit.FillOnly
-                                  forM_ (m^.polyLines) $ \poly ->
-                                    renderPoly strokeOnly (m^.canvas) poly canvasKit canvasRef
-                                  forM_ (m^.points) $ \p ->
-                                    renderPoint strokeOnly fillOnly (m^.canvas) p canvasKit canvasRef
-                                  case m^.mode of
-                                    PolyLineMode current ->
-                                      let current' = extendWith (m^.canvas.mouseCoordinates)
-                                                                current
-                                      in renderPartialPolyLine strokeOnly
-                                                      (m^.canvas)
-                                                      current' canvasKit canvasRef
-                                    _                     -> pure ()
+myDraw m canvasKit canvasRef = do
+    -- some setup
+    strokeOnly <- mkPaintStyle canvasKit CanvasKit.StrokeOnly
+    fillOnly <- mkPaintStyle canvasKit CanvasKit.FillOnly
+    -- clear the canvas
+    clear canvasKit canvasRef
+    -- render all polylines
+    forM_ (m^.polyLines) $ \poly ->
+      renderPoly strokeOnly (m^.canvas) poly canvasKit canvasRef
+      -- render all points
+    forM_ (m^.points) $ \p ->
+      renderPoint strokeOnly fillOnly (m^.canvas) p canvasKit canvasRef
+
+    case m^.mode of
+      PolyLineMode current ->
+        let current' = extendWith (m^.canvas.mouseCoordinates)
+                                  current
+        in renderPartialPolyLine strokeOnly
+                        (m^.canvas)
+                        current' canvasKit canvasRef
+      _                     -> pure ()
+    -- render cursor
+    case m^.canvas.mouseCoordinates of
+      Nothing -> pure ()
+      Just p  -> renderPoint strokeOnly fillOnly (m^.canvas) (p :+ cursorAttributes)
+                             canvasKit canvasRef
 
 
-                                  -- myColor <- mkColor4f canvasKit (fromRGB24 192 40  27)
-                                  -- withPaint canvasKit $ \paint -> do
-                                  --   forM_ (m^.points) $ \p ->
-                                  --     Render.point (m^.canvas) canvasRef p paint
-                                    -- setAntiAlias paint True
-                                    -- setColor paint myColor
-                                    -- setStyle paint strokeOnly
-                                    -- case NonEmpty.nonEmpty $ m^..points.traverse of
-                                    --   Just pts@(_ :| _ : _) -> do
-                                    --     let poly :: PolyLine (Point 2 R)
-                                    --         poly = polyLineFromPoints $ (^.core) <$> pts
-                                    --     Render.polyLine (m^.canvas) canvasRef poly paint
-                                    --   _                     -> pure ()
-                                  -- pure ()
+cursorAttributes :: Attributes (Point 2 R)
+cursorAttributes = def&coloring .~ StrokeAndFill red red
+  where
+    red = fromRGB24 192 40  27 -- darkish red
 
 --------------------------------------------------------------------------------
 

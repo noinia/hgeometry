@@ -35,6 +35,7 @@ module SkiaCanvas.Core
 import           Control.Lens
 import qualified Data.Map as Map
 import           GHCJS.Marshal (fromJSVal)
+import           HGeometry.Miso.Subscription.MouseExtra
 import           HGeometry.Miso.Svg.Canvas (HasMousePosition(..))
 import           HGeometry.Miso.Svg.StaticCanvas (HasDimensions(..))
 import           HGeometry.Point
@@ -43,7 +44,6 @@ import           HGeometry.Viewport
 import qualified Language.Javascript.JSaddle.Object as JS
 import           Miso (Attribute, View, Effect, noEff, onMouseLeave, canvas_, id_, getElementById, JSM)
 import           Miso.String (MisoString)
-import           MouseExtra
 import           SkiaCanvas.CanvasKit
 
 --------------------------------------------------------------------------------

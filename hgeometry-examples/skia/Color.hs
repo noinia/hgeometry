@@ -28,7 +28,7 @@ type Color = ColorF Float
 instance Num a => Default (ColorF a) where
   def = Color black Opaque
 
-
+-- | Create a color from three word8 values (i.e. integer values in the range [0..255])
 fromRGB24       :: Word8 -> Word8 -> Word8 -> Color
 fromRGB24 r g b = Color (sRGB24 r g b) Opaque
 

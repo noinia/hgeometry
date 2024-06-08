@@ -2,7 +2,17 @@
 {-# LANGUAGE RecordWildCards          #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Redundant lambda" #-}
-module Miso.Subscription.MouseExtra
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Miso.Subscription.MouseExtra
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Extra mouse event events/decoders
+--
+--------------------------------------------------------------------------------
+module HGeometry.Miso.Subscription.MouseExtra
   ( onMouseEnterAt
   , onMouseMoveAt
   , onMouseClickAt
@@ -17,17 +27,15 @@ import           Data.Aeson (withObject, withArray, (.:), Value)
 import           Data.Aeson.Types (Parser, parseEither)
 import qualified Data.Foldable as F
 import           GHCJS.Marshal
+import           HGeometry.Miso.FFI.Extra
 import           HGeometry.Point
 import           HGeometry.Vector
 import           JavaScript.Object
 import           JavaScript.Object.Internal
-import           Language.Javascript.JSaddle (JSVal)
 import           Miso
-import           Miso.FFI.Extra
 import           Miso.String (MisoString, unpack)
 
 
-import           Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | onMouseMove event, the position is relative to the target of the event
