@@ -72,6 +72,8 @@ data Action = Id
             | StrokeAction !ColorAction
             | FillAction !ColorAction
 
+            | AddLayer
+
 -- | Actions one can do with the stroke or fill color
 data ColorAction = ToggleModal
                  | ToggleColor

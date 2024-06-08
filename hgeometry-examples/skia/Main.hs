@@ -109,10 +109,7 @@ updateModel m = \case
     Id                     -> noEff m
     OnLoad                 -> onLoad m
     CanvasKitAction act    -> m&canvas %%~ flip SkiaCanvas.handleCanvasKitAction act
-    CanvasResizeAction act ->
-
-
-      m&canvas %%~ flip SkiaCanvas.handleCanvasResize act
+    CanvasResizeAction act -> m&canvas %%~ flip SkiaCanvas.handleCanvasResize act
 
     CanvasAction ca       -> do
                                m' <- m&canvas %%~ flip SkiaCanvas.handleInternalCanvasAction ca
@@ -175,6 +172,10 @@ updateModel m = \case
                         case handleColorAction (m^.fill) (m^.currentModal) FillModal act of
                           Left cm -> m&currentModal .~ cm
                           Right s -> m&fill       .~ s
+
+
+    AddLayer         -> noEff $ m&layers %~ addLayer
+
   where
     extend = extendWith (m^.canvas.mouseCoordinates)
 
@@ -308,7 +309,7 @@ viewModel m =
 
     rightPanels = div_ [ class_ "column is-2"]
                        [ overviewPanel
-                       , layersPanel
+                       , layersPanel m
                        ]
     overviewPanel = panel [ styleM_ [ "height"   =: "60%"
                                     , "overflow" =: "scroll"
@@ -337,25 +338,6 @@ viewModel m =
                            -- , message_ (Just Warning) [] [text "warning :)"]
                           ]
 
-    layersPanel = panel [ styleM_ [ "height"   =: "35%"
-                                  , "overflow" =: "scroll"
-                                  ]
-                        ]
-                        [text "Layers"]
-                        (map layer_ $ m^..layers.to theLayers.traverse)
-
-
-    layer_   :: Layer -> View Action
-    layer_ l = label_ [class_ "panel-block"]
-                      [ input_ [ type_ "checkbox"
-                               , name_    $ l^.name
-                               , checked_ $ l^.layerStatus == Visible
-                               , onClick  $ ToggleLayerStatus (l^.name)
-                               ]
-                      , text $ l^.name
-                      ]
-
-
     footer = footer_ [ class_ "navbar is-fixed-bottom"]
                      [ navBarEnd_ [ p_ [class_ "navbar-item"]
                                        [ icon "fas fa-mouse-pointer" []
@@ -368,6 +350,8 @@ viewModel m =
                      ]
 
     Vector2 w h = ms <$> m^.canvas.dimensions
+
+
 
 -- | Our "main", full width/full height, hero section
 hero_     :: [View action] -> View action
@@ -396,6 +380,37 @@ menuBar_ _ = navBar_
   --                        ]
   --                | (i,p) <- m^..points.ifolded.withIndex ]
   --             -- <> [ draw p [ fill_ "blue" ]  | Just p <- [m^.canvas.mouseCoordinates] ]
+
+
+--------------------------------------------------------------------------------
+
+-- | Renders the Layers panel
+layersPanel   :: Model -> View Action
+layersPanel m =
+      panel [ styleM_ [ "height"   =: "35%"
+                      , "overflow" =: "scroll"
+                      ]
+            ]
+            [text "Layers"]
+            ((map layer_ $ m^..layers.to theLayers.traverse)
+            <>
+            [ panelBlock
+                [ button_ [class_ "button is-primary is-outlined is-fullwidth"
+                          , onClick $ AddLayer
+                          ]
+                          [ "Add Layer" ]
+                ]
+            ])
+  where
+    layer_   :: Layer -> View Action
+    layer_ l = label_ [class_ "panel-block"]
+                      [ input_ [ type_ "checkbox"
+                               , name_    $ l^.name
+                               , checked_ $ l^.layerStatus == Visible
+                               , onClick  $ ToggleLayerStatus (l^.name)
+                               ]
+                      , text $ l^.name
+                      ]
 
 
 

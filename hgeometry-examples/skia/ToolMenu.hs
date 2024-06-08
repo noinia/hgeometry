@@ -21,15 +21,15 @@ import StrokeAndFill
 
 
 menuButtons_   :: Model -> View Action
-menuButtons_ m = aside_ [class_ "menu"]
-                        [ menuList_ [ selectButton
-                                    , panButton
-                                    ]
-                        , zoomButtons_ m
-                        , colorButtons
-                        , toolButtons_ m
-                        ]
-
+menuButtons_ m =
+    aside_ [class_ "menu"]
+           [ menuList_ [ selectButton
+                       , panButton
+                       ]
+           , zoomButtons_ m
+           , colorButtons
+           , toolButtons_ m
+           ]
   where
     selectButton = menuModeButton_ m SelectMode  "fas fa-mouse-pointer"
                                    [ title_ "Select" ]
@@ -41,34 +41,35 @@ menuButtons_ m = aside_ [class_ "menu"]
                              ]
 
     strokeButton = menuButton_  "fas fa-paint-brush"
-                                [ title_ "Stroke color"
-                                , styleM_ ["color" =: rgba (m^.stroke.color)]
+                                [ styleM_ ["color" =: rgba (m^.stroke.color)]
                                 ]
                                 (m^.stroke.status)
                                 NotSelected
                                 [ onClick $ StrokeAction ToggleModal
+                                , title_ "Stroke color"
                                 ]
     fillButton   = menuButton_  "fas fa-fill"
-                                [ title_ "Fill color"
-                                , styleM_ ["color" =: rgba (m^.fill.color)]
+                                [ styleM_ ["color" =: rgba (m^.fill.color)]
                                 ]
                                 (m^.fill.status)
                                 NotSelected
                                 [ onClick $ FillAction ToggleModal
+                                , title_ "Fill color"
                                 ]
 
 
 toolButtons_   :: Model -> View Action
-toolButtons_ m = menuList_ [ pointButton
-                           , penButton
-                           , lineButton
-                           , polyLineButton
-                           , polygonButton
-                           , rectangleButton
-                           , circleButton
-                           , textButton
-                           , mathButton
-                           ]
+toolButtons_ m =
+    menuList_ [ pointButton
+              , penButton
+              , lineButton
+              , polyLineButton
+              , polygonButton
+              , rectangleButton
+              , circleButton
+              , textButton
+              , mathButton
+              ]
   where
     pointButton     = menuButton' PointMode "fas fa-circle"
                                   [title_ "Point"]
@@ -95,12 +96,14 @@ toolButtons_ m = menuList_ [ pointButton
 menuModeButton_   :: Model
                   -> Mode
                   -> MisoString -> [Attribute Action] -> View Action
-menuModeButton_ m mode' i ats = menuButton_ i
-                                           ats
-                                           (if (m^.mode) `matches` mode' then Active else InActive)
-                                           (if (m^.mode) `matches` mode' then Selected else NotSelected)
-                                           [ onClick $ SwitchMode mode'
-                                           ]
+menuModeButton_ m mode' i ats =
+    menuButton_ i
+                [] -- no icon ats
+                (if (m^.mode) `matches` mode' then Active else InActive)
+                (if (m^.mode) `matches` mode' then Selected else NotSelected)
+                ((onClick $ SwitchMode mode')
+                : ats
+                )
 
 menuList_ :: [View action] -> View action
 menuList_ = ul_ [class_ "menu-list"]
@@ -135,30 +138,30 @@ menuButton_ i ats status' selected buttonAts =
   --              | otherwise = id
 
 zoomButtons_   :: Model -> View Action
-zoomButtons_ m = menuList_ [ menuButton_ "fas fa-plus-square"
-                                         [ title_ "Zoom in"
-                                         ]
-                                         InActive NotSelected
-                                         []
-
-                           , menuButton_ "fas fa-equals"
-                                         [ title_ "Zoom 1:1"
-                                         ]
-                                         (if m^.zoomConfig.currentLevel == 1
-                                           then Active else InActive)
-                                         NotSelected
-                                         []
-                           , menuButton_ "fas fa-minus-square"
-                                         [ title_ "Zoom out"
-                                         ]
-                                         InActive NotSelected
-                                         []
+zoomButtons_ m =
+    menuList_ [ menuButton_ "fas fa-plus-square"
+                           [ ]
+                           InActive NotSelected
+                           [ title_ "Zoom in"
                            ]
 
-
+             , menuButton_ "fas fa-equals"
+                           [ ]
+                           (if m^.zoomConfig.currentLevel == 1
+                             then Active else InActive)
+                           NotSelected
+                           [ title_ "Zoom 1:1"
+                           ]
+             , menuButton_ "fas fa-minus-square"
+                           [ ]
+                           InActive NotSelected
+                           [ title_ "Zoom out"
+                           ]
+             ]
 
 --------------------------------------------------------------------------------
 
+-- | Renders the modal to select the stroke/fill color
 colorModal_                           :: Status -- ^ Status of the modal
                                       -> StrokeFill
                                       -> MisoString -- ^ title

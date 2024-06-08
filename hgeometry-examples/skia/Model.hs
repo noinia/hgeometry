@@ -67,8 +67,6 @@ import           StrokeAndFill
 --------------------------------------------------------------------------------
 
 
-initialLayers :: Layers
-initialLayers = Layers mempty (Layer "alpha" Visible) mempty
 
 --------------------------------------------------------------------------------
 -- * Type representing the currently active Modal (if any)
