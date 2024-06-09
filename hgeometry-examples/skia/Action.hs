@@ -45,6 +45,7 @@ import           Model
 import           Modes
 import           Options
 import           PolyLineMode
+import           RectangleMode (Rectangle')
 import qualified SkiaCanvas
 import           SkiaCanvas (mouseCoordinates, dimensions, canvasKitRef, surfaceRef)
 import qualified SkiaCanvas.CanvasKit as CanvasKit
@@ -73,6 +74,10 @@ data Action = Id
             | FillAction !ColorAction
 
             | AddLayer
+
+
+            | ComputeSelection (Rectangle' R)
+
 
 -- | Actions one can do with the stroke or fill color
 data ColorAction = ToggleModal

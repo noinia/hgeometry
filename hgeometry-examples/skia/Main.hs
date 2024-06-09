@@ -122,9 +122,11 @@ updateModel m = \case
                                pure m'
 
     CanvasClicked       -> case m^.mode of
-        SelectMode{}           -> (m&mode._SelectMode %~
-                                     updateSelection (m^.canvas.mouseCoordinates)
-                                  ) <# pure Draw
+        SelectMode{}           ->
+            do m' <- m&mode._SelectMode %%~ updateSelection ComputeSelection
+                                                            (m^.canvas.mouseCoordinates)
+               () <# pure Draw
+               return m'
         PointMode              -> addPoint
         PenMode                -> noEff m
         PolyLineMode{}         -> (m&mode._PolyLineMode.currentPoly %~ extend)
@@ -176,6 +178,8 @@ updateModel m = \case
 
 
     AddLayer         -> noEff $ m&layers %~ addLayer
+
+    ComputeSelection rng -> noEff $ m -- TODO
 
   where
     extend = extendWith (m^.canvas.mouseCoordinates)

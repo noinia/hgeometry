@@ -19,19 +19,20 @@ import           HGeometry.Box
 import           HGeometry.Point
 import           HGeometry.PolyLine
 import           HGeometry.Sequence.NonEmpty
+import           Miso
 import           RectangleMode
 
 --------------------------------------------------------------------------------
 
--- | A rectangle selection may either be incomplete or complete
-data RectangleRange r = PartialSelection (PartialRectangle r)
-                      | CompleteSelection (Rectangle' r)
-                      deriving (Show,Read,Eq)
+-- -- | A rectangle selection may either be incomplete or complete
+-- data RectangleRange r = PartialSelection (PartialRectangle r)
+--                       | CompleteSelection (Rectangle' r)
+--                       deriving (Show,Read,Eq)
 
-newtype SelectionRange r = RectangleSelection (RectangleRange r)
+newtype SelectionRange r = RectangleSelection (PartialRectangle r)
   deriving (Show,Read,Eq)
 
-rectangleRange :: Lens' (SelectionRange r) (RectangleRange r)
+rectangleRange :: Lens' (SelectionRange r) (PartialRectangle r)
 rectangleRange = coerced
 
 --------------------------------------------------------------------------------
@@ -58,24 +59,25 @@ instance Default SelectModeData where
 
 
 instance HasAsRectangleWith SelectModeData R where
-  asRectangleWith mousePos mData = (mData^?selectionRange._Just.rectangleRange) >>= \case
-    PartialSelection pr -> asRectangleWith mousePos pr
-    CompleteSelection r -> Just r
+  asRectangleWith mousePos mData = (mData^?selectionRange._Just.rectangleRange) >>= \pr ->
+                                     asRectangleWith mousePos pr
+
+-- data ComputeSelectionAction = ComputeSelection (Rectangle' R)
+--   deriving (Show,Eq)
 
 
-
-updateSelection                :: Maybe (Point 2 R) -> SelectModeData -> SelectModeData
-updateSelection mousePos mData = case mousePos of
-    Nothing -> mData
+updateSelection                                 :: (Rectangle' R -> computeSelectionAction)
+                                                -> Maybe (Point 2 R)
+                                                -> SelectModeData
+                                                -> Effect computeSelectionAction SelectModeData
+updateSelection computeSelection mousePos mData = case mousePos of
+    Nothing -> noEff mData
     Just p  -> case mData^.selectionRange of
-      Nothing                      -> startSelection p
-      Just sr  -> case sr^.rectangleRange of
-        PartialSelection pr   -> mData&selectionRange ?~ RectangleSelection (extendRange pr p)
-        CompleteSelection _   -> mData
-                     -- we already have a complete selection, so this is kind of weird,
-                     -- so ignore
+      Nothing -> noEff $ startSelection p
+      Just pr -> (mData&selectionRange .~ Nothing) -- reset the selection range
+                 <# pure (computeSelection $ extend (pr^.rectangleRange) p) -- send a ComputeSelection action
   where
     startSelection p = SelectModeData (Just $ selRange p) Nothing
-    selRange = RectangleSelection . PartialSelection . PartialRectangle
+    selRange = RectangleSelection . PartialRectangle
 
-    extendRange (PartialRectangle s) p = CompleteSelection $ boundingBox (s :| [p])
+    extend (PartialRectangle s) p = boundingBox (s :| [p])
