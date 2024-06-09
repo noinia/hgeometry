@@ -5,7 +5,7 @@ module SelectMode
   , SelectionRange(..), rectangleRange
   , Selection(..)
 
-  , startSelectionWith
+  , updateSelection
   ) where
 
 import           Base
@@ -64,9 +64,18 @@ instance HasAsRectangleWith SelectModeData R where
 
 
 
+updateSelection                :: Maybe (Point 2 R) -> SelectModeData -> SelectModeData
+updateSelection mousePos mData = case mousePos of
+    Nothing -> mData
+    Just p  -> case mData^.selectionRange of
+      Nothing                      -> startSelection p
+      Just sr  -> case sr^.rectangleRange of
+        PartialSelection pr   -> mData&selectionRange ?~ RectangleSelection (extendRange pr p)
+        CompleteSelection _   -> mData
+                     -- we already have a complete selection, so this is kind of weird,
+                     -- so ignore
+  where
+    startSelection p = SelectModeData (Just $ selRange p) Nothing
+    selRange = RectangleSelection . PartialSelection . PartialRectangle
 
-startSelectionWith                :: Maybe (Point 2 R) ->SelectModeData -> SelectModeData
-startSelectionWith mousePos mData = case mousePos of
-  Nothing -> mData
-  Just p  -> let selRange = RectangleSelection . PartialSelection $ PartialRectangle p
-             in SelectModeData (Just selRange) Nothing
+    extendRange (PartialRectangle s) p = CompleteSelection $ boundingBox (s :| [p])

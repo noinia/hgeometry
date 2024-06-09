@@ -7,10 +7,12 @@ module Color
   , Alpha(..)
   , fromAlpha
 
+  , opacity
 
   , Coloring(..)
   ) where
 
+import Control.Lens(Lens', lens)
 import Data.Colour (black)
 import Data.Colour.SRGB
 import Data.Default.Class
@@ -24,6 +26,11 @@ data ColorF a = Color (Colour a) (Alpha Float)
 deriving instance Show (Colour a) => Show (ColorF a)
 
 type Color = ColorF Float
+
+-- | Lens to access the opacity
+opacity :: Lens' (ColorF a) (Alpha Float)
+opacity = lens (\(Color _ a) -> a) (\(Color rgb _) a -> Color rgb a)
+
 
 instance Num a => Default (ColorF a) where
   def = Color black Opaque

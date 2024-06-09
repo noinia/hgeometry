@@ -123,7 +123,7 @@ updateModel m = \case
 
     CanvasClicked       -> case m^.mode of
         SelectMode{}           -> (m&mode._SelectMode %~
-                                     startSelectionWith (m^.canvas.mouseCoordinates)
+                                     updateSelection (m^.canvas.mouseCoordinates)
                                   ) <# pure Draw
         PointMode              -> addPoint
         PenMode                -> noEff m
@@ -611,7 +611,7 @@ cursorAttributes = def&coloring .~ StrokeAndFill red red
     red = fromRGB24 192 40  27 -- darkish red
 
 selectAttributes :: Attributes (Rectangle' R)
-selectAttributes = def&coloring .~ StrokeAndFill darkishGrey lightGrey
+selectAttributes = def&coloring .~ StrokeAndFill darkishGrey (lightGrey&opacity .~ Alpha 0.1)
 
 --------------------------------------------------------------------------------
 
