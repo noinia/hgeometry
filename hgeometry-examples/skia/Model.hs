@@ -15,6 +15,8 @@ module Model
   , Selected(..)
 
   , colorPresets
+
+  , darkishGrey, lightGrey
   ) where
 
 import           Attributes
@@ -140,9 +142,9 @@ data Selected = NotSelected | Selected
 colorPresets :: NonEmpty Color
 colorPresets = NonEmpty.fromList
                [ fromRGB24 0   0   0
-               , fromRGB24 99  99  99
-               , fromRGB24 155 155 155
-               , fromRGB24 210 210 210
+               , darkishGrey
+               , mediumGrey
+               , lightGrey
                , fromRGB24 252 252 252
 
                , fromRGB24 119 41  135 -- purple
@@ -157,3 +159,12 @@ colorPresets = NonEmpty.fromList
                , fromRGB24 142 196 79 -- lightgreen
                , fromRGB24 254 255 149
                ]
+
+darkishGrey :: Color
+darkishGrey = fromRGB24 99  99  99
+
+mediumGrey :: Color
+mediumGrey = fromRGB24 155 155 155
+
+lightGrey :: Color
+lightGrey = fromRGB24 210 210 210

@@ -9,6 +9,7 @@ module ToolMenu
 import Action
 import Color
 import Control.Lens hiding (view, element)
+import Data.Default.Class
 import HGeometry.Viewport (currentLevel)
 import Miso
 import Miso.Bulma.Generic
@@ -33,7 +34,7 @@ menuButtons_ m =
            , toolButtons_ m
            ]
   where
-    selectButton = menuModeButton_ m (SelectMode Nothing Nothing)  "fas fa-mouse-pointer"
+    selectButton = menuModeButton_ m (SelectMode def)  "fas fa-mouse-pointer"
                                    [ title_ "Select" ]
     panButton    = menuModeButton_ m PanMode "fas fa-hand-pointer"
                                    [title_ "Pan"]
@@ -80,11 +81,11 @@ toolButtons_ m =
     lineButton      = menuButton' LineMode  "fas fa-slash"
                                   [title_ "Line"]
 
-    polyLineButton  = menuButton' (PolyLineMode Nothing) "fas fa-wave-square"
+    polyLineButton  = menuButton' (PolyLineMode def) "fas fa-wave-square"
                                   [title_ "Polyline"]
     polygonButton   = menuButton' PolygonMode "fas fa-draw-polygon"
                                   [title_ "Polygon"]
-    rectangleButton = menuButton' (RectangleMode Nothing) "far fa-square"
+    rectangleButton = menuButton' (RectangleMode def) "far fa-square"
                                   [title_ "Rectangle"]
     circleButton    = menuButton' CircleMode "far fa-circle"
                                   [title_ "Circle"]

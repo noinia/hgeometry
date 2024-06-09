@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell            #-}
+{-# LANGUAGE PartialTypeSignatures            #-}
 module Modes
   ( Mode(..)
   , _SelectMode
@@ -13,10 +14,8 @@ module Modes
   , _TextMode
   , _MathMode
 
-  , matches
 
-  , currentPoly
-  , currentRect
+  , matches
   ) where
 
 
@@ -29,17 +28,14 @@ import RectangleMode
 import SelectMode
 
 --------------------------------------------------------------------------------
-
-data Mode = SelectMode { _selectionRange :: Maybe (SelectionRange R)
-                       , _selection      :: Maybe (Selection ())
-                       }
+data Mode = SelectMode {-# UNPACK #-}!SelectModeData
           | PanMode
           | PointMode
           | PenMode
           | LineMode
-          | PolyLineMode { _currentPoly :: Maybe (PartialPolyLine R) }
+          | PolyLineMode {-# UNPACK #-}!PolyLineModeData
           | PolygonMode
-          | RectangleMode { _currentRect :: Maybe (PartialRectangle R) }
+          | RectangleMode {-# UNPACK #-}!RectangleModeData
           | CircleMode
           | TextMode
           | MathMode
@@ -47,9 +43,7 @@ data Mode = SelectMode { _selectionRange :: Maybe (SelectionRange R)
 makePrisms ''Mode
 
 
--- | TODO, not sure what these should be exactly; I guess prisms from Mode to PartialPolyLine R or so
-currentPoly = id
-currentRect = id
+
 
 -- | Returns if the two match; i.e if the modes are the same (ignoring any specific data
 -- they may have.)
@@ -69,23 +63,6 @@ matches m1 = \case
 
 
 --------------------------------------------------------------------------------
-
--- data instance ModeData SelectMode =
---   SelectModeData { _selection :: Maybe Int -- TODO;
---                  } deriving (Show,Eq)
-
-
--- instance Default (ModeData SelectMode) where
---   def = SelectModeData Nothing
-
--- --------------------------------------------------------------------------------
-
--- -- | In point data we don't cary anything useful
--- newtype instance ModeData PointMode =
---   PointModeData () deriving (Show,Eq)
-
--- instance Default (ModeData PointMode) where
---   def = PointModeData ()
 
 -- --------------------------------------------------------------------------------
 

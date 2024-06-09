@@ -122,25 +122,24 @@ updateModel m = \case
                                pure m'
 
     CanvasClicked       -> case m^.mode of
+        SelectMode{}           -> (m&mode._SelectMode %~
+                                     startSelectionWith (m^.canvas.mouseCoordinates)
+                                  ) <# pure Draw
         PointMode              -> addPoint
         PenMode                -> noEff m
         PolyLineMode{}         -> (m&mode._PolyLineMode.currentPoly %~ extend)
                                   <# pure Draw
-        RectangleMode current' -> case current' of
-                                    Just _  -> noEff m
-                                    Nothing -> case m^.canvas.mouseCoordinates of
-                                                 Nothing  -> noEff m -- absurd
-                                                 Just loc ->
-                                                   let pr = PartialRectangle loc
-                                                   in (m&mode._RectangleMode.currentRect ?~ pr)
-                                                      <# pure Draw
+        RectangleMode mData -> case mData^.currentRect of
+          Just _  -> noEff m
+          Nothing -> (m&mode._RectangleMode %~ startRectangleWith (m^.canvas.mouseCoordinates))
+                     <# pure Draw
         _                      -> noEff m
 
     CanvasRightClicked -> case m^.mode of
-        PenMode                -> noEff m
-        PolyLineMode current'  -> addPoly current'
-        RectangleMode current' -> addRect current'
-        _                      -> noEff m
+        PenMode             -> noEff m
+        PolyLineMode mData  -> addPoly mData
+        RectangleMode mData -> addRect mData
+        _                   -> noEff m
 
 
     Draw                  -> m <# notifyOnError (handleDraw m)
@@ -200,27 +199,25 @@ updateModel m = \case
                Just p  -> let ats = PointAttributes $ toColoring (m^.stroke) (m^.fill)
                           in m&points %~ insert (p :+ ats)
 
-    addPoly current = m' <# pure Draw
+    addPoly mData = m' <# pure Draw
       where
         m' = m&polyLines                      %~ addPoly'
               &mode._PolyLineMode.currentPoly .~ Nothing
 
-        addPoly' = case extend current of
+        addPoly' = case extend (mData^.currentPoly) of
           Just (PartialPolyLine p) -> let ats = PolyLineAttributes (m^.stroke.color)
                                                                    Normal
                                       in insert (p :+ ats)
           _                        -> id
 
-    addRect current = m' <# pure Draw
+    addRect mData = m' <# pure Draw
       where
         m' = m&rectangles %~ addRect'
               &mode._RectangleMode.currentRect .~ Nothing
 
-        addRect' = case current of
+        addRect' = case asRectangleWith (m^.canvas.mouseCoordinates) mData of
                      Nothing -> id
-                     Just pr -> let loc = m^.canvas.mouseCoordinates
-                                    r   = extendToRectangle pr loc
-                                in insert (r :+ ats)
+                     Just r  -> insert (r :+ ats)
 
         ats = RectangleAttributes (toColoring (m^.stroke) (m^.fill)) Normal
 
@@ -581,16 +578,25 @@ myDraw m canvasKit canvasRef = do
       renderPoint strokeOnly fillOnly (m^.canvas) p canvasKit canvasRef
 
     case m^.mode of
-      PolyLineMode current ->
-        let current' = extendWith (m^.canvas.mouseCoordinates)
-                                  current
+      PolyLineMode mData ->
+        let current' = extendWith (m^.canvas.mouseCoordinates) (mData^.currentPoly)
         in renderPartialPolyLine strokeOnly
                         (m^.canvas)
                         current' canvasKit canvasRef
-      RectangleMode (Just current) ->
-        let current' = extendToRectangle current (m^.canvas.mouseCoordinates)
-            rect     = current' :+ RectangleAttributes def Normal
-        in renderRect strokeOnly fillOnly (m^.canvas) rect canvasKit canvasRef
+      RectangleMode mData -> forM_ (asRectangleWith (m^.canvas.mouseCoordinates) mData) $ \rect ->
+                                let ats = RectangleAttributes def Normal
+                                in renderRect strokeOnly fillOnly (m^.canvas) (rect :+ ats)
+                                              canvasKit canvasRef
+      SelectMode mData -> do renderSelectionRange
+                             renderSelection
+        where
+          renderSelectionRange =
+            forM_ (asRectangleWith (m^.canvas.mouseCoordinates) mData) $ \r ->
+              let rect     = r :+ selectAttributes
+              in renderRect strokeOnly fillOnly (m^.canvas) rect canvasKit canvasRef
+          renderSelection = pure () -- TODO
+
+
       _                     -> pure ()
     -- render cursor
     case m^.canvas.mouseCoordinates of
@@ -603,6 +609,9 @@ cursorAttributes :: Attributes (Point 2 R)
 cursorAttributes = def&coloring .~ StrokeAndFill red red
   where
     red = fromRGB24 192 40  27 -- darkish red
+
+selectAttributes :: Attributes (Rectangle' R)
+selectAttributes = def&coloring .~ StrokeAndFill darkishGrey lightGrey
 
 --------------------------------------------------------------------------------
 

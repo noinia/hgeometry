@@ -1,7 +1,12 @@
 module RectangleMode
-  ( Rectangle'
+  ( RectangleModeData(RectangleModeData), currentRect
+
+  , Rectangle'
   , PartialRectangle(..)
-  , extendToRectangle
+
+  , HasAsRectangleWith(..)
+
+  , startRectangleWith
   ) where
 
 import           Base
@@ -26,8 +31,33 @@ type Rectangle' r = Rectangle (Point 2 r)
 newtype PartialRectangle r = PartialRectangle (Point 2 r)
   deriving (Show,Read,Eq,Ord)
 
--- | Extends a box to a rectangle
-extendToRectangle                         :: (Ord r, Num r)
-                                          => PartialRectangle r
-                                          -> Maybe (Point 2 r) -> Rectangle' r
-extendToRectangle (PartialRectangle p) mq = boundingBox (p :| maybeToList mq)
+class HasAsRectangleWith t r | t -> r where
+  -- | Renders the selection range as a rectangle (the first arg is the mouse coords used
+  -- to complete the range)
+  asRectangleWith :: (Ord r, Num r) => Maybe (Point 2 r) -> t -> Maybe (Rectangle' r)
+
+instance HasAsRectangleWith (PartialRectangle r) r where
+  asRectangleWith mq (PartialRectangle p) = Just $ boundingBox (p :| maybeToList mq)
+
+--------------------------------------------------------------------------------
+
+-- | Data we store in Rectangle mode
+newtype RectangleModeData = RectangleModeData (Maybe (PartialRectangle R))
+  deriving (Show,Read,Eq)
+
+currentRect :: Lens' RectangleModeData (Maybe (PartialRectangle R))
+currentRect = coerced
+
+instance Default RectangleModeData where
+  def = RectangleModeData Nothing
+
+instance HasAsRectangleWith RectangleModeData R where
+  asRectangleWith mousePos (RectangleModeData mpr) = mpr >>= asRectangleWith mousePos
+
+
+-----------------------------------------------------------------------------------------
+
+startRectangleWith                :: Maybe (Point 2 R) ->RectangleModeData -> RectangleModeData
+startRectangleWith mousePos mData = case mousePos of
+  Nothing -> mData
+  Just p  -> mData&currentRect ?~ PartialRectangle p

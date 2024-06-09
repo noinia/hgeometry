@@ -1,7 +1,9 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
 module PolyLineMode
-  ( PolyLine'
+  ( PolyLineModeData(PolyLineModeData), currentPoly
+
+  , PolyLine'
   , PartialPolyLine(..)
   , _StartPoint, _PartialPolyLine
 
@@ -55,3 +57,14 @@ extendPolyLine pl p = pl&_PolyLineF %~ \vs@(_ :>> q) -> if p /= q then vs |>> p 
 
 -- instance Default (ModeData PenMode) where
 --   def = PenModeData def
+
+
+newtype PolyLineModeData = PolyLineModeData (Maybe (PartialPolyLine R))
+  deriving (Show,Read,Eq)
+
+
+currentPoly :: Lens' PolyLineModeData (Maybe (PartialPolyLine R))
+currentPoly = coerced
+
+instance Default PolyLineModeData where
+  def = PolyLineModeData Nothing
