@@ -25,6 +25,10 @@ data Action = Id
             | CanvasRightClicked
             -- | AddPoint
             | Draw
+
+            | ReDraw
+            | StoreCached {-# UNPACK #-}!SkPictureRef
+
             -- | SetStrokeColor (Maybe Color)
             -- | SetFillColor   (Maybe Color)
             | NotifyError !MisoString
@@ -38,6 +42,9 @@ data Action = Id
 
 
             | ComputeSelection (Rectangle' R)
+
+            | SaveSkpFile
+
 
 
 -- | Actions one can do with the stroke or fill color

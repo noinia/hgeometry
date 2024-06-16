@@ -15,6 +15,8 @@ module SkiaCanvas.CanvasKit
 
   , withPath
 
+  , SkPictureRef
+  , SkPictureRecorderRef
 
   , withPaint
   , setAntiAlias

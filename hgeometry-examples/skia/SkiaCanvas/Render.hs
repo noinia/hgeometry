@@ -3,11 +3,12 @@ module SkiaCanvas.Render
   , Render
   , renderWith
   , CanvasKitRefs(CanvasKitRefs), theCanvasKit, theSurface, strokeOnly, fillOnly, theCanvas
+  , pictureRecorder
   , HasCanvasKitRef(..)
   , withPaint
   , liftR
 
-
+  , Render.picture
   , point
   -- , circle
   , polyLine
@@ -25,7 +26,7 @@ import           HGeometry.Transformation
 import           HGeometry.Viewport
 import           Miso (JSM)
 import           SkiaCanvas.CanvasKit
-import           SkiaCanvas.CanvasKit.Initialize (CanvasKitRefs(..), theSurface, strokeOnly, fillOnly, theCanvasKit, theCanvas, HasCanvasKitRef(..))
+import           SkiaCanvas.CanvasKit.Initialize (CanvasKitRefs(..), theSurface, strokeOnly, fillOnly, theCanvasKit, theCanvas, HasCanvasKitRef(..), pictureRecorder)
 import           SkiaCanvas.CanvasKit.Paint (SkPaintRef)
 import           SkiaCanvas.CanvasKit.Render (Render, liftR, renderWith
                                              , withPaint

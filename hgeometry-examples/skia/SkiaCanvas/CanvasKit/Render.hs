@@ -7,6 +7,8 @@ module SkiaCanvas.CanvasKit.Render
   , withPaint
   -- , withPath
 
+  , picture
+
   , point
   , circle
   , polyLine
@@ -32,6 +34,7 @@ import           SkiaCanvas.CanvasKit.Initialize
 import           SkiaCanvas.CanvasKit.Paint (SkPaintRef, SkPaintStyle)
 import qualified SkiaCanvas.CanvasKit.Paint as Paint
 import qualified SkiaCanvas.CanvasKit.Path as Path
+import           SkiaCanvas.CanvasKit.Picture (SkPictureRef, drawPicture)
 --------------------------------------------------------------------------------
 
 
@@ -60,10 +63,19 @@ withPaint f = do canvasKit <- asks (^.canvasKitRef)
 
 --------------------------------------------------------------------------------
 
+
+
 clear :: SkCanvas_ skCanvas => Render skCanvas ()
 clear = do canvasKit <- asks (^.canvasKitRef)
            canvasRef <- asks (^.theCanvas)
            liftR $ CKCore.clear canvasKit canvasRef
+
+--------------------------------------------------------------------------------
+
+-- | Renders a skia picture
+picture     :: SkCanvas_ skCanvas => SkPictureRef -> Render skCanvas ()
+picture pic = do canvas <- asks (^.theCanvas)
+                 liftR $ drawPicture canvas pic
 
 --------------------------------------------------------------------------------
 

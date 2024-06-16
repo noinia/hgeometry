@@ -14,9 +14,11 @@ import           Control.Monad.Error.Class
 import           Control.Monad.Except
 import           Control.Monad.IO.Class
 import           Control.Monad.Reader
+import qualified Data.ByteString.Lazy as BS
 import           Data.Default.Class
 import qualified Data.IntMap as IntMap
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Sequence as Seq
 import           HGeometry.Box
 import           HGeometry.Ext
 import           HGeometry.Miso.Event.Extra
@@ -46,13 +48,16 @@ import           SkiaCanvas ( mouseCoordinates, dimensions, canvasKitRefs, surfa
                             , Canvas
                             )
 import           SkiaCanvas.CanvasKit hiding (Style(..))
+import           SkiaCanvas.CanvasKit.GeomPrims (lrtbRect)
 import           SkiaCanvas.CanvasKit.Paint (SkPaintRef)
-import           SkiaCanvas.Render (Render, theCanvasKit, canvasKitRef, strokeOnly, fillOnly, theCanvas, liftR)
+import           SkiaCanvas.CanvasKit.Picture (serialize, withPicture)
+import           SkiaCanvas.CanvasKit.PictureRecorder (recordAsPicture)
+import           SkiaCanvas.Render (Render, theCanvasKit, canvasKitRef, strokeOnly, fillOnly, theCanvas, liftR, pictureRecorder)
 import qualified SkiaCanvas.Render as Render
 import           StrokeAndFill
 import           ToolMenu
 
-
+import           Debug.Trace
 --------------------------------------------------------------------------------
 
 
@@ -63,12 +68,6 @@ import           ToolMenu
 maybeToM     :: MonadError e m => e -> Maybe a -> m a
 maybeToM msg = maybe (throwError msg) pure
 
-handleDraw   :: Model -> ExceptT MisoString JSM Action
-handleDraw m = do canvasKit <- maybeToM "Loading CanvasKit failed"
-                               $ m^?canvas.canvasKitRefs._Just.canvasKitRef
-                  surface'  <- maybeToM "Ackquiring surface failed" $ m^?canvas.surfaceRef
-                  lift $ requestAnimationFrame canvasKit surface' (myDraw m)
-                  pure Id
 
 notifyOnError :: ExceptT MisoString JSM Action -> JSM Action
 notifyOnError = fmap (\case
@@ -76,6 +75,16 @@ notifyOnError = fmap (\case
                          Right act -> act
                      ) . runExceptT
 
+
+
+handleDraw   :: Model -> ExceptT MisoString JSM Action
+handleDraw m = do canvasKit <- maybeToM "Loading CanvasKit failed"
+                               $ m^?canvas.canvasKitRefs._Just.canvasKitRef
+                  surface'  <- maybeToM "Ackquiring surface failed" $ m^?canvas.surfaceRef
+                  lift $ requestAnimationFrame canvasKit surface' $ \_ canvasRef -> do
+                    let refs = (m^?!canvas.canvasKitRefs._Just) &theCanvas .~ canvasRef
+                    Render.renderWith refs (myDraw m)
+                  pure Id
 
 onLoad   :: Model -> Effect Action Model
 onLoad m = Effect m [ initializeCanvas
@@ -93,6 +102,8 @@ onLoad m = Effect m [ initializeCanvas
 
     initializeCanvasKit :: Sub Action
     initializeCanvasKit = mapSub CanvasKitAction $ initializeCanvasKitSub theMainCanvasId
+
+--------------------------------------------------------------------------------
 
 updateModel   :: Model -> Action -> Effect Action Model
 updateModel m = \case
@@ -134,8 +145,18 @@ updateModel m = \case
 
     Draw                  -> m <# notifyOnError (handleDraw m)
 
+    -- redraws the permanent items, updates the cache, and then runs draw
+    ReDraw                -> m <# notifyOnError (handleDraw m)
+      -- traceShow "redrawing" $
+      --                        m <# (StoreCached <$> redraw m)
+
+    StoreCached pic       -> (m&cachedPictures .~ Seq.singleton pic)
+                             <# do bs <- serialize pic
+                                   liftIO $ BS.writeFile "/tmp/foo.skp" bs
+                                   pure Draw
+
     ToggleLayerStatus lr  -> (m&layers.ix lr.layerStatus %~ toggleLayerStatus)
-                             <# pure Draw
+                             <# pure ReDraw
 
     -- SetStrokeColor mc     -> noEff $ m&stroke %~ \cs ->
     --                            case mc of
@@ -169,6 +190,10 @@ updateModel m = \case
 
     ComputeSelection rng -> noEff $ m -- TODO
 
+    SaveSkpFile     -> m <# do pic <- drawToPicture m
+                               bs <- serialize pic
+                               liftIO $ BS.writeFile "/tmp/foo.skp" bs
+                               pure Id
   where
     extend = extendWith (m^.canvas.mouseCoordinates)
 
@@ -184,14 +209,14 @@ updateModel m = \case
     --     PolyLineMode -> noEff m
     --     PenMode      -> addPoly
 
-    addPoint = recomputeDiagram m' <# pure Draw
+    addPoint = recomputeDiagram m' <# pure ReDraw
       where
         m' = case m^.canvas.mouseCoordinates of
                Nothing -> m
                Just p  -> let ats = PointAttributes $ toColoring (m^.stroke) (m^.fill)
                           in m&points %~ insert (p :+ ats)
 
-    addPoly mData = m' <# pure Draw
+    addPoly mData = m' <# pure ReDraw
       where
         m' = m&polyLines                      %~ addPoly'
               &mode._PolyLineMode.currentPoly .~ Nothing
@@ -202,7 +227,7 @@ updateModel m = \case
                                       in insert (p :+ ats)
           _                        -> id
 
-    addRect mData = m' <# pure Draw
+    addRect mData = m' <# pure ReDraw
       where
         m' = m&rectangles %~ addRect'
               &mode._RectangleMode.currentRect .~ Nothing
@@ -212,6 +237,12 @@ updateModel m = \case
                      Just r  -> insert (r :+ ats)
 
         ats = RectangleAttributes (toColoring (m^.stroke) (m^.fill)) Normal
+
+
+
+--------------------------------------------------------------------------------
+
+
 
 
 -- | Updates setting a color
@@ -334,6 +365,8 @@ viewModel m =
                               [text . ms . show $ m^.stroke ]
                           , panelBlock
                               [text . ms . show $ m^.fill ]
+                          , panelBlock
+                              [text . ms . show $ m^..cachedPictures ]
                            -- , message_ Nothing        [] [text "foo"]
                            -- , message_ (Just Warning) [] [text "warning :)"]
                           ]
@@ -468,7 +501,7 @@ navBar_ = let theMainMenuId = "theMainMenuId"
                                              [ navBarItemA_ []
                                                             [text "Open"]
                                              , navBarDivider_
-                                             , navBarSelectedItemA_ []
+                                             , navBarSelectedItemA_ [ onClick SaveSkpFile ]
                                                                     [text "Save"]
                                              ]
                             , navBarSubMenu_ [ navBarItemA_ []
@@ -551,14 +584,11 @@ message_ mc ats bdy = article_ ([class_ $ "message" `withColor` mc] <> ats)
 
 --------------------------------------------------------------------------------
 
-
-myDraw               :: Model -> CanvasKit -> SkCanvasRef -> JSM ()
-myDraw m _ canvasRef = do
-    -- store the reference to the canvas, and then render
-    let refs = (m^?!canvas.canvasKitRefs._Just) &theCanvas .~ canvasRef
-    Render.renderWith refs $ do
-      -- clear the canvas
-      clear
+drawPermanent   :: SkCanvas_ skCanvas
+                => Model -> Render skCanvas ()
+drawPermanent m =
+    do
+      liftR $ consoleLog ("rendering" :: MisoString)
       -- render all polylines
       forM_ (m^.polyLines) $ \poly ->
         renderPoly (m^.canvas) poly
@@ -568,6 +598,44 @@ myDraw m _ canvasRef = do
         -- render all points
       forM_ (m^.points) $ \p ->
         renderPoint (m^.canvas) p
+
+drawToPicture m = do initialBounds <- lrtbRect (refs^.theCanvasKit) 0 r t 0
+                     recordAsPicture (refs^.theCanvasKit) (refs^.pictureRecorder) initialBounds
+                                     (\canvasRef ->
+                                        let refs' = refs&theCanvas .~ canvasRef
+                                        in Render.renderWith refs' $ myDraw m
+                                     )
+  where
+    refs = m^?!canvas.canvasKitRefs._Just
+    Vector2 r t = m^.canvas.dimensions
+
+
+
+
+
+-- | Forces a redraw
+redraw   :: Model -> JSM SkPictureRef
+redraw m = do initialBounds <- lrtbRect (refs^.theCanvasKit) 0 r t 0
+              consoleLog ("in redraw" :: MisoString)
+              recordAsPicture (refs^.theCanvasKit) (refs^.pictureRecorder) initialBounds
+                              (\canvasRef ->
+                                 let refs' = refs&theCanvas .~ canvasRef
+                                 in Render.renderWith refs' $ drawPermanent m
+                              )
+  where
+    refs = m^?!canvas.canvasKitRefs._Just
+    Vector2 r t = m^.canvas.dimensions
+
+
+myDraw   :: SkCanvas_ skCanvas => Model -> Render skCanvas ()
+myDraw m = do
+      -- clear the canvas
+      clear
+
+      -- renders the cached picture
+      drawPermanent m
+      -- forM_ (m^.cachedPictures) $ \pic ->
+      --   Render.picture pic
 
       case m^.mode of
         PolyLineMode mData ->
@@ -608,11 +676,11 @@ selectAttributes = def&coloring .~ StrokeAndFill darkishGrey (lightGrey&opacity 
 
 --------------------------------------------------------------------------------
 
-renderPoint                   :: SkCanvas_ skCanvas
-                              => Canvas R
-                              -> (Point 2 R :+ Attributes (Point 2 R))
-                              -> Render skCanvas ()
-renderPoint canvas (p :+ ats) = renderColoring (Render.point canvas p) (ats^.coloring)
+renderPoint                    :: SkCanvas_ skCanvas
+                               => Canvas R
+                               -> (Point 2 R :+ Attributes (Point 2 R))
+                               -> Render skCanvas ()
+renderPoint canvas' (p :+ ats) = renderColoring (Render.point canvas' p) (ats^.coloring)
 
 renderColoring        :: SkCanvas_ skCanvas
                       => (SkPaintRef -> Render skCanvas ()) -- ^ the renderer
@@ -634,27 +702,27 @@ renderColoring render = \case
                     liftR $ setAntiAlias paint True
                     render paint
 
-renderRect                   :: SkCanvas_ skCanvas
-                             => Canvas R
-                             -> (Rectangle' R :+ Attributes (Rectangle' R))
-                             -> Render skCanvas ()
-renderRect canvas (r :+ ats) =
+renderRect                    :: SkCanvas_ skCanvas
+                              => Canvas R
+                              -> (Rectangle' R :+ Attributes (Rectangle' R))
+                              -> Render skCanvas ()
+renderRect canvas' (r :+ ats) =
     renderColoring render (ats^.coloring)
   where
     render paint = let poly :: SimplePolygon (Point 2 R)
                        poly = uncheckedFromCCWPoints $ corners r
-                   in Render.simplePolygon canvas poly paint
+                   in Render.simplePolygon canvas' poly paint
 
-renderPoly                    :: SkCanvas_ skCanvas
-                              => Canvas R
-                              -> (PolyLine' R :+ Attributes (PolyLine' R))
-                              -> Render skCanvas ()
-renderPoly canvas (pl :+ ats) =
+renderPoly                     :: SkCanvas_ skCanvas
+                               => Canvas R
+                               -> (PolyLine' R :+ Attributes (PolyLine' R))
+                               -> Render skCanvas ()
+renderPoly canvas' (pl :+ ats) =
   withColor' (ats^.color) $ \paint ->
     do strokeOnly' <- asks (^.strokeOnly)
        liftR $ setStyle paint strokeOnly'
        liftR $ setAntiAlias paint True
-       Render.polyLine canvas pl paint
+       Render.polyLine canvas' pl paint
 
 withColor'          :: Color -> (SkPaintRef -> Render skCanvas a) -> Render skCanvas a
 withColor' c render = do canvasKit <- asks (^.theCanvasKit)
@@ -663,12 +731,12 @@ withColor' c render = do canvasKit <- asks (^.theCanvasKit)
                            liftR $ setColor paint c'
                            render paint
 
-renderPartialPolyLine                    :: SkCanvas_ skCanvas
-                                         => Canvas R
-                                         -> Maybe (PartialPolyLine R)
-                                         -> Render skCanvas ()
-renderPartialPolyLine canvas partialPoly = case partialPoly of
-    Just (PartialPolyLine pl) -> renderPoly canvas (pl :+ ats)
+renderPartialPolyLine                     :: SkCanvas_ skCanvas
+                                          => Canvas R
+                                          -> Maybe (PartialPolyLine R)
+                                          -> Render skCanvas ()
+renderPartialPolyLine canvas' partialPoly = case partialPoly of
+    Just (PartialPolyLine pl) -> renderPoly canvas' (pl :+ ats)
     Just (StartPoint _)       -> pure ()
     Nothing                   -> pure ()
   where

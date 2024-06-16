@@ -3,6 +3,7 @@ module SkiaCanvas.CanvasKit.GeomPrims
   ( SkInputRect_
   , SkInputRectRef
   , lrtbRect
+  , fromRect
 
   , circle
   ) where
@@ -12,6 +13,7 @@ import           Control.Monad (void)
 import           GHCJS.Marshal (ToJSVal(..))
 import           GHCJS.Types
 import           HGeometry.Ball
+import           HGeometry.Box
 import           HGeometry.Number.Radical (Radical)
 import           HGeometry.Point
 import qualified Language.Javascript.JSaddle as JSAddle
@@ -29,7 +31,7 @@ newtype SkInputRectRef = SkInputRectRef JSVal
   deriving (ToJSVal, JS.MakeObject)
 
 -- | Creates a rectangle
-lrtbRect                   :: (Num r, ToJSVal r)
+lrtbRect                   :: (ToJSVal r)
                            => CanvasKit -> r ->  r  -> r -> r -> JSM SkInputRectRef
 lrtbRect canvasKit l r t b =
   SkInputRectRef <$> canvasKit ^.js4 ("LTRBRect" :: MisoString) l t b r
@@ -40,9 +42,13 @@ class ToJSVal rect => SkInputRect_ rect
 
 instance SkInputRect_ SkInputRectRef
 
-
-
-
+-- | Convert a rectangle into a SkRect
+fromRect                :: ( Rectangle_ rectangle point
+                           , Point_ point 2 r, ToJSVal r
+                           )
+                        => CanvasKit -> rectangle -> JSM SkInputRectRef
+fromRect canvasKit rect = let Sides t r b l = sideValues rect
+                          in lrtbRect canvasKit l r t b
 
 --------------------------------------------------------------------------------
 -- * Simple objects (Rectangles, Circles)

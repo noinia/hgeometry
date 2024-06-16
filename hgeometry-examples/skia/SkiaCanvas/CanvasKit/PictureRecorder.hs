@@ -2,6 +2,7 @@
 module SkiaCanvas.CanvasKit.PictureRecorder
   ( SkPictureRecorderRef(..)
   , withPictureRecorder
+  , createPictureRecorder
 
   , recordAsPicture
   , beginPictureRecorder
@@ -32,8 +33,15 @@ newtype SkPictureRecorderRef = SkPictureRecorderRef JSVal
 -- | Run some computation with a picture recorder.
 withPictureRecorder           :: CanvasKit -> (SkPictureRecorderRef -> JSM a) -> JSM a
 withPictureRecorder canvasKit =
-  JSAddle.bracket (SkPictureRecorderRef <$> canvasKit JS.! ("PictureRecorder" :: MisoString))
+  JSAddle.bracket (createPictureRecorder canvasKit)
                   (\pr -> pr ^. JS.js0 ("delete" :: MisoString))
+
+-- | Create a new picturerecorder.
+createPictureRecorder           :: CanvasKit -> JSM SkPictureRecorderRef
+createPictureRecorder canvasKit =
+  SkPictureRecorderRef <$> (JS.new (canvasKit JS.! ("PictureRecorder" :: MisoString)) ())
+  -- TODO: this thing should be deleted at some point, which we currently don't
+
 
 -- | Record the drawing commands
 recordAsPicture :: SkInputRect_ skInputRect
@@ -43,10 +51,13 @@ recordAsPicture :: SkInputRect_ skInputRect
                 -> (SkCanvasRef -> JSM ()) -- ^ the drawing commands
                 -> JSM SkPictureRef
 recordAsPicture canvasKit pr bounds draw =
-  do canvasRef <- beginPictureRecorder canvasKit pr bounds ComputeBounds
+  do canvasRef <- beginPictureRecorder canvasKit pr bounds FixedBounds --ComputeBounds
      draw canvasRef
+     consoleLog ("done drawing" :: MisoString)
      finishRecordingAsPicture canvasKit pr
 
+
+-- consoleLog arg = ("console" :: MisoString) JS.js1 ("log" :: MisoString) arg
 
 data ComputeBounds = FixedBounds | ComputeBounds
                    deriving (Show,Read,Eq,Ord)

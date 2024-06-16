@@ -5,6 +5,7 @@ module Model
   , canvas, zoomConfig, points, polyLines, rectangles
   , diagram, _layers, mode, stroke, fill
   , currentModal
+  , cachedPictures
 
   , initialModel
 
@@ -27,6 +28,7 @@ import           Data.Default.Class
 import qualified Data.IntMap as IntMap
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Sequence (Seq(..))
 import           HGeometry.Ext
 import           HGeometry.Interval
 import           HGeometry.Miso.OrphanInstances ()
@@ -37,6 +39,7 @@ import           Modes
 import           PolyLineMode
 import           RectangleMode
 import qualified SkiaCanvas
+import           SkiaCanvas.CanvasKit.Picture (SkPictureRef)
 import           StrokeAndFill
 
 --------------------------------------------------------------------------------
@@ -73,6 +76,10 @@ data Model = Model { _canvas       :: SkiaCanvas.Canvas R
                    , _stroke       :: !StrokeFill
                    , _fill         :: !StrokeFill
                    , _currentModal :: Maybe Modal
+
+
+                   ,  _cachedPictures  :: Seq SkPictureRef
+                   -- ^ Pictures we may have cached. They are rendered in order.
                    } deriving (Eq,Show)
 makeLenses ''Model
 
@@ -99,6 +106,7 @@ initialModel = Model { _canvas       = SkiaCanvas.blankCanvas 1024 768
                      , _stroke       = defaultStroke
                      , _fill         = defaultFill
                      , _currentModal = Nothing
+                     , _cachedPictures = mempty
                      }
 
 --------------------------------------------------------------------------------

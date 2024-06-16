@@ -51,15 +51,16 @@ import           SkiaCanvas.CanvasKit.Initialize
 --------------------------------------------------------------------------------
 
 -- | A Skia Canvas
-data CanvasF f r = Canvas {  _theViewport  :: !(Viewport r)
-                                           -- ^ the viewport
-                          , _dimensions    :: !(Vector 2 Int)
-                                           -- ^ dimensions (width,height) in pixels, of the canvas
-                          , _mousePosition :: Maybe (Point 2 Int)
-                                           -- ^ the mouse position, in raw pixel coordinates
-                          , _canvasKitRefs :: f (CanvasKitRefs ())
-                                           -- ^ references to the canvaskit
-                          }
+data CanvasF f r =
+  Canvas {  _theViewport    :: !(Viewport r)
+          -- ^ the viewport
+         , _dimensions      :: !(Vector 2 Int)
+          -- ^ dimensions (width,height) in pixels, of the canvas
+         , _mousePosition   :: Maybe (Point 2 Int)
+          -- ^ the mouse position, in raw pixel coordinates
+         , _canvasKitRefs   :: f (CanvasKitRefs ())
+         -- ^ references to the canvaskit
+         }
 
 deriving instance (Show (f (CanvasKitRefs ())), Show r) => Show (CanvasF f r)
 deriving instance (Eq   (f (CanvasKitRefs ())), Eq r)   => Eq   (CanvasF f r)
@@ -71,10 +72,10 @@ type Canvas = CanvasF Maybe
 blankCanvas     :: (Num r)
                  => Int -> Int -> CanvasF Maybe r
 blankCanvas w h = let v = Vector2 w h
-                  in Canvas { _theViewport   = flipY (fromIntegral <$> v)
-                            , _dimensions    = v
-                            , _mousePosition = Nothing
-                            , _canvasKitRefs = Nothing
+                  in Canvas { _theViewport    = flipY (fromIntegral <$> v)
+                            , _dimensions     = v
+                            , _mousePosition  = Nothing
+                            , _canvasKitRefs  = Nothing
                             }
 
 -- | Lens to access the viewport
@@ -86,12 +87,11 @@ canvasKitRefs :: Lens (CanvasF f r)                  (CanvasF g r)
                       (f (CanvasKitRefs ())) (g (CanvasKitRefs ()))
 canvasKitRefs = lens _canvasKitRefs (\c ckRefs -> c { _canvasKitRefs = ckRefs })
 
--- | Lens to access the Surface
+-- | Afine traversal to access the Surface
 surfaceRef :: Traversal (Canvas r) (Canvas r) SurfaceRef SurfaceRef
 surfaceRef = canvasKitRefs._Just.theSurface
 
   -- lens _surfaceRef (\c surfRef -> c { _surfaceRef = surfRef })
-
 
 instance HasDimensions (Canvas r) (Vector 2 Int) where
   dimensions = lens _dimensions (\c d -> c { _dimensions = d })

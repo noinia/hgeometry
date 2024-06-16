@@ -31,7 +31,7 @@ newtype SkPathRef = SkPathRef JSVal
 -- | Apply some operations with a path reference.
 withPath           :: CanvasKit -> (SkPathRef -> JSM a) -> JSM a
 withPath canvasKit =
-    JSAddle.bracket (SkPathRef <$> (JS.new (canvasKit JS.! ("Path" :: MisoString)) ()))
+    JSAddle.bracket (SkPathRef <$> JS.new (canvasKit JS.! ("Path" :: MisoString)) ())
                     (\path -> path ^. JS.js0 ("delete" :: MisoString))
 
 -- | Apply some operations with a path reference.
