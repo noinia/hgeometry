@@ -51,7 +51,7 @@ recordAsPicture :: SkInputRect_ skInputRect
                 -> (SkCanvasRef -> JSM ()) -- ^ the drawing commands
                 -> JSM SkPictureRef
 recordAsPicture canvasKit pr bounds draw =
-  do canvasRef <- beginPictureRecorder canvasKit pr bounds FixedBounds --ComputeBounds
+  do canvasRef <- beginPictureRecorder canvasKit pr bounds ComputeBounds
      draw canvasRef
      consoleLog ("done drawing" :: MisoString)
      finishRecordingAsPicture canvasKit pr

@@ -48,9 +48,9 @@ import           SkiaCanvas ( mouseCoordinates, dimensions, canvasKitRefs, surfa
                             , Canvas
                             )
 import           SkiaCanvas.CanvasKit hiding (Style(..))
-import           SkiaCanvas.CanvasKit.GeomPrims (lrtbRect)
+import           SkiaCanvas.CanvasKit.GeomPrims (ltrbRect)
 import           SkiaCanvas.CanvasKit.Paint (SkPaintRef)
-import           SkiaCanvas.CanvasKit.Picture (serialize, withPicture)
+import           SkiaCanvas.CanvasKit.Picture (serialize, withPicture, drawPicture)
 import           SkiaCanvas.CanvasKit.PictureRecorder (recordAsPicture)
 import           SkiaCanvas.Render (Render, theCanvasKit, canvasKitRef, strokeOnly, fillOnly, theCanvas, liftR, pictureRecorder)
 import qualified SkiaCanvas.Render as Render
@@ -146,14 +146,10 @@ updateModel m = \case
     Draw                  -> m <# notifyOnError (handleDraw m)
 
     -- redraws the permanent items, updates the cache, and then runs draw
-    ReDraw                -> m <# notifyOnError (handleDraw m)
-      -- traceShow "redrawing" $
-      --                        m <# (StoreCached <$> redraw m)
+    ReDraw                -> m <# (StoreCached <$> redraw m)
 
     StoreCached pic       -> (m&cachedPictures .~ Seq.singleton pic)
-                             <# do bs <- serialize pic
-                                   liftIO $ BS.writeFile "/tmp/foo.skp" bs
-                                   pure Draw
+                             <# pure Draw
 
     ToggleLayerStatus lr  -> (m&layers.ix lr.layerStatus %~ toggleLayerStatus)
                              <# pure ReDraw
@@ -194,6 +190,19 @@ updateModel m = \case
                                bs <- serialize pic
                                liftIO $ BS.writeFile "/tmp/foo.skp" bs
                                pure Id
+
+    LoadSkpFile     -> m <#
+                       do bs <- liftIO $ BS.readFile "/tmp/foo.skp"
+                          liftIO $ putStrLn "loading!"
+                          let canvasKit = m^?!canvas.canvasKitRefs._Just.canvasKitRef
+                              surface'  = m^?!canvas.surfaceRef
+                          requestAnimationFrame canvasKit surface' $ \_ canvasRef -> do
+                            let refs = (m^?!canvas.canvasKitRefs._Just) &theCanvas .~ canvasRef
+                            Render.renderWith refs $ do
+                              liftR $ withPicture canvasKit bs $ \pic -> do
+                                drawPicture canvasRef pic
+                          liftIO $ putStrLn "Drawn"
+                          pure Id
   where
     extend = extendWith (m^.canvas.mouseCoordinates)
 
@@ -498,7 +507,7 @@ navBar_ = let theMainMenuId = "theMainMenuId"
              [ navBarStart_ [ navBarSubMenu_ [ navBarItemA_ []
                                                             [text "File"]
                                              ]
-                                             [ navBarItemA_ []
+                                             [ navBarItemA_ [ onClick LoadSkpFile ]
                                                             [text "Open"]
                                              , navBarDivider_
                                              , navBarSelectedItemA_ [ onClick SaveSkpFile ]
@@ -599,7 +608,7 @@ drawPermanent m =
       forM_ (m^.points) $ \p ->
         renderPoint (m^.canvas) p
 
-drawToPicture m = do initialBounds <- lrtbRect (refs^.theCanvasKit) 0 r t 0
+drawToPicture m = do initialBounds <- ltrbRect (refs^.theCanvasKit) 0 0 r b
                      recordAsPicture (refs^.theCanvasKit) (refs^.pictureRecorder) initialBounds
                                      (\canvasRef ->
                                         let refs' = refs&theCanvas .~ canvasRef
@@ -607,15 +616,12 @@ drawToPicture m = do initialBounds <- lrtbRect (refs^.theCanvasKit) 0 r t 0
                                      )
   where
     refs = m^?!canvas.canvasKitRefs._Just
-    Vector2 r t = m^.canvas.dimensions
-
-
-
+    Vector2 r b = m^.canvas.dimensions
 
 
 -- | Forces a redraw
 redraw   :: Model -> JSM SkPictureRef
-redraw m = do initialBounds <- lrtbRect (refs^.theCanvasKit) 0 r t 0
+redraw m = do initialBounds <- ltrbRect (refs^.theCanvasKit) 0 0 r b
               consoleLog ("in redraw" :: MisoString)
               recordAsPicture (refs^.theCanvasKit) (refs^.pictureRecorder) initialBounds
                               (\canvasRef ->
@@ -624,7 +630,7 @@ redraw m = do initialBounds <- lrtbRect (refs^.theCanvasKit) 0 r t 0
                               )
   where
     refs = m^?!canvas.canvasKitRefs._Just
-    Vector2 r t = m^.canvas.dimensions
+    Vector2 r b = m^.canvas.dimensions
 
 
 myDraw   :: SkCanvas_ skCanvas => Model -> Render skCanvas ()
@@ -633,9 +639,9 @@ myDraw m = do
       clear
 
       -- renders the cached picture
-      drawPermanent m
-      -- forM_ (m^.cachedPictures) $ \pic ->
-      --   Render.picture pic
+      -- drawPermanent m
+      forM_ (m^.cachedPictures) $ \pic ->
+        Render.picture pic
 
       case m^.mode of
         PolyLineMode mData ->

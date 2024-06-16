@@ -44,6 +44,7 @@ data Action = Id
             | ComputeSelection (Rectangle' R)
 
             | SaveSkpFile
+            | LoadSkpFile
 
 
 

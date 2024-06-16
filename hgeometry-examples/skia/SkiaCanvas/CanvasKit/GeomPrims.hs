@@ -2,7 +2,7 @@
 module SkiaCanvas.CanvasKit.GeomPrims
   ( SkInputRect_
   , SkInputRectRef
-  , lrtbRect
+  , ltrbRect
   , fromRect
 
   , circle
@@ -31,10 +31,10 @@ newtype SkInputRectRef = SkInputRectRef JSVal
   deriving (ToJSVal, JS.MakeObject)
 
 -- | Creates a rectangle
-lrtbRect                   :: (ToJSVal r)
+ltrbRect                   :: (ToJSVal r)
                            => CanvasKit -> r ->  r  -> r -> r -> JSM SkInputRectRef
-lrtbRect canvasKit l r t b =
-  SkInputRectRef <$> canvasKit ^.js4 ("LTRBRect" :: MisoString) l t b r
+ltrbRect canvasKit l t r b =
+  SkInputRectRef <$> canvasKit ^.js4 ("LTRBRect" :: MisoString) l t r b
 
 class ToJSVal rect => SkInputRect_ rect
   -- there is no implementation since all these things are just newtype's over JsVals
@@ -43,12 +43,15 @@ class ToJSVal rect => SkInputRect_ rect
 instance SkInputRect_ SkInputRectRef
 
 -- | Convert a rectangle into a SkRect
+--
+-- FIXME: since Skia considers the top-left to be the origin, this may produce unexpected
+-- results.
 fromRect                :: ( Rectangle_ rectangle point
                            , Point_ point 2 r, ToJSVal r
                            )
                         => CanvasKit -> rectangle -> JSM SkInputRectRef
 fromRect canvasKit rect = let Sides t r b l = sideValues rect
-                          in lrtbRect canvasKit l r t b
+                          in ltrbRect canvasKit l t r b
 
 --------------------------------------------------------------------------------
 -- * Simple objects (Rectangles, Circles)
