@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings          #-}
 module SkiaCanvas.CanvasKit
   ( CanvasKit
-  , Surface
+  , SurfaceRef
   , SkCanvas_
   , SkCanvasRef
   , InitializeSkCanvasAction(..)
@@ -33,10 +33,12 @@ module SkiaCanvas.CanvasKit
 import SkiaCanvas.CanvasKit.Color
 import SkiaCanvas.CanvasKit.Core hiding (clear, clearWith)
 import SkiaCanvas.CanvasKit.GeomPrims
+import SkiaCanvas.CanvasKit.Initialize
 import SkiaCanvas.CanvasKit.Paint hiding (withPaint)
 import SkiaCanvas.CanvasKit.Path
 import SkiaCanvas.CanvasKit.Picture
 import SkiaCanvas.CanvasKit.PictureRecorder
 import SkiaCanvas.CanvasKit.Render
+
 --------------------------------------------------------------------------------
 -- * The drawing functions

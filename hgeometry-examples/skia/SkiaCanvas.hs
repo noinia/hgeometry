@@ -11,7 +11,7 @@ module SkiaCanvas
   , HasMousePosition(..)
   , mouseCoordinates
 
-  , canvasKitRef
+  , canvasKitRefs
   , surfaceRef
 
   -- * Controller

@@ -1,19 +1,15 @@
+{-# LANGUAGE TemplateHaskell          #-}
 {-# LANGUAGE OverloadedStrings      #-}
 module SkiaCanvas.CanvasKit.Core
   ( CanvasKit(..)
-  , Surface(..)
-
+  , SurfaceRef(..)
 
   , SkCanvas_
   , SkCanvasRef(..)
 
   , SkInputColor
 
-  , InitializeSkCanvasAction(..)
-  , initializeCanvasKitSub
-
   , requestAnimationFrame
-
 
   , clear
   , clearWith
@@ -22,12 +18,11 @@ module SkiaCanvas.CanvasKit.Core
 
 import           Control.Lens
 import           Control.Monad (void)
-import           Control.Monad.IO.Class
 import           Data.Functor.Apply (Apply(..))
 import           GHCJS.Marshal (ToJSVal(..))
 import           GHCJS.Types
 import qualified Language.Javascript.JSaddle as JSAddle
-import           Language.Javascript.JSaddle.Object (js1, jsg)
+import           Language.Javascript.JSaddle.Object (js1)
 import qualified Language.Javascript.JSaddle.Object as JS
 import           Miso
 import           Miso.String (MisoString)
@@ -47,15 +42,15 @@ instance Eq CanvasKit where
   -- we should only have one
 
 --------------------------------------------------------------------------------
--- * Surface
+-- * SurfaceRef
 
- -- ^ the Surface object
-newtype Surface = MkSurface JSVal
+ -- ^ the SurfaceRef object
+newtype SurfaceRef = MkSurfaceRef JSVal
   deriving newtype (JS.MakeObject, ToJSVal)
 
-instance Show Surface where
+instance Show SurfaceRef where
   show _ = "SurfaceObj"
-instance Eq Surface where
+instance Eq SurfaceRef where
   _ == _ = True
   -- we should only have one
 
@@ -79,44 +74,9 @@ instance SkCanvas_ SkCanvasRef
 
 --------------------------------------------------------------------------------
 
--- | Action to initailize the CanvasKit there is nohandler; i..e. your model should
--- somehow store this CanvasKit object and th surface.
-data InitializeSkCanvasAction = InitializeRefs {-# UNPACK #-} !CanvasKit
-                                               {-# UNPACK #-} !Surface
-
---------------------------------------------------------------------------------
-
--- | We need to initialize the CanvasKit. This needs to fetch the CanvasKit wasm module,
--- so this is a subscription; i.e. we listen to when the CanvasKit module has been loaded.
-initializeCanvasKitSub             :: MisoString -> Sub InitializeSkCanvasAction
-initializeCanvasKitSub theCanvasId = \sink -> do
-   -- withCKFunction is the callback; i.e. the thing that we do with the given CanvasKit
-   -- value. In particular, we will store the CanvasKit object and surface so we can use it later.
-   withCKFunction <- JS.function $ storeCanvasKitAndSurface theCanvasId sink
-    --  We grab the ckLoaded varaible, which represents the CanvasKit wasm object
-   ckLoaded <- jsg ("ckLoaded" :: MisoString)
-   -- and call the "then" function with our given callback. the callback will run when
-   -- the wasm module has been loaded.
-   _       <- ckLoaded ^.js1 ("then" :: MisoString) withCKFunction
-   pure ()
-
--- | Function to Store the canvasKit object. In addition, it will clear the
--- canvas/painting it all white as an initial draw
-storeCanvasKitAndSurface                              :: MisoString
-                                                      -> Sink InitializeSkCanvasAction
-                                                      -> JS.JSCallAsFunction
-storeCanvasKitAndSurface theCanvasId sink _fObj _this = \case
-  [ckJSVal] -> do surfJSVal <- ckJSVal ^.js1 ("MakeCanvasSurface" :: MisoString) theCanvasId
-                  let canvasKit = MkCanvasKit ckJSVal
-                      surface'  = MkSurface surfJSVal
-                  -- someshow store the canvasKit and the surface
-                  liftIO . sink $ InitializeRefs canvasKit surface'
-                  requestAnimationFrame canvasKit surface' clear
-  _         -> pure () -- TODO this should probably be some error?
-
 -- | Calls requestAnimationFrame
 requestAnimationFrame                        :: CanvasKit
-                                             -> Surface
+                                             -> SurfaceRef
                                              -> (CanvasKit -> SkCanvasRef -> JSM ())
                                              -- ^ the drawing function
                                              -> JSM ()
@@ -129,8 +89,6 @@ requestAnimationFrame canvasKit surface draw = do
     draw' _ _ = \case
       [skCanvasRefJSVal] -> draw canvasKit (MkSkCanvasRef skCanvasRefJSVal)
       _                  -> pure () -- TODO: again, this should probably be an error
-
-
 
 --------------------------------------------------------------------------------
 

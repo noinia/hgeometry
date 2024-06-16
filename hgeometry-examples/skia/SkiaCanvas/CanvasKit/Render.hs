@@ -1,7 +1,6 @@
 {-# LANGUAGE OverloadedStrings          #-}
 module SkiaCanvas.CanvasKit.Render
   ( Render
-  , CanvasKitRefs(..)
   , renderWith
   , clear
   , liftR
@@ -29,18 +28,12 @@ import           Miso (JSM)
 import           SkiaCanvas.CanvasKit.Core (SkCanvas_, CanvasKit)
 import qualified SkiaCanvas.CanvasKit.Core as CKCore
 import qualified SkiaCanvas.CanvasKit.GeomPrims as CKCore
+import           SkiaCanvas.CanvasKit.Initialize
 import           SkiaCanvas.CanvasKit.Paint (SkPaintRef, SkPaintStyle)
 import qualified SkiaCanvas.CanvasKit.Paint as Paint
 import qualified SkiaCanvas.CanvasKit.Path as Path
-
 --------------------------------------------------------------------------------
 
-data CanvasKitRefs skCanvas = CanvasKitRefs
-  { theCanvasKit  :: {-# UNPACK #-}!CanvasKit
-  , theCanvas     :: skCanvas
-  , theStrokeOnly :: {-# UNPACK #-}!SkPaintStyle
-  , theFillOnly   :: {-# UNPACK #-}!SkPaintStyle
-  }
 
 newtype Render skCanvas a = Render { runRender :: ReaderT (CanvasKitRefs skCanvas) JSM a }
   deriving newtype (Functor,Applicative,Monad, MonadReader (CanvasKitRefs skCanvas))
@@ -56,20 +49,20 @@ liftR :: JSM a -> Render skCanvas a
 liftR = Render . lift
 
 withPaint   :: (SkPaintRef -> Render skCanvas a) -> Render skCanvas a
-withPaint f = do canvasKit <- asks theCanvasKit
+withPaint f = do canvasKit <- asks (^.canvasKitRef)
                  ckRefs    <- ask
                  liftR $ Paint.withPaint canvasKit (renderWith ckRefs . f)
 
 -- withPath   :: (SkPathRef -> Render skCanvas a) -> Render skCanvas a
--- withPath f = do canvasKit <- asks theCanvasKit
+-- withPath f = do canvasKit <- asks (^.canvasKitRef)
 --                 ckRefs    <- ask
 --                 Path.withPath canvasKit (renderWith ckRefs . f)
 
 --------------------------------------------------------------------------------
 
 clear :: SkCanvas_ skCanvas => Render skCanvas ()
-clear = do canvasKit <- asks theCanvasKit
-           canvasRef <- asks theCanvas
+clear = do canvasKit <- asks (^.canvasKitRef)
+           canvasRef <- asks (^.theCanvas)
            liftR $ CKCore.clear canvasKit canvasRef
 
 --------------------------------------------------------------------------------
@@ -96,7 +89,7 @@ circle         :: forall circle point r skCanvas.
 circle c paint = let ctr = c^.center.asPoint
                      c'  = Disk (ctr&coordinates %~ toFloat) (toFloat $ c^.squaredRadius)
                      toFloat = realToFrac :: r -> Float
-                 in do canvasRef <- asks theCanvas
+                 in do canvasRef <- asks (^.theCanvas)
                        liftR $ CKCore.circle canvasRef c' paint
 
 -- | Renders a line segment
@@ -108,8 +101,8 @@ lineSegment           :: ( LineSegment_ lineSegment point
 lineSegment seg paint = let cmds = [ Path.MoveTo $ seg^.start.asPoint
                                    , Path.LineTo $ seg^.end.asPoint
                                    ]
-                        in do canvasKit <- asks theCanvasKit
-                              canvas    <- asks theCanvas
+                        in do canvasKit <- asks (^.canvasKitRef)
+                              canvas    <- asks (^.theCanvas)
                               liftR $ Path.withPathFromCmds canvasKit cmds $ \path ->
                                 Path.drawPath canvas path paint
 
@@ -122,8 +115,8 @@ polyLine            :: ( PolyLine_ polyLine point
                     => polyLine -> SkPaintRef -> Render skCanvas ()
 polyLine poly paint = let (p :| pts) = toNonEmptyOf (vertices.asPoint) poly
                           cmds       = Path.MoveTo p :| map Path.LineTo pts
-                      in do canvasKit <- asks theCanvasKit
-                            canvas    <- asks theCanvas
+                      in do canvasKit <- asks (^.canvasKitRef)
+                            canvas    <- asks (^.theCanvas)
                             liftR $ Path.withPathFromCmds canvasKit cmds $ \path ->
                               Path.drawPath canvas path paint
 
@@ -136,7 +129,7 @@ simplePolygon            :: ( SimplePolygon_ simplePolygon point r
 simplePolygon poly paint =
   let (p :| pts) = toNonEmptyOf (vertices.asPoint) poly
       cmds       = Path.MoveTo p :| foldr (\q cs -> Path.LineTo q : cs) [Path.Close] pts
-  in do canvasKit <- asks theCanvasKit
-        canvas    <- asks theCanvas
+  in do canvasKit <- asks (^.canvasKitRef)
+        canvas    <- asks (^.theCanvas)
         liftR $ Path.withPathFromCmds canvasKit cmds $ \path ->
           Path.drawPath canvas path paint

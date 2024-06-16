@@ -60,7 +60,7 @@ import           Options
 import           PolyLineMode
 import           RectangleMode
 import qualified SkiaCanvas
-import           SkiaCanvas (mouseCoordinates, dimensions, canvasKitRef, surfaceRef)
+import           SkiaCanvas (mouseCoordinates, dimensions, canvasKitRefs, surfaceRef)
 import qualified SkiaCanvas.CanvasKit as CanvasKit
 import           SkiaCanvas.CanvasKit hiding (Style(..))
 import qualified SkiaCanvas.Render as Render

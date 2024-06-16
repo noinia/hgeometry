@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE UndecidableInstances       #-}
 {-# LANGUAGE TemplateHaskell            #-}
 module SkiaCanvas.Core
   (
@@ -11,7 +12,7 @@ module SkiaCanvas.Core
   , HasMousePosition(..)
   , mouseCoordinates
 
-  , canvasKitRef
+  , canvasKitRefs
   , surfaceRef
 
   -- * Controller
@@ -45,52 +46,52 @@ import qualified Language.Javascript.JSaddle.Object as JS
 import           Miso (Attribute, View, Effect, noEff, onMouseLeave, canvas_, id_, getElementById, JSM)
 import           Miso.String (MisoString)
 import           SkiaCanvas.CanvasKit
+import           SkiaCanvas.CanvasKit.Initialize
+import           SkiaCanvas.CanvasKit.Render
 
 --------------------------------------------------------------------------------
 
 -- | A Skia Canvas
-data Canvas r = Canvas {  _theViewport  :: !(Viewport r)
-                                        -- ^ the viewport
-                       , _dimensions    :: !(Vector 2 Int)
-                                        -- ^ dimensions (width,height) in pixels, of the canvas
-                       , _mousePosition :: Maybe (Point 2 Int)
-                                        -- ^ the mouse position, in raw pixel coordinates
-                       , _canvasKitRef  :: Maybe CanvasKit
-                                        -- ^ Reference to the canvasKit WASM module (if loaded)
-                       , _surfaceRef    :: Maybe Surface
-                                       -- ^ Reference ot the surface we are using (if loaded)
-                       }
-              deriving (Show,Eq)
+data CanvasF f r = Canvas {  _theViewport  :: !(Viewport r)
+                                           -- ^ the viewport
+                          , _dimensions    :: !(Vector 2 Int)
+                                           -- ^ dimensions (width,height) in pixels, of the canvas
+                          , _mousePosition :: Maybe (Point 2 Int)
+                                           -- ^ the mouse position, in raw pixel coordinates
+                          , _canvasKitRefs :: f (CanvasKitRefs ())
+                                           -- ^ references to the canvaskit
+                          }
 
+deriving instance (Show (f (CanvasKitRefs ())), Show r) => Show (CanvasF f r)
+deriving instance (Eq   (f (CanvasKitRefs ())), Eq r)   => Eq   (CanvasF f r)
 
-data CanvasKitRefs = CanvasKitRefs { __canvasKitRef :: CanvasKit
-                                   , __surfaceRef   :: Surface
-                                   , _canvasRef    :: SkCanvasRef
-                                   , _onlyStroke   :: SkPaintStyle
-                                   , _onlyFill     :: SkPaintStyle
-                                   }
-
-
-
+type Canvas = CanvasF Maybe
 
 
 -- | Crate a blank canvas, that has the origin in the bottom-left.
 blankCanvas     :: (Num r)
-                 => Int -> Int -> Canvas r
+                 => Int -> Int -> CanvasF Maybe r
 blankCanvas w h = let v = Vector2 w h
-                  in Canvas (flipY (fromIntegral <$> v)) v Nothing Nothing Nothing
+                  in Canvas { _theViewport   = flipY (fromIntegral <$> v)
+                            , _dimensions    = v
+                            , _mousePosition = Nothing
+                            , _canvasKitRefs = Nothing
+                            }
 
 -- | Lens to access the viewport
 theViewport :: Lens (Canvas r) (Canvas s) (Viewport r) (Viewport s)
 theViewport = lens _theViewport (\c vp -> c { _theViewport = vp })
 
 -- | Lens to access the canvasKit
-canvasKitRef :: Lens (Canvas r) (Canvas r) (Maybe CanvasKit) (Maybe CanvasKit)
-canvasKitRef = lens _canvasKitRef (\c ckRef -> c { _canvasKitRef = ckRef })
+canvasKitRefs :: Lens (CanvasF f r)                  (CanvasF g r)
+                      (f (CanvasKitRefs ())) (g (CanvasKitRefs ()))
+canvasKitRefs = lens _canvasKitRefs (\c ckRefs -> c { _canvasKitRefs = ckRefs })
 
 -- | Lens to access the Surface
-surfaceRef :: Lens (Canvas r) (Canvas r) (Maybe Surface) (Maybe Surface)
-surfaceRef = lens _surfaceRef (\c surfRef -> c { _surfaceRef = surfRef })
+surfaceRef :: Traversal (Canvas r) (Canvas r) SurfaceRef SurfaceRef
+surfaceRef = canvasKitRefs._Just.theSurface
+
+  -- lens _surfaceRef (\c surfRef -> c { _surfaceRef = surfRef })
 
 
 instance HasDimensions (Canvas r) (Vector 2 Int) where
@@ -135,8 +136,7 @@ handleInternalCanvasAction canvas = noEff . \case
 
 handleCanvasKitAction        :: Canvas r -> InitializeSkCanvasAction -> Effect action (Canvas r)
 handleCanvasKitAction canvas = noEff . \case
-  InitializeRefs ck surf -> canvas&canvasKitRef  ?~ ck
-                                  &surfaceRef    ?~ surf
+  InitializeRefs refs -> canvas&canvasKitRefs  ?~ refs
 
 newtype CanvasResizeAction = SetCanvasSize (Vector 2 Int )
   deriving (Show,Read,Eq)

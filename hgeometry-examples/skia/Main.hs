@@ -13,6 +13,7 @@ import           Control.Monad (forM_)
 import           Control.Monad.Error.Class
 import           Control.Monad.Except
 import           Control.Monad.IO.Class
+import           Control.Monad.Reader
 import           Control.Monad.Trans.Class
 import           Data.Colour.SRGB
 import           Data.Default.Class
@@ -20,7 +21,6 @@ import qualified Data.IntMap as IntMap
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
--- import           Data.Maybe (maybe)
 import qualified Data.Sequence as Seq
 import           GHC.TypeNats
 import           GHCJS.Marshal
@@ -57,18 +57,18 @@ import           PolyLineMode
 import           RectangleMode
 import           SelectMode
 import qualified SkiaCanvas
-import           SkiaCanvas ( mouseCoordinates, dimensions, canvasKitRef, surfaceRef
+import           SkiaCanvas ( mouseCoordinates, dimensions, canvasKitRefs, surfaceRef
                             , Canvas
                             )
 import qualified SkiaCanvas.CanvasKit as CanvasKit
 import           SkiaCanvas.CanvasKit hiding (Style(..))
 import qualified SkiaCanvas.CanvasKit.Core as Core
 import           SkiaCanvas.CanvasKit.Paint (SkPaintRef)
+import           SkiaCanvas.Render (Render, theCanvasKit, canvasKitRef, CanvasKitRefs, strokeOnly, fillOnly, theCanvas, withPaint, liftR)
 import qualified SkiaCanvas.Render as Render
-import           SkiaCanvas.Render (Render, CanvasKitRefs(..), withPaint, liftR)
 import           StrokeAndFill
-import           Control.Monad.Reader
 import           ToolMenu
+
 
 import           Debug.Trace
 --------------------------------------------------------------------------------
@@ -82,8 +82,9 @@ maybeToM     :: MonadError e m => e -> Maybe a -> m a
 maybeToM msg = maybe (throwError msg) pure
 
 handleDraw   :: Model -> ExceptT MisoString JSM Action
-handleDraw m = do canvasKit <- maybeToM "Loading CanvasKit failed"  $ m^.canvas.canvasKitRef
-                  surface'  <- maybeToM "Ackquiring surface failed" $ m^.canvas.surfaceRef
+handleDraw m = do canvasKit <- maybeToM "Loading CanvasKit failed"
+                               $ m^?canvas.canvasKitRefs._Just.canvasKitRef
+                  surface'  <- maybeToM "Ackquiring surface failed" $ m^?canvas.surfaceRef
                   lift $ requestAnimationFrame canvasKit surface' (myDraw m)
                   pure Id
 
@@ -569,14 +570,11 @@ message_ mc ats bdy = article_ ([class_ $ "message" `withColor` mc] <> ats)
 --------------------------------------------------------------------------------
 
 
-myDraw                       :: Model -> CanvasKit -> SkCanvasRef -> JSM ()
-myDraw m canvasKit canvasRef = do
-    -- some setup
-    strokeOnly <- mkPaintStyle canvasKit CanvasKit.StrokeOnly
-    fillOnly <- mkPaintStyle canvasKit CanvasKit.FillOnly
-
-    let ckRefs = CanvasKitRefs canvasKit canvasRef strokeOnly fillOnly
-    Render.renderWith ckRefs $ do
+myDraw               :: Model -> CanvasKit -> SkCanvasRef -> JSM ()
+myDraw m _ canvasRef = do
+    -- store the reference to the canvas, and then render
+    let refs = (m^?!canvas.canvasKitRefs._Just) &theCanvas .~ canvasRef
+    Render.renderWith refs $ do
       -- clear the canvas
       clear
       -- render all polylines
@@ -644,13 +642,13 @@ renderColoring render = \case
     StrokeAndFill s f -> fill' f >> stroke' s
   where
     stroke' c = withColor' c $ \paint ->
-                 do strokeOnly <- asks theStrokeOnly
-                    liftR $ setStyle paint strokeOnly
+                 do strokeOnly' <- asks (^.strokeOnly)
+                    liftR $ setStyle paint strokeOnly'
                     liftR $ setAntiAlias paint True
                     render paint
     fill' c = withColor' c $ \paint ->
-                 do fillOnly <- asks theFillOnly
-                    liftR $ setStyle paint fillOnly
+                 do fillOnly' <- asks (^.fillOnly)
+                    liftR $ setStyle paint fillOnly'
                     liftR $ setAntiAlias paint True
                     render paint
 
@@ -671,13 +669,13 @@ renderPoly                    :: SkCanvas_ skCanvas
                               -> Render skCanvas ()
 renderPoly canvas (pl :+ ats) =
   withColor' (ats^.color) $ \paint ->
-    do strokeOnly <- asks theStrokeOnly
-       liftR $ setStyle paint strokeOnly
+    do strokeOnly' <- asks (^.strokeOnly)
+       liftR $ setStyle paint strokeOnly'
        liftR $ setAntiAlias paint True
        Render.polyLine canvas pl paint
 
 withColor'          :: Color -> (SkPaintRef -> Render skCanvas a) -> Render skCanvas a
-withColor' c render = do canvasKit <- asks theCanvasKit
+withColor' c render = do canvasKit <- asks (^.theCanvasKit)
                          withPaint $ \paint -> do
                            c' <- liftR $ mkColor4f canvasKit c
                            liftR $ setColor paint c'

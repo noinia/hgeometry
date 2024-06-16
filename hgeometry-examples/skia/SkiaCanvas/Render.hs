@@ -2,7 +2,8 @@ module SkiaCanvas.Render
   ( Drawable(..)
   , Render
   , renderWith
-  , CanvasKitRefs(..)
+  , CanvasKitRefs(CanvasKitRefs), theCanvasKit, theSurface, strokeOnly, fillOnly, theCanvas
+  , HasCanvasKitRef(..)
   , withPaint
   , liftR
 
@@ -24,8 +25,9 @@ import           HGeometry.Transformation
 import           HGeometry.Viewport
 import           Miso (JSM)
 import           SkiaCanvas.CanvasKit
+import           SkiaCanvas.CanvasKit.Initialize (CanvasKitRefs(..), theSurface, strokeOnly, fillOnly, theCanvasKit, theCanvas, HasCanvasKitRef(..))
 import           SkiaCanvas.CanvasKit.Paint (SkPaintRef)
-import           SkiaCanvas.CanvasKit.Render (Render, CanvasKitRefs(..), liftR, renderWith
+import           SkiaCanvas.CanvasKit.Render (Render, liftR, renderWith
                                              , withPaint
                                              )
 import qualified SkiaCanvas.CanvasKit.Render as Render

@@ -37,6 +37,7 @@ import           SkiaCanvas.CanvasKit.Core
 newtype SkPaintRef = SkPaintRef JSVal
   deriving (ToJSVal, JS.MakeObject)
 
+
 -- | Apply some operations with a paint
 withPaint           :: CanvasKit -> (SkPaintRef -> JSM a) -> JSM a
 withPaint canvasKit =
