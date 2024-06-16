@@ -107,6 +107,7 @@ fromFloatCmd _ = \case
     closeVerb = 5 :: Int -- CanvasKit.CLOSE_VERB
 
 -- |  call drawPath
-drawPath                   :: SkCanvasRef -> SkPathRef -> SkPaintRef -> JSM ()
+drawPath                   :: SkCanvas_ skCanvas
+                           => skCanvas -> SkPathRef -> SkPaintRef -> JSM ()
 drawPath canvas path paint =
   void $ canvas ^.js2 ("drawPath" :: MisoString) path paint

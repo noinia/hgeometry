@@ -1,5 +1,12 @@
 module SkiaCanvas.Render
   ( Drawable(..)
+  , Render
+  , renderWith
+  , CanvasKitRefs(..)
+  , withPaint
+  , liftR
+
+
   , point
   -- , circle
   , polyLine
@@ -18,6 +25,9 @@ import           HGeometry.Viewport
 import           Miso (JSM)
 import           SkiaCanvas.CanvasKit
 import           SkiaCanvas.CanvasKit.Paint (SkPaintRef)
+import           SkiaCanvas.CanvasKit.Render (Render, CanvasKitRefs(..), liftR, renderWith
+                                             , withPaint
+                                             )
 import qualified SkiaCanvas.CanvasKit.Render as Render
 import           SkiaCanvas.Core
 
@@ -36,13 +46,13 @@ class Drawable geom where
 
 drawTransform              :: ( IsTransformable geom
                               , NumType geom ~ r, Dimension geom ~ 2, Fractional r
+                              , SkCanvas_ skCanvas
                               )
-                           => (CanvasKit -> SkCanvasRef -> geom -> SkPaintRef -> JSM ())
+                           => (geom -> SkPaintRef -> Render skCanvas ())
                               -- ^ raw render function
-                           -> Canvas r -> SkCanvasRef -> geom -> SkPaintRef -> JSM ()
-drawTransform draw' c ckRef geom =
-  draw' (c^?!canvasKitRef._Just) ckRef (toHostFrom (c^.theViewport) geom)
-  -- TODO: parameterize canvas with an f
+                           -> Canvas r -> geom -> SkPaintRef
+                           -> Render skCanvas ()
+drawTransform draw' c geom = draw' (toHostFrom (c^.theViewport) geom)
 
 
 -- | Renders a Point
@@ -50,8 +60,9 @@ point   :: ( Point_ point 2 r
            -- , HasCoordinates point (Point 2 Float)
            , RealFrac r
            , IsTransformable point
+           , SkCanvas_ skCanvas
            )
-        => Canvas r -> SkCanvasRef -> point -> SkPaintRef -> JSM ()
+        => Canvas r -> point -> SkPaintRef -> Render skCanvas ()
 point = drawTransform Render.point
 
 -- | Renders a circle
@@ -67,7 +78,8 @@ lineSegment :: ( LineSegment_ lineSegment point
                , Point_ point 2 r
                , IsTransformable lineSegment
                , RealFrac r
-               ) => Canvas r -> SkCanvasRef -> lineSegment -> SkPaintRef -> JSM ()
+               , SkCanvas_ skCanvas
+               ) => Canvas r -> lineSegment -> SkPaintRef -> Render skCanvas ()
 lineSegment = drawTransform Render.lineSegment
 
 -- | Renders a polyLine
@@ -75,14 +87,16 @@ polyLine :: ( PolyLine_ polyLine point
             , IsTransformable polyLine
             , Point_ point 2 r
             , RealFrac r
+            , SkCanvas_ skCanvas
             )
-         => Canvas r -> SkCanvasRef -> polyLine -> SkPaintRef -> JSM ()
+         => Canvas r -> polyLine -> SkPaintRef -> Render skCanvas ()
 polyLine = drawTransform Render.polyLine
 
 -- | Renders a simple polygon
 simplePolygon :: ( SimplePolygon_ simplePolygon point r
                  , IsTransformable simplePolygon
                  , RealFrac r
+                 , SkCanvas_ skCanvas
                  )
-              => Canvas r -> SkCanvasRef -> simplePolygon -> SkPaintRef -> JSM ()
+              => Canvas r -> simplePolygon -> SkPaintRef -> Render skCanvas ()
 simplePolygon = drawTransform Render.simplePolygon

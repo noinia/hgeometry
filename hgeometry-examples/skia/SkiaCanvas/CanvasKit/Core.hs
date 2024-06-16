@@ -2,6 +2,9 @@
 module SkiaCanvas.CanvasKit.Core
   ( CanvasKit(..)
   , Surface(..)
+
+
+  , SkCanvas_
   , SkCanvasRef(..)
 
   , SkInputColor
@@ -59,6 +62,9 @@ instance Eq Surface where
 --------------------------------------------------------------------------------
 -- * SkCanvasRef
 
+-- | Types that can act as a SkCanvas
+class (ToJSVal skCanvas, JS.MakeObject skCanvas) => SkCanvas_ skCanvas
+
  -- | A reference to the SkCanvas
 newtype SkCanvasRef = MkSkCanvasRef JSVal
   deriving newtype (JS.MakeObject, ToJSVal)
@@ -68,6 +74,8 @@ instance Show SkCanvasRef where
 instance Eq SkCanvasRef where
   _ == _ = True
   -- we should only have one
+
+instance SkCanvas_ SkCanvasRef
 
 --------------------------------------------------------------------------------
 
@@ -133,12 +141,12 @@ newtype SkInputColor = SkInputColor JSVal
 
 
 -- | Clear the canvas with white
-clear                  :: CanvasKit -> SkCanvasRef -> JSM ()
+clear                  :: SkCanvas_ skCanvas => CanvasKit -> skCanvas -> JSM ()
 clear canvasKit canvas = do white <- mkWhite canvasKit
                             clearWith canvas white
 
 -- | Clear with a given color
-clearWith              :: SkCanvasRef -> SkInputColor -> JSM ()
+clearWith              :: SkCanvas_ skCanvas => skCanvas -> SkInputColor -> JSM ()
 clearWith canvas color = void $ canvas ^.js1 ("clear" :: MisoString) color
 
 

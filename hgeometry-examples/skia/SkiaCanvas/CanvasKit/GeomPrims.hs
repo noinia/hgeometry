@@ -34,6 +34,7 @@ import           SkiaCanvas.CanvasKit.Paint
 newtype SkInputRectRef = SkInputRectRef JSVal
   deriving (ToJSVal, JS.MakeObject)
 
+-- | Creates a rectangle
 lrtbRect                   :: (Num r, ToJSVal r)
                            => CanvasKit -> r ->  r  -> r -> r -> JSM SkInputRectRef
 lrtbRect canvasKit l r t b =
@@ -55,7 +56,8 @@ instance SkInputRect_ SkInputRectRef
 circle                :: ( Ball_ circle (Point 2 r)
                          , ToJSVal r
                          , Radical r
-                         ) => SkCanvasRef -> circle -> SkPaintRef -> JSM ()
+                         , SkCanvas_ skCanvas
+                         ) => skCanvas -> circle -> SkPaintRef -> JSM ()
 circle canvas c paint = do Point2 x y <- (c^.center)&coordinates %%~ toJSVal
                            r          <- toJSVal $ c^.radius
                            void $ canvas ^.js4 ("drawCircle" :: MisoString) x y r paint

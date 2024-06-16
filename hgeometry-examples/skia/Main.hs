@@ -57,13 +57,17 @@ import           PolyLineMode
 import           RectangleMode
 import           SelectMode
 import qualified SkiaCanvas
-import           SkiaCanvas (mouseCoordinates, dimensions, canvasKitRef, surfaceRef)
+import           SkiaCanvas ( mouseCoordinates, dimensions, canvasKitRef, surfaceRef
+                            , Canvas
+                            )
 import qualified SkiaCanvas.CanvasKit as CanvasKit
 import           SkiaCanvas.CanvasKit hiding (Style(..))
 import qualified SkiaCanvas.CanvasKit.Core as Core
 import           SkiaCanvas.CanvasKit.Paint (SkPaintRef)
 import qualified SkiaCanvas.Render as Render
+import           SkiaCanvas.Render (Render, CanvasKitRefs(..), withPaint, liftR)
 import           StrokeAndFill
+import           Control.Monad.Reader
 import           ToolMenu
 
 import           Debug.Trace
@@ -570,44 +574,44 @@ myDraw m canvasKit canvasRef = do
     -- some setup
     strokeOnly <- mkPaintStyle canvasKit CanvasKit.StrokeOnly
     fillOnly <- mkPaintStyle canvasKit CanvasKit.FillOnly
-    -- clear the canvas
-    clear canvasKit canvasRef
-    -- render all polylines
-    forM_ (m^.polyLines) $ \poly ->
-      renderPoly strokeOnly (m^.canvas) poly canvasKit canvasRef
-    -- render all rectangles
-    forM_ (m^.rectangles) $ \rect ->
-      renderRect strokeOnly fillOnly (m^.canvas) rect canvasKit canvasRef
-      -- render all points
-    forM_ (m^.points) $ \p ->
-      renderPoint strokeOnly fillOnly (m^.canvas) p canvasKit canvasRef
 
-    case m^.mode of
-      PolyLineMode mData ->
-        let current' = extendWith (m^.canvas.mouseCoordinates) (mData^.currentPoly)
-        in renderPartialPolyLine strokeOnly
-                        (m^.canvas)
-                        current' canvasKit canvasRef
-      RectangleMode mData -> forM_ (asRectangleWith (m^.canvas.mouseCoordinates) mData) $ \rect ->
-                                let ats = RectangleAttributes def Normal
-                                in renderRect strokeOnly fillOnly (m^.canvas) (rect :+ ats)
-                                              canvasKit canvasRef
-      SelectMode mData -> do renderSelectionRange
-                             renderSelection
-        where
-          renderSelectionRange =
-            forM_ (asRectangleWith (m^.canvas.mouseCoordinates) mData) $ \r ->
-              let rect     = r :+ selectAttributes
-              in renderRect strokeOnly fillOnly (m^.canvas) rect canvasKit canvasRef
-          renderSelection = pure () -- TODO
+    let ckRefs = CanvasKitRefs canvasKit canvasRef strokeOnly fillOnly
+    Render.renderWith ckRefs $ do
+      -- clear the canvas
+      clear
+      -- render all polylines
+      forM_ (m^.polyLines) $ \poly ->
+        renderPoly (m^.canvas) poly
+      -- render all rectangles
+      forM_ (m^.rectangles) $ \rect ->
+        renderRect (m^.canvas) rect
+        -- render all points
+      forM_ (m^.points) $ \p ->
+        renderPoint (m^.canvas) p
+
+      case m^.mode of
+        PolyLineMode mData ->
+          let current' = extendWith (m^.canvas.mouseCoordinates) (mData^.currentPoly)
+          in renderPartialPolyLine (m^.canvas) current'
+        RectangleMode mData -> forM_ (asRectangleWith (m^.canvas.mouseCoordinates) mData) $ \rect ->
+                                  let ats = RectangleAttributes def Normal
+                                  in renderRect (m^.canvas) (rect :+ ats)
+
+        SelectMode mData -> do renderSelectionRange
+                               renderSelection
+          where
+            renderSelectionRange =
+              forM_ (asRectangleWith (m^.canvas.mouseCoordinates) mData) $ \r ->
+                let rect     = r :+ selectAttributes
+                in renderRect (m^.canvas) rect
+            renderSelection = pure () -- TODO
 
 
-      _                     -> pure ()
-    -- render cursor
-    case m^.canvas.mouseCoordinates of
-      Nothing -> pure ()
-      Just p  -> renderPoint strokeOnly fillOnly (m^.canvas) (p :+ cursorAttributes)
-                             canvasKit canvasRef
+        _                     -> pure ()
+      -- render cursor
+      case m^.canvas.mouseCoordinates of
+        Nothing -> pure ()
+        Just p  -> renderPoint (m^.canvas) (p :+ cursorAttributes)
 
 
 cursorAttributes :: Attributes (Point 2 R)
@@ -620,77 +624,71 @@ selectAttributes = def&coloring .~ StrokeAndFill darkishGrey (lightGrey&opacity 
 
 --------------------------------------------------------------------------------
 
-renderPoint :: SkPaintStyle
-            -> SkPaintStyle
-            -> SkiaCanvas.Canvas R
-            -> (Point 2 R :+ Attributes (Point 2 R))
-            -> CanvasKit -> SkCanvasRef -> JSM ()
-renderPoint strokeOnly fillOnly canvas' (p :+ ats) canvasKit skCanvasRef =
-    renderColoring strokeOnly fillOnly canvas' render canvasKit skCanvasRef (ats^.coloring)
-  where
-    render paint = Render.point canvas' skCanvasRef p paint
 
-renderColoring  :: SkPaintStyle
-                -> SkPaintStyle
-                -> SkiaCanvas.Canvas R
-                -> (SkPaintRef -> JSM ()) -- ^ the renderer
-                -> CanvasKit -> SkCanvasRef
-                -> Coloring
-                -> JSM ()
-renderColoring strokeOnly fillOnly canvas' render canvasKit skCanvasRef = \case
+
+--------------------------------------------------------------------------------
+
+renderPoint                   :: SkCanvas_ skCanvas
+                              => Canvas R
+                              -> (Point 2 R :+ Attributes (Point 2 R))
+                              -> Render skCanvas ()
+renderPoint canvas (p :+ ats) = renderColoring (Render.point canvas p) (ats^.coloring)
+
+renderColoring        :: SkCanvas_ skCanvas
+                      => (SkPaintRef -> Render skCanvas ()) -- ^ the renderer
+                      -> Coloring
+                      -> Render skCanvas ()
+renderColoring render = \case
     StrokeOnly s      -> stroke' s
     FillOnly f        -> fill' f
     StrokeAndFill s f -> fill' f >> stroke' s
   where
-    stroke' c = withColor' c canvasKit $ \paint ->
-                 do setStyle paint strokeOnly
-                    setAntiAlias paint True
+    stroke' c = withColor' c $ \paint ->
+                 do strokeOnly <- asks theStrokeOnly
+                    liftR $ setStyle paint strokeOnly
+                    liftR $ setAntiAlias paint True
                     render paint
-    fill' c = withColor' c canvasKit $ \paint ->
-                 do setStyle paint fillOnly
-                    setAntiAlias paint True
+    fill' c = withColor' c $ \paint ->
+                 do fillOnly <- asks theFillOnly
+                    liftR $ setStyle paint fillOnly
+                    liftR $ setAntiAlias paint True
                     render paint
 
-renderRect :: SkPaintStyle
-            -> SkPaintStyle
-            -> SkiaCanvas.Canvas R
-            -> (Rectangle' R :+ Attributes (Rectangle' R))
-            -> CanvasKit -> SkCanvasRef -> JSM ()
-renderRect strokeOnly fillOnly canvas' (r :+ ats) canvasKit skCanvasRef =
-    renderColoring strokeOnly fillOnly canvas' render canvasKit skCanvasRef (ats^.coloring)
+renderRect                   :: SkCanvas_ skCanvas
+                             => Canvas R
+                             -> (Rectangle' R :+ Attributes (Rectangle' R))
+                             -> Render skCanvas ()
+renderRect canvas (r :+ ats) =
+    renderColoring render (ats^.coloring)
   where
     render paint = let poly :: SimplePolygon (Point 2 R)
                        poly = uncheckedFromCCWPoints $ corners r
-                   in Render.simplePolygon canvas' skCanvasRef poly paint
+                   in Render.simplePolygon canvas poly paint
 
-renderPoly                             :: SkPaintStyle
-                                       -> SkiaCanvas.Canvas R
-                                       -> (PolyLine' R :+ Attributes (PolyLine' R))
-                                       -> CanvasKit -> SkCanvasRef -> JSM ()
-renderPoly strokeOnly canvas' (pl :+ ats) canvasKit skCanvasRef =
-  withColor' (ats^.color) canvasKit $ \paint ->
-    do setStyle paint strokeOnly
-       setAntiAlias paint True
-       Render.polyLine canvas' skCanvasRef pl paint
+renderPoly                    :: SkCanvas_ skCanvas
+                              => Canvas R
+                              -> (PolyLine' R :+ Attributes (PolyLine' R))
+                              -> Render skCanvas ()
+renderPoly canvas (pl :+ ats) =
+  withColor' (ats^.color) $ \paint ->
+    do strokeOnly <- asks theStrokeOnly
+       liftR $ setStyle paint strokeOnly
+       liftR $ setAntiAlias paint True
+       Render.polyLine canvas pl paint
 
-withColor'                    :: Color -> CanvasKit -> (SkPaintRef -> JSM a) -> JSM a
-withColor' c canvasKit render = withPaint canvasKit $ \paint -> do
-    c' <- mkColor4f canvasKit c
-    setColor paint c'
-    render paint
+withColor'          :: Color -> (SkPaintRef -> Render skCanvas a) -> Render skCanvas a
+withColor' c render = do canvasKit <- asks theCanvasKit
+                         withPaint $ \paint -> do
+                           c' <- liftR $ mkColor4f canvasKit c
+                           liftR $ setColor paint c'
+                           render paint
 
-
-
-
-
-renderPartialPolyLine :: SkPaintStyle
-                      -> SkiaCanvas.Canvas R
-                      -> Maybe (PartialPolyLine R)
-                      -> CanvasKit
-                      -> SkCanvasRef
-                      -> JSM ()
-renderPartialPolyLine strokeOnly canvas' partialPoly canvasKit skCanvasRef = case partialPoly of
-    Just (PartialPolyLine pl) -> renderPoly strokeOnly canvas' (pl :+ ats) canvasKit skCanvasRef
+renderPartialPolyLine                    :: SkCanvas_ skCanvas
+                                         => Canvas R
+                                         -> Maybe (PartialPolyLine R)
+                                         -> Render skCanvas ()
+renderPartialPolyLine canvas partialPoly = case partialPoly of
+    Just (PartialPolyLine pl) -> renderPoly canvas (pl :+ ats)
     Just (StartPoint _)       -> pure ()
     Nothing                   -> pure ()
   where

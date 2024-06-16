@@ -27,3 +27,6 @@ import           SkiaCanvas.CanvasKit.Core
 -- | A reference to a SkPicture object
 newtype SkPictureRef = SkPictureRef JSVal
   deriving (ToJSVal, JS.MakeObject)
+
+-- we can use a SkPicture as a SkCanvas
+instance SkCanvas_ SkPictureRef

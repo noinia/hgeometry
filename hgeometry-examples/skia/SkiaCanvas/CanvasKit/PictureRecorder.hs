@@ -2,8 +2,12 @@
 module SkiaCanvas.CanvasKit.PictureRecorder
   ( SkPictureRecorderRef(..)
   , withPictureRecorder
+
+  , recordAsPicture
   , beginPictureRecorder
   , finishRecordingAsPicture
+
+  , ComputeBounds(..)
   ) where
 
 import           Color (Color, ColorF(..), Alpha(..), fromAlpha)
@@ -40,6 +44,19 @@ withPictureRecorder           :: CanvasKit -> (SkPictureRecorderRef -> JSM a) ->
 withPictureRecorder canvasKit =
   JSAddle.bracket (SkPictureRecorderRef <$> canvasKit JS.! ("PictureRecorder" :: MisoString))
                   (\pr -> pr ^. JS.js0 ("delete" :: MisoString))
+
+-- | Record the drawing commands
+recordAsPicture :: SkInputRect_ skInputRect
+                => CanvasKit
+                -> SkPictureRecorderRef
+                -> skInputRect -- ^ the initial bounds in which to draw
+                -> JSM () -- ^ the drawing commands
+                -> JSM SkPictureRef
+recordAsPicture canvasKit pr bounds draw =
+  do beginPictureRecorder canvasKit pr bounds ComputeBounds
+     draw
+     finishRecordingAsPicture canvasKit pr
+
 
 data ComputeBounds = FixedBounds | ComputeBounds
                    deriving (Show,Read,Eq,Ord)

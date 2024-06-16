@@ -1,6 +1,14 @@
 {-# LANGUAGE OverloadedStrings          #-}
 module SkiaCanvas.CanvasKit.Render
-  ( point
+  ( Render
+  , CanvasKitRefs(..)
+  , renderWith
+  , clear
+  , liftR
+  , withPaint
+  -- , withPath
+
+  , point
   , circle
   , polyLine
   , lineSegment
@@ -8,6 +16,9 @@ module SkiaCanvas.CanvasKit.Render
   ) where
 
 import           Control.Lens
+import           Control.Monad.Reader
+import           Control.Monad.Reader.Class
+import           Control.Monad.Trans
 import           Data.List.NonEmpty (NonEmpty(..))
 import           HGeometry.Ball
 import           HGeometry.LineSegment.Class
@@ -15,69 +26,117 @@ import           HGeometry.Point
 import           HGeometry.PolyLine
 import           HGeometry.Polygon.Simple
 import           Miso (JSM)
-import           SkiaCanvas.CanvasKit
+import           SkiaCanvas.CanvasKit.Core (SkCanvas_, CanvasKit)
 import qualified SkiaCanvas.CanvasKit.Core as CKCore
 import qualified SkiaCanvas.CanvasKit.GeomPrims as CKCore
-import           SkiaCanvas.CanvasKit.Paint (SkPaintRef)
-import qualified SkiaCanvas.CanvasKit.Path as CKCore
+import           SkiaCanvas.CanvasKit.Paint (SkPaintRef, SkPaintStyle)
+import qualified SkiaCanvas.CanvasKit.Paint as Paint
+import qualified SkiaCanvas.CanvasKit.Path as Path
+
+--------------------------------------------------------------------------------
+
+data CanvasKitRefs skCanvas = CanvasKitRefs
+  { theCanvasKit  :: {-# UNPACK #-}!CanvasKit
+  , theCanvas     :: skCanvas
+  , theStrokeOnly :: {-# UNPACK #-}!SkPaintStyle
+  , theFillOnly   :: {-# UNPACK #-}!SkPaintStyle
+  }
+
+newtype Render skCanvas a = Render { runRender :: ReaderT (CanvasKitRefs skCanvas) JSM a }
+  deriving newtype (Functor,Applicative,Monad, MonadReader (CanvasKitRefs skCanvas))
+
+-- instance MonadTrans (Render skCanvas) where
+--   lift = Render . lift
+
+renderWith          :: CanvasKitRefs skCanvas -> Render skCanvas a -> JSM a
+renderWith ckRefs r = runReaderT (runRender r) ckRefs
+
+
+liftR :: JSM a -> Render skCanvas a
+liftR = Render . lift
+
+withPaint   :: (SkPaintRef -> Render skCanvas a) -> Render skCanvas a
+withPaint f = do canvasKit <- asks theCanvasKit
+                 ckRefs    <- ask
+                 liftR $ Paint.withPaint canvasKit (renderWith ckRefs . f)
+
+-- withPath   :: (SkPathRef -> Render skCanvas a) -> Render skCanvas a
+-- withPath f = do canvasKit <- asks theCanvasKit
+--                 ckRefs    <- ask
+--                 Path.withPath canvasKit (renderWith ckRefs . f)
+
+--------------------------------------------------------------------------------
+
+clear :: SkCanvas_ skCanvas => Render skCanvas ()
+clear = do canvasKit <- asks theCanvasKit
+           canvasRef <- asks theCanvas
+           liftR $ CKCore.clear canvasKit canvasRef
 
 --------------------------------------------------------------------------------
 
 -- | Renders a Point
-point             :: forall point r canvasKit.
+point             :: forall point r skCanvas.
                      ( Point_ point 2 r
+                     , SkCanvas_ skCanvas
                      , Real r
                      )
-                  => canvasKit -> SkCanvasRef -> point -> SkPaintRef -> JSM ()
-point ck canvas p = circle ck canvas $ Disk (f $ p^.asPoint) 3
+                  => point -> SkPaintRef -> Render skCanvas ()
+point p = circle $ Disk (f $ p^.asPoint) 3
   where
     f :: Point 2 r -> Point 2 Float
     f = over coordinates realToFrac
 
 -- | Renders a circle
-circle            :: forall circle point r canvasKit.
-                     ( Ball_ circle point
-                     , Point_ point 2 r
-                     , Real r
-                     ) => canvasKit -> SkCanvasRef -> circle -> SkPaintRef -> JSM ()
-circle _ canvas c = let ctr = c^.center.asPoint
-                        c'  = Disk (ctr&coordinates %~ toFloat) (toFloat $ c^.squaredRadius)
-                        toFloat = realToFrac :: r -> Float
-                    in CKCore.circle canvas c'
+circle         :: forall circle point r skCanvas.
+                  ( Ball_ circle point
+                  , Point_ point 2 r
+                  , Real r
+                  , SkCanvas_ skCanvas
+                  ) => circle -> SkPaintRef -> Render skCanvas ()
+circle c paint = let ctr = c^.center.asPoint
+                     c'  = Disk (ctr&coordinates %~ toFloat) (toFloat $ c^.squaredRadius)
+                     toFloat = realToFrac :: r -> Float
+                 in do canvasRef <- asks theCanvas
+                       liftR $ CKCore.circle canvasRef c' paint
 
 -- | Renders a line segment
-lineSegment ::                         ( LineSegment_ lineSegment point
-                                       , Point_ point 2 r
-                                       , Real r
-                                       ) => CanvasKit -> SkCanvasRef -> lineSegment -> SkPaintRef
-                                       -> JSM ()
-lineSegment canvasKit canvas seg paint = let cmds = [ CKCore.MoveTo $ seg^.start.asPoint
-                                                    , CKCore.LineTo $ seg^.end.asPoint
-                                                    ]
-                                         in CKCore.withPathFromCmds canvasKit cmds $ \path ->
-                                              CKCore.drawPath canvas path paint
+lineSegment           :: ( LineSegment_ lineSegment point
+                         , Point_ point 2 r
+                         , Real r
+                         , SkCanvas_ skCanvas
+                         ) => lineSegment -> SkPaintRef -> Render skCanvas ()
+lineSegment seg paint = let cmds = [ Path.MoveTo $ seg^.start.asPoint
+                                   , Path.LineTo $ seg^.end.asPoint
+                                   ]
+                        in do canvasKit <- asks theCanvasKit
+                              canvas    <- asks theCanvas
+                              liftR $ Path.withPathFromCmds canvasKit cmds $ \path ->
+                                Path.drawPath canvas path paint
 
 -- | Renders a polyLine
-polyLine                             :: ( PolyLine_ polyLine point
-                                        , Point_ point 2 r
-                                        , Real r
-                                        )
-                                     => CanvasKit -> SkCanvasRef -> polyLine -> SkPaintRef
-                                     -> JSM ()
-polyLine canvasKit canvas poly paint = let (p :| pts) = toNonEmptyOf (vertices.asPoint) poly
-                                           cmds       = CKCore.MoveTo p :| map (CKCore.LineTo) pts
-                                       in CKCore.withPathFromCmds canvasKit cmds $ \path ->
-                                            CKCore.drawPath canvas path paint
+polyLine            :: ( PolyLine_ polyLine point
+                       , Point_ point 2 r
+                       , Real r
+                       , SkCanvas_ skCanvas
+                       )
+                    => polyLine -> SkPaintRef -> Render skCanvas ()
+polyLine poly paint = let (p :| pts) = toNonEmptyOf (vertices.asPoint) poly
+                          cmds       = Path.MoveTo p :| map Path.LineTo pts
+                      in do canvasKit <- asks theCanvasKit
+                            canvas    <- asks theCanvas
+                            liftR $ Path.withPathFromCmds canvasKit cmds $ \path ->
+                              Path.drawPath canvas path paint
 
 -- | Renders a polyLine
-simplePolygon                             :: ( SimplePolygon_ simplePolygon point r
-                                             , Real r
-                                             )
-                                          => CanvasKit -> SkCanvasRef
-                                          -> simplePolygon -> SkPaintRef
-                                          -> JSM ()
-simplePolygon canvasKit canvas poly paint =
+simplePolygon            :: ( SimplePolygon_ simplePolygon point r
+                            , Real r
+                            , SkCanvas_ skCanvas
+                            )
+                         => simplePolygon -> SkPaintRef -> Render skCanvas ()
+simplePolygon poly paint =
   let (p :| pts) = toNonEmptyOf (vertices.asPoint) poly
-      cmds       = CKCore.MoveTo p :| foldr (\q cs -> CKCore.LineTo q : cs) [CKCore.Close] pts
-  in CKCore.withPathFromCmds canvasKit cmds $ \path -> do
-       CKCore.drawPath canvas path paint
+      cmds       = Path.MoveTo p :| foldr (\q cs -> Path.LineTo q : cs) [Path.Close] pts
+  in do canvasKit <- asks theCanvasKit
+        canvas    <- asks theCanvas
+        liftR $ Path.withPathFromCmds canvasKit cmds $ \path ->
+          Path.drawPath canvas path paint
