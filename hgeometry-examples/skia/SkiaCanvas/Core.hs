@@ -62,6 +62,18 @@ data Canvas r = Canvas {  _theViewport  :: !(Viewport r)
                        }
               deriving (Show,Eq)
 
+
+data CanvasKitRefs = CanvasKitRefs { __canvasKitRef :: CanvasKit
+                                   , __surfaceRef   :: Surface
+                                   , _canvasRef    :: SkCanvasRef
+                                   , _onlyStroke   :: SkPaintStyle
+                                   , _onlyFill     :: SkPaintStyle
+                                   }
+
+
+
+
+
 -- | Crate a blank canvas, that has the origin in the bottom-left.
 blankCanvas     :: (Num r)
                  => Int -> Int -> Canvas r

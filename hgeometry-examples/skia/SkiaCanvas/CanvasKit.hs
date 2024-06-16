@@ -29,7 +29,13 @@ module SkiaCanvas.CanvasKit
   , mkColor
   ) where
 
-import           SkiaCanvas.CanvasKit.Core
+import SkiaCanvas.CanvasKit.Color
+import SkiaCanvas.CanvasKit.Core
+import SkiaCanvas.CanvasKit.Paint
+import SkiaCanvas.CanvasKit.Path
+import SkiaCanvas.CanvasKit.Picture
+import SkiaCanvas.CanvasKit.PictureRecorder
+import SkiaCanvas.CanvasKit.GeomPrims
 
 --------------------------------------------------------------------------------
 -- * The drawing functions

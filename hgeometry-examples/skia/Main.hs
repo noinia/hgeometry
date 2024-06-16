@@ -61,6 +61,7 @@ import           SkiaCanvas (mouseCoordinates, dimensions, canvasKitRef, surface
 import qualified SkiaCanvas.CanvasKit as CanvasKit
 import           SkiaCanvas.CanvasKit hiding (Style(..))
 import qualified SkiaCanvas.CanvasKit.Core as Core
+import           SkiaCanvas.CanvasKit.Paint (SkPaintRef)
 import qualified SkiaCanvas.Render as Render
 import           StrokeAndFill
 import           ToolMenu
@@ -632,7 +633,7 @@ renderPoint strokeOnly fillOnly canvas' (p :+ ats) canvasKit skCanvasRef =
 renderColoring  :: SkPaintStyle
                 -> SkPaintStyle
                 -> SkiaCanvas.Canvas R
-                -> (Core.SkPaintRef -> JSM ()) -- ^ the renderer
+                -> (SkPaintRef -> JSM ()) -- ^ the renderer
                 -> CanvasKit -> SkCanvasRef
                 -> Coloring
                 -> JSM ()
@@ -672,7 +673,7 @@ renderPoly strokeOnly canvas' (pl :+ ats) canvasKit skCanvasRef =
        setAntiAlias paint True
        Render.polyLine canvas' skCanvasRef pl paint
 
-withColor'                    :: Color -> CanvasKit -> (Core.SkPaintRef -> JSM a) -> JSM a
+withColor'                    :: Color -> CanvasKit -> (SkPaintRef -> JSM a) -> JSM a
 withColor' c canvasKit render = withPaint canvasKit $ \paint -> do
     c' <- mkColor4f canvasKit c
     setColor paint c'

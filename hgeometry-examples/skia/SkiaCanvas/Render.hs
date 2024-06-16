@@ -17,7 +17,7 @@ import           HGeometry.Transformation
 import           HGeometry.Viewport
 import           Miso (JSM)
 import           SkiaCanvas.CanvasKit
-import           SkiaCanvas.CanvasKit.Core (SkPaintRef)
+import           SkiaCanvas.CanvasKit.Paint (SkPaintRef)
 import qualified SkiaCanvas.CanvasKit.Render as Render
 import           SkiaCanvas.Core
 

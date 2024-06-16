@@ -16,8 +16,10 @@ import           HGeometry.PolyLine
 import           HGeometry.Polygon.Simple
 import           Miso (JSM)
 import           SkiaCanvas.CanvasKit
-import           SkiaCanvas.CanvasKit.Core (SkPaintRef)
 import qualified SkiaCanvas.CanvasKit.Core as CKCore
+import qualified SkiaCanvas.CanvasKit.GeomPrims as CKCore
+import           SkiaCanvas.CanvasKit.Paint (SkPaintRef)
+import qualified SkiaCanvas.CanvasKit.Path as CKCore
 
 --------------------------------------------------------------------------------
 
