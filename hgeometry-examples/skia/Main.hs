@@ -14,32 +14,17 @@ import           Control.Monad.Error.Class
 import           Control.Monad.Except
 import           Control.Monad.IO.Class
 import           Control.Monad.Reader
-import           Control.Monad.Trans.Class
-import           Data.Colour.SRGB
 import           Data.Default.Class
 import qualified Data.IntMap as IntMap
-import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
-import qualified Data.Sequence as Seq
-import           GHC.TypeNats
-import           GHCJS.Marshal
-import           GHCJS.Types
 import           HGeometry.Box
 import           HGeometry.Ext
-import           HGeometry.Interval
 import           HGeometry.Miso.Event.Extra
 import           HGeometry.Miso.OrphanInstances ()
-import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
-import           HGeometry.PolyLine
 import           HGeometry.Polygon.Simple
 import           HGeometry.Vector
-import           HGeometry.Viewport (ZoomConfig(..), currentLevel, range)
 import           HGeometry.VoronoiDiagram
-import qualified Language.Javascript.JSaddle as JSAddle
-import           Language.Javascript.JSaddle.Object (jsg1, jsg2, jsf, js1, jsg)
-import qualified Language.Javascript.JSaddle.Object as JS
 import           Layers
 import           Miso
 import           Miso.Bulma.Color
@@ -49,7 +34,7 @@ import qualified Miso.Bulma.JSAddle as Run
 import           Miso.Bulma.Modal
 import           Miso.Bulma.NavBar
 import           Miso.Bulma.Panel
-import           Miso.String (MisoString,ToMisoString(..), ms)
+import           Miso.String (MisoString, ms)
 import           Model
 import           Modes
 import           Options
@@ -60,17 +45,14 @@ import qualified SkiaCanvas
 import           SkiaCanvas ( mouseCoordinates, dimensions, canvasKitRefs, surfaceRef
                             , Canvas
                             )
-import qualified SkiaCanvas.CanvasKit as CanvasKit
 import           SkiaCanvas.CanvasKit hiding (Style(..))
-import qualified SkiaCanvas.CanvasKit.Core as Core
 import           SkiaCanvas.CanvasKit.Paint (SkPaintRef)
-import           SkiaCanvas.Render (Render, theCanvasKit, canvasKitRef, CanvasKitRefs, strokeOnly, fillOnly, theCanvas, withPaint, liftR)
+import           SkiaCanvas.Render (Render, theCanvasKit, canvasKitRef, strokeOnly, fillOnly, theCanvas, liftR)
 import qualified SkiaCanvas.Render as Render
 import           StrokeAndFill
 import           ToolMenu
 
 
-import           Debug.Trace
 --------------------------------------------------------------------------------
 
 

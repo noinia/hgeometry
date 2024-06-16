@@ -47,7 +47,6 @@ import           Miso (Attribute, View, Effect, noEff, onMouseLeave, canvas_, id
 import           Miso.String (MisoString)
 import           SkiaCanvas.CanvasKit
 import           SkiaCanvas.CanvasKit.Initialize
-import           SkiaCanvas.CanvasKit.Render
 
 --------------------------------------------------------------------------------
 
