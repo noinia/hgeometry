@@ -116,7 +116,9 @@ updateModel m = \case
                                m' <- m&canvas %%~ flip SkiaCanvas.handleInternalCanvasAction ca
                                -- if we moved the mouse, also redraw
                                case ca of
-                                 SkiaCanvas.MouseMove _ -> () <# pure Draw
+                                 SkiaCanvas.MouseMove _ -> () <# notifyOnError (handleDraw m)
+                                                           -- run the draw handler directly
+                                   -- () <# pure Draw
                                  _                      -> noEff () -- otherwise just return
                                pure m'
 
@@ -597,7 +599,7 @@ drawPermanent   :: SkCanvas_ skCanvas
                 => Model -> Render skCanvas ()
 drawPermanent m =
     do
-      liftR $ consoleLog ("rendering" :: MisoString)
+      -- liftR $ consoleLog ("rendering" :: MisoString)
       -- render all polylines
       forM_ (m^.polyLines) $ \poly ->
         renderPoly (m^.canvas) poly
@@ -622,7 +624,7 @@ drawToPicture m = do initialBounds <- ltrbRect (refs^.theCanvasKit) 0 0 r b
 -- | Forces a redraw
 redraw   :: Model -> JSM SkPictureRef
 redraw m = do initialBounds <- ltrbRect (refs^.theCanvasKit) 0 0 r b
-              consoleLog ("in redraw" :: MisoString)
+              -- consoleLog ("in redraw" :: MisoString)
               recordAsPicture (refs^.theCanvasKit) (refs^.pictureRecorder) initialBounds
                               (\canvasRef ->
                                  let refs' = refs&theCanvas .~ canvasRef

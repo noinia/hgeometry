@@ -52,17 +52,12 @@ instance SkCanvas_ SkPictureRef
 
 -- | Renders a picture
 drawPicture            :: SkCanvas_ skCanvas => skCanvas -> SkPictureRef -> JSM ()
-drawPicture canvas pic = do
-  consoleLog ("drawing the picture" :: MisoString)
-  log' pic
-  bs <- serialize pic
-  log' $ show bs
-  void $ canvas ^.js1 ("drawPicture" :: MisoString) pic
+drawPicture canvas pic = void $ canvas ^.js1 ("drawPicture" :: MisoString) pic
 
-log'     :: ToJSVal arg => arg -> JSM ()
-log' arg = void $ do
-  console <- JS.jsg ("console" :: MisoString)
-  console ^.JS.js1 ("log" :: MisoString) arg
+-- log'     :: ToJSVal arg => arg -> JSM ()
+-- log' arg = void $ do
+--   console <- JS.jsg ("console" :: MisoString)
+--   console ^.JS.js1 ("log" :: MisoString) arg
 
 --------------------------------------------------------------------------------
 -- | Serialize a picture to a bytestring representing the 'skp' value

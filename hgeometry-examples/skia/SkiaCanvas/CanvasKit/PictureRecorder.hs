@@ -53,7 +53,6 @@ recordAsPicture :: SkInputRect_ skInputRect
 recordAsPicture canvasKit pr bounds draw =
   do canvasRef <- beginPictureRecorder canvasKit pr bounds ComputeBounds
      draw canvasRef
-     consoleLog ("done drawing" :: MisoString)
      finishRecordingAsPicture canvasKit pr
 
 
