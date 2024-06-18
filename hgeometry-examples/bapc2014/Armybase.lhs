@@ -236,7 +236,7 @@ Input & Output
 
 
 > armybase :: String -> String
-> armybase = unlines . map (showValue . maxBaseArea) . readInput . tail . lines
+> armybase = unlines . map (showValue . maxBaseArea) . readInput . drop 1 . lines
 
 
 > main :: IO ()

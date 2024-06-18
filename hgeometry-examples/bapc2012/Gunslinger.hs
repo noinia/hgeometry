@@ -117,8 +117,9 @@ distanceToHatch :: NonEmpty (Point 2 Int :+ Kind) -> Answer
 distanceToHatch = maybe Impossible (Possible . distanceAlong) . toHatch
 
 readPoint   :: String -> Point 2 Int
-readPoint s = let [x,y] = map read . words $ s in Point2 x y
-
+readPoint s = case map read . words $ s of
+                [x,y] -> Point2 x y
+                _     -> error "readPoint: wrong number of args"
 
 readInput                 :: [String] -> [Input]
 readInput []              = []
@@ -131,7 +132,7 @@ readInput (ls:hs:ns:rest) = let n            = read ns
 readInput _                = error "readInput: wrong number of args"
 
 gunslinger :: String -> String
-gunslinger = unlines . map (show . escape) . readInput . tail . lines
+gunslinger = unlines . map (show . escape) . readInput . drop 1 . lines
 
 main :: IO ()
 main = interact gunslinger
