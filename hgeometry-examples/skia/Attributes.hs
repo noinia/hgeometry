@@ -32,6 +32,7 @@ import           HGeometry.Miso.OrphanInstances ()
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.PolyLine
+import           HGeometry.Polygon.Simple
 import           HGeometry.Vector
 import           HGeometry.Viewport (ZoomConfig(..), currentLevel, range)
 import           HGeometry.VoronoiDiagram
@@ -113,7 +114,7 @@ instance Default (Attributes (PolyLineF f (Point 2 r))) where
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
--- * PolyLine Attributes
+-- * Rectangle Attributes
 
 data instance Attributes (Rectangle (Point 2 r)) =
   RectangleAttributes { _rectColoring    :: {-# UNPACK #-} !Coloring
@@ -125,3 +126,18 @@ instance HasColoring (Attributes (Rectangle (Point 2 r))) where
 
 instance Default (Attributes (Rectangle (Point 2 r))) where
   def = RectangleAttributes def def
+
+
+--------------------------------------------------------------------------------
+-- * Polygon Attributes
+
+data instance Attributes (SimplePolygon (Point 2 r)) =
+  SimplePolygonAttributes { _pgColoring    :: {-# UNPACK #-} !Coloring
+                          , _pgThickness   :: {-# UNPACK #-} !Thickness
+                          } deriving (Show,Eq)
+
+instance HasColoring (Attributes (SimplePolygon (Point 2 r))) where
+  coloring = lens _pgColoring (\ats c -> ats { _pgColoring = c })
+
+instance Default (Attributes (SimplePolygon (Point 2 r))) where
+  def = SimplePolygonAttributes def def

@@ -4,11 +4,15 @@ module PolygonMode
   ( PolygonModeData(PolygonModeData), currentPolygon
 
   , PartialPolygon(..)
+  , extendPolygonWith
+  , completePolygon
 
+  , SimplePolygon'
   ) where
 
 import           Base
 import           Control.Lens hiding (view, element)
+import           Data.Coerce
 import           Data.Default.Class
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
@@ -23,13 +27,25 @@ import           PolyLineMode
 
 --------------------------------------------------------------------------------
 
--- type SimplePolygon' r = SimplePolygonF (ViewR1 (Point 2 r))
+type SimplePolygon' r = SimplePolygon (Point 2 r)
 
 -- | Just reuse whatever is in PolyLine mode.
 newtype PartialPolygon r = PartialPolygon (PartialPolyLine r)
   deriving (Show,Read,Eq)
 
+-- | Extend the current partial polyline with the given point (if it is on the canvas.)
+extendPolygonWith    :: Eq r
+                     => Maybe (Point 2 r) -> Maybe (PartialPolygon r) -> Maybe (PartialPolygon r)
+extendPolygonWith mp = coerce . extendWith mp . coerce
 
+
+-- | Try to complete the partial polygon into a proper simple polygon
+completePolygon                  :: (Eq r, Num r)
+                                 => PartialPolygon r -> Maybe (SimplePolygon' r )
+completePolygon (coerce -> poly) = case poly of
+  StartPoint _        -> Nothing
+  PartialPolyLine pol -> fromPoints $ toNonEmptyOf vertices pol
+    -- needs at least three vertices
 
 -- drawPartialPolygon       :: (Real r, Ord r, Fractional r)
 --                          => PolygonModeState r -> Maybe (Point 2 r :+ a) -> Canvas ()

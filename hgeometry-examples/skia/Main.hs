@@ -15,6 +15,7 @@ import           Control.Monad.Except
 import           Control.Monad.IO.Class
 import           Control.Monad.Reader
 import qualified Data.ByteString.Lazy as BS
+import           Data.Coerce
 import           Data.Default.Class
 import qualified Data.IntMap as IntMap
 import qualified Data.List.NonEmpty as NonEmpty
@@ -40,8 +41,8 @@ import           Miso.String (MisoString, ms)
 import           Model
 import           Modes
 import           Options
-import           PolygonMode
 import           PolyLineMode
+import           PolygonMode
 import           RectangleMode
 import           SelectMode
 import qualified SkiaCanvas
@@ -118,13 +119,18 @@ handleClick m = case m^.mode of
     PenMode                -> noEff m
     PolyLineMode{}         -> (m&mode._PolyLineMode.currentPoly %~ extend)
                               <# pure Draw
+    PolygonMode{}          -> (m&mode._PolygonMode.currentPolygon %~ extendPolygon)
+                              <# pure Draw
+
     RectangleMode mData -> case mData^.currentRect of
       Just _  -> noEff m
       Nothing -> (m&mode._RectangleMode %~ startRectangleWith (m^.canvas.mouseCoordinates))
                  <# pure Draw
     _                      -> noEff m
   where
-    extend = extendWith (m^.canvas.mouseCoordinates)
+    extend        = extendWith        (m^.canvas.mouseCoordinates)
+    extendPolygon = extendPolygonWith (m^.canvas.mouseCoordinates)
+
     addPoint = recomputeDiagram m' <# pure ReDraw
       where
         m' = case m^.canvas.mouseCoordinates of
@@ -137,6 +143,7 @@ handleRightClick    :: Model -> Effect Action Model
 handleRightClick m = case m^.mode of
     PenMode             -> noEff m
     PolyLineMode mData  -> addPoly mData
+    PolygonMode mData   -> addPolygon mData
     RectangleMode mData -> addRect mData
     _                   -> noEff m
   where
@@ -147,10 +154,22 @@ handleRightClick m = case m^.mode of
               &mode._PolyLineMode.currentPoly .~ Nothing
 
         addPoly' = case extend (mData^.currentPoly) of
-          Just (PartialPolyLine p) -> let ats = PolyLineAttributes (m^.stroke.color)
-                                                                   Normal
-                                      in insert (p :+ ats)
+          Just (PartialPolyLine p) -> insert (p :+ ats)
           _                        -> id
+        ats = PolyLineAttributes (m^.stroke.color) Normal
+
+    addPolygon mData = m' <# pure ReDraw
+      where
+        m' = m&polygons %~ addPoly'
+              &mode._PolygonMode.currentPolygon .~ Nothing
+        addPoly' = case extended of
+          Just p -> insert (p :+ ats)
+          _      -> id
+        ats = SimplePolygonAttributes  (toColoring (m^.stroke) (m^.fill)) Normal
+        extended = do
+            pp <- extendPolygonWith (m^.canvas.mouseCoordinates) (mData^.currentPolygon)
+            completePolygon pp
+        -- tries to complete the current partial polygon into a complete simple polygon.
 
     addRect mData = m' <# pure ReDraw
       where
@@ -162,6 +181,9 @@ handleRightClick m = case m^.mode of
                      Just r  -> insert (r :+ ats)
 
         ats = RectangleAttributes (toColoring (m^.stroke) (m^.fill)) Normal
+
+
+
 
 
 -- | The main entry point of our controller.
@@ -178,14 +200,11 @@ updateModel m = \case
                                case ca of
                                  SkiaCanvas.MouseMove _ -> () <# notifyOnError (handleDraw m)
                                                            -- run the draw handler directly
-                                   -- () <# pure Draw
                                  _                      -> noEff () -- otherwise just return
                                pure m'
 
-    CanvasClicked       -> handleClick m
-
+    CanvasClicked      -> handleClick m
     CanvasRightClicked -> handleRightClick m
-
 
     Draw                  -> m <# notifyOnError (handleDraw m)
 
@@ -615,6 +634,9 @@ drawPermanent m =
       -- render all polylines
       forM_ (m^.polyLines) $ \poly ->
         renderPoly (m^.canvas) poly
+
+      forM_ (m^.polygons) $ \poly ->
+        renderPolygon (m^.canvas) poly
       -- render all rectangles
       forM_ (m^.rectangles) $ \rect ->
         renderRect (m^.canvas) rect
@@ -661,6 +683,12 @@ myDraw m = do
         PolyLineMode mData ->
           let current' = extendWith (m^.canvas.mouseCoordinates) (mData^.currentPoly)
           in renderPartialPolyLine (m^.canvas) current'
+        PolygonMode mData ->
+          let current' = extendPolygonWith (m^.canvas.mouseCoordinates) (mData^.currentPolygon)
+          in renderPartialPolyLine (m^.canvas) (coerce $ current')
+          -- TODO
+
+
         RectangleMode mData -> forM_ (asRectangleWith (m^.canvas.mouseCoordinates) mData) $ \rect ->
                                   let ats = RectangleAttributes def Normal
                                   in renderRect (m^.canvas) (rect :+ ats)
@@ -733,6 +761,9 @@ renderRect canvas' (r :+ ats) =
                        poly = uncheckedFromCCWPoints $ corners r
                    in Render.simplePolygon canvas' poly paint
 
+
+
+
 renderPoly                     :: SkCanvas_ skCanvas
                                => Canvas R
                                -> (PolyLine' R :+ Attributes (PolyLine' R))
@@ -743,6 +774,13 @@ renderPoly canvas' (pl :+ ats) =
        liftR $ setStyle paint strokeOnly'
        liftR $ setAntiAlias paint True
        Render.polyLine canvas' pl paint
+
+renderPolygon                     :: SkCanvas_ skCanvas
+                                  => Canvas R
+                                  -> (SimplePolygon' R :+ Attributes (SimplePolygon' R))
+                                  -> Render skCanvas ()
+renderPolygon canvas' (pg :+ ats) =
+    renderColoring (Render.simplePolygon canvas' pg) (ats^.coloring)
 
 withColor'          :: Color -> (SkPaintRef -> Render skCanvas a) -> Render skCanvas a
 withColor' c render = do canvasKit <- asks (^.theCanvasKit)

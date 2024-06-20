@@ -2,7 +2,7 @@
 {-# LANGUAGE TemplateHaskell            #-}
 module Model
   ( Model(Model)
-  , canvas, zoomConfig, points, polyLines, rectangles
+  , canvas, zoomConfig, points, polyLines, polygons, rectangles
   , diagram, _layers, mode, stroke, fill
   , currentModal
   , cachedPictures
@@ -37,6 +37,7 @@ import           HGeometry.Viewport (ZoomConfig(..))
 import           Layers
 import           Modes
 import           PolyLineMode
+import           PolygonMode
 import           RectangleMode
 import qualified SkiaCanvas
 import           SkiaCanvas.CanvasKit.Picture (SkPictureRef)
@@ -70,6 +71,7 @@ data Model = Model { _canvas       :: SkiaCanvas.Canvas R
                    , _mode         :: Mode
                    , _points       :: IntMap.IntMap (Point 2 R :+ Attributes (Point 2 R))
                    , _polyLines    :: IntMap.IntMap (PolyLine' R :+ Attributes (PolyLine' R))
+                   , _polygons     :: IntMap.IntMap (SimplePolygon' R :+ Attributes (SimplePolygon' R))
                    , _rectangles   :: IntMap.IntMap (Rectangle' R :+ Attributes (Rectangle' R))
                    , _diagram      :: Maybe [Point 2 R]
                    , __layers      :: Layers
@@ -99,6 +101,7 @@ initialModel = Model { _canvas       = SkiaCanvas.blankCanvas 1024 768
                      , _zoomConfig   = ZoomConfig (ClosedInterval 0.1 4) 1
                      , _points       = mempty
                      , _polyLines    = mempty
+                     , _polygons     = mempty
                      , _rectangles   = mempty
                      , _diagram      = Nothing
                      , __layers      = initialLayers
