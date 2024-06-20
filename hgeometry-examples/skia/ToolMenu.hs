@@ -83,7 +83,7 @@ toolButtons_ m =
 
     polyLineButton  = menuButton' (PolyLineMode def) "fas fa-wave-square"
                                   [title_ "Polyline"]
-    polygonButton   = menuButton' PolygonMode "fas fa-draw-polygon"
+    polygonButton   = menuButton' (PolygonMode def) "fas fa-draw-polygon"
                                   [title_ "Polygon"]
     rectangleButton = menuButton' (RectangleMode def) "far fa-square"
                                   [title_ "Rectangle"]

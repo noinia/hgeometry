@@ -40,6 +40,7 @@ import           Miso.String (MisoString, ms)
 import           Model
 import           Modes
 import           Options
+import           PolygonMode
 import           PolyLineMode
 import           RectangleMode
 import           SelectMode
@@ -175,9 +176,9 @@ updateModel m = \case
 
     -- allow toggling the stroke and fill modals base on the status and fillStatus
     StrokeAction act -> noEff $ m&currentModal .~ cm
-                                 &stroke       %~ maybe id const ms
+                                 &stroke       %~ maybe id const ms'
       where
-        (cm, ms) = handleColorAction (m^.stroke) (m^.currentModal) StrokeModal act
+        (cm, ms') = handleColorAction (m^.stroke) (m^.currentModal) StrokeModal act
     FillAction act   -> noEff $ m&currentModal .~ cm
                                  &fill         %~ maybe id const mf
       where
@@ -279,16 +280,16 @@ handleColorAction sf modalStatus theModal = \case
                    )
 
 
--- | Handles the given toggleModal action
-toggleModal                  :: Modal -> Maybe Modal -> ModalAction -> Maybe Modal
-toggleModal theModal current = \case
-  ToggleModalStatus -> case current of
-                         Nothing                -> Just theModal
-                         Just m | m == theModal -> Nothing
-                         Just _                 -> current
-                           -- this is kind of weird, since the modal that is currentlyActive
-                           -- is not actually the modal that we're getting a ToggleModalAction
-                           -- for
+-- -- | Handles the given toggleModal action
+-- toggleModal                  :: Modal -> Maybe Modal -> ModalAction -> Maybe Modal
+-- toggleModal theModal current = \case
+--   ToggleModalStatus -> case current of
+--                          Nothing                -> Just theModal
+--                          Just m | m == theModal -> Nothing
+--                          Just _                 -> current
+--                            -- this is kind of weird, since the modal that is currentlyActive
+--                            -- is not actually the modal that we're getting a ToggleModalAction
+--                            -- for
 
 
 recomputeDiagram   :: Model -> Model

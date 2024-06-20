@@ -24,6 +24,7 @@ import Control.Lens
 import Control.Lens.Extras (is)
 import Data.Default.Class
 import PolyLineMode
+import PolygonMode
 import RectangleMode
 import SelectMode
 
@@ -34,7 +35,7 @@ data Mode = SelectMode {-# UNPACK #-}!SelectModeData
           | PenMode
           | LineMode
           | PolyLineMode {-# UNPACK #-}!PolyLineModeData
-          | PolygonMode
+          | PolygonMode {-# UNPACK #-}!PolygonModeData
           | RectangleMode {-# UNPACK #-}!RectangleModeData
           | CircleMode
           | TextMode
@@ -55,7 +56,7 @@ matches m1 = \case
   PenMode          -> is _PenMode       m1
   LineMode         -> is _LineMode      m1
   PolyLineMode{}   -> is _PolyLineMode  m1
-  PolygonMode      -> is _PolygonMode   m1
+  PolygonMode{}    -> is _PolygonMode   m1
   RectangleMode{}  -> is _RectangleMode m1
   CircleMode       -> is _CircleMode    m1
   TextMode         -> is _TextMode      m1
