@@ -106,6 +106,65 @@ onLoad m = Effect m [ initializeCanvas
 
 --------------------------------------------------------------------------------
 
+-- | Handles a left click action on the canvas.
+handleClick   :: Model -> Effect Action Model
+handleClick m = case m^.mode of
+    SelectMode{}           ->
+        do m' <- m&mode._SelectMode %%~ updateSelection ComputeSelection
+                                                        (m^.canvas.mouseCoordinates)
+           () <# pure Draw
+           return m'
+    PointMode              -> addPoint
+    PenMode                -> noEff m
+    PolyLineMode{}         -> (m&mode._PolyLineMode.currentPoly %~ extend)
+                              <# pure Draw
+    RectangleMode mData -> case mData^.currentRect of
+      Just _  -> noEff m
+      Nothing -> (m&mode._RectangleMode %~ startRectangleWith (m^.canvas.mouseCoordinates))
+                 <# pure Draw
+    _                      -> noEff m
+  where
+    extend = extendWith (m^.canvas.mouseCoordinates)
+    addPoint = recomputeDiagram m' <# pure ReDraw
+      where
+        m' = case m^.canvas.mouseCoordinates of
+               Nothing -> m
+               Just p  -> let ats = PointAttributes $ toColoring (m^.stroke) (m^.fill)
+                          in m&points %~ insert (p :+ ats)
+
+-- | Handles a right click action on the canvas
+handleRightClick    :: Model -> Effect Action Model
+handleRightClick m = case m^.mode of
+    PenMode             -> noEff m
+    PolyLineMode mData  -> addPoly mData
+    RectangleMode mData -> addRect mData
+    _                   -> noEff m
+  where
+    extend = extendWith (m^.canvas.mouseCoordinates)
+    addPoly mData = m' <# pure ReDraw
+      where
+        m' = m&polyLines                      %~ addPoly'
+              &mode._PolyLineMode.currentPoly .~ Nothing
+
+        addPoly' = case extend (mData^.currentPoly) of
+          Just (PartialPolyLine p) -> let ats = PolyLineAttributes (m^.stroke.color)
+                                                                   Normal
+                                      in insert (p :+ ats)
+          _                        -> id
+
+    addRect mData = m' <# pure ReDraw
+      where
+        m' = m&rectangles %~ addRect'
+              &mode._RectangleMode.currentRect .~ Nothing
+
+        addRect' = case asRectangleWith (m^.canvas.mouseCoordinates) mData of
+                     Nothing -> id
+                     Just r  -> insert (r :+ ats)
+
+        ats = RectangleAttributes (toColoring (m^.stroke) (m^.fill)) Normal
+
+
+-- | The main entry point of our controller.
 updateModel   :: Model -> Action -> Effect Action Model
 updateModel m = \case
     Id                     -> noEff m
@@ -123,27 +182,9 @@ updateModel m = \case
                                  _                      -> noEff () -- otherwise just return
                                pure m'
 
-    CanvasClicked       -> case m^.mode of
-        SelectMode{}           ->
-            do m' <- m&mode._SelectMode %%~ updateSelection ComputeSelection
-                                                            (m^.canvas.mouseCoordinates)
-               () <# pure Draw
-               return m'
-        PointMode              -> addPoint
-        PenMode                -> noEff m
-        PolyLineMode{}         -> (m&mode._PolyLineMode.currentPoly %~ extend)
-                                  <# pure Draw
-        RectangleMode mData -> case mData^.currentRect of
-          Just _  -> noEff m
-          Nothing -> (m&mode._RectangleMode %~ startRectangleWith (m^.canvas.mouseCoordinates))
-                     <# pure Draw
-        _                      -> noEff m
+    CanvasClicked       -> handleClick m
 
-    CanvasRightClicked -> case m^.mode of
-        PenMode             -> noEff m
-        PolyLineMode mData  -> addPoly mData
-        RectangleMode mData -> addRect mData
-        _                   -> noEff m
+    CanvasRightClicked -> handleRightClick m
 
 
     Draw                  -> m <# notifyOnError (handleDraw m)
@@ -206,8 +247,6 @@ updateModel m = \case
                                 drawPicture canvasRef pic
                           liftIO $ putStrLn "Drawn"
                           pure Id
-  where
-    extend = extendWith (m^.canvas.mouseCoordinates)
 
     -- startMouseDown = case m^.mode of
     --     PolyLineMode -> noEff m
@@ -221,34 +260,6 @@ updateModel m = \case
     --     PolyLineMode -> noEff m
     --     PenMode      -> addPoly
 
-    addPoint = recomputeDiagram m' <# pure ReDraw
-      where
-        m' = case m^.canvas.mouseCoordinates of
-               Nothing -> m
-               Just p  -> let ats = PointAttributes $ toColoring (m^.stroke) (m^.fill)
-                          in m&points %~ insert (p :+ ats)
-
-    addPoly mData = m' <# pure ReDraw
-      where
-        m' = m&polyLines                      %~ addPoly'
-              &mode._PolyLineMode.currentPoly .~ Nothing
-
-        addPoly' = case extend (mData^.currentPoly) of
-          Just (PartialPolyLine p) -> let ats = PolyLineAttributes (m^.stroke.color)
-                                                                   Normal
-                                      in insert (p :+ ats)
-          _                        -> id
-
-    addRect mData = m' <# pure ReDraw
-      where
-        m' = m&rectangles %~ addRect'
-              &mode._RectangleMode.currentRect .~ Nothing
-
-        addRect' = case asRectangleWith (m^.canvas.mouseCoordinates) mData of
-                     Nothing -> id
-                     Just r  -> insert (r :+ ats)
-
-        ats = RectangleAttributes (toColoring (m^.stroke) (m^.fill)) Normal
 
 
 
