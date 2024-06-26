@@ -143,22 +143,13 @@ instance ( Point_ point 2 r
   uncheckedFromCCWPoints = MkSimplePolygon . fromFoldable1
                          . NonEmpty.fromList . F.toList
 
-  fromPoints = Just
-             . toCounterClockwiseOrder
-             . uncheckedFromCCWPoints
-             . requireThree "fromPoints" . F.toList
-  -- TODO: verify that:
-  --      we have no repeated vertices,
-  --      no self intersections, and
-  --      not all vertices are colinear
-
-
--- | Validate that we have at least three points
-requireThree :: String -> [a] -> [a]
-requireThree _ lst@(_:_:_:_) = lst
-requireThree label _ = error $
-  "HGeometry.Polygon." ++ label ++ ": Polygons must have at least three points."
-
+  fromPoints pts = case F.toList pts of
+    pts'@(_ : _ : _ : _ ) -> Just . toCounterClockwiseOrder . uncheckedFromCCWPoints $ pts'
+                             -- TODO: verify that:
+                              --      we have no repeated vertices,
+                             --      no self intersections, and
+                             --      not all vertices are colinear
+    _                     -> Nothing -- we need at least three vertices
 
 instance ( Show point
          , SimplePolygon_ (SimplePolygonF f point) point r

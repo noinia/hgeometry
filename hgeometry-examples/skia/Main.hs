@@ -685,9 +685,7 @@ myDraw m = do
           in renderPartialPolyLine (m^.canvas) current'
         PolygonMode mData ->
           let current' = extendPolygonWith (m^.canvas.mouseCoordinates) (mData^.currentPolygon)
-          in renderPartialPolyLine (m^.canvas) (coerce $ current')
-          -- TODO
-
+          in renderPartialPolygon (m^.canvas) current'
 
         RectangleMode mData -> forM_ (asRectangleWith (m^.canvas.mouseCoordinates) mData) $ \rect ->
                                   let ats = RectangleAttributes def Normal
@@ -789,6 +787,7 @@ withColor' c render = do canvasKit <- asks (^.theCanvasKit)
                            liftR $ setColor paint c'
                            render paint
 
+-- | Renders the partial polyline
 renderPartialPolyLine                     :: SkCanvas_ skCanvas
                                           => Canvas R
                                           -> Maybe (PartialPolyLine R)
@@ -799,5 +798,16 @@ renderPartialPolyLine canvas' partialPoly = case partialPoly of
     Nothing                   -> pure ()
   where
     ats = def
+
+-- | Renders the partial polygon
+renderPartialPolygon             :: SkCanvas_ skCanvas
+                                 => Canvas R
+                                 -> Maybe (PartialPolygon R)
+                                 -> Render skCanvas ()
+renderPartialPolygon canvas' mpp = case mpp >>= completePolygon of
+    Just pg -> renderColoring (Render.simplePolygon canvas' pg) (ats^.coloring)
+    Nothing -> pure ()
+  where
+    ats = def :: Attributes (SimplePolygon' R)
 
 --------------------------------------------------------------------------------

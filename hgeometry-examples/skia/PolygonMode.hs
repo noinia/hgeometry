@@ -27,6 +27,7 @@ import           PolyLineMode
 
 --------------------------------------------------------------------------------
 
+-- | By default the vertices of a simple polygon are just 'Point 2 r's.
 type SimplePolygon' r = SimplePolygon (Point 2 r)
 
 -- | Just reuse whatever is in PolyLine mode.
@@ -63,6 +64,7 @@ completePolygon (coerce -> poly) = case poly of
 newtype PolygonModeData = PolygonModeData (Maybe (PartialPolygon R))
   deriving (Show,Read,Eq)
 
+-- | Lens to access the current partial polygon
 currentPolygon :: Lens' PolygonModeData (Maybe (PartialPolygon R))
 currentPolygon = coerced
 
