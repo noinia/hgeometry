@@ -15,7 +15,6 @@ module HGeometry.Plane.LowerEnvelope.AdjListForm
   , LowerEnvelope'(LowerEnvelope)
   , ParallelPlane
   , theUnboundedVertex, boundedVertices
-  , IntersectionLine(..)
 
   , singleton
   , fromVertexForm
@@ -38,16 +37,10 @@ import           Control.Lens
 import qualified Data.Foldable as F
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
--- import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Set as Set
--- import           HGeometry.Algorithms.DivideAndConquer
--- import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
--- import           HGeometry.Line.LineEQ
 import           HGeometry.Plane.LowerEnvelope.Connected
-import           HGeometry.Plane.LowerEnvelope.VertexForm (IntersectionLine(..))
 import qualified HGeometry.Plane.LowerEnvelope.VertexForm as VertexForm
--- import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector.NonEmpty.Util ()
 

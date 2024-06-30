@@ -13,7 +13,7 @@ module HGeometry.Line
   ( module HGeometry.Line.Class
   , module HGeometry.Line.LineEQ
   , module HGeometry.Line.PointAndVector
-  , LineLineIntersection(..)
+  , LineLineIntersection, LineLineIntersectionG(..)
   ) where
 
 import Control.Lens

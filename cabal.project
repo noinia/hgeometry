@@ -5,8 +5,8 @@ packages:
   hgeometry-combinatorial
   hgeometry
   hgeometry-examples
-  ../hiraffe
-  ../miso-bulma
+  -- ../hiraffe
+  -- ../miso-bulma
 
 allow-newer:
     vector-circular:vector,
@@ -17,14 +17,29 @@ allow-newer:
     vector-circular:deepseq,
     all:jsaddle,
     lucid-svg:transformers,text,
+    servant-lucid:servant,
+    servant:base,
+    vault:base,
+    singleton-bool:base,
+    lucid-svg:transformers,text,
+    pretty:deepseq,
+    pretty:dlist,
+    hexpat:deepseq,
+    websockets:all,
+    jsaddle-warp:all,
+    entropy:Cabal
 
--- source-repository-package
---     type: git
---     location: https://github.com/noinia/hiraffe
+source-repository-package
+    type: git
+    location: https://github.com/noinia/hiraffe
 
 source-repository-package
     type: git
     location: https://github.com/noinia/hspec-with-tempfile
+
+source-repository-package
+    type: git
+    location: https://github.com/noinia/miso-bulma
 
 -- source-repository-package
 --     type: git
@@ -42,6 +57,10 @@ source-repository-package
 --     location: https://github.com/noinia/miso
 --     tag: 1d16ba220bcd6be28d1e89d141330cd6875c70ff
 
+source-repository-package
+    type: git
+    location: https://github.com/noinia/vector-circular
+    tag: 98090784e9ed97cf761cf69ad3f32b88dbdd30a2
 
 package miso
     flags: +jsaddle

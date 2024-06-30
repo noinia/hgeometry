@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings          #-}
-{-# LANGUAGE TemplateHaskell            #-}
 module StrokeAndFill
   ( Status(..)
   , _InActive, _Active

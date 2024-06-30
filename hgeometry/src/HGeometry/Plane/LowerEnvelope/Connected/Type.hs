@@ -56,9 +56,10 @@ import           HGeometry.HalfLine
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line
+import           HGeometry.Line.General
 import           HGeometry.LineSegment
 import           HGeometry.Plane.LowerEnvelope.Type
-import           HGeometry.Plane.LowerEnvelope.VertexForm (IntersectionLine(..),intersectionLine)
+import           HGeometry.Plane.LowerEnvelope.VertexForm (intersectionLine)
 import qualified HGeometry.Plane.LowerEnvelope.VertexForm as VertexForm
 import           HGeometry.Point
 import           HGeometry.Properties
@@ -242,9 +243,9 @@ intersectionLineWithDefiners h h' = (:+ EdgeDefiners h h') <$> intersectionLine'
 intersectionLine'      :: ( Plane_ plane r, Ord r, Fractional r)
                        => plane -> plane -> Maybe (LinePV 2 r)
 intersectionLine' h h' = intersectionLine h h' <&> \case
-    Vertical x    -> reorient (LinePV (Point2 x 0) (Vector2 0 1)) (Point2 (x-1) 0)
-    NonVertical l -> let l'@(LinePV p _) = fromLineEQ l
-                     in reorient l' (p&yCoord %~ (+1))
+    VerticalLineThrough x -> reorient (LinePV (Point2 x 0) (Vector2 0 1)) (Point2 (x-1) 0)
+    NonVertical l         -> let l'@(LinePV p _) = fromLineEQ l
+                             in reorient l' (p&yCoord %~ (+1))
   where
     -- make sure h is to the left of the line
     reorient l q = let f = evalAt q

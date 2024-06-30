@@ -28,8 +28,9 @@ data-files:
     test-with-ipe/**/*.ipe
 
 tested-with:
-    GHC == 9.6.4
+    GHC == 9.6.5
   , GHC == 9.8.2
+  , GHC == 9.10.1
 
 source-repository head
   type:     git
@@ -75,6 +76,8 @@ common all-setup
 
       , ghc-typelits-natnormalise >= 0.7.7         && < 1
       , ghc-typelits-knownnat     >= 0.7.6         && < 1
+
+      , entropy >= 0.4.1.10
 
     default-language: GHC2021
 
@@ -432,6 +435,9 @@ library
         -- HGeometry.Plane.LowerEnvelope.Sample
 
 
+        HGeometry.Plane.LowerEnvelope.DivideAndConquer
+        HGeometry.Plane.LowerEnvelope.EpsApproximation
+
         -- HGeometry.Plane.LowerEnvelope.AtMostThree
         -- HGeometry.Plane.LowerEnvelope.Triangulate
 
@@ -695,7 +701,9 @@ test-suite with-ipe-hspec
       PlaneGraph.RenderSpec
       HalfPlane.CommonIntersectionSpec
       Line.LowerEnvelopeSpec
-
+      Paths_hgeometry
+  autogen-modules:
+      Paths_hgeometry
   hs-source-dirs:   test-with-ipe/test
   build-depends:
         hspec-with-tempfile >= 0.1
