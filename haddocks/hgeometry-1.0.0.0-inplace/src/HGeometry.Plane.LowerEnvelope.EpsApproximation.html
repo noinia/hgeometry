@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.Plane.LowerEnvelope.EpsApproximation</span><span>
+</span><span id="line-2"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.EpsApproximation.html#epsilonNet"><span class="hs-identifier">epsilonNet</span></a></span><span>
+</span><span id="line-3"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- import           Control.Monad.State.Class</span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- import           HGeometry.HyperPlane.Class</span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/kernel/doc/html/hgeometry/src/HGeometry.HyperPlane.NonVertical.html"><span class="hs-identifier">HGeometry.HyperPlane.NonVertical</span></a></span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- import           System.Random.Stateful</span><span>
+</span><span id="line-12"></span><span class="hs-comment">-- import           Witherable</span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- | Given a value r, and a set of planes H, we construct a 1/r-net A of H w.r.t</span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- the shallow downward ranges.</span><span>
+</span><span id="line-18"></span><span id="local-6989586621679422486"><span id="local-6989586621679422487"><span id="local-6989586621679422489"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.EpsApproximation.html#epsilonNet"><span class="hs-identifier hs-type">epsilonNet</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/l/kernel/doc/html/hgeometry/src/HGeometry.HyperPlane.NonVertical.html#Plane_"><span class="hs-identifier hs-type">Plane_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679422486"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679422487"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-19"></span><span>                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679422487"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679422487"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679422489"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679422489"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679422486"><span class="hs-identifier hs-type">plane</span></a></span><span>
+</span><span id="line-20"></span><span>                 </span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span>              </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ the parameter r</span></span><span>
+</span><span id="line-22"></span><span>             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679422489"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679422486"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679422486"><span class="hs-identifier hs-type">plane</span></a></span></span></span></span><span>
+</span><span id="line-23"></span><span id="epsilonNet"><span class="annot"><span class="annottext">epsilonNet :: forall plane r (f :: * -&gt; *).
+(Plane_ plane r, Ord r, Fractional r, Foldable1 f, Functor f,
+ Ord plane) =&gt;
+Int -&gt; f plane -&gt; NonEmpty plane
+</span><a href="HGeometry.Plane.LowerEnvelope.EpsApproximation.html#epsilonNet"><span class="hs-identifier hs-var hs-var">epsilonNet</span></a></span></span><span> </span><span id="local-6989586621679422525"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679422525"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[plane] -&gt; NonEmpty plane
+forall a. HasCallStack =&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">NonEmpty.fromList</span></span><span> </span><span class="annot"><span class="annottext">([plane] -&gt; NonEmpty plane)
+-&gt; (f plane -&gt; [plane]) -&gt; f plane -&gt; NonEmpty plane
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; NonEmpty plane -&gt; [plane]
+forall a. Int -&gt; NonEmpty a -&gt; [a]
+</span><span class="hs-identifier hs-var">NonEmpty.take</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679422529"><span class="hs-identifier hs-var">size</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty plane -&gt; [plane])
+-&gt; (f plane -&gt; NonEmpty plane) -&gt; f plane -&gt; [plane]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">f plane -&gt; NonEmpty plane
+forall a. f a -&gt; NonEmpty a
+forall (t :: * -&gt; *) a. Foldable1 t =&gt; t a -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">toNonEmpty</span></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-25"></span><span>    </span><span id="local-6989586621679422529"><span class="annot"><span class="annottext">size :: Int
+</span><a href="#local-6989586621679422529"><span class="hs-identifier hs-var hs-var">size</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679422525"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int
+</span><a href="HGeometry.Plane.LowerEnvelope.EpsApproximation.html#lg"><span class="hs-identifier hs-var">lg</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679422525"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-comment">-- FIXME: this currently does not really construct not eps net</span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="annot"><span class="hs-comment">-- | Compute something like log base 2 (this is a bit silly)</span></span><span>
+</span><span id="line-29"></span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.EpsApproximation.html#lg"><span class="hs-identifier hs-type">lg</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-30"></span><span id="lg"><span class="annot"><span class="annottext">lg :: Int -&gt; Int
+</span><a href="HGeometry.Plane.LowerEnvelope.EpsApproximation.html#lg"><span class="hs-identifier hs-var hs-var">lg</span></a></span></span><span> </span><span id="local-6989586621679422533"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679422533"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679422533"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-31"></span><span>         </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-32"></span><span>         </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-33"></span><span>         </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int
+</span><a href="HGeometry.Plane.LowerEnvelope.EpsApproximation.html#lg"><span class="hs-identifier hs-var">lg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679422533"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Integral a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">`div`</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-comment">{-
+
+-- | Given a value r, and a set of planes H, we construct a 1/r-approximation A of H w.r.t
+-- the shallow downward ranges.
+epsApproximation :: ( Plane_ plane r
+                    , Ord r, Fractional r, Foldable f, Functor f, Ord plane
+                    )
+                 =&gt; Int -- ^ the parameter r
+                 -&gt; f plane -&gt; f plane
+epsApproximation = undefined
+
+-- | Given a value r, and a set of planes H, we construct a 1/r-approximation A of H w.r.t
+-- the shallow downward ranges.
+epsApproximation'      :: ( Plane_ plane r
+                          , Ord r, Fractional r, Foldable f, Functor f, Ord plane
+                          , RandomGen gen, MonadState gen m
+                          , Show plane, Show r
+                          )
+                       =&gt; Int -- ^ the parameter r
+                       -&gt; f plane -&gt; m (f plane)
+epsApproximation' r hs = undefined
+
+-}</span><span>
+</span><span id="line-58"></span></pre></body></html>
