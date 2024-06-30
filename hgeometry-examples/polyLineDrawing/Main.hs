@@ -40,7 +40,7 @@ import           HGeometry.Sequence.NonEmpty
 import           HGeometry.Vector
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
 import           Miso hiding (onMouseUp, onMouseDown)
-import           Miso.Event.Extra
+import           HGeometry.Miso.Event.Extra
 import qualified Miso.Html.Element as Html
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Miso.Svg hiding (height_, id_, style_, width_)

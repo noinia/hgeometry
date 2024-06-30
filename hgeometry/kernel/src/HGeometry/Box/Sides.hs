@@ -11,6 +11,7 @@ module HGeometry.Box.Sides
   , sides, sides'
 
   , sideDirections
+  , sideValues
   ) where
 
 import Control.Lens hiding ((<.>))
@@ -127,3 +128,11 @@ sides'   :: (Num r, Rectangle_ rectangle point, Point_ point 2 r
            )
          => rectangle -> Sides (ClosedLineSegment point)
 sides' r = Sides (topSide r) (rightSide r) (bottomSide r) (leftSide r)
+
+
+-- | The side values of the rectangle, i.e. the coordinates of the top, right, bottom, and
+-- left sides.
+sideValues      :: (Rectangle_ rectangle point, Point_ point 2 r
+                   ) => rectangle -> Sides r
+sideValues rect = Sides (rect^.maxPoint.yCoord) (rect^.maxPoint.xCoord)
+                        (rect^.minPoint.yCoord) (rect^.minPoint.xCoord)

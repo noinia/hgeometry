@@ -185,7 +185,7 @@ common svg-setup
       , miso                      >= 1.8.4         && < 2
       , lucid                     >= 2             && < 3
       , lucid-svg                 >= 0.7           && < 1
-      , jsaddle                   >= 0.9.8.3       && < 0.10
+      , jsaddle                   >= 0.9.9.0       && < 0.10
       , vinyl
       , colour
       , singletons
@@ -478,8 +478,10 @@ library ipe
 
 library svg
     import: all-setup, svg-setup
+    build-depends:
+      hgeometry:miso
     visibility: public
-    hs-source-dirs: svg/src web/src
+    hs-source-dirs: svg/src
     exposed-modules:
         HGeometry.Miso.Svg
         HGeometry.Miso.OrphanInstances
@@ -487,11 +489,27 @@ library svg
         HGeometry.Miso.Svg.Canvas
         HGeometry.Svg
 
+        HGeometry.Miso.Canvas.Zoom
+
     other-modules:
-        Miso.Subscription.MouseExtra
         HGeometry.Miso.Svg.Writer
         Miso.String.Util
-        Miso.FFI.Extra
+
+--------------------------------------------------------------------------------
+-- * miso
+
+library miso
+    import: all-setup, svg-setup
+    visibility: public
+    hs-source-dirs: miso/src
+    exposed-modules:
+        HGeometry.Miso.Event.Extra
+        HGeometry.Miso.FFI.Extra
+        HGeometry.Miso.Subscription.MouseExtra
+
+    -- other-modules:
+    --     Miso.String.Util
+
 
 --------------------------------------------------------------------------------
 -- * HGeometry-quickcheck
