@@ -19,7 +19,7 @@ $O(n^2 \log n)$ solution.
 > import Data.Monoid
 > import Data.Ix
 
->
+
 > import qualified Data.Array   as A
 
 > import qualified Data.List     as L
@@ -47,7 +47,7 @@ A value of type Half should still be halved. I.e. 'Half 2x = x'
 
 > newtype Half = Half Int
 >                        deriving (Show,Eq,Ord)
->
+
 > instance Num Half where
 >   (Half a) + (Half b) = Half $ a + b
 >   (Half a) - (Half b) = Half $ a - b
@@ -98,8 +98,8 @@ points in $O(n \log n)$ time.
 > convexHull []  = ConvexHull []
 > convexHull [p] = ConvexHull [p]
 > convexHull ps  = let ps' = L.sortBy incXdecY ps
->                      uh  = tail . hull . Sorted $         ps'
->                      lh  = tail . hull . Sorted $ reverse ps'
+>                      uh  = drop 1 . hull . Sorted $         ps'
+>                      lh  = drop 1 . hull . Sorted $ reverse ps'
 >                  in ConvexHull $ lh ++ uh
 
 > incXdecY (Point (px,py)) (Point (qx,qy)) =
@@ -115,7 +115,7 @@ points in $O(n \log n)$ time.
 >   where
 >     hull' h  []    = h
 >     hull' h (p:ps) = hull' (cleanMiddle (p:h)) ps
->
+
 >     cleanMiddle [b,a]          = [b,a]
 >     cleanMiddle h@(c:b:a:rest)
 >       | rightTurn a b c       = h
@@ -177,7 +177,7 @@ the function `allChains` finds all alowed pairs $p$ and $q$, and the chains of
 vertices (along the convex hull) connecting $p$ to $q$ and $q$ to $p$.
 
 > type Chain = Array Int Point
->
+
 > allChains                 :: ConvexHull -> [(Point,Point,(Chain,Chain))]
 > allChains (ConvexHull ch) =
 >     [ (chA ! i, chA ! j, chains chA i j) | i <- [1..n-2], j <- rest i ]
@@ -316,11 +316,11 @@ Input & Output
 
 > main :: IO ()
 > main = interact $
->          unlines . map (showValue . maxBaseArea) . readInput . tail . lines
+>          unlines . map (showValue . maxBaseArea) . readInput . drop 1 . lines
 
 -- > main :: IO ()
 -- > main = readFile "testdata_ipe.in" >>=
--- >        putStr . unlines . map (showValue . maxBaseArea) . readInput . tail . lines
+-- >        putStr . unlines . map (showValue . maxBaseArea) . readInput . drop 1 . lines
 
 
 > show' (p,q,(a,b)) = (p,q,elems a, elems b)

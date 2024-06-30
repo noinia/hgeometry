@@ -1,5 +1,15 @@
 {-# LANGUAGE OverloadedStrings          #-}
-module Miso.Event.Extra
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Miso.Event.Extra
+-- Copyright   :  (C) Frank Staals
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Some extra event helpers, in partricular for touch and wheel events
+--
+--------------------------------------------------------------------------------
+module HGeometry.Miso.Event.Extra
   ( WheelDirection(..)
   , onWheel
   , Button(..)
@@ -16,15 +26,16 @@ module Miso.Event.Extra
 
 import qualified Data.Aeson.KeyMap as Aeson
 import           Data.Aeson.Types
-import           HGeometry.Point
+-- import           HGeometry.Point
 import           Miso
 import qualified Miso.Html.Event as Event
 
 --------------------------------------------------------------------------------
 
+-- | Scroll-wheel direction
 data WheelDirection = Up | Down deriving (Show,Eq)
 
-
+-- | A type modelling the mouse buttons
 data Button = LeftButton
             | MiddleButton
             | RightButton

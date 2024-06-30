@@ -44,6 +44,7 @@ common setup
       , hgeometry:kernel
       , hgeometry:ipe
       , hgeometry:svg
+      , hgeometry:miso
       , hiraffe                   >= 0.1
       , containers                >= 0.6
       , vector                    >= 0.13
@@ -59,7 +60,13 @@ common setup
       , array                     >= 0.5
       , aeson                     >= 2.0
       , colour                    >= 2.3.6
-      -- , miso-bulma                >= 0.1.0.0   && < 1
+      , bytestring                >= 0.11
+      , miso-bulma                >= 0.1.0.0       && < 1
+      , file-embed                >= 0.0.15        && < 0.1
+      , mtl                       >= 2.3.1
+      , transformers              >= 0.6.0.0
+      , infinite-list             >= 0.1.1         && < 0.2
+
 
       , ghc-typelits-natnormalise >= 0.7.7
       , ghc-typelits-knownnat     >= 0.7.6
@@ -87,8 +94,8 @@ common setup
 common miso-setup
   build-depends:
         miso
-      , jsaddle
-      , jsaddle-warp
+      , jsaddle                   >= 0.9.9.0       && < 0.10
+      , jsaddle-warp              >= 0.9.9.0       && < 0.10
 
 common quickcheck-setup
     ghc-options:
@@ -169,5 +176,41 @@ executable hgeometry-polyLineDrawing
   import:         setup, miso-setup
   hs-source-dirs: polyLineDrawing
   main-is:        Main.hs
+  -- other-modules:
+  --      Miso.Event.Extra
+
+--------------------------------------------------------------------------------
+-- * Polyline Drawing
+
+executable hgeometry-skia
+  import:         setup, miso-setup
+  hs-source-dirs: skia
+  main-is:        Main.hs
   other-modules:
-       Miso.Event.Extra
+        Options
+        SkiaCanvas
+        SkiaCanvas.Core
+        SkiaCanvas.Render
+        SkiaCanvas.CanvasKit
+        SkiaCanvas.CanvasKit.Core
+        SkiaCanvas.CanvasKit.Color
+        SkiaCanvas.CanvasKit.GeomPrims
+        SkiaCanvas.CanvasKit.Paint
+        SkiaCanvas.CanvasKit.Path
+        SkiaCanvas.CanvasKit.Picture
+        SkiaCanvas.CanvasKit.PictureRecorder
+        SkiaCanvas.CanvasKit.Render
+        SkiaCanvas.CanvasKit.Initialize
+        Modes
+        Layers
+        StrokeAndFill
+        Attributes
+        Color
+        PolyLineMode
+        PolygonMode
+        RectangleMode
+        SelectMode
+        Model
+        Action
+        ToolMenu
+        Base
