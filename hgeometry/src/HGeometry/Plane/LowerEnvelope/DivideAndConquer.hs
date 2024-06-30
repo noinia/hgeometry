@@ -1,24 +1,31 @@
-module HGeometry.LowerEnvelope.DivideAndConquer
+module HGeometry.Plane.LowerEnvelope.DivideAndConquer
   ( lowerEnvelope
   ) where
 
 import           Control.Lens
+import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
+import qualified Data.Set as Set
 import           Data.Word
+import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Line.PointAndVector
+import           HGeometry.Intersection
+import           HGeometry.Line
+import           HGeometry.Line.General
+import           HGeometry.Line.LineEQ
 import qualified HGeometry.Line.LowerEnvelope as LowerEnvelope
-import           HGeometry.LowerEnvelope.AdjListForm
-import           HGeometry.LowerEnvelope.EpsApproximation
-import qualified HGeometry.LowerEnvelope.Naive as Naive
-import           HGeometry.LowerEnvelope.Sample
-import           HGeometry.LowerEnvelope.Type
-import           HGeometry.LowerEnvelope.VertexForm
+import           HGeometry.Line.PointAndVector
+import           HGeometry.Plane.LowerEnvelope.AdjListForm
+import           HGeometry.Plane.LowerEnvelope.EpsApproximation
+import qualified HGeometry.Plane.LowerEnvelope.Naive as Naive
+import           HGeometry.Plane.LowerEnvelope.Type
+import           HGeometry.Plane.LowerEnvelope.VertexForm
 import           HGeometry.Point
 import           HGeometry.Properties
+import           HGeometry.Vector
 import           Witherable
 --------------------------------------------------------------------------------
 
@@ -37,19 +44,23 @@ eps = 1/8 -- TODO figure out what this had to be again.
 lowerEnvelope    :: ( Plane_ plane r
                     , Ord r, Fractional r, Foldable1 f, Functor f, Ord plane
                     , Show plane, Show r
+
+
+                    , Intersection (VerticalOrLineEQ r :+ plane) (VerticalOrLineEQ r :+ plane)
+                      ~ Maybe (LineLineIntersection (VerticalOrLineEQ r :+ plane))
                     ) => f plane -> LowerEnvelope plane
 lowerEnvelope hs = case verifyNotAllColinear hs of
-    JustOnePlane h  -> ParallelStrips $ Set.singleton (ParallelPlane h)
+    JustOnePlane h  -> ParallelStrips $ Set.singleton (h^.re _Wrapped')
     AllColinear v   -> let lines = fmap (toLine v) hs
                            env   = LowerEnvelope.lowerEnvelope lines
                        in ParallelStrips $ fromEnv env
-    NonDegenerate _ -> fromVertexForm . lowerEnvelopeVertexForm $ hs
+    NonDegenerate _ -> fromVertexForm hs . lowerEnvelopeVertexForm $ hs
 
+toLine :: Vector 2 r -> plane -> LineEQ r :+ plane
+toLine = undefined
 
-toLine :: Vector 2 r -> plane -> General r :+ plane
-toLine undefined
-
-fromEnv :: LowerEnvelopeF g (Point 2 r) (General r :+ plane) -> Set.Set (ParallelPlane plane)
+fromEnv :: ( g ~ [])
+        => LowerEnvelope.LowerEnvelopeF g (Point 2 r) (LineEQ r :+ plane) -> Set.Set (ParallelPlane plane)
 fromEnv = undefined
 
 
@@ -63,39 +74,48 @@ data VerifyDegenerate plane r = JustOnePlane plane
                               deriving (Show,Eq)
 
 -- | Verifies that not all planes are colinear.
-verifyNotAllColinear    :: ( Plane_ plane r
+verifyNotAllColinear    :: forall f plane r.
+                           ( Plane_ plane r
                            , Ord r, Fractional r, Foldable1 f, Ord plane
                            , Show plane, Show r
-                           ) => f plane -> VerifyDegenrate plane (NumType plane)
+                           ) => f plane -> VerifyDegenerate plane r
 verifyNotAllColinear hs = findOnParalellPlanes (toNonEmpty hs)
   where
     -- try to find two non-parallel planes h1 h2
+    findOnParalellPlanes              :: NonEmpty plane -> VerifyDegenerate plane r
     findOnParalellPlanes (h1 :| rest) = case NonEmpty.nonEmpty rest of
       Nothing            -> JustOnePlane h1
       Just (h2 :| rest') -> case direction h1 h2 of
         Left h' -> findOnParalellPlanes (h' :| rest')
         Right l -> findThirdPlane h1 h2 l rest -- find a third plane
-  where
-    -- | Tries to compute the vector of the line in which the two planes intersect,
+
+    -- Tries to compute the vector of the line in which the two planes intersect,
     -- returns this vector (if the intersection line exists), or the lowest plane if one
     -- is always below the other.
+    direction       :: plane -> plane -> Either plane (Vector 2 r)
     direction h1 h2 = case intersectionLine h1 h2 of
-      Nothing | evalAt' origin h1 <= evalAt' origin h2 -> Left h1
-              | otherwise                              -> Left h2
-      Just l                                           -> Right $ toPV (l^.direction)
+      Nothing | heightOf h1 <= heightOf h2 -> Left h1
+              | otherwise                  -> Left h2
+      Just l                               -> Right $ case l of
+        VerticalLineThrough _    -> Vector2 0 1
+        NonVertical (LineEQ a _) -> Vector2 1 a
 
-    findThirdPlane h1 h2 l = go
+    heightOf = evalAt (origin :: Point 2 r)
+
+
+    findThirdPlane h1 h2 v = go
       where
         go = \case
-          []                                              -> AllColinear v
-          (h3 : rest)
-            | direction h1 h3 `isParallelTo2` l -> go rest
-            | otherwise                                   -> NonDegnerate $ Vector3 h1 h2 h3
+          []                                    -> AllColinear v
+          (h3 : rest) -> case direction h1 h3 of
+            Left _  -> go rest -- h3 is parallel to h1, so simply continue the search
+                               -- note that we don't really care if h1 or h3 is the lowest
+            Right u | u  `isParallelTo'` v      -> go rest
+                    | otherwise                 -> NonDegenerate $ Vector3 h1 h2 h3
 
-    toPV = \case
-      VerticalLineThrough x  -> verticalLine x
-      NonLinear (LineEQ a b) -> fromLinearFunction a b
-
+    isParallelTo' (Vector2 ux uy) (Vector2 vx vy) = denom == 0
+      where
+        denom = vy * ux - vx * uy
 
 -- | Compute the vertices of the lower envelope
 --
@@ -103,24 +123,32 @@ verifyNotAllColinear hs = findOnParalellPlanes (toNonEmpty hs)
 -- running time: \(O(n \log n)\)
 lowerEnvelopeVertexForm    :: forall f plane r.
                               ( Plane_ plane r
-                              , Ord r, Fractional r, Foldable f, Ord plane
+                              , Ord r, Fractional r, Foldable1 f, Functor f, Ord plane
+                              , Show plane, Show r
                               ) => f plane -> VertexForm plane
 lowerEnvelopeVertexForm hs
     | n <= nZero = Naive.lowerEnvelopeVertexForm hs
-    | otherwise  = undefined
+    | otherwise  = foldMap lowerEnvelopeVertexForm superCells'
+                   -- we recursively compute the lower envelope (in vertex form)
+                   -- for each supercell, and combine (= concatenate) their results.
   where
-    r = undefined
-    s = undefined
+    -- | Computes an 1/r-net of the planes in hs
+    net  = epsilonNet r hs
+    -- Compute the triangulated lower envelope of the net
+    env = triangulatedLowerEnvelope net
+    -- We form supercells out of the triangles of the lower envelop
+    superCells  = formSuperCells s env
+    -- and for each supercell, compute its conflict list.
+    superCells' :: NonEmpty (NonEmpty plane)
+    superCells' = undefined
 
-    as  = epsApproximation r hs
-    env = triangulatedLowerEnvelope as
-
+    r = undefined -- parameter for the 1/r net
+    s = undefined -- parameter for the number of cells per super cell
 
     conflictLists' = computeConflictLists env hs
 
-    superCells = formSuperCells s env
 
-    conflictLists = undefined --- combineConlictLists
+    -- conflictLists = undefined --- combineConlictLists
 
 
 
