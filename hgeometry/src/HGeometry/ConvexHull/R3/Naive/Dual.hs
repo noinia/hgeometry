@@ -1,6 +1,10 @@
 module HGeometry.ConvexHull.R3.Naive.Dual
   ( UpperHull
   , upperHull
+
+
+  , Facet
+  , facets
   ) where
 
 import Control.Lens
@@ -16,7 +20,7 @@ import HGeometry.HalfSpace
 import HGeometry.HyperPlane
 import HGeometry.HyperPlane.NonVertical
 import HGeometry.Intersection (intersects)
-import HGeometry.Plane.LowerEnvelope (LowerEnvelope)
+import HGeometry.Plane.LowerEnvelope
 import HGeometry.Plane.LowerEnvelope.Naive
 import HGeometry.Point
 import HGeometry.Properties
@@ -30,6 +34,9 @@ import HGeometry.Vector
 type UpperHull point = LowerEnvelope (NonVerticalHyperPlane 3 (NumType point) :+ point)
 
 
+-- | Computes the upper hull of a set of points in R^3
+--
+-- O(n^4)
 upperHull :: ( Point_ point 3 r
              , Ord r, Fractional r
              , Foldable1 f, Functor f
@@ -39,10 +46,13 @@ upperHull :: ( Point_ point 3 r
 upperHull = lowerEnvelope . fmap (\p -> dualHyperPlane p :+ p)
 
 
--- newtype DualHyperPlane point = DualHyperPlane point
---   deriving (Show,Read,Eq,Ord)
+type Facet point = [point]
 
--- instance (Point_ point d r, 1 <= d, Num r) => HyperPlane_ (DualHyperPlane point) d r where
-
-
--- instance (Point_ point d r, 1 <= d, Num r) => NonVerticalHyperPlane_ (DualHyperPlane point) d r where
+-- | Outputs the facet sof the upper hull.
+facets :: UpperHull point -> [Facet point]
+facets = \case
+    ParallelStrips _      -> error "facets: parallel strips; no bounded facets"
+    ConnectedEnvelope env -> env^..boundedVertices.traverse.to toFacet
+  where
+    toFacet   :: BoundedVertexF f (plane :+ point) -> Facet point
+    toFacet v = (^.extra) <$> v^.definers.to toList
