@@ -24,8 +24,10 @@ import           HGeometry.Box
 import           HGeometry.Ext
 import           HGeometry.Miso.Event.Extra
 import           HGeometry.Miso.OrphanInstances ()
+import           HGeometry.PlaneGraph
 import           HGeometry.Point
 import           HGeometry.Polygon.Simple
+import           HGeometry.Polygon.Triangulation
 import           HGeometry.Vector
 import           HGeometry.VoronoiDiagram
 import           Layers
@@ -192,7 +194,8 @@ updateModel m = \case
     Id                     -> noEff m
     OnLoad                 -> onLoad m
     CanvasKitAction act    -> m&canvas %%~ flip SkiaCanvas.handleCanvasKitAction act
-    CanvasResizeAction act -> m&canvas %%~ flip SkiaCanvas.handleCanvasResize act
+    CanvasResizeAction act -> do m' <- m&canvas %%~ flip SkiaCanvas.handleCanvasResize act
+                                 m' <# pure ReDraw -- draw the initial items if there are any
 
     CanvasAction ca       -> do
                                m' <- m&canvas %%~ flip SkiaCanvas.handleInternalCanvasAction ca
@@ -266,6 +269,16 @@ updateModel m = \case
                                 drawPicture canvasRef pic
                           liftIO $ putStrLn "Drawn"
                           pure Id
+
+
+    TriangulateSelectedPolygon -> let selectedId = 0 in  -- TODO
+                                  case m^?polygons.ix selectedId of
+      Nothing -> noEff m -- todo; notify on error?
+      Just pg -> let t  = triangulate pg
+                     m' = m&planeGraphs %~ insert t
+                 in m' <# pure ReDraw
+
+
 
     -- startMouseDown = case m^.mode of
     --     PolyLineMode -> noEff m
@@ -553,6 +566,9 @@ navBar_ = let theMainMenuId = "theMainMenuId"
                                                             [text "Convex Hull"]
                                              , navBarSelectedItemA_ []
                                                                     [text "Voronoi Diagram"]
+                                             , navBarItemA_ [ onClick $ TriangulateSelectedPolygon
+                                                            ]
+                                                            [text "Triangulate Polygon"]
                                              ]
                             , navBarItemA_ [onClick Draw ]
                                            [ text "Draw" ]
@@ -644,6 +660,13 @@ drawPermanent m =
       forM_ (m^.points) $ \p ->
         renderPoint (m^.canvas) p
 
+        -- render all planegraphs
+      forM_ (m^.planeGraphs) $ \pg ->
+        renderPlaneGraph (m^.canvas) pg
+
+
+
+
 drawToPicture m = do initialBounds <- ltrbRect (refs^.theCanvasKit) 0 0 r b
                      recordAsPicture (refs^.theCanvasKit) (refs^.pictureRecorder) initialBounds
                                      (\canvasRef ->
@@ -722,6 +745,17 @@ selectAttributes = def&coloring .~ StrokeAndFill darkishGrey (lightGrey&opacity 
 
 --------------------------------------------------------------------------------
 
+
+renderPlaneGraph            :: SkCanvas_ skCanvas
+                            => Canvas R
+                            -> PlaneGraph' R
+                            -> Render skCanvas ()
+renderPlaneGraph canvas' gr = forM_ (gr^..interiorFacePolygons) $ \face ->
+                                renderPolygon canvas' (face :+ ats)
+  where
+    ats = def :: Attributes (SimplePolygon' R)
+
+
 renderPoint                    :: SkCanvas_ skCanvas
                                => Canvas R
                                -> (Point 2 R :+ Attributes (Point 2 R))
@@ -773,9 +807,11 @@ renderPoly canvas' (pl :+ ats) =
        liftR $ setAntiAlias paint True
        Render.polyLine canvas' pl paint
 
-renderPolygon                     :: SkCanvas_ skCanvas
+renderPolygon                     :: ( SkCanvas_ skCanvas
+                                     , Point_ point 2 R
+                                     )
                                   => Canvas R
-                                  -> (SimplePolygon' R :+ Attributes (SimplePolygon' R))
+                                  -> (SimplePolygon point :+ Attributes (SimplePolygon' R))
                                   -> Render skCanvas ()
 renderPolygon canvas' (pg :+ ats) =
     renderColoring (Render.simplePolygon canvas' pg) (ats^.coloring)

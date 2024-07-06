@@ -105,6 +105,9 @@ class IsTransformable g where
   default transformBy :: forall d r. ( DefaultTransformByConstraints g d r )
                       => Transformation (Dimension g) (NumType g) -> g -> g
   transformBy t = over (allPoints @g @g @(Point d r) @(Point d r))
+                      -- the left Point d r is too strict, since that forces
+                      -- that g stores values of type Point d r rather than generic
+                     -- things that implement the point typeclass.
                        (transformBy t)
   {-# INLINE transformBy #-}
 
