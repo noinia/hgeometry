@@ -91,7 +91,8 @@ type TransformationConstraints d r =
 -- | Bunch of constraints we need for the default implementation of transformBy
 type DefaultTransformByConstraints g d r =
   ( d ~ Dimension g, r ~ NumType g
-  , HasPoints g g (Point d r) (Point d r)
+  -- , forall point. HasPoints g g point point
+  -- , Point_ point d r
   , OptMatrix_ (d+1) r
   , Fractional r
   , Has_ Additive_ d r
@@ -101,14 +102,13 @@ type DefaultTransformByConstraints g d r =
 -- | A class representing types that can be transformed using a transformation
 class IsTransformable g where
   transformBy :: Transformation (Dimension g) (NumType g) -> g -> g
-
-  default transformBy :: forall d r. ( DefaultTransformByConstraints g d r )
+  default transformBy :: forall d r point.
+                         ( DefaultTransformByConstraints g d r
+                         , Point_ point d r
+                         , HasPoints g g point point
+                         )
                       => Transformation (Dimension g) (NumType g) -> g -> g
-  transformBy t = over (allPoints @g @g @(Point d r) @(Point d r))
-                      -- the left Point d r is too strict, since that forces
-                      -- that g stores values of type Point d r rather than generic
-                     -- things that implement the point typeclass.
-                       (transformBy t)
+  transformBy t = over (allPoints.asPoint) (transformBy t)
   {-# INLINE transformBy #-}
 
 instance (Fractional r, Has_ Vector_ d r, OptMatrix_ (d+1) r

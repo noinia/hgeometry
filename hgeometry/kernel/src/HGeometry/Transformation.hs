@@ -11,7 +11,8 @@ module HGeometry.Transformation
   , (|.|), identity, inverseOf
 
   , IsTransformable(..)
-  , TransformationConstraints, DefaultTransformByConstraints
+  , TransformationConstraints
+  , DefaultTransformByConstraints
   , OptMatrix_
 
   , translation, scaling, uniformScaling

@@ -98,14 +98,9 @@ instance ( VertexContainer f point
   allPoints = _SimplePolygonF . traversed1
 
 instance ( VertexContainer f point
-         -- , DefaultTransformByConstraints (SimplePolygonF f point) 2 r
-         , Fractional r
+         , DefaultTransformByConstraints (SimplePolygonF f point) 2 r
          , Point_ point 2 r
-         ) => IsTransformable (SimplePolygonF f point) where
-  transformBy t = over (vertices.asPoint) (transformBy t)
-  {-# INLINE transformBy #-}
--- allPoints @g @g @(Point d r) @(Point d r))
---                        (transformBy t)
+         ) => IsTransformable (SimplePolygonF f point)
 
 instance ( VertexContainer f point
          , Point_ point 2 r
