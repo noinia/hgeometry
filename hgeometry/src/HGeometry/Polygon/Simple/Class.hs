@@ -15,8 +15,10 @@ module HGeometry.Polygon.Simple.Class
   ) where
 
 import           Control.Lens
+import           Data.Default.Class
 import qualified Data.Foldable as F
 import           Data.Kind (Constraint)
+import           HGeometry.Ext
 import           HGeometry.Point.Class
 import           HGeometry.Polygon.Class
 import           HGeometry.Vector
@@ -61,6 +63,15 @@ class ( Polygon_ simplePolygon point r
       xs = [ (p^.vector ^+^ q^.vector) ^* (p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord)
            | (p,q) <- poly ^..outerBoundaryEdges   ]
       sum' = F.foldl' (^+^) zero
+
+instance ( SimplePolygon_ simplePolygon point r
+         , Default extra
+         )
+         => SimplePolygon_ (simplePolygon :+ extra) point r where
+  uncheckedFromCCWPoints = (:+ def) . uncheckedFromCCWPoints
+  type ConstructableSimplePolygon (simplePolygon :+ extra) point r =
+         (ConstructableSimplePolygon simplePolygon point r, Default extra)
+  fromPoints = fmap (:+ def) . fromPoints
 
 --------------------------------------------------------------------------------
 
