@@ -8,6 +8,8 @@ module SkiaCanvas.CanvasKit.Picture
 
   , serialize'
   , withPicture'
+
+  , uint8ArrayToByteString
   ) where
 
 import           Control.Lens
@@ -62,18 +64,20 @@ drawPicture canvas pic = void $ canvas ^.js1 ("drawPicture" :: MisoString) pic
 --------------------------------------------------------------------------------
 -- | Serialize a picture to a bytestring representing the 'skp' value
 serialize      :: SkPictureRef -> JSM Lazy.LazyByteString
-serialize pic = serialize' pic >>= convert . coerce
+serialize pic = serialize' pic >>= uint8ArrayToByteString . coerce
+
+
+-- | Converts an IOUint8Array into a lazy bytestring
+uint8ArrayToByteString     :: IOUint8Array -> JSM Lazy.LazyByteString
+uint8ArrayToByteString arr = do n <- ghcjsPure $ TypedArray.length arr
+                                Builder.toLazyByteString <$> go0 n 0
   where
-    convert     :: IOUint8Array -> JSM Lazy.LazyByteString
-    convert arr = do n <- ghcjsPure $ TypedArray.length arr
-                     Builder.toLazyByteString <$> go0 n 0
+    go0 n = go
       where
-        go0 n = go
-          where
-            go i | i == n    = pure mempty
-                 | otherwise = ( \x bs -> Builder.word8 x <> bs
-                             ) <$> TypedArray.unsafeIndex i arr
-                               <*> go (succ i)
+        go i | i == n    = pure mempty
+             | otherwise = ( \x bs -> Builder.word8 x <> bs
+                         ) <$> TypedArray.unsafeIndex i arr
+                           <*> go (succ i)
 
 -- | Serialize a picture into a javascript Uint8Array
 serialize'     :: SkPictureRef -> JSM Uint8Array

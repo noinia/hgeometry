@@ -48,6 +48,7 @@ data Action = Id
 
             | TriangulateSelectedPolygon -- triangulates the selected polygon
 
+            | SavePngFile
 
 
 

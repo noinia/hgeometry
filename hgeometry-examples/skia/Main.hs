@@ -51,6 +51,8 @@ import qualified SkiaCanvas
 import           SkiaCanvas ( mouseCoordinates, dimensions, canvasKitRefs, surfaceRef
                             , Canvas
                             )
+
+import           SkiaCanvas.CanvasKit.Image
 import           SkiaCanvas.CanvasKit hiding (Style(..))
 import           SkiaCanvas.CanvasKit.GeomPrims (ltrbRect)
 import           SkiaCanvas.CanvasKit.Paint (SkPaintRef)
@@ -255,6 +257,14 @@ updateModel m = \case
     SaveSkpFile     -> m <# do pic <- drawToPicture m
                                bs <- serialize pic
                                liftIO $ BS.writeFile "/tmp/foo.skp" bs
+                               pure Id
+
+    SavePngFile     -> m <# do let canvasKit = m^?!canvas.canvasKitRefs._Just.canvasKitRef
+                                   surface'  = m^?!canvas.surfaceRef
+                               flush surface'
+                               withImageSnapshot surface' FullScreen $ \img -> do
+                                 bs <- encodeToBytes canvasKit img Png def
+                                 liftIO $ BS.writeFile "/tmp/foo.png" bs
                                pure Id
 
     LoadSkpFile     -> m <#
@@ -557,7 +567,9 @@ navBar_ = let theMainMenuId = "theMainMenuId"
                                                             [text "Open"]
                                              , navBarDivider_
                                              , navBarSelectedItemA_ [ onClick SaveSkpFile ]
-                                                                    [text "Save"]
+                                                                    [text "Save Skp"]
+                                             , navBarItemA_ [ onClick SavePngFile ]
+                                                            [text "Save Png"]
                                              ]
                             , navBarSubMenu_ [ navBarItemA_ []
                                                             [text "Run"]
