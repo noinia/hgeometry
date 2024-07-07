@@ -516,6 +516,26 @@ library miso
     --     Miso.String.Util
 
 
+
+--------------------------------------------------------------------------------
+-- * HGeometry GeoJSON
+
+library geojson
+    import: all-setup
+    visibility: public
+    hs-source-dirs: geojson/src
+    build-depends:
+       geojson        >= 4.1.1  && < 5.0
+    exposed-modules:
+       HGeometry.GeoJSON
+
+    -- other-modules:
+    --     HGeometry.Point.Type
+    --     HGeometry.Point.Orientation.Degenerate
+    --     HGeometry.Point.Quadrants
+
+
+
 --------------------------------------------------------------------------------
 -- * HGeometry-quickcheck
 
