@@ -1,68 +1,90 @@
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE TemplateHaskell            #-}
 module GeometryStore
-  ( GeometryStore, GeometryStore'
+  ( GeometryStore
   , empty
   , Key
   , insertNew
-  , insertNew'
 
   ) where
 
+import           Attributes
+import           Base
 import           Control.Lens
-import qualified Data.Dependent.Map as DMap
-import           Data.Dependent.Sum
-import           Data.GADT.Compare
-import           Data.GADT.Show
-import           Unsafe.Coerce (unsafeCoerce)
+import qualified Data.EnumMap as EnumMap
+import qualified Data.EnumSet as EnumSet
+import           GeometryStore.Helper (lensFieldNamer)
+import           HGeometry.Ext
+import           HGeometry.PlaneGraph
+import           HGeometry.Point
+import           HGeometry.Polygon.Simple
+import           HGeometry.Polygon.Triangulation
+import           PolyLineMode
+import           PolygonMode
+import           RectangleMode
 --------------------------------------------------------------------------------
 
-newtype Key v = Key Int
-  deriving (Show,Eq,Ord)
-
-
-instance GEq Key where
-  geq (Key i) (Key j)
-    | i == j    = Just $ unsafeCoerce Refl
-                  -- this is safe since we keep the Keys to ourselves
-    | otherwise = Nothing
-
-instance GCompare Key where
-  gcompare (Key i) (Key j) = case i `compare` j of
-                               LT -> GLT
-                               EQ -> unsafeCoerce GEQ
-                                 -- this is safe since we keep the Keys to ourselves
-                               GT -> GGT
-
-instance GShow Key where
-  gshowsPrec = showsPrec
+newtype Key = Key Int
+  deriving stock   (Show)
+  deriving newtype (Eq,Ord,Enum)
 
 --------------------------------------------------------------------------------
 
-type GeometryStore' = GeometryStore Identity
+data Geom = G_Point      (Point 2 R :+ Attributes (Point 2 R))
+          | G_PolyLine   (PolyLine' R :+ Attributes (PolyLine' R))
+          | G_Polygon    (SimplePolygon' R :+ Attributes (SimplePolygon' R))
+          | G_Rect       (Rectangle' R :+ Attributes (Rectangle' R))
+          | G_PlaneGraph (PlaneGraph' R)
+          deriving (Show,Eq)
 
-newtype GeometryStore f = GeometryStore (DMap.DMap Key f)
+data MyWorld
 
-deriving newtype instance (Show (DMap.DMap Key f)) => Show (GeometryStore f)
-deriving newtype instance Eq   (DMap.DMap Key f) => Eq   (GeometryStore f)
+type PlaneGraph' r = PlaneGraph MyWorld (Point 2 r) PolygonEdgeType PolygonFaceData
 
-_DMap :: Iso (GeometryStore f) (GeometryStore g) (DMap.DMap Key f) (DMap.DMap Key g)
-_DMap = coerced
+--------------------------------------------------------------------------------
+
+data GeometryStore =
+  GeometryStore { _store       :: EnumMap.EnumMap Key Geom
+                  -- ^ place where we store the actual geometries
+                , _points      :: EnumSet.EnumSet Key
+                  -- ^ indices of all points
+                , _polyLines   :: EnumSet.EnumSet Key
+                  -- ^ indices of all polylines
+                , _polygons    :: EnumSet.EnumSet Key
+                  -- ^ indices of all polygons
+                , _planeGraphs :: EnumSet.EnumSet Key
+                  -- ^  indices of all planeGraphs
+                } deriving (Show,Eq)
+
+
+-- | Generate actuall lenses of the form 'geomstoreMyFieldName'
+makeLensesWith (defaultFieldRules&lensField .~ lensFieldNamer) ''GeometryStore
+
+
+points :: IndexedFold Key GeometryStore (Point 2 R)
+points = undefined
+  -- TODO
+
+--------------------------------------------------------------------------------
 
 -- | Creates an empty geometry store
-empty :: GeometryStore f
-empty = GeometryStore DMap.empty
+empty :: GeometryStore
+empty =  GeometryStore
+         { _store       = mempty
+         , _points      = mempty
+         , _polyLines   = mempty
+         , _polygons    = mempty
+         , _planeGraphs = mempty
+         }
+
 
 -- | Inserts a new element in the store (with a new key). Returns the new key and the
 -- updated store.
-insertNew         :: f v -> GeometryStore f -> (Key v, GeometryStore f)
-insertNew x store = (k, store&_DMap %~ DMap.insert k x)
-  where
-    k = case DMap.lookupMax $ store^._DMap of
-          Nothing            -> Key 0
-          Just (Key m :=> _) -> Key (m+1)
+insertNew         :: v -> GeometryStore -> (Key, GeometryStore)
+insertNew x store = undefined
 
--- | Insert a new element into the GeometryStore
-insertNew'   :: v -> GeometryStore' -> (Key v, GeometryStore')
-insertNew' x = insertNew (Identity x)
+  -- (k, store&_DMap %~ DMap.insert k (Identity x))
+  -- where
+  --   k = case DMap.lookupMax $ store^._DMap of
+  --         Nothing            -> Key 0
+  --         Just (Key m :=> _) -> Key (m+1)
