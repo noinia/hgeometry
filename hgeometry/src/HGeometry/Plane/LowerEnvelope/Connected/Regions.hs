@@ -134,15 +134,15 @@ fromVertexForm = Map.mapWithKey sortAroundBoundary . Map.foldMapWithKey (\v defs
 sortAroundBoundary            :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
                               => plane -> Set (Point 3 r, Set plane) -> Region (Point 2 r)
 sortAroundBoundary h vertices = case map project (Set.toList vertices) of
-    []           -> error "absurd: every plane has a non-empty set of incident vertices"
-    [v]          -> Unbounded undefined [fst v] undefined
-    [u,v]        -> Unbounded undefined [fst u, fst v]  undefined
-    vs@((p,_):_) -> let vertices' = sortAround' p vs
-                        edges     = zip vertices' (tail vertices' <> vertices')
-                        f         = fst . fst
-                    in case List.break (isInvalid h) edges of
-                         (vs, (u,v) : ws) -> Unbounded undefined (map f $ ws <> vs) undefined
-                         (_, [])          -> Bounded $ map fst vertices'
+    []                    -> error "absurd: every plane has a non-empty set of incident vertices"
+    [(v,defsV)]           -> Unbounded undefined [v] undefined
+    [(u,defsU),(v,defsV)] -> Unbounded undefined [u, v]  undefined
+    vs@((p,_):_)          -> let vertices' = sortAround' p vs
+                                 edges     = zip vertices' (drop 1 vertices' <> vertices')
+                                 f         = fst . fst
+                             in case List.break (isInvalid h) edges of
+                                  (vs, (u,v) : ws) -> Unbounded undefined (map f $ ws <> vs) undefined
+                                  (_,  [])         -> Bounded $ map fst vertices'
 
 
 -- | Test if (u,v) is a valid edge bounding the region of h.
@@ -151,9 +151,8 @@ isInvalid                          :: (Plane_ plane r, Ord r, Fractional r)
                                    -> ((Point 2 r, Set plane), (Point 2 r, Set plane)) -> Bool
 isInvalid h ((u,defsU), (v,defsV)) = all hClosest defsU && all hClosest defsV
   where
-    w          = (v .-. u) ^/ 2   -- vector from u to v
-    m          = u .+^ w          -- midpoint of uv
-    v'         = m .+^ rot90Cw w  --
+    w           = (v .-. u) ^/ 2         -- vector from u to the midpoint m of uv
+    v'          = u .+^ w .+^ rot90Cw w  -- u .+^ w is midpoint,
     hClosest h' = evalAt v' h <= evalAt v' h'
     -- we essentially rotate the directed segment uv CW by 90 degrees around its
     -- center. Let u'v' denote the resulting segment. Since uv is in CCW order the point u'
