@@ -61,7 +61,7 @@ data GeometryStore =
 makeLensesWith (defaultFieldRules&lensField .~ lensFieldNamer) ''GeometryStore
 
 
-points :: IndexedFold Key GeometryStore (Point 2 R)
+points :: IndexedTraversal' Key GeometryStore (Point 2 R :+ Attributes (Point 2 r))
 points = undefined
   -- TODO
 
@@ -69,13 +69,13 @@ points = undefined
 
 -- | Creates an empty geometry store
 empty :: GeometryStore
-empty =  GeometryStore
-         { _store       = mempty
-         , _points      = mempty
-         , _polyLines   = mempty
-         , _polygons    = mempty
-         , _planeGraphs = mempty
-         }
+empty = GeometryStore
+        { _store       = mempty
+        , _points      = mempty
+        , _polyLines   = mempty
+        , _polygons    = mempty
+        , _planeGraphs = mempty
+        }
 
 
 -- | Inserts a new element in the store (with a new key). Returns the new key and the
