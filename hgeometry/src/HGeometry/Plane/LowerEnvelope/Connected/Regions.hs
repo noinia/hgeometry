@@ -1,3 +1,4 @@
+{-# LANGUAGE  UndecidableInstances  #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Plane.LowerEnvelope.Regions
@@ -21,13 +22,15 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
   , intersectionLine
   ) where
 
+import           Control.Lens
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map (Map)
 import qualified Data.Map as Map
-import           Data.Sequence (Seq)
-import qualified Data.Sequence as Seq
+import           Data.Maybe (mapMaybe)
+-- import           Data.Sequence (Seq)
+-- import qualified Data.Sequence as Seq
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import           HGeometry.Combinatorial.Util
@@ -38,8 +41,8 @@ import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.Line.General
 import           HGeometry.Point
-import           HGeometry.Polygon.Convex
-import           HGeometry.Properties
+-- import           HGeometry.Polygon.Convex
+-- import           HGeometry.Properties
 import           HGeometry.Vector
 
 --------------------------------------------------------------------------------
@@ -49,12 +52,13 @@ type CircularList a = [a]
 data Region point = Bounded   (CircularList point)
                   | Unbounded (HalfLine point)
                               [point]
-                    -- in CCW order, includes the starting points of the
+                    -- NonEmpty, and in CCW order, includes the starting points of the
                     -- halflines (which may be the same anyway.)
                               (HalfLine point)
 
--- deriving instance (Eq point, Eq (NumType point), Dimension point ~ 2)   => Eq (Region point)
--- deriving instance (Show point, Show (NumType point), Point_ point 2 r) => Show (Region point)
+deriving instance (Eq point,   Eq   (HalfLine point)) => Eq   (Region point)
+deriving instance (Show point, Show (HalfLine point)) => Show (Region point)
+
 
 
 type MinimizationDiagram r plane = Map plane (Region (Point 2 r))
@@ -93,6 +97,10 @@ intersectionLine (Plane_ a1 b1 c1) (Plane_ a2 b2 c2)
                   -- the planes don't intersect at all
   where
     diffB = b1 - b2
+
+
+
+
 
 -- | Computes there the three planes intersect
 intersectionPoint                                    :: ( Plane_ plane r, Ord r, Fractional r)
@@ -135,14 +143,73 @@ sortAroundBoundary            :: (Plane_ plane r, Ord r, Fractional r, Ord plane
                               => plane -> Set (Point 3 r, Set plane) -> Region (Point 2 r)
 sortAroundBoundary h vertices = case map project (Set.toList vertices) of
     []                    -> error "absurd: every plane has a non-empty set of incident vertices"
-    [(v,defsV)]           -> Unbounded undefined [v] undefined
-    [(u,defsU),(v,defsV)] -> Unbounded undefined [u, v]  undefined
+    [v]           -> singleVertex h v
+      -- [(u,defsU),(v,defsV)] -> Unbounded undefined [u, v]  undefined
     vs@((p,_):_)          -> let vertices' = sortAround' p vs
                                  edges     = zip vertices' (drop 1 vertices' <> vertices')
                                  f         = fst . fst
                              in case List.break (isInvalid h) edges of
-                                  (vs, (u,v) : ws) -> Unbounded undefined (map f $ ws <> vs) undefined
+                                  (vs, (u,v) : ws) ->
+                                    Unbounded undefined (map f $ ws <> vs <> [(u,v)]) undefined
                                   (_,  [])         -> Bounded $ map fst vertices'
+
+-- | Given a plane h, and the single vertex v incident to the region of h, computes the
+-- unbounded region for h.
+singleVertex            :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
+                        => plane -> (Point 2 r, Set plane) -> Region (Point 2 r)
+singleVertex h (v,defs) =
+    case mapMaybe withIntersectionLine . Set.toList $ Set.delete h defs of
+      (h1:h2:_) -> let (w1, w2) = determineDirection h1 h2
+                   in Unbounded (HalfLine v w1) [v] (HalfLine v w2)
+      _         -> error "absurd: too few planes"
+  where
+    withIntersectionLine h' = (\w -> (h', LinePV v w)) <$> intersectionVec h h'
+    determineDirection h1 h2 = case (h `onSideOf` h1,  h `onSideOf` h2) of
+      (Left w1,  Left w2)  -> (w2,w1)
+      (Left w1,  Right w2) -> (w1,w2)
+      (Right w1, Left w2)  -> (w1,w2)
+      (Right w1, Right w2) -> (w2,w1)
+
+-- | given: a plane h, and (h',l) where l is the intersection line of h and h'.  computes
+-- the side of l on which h is the lowest. (In both cases we tag it with the vector
+-- corresponding of the line.)
+--
+onSideOf :: (Plane_ plane r, Ord r, Num r)
+         => plane -> (plane, LinePV 2 r) -> Either (Vector 2 r) (Vector 2 r)
+h `onSideOf` (h', LinePV p v)
+    | evalAt q h <= evalAt q h' = Right v
+    | otherwise                 = Left v
+  where
+    q = p .+^ rot90Cw v -- q should be a point in the right halfplane of l.
+
+
+-- | Returns a vector indicating the intersection direction
+intersectionVec      :: ( Plane_ plane r, Ord r, Fractional r)
+                     => plane -> plane -> Maybe (Vector 2 r)
+intersectionVec h h' = intersectionLine h h' <&> \case
+    VerticalLineThrough _    -> Vector2 0 1
+    NonVertical (LineEQ a _) -> Vector2 1 a
+
+
+  --
+
+-- -- | Computes the line in which the two planes intersect. The returned line will have h to
+-- -- its left and h' to its right.
+-- --
+-- --
+-- intersectionLine'      :: ( Plane_ plane r, Ord r, Fractional r)
+--                        => plane -> plane -> Maybe (LinePV 2 r)
+-- intersectionLine' h h' = intersectionLine h h' <&> \case
+--     VerticalLineThrough x -> reorient (LinePV (Point2 x 0) (Vector2 0 1)) (Point2 (x-1) 0)
+--     NonVertical l         -> let l'@(LinePV p _) = fromLineEQ l
+--                              in reorient l' (p&yCoord %~ (+1))
+--   where
+--     -- make sure h is to the left of the line
+--     reorient l q = let f = evalAt q
+--                    in if f h <= f h' then l else l&direction %~ negated
+--     fromLineEQ (LineEQ a b) = fromLinearFunction a b
+
+
 
 
 -- | Test if (u,v) is a valid edge bounding the region of h.
