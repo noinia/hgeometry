@@ -34,7 +34,7 @@ import           Data.Maybe (mapMaybe)
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import           HGeometry.Combinatorial.Util
-import           HGeometry.HalfLine
+-- import           HGeometry.HalfLine
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Intersection
@@ -49,19 +49,14 @@ import           HGeometry.Vector
 
 type CircularList a = [a]
 
-data Region point = Bounded   (CircularList point)
-                  | Unbounded (HalfLine point)
-                              [point]
-                    -- NonEmpty, and in CCW order, includes the starting points of the
-                    -- halflines (which may be the same anyway.)
-                              (HalfLine point)
+data Region r point = Bounded   (CircularList point)
+                    | Unbounded (Vector 2 r) -- vector indicating the direction of the unbounded edge
+                                (NonEmpty point)
+                    -- ^ in CCW order,
+                                (Vector 2 r)
+                      deriving (Show,Eq)
 
-deriving instance (Eq point,   Eq   (HalfLine point)) => Eq   (Region point)
-deriving instance (Show point, Show (HalfLine point)) => Show (Region point)
-
-
-
-type MinimizationDiagram r plane = Map plane (Region (Point 2 r))
+type MinimizationDiagram r plane = Map plane (Region r (Point 2 r))
 -- every plane produces at most one region.
 
 --------------------------------------------------------------------------------
@@ -140,35 +135,70 @@ fromVertexForm = Map.mapWithKey sortAroundBoundary . Map.foldMapWithKey (\v defs
 -- | Given a plane h, and the set of vertices incident to h, compute the corresponding
 -- region in the minimization diagram.
 sortAroundBoundary            :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
-                              => plane -> Set (Point 3 r, Set plane) -> Region (Point 2 r)
+                              => plane -> Set (Point 3 r, Set plane) -> Region r (Point 2 r)
 sortAroundBoundary h vertices = case map project (Set.toList vertices) of
-    []                    -> error "absurd: every plane has a non-empty set of incident vertices"
-    [v]           -> singleVertex h v
-      -- [(u,defsU),(v,defsV)] -> Unbounded undefined [u, v]  undefined
-    vs@((p,_):_)          -> let vertices' = sortAround' p vs
-                                 edges     = zip vertices' (drop 1 vertices' <> vertices')
-                                 f         = fst . fst
-                             in case List.break (isInvalid h) edges of
-                                  (vs, (u,v) : ws) ->
-                                    Unbounded undefined (map f $ ws <> vs <> [(u,v)]) undefined
-                                  (_,  [])         -> Bounded $ map fst vertices'
+    []              -> error "absurd: every plane has a non-empty set of incident vertices"
+    [v]             -> let (u,p,w) = singleVertex h v in Unbounded u (NonEmpty.singleton p) w
+    verts@((p,_):_) -> let vertices' = sortCCWAround p verts
+                           edges     = zip vertices' (drop 1 vertices' <> vertices')
+                       in case List.break (isInvalid h) edges of
+                            (vs, (u,v) : ws) -> let chain = NonEmpty.fromList . map (fst . fst)
+                                                          $ ws <> vs <> [(u,v)]
+                                                in unboundedRegion h chain v u
+                            (_,  [])         -> Bounded $ map fst vertices'
 
 -- | Given a plane h, and the single vertex v incident to the region of h, computes the
 -- unbounded region for h.
-singleVertex            :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
-                        => plane -> (Point 2 r, Set plane) -> Region (Point 2 r)
-singleVertex h (v,defs) =
-    case mapMaybe withIntersectionLine . Set.toList $ Set.delete h defs of
-      (h1:h2:_) -> let (w1, w2) = determineDirection h1 h2
-                   in Unbounded (HalfLine v w1) [v] (HalfLine v w2)
+-- singleVertex            :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
+--                         => plane -> (Point 2 r, Set plane) -> Region r (Point 2 r)
+singleVertex           :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
+                       => plane -> (Point 2 r, Set plane) -> (Vector 2 r, Point 2 r, Vector 2 r)
+singleVertex h (v,defs) = case mapMaybe withIntersectionLine . Set.toList $ Set.delete h defs of
+      (h1:h2:_) -> case (h `onSideOf` h1,  h `onSideOf` h2) of
+                     (Left w1,  Left w2)  -> (w2,v,w1)
+                     (Left w1,  Right w2) -> (w1,v,w2)
+                     (Right w1, Left w2)  -> (w1,v,w2)
+                     (Right w1, Right w2) -> (w2,v,w1)
       _         -> error "absurd: too few planes"
   where
     withIntersectionLine h' = (\w -> (h', LinePV v w)) <$> intersectionVec h h'
-    determineDirection h1 h2 = case (h `onSideOf` h1,  h `onSideOf` h2) of
-      (Left w1,  Left w2)  -> (w2,w1)
-      (Left w1,  Right w2) -> (w1,w2)
-      (Right w1, Left w2)  -> (w1,w2)
-      (Right w1, Right w2) -> (w2,w1)
+
+-- | Given:
+--
+-- - plane h bounding an unbounded region R
+-- - the chain of vertices bounding R
+-- - the first vertex v (with its definers)
+-- - the last vertex v (with its definers)
+--
+-- computes the actual region R. In particular, we compute the direction that the
+-- unbounded edges have.
+unboundedRegion              :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
+                             => plane
+                             -> NonEmpty (Point 2 r)
+                             -> (Point 2 r, Set plane) -> (Point 2 r, Set plane)
+                             -> Region r (Point 2 r)
+unboundedRegion h chain v u  = Unbounded wv chain wu
+  where
+    (v1,_,v2) = singleVertex h v
+    (u1,_,u2) = singleVertex h u
+
+    wv = pick CW  (fst u) (fst v) v1 v2
+    wu = pick CCW (fst v) (fst u) u1 u2
+
+    pick dir p q w z
+      | ccw p q (q .+^ w) == dir = w
+      | otherwise                = z
+  -- overall idea: we reduce to the single vertex case; essentially computing the
+  -- region of h in the minimization diagram with respect to just the definers of v.
+  -- this region has two unbounded edges that have directions v1 and v2.
+  --
+  -- the direction wv of the unbounded edge incident to v is one of these two vectors;
+  -- either v1 or v2. In particular, it is the direction so that if we go from u to v
+  -- we make a right-turn (= clockwise turn).
+  --
+  -- We symettrically compute the diagram around u, giving us two candidates u1 and
+  -- u2. Going from v to u we have to make a CCW turn, so we pick that direction as wu.
+
 
 -- | given: a plane h, and (h',l) where l is the intersection line of h and h'.  computes
 -- the side of l on which h is the lowest. (In both cases we tag it with the vector
@@ -190,28 +220,6 @@ intersectionVec h h' = intersectionLine h h' <&> \case
     VerticalLineThrough _    -> Vector2 0 1
     NonVertical (LineEQ a _) -> Vector2 1 a
 
-
-  --
-
--- -- | Computes the line in which the two planes intersect. The returned line will have h to
--- -- its left and h' to its right.
--- --
--- --
--- intersectionLine'      :: ( Plane_ plane r, Ord r, Fractional r)
---                        => plane -> plane -> Maybe (LinePV 2 r)
--- intersectionLine' h h' = intersectionLine h h' <&> \case
---     VerticalLineThrough x -> reorient (LinePV (Point2 x 0) (Vector2 0 1)) (Point2 (x-1) 0)
---     NonVertical l         -> let l'@(LinePV p _) = fromLineEQ l
---                              in reorient l' (p&yCoord %~ (+1))
---   where
---     -- make sure h is to the left of the line
---     reorient l q = let f = evalAt q
---                    in if f h <= f h' then l else l&direction %~ negated
---     fromLineEQ (LineEQ a b) = fromLinearFunction a b
-
-
-
-
 -- | Test if (u,v) is a valid edge bounding the region of h.
 isInvalid                          :: (Plane_ plane r, Ord r, Fractional r)
                                    => plane
@@ -232,5 +240,5 @@ rot90Cw (Vector2 vx vy) = Vector2 vy (-vx)
 project                     :: (Point 3 r, a) -> (Point 2 r, a)
 project (Point3 x y _, loc) = (Point2 x y, loc)
 
-sortAround'   :: (Ord r, Num r) => Point 2 r -> [(Point 2 r, a)] -> [(Point 2 r, a)]
-sortAround' c = List.sortBy (\(p,_) (q,_) -> ccwCmpAround c p q <> cmpByDistanceTo c p q)
+sortCCWAround   :: (Ord r, Num r) => Point 2 r -> [(Point 2 r, a)] -> [(Point 2 r, a)]
+sortCCWAround c = List.sortBy (\(p,_) (q,_) -> ccwCmpAround c p q <> cmpByDistanceTo c p q)
