@@ -15,6 +15,8 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
   , CircularList
   , fromVertexForm
 
+  , bruteForceLowerEnvelope
+
   , VertexForm
   , computeVertexForm
 
@@ -42,7 +44,7 @@ import           HGeometry.Line
 import           HGeometry.Line.General
 import           HGeometry.Point
 -- import           HGeometry.Polygon.Convex
--- import           HGeometry.Properties
+import           HGeometry.Properties
 import           HGeometry.Vector
 
 --------------------------------------------------------------------------------
@@ -54,18 +56,35 @@ data Region r point = Bounded   (CircularList point)
                                 (NonEmpty point)
                     -- ^ in CCW order,
                                 (Vector 2 r)
-                      deriving (Show,Eq)
+                      deriving stock (Show,Eq,Functor,Foldable,Traversable)
+
+
+type instance NumType   (Region r point) = r
+type instance Dimension (Region r point) = Dimension point
 
 type MinimizationDiagram r plane = Map plane (Region r (Point 2 r))
 -- every plane produces at most one region.
+
+type instance NumType   (MinimizationDiagram r plane) = r
+type instance Dimension (MinimizationDiagram r plane) = 2
 
 --------------------------------------------------------------------------------
 -- * The naive O(n^4) time algorithm.
 
 type VertexForm r plane = Map (Point 3 r) (Set plane)
 
-computeVertexForm        :: (Plane_ plane r, Ord plane, Ord r, Fractional r, Foldable f)
-                         => f plane -> VertexForm r plane
+
+-- | Computes the lower envelope in O(n^4) time.
+bruteForceLowerEnvelope :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
+                           , Foldable set
+                           ) => set plane -> MinimizationDiagram r plane
+bruteForceLowerEnvelope = fromVertexForm . computeVertexForm
+
+-- | Computes the vertices of the lower envelope
+--
+-- O(n^4) time.
+computeVertexForm        :: (Plane_ plane r, Ord plane, Ord r, Fractional r, Foldable set)
+                         => set plane -> VertexForm r plane
 computeVertexForm planes = foldMap (asVertex planes) $ uniqueTriplets planes
 
 asVertex             :: (Plane_ plane r, Foldable f, Ord plane, Ord r, Fractional r)
@@ -92,10 +111,6 @@ intersectionLine (Plane_ a1 b1 c1) (Plane_ a2 b2 c2)
                   -- the planes don't intersect at all
   where
     diffB = b1 - b2
-
-
-
-
 
 -- | Computes there the three planes intersect
 intersectionPoint                                    :: ( Plane_ plane r, Ord r, Fractional r)

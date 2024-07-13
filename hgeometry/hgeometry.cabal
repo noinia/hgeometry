@@ -400,6 +400,9 @@ library
         HGeometry.Plane.LowerEnvelope.AdjListForm
         HGeometry.Plane.LowerEnvelope.Connected
 
+        -- newer attempt:
+        HGeometry.Plane.LowerEnvelope.Connected.Regions
+
 
         HGeometry.VoronoiDiagram
 
@@ -433,7 +436,6 @@ library
         HGeometry.Plane.LowerEnvelope.Connected.Type
         HGeometry.Plane.LowerEnvelope.Connected.FromVertexForm
         -- HGeometry.Plane.LowerEnvelope.Sample
-        HGeometry.Plane.LowerEnvelope.Connected.Regions
 
         HGeometry.Plane.LowerEnvelope.DivideAndConquer
         HGeometry.Plane.LowerEnvelope.EpsApproximation
@@ -678,6 +680,7 @@ test-suite hspec
       ClosestPair.ClosestPairSpec
       IntervalTreeSpec
       LowerEnvelope.NaiveSpec
+      LowerEnvelope.RegionsSpec
       Polygon.Convex.ConvexSpec
       Polygon.TriangulateSpec
       Polygon.Triangulation.MakeMonotoneSpec
@@ -714,6 +717,7 @@ test-suite with-ipe-hspec
       Polygon.Convex.ConvexSpec
       Polygon.Convex.ConvexSpec
       VoronoiDiagram.VoronoiSpec
+      Plane.LowerEnvelopeSpec
       LineSegmentSpec
       HalfLineSpec
       Polygon.Triangulation.TriangulateMonotoneSpec
