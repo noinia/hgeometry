@@ -52,10 +52,18 @@ import           HGeometry.Vector
 type CircularList a = [a]
 
 data Region r point = Bounded   (CircularList point)
-                    | Unbounded (Vector 2 r) -- vector indicating the direction of the unbounded edge
+                    | Unbounded (Vector 2 r)
+                                -- ^ vector indicating the direction of the unbounded edge
+                                -- incident to the first vertex. Note that this vector
+                                -- thus points "away" from the first vertex (towards
+                                -- +infty). So in some sence it is in opposite direction
+                                -- compared to the other edges.
                                 (NonEmpty point)
-                    -- ^ in CCW order,
+                                -- ^ the vertices in CCW order,
                                 (Vector 2 r)
+                                -- ^ the vector indicating the direction of the unbounded
+                                -- edge incident to the last vertex. The vector points
+                                -- away from the vertex (i.e. towards +infty).
                       deriving stock (Show,Eq,Functor,Foldable,Traversable)
 
 

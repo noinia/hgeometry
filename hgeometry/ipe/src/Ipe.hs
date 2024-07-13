@@ -56,9 +56,9 @@ module Ipe(
   , View(View), layerNames, activeLayer
   -- * Ipe Syles and Preamble
   , IpeStyle(IpeStyle), styleName, styleData
-  , basicIpeStyle
+  , basicIpeStyle, opacitiesStyle
   , readIpeStylesheet
-  , addStyleSheetFrom
+  , addStyleSheet, addStyleSheetFrom
   , IpePreamble(IpePreamble), encoding, preambleData
   -- * Reading Geometries *From* Ipe
   , IpeRead(..)

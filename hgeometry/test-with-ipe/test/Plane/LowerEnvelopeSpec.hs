@@ -16,6 +16,7 @@ import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
 import           Data.Set (Set)
 import qualified Data.Set as Set
+import qualified Data.Text as Text
 import           Golden
 import           HGeometry.Box
 import           HGeometry.Duality
@@ -43,9 +44,7 @@ import           Test.QuickCheck.Instances ()
 
 type R = RealNumber 5
 
-instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r
-         , Show r, Show point
-         )
+instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r)
          => HasDefaultIpeOut (Region r point) where
   type DefaultIpeOut (Region r point) = Path
   defIO region = case fromPoints $ map (^.asPoint) vertices of
@@ -56,16 +55,25 @@ instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r
         Bounded vs        -> vs
         Unbounded u pts v -> let p  = NonEmpty.head pts
                                  q  = NonEmpty.last pts
-                                 p' = p .+^ (100 *^ u) -- TODO: clip this somewhere
-                                 q' = q .+^ (100 *^ v) -- TODO: clip this somewhere
+                                 p' = p .+^ ((-1000) *^ u) -- TODO: clip this somewhere
+                                 -- observe that the vectors point away from
+                                 -- the vertex.
+                                 q' = q .+^ (1000 *^ v) -- TODO: clip this somewhere
                              in p' : q' : toList pts
 
-instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r
-         , Show r, Show point
-         )
+
+-- colors =
+
+instance ( Point_ point 2 r, Fractional r, Ord r)
          => HasDefaultIpeOut (MinimizationDiagram r point) where
   type DefaultIpeOut (MinimizationDiagram r point) = Group
-  defIO = ipeGroup . map iO' . Map.elems
+  defIO = ipeGroup . zipWith render (cycle basicNamedColors) . Map.assocs
+    where
+      render color (site, voronoiRegion) = iO' $ ipeGroup
+                 [ iO $ defIO (site^.asPoint) ! attr SStroke  color
+                 , iO $ defIO voronoiRegion   ! attr SFill    color
+                                              ! attr SOpacity (Text.pack "10%")
+                 ]
 
 spec :: Spec
 spec = describe "lower envelope tests" $ do
@@ -116,17 +124,16 @@ testIpe inFp outFp = do
       NonEmpty.fromList <$> readAllFrom inFp'
     let vd = voronoiDiagram' $ (view core) <$> points
         vv = voronoiVertices $ (view core) <$> points
-        out = [ iO' points
-              , iO' vd
+        out = [ iO' vd
               ] <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
     goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
-               (ipeContentGolden { name = outFp })
-               out
+               (ipeFileGolden { name = outFp })
+               (addStyleSheet opacitiesStyle $ singlePageFromContent out)
      -- FIXME: use data/test-with-ipe/VoronoiDiagram/ as input and data/test-with-ipe/Plane/LowerEnvelope
       -- as output dir
 
 
-
+-- outputFile' <- addStyleSheetFrom "../hgeometry-ipe/resources/opacities.isy" outputFile
 
 {-
 

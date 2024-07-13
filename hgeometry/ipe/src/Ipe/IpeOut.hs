@@ -187,6 +187,11 @@ instance Num r => HasDefaultIpeOut (Rectangle (Point 2 r)) where
   type DefaultIpeOut (Rectangle (Point 2 r)) = Path
   defIO = ipeRectangle
 
+
+instance HasDefaultIpeOut (Group r) where
+  type DefaultIpeOut (Group r) = Group
+  defIO = (:+ mempty)
+
 --------------------------------------------------------------------------------
 -- * Point Converters
 
