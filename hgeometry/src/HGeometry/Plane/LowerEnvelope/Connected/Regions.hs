@@ -22,6 +22,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
 
   , intersectionPoint
   , intersectionLine
+
   ) where
 
 import           Control.Lens
@@ -47,17 +48,18 @@ import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector
 
+import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type CircularList a = [a]
 
+-- | A region in the minimization diagram. The boundary is given in CCW order; i.e. the
+-- region is to the left of the boundary.
 data Region r point = Bounded   (CircularList point)
                     | Unbounded (Vector 2 r)
                                 -- ^ vector indicating the direction of the unbounded edge
                                 -- incident to the first vertex. Note that this vector
-                                -- thus points "away" from the first vertex (towards
-                                -- +infty). So in some sence it is in opposite direction
-                                -- compared to the other edges.
+                                -- thus points INTO vertex v.
                                 (NonEmpty point)
                                 -- ^ the vertices in CCW order,
                                 (Vector 2 r)
@@ -85,6 +87,8 @@ type VertexForm r plane = Map (Point 3 r) (Set plane)
 -- | Computes the lower envelope in O(n^4) time.
 bruteForceLowerEnvelope :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                            , Foldable set
+                          , Show r, Show plane
+
                            ) => set plane -> MinimizationDiagram r plane
 bruteForceLowerEnvelope = fromVertexForm . computeVertexForm
 
@@ -145,7 +149,10 @@ intersectionPoint (Three h1@(Plane_ a1 b1 c1) h2 h3) =
 -- | Given the vertices of the lower envelope; compute the minimization diagram.
 --
 --
-fromVertexForm :: (Plane_ plane r, Ord plane, Ord r, Fractional r)
+fromVertexForm :: (Plane_ plane r, Ord plane, Ord r, Fractional r
+                          , Show r, Show plane
+
+                  )
                => VertexForm r plane -> MinimizationDiagram r plane
 fromVertexForm = Map.mapWithKey sortAroundBoundary . Map.foldMapWithKey (\v defs ->
                     Map.fromSet (const $ Set.singleton (v, defs)) defs)
@@ -157,7 +164,10 @@ fromVertexForm = Map.mapWithKey sortAroundBoundary . Map.foldMapWithKey (\v defs
 
 -- | Given a plane h, and the set of vertices incident to h, compute the corresponding
 -- region in the minimization diagram.
-sortAroundBoundary            :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
+sortAroundBoundary            :: (Plane_ plane r, Ord r, Fractional r, Ord plane
+                          , Show r, Show plane
+
+                                 )
                               => plane -> Set (Point 3 r, Set plane) -> Region r (Point 2 r)
 sortAroundBoundary h vertices = case map project (Set.toList vertices) of
     []              -> error "absurd: every plane has a non-empty set of incident vertices"
@@ -172,19 +182,32 @@ sortAroundBoundary h vertices = case map project (Set.toList vertices) of
 
 -- | Given a plane h, and the single vertex v incident to the region of h, computes the
 -- unbounded region for h.
--- singleVertex            :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
---                         => plane -> (Point 2 r, Set plane) -> Region r (Point 2 r)
-singleVertex           :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
+--
+-- In particular, returns the pair (u,p,w). h is the region to the left of u, and also the
+-- left of w.
+singleVertex           :: (Plane_ plane r, Ord r, Fractional r, Ord plane
+                          , Show r, Show plane
+                          )
                        => plane -> (Point 2 r, Set plane) -> (Vector 2 r, Point 2 r, Vector 2 r)
 singleVertex h (v,defs) = case mapMaybe withIntersectionLine . Set.toList $ Set.delete h defs of
-      (h1:h2:_) -> case (h `onSideOf` h1,  h `onSideOf` h2) of
-                     (Left w1,  Left w2)  -> (w2,v,w1)
-                     (Left w1,  Right w2) -> (w1,v,w2)
-                     (Right w1, Left w2)  -> (w1,v,w2)
-                     (Right w1, Right w2) -> (w2,v,w1)
+      (h1:h2:_) -> traceShowWith (h,"result",) $
+        case traceShowWith (h,) $ sortBySlope (h `onSideOf` h1,  h `onSideOf` h2) of
+                     (Left w1,  Left w2)  -> (w1,        v,w2)
+                     (Left w1,  Right w2) -> (negated w2,v,w1)
+                     (Right w1, Left w2)  -> (w1        ,v,negated w2)
+                     (Right w1, Right w2) -> (w2,        v,w1)
       _         -> error "absurd: too few planes"
   where
     withIntersectionLine h' = (\w -> (h', LinePV v w)) <$> intersectionVec h h'
+
+    sortBySlope t@(a, b)
+      | slope' a <= slope' b = t
+      | otherwise            = (b,a)
+      where
+        slope' = either id id
+
+
+
 
 -- | Given:
 --
@@ -195,7 +218,10 @@ singleVertex h (v,defs) = case mapMaybe withIntersectionLine . Set.toList $ Set.
 --
 -- computes the actual region R. In particular, we compute the direction that the
 -- unbounded edges have.
-unboundedRegion              :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
+unboundedRegion              :: (Plane_ plane r, Ord r, Fractional r, Ord plane
+                          , Show r, Show plane
+
+                                )
                              => plane
                              -> NonEmpty (Point 2 r)
                              -> (Point 2 r, Set plane) -> (Point 2 r, Set plane)

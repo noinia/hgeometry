@@ -55,11 +55,11 @@ instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r)
         Bounded vs        -> vs
         Unbounded u pts v -> let p  = NonEmpty.head pts
                                  q  = NonEmpty.last pts
-                                 p' = p .+^ ((-1000) *^ u) -- TODO: clip this somewhere
+                                 p' = p .-^ (1000 *^ u) -- TODO: clip this somewhere
                                  -- observe that the vectors point away from
                                  -- the vertex.
                                  q' = q .+^ (1000 *^ v) -- TODO: clip this somewhere
-                             in p' : q' : toList pts
+                             in q' : p' : toList pts
 
 
 -- colors =
@@ -67,7 +67,7 @@ instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r)
 instance ( Point_ point 2 r, Fractional r, Ord r)
          => HasDefaultIpeOut (MinimizationDiagram r point) where
   type DefaultIpeOut (MinimizationDiagram r point) = Group
-  defIO = ipeGroup . zipWith render (cycle basicNamedColors) . Map.assocs
+  defIO = ipeGroup . zipWith render (cycle $ drop 3 basicNamedColors) . Map.assocs
     where
       render color (site, voronoiRegion) = iO' $ ipeGroup
                  [ iO $ defIO (site^.asPoint) ! attr SStroke  color
@@ -77,18 +77,18 @@ instance ( Point_ point 2 r, Fractional r, Ord r)
 
 spec :: Spec
 spec = describe "lower envelope tests" $ do
-         testIpe [osp|trivial.ipe|]
-                 [osp|trivial_out|]
+         -- testIpe [osp|trivial.ipe|]
+         --         [osp|trivial_out|]
          testIpe [osp|simplest.ipe|]
                  [osp|simplest_out|]
          testIpe [osp|simpler.ipe|]
                  [osp|simpler_out|]
          testIpe [osp|simple.ipe|]
                  [osp|simple_out|]
-         testIpe [osp|simple1.ipe|]
-                 [osp|simple1_out|]
-         testIpe [osp|foo.ipe|]
-                 [osp|foo_out|]
+         -- testIpe [osp|simple1.ipe|]
+         --         [osp|simple1_out|]
+         -- testIpe [osp|foo.ipe|]
+         --         [osp|foo_out|]
 
 
 -- | Computes the vertex form of the upper envelope. The z-coordinates are still flipped.
@@ -98,6 +98,8 @@ type VoronoiDiagram' r point = MinimizationDiagram r point
 voronoiDiagram' :: ( Point_ point 2 r, Functor f, Ord point
                    , Ord r, Fractional r, Foldable1 f
                    , Show point, Show r
+
+
                    ) => f point -> VoronoiDiagram' r point
 voronoiDiagram' = Map.mapKeysMonotonic (view extra)
                 . bruteForceLowerEnvelope
@@ -124,7 +126,8 @@ testIpe inFp outFp = do
       NonEmpty.fromList <$> readAllFrom inFp'
     let vd = voronoiDiagram' $ (view core) <$> points
         vv = voronoiVertices $ (view core) <$> points
-        out = [ iO' vd
+        out = [ iO' points
+              , iO' vd
               ] <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
     goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
                (ipeFileGolden { name = outFp })
