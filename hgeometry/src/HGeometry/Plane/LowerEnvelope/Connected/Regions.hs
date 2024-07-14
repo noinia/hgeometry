@@ -207,8 +207,8 @@ singleVertex           :: (Plane_ plane r, Ord r, Fractional r, Ord plane
                           )
                        => plane -> (Point 2 r, Set plane) -> (Vector 2 r, Point 2 r, Vector 2 r)
 singleVertex h (v,defs) = case mapMaybe withIntersectionLine . Set.toList $ Set.delete h defs of
-      (h1:h2:_) -> traceShowWith (h,"result",) $
-        case traceShowWith (h,) $ sortBySlope (h `onSideOf` h1,  h `onSideOf` h2) of
+      (hA:hB:_) -> traceShowWith (h,"result",) $
+        case traceShowWith (h,) $ sortBySlope (h `onSideOf` hA,  h `onSideOf` hB) of
                      (Left w1,  Left w2)  -> (w1,        v,w2)
                      (Left w1,  Right w2) -> (negated w2,v,w1)
                      (Right w1, Left w2)  -> (w2        ,v,negated w1)
@@ -222,7 +222,16 @@ singleVertex h (v,defs) = case mapMaybe withIntersectionLine . Set.toList $ Set.
       | otherwise            = (b,a)
       where
         slope' = either id id
-    -- we make sure the vector w1 is less steep than w2.
+
+    -- the overall idea is as follows: there are (at least) two other planes hA and hB
+    -- that (together with h) define v. We compute the two direction-vectors corresponding
+    -- to the intersection lines of hA and hB with h, and order them by slope. Let w1 be
+    -- the most vector whose line has the most negative slope, and let w2 be the other direction.
+    --
+    -- We then compute whether h is left or right of the *directed* lines (whose
+    -- directions are w1 and w2). These two directed lines produce four quadrants,
+    -- for each quadrant we then explicitly give the answers so that: the boundary
+    -- is traversed in CCW order, and the vectors are oriented so that h is always to the left.
 
 
 -- | Given:
@@ -247,15 +256,12 @@ unboundedRegion h chain v@(v',_) u@(u',_)  = Unbounded wv chain wu
     (v1,_,v2) = traceShowWith (h,"V",v',"->",) $ singleVertex h v
     (u1,_,u2) = traceShowWith (h,"U",u',"->",) $ singleVertex h u
 
-    wv = case ccwCmpAroundWith (u' .-. v') origin (Point $ negated v1) (Point $ negated v2) of
+    z  = u' .-. v'
+    wv = case ccwCmpAroundWith z origin (Point $ negated v1) (Point $ negated v2) of
            LT -> v1
            EQ -> v2 -- this probably shouldn't happen
            GT -> v2
-
-      -- | ccw (v' .-^ v1) v' u' == CCW = v1
-      --  | otherwise                    = v2
-
-    wu = case ccwCmpAroundWith (u' .-. v') origin (Point u1) (Point u2) of
+    wu = case ccwCmpAroundWith z origin (Point u1) (Point u2) of
            LT -> u2
            EQ -> u1 -- this probably shouldn't happen
            GT -> u1
@@ -263,24 +269,22 @@ unboundedRegion h chain v@(v',_) u@(u',_)  = Unbounded wv chain wu
     -- to the vector from v to u.
 
 
-      -- | ccw v' u' (u' .+^ u1) == CCW = u1
-      --  | otherwise                    = u2
-
-
-
-
-    -- TODO: update doc
-
   -- overall idea: we reduce to the single vertex case; essentially computing the
-  -- region of h in the minimization diagram with respect to just the definers of v.
-  -- this region has two unbounded edges that have directions v1 and v2.
+  -- region of h in the minimization diagram with respect to just the definers of u.
+  -- this region has two unbounded edges that have directions u1 and u2.
   --
-  -- the direction wv of the unbounded edge incident to v is one of these two vectors;
-  -- either v1 or v2. In particular, it is the direction so that if we go from u to v
-  -- we make a right-turn (= clockwise turn).
+  -- the direction wu of the unbounded edge incident to u is one of these two vectors;
+  -- either u1 or u2. In particular, if we go from v to u, then we want the "most CCW"
+  -- vector among u1 and u2.
   --
-  -- We symettrically compute the diagram around u, giving us two candidates u1 and
-  -- u2. Going from v to u we have to make a CCW turn, so we pick that direction as wu.
+  -- We symettrically compute the diagram around v, giving us two candidates v1 and v2. If
+  -- we arrive at v using v1 or v2, and then turn towards u, we should make a CCW
+  -- turn. So, we again order the vectors with respect to the base vector from v to u.
+  --
+  -- note we can create a point p so that the vector from p to v is "v1" by using p = v
+  -- .+^ (negated v1). Hence the negateds. (In the end we just translate everything so
+  -- that v is the origin, so then we don't need to .+^ the v's.)
+
 
 
 -- | given: a plane h, and (h',l) where l is the intersection line of h and h'.  computes
