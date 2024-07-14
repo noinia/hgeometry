@@ -96,18 +96,18 @@ instance ( Point_ point 2 r, Fractional r, Ord r
 
 spec :: Spec
 spec = describe "lower envelope tests" $ do
-         -- testIpe [osp|trivial.ipe|]
-         --         [osp|trivial_out|]
+         testIpe [osp|trivial.ipe|]
+                 [osp|trivial_out|]
          testIpe [osp|simplest.ipe|]
                  [osp|simplest_out|]
          testIpe [osp|simpler.ipe|]
                  [osp|simpler_out|]
          testIpe [osp|simple.ipe|]
                  [osp|simple_out|]
-         -- testIpe [osp|simple1.ipe|]
-         --         [osp|simple1_out|]
-         -- testIpe [osp|foo.ipe|]
-         --         [osp|foo_out|]
+         testIpe [osp|simple1.ipe|]
+                 [osp|simple1_out|]
+         testIpe [osp|foo.ipe|]
+                 [osp|foo_out|]
 
 
 -- | Computes the vertex form of the upper envelope. The z-coordinates are still flipped.

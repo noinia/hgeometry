@@ -244,21 +244,30 @@ unboundedRegion              :: (Plane_ plane r, Ord r, Fractional r, Ord plane
                              -> Region r (Point 2 r)
 unboundedRegion h chain v@(v',_) u@(u',_)  = Unbounded wv chain wu
   where
-    (v1,_,v2) = singleVertex h v
-    (u1,_,u2) = singleVertex h u
+    (v1,_,v2) = traceShowWith (h,"V",v',"->",) $ singleVertex h v
+    (u1,_,u2) = traceShowWith (h,"U",u',"->",) $ singleVertex h u
 
-    -- I guess we may have flipped the vectors in singleVertex, so that they no longer
-    -- always have h to the left?
+    wv = case ccwCmpAroundWith (u' .-. v') origin (Point $ negated v1) (Point $ negated v2) of
+           LT -> v1
+           EQ -> v2 -- this probably shouldn't happen
+           GT -> v2
 
-    wv | ccw (v' .-^ v1) v' u' == CCW = v1
-       | otherwise                    = v2
+      -- | ccw (v' .-^ v1) v' u' == CCW = v1
+      --  | otherwise                    = v2
 
-       -- | ccw (v' .-^ v2) v' u' == CCW = v2
-       -- | otherwise                    = error $ "prepick" <> show  (v',u',"options",v1,v2)
+    wu = case ccwCmpAroundWith (u' .-. v') origin (Point u1) (Point u2) of
+           LT -> u2
+           EQ -> u1 -- this probably shouldn't happen
+           GT -> u1
+    -- we essentially compare the vectors u1 and u2, and pick the "most CCW" one with respect
+    -- to the vector from v to u.
 
 
-    wu | ccw v' u' (u' .+^ u1) == CCW = u1
-       | otherwise                    = u2
+      -- | ccw v' u' (u' .+^ u1) == CCW = u1
+      --  | otherwise                    = u2
+
+
+
 
     -- TODO: update doc
 
