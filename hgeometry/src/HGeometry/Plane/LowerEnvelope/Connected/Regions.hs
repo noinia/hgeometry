@@ -188,7 +188,7 @@ sortAroundBoundary            :: (Plane_ plane r, Ord r, Fractional r, Ord plane
 sortAroundBoundary h vertices = case map project (Set.toList vertices) of
     []              -> error "absurd: every plane has a non-empty set of incident vertices"
     [v]             -> let (u,p,w) = singleVertex h v in Unbounded u (NonEmpty.singleton p) w
-    verts@((p,_):_) -> let vertices' = sortCCWAround p verts
+    verts@((p,_):_) -> let vertices' = traceShowWith (h,p,"vertices",) $ sortCCWAround p verts
                            edges     = zip vertices' (drop 1 vertices' <> vertices')
                        in case List.break (isInvalid h) edges of
                             (vs, (u,v) : ws) -> let chain = NonEmpty.fromList . map (fst . fst)
@@ -327,5 +327,8 @@ rot90Cw (Vector2 vx vy) = Vector2 vy (-vx)
 project                     :: (Point 3 r, a) -> (Point 2 r, a)
 project (Point3 x y _, loc) = (Point2 x y, loc)
 
-sortCCWAround   :: (Ord r, Num r) => Point 2 r -> [(Point 2 r, a)] -> [(Point 2 r, a)]
-sortCCWAround c = List.sortBy (\(p,_) (q,_) -> ccwCmpAround c p q <> cmpByDistanceTo c p q)
+sortCCWAround       :: (Ord r, Fractional r) => Point 2 r -> [(Point 2 r, a)] -> [(Point 2 r, a)]
+sortCCWAround _ pts = case pts of
+  ((p,_):(q,_):_) -> let c = p .+^ ((q .-. p) ^/ 2)
+                     in List.sortBy (\(a,_) (b,_) -> ccwCmpAround c a b <> cmpByDistanceTo c a b) pts
+  _               -> pts
