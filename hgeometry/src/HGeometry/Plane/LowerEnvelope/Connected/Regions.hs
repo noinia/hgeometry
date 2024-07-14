@@ -154,12 +154,28 @@ fromVertexForm :: (Plane_ plane r, Ord plane, Ord r, Fractional r
 
                   )
                => VertexForm r plane -> MinimizationDiagram r plane
-fromVertexForm = Map.mapWithKey sortAroundBoundary . Map.foldMapWithKey (\v defs ->
+fromVertexForm = Map.mapWithKey sortAroundBoundary . mapWithKeyMerge (\v defs ->
                     Map.fromSet (const $ Set.singleton (v, defs)) defs)
 -- for each vertex v, we go through its definers defs; and for each such plane h, we
 -- associate it with with the set {(v,defs)}. the foldMapWithKey part thus collects all
 -- vertices (together with their definers) incident to h. i.e. it combines these sets {(v,
 -- defsV)} and {(u, defsU)} etc into one big set with all vertices.
+
+--FIXME: this uses the wrong unioning; since <> for Map apparently just prefers the left value
+
+
+newtype MergingMap k v = MergingMap { getMap :: Map k v }
+
+instance (Ord k, Semigroup v) => Semigroup (MergingMap k v) where
+  (MergingMap ma) <> (MergingMap mb) = MergingMap $ Map.unionWith (<>) ma mb
+
+instance (Ord k, Semigroup v) => Monoid (MergingMap k v) where
+  mempty = MergingMap mempty
+
+mapWithKeyMerge   :: (Ord k, Ord k', Semigroup v')
+                  => (k -> v -> Map k' v') -> Map k v -> Map k' v'
+mapWithKeyMerge f = getMap . Map.foldMapWithKey (\k v -> MergingMap $ f k v)
+
 
 
 -- | Given a plane h, and the set of vertices incident to h, compute the corresponding
@@ -177,7 +193,8 @@ sortAroundBoundary h vertices = case map project (Set.toList vertices) of
                        in case List.break (isInvalid h) edges of
                             (vs, (u,v) : ws) -> let chain = NonEmpty.fromList . map (fst . fst)
                                                           $ ws <> vs <> [(u,v)]
-                                                in unboundedRegion h chain v u
+                                                in traceShowWith (h,"invalidEdge",u,v,) $
+                                                  unboundedRegion h chain v u
                             (_,  [])         -> Bounded $ map fst vertices'
 
 -- | Given a plane h, and the single vertex v incident to the region of h, computes the
@@ -194,8 +211,8 @@ singleVertex h (v,defs) = case mapMaybe withIntersectionLine . Set.toList $ Set.
         case traceShowWith (h,) $ sortBySlope (h `onSideOf` h1,  h `onSideOf` h2) of
                      (Left w1,  Left w2)  -> (w1,        v,w2)
                      (Left w1,  Right w2) -> (negated w2,v,w1)
-                     (Right w1, Left w2)  -> (w1        ,v,negated w2)
-                     (Right w1, Right w2) -> (w2,        v,w1)
+                     (Right w1, Left w2)  -> (w2        ,v,negated w1)
+                     (Right w1, Right w2) -> (negated w1,v,negated w2)
       _         -> error "absurd: too few planes"
   where
     withIntersectionLine h' = (\w -> (h', LinePV v w)) <$> intersectionVec h h'
@@ -205,8 +222,7 @@ singleVertex h (v,defs) = case mapMaybe withIntersectionLine . Set.toList $ Set.
       | otherwise            = (b,a)
       where
         slope' = either id id
-
-
+    -- we make sure the vector w1 is less steep than w2.
 
 
 -- | Given:
@@ -226,17 +242,26 @@ unboundedRegion              :: (Plane_ plane r, Ord r, Fractional r, Ord plane
                              -> NonEmpty (Point 2 r)
                              -> (Point 2 r, Set plane) -> (Point 2 r, Set plane)
                              -> Region r (Point 2 r)
-unboundedRegion h chain v u  = Unbounded wv chain wu
+unboundedRegion h chain v@(v',_) u@(u',_)  = Unbounded wv chain wu
   where
     (v1,_,v2) = singleVertex h v
     (u1,_,u2) = singleVertex h u
 
-    wv = pick CW  (fst u) (fst v) v1 v2
-    wu = pick CCW (fst v) (fst u) u1 u2
+    -- I guess we may have flipped the vectors in singleVertex, so that they no longer
+    -- always have h to the left?
 
-    pick dir p q w z
-      | ccw p q (q .+^ w) == dir = w
-      | otherwise                = z
+    wv | ccw (v' .-^ v1) v' u' == CCW = v1
+       | otherwise                    = v2
+
+       -- | ccw (v' .-^ v2) v' u' == CCW = v2
+       -- | otherwise                    = error $ "prepick" <> show  (v',u',"options",v1,v2)
+
+
+    wu | ccw v' u' (u' .+^ u1) == CCW = u1
+       | otherwise                    = u2
+
+    -- TODO: update doc
+
   -- overall idea: we reduce to the single vertex case; essentially computing the
   -- region of h in the minimization diagram with respect to just the definers of v.
   -- this region has two unbounded edges that have directions v1 and v2.

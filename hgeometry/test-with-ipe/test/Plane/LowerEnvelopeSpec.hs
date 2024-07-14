@@ -39,32 +39,51 @@ import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
 
 -- import Test.Util
-
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
-instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r)
+instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r
+         , Show point, Show r
+         )
          => HasDefaultIpeOut (Region r point) where
   type DefaultIpeOut (Region r point) = Path
-  defIO region = case fromPoints $ map (^.asPoint) vertices of
-      Nothing -> error "could not create convex polygon?"
-      Just pg -> defIO (pg :: ConvexPolygon (Point 2 r))
+  defIO region = defIO $ ((uncheckedFromCCWPoints $ map (^.asPoint) vertices)
+                         :: ConvexPolygon (Point 2 r)
+                         )
+
+    -- case fromPoints $ map (^.asPoint) vertices of
+    --   Nothing -> error $ "could not create convex polygon?" <> show vertices
+    --   Just pg -> defIO (pg :: ConvexPolygon (Point 2 r))
     where
       vertices = case region of
         Bounded vs        -> vs
-        Unbounded u pts v -> let p  = NonEmpty.head pts
+        Unbounded v pts u -> let p  = NonEmpty.head pts
                                  q  = NonEmpty.last pts
-                                 p' = p .-^ (1000 *^ u) -- TODO: clip this somewhere
-                                 -- observe that the vectors point away from
-                                 -- the vertex.
-                                 q' = q .+^ (1000 *^ v) -- TODO: clip this somewhere
+                                 p' = p .-^ (1000 *^ v) -- TODO: clip this somewhere
+                                 q' = q .+^ (1000 *^ u) -- TODO: clip this somewhere
                              in q' : p' : toList pts
 
 
 -- colors =
 
-instance ( Point_ point 2 r, Fractional r, Ord r)
+-- 1083.83267 -5893.86633 m
+-- -907.76924 6277.03418 l
+-- 92.23076 165.92307 l
+-- 83.83267 217.24478 l
+-- h
+
+-- 1083.83267 -5893.86633 m
+-- 1092.23076 915.92307 l
+-- 92.23076 165.92307 l
+-- 83.83267 217.24478 l
+-- h
+
+instance ( Point_ point 2 r, Fractional r, Ord r
+
+         , Show point, Show r
+         )
          => HasDefaultIpeOut (MinimizationDiagram r point) where
   type DefaultIpeOut (MinimizationDiagram r point) = Group
   defIO = ipeGroup . zipWith render (cycle $ drop 3 basicNamedColors) . Map.assocs
@@ -124,7 +143,7 @@ testIpe inFp outFp = do
     (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
       inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
       NonEmpty.fromList <$> readAllFrom inFp'
-    let vd = voronoiDiagram' $ (view core) <$> points
+    let vd = traceShowWith ("Result:",)  $ voronoiDiagram' $ (view core) <$> points
         vv = voronoiVertices $ (view core) <$> points
         out = [ iO' points
               , iO' vd
