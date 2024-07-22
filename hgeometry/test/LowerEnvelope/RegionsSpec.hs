@@ -1,12 +1,7 @@
 module LowerEnvelope.RegionsSpec where
 
-
-import           Control.Lens
-import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Map (Map)
 import qualified Data.Map as Map
-import qualified Data.Set as Set
 import           HGeometry.Combinatorial.Util
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
@@ -37,27 +32,21 @@ spec = describe "lowerEnvelope tests" $ do
            verifyOnPlane h1 h2 h3
          it "asVertex" $ do
            computeVertexForm inputs `shouldBe`
-             Map.singleton (Point3 10 10 10) (Set.fromList inputs)
+             Map.singleton (Point3 10 10 10) (fromCCWList inputs)
          prop "belowall" $ \h1 h2 (h3 :: Plane R) ->
            let vertices = Map.toAscList $ computeVertexForm [h1,h2,h3]
            in all (\(v, _) -> v `belowAll` [h1,h2,h3]) vertices
 
          it "singleton diagram" $ do
+           let v = Point2 10 10 :: Point 2 R
            [h1,h2,h3] <- pure inputs
            bruteForceLowerEnvelope inputs `shouldBe`
              Map.fromList
-  -- might make some sense :)
-  --          [(NonVerticalHyperPlane [0,0,10]
-  --           ,Unbounded (Vector2 1 0) (Point2 10 10 :| []) (Vector2 0 1))
-  -- ,(NonVerticalHyperPlane [0,1,0]
-  --            ,Unbounded (Vector2 1 1) (Point2 10 10 :| []) (Vector2 1 0))
-  -- ,(NonVerticalHyperPlane [1,0,0]
-  --            ,Unbounded (Vector2 1 1) (Point2 10 10 :| []) (Vector2 0 1))
-             -- ]
-               [ (h1, Unbounded (Vector2 0 0) (NonEmpty.singleton (Point2 0 0)) (Vector2 0 0))
-               , (h2, Unbounded (Vector2 0 0) (NonEmpty.singleton (Point2 0 0)) (Vector2 0 0))
-               , (h3, Unbounded (Vector2 0 0) (NonEmpty.singleton (Point2 0 0)) (Vector2 0 0))
+               [ (h1, Unbounded (Vector2 1 1)    (NonEmpty.singleton v) (Vector2 0 1))
+               , (h2, Unbounded (Vector2 (-1) 0) (NonEmpty.singleton v) (Vector2 (-1) (-1)))
+               , (h3, Unbounded (Vector2 0 (-1)) (NonEmpty.singleton v) (Vector2 1 0))
                ]
+
 
 -- | verify that the intersection point indeed lis on all three planes
 verifyOnPlane          :: (Fractional r, Ord r)
@@ -65,7 +54,7 @@ verifyOnPlane          :: (Fractional r, Ord r)
 verifyOnPlane h1 h2 h3 = case intersectionPoint (Three h1 h2 h3) of
                            Nothing -> True
                            Just (Point3 x y _)  -> allEqual $
-                                                   (evalAt $ Point2 x y) <$> Three h1 h2 h3
+                                                   evalAt (Point2 x y) <$> Three h1 h2 h3
   where
     allEqual (Three a b c) = a == b && b == c
 

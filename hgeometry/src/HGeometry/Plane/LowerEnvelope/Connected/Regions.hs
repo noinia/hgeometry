@@ -15,6 +15,11 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
   , CircularList
   , fromVertexForm
 
+  , Definers
+  , fromCCWList
+  , definers
+
+
   , bruteForceLowerEnvelope
 
   , VertexForm
@@ -88,6 +93,11 @@ type instance Dimension (MinimizationDiagram r plane) = 2
 newtype Definers plane = Definers [plane]
   deriving stock (Show,Eq,Ord)
   deriving newtype (Functor,Foldable)
+
+-- | Given the planes in order, starting with the one that is closest in the up direction,
+-- construct the Definers.
+fromCCWList :: [plane] -> Definers plane
+fromCCWList = Definers
 
 -- | Smart constructor for creating the definers of three planes
 definers                                    :: (Plane_ plane r, Ord r, Fractional r)
