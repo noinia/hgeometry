@@ -109,6 +109,8 @@ spec = describe "lower envelope tests" $ do
                  [osp|simple1_out|]
          testIpe [osp|foo.ipe|]
                  [osp|foo_out|]
+         testIpe [osp|degenerate.ipe|]
+                 [osp|degenerate_out|]
 
 
 -- | Computes the vertex form of the upper envelope. The z-coordinates are still flipped.
@@ -144,8 +146,8 @@ testIpe inFp outFp = do
     (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
       inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
       NonEmpty.fromList <$> readAllFrom inFp'
-    let vd = traceShowWith ("Result:",)  $ voronoiDiagram' $ (view core) <$> points
-        vv = voronoiVertices $ (view core) <$> points
+    let vd = traceShowWith ("Result:",)  $ voronoiDiagram' $ view core <$> points
+        vv = voronoiVertices $ view core <$> points
         out = [ iO' points
               , iO' vd
               ] <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
