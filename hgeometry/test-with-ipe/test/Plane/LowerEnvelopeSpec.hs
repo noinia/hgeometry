@@ -9,6 +9,7 @@ module Plane.LowerEnvelopeSpec
 import           Control.Lens
 import           Data.Foldable
 import           Data.Foldable1
+import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map (Map)
@@ -39,7 +40,7 @@ import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
 
 -- import Test.Util
-import Debug.Trace
+import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
