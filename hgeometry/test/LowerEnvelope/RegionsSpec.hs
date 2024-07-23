@@ -7,7 +7,7 @@ import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Instances ()
 import           HGeometry.Number.Real.Rational
-import           HGeometry.Plane.LowerEnvelope.Connected.Regions
+import           HGeometry.Plane.LowerEnvelope.ConnectedNew
 import           HGeometry.Point
 import           HGeometry.Vector
 import           Test.Hspec

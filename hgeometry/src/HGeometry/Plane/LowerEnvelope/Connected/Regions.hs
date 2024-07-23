@@ -18,15 +18,9 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
   , Definers
   , fromCCWList
   , definers
-
-
-  , bruteForceLowerEnvelope
+  , mergeDefiners
 
   , VertexForm
-  , computeVertexForm
-
-  , intersectionPoint
-  , intersectionLine
   ) where
 
 import           Control.Lens
@@ -54,6 +48,7 @@ import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
+import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
 
 --------------------------------------------------------------------------------
 -- * The Minimization Diagram, i.e. the type that we use to represent our
@@ -228,102 +223,12 @@ insertPlane (Point2 x y) plane (Definers planes) = Definers $ go plane planes
 -- | Merge two lists of definers.
 --
 -- O(n^2), since we are using incremental insertion.
-merge                :: (Plane_ plane r, Eq plane, Ord r, Fractional r)
-                     => Point 3 r
-                     -> Definers plane -> Definers plane
-                     -> Definers plane
-merge (Point3 x y _) = foldr (insertPlane $ Point2 x y)
+mergeDefiners                :: (Plane_ plane r, Eq plane, Ord r, Fractional r)
+                             => Point 3 r
+                             -> Definers plane -> Definers plane
+                             -> Definers plane
+mergeDefiners (Point3 x y _) = foldr (insertPlane $ Point2 x y)
 -- TODO: improve running time
-
-
---------------------------------------------------------------------------------
--- * The naive O(n^4) time algorithm.
-
--- | Computes the lower envelope in O(n^4) time.
-bruteForceLowerEnvelope :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
-                           , Foldable set
-                           -- , Show r, Show plane
-                           ) => set plane -> MinimizationDiagram r plane
-bruteForceLowerEnvelope = fromVertexForm . computeVertexForm
-
--- | Computes the vertices of the lower envelope
---
--- O(n^4) time.
-computeVertexForm        :: (Plane_ plane r, Ord plane, Ord r, Fractional r, Foldable set)
-                         => set plane -> VertexForm r plane
-computeVertexForm planes = unionsWithKey merge . map (asVertex planes) $ uniqueTriplets planes
-
-asVertex             :: (Plane_ plane r, Foldable f, Ord plane, Ord r, Fractional r)
-                     => f plane -> Three plane -> Map (Point 3 r) (Definers plane)
-asVertex planes defs = case definers defs of
-  Just (v,defs')  | v `belowAll` planes -> Map.singleton v defs'
-  _                                     -> Map.empty
-
--- | test if v lies below (or on) all the given planes
-belowAll   :: (Plane_ plane r, Ord r, Num r, Foldable f) => Point 3 r -> f plane -> Bool
-belowAll v = all (\h -> onSideTest v h /= GT)
-{-# INLINE belowAll #-}
-
---------------------------------------------------------------------------------
--- * Geometric Primitives
-
--- | Given two planes, computes the line in which they intersect.
-intersectionLine :: (Plane_ plane r, Fractional r, Eq r)
-                 => plane -> plane -> Maybe (VerticalOrLineEQ r)
-intersectionLine (Plane_ a1 b1 c1) (Plane_ a2 b2 c2)
-    | b1 /= b2  = Just $ NonVertical $ LineEQ ((a2 - a1) / diffB) ((c2 - c1) / diffB)
-                  -- the two planes intersect in some normal line
-    | a1 /= a2  = Just $ VerticalLineThrough ((c2 -c1) / (a1 - a2))
-                  -- the planes intersect in a vertical line
-    | otherwise = Nothing
-                  -- the planes don't intersect at all
-  where
-    diffB = b1 - b2
-
--- -- | Computes the directed line in which the two planes h and h' intersect. The returned
--- -- line will have h to its left and h' to its right.
--- --
--- intersectionLine'      :: ( Plane_ plane r, Ord r, Fractional r)
---                        => plane -> plane -> Maybe (LinePV 2 r)
--- intersectionLine' h h' = intersectionLine h h' <&> \case
---     VerticalLineThrough x -> reorient (LinePV (Point2 x 0) (Vector2 0 1)) (Point2 (x-1) 0)
---     NonVertical l         -> let l'@(LinePV p _) = fromLineEQ l
---                              in reorient l' (p&yCoord %~ (+1))
---   where
---     -- make sure h is to the left of the line
---     reorient l q = let f = evalAt q
---                    in if f h <= f h' then l else l&direction %~ negated
---     fromLineEQ (LineEQ a b) = fromLinearFunction a b
-
-
--- | Computes the direction vector v of the directed line l in which the two planes h and h'
--- intersect, and so that h will be to the left of the directed line
-intersectionVector      :: ( Plane_ plane r, Ord r, Fractional r)
-                        => plane -> plane -> Maybe (Vector 2 r)
-intersectionVector h h' = intersectionLine h h' <&> \case
-    VerticalLineThrough x    -> orient (Point2 (x-1) 0)     (Vector2 0 1)
-    NonVertical (LineEQ a b) -> orient (Point2 0     (b+1)) (Vector2 1 a)
-  where
-    orient q v = let f = evalAt q in if f h <= f h' then v else negated v
-
--- | Computes there the three planes intersect
-intersectionPoint                                    :: ( Plane_ plane r, Ord r, Fractional r)
-                                                     => Three plane -> Maybe (Point 3 r)
-intersectionPoint (Three h1@(Plane_ a1 b1 c1) h2 h3) =
-    do l12 <- intersectionLine h1 h2
-       l13 <- intersectionLine h1 h3
-       case (l12,l13) of
-         (VerticalLineThrough _x12, VerticalLineThrough _x13) -> Nothing
-           -- if the xes are the same they would be the same plane even
-         (VerticalLineThrough x, NonVertical l)               -> vertNonVertIntersect x l
-         (NonVertical l, VerticalLineThrough x)               -> vertNonVertIntersect x l
-         (NonVertical l, NonVertical m)                       -> l `intersect` m >>= \case
-           Line_x_Line_Point (Point2 x y) -> Just $ Point3 x y (a1 * x + b1* y + c1)
-           Line_x_Line_Line _             -> Nothing
-   where
-     vertNonVertIntersect x l = let y = evalAt' x l
-                                    z = a1 * x + b1* y + c1
-                                in Just $ Point3 x y z
 
 --------------------------------------------------------------------------------
 -- * Converting into a minimization diagram
