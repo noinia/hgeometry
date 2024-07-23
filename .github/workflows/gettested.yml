@@ -39,7 +39,7 @@ jobs:
           cabal configure --enable-tests --enable-benchmarks
 
       - name: Install dependencies
-        run: cabal build --dependencies-only -j2
+        run: cabal build --dependencies-only -j2 hgeometry-combinatorial
 
       - name: Cache
         uses: actions/cache@v4.0.2
