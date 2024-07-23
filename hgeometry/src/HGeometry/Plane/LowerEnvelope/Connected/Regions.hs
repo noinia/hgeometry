@@ -54,10 +54,18 @@ import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector
 
-import           Debug.Trace
 --------------------------------------------------------------------------------
+-- * The Minimization Diagram, i.e. the type that we use to represent our
+-- lower envelope
 
-type CircularList a = [a]
+-- | A minimization daigram just maps every plane on the lower envelope to the region
+-- above which it is minimal. Every plane has at most one such a region.
+type MinimizationDiagram r plane = Map plane (Region r (Point 2 r))
+
+type instance NumType   (MinimizationDiagram r plane) = r
+type instance Dimension (MinimizationDiagram r plane) = 2
+-- TODO: this is a bit of hack; maybe use a newtype instead. We only need these instances
+-- to actually print the thing in ipe.
 
 -- | A region in the minimization diagram. The boundary is given in CCW order; i.e. the
 -- region is to the left of the boundary.
@@ -74,18 +82,22 @@ data Region r point = Bounded   (CircularList point)
                                 -- away from the vertex (i.e. towards +infty).
                       deriving stock (Show,Eq,Functor,Foldable,Traversable)
 
-
 type instance NumType   (Region r point) = r
 type instance Dimension (Region r point) = Dimension point
 
-type MinimizationDiagram r plane = Map plane (Region r (Point 2 r))
--- every plane produces at most one region.
-
-type instance NumType   (MinimizationDiagram r plane) = r
-type instance Dimension (MinimizationDiagram r plane) = 2
+-- | bounded regions are really circular lists, but we just represent them as lists for
+-- now.
+type CircularList a = [a]
 
 
 --------------------------------------------------------------------------------
+-- *  The planes defining a vertex
+
+-- | The vertices of a lower envelope is just a Map with every vertex its definers,
+-- i.e. the planes that define the vertex in CCW order around it.
+type VertexForm r plane = Map (Point 3 r) (Definers plane)
+
+----------------------------------------
 -- *  The planes defining a vertex
 
 -- | in CCW order, starting with the plane that is minimal at the vertical up direction
@@ -122,8 +134,8 @@ definers (Three h1@(Plane_ a1 b1 c1) h2 h3) =
                                EQ -> error "definers: weird degeneracy?"
                                GT -> (h',h)
 
-             LinePV _ vMinH  = fromMaybe err $ intersectionLine' h  hMin
-             LinePV _ vMinH' = fromMaybe err $ intersectionLine' h' hMin
+             vMinH  = fromMaybe err $ intersectionVector h  hMin
+             vMinH' = fromMaybe err $ intersectionVector h' hMin
              err = error "definers: absurd"
 
 -- | given three elements, returns the minimum element in the first argument and the
@@ -137,6 +149,8 @@ extractMinOn f a b c = let (m,ab)  = min' a b
       | f x <= f y = (x,y)
       | otherwise  = (y,x)
 
+----------------------------------------
+
 -- | returns the CCW predecessor, and CCW successor of the given plane.
 findNeighbours                   :: Eq plane => plane -> Definers plane -> Maybe (plane,plane)
 findNeighbours h (Definers defs) = withNeighs <$> List.elemIndex h defs
@@ -145,37 +159,44 @@ findNeighbours h (Definers defs) = withNeighs <$> List.elemIndex h defs
     k = length defs
 -- TODO not exactly the best implementation yet
 
-insertPlane :: (Plane_ plane r, Eq plane, Ord r, Fractional r
-               -- , Show plane, Show r
-               )
-            => Point 2 r -> plane -> Definers plane -> Definers plane
+
+-- | Adds a plane to the definers. In particular, places it in the right cyclic order.
+-- pre: the plane is an actual definer; i.e. it also goes through the vertex.
+insertPlane :: (Plane_ plane r, Eq plane, Ord r, Fractional r)
+            => Point 2 r -- ^ the projection of the vertex
+            -> plane     -- ^ the plane that is a definer
+            -> Definers plane -> Definers plane
 insertPlane (Point2 x y) plane (Definers planes) = Definers $ go plane planes
   where
-    q  = Point2 x (y+1)
+    q  = Point2 x     (y+1)
     q' = Point2 (x-1) (y+1)
     up = Vector2 0 1
 
-    --
-    go h []       = [h]
-    go h (h':hs)
-      | h == h'   = h':hs
-      | otherwise = case evalAt q h `compare` evalAt q h' of
-          LT -> h : insert  h  h' hs h
-          EQ -> case evalAt q' h `compare` evalAt q' h' of
-                  LT -> h  : insert h  h' hs h
-                  _  -> h' : insert h' h  hs h'
-          GT -> h' : insert h' h  hs h'
+    -- We first test if the new plane is the new first plane (i.e. that is minimal just
+    -- above the vertex.)
+    go h hs = case hs of
+      []                   -> [h] -- this case should never happen really
+      (h':hs') | h == h'   -> hs
+               | otherwise -> case evalAt q h `compare` evalAt q h' of
+                                LT -> h : insert  h  h' hs' h
+                                EQ -> case evalAt q' h `compare` evalAt q' h' of
+                                        LT -> h  : insert h  h' hs' h
+                                        _  -> h' : insert h' h  hs' h'
+                                        -- h and h' cannot both be equal at v, q and q'
+                                        -- unless they are the same plane.
+                                GT -> h' : insert h' h  hs' h'
 
     -- | try to insert h into the cyclic order.
     -- pre: hPrev is guaranteed to be in the output, and occurs before h and hNxt
-    --
+    --      h0 is the final plane that also started the cyclic order.
+    -- hs are the remaining planes in the yclic order.
     insert hPrev h hs h0 = case hs of
       [] -> case ccwCmpAroundWith up origin (Point u) (Point w) of
               GT -> [h] -- insert h and finish
               _  -> [] -- h is dominated; don't insert it
         where
-          LinePV _ u  = fromMaybe err $ intersectionLine' h0 hPrev
-          LinePV _ w  = fromMaybe err $ intersectionLine' h  h0
+          u  = fromMaybe err $ intersectionVector h0 hPrev
+          w  = fromMaybe err $ intersectionVector h  h0
           err = error "insertPlane: insert basecase. absurd"
       (hNxt:hs')
         | h == hNxt  -> hs -- duplicate plane; exit early
@@ -184,8 +205,8 @@ insertPlane (Point2 x y) plane (Definers planes) = Definers $ go plane planes
           -- we've inserted h, so drop the planes that are dominated by h
           _  -> hNxt : insert hNxt h hs' h0 -- try to insert at a later position
         where
-          LinePV _ u  = fromMaybe err $ intersectionLine' hNxt hPrev
-          LinePV _ w  = fromMaybe err $ intersectionLine' h    hNxt
+          u  = fromMaybe err $ intersectionVector hNxt hPrev
+          w  = fromMaybe err $ intersectionVector h    hNxt
           err = error "insertPlane: insert. absurd"
 
     -- we've just inserted hNew, so see if we still need/want the remaining planes
@@ -199,27 +220,23 @@ insertPlane (Point2 x y) plane (Definers planes) = Definers $ go plane planes
         where
           hNxt = fromMaybe h0 $ listToMaybe hs'
 
-          LinePV _ u  = fromMaybe err $ intersectionLine' hNxt hNew
-          LinePV _ w  = fromMaybe err $ intersectionLine' h    hNxt
+          u  = fromMaybe err $ intersectionVector hNxt hNew
+          w  = fromMaybe err $ intersectionVector h    hNxt
           err = error "insertPlane: finish. absurd"
 
 -- | Merge two lists of definers.
 --
 -- O(n^2), since we are using incremental insertion.
-merge                         :: (Plane_ plane r, Eq plane, Ord r, Fractional r
-                                 -- , Show plane, Show r
-                                 )
+merge                         :: (Plane_ plane r, Eq plane, Ord r, Fractional r)
                               => Point 3 r
                               -> Definers plane -> Definers plane
                               -> Definers plane
 merge (Point3 x y _) defA (Definers defsB) = foldr (insertPlane $ Point2 x y) defA defsB
 -- TODO: improve running time
 
+
 --------------------------------------------------------------------------------
 -- * The naive O(n^4) time algorithm.
-
-type VertexForm r plane = Map (Point 3 r) (Definers plane)
-
 
 -- | Computes the lower envelope in O(n^4) time.
 bruteForceLowerEnvelope :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
@@ -227,7 +244,6 @@ bruteForceLowerEnvelope :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                            -- , Show r, Show plane
                            ) => set plane -> MinimizationDiagram r plane
 bruteForceLowerEnvelope = fromVertexForm . computeVertexForm
-
 
 -- | Computes the vertices of the lower envelope
 --
@@ -247,6 +263,9 @@ belowAll   :: (Plane_ plane r, Ord r, Num r, Foldable f) => Point 3 r -> f plane
 belowAll v = all (\h -> onSideTest v h /= GT)
 {-# INLINE belowAll #-}
 
+--------------------------------------------------------------------------------
+-- * Geometric Primitives
+
 -- | Given two planes, computes the line in which they intersect.
 intersectionLine :: (Plane_ plane r, Fractional r, Eq r)
                  => plane -> plane -> Maybe (VerticalOrLineEQ r)
@@ -260,23 +279,31 @@ intersectionLine (Plane_ a1 b1 c1) (Plane_ a2 b2 c2)
   where
     diffB = b1 - b2
 
--- | Computes the line in which the two planes h and h' intersect. The returned line will
--- have h to its left and h' to its right.
---
-intersectionLine'      :: ( Plane_ plane r, Ord r, Fractional r)
-                       => plane -> plane -> Maybe (LinePV 2 r)
-intersectionLine' h h' = intersectionLine h h' <&> \case
-    VerticalLineThrough x -> reorient (LinePV (Point2 x 0) (Vector2 0 1)) (Point2 (x-1) 0)
-    NonVertical l         -> let l'@(LinePV p _) = fromLineEQ l
-                             in reorient l' (p&yCoord %~ (+1))
+-- -- | Computes the directed line in which the two planes h and h' intersect. The returned
+-- -- line will have h to its left and h' to its right.
+-- --
+-- intersectionLine'      :: ( Plane_ plane r, Ord r, Fractional r)
+--                        => plane -> plane -> Maybe (LinePV 2 r)
+-- intersectionLine' h h' = intersectionLine h h' <&> \case
+--     VerticalLineThrough x -> reorient (LinePV (Point2 x 0) (Vector2 0 1)) (Point2 (x-1) 0)
+--     NonVertical l         -> let l'@(LinePV p _) = fromLineEQ l
+--                              in reorient l' (p&yCoord %~ (+1))
+--   where
+--     -- make sure h is to the left of the line
+--     reorient l q = let f = evalAt q
+--                    in if f h <= f h' then l else l&direction %~ negated
+--     fromLineEQ (LineEQ a b) = fromLinearFunction a b
+
+
+-- | Computes the direction vector v of the directed line l in which the two planes h and h'
+-- intersect, and so that h will be to the left of the directed line
+intersectionVector      :: ( Plane_ plane r, Ord r, Fractional r)
+                        => plane -> plane -> Maybe (Vector 2 r)
+intersectionVector h h' = intersectionLine h h' <&> \case
+    VerticalLineThrough x    -> orient (Point2 (x-1) 0)     (Vector2 0 1)
+    NonVertical (LineEQ a b) -> orient (Point2 0     (b+1)) (Vector2 1 a)
   where
-    -- make sure h is to the left of the line
-    reorient l q = let f = evalAt q
-                   in if f h <= f h' then l else l&direction %~ negated
-    fromLineEQ (LineEQ a b) = fromLinearFunction a b
-
-
-
+    orient q v = let f = evalAt q in if f h <= f h' then v else negated v
 
 -- | Computes there the three planes intersect
 intersectionPoint                                    :: ( Plane_ plane r, Ord r, Fractional r)
@@ -302,10 +329,8 @@ intersectionPoint (Three h1@(Plane_ a1 b1 c1) h2 h3) =
 
 -- | Given the vertices of the lower envelope; compute the minimization diagram.
 --
---
-fromVertexForm :: (Plane_ plane r, Ord plane, Ord r, Fractional r
-                          -- , Show r, Show plane
-                  )
+-- \(O(h\log h)\) assuming that the input is degenerate.
+fromVertexForm :: (Plane_ plane r, Ord plane, Ord r, Fractional r)
                => VertexForm r plane -> MinimizationDiagram r plane
 fromVertexForm = Map.mapWithKey sortAroundBoundary . mapWithKeyMerge (\v defs ->
                     Map.fromList [ (h, Set.singleton (v,defs))
@@ -316,27 +341,13 @@ fromVertexForm = Map.mapWithKey sortAroundBoundary . mapWithKeyMerge (\v defs ->
 -- vertices (together with their definers) incident to h. i.e. it combines these sets {(v,
 -- defsV)} and {(u, defsU)} etc into one big set with all vertices.
 
-newtype MonoidalMap k v = MonoidalMap { getMap :: Map k v }
-  deriving (Show)
-
-instance (Ord k, Semigroup v) => Semigroup (MonoidalMap k v) where
-  (MonoidalMap ma) <> (MonoidalMap mb) = MonoidalMap $ Map.unionWith (<>) ma mb
-
-instance (Ord k, Semigroup v) => Monoid (MonoidalMap k v) where
-  mempty = MonoidalMap mempty
-
-
--- | Merge the maps. When they share a key, combine their values using a semigroup.
-mapWithKeyMerge   :: (Ord k, Ord k', Semigroup v')
-                  => (k -> v -> Map k' v') -> Map k v -> Map k' v'
-mapWithKeyMerge f = getMap . Map.foldMapWithKey (\k v -> MonoidalMap $ f k v)
-
+-- TODO: we should improve the running time of merge for the definers from O(k^2) to
+-- O(k\log k). that should bring the overall running time to O(nlog n) even for degenerate
+-- inputs.
 
 -- | Given a plane h, and the set of vertices incident to h, compute the corresponding
 -- region in the minimization diagram.
-sortAroundBoundary            :: (Plane_ plane r, Ord r, Fractional r, Ord plane
-                          -- , Show r, Show plane
-                                 )
+sortAroundBoundary            :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
                               => plane -> Set (Point 3 r, Definers plane)
                               -> Region r (Point 2 r)
 sortAroundBoundary h vertices = case inCCWOrder . map project . Set.toList $ vertices of
@@ -360,8 +371,8 @@ singleVertex           :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
                        -> (Vector 2 r, Point 2 r, Vector 2 r)
 singleVertex h (v,defs) = fromMaybe (error "singleVertex: absurd") $
     do (hPred,hSucc) <- findNeighbours h defs
-       LinePV _ u    <- intersectionLine' h hPred
-       LinePV _ w    <- intersectionLine' h hSucc
+       u             <- intersectionVector h hPred
+       w             <- intersectionVector h hSucc
        pure (w, v, u)
 
 -- | Given:
@@ -395,7 +406,6 @@ unboundedRegion h chain v@(v',_) u@(u',_)  = Unbounded wv chain wu
     -- we essentially compare the vectors u1 and u2, and pick the "most CCW" one with respect
     -- to the vector from v to u.
 
-
   -- overall idea: we reduce to the single vertex case; essentially computing the
   -- region of h in the minimization diagram with respect to just the definers of u.
   -- this region has two unbounded edges that have directions u1 and u2.
@@ -413,27 +423,6 @@ unboundedRegion h chain v@(v',_) u@(u',_)  = Unbounded wv chain wu
   -- that v is the origin, so then we don't need to .+^ the v's.)
 
 
-
--- | given: a plane h, and (h',l) where l is the intersection line of h and h'.  computes
--- the side of l on which h is the lowest. (In both cases we tag it with the vector
--- corresponding of the line.)
---
--- onSideOf :: (Plane_ plane r, Ord r, Num r)
---          => plane -> (plane, LinePV 2 r) -> Either (Vector 2 r) (Vector 2 r)
--- h `onSideOf` (h', LinePV p v)
---     | evalAt q h <= evalAt q h' = Right v
---     | otherwise                 = Left v
---   where
---     q = p .+^ rot90Cw v -- q should be a point in the right halfplane of l.
-
-
--- | Returns a vector indicating the intersection direction
-intersectionVec      :: ( Plane_ plane r, Ord r, Fractional r)
-                     => plane -> plane -> Maybe (Vector 2 r)
-intersectionVec h h' = intersectionLine h h' <&> \case
-    VerticalLineThrough _    -> Vector2 0 1
-    NonVertical (LineEQ a _) -> Vector2 1 a
-
 -- | Test if (u,v) is an invalid edge to be on the CCW boundary of h.  this can mean that
 -- either (u,v) is not an actual edge (i.e. u and v) are connected to the vertex at
 -- infinity. Or that the edge is in the wrong orientation
@@ -450,7 +439,7 @@ isInvalid h ((_u,defsU), (_v,defsV)) =
     -- successor w.r.t to v, and the CCW predecessor w.r.t u must be the same plane.
     -- if that is not the case the edge must be invalid.
 
-
+-- | Project the vertex onto the plane.
 project                     :: (Point 3 r, a) -> (Point 2 r, a)
 project (Point3 x y _, loc) = (Point2 x y, loc)
 
@@ -463,10 +452,25 @@ inCCWOrder pts = case pts of
                      in List.sortBy cmp pts
   _               -> pts -- already sorted.
 
-
-
 --------------------------------------------------------------------------------
+-- * Operations on Maps
 
 -- | Merge a bunch of maps
 unionsWithKey   :: (Foldable f, Ord k) => (k -> a-> a ->a) -> f (Map k a) -> Map k a
 unionsWithKey f = F.foldl' (Map.unionWithKey f) Map.empty
+
+-- | Merge the maps. When they share a key, combine their values using a semigroup.
+mapWithKeyMerge   :: (Ord k, Ord k', Semigroup v')
+                  => (k -> v -> Map k' v') -> Map k v -> Map k' v'
+mapWithKeyMerge f = getMap . Map.foldMapWithKey (\k v -> MonoidalMap $ f k v)
+
+-- | A Map in which we combine conflicting elements by using their semigroup operation
+-- rather than picking the left value (as is done in the default Data.Map)
+newtype MonoidalMap k v = MonoidalMap { getMap :: Map k v }
+  deriving (Show)
+
+instance (Ord k, Semigroup v) => Semigroup (MonoidalMap k v) where
+  (MonoidalMap ma) <> (MonoidalMap mb) = MonoidalMap $ Map.unionWith (<>) ma mb
+
+instance (Ord k, Semigroup v) => Monoid (MonoidalMap k v) where
+  mempty = MonoidalMap mempty
