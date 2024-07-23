@@ -37,7 +37,7 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map (Map)
 import qualified Data.Map as Map
-import           Data.Maybe (fromMaybe)
+import           Data.Maybe (fromMaybe, listToMaybe)
 -- import           Data.Sequence (Seq)
 -- import qualified Data.Sequence as Seq
 import           Data.Set (Set)
@@ -126,6 +126,8 @@ definers (Three h1@(Plane_ a1 b1 c1) h2 h3) =
              LinePV _ vMinH' = fromMaybe err $ intersectionLine' h' hMin
              err = error "definers: absurd"
 
+-- | given three elements, returns the minimum element in the first argument and the
+-- remaining two elements in the second and third argument (in arbitrary order).
 extractMinOn         :: Ord a => (c -> a) -> c -> c -> c -> (c, c, c)
 extractMinOn f a b c = let (m,ab)  = min' a b
                            (mi,c') = min' m c
@@ -141,10 +143,77 @@ findNeighbours h (Definers defs) = withNeighs <$> List.elemIndex h defs
   where
     withNeighs i = (defs List.!! ((i-1) `mod` k), defs List.!! ((i+1) `mod` k))
     k = length defs
--- not exactly the best implementation yet
+-- TODO not exactly the best implementation yet
 
-instance Semigroup (Definers plane) where
-  _defsA <> _defsB = error "semigroup for definers not implemented yet"
+insertPlane :: (Plane_ plane r, Eq plane, Ord r, Fractional r
+               , Show plane, Show r
+               )
+            => Point 2 r -> plane -> Definers plane -> Definers plane
+insertPlane (Point2 x y) plane (Definers planes) = Definers $ go plane planes
+  where
+    q  = Point2 x (y+1)
+    q' = Point2 (x-1) (y+1)
+    up = Vector2 0 1
+
+    --
+    go h []       = [h]
+    go h (h':hs)
+      | h == h'   = h':hs
+      | otherwise = case evalAt q h `compare` evalAt q h' of
+          LT -> h : insert  h  h' hs h
+          EQ -> case evalAt q' h `compare` evalAt q' h' of
+                  LT -> h  : insert h  h' hs h
+                  _  -> h' : insert h' h  hs h'
+          GT -> h' : insert h' h  hs h'
+
+    -- | try to insert h into the cyclic order.
+    -- pre: hPrev is guaranteed to be in the output, and occurs before h and hNxt
+    --
+    insert hPrev h hs h0 = traceShowWith ("insert",hPrev,h,hs,h0,) $ case hs of
+      [] -> case ccwCmpAroundWith up origin (Point u) (Point w) of
+              GT -> [h] -- insert h and finish
+              _  -> [] -- h is dominated; don't insert it
+        where
+          LinePV _ u  = fromMaybe err $ intersectionLine' h0 hPrev
+          LinePV _ w  = fromMaybe err $ intersectionLine' h  h0
+          err = error "insertPlane: insert basecase. absurd"
+      (hNxt:hs')
+        | h == hNxt  -> hs -- duplicate plane; exit early
+        | otherwise  -> case ccwCmpAroundWith up origin (Point u) (Point w) of
+          GT -> h : finish h hs h0
+          -- we've inserted h, so drop the planes that are dominated by h
+          _  -> hNxt : insert hNxt h hs' h0 -- try to insert at a later position
+        where
+          LinePV _ u  = fromMaybe err $ traceShowWith ("Iu",hPrev,h,hNxt,) $ intersectionLine' hNxt (traceShowWith ("insert,Diff",hPrev,h,hNxt,) $ hPrev)
+          LinePV _ w  = fromMaybe err $ traceShowWith ("Iw",hPrev,h,hNxt,) $ intersectionLine' h    hNxt
+          err = error "insertPlane: insert. absurd"
+
+    -- we've just inserted hNew, so see if we still need/want the remaining planes
+    -- this is essentially List.dropWhile, but we may need the h0 plane in the end.
+    finish hNew hs h0 = case hs of
+      []      -> []
+      (h:hs') -> case ccwCmpAroundWith up origin (Point u) (Point w) of
+                   LT -> hs  -- hNew's region indeed ends before h's region ends, so keep
+                             -- h and the remaining planes
+                   _  -> finish hNew hs' h0 -- hNew dominates h, so drop h.
+        where
+          hNxt = fromMaybe h0 $ listToMaybe hs'
+
+          LinePV _ u  = fromMaybe err $ intersectionLine' hNxt hNew
+          LinePV _ w  = fromMaybe err $ intersectionLine' h    hNxt
+          err = error "insertPlane: finish. absurd"
+
+-- | Merge two lists of definers.
+--
+-- O(n^2), since we are using incremental insertion.
+merge                         :: (Plane_ plane r, Eq plane, Ord r, Fractional r
+                                 , Show plane, Show r
+                                 )
+                              => Point 3 r
+                              -> Definers plane -> Definers plane
+                              -> Definers plane
+merge (Point3 x y _) defA (Definers defsB) = foldr (insertPlane $ Point2 x y) defA defsB
+-- TODO: improve running time
 
 --------------------------------------------------------------------------------
 -- * The naive O(n^4) time algorithm.
@@ -160,6 +229,7 @@ bruteForceLowerEnvelope :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                            ) => set plane -> MinimizationDiagram r plane
 bruteForceLowerEnvelope = fromVertexForm . computeVertexForm
 
+
 -- | Computes the vertices of the lower envelope
 --
 -- O(n^4) time.
@@ -167,16 +237,15 @@ computeVertexForm        :: (Plane_ plane r, Ord plane, Ord r, Fractional r, Fol
                             , Show plane, Show r
                             )
                          => set plane -> VertexForm r plane
-computeVertexForm planes = getMap . foldMap (asVertex planes) $ uniqueTriplets planes
+computeVertexForm planes = unionsWithKey merge . fmap (asVertex planes) $ uniqueTriplets planes
 
 asVertex             :: (Plane_ plane r, Foldable f, Ord plane, Ord r, Fractional r
                         , Show plane, Show r
                         )
-                     => f plane -> Three plane -> MonoidalMap (Point 3 r) (Definers plane)
+                     => f plane -> Three plane -> Map (Point 3 r) (Definers plane)
 asVertex planes defs = case definers defs of
-  Just (v,defs')  | v `belowAll` planes ->traceShowWith ("vertex",) $
-                    MonoidalMap (Map.singleton v defs')
-  _                                     -> MonoidalMap Map.empty
+  Just (v,defs')  | v `belowAll` planes -> traceShowWith ("vertex",) $ Map.singleton v defs'
+  _                                     -> Map.empty
 
 -- | test if v lies below (or on) all the given planes
 belowAll   :: (Plane_ plane r, Ord r, Num r, Foldable f) => Point 3 r -> f plane -> Bool
@@ -260,6 +329,7 @@ instance (Ord k, Semigroup v) => Semigroup (MonoidalMap k v) where
 
 instance (Ord k, Semigroup v) => Monoid (MonoidalMap k v) where
   mempty = MonoidalMap mempty
+
 
 -- | Merge the maps. When they share a key, combine their values using a semigroup.
 mapWithKeyMerge   :: (Ord k, Ord k', Semigroup v')
@@ -432,3 +502,11 @@ inCCWOrder pts = case pts of
                          cmp (a,_) (b,_) = ccwCmpAround c a b <> cmpByDistanceTo c a b
                      in List.sortBy cmp pts
   _               -> pts -- already sorted.
+
+
+
+--------------------------------------------------------------------------------
+
+-- | Merge a bunch of maps
+unionsWithKey   :: (Foldable f, Ord k) => (k -> a-> a ->a) -> f (Map k a) -> Map k a
+unionsWithKey f = F.foldl' (Map.unionWithKey f) Map.empty

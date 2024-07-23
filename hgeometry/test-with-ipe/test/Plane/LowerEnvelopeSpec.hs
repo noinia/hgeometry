@@ -111,6 +111,8 @@ spec = describe "lower envelope tests" $ do
                  [osp|foo_out|]
          testIpe [osp|degenerate.ipe|]
                  [osp|degenerate_out|]
+         testIpe [osp|degenerate1.ipe|]
+                 [osp|degenerate1_out|]
 
 
 -- | Computes the vertex form of the upper envelope. The z-coordinates are still flipped.
