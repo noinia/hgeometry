@@ -227,11 +227,11 @@ insertPlane (Point2 x y) plane (Definers planes) = Definers $ go plane planes
 -- | Merge two lists of definers.
 --
 -- O(n^2), since we are using incremental insertion.
-merge                         :: (Plane_ plane r, Eq plane, Ord r, Fractional r)
-                              => Point 3 r
-                              -> Definers plane -> Definers plane
-                              -> Definers plane
-merge (Point3 x y _) defA (Definers defsB) = foldr (insertPlane $ Point2 x y) defA defsB
+merge                :: (Plane_ plane r, Eq plane, Ord r, Fractional r)
+                     => Point 3 r
+                     -> Definers plane -> Definers plane
+                     -> Definers plane
+merge (Point3 x y _) = foldr (insertPlane $ Point2 x y)
 -- TODO: improve running time
 
 
