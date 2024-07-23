@@ -1,0 +1,64 @@
+name: Get-Tested
+on:
+  - push
+  - pull_request
+jobs:
+  generate-matrix:
+    name: 'Generate matrix from cabal'
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract the tested GHC versions
+        id: set-matrix
+        uses: kleidukos/get-tested@0.1.7.1
+        with:
+          cabal-file: hgeometry.cabal
+          ubuntu-version: 'latest'
+          macos-version: 'latest'
+          version: 0.1.7.0
+  tests:
+    name: ${{ matrix.ghc }} on ${{ matrix.os }}
+    needs: generate-matrix
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix: ${{ fromJSON(needs.generate-matrix.outputs.matrix) }}
+    steps:
+      - name: Checkout base repo
+        uses: actions/checkout@v4
+      - name: Set up Haskell
+        id: setup-haskell
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: ${{ matrix.ghc }}
+          cabal-version: 'latest'
+      - name: Configure
+        run: |
+          ARCHITECTURE=$(uname -m)
+          echo "ARCH=$ARCHITECTURE" >> $GITHUB_ENV
+          echo ${{ env.ARCH }}
+          cabal configure --enable-tests --enable-benchmarks
+
+      - name: Install dependencies
+        run: cabal build --dependencies-only -j2
+
+      - name: Cache
+        uses: actions/cache@v4.0.2
+        with:
+          path: ${{ steps.setup-haskell.outputs.cabal-store }}
+          key: ${{ runner.os }}-ghc-${{ matrix.ghc }}-${{ hashFiles('**/plan.json') }}
+          restore-keys: ${{ runner.os }}-ghc-${{ matrix.ghc }}-
+
+      - name: Build
+        run: cabal build
+
+      - name: Test
+        run: cabal test all --test-show-details=direct
+
+      - name: cabal check
+        run: |
+          cabal -vnormal check hgeometry_combinatorial
+          cabal -vnormal check hgeometry
+      - name: haddock
+        run: |
+          cabal haddock --disable-documentation --haddock-all --with-haddock all
