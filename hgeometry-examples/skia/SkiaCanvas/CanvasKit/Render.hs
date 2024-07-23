@@ -18,8 +18,6 @@ module SkiaCanvas.CanvasKit.Render
 
 import           Control.Lens
 import           Control.Monad.Reader
-import           Control.Monad.Reader.Class
-import           Control.Monad.Trans
 import           Data.List.NonEmpty (NonEmpty(..))
 import           HGeometry.Ball
 import           HGeometry.LineSegment.Class
@@ -27,11 +25,11 @@ import           HGeometry.Point
 import           HGeometry.PolyLine
 import           HGeometry.Polygon.Simple
 import           Miso (JSM)
-import           SkiaCanvas.CanvasKit.Core (SkCanvas_, CanvasKit)
+import           SkiaCanvas.CanvasKit.Core (SkCanvas_)
 import qualified SkiaCanvas.CanvasKit.Core as CKCore
 import qualified SkiaCanvas.CanvasKit.GeomPrims as CKCore
 import           SkiaCanvas.CanvasKit.Initialize
-import           SkiaCanvas.CanvasKit.Paint (SkPaintRef, SkPaintStyle)
+import           SkiaCanvas.CanvasKit.Paint (SkPaintRef)
 import qualified SkiaCanvas.CanvasKit.Paint as Paint
 import qualified SkiaCanvas.CanvasKit.Path as Path
 import           SkiaCanvas.CanvasKit.Picture (SkPictureRef, drawPicture)

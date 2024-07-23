@@ -2,6 +2,7 @@
 module SkiaCanvas.CanvasKit.GeomPrims
   ( SkInputRect_
   , SkInputRectRef
+  , SkInputIRectRef
   , ltrbRect
   , fromRect
 
@@ -23,6 +24,14 @@ import           Miso
 import           Miso.String (MisoString)
 import           SkiaCanvas.CanvasKit.Core
 import           SkiaCanvas.CanvasKit.Paint
+
+--------------------------------------------------------------------------------
+
+-- | Rectangles with intager coordinates.
+newtype SkInputIRectRef = SkInputIRect JSVal
+  deriving (ToJSVal, JS.MakeObject)
+
+-- TODO: we may want to be able to create these things ....
 
 --------------------------------------------------------------------------------
 

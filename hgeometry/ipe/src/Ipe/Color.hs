@@ -41,6 +41,40 @@ named :: Text -> IpeColor r
 named = IpeColor . Named
 
 --------------------------------------------------------------------------------
+
+-- | All basic named colors
+basicNamedColors :: [IpeColor r]
+basicNamedColors = [ black
+                   , white
+                   , red
+                   , green
+                   , blue
+                   , yellow
+                   , orange
+                   , gold
+                   , purple
+                   , gray
+                   , brown
+                   , navy
+                   , pink
+                   , seagreen
+                   , turquoise
+                   , violet
+                   , darkblue
+                   , darkcyan
+                   , darkgray
+                   , darkgreen
+                   , darkmagenta
+                   , darkorange
+                   , darkred
+                   , lightblue
+                   , lightcyan
+                   , lightgray
+                   , lightgreen
+                   , lightyellow
+                   ]
+
+--------------------------------------------------------------------------------
 -- * Basic Named colors
 
 black :: IpeColor r

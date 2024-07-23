@@ -2,6 +2,7 @@
 module SkiaCanvas.CanvasKit
   ( CanvasKit
   , SurfaceRef
+  , flush
   , SkCanvas_
   , SkCanvasRef
   , InitializeSkCanvasAction(..)

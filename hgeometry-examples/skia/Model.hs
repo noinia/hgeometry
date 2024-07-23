@@ -2,12 +2,14 @@
 {-# LANGUAGE TemplateHaskell            #-}
 module Model
   ( Model(Model)
-  , canvas, zoomConfig, points, polyLines, polygons, rectangles
+  , canvas, zoomConfig, points, polyLines, polygons, rectangles, planeGraphs
   , diagram, _layers, mode, stroke, fill
   , currentModal
   , cachedPictures
 
   , initialModel
+
+  , PlaneGraph'
 
   , Modal(..), currentStatus
 
@@ -28,11 +30,15 @@ import           Data.Default.Class
 import qualified Data.IntMap as IntMap
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (fromJust)
 import           Data.Sequence (Seq(..))
 import           HGeometry.Ext
 import           HGeometry.Interval
 import           HGeometry.Miso.OrphanInstances ()
+import           HGeometry.PlaneGraph
 import           HGeometry.Point
+import           HGeometry.Polygon.Simple
+import           HGeometry.Polygon.Triangulation
 import           HGeometry.Viewport (ZoomConfig(..))
 import           Layers
 import           Modes
@@ -42,6 +48,7 @@ import           RectangleMode
 import qualified SkiaCanvas
 import           SkiaCanvas.CanvasKit.Picture (SkPictureRef)
 import           StrokeAndFill
+
 
 --------------------------------------------------------------------------------
 
@@ -63,6 +70,15 @@ currentStatus m1 m2
   | m1 == Just m2  = Active
   | otherwise      = InActive
 
+
+--------------------------------------------------------------------------------
+
+-- Ideally the worlds of the various graphs are different and we use a dependent map
+-- in planeGraphs
+data MyWorld
+
+type PlaneGraph' r = PlaneGraph MyWorld (Point 2 r) PolygonEdgeType PolygonFaceData
+
 --------------------------------------------------------------------------------
 -- * Data Type representing all our modal data
 
@@ -73,6 +89,11 @@ data Model = Model { _canvas       :: SkiaCanvas.Canvas R
                    , _polyLines    :: IntMap.IntMap (PolyLine' R :+ Attributes (PolyLine' R))
                    , _polygons     :: IntMap.IntMap (SimplePolygon' R :+ Attributes (SimplePolygon' R))
                    , _rectangles   :: IntMap.IntMap (Rectangle' R :+ Attributes (Rectangle' R))
+
+
+
+                   , _planeGraphs  :: IntMap.IntMap (PlaneGraph' R)
+
                    , _diagram      :: Maybe [Point 2 R]
                    , __layers      :: Layers
                    , _stroke       :: !StrokeFill
@@ -101,8 +122,9 @@ initialModel = Model { _canvas       = SkiaCanvas.blankCanvas 1024 768
                      , _zoomConfig   = ZoomConfig (ClosedInterval 0.1 4) 1
                      , _points       = mempty
                      , _polyLines    = mempty
-                     , _polygons     = mempty
+                     , _polygons     = IntMap.singleton 0 (myPolygon :+ def)
                      , _rectangles   = mempty
+                     , _planeGraphs  = mempty
                      , _diagram      = Nothing
                      , __layers      = initialLayers
                      , _mode         = PointMode
@@ -111,6 +133,37 @@ initialModel = Model { _canvas       = SkiaCanvas.blankCanvas 1024 768
                      , _currentModal = Nothing
                      , _cachedPictures = mempty
                      }
+
+
+myPolygon :: SimplePolygon' R
+myPolygon = fromJust
+          . fromPoints $ [ Point2 64 128
+                         , Point2 48 64
+                         , Point2 96 32
+                         , Point2 128 64
+                         , Point2 176 48
+                         , Point2 176 96
+                         , Point2 80 80
+                         , Point2 128 128
+                         , Point2 112 176
+                         , Point2 48 160
+                         ]
+
+-- <path stroke="black">
+-- 64 128 m
+-- 48 64 l
+-- 96 32 l
+-- 128 64 l
+-- 176 48 l
+-- 176 96 l
+-- 80 80 l
+-- 128 128 l
+-- 112 176 l
+-- 48 160 l
+-- h
+-- </path>
+
+
 
 --------------------------------------------------------------------------------
 
