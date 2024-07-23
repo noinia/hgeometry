@@ -20,7 +20,9 @@ import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
+import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
+import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Plane.LowerEnvelope.ConnectedNew
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
@@ -106,8 +108,8 @@ spec = describe "lower envelope tests" $ do
          testIpe [osp|degenerate1.ipe|]
                  [osp|degenerate1_out|]
 
-         -- testIpeGraph [osp|foo.ipe|]
-         --              [osp|foo_graph_out|]
+         testIpeGraph [osp|foo.ipe|]
+                      [osp|foo_graph_out|]
 
 
 
@@ -153,7 +155,13 @@ testIpe inFp outFp = do
                (ipeFileGolden { name = outFp })
                (addStyleSheet opacitiesStyle $ singlePageFromContent out)
 
-{-
+
+theEdges :: PlaneGraph (Point 2 R) h (E R) -> IpeObject' Group R
+theEdges = ipeGroup . Map.foldMapWithKey (\v (adjs, _) ->
+               foldMap (\w -> [ iO $ defIO (ClosedLineSegment v w)
+                              ]) adjs)
+
+
 -- build a triangulated graph from the points in the input file
 testIpeGraph            :: OsPath -> OsPath -> Spec
 testIpeGraph inFp outFp = do
@@ -162,14 +170,15 @@ testIpeGraph inFp outFp = do
       NonEmpty.fromList <$> readAllFrom inFp'
     let vd = voronoiDiagram' $ view core <$> points
         vv = voronoiVertices $ view core <$> points
+        gr = toPlaneGraph $ Map.mapKeysMonotonic liftPointToPlane vd
         out = [ iO' points
               , iO' vd
+              , iO' $ theEdges gr
               ] <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
     goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
                (ipeFileGolden { name = outFp })
                (addStyleSheet opacitiesStyle $ singlePageFromContent out)
 
--}
 
 
 

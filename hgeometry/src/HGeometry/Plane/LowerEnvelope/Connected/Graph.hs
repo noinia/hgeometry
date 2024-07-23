@@ -9,7 +9,9 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Plane.LowerEnvelope.Connected.Graph
-  ( toPlaneGraph
+  ( PlaneGraph
+  , E(..)
+  , toPlaneGraph
   ) where
 
 import           Control.Lens
@@ -40,6 +42,8 @@ import           HGeometry.Vector
 -- | A Plane graph storing vertices of type v that are identified by keys of type k, and
 -- some ordered sequence of edges (which are ordered using e).
 type PlaneGraph k v e = Map k (Map e k, v)
+
+
 
 newtype E r = E (Vector 2 r)
   deriving newtype (Show)
