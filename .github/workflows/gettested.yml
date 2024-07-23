@@ -56,11 +56,10 @@ jobs:
 
       - name: cabal check
         run: |
-          cd hgeometry_combinatorial
+          cd $GITHUB_WORKSPACE/hgeometry-combinatorial
           cabal -vnormal check
-          cd ../hgeometry
+          cd $GITHUB_WORKSPACE/hgeometry
           cabal -vnormal check
-          cd ..
       - name: haddock
         run: |
           cabal haddock --disable-documentation --haddock-all --with-haddock all
