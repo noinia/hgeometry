@@ -56,8 +56,11 @@ jobs:
 
       - name: cabal check
         run: |
-          cabal -vnormal check hgeometry_combinatorial
-          cabal -vnormal check hgeometry
+          cd hgeometry_combinatorial
+          cabal -vnormal check
+          cd ../hgeometry
+          cabal -vnormal check
+          cd ..
       - name: haddock
         run: |
           cabal haddock --disable-documentation --haddock-all --with-haddock all
