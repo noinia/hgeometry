@@ -24,6 +24,7 @@ module HGeometry.Polygon.Class
 
 import Control.Lens
 import Data.Function (on)
+import HGeometry.Ext
 import HGeometry.Lens.Util
 -- import qualified Data.Functor.Apply as Apply
 import Data.Semigroup (First(..))
@@ -110,6 +111,13 @@ class HasVertices polygon polygon => HasOuterBoundary polygon where
 -- end of te HasOuterBoundary class
 --------------------------------------------------------------------------------
 
+instance HasOuterBoundary polygon => HasOuterBoundary (polygon :+ extra) where
+  outerBoundary = core .> outerBoundary
+  ccwOuterBoundaryFrom u = core .> ccwOuterBoundaryFrom u
+  cwOuterBoundaryFrom u  = core .> cwOuterBoundaryFrom  u
+  outerBoundaryVertexAt u = core .> outerBoundaryVertexAt u
+  outerBoundaryEdges = core .> outerBoundaryEdges
+  outerBoundaryEdgeAt u = core .> outerBoundaryEdgeAt u
 
 --------------------------------------------------------------------------------
 -- * HasOuterBoundary Helpers
@@ -250,6 +258,12 @@ class ( HasOuterBoundary polygon
 --------------------------------------------------------------------------------
 -- end of te Polygon_ class
 --------------------------------------------------------------------------------
+
+instance Polygon_ polygon point r  => Polygon_ (polygon :+ extra) point r where
+  area = area . view core
+  extremes u = extremes u . view core
+  ccwPredecessorOf u = core .> ccwPredecessorOf u
+  ccwSuccessorOf   u = core .> ccwSuccessorOf   u
 
 --------------------------------------------------------------------------------
 

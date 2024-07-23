@@ -46,6 +46,10 @@ data Action = Id
             | SaveSkpFile
             | LoadSkpFile
 
+            | TriangulateSelectedPolygon -- triangulates the selected polygon
+
+            | SavePngFile
+
 
 
 -- | Actions one can do with the stroke or fill color

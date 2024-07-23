@@ -3,6 +3,7 @@
 module SkiaCanvas.CanvasKit.Core
   ( CanvasKit(..)
   , SurfaceRef(..)
+  , flush
 
   , SkCanvas_
   , SkCanvasRef(..)
@@ -14,15 +15,22 @@ module SkiaCanvas.CanvasKit.Core
   , clear
   , clearWith
   , mkWhite
+  , toDataURL
+  , Codec(..)
+  , Base64EncodedString(..)
+
+
+
   ) where
 
 import           Control.Lens
 import           Control.Monad (void)
 import           Data.Functor.Apply (Apply(..))
+import           Data.Text (Text)
 import           GHCJS.Marshal (ToJSVal(..))
 import           GHCJS.Types
 import qualified Language.Javascript.JSaddle as JSAddle
-import           Language.Javascript.JSaddle.Object (js1)
+import           Language.Javascript.JSaddle.Object (js0, js1)
 import qualified Language.Javascript.JSaddle.Object as JS
 import           Miso
 import           Miso.String (MisoString)
@@ -53,6 +61,10 @@ instance Show SurfaceRef where
 instance Eq SurfaceRef where
   _ == _ = True
   -- we should only have one
+
+-- | Flush drawing to the survace
+flush         :: SurfaceRef -> JSM ()
+flush surface = void $ surface ^.js0 ("flush" :: MisoString)
 
 --------------------------------------------------------------------------------
 -- * SkCanvasRef
@@ -112,8 +124,36 @@ mkWhite           :: CanvasKit -> JSM SkInputColor
 mkWhite canvasKit = SkInputColor <$> canvasKit JS.! ("WHITE" :: MisoString)
 
 
+-- | Save the canvas using the given codec to a base64 encoded string.
+toDataURL              :: SkCanvas_ skCanvas => skCanvas -> Codec -> JSM Base64EncodedString
+toDataURL canvas codec = do
+    jsValStr <- canvas ^.js1 ("toDataURL" :: MisoString) (codecStr :: MisoString)
+    JSAddle.fromJSValUnchecked jsValStr
+  where
+    codecStr = case codec of
+                 PngCodec -> "image/png"
+                 JpgCodec -> "image/jpg"
+
+-- | Codec for storing DataURLs
+data Codec = PngCodec | JpgCodec
+  deriving (Show,Read,Eq,Ord)
 
 --------------------------------------------------------------------------------
+
+-- | Base64 encoded strings
+newtype Base64EncodedString = Base64EncodedString Text
+  deriving (Show,Eq,Ord)
+
+instance JSAddle.FromJSVal Base64EncodedString where
+  fromJSVal jsv =
+    fmap (\(JSAddle.JSString t) -> Base64EncodedString t) <$> JSAddle.fromJSVal jsv
+
+-- writeToFile :: Base64EncodedString -> OsPath -> IO ()
+-- writeToFile (Base64EncodedString t) =  undefined
+
+
+--------------------------------------------------------------------------------
+
 
 --------------------------------------------------------------------------------
 

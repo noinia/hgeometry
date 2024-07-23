@@ -45,7 +45,7 @@ module Ipe.Types(
   -- * Styles and Preamble
   , addStyleSheet
   , IpeStyle(IpeStyle), styleName, styleData
-  , basicIpeStyle
+  , basicIpeStyle, opacitiesStyle
   , IpePreamble(IpePreamble), encoding, preambleData
   --
   -- , flattenGroups
@@ -86,11 +86,14 @@ data IpeStyle = IpeStyle { _styleName :: Maybe Text
               deriving (Eq,Show)
 makeLenses ''IpeStyle
 
-
+-- | The "basic" ipe stylesheet
 basicIpeStyle :: IpeStyle
 basicIpeStyle = IpeStyle (Just "basic") (xmlLiteral [litFile|data/ipe/basic.isy|])
 
-
+-- | A stylesheet with some convenient predefined opacities. In particular
+-- the opacities "10%","20%",..,"90%".
+opacitiesStyle :: IpeStyle
+opacitiesStyle = IpeStyle (Just "opacities") (xmlLiteral [litFile|data/ipe/opacities.isy|])
 
 -- | The maybe string is the encoding
 data IpePreamble  = IpePreamble { _encoding     :: Maybe Text

@@ -51,6 +51,7 @@ common setup
       , hiraffe                   >= 0.1
       , containers                >= 0.6
       , vector                    >= 0.13
+      , enummapset                >= 0.7.2.0
       , lens                      >= 5.2
       , deepseq                   >= 1.1
       , semigroupoids             >= 5
@@ -69,7 +70,12 @@ common setup
       , mtl                       >= 2.3.1
       , transformers              >= 0.6.0.0
       , infinite-list             >= 0.1.1         && < 0.2
+      , text                      >= 2.0
 
+      -- , dependent-map             >= 0.4
+      -- , dependent-sum             >= 0.7.1
+      -- , some                      >= 1.0.1
+      -- , constraints-extras        >= 0.4
 
       , ghc-typelits-natnormalise >= 0.7.7
       , ghc-typelits-knownnat     >= 0.7.6
@@ -201,6 +207,7 @@ executable hgeometry-skia
         SkiaCanvas.CanvasKit.Paint
         SkiaCanvas.CanvasKit.Path
         SkiaCanvas.CanvasKit.Picture
+        SkiaCanvas.CanvasKit.Image
         SkiaCanvas.CanvasKit.PictureRecorder
         SkiaCanvas.CanvasKit.Render
         SkiaCanvas.CanvasKit.Initialize
@@ -217,3 +224,5 @@ executable hgeometry-skia
         Action
         ToolMenu
         Base
+        GeometryStore
+        GeometryStore.Helper

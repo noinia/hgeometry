@@ -25,11 +25,11 @@ data-files:
     polygons.simple
     polygons.multi
     ipe/basic.isy
+    ipe/opacities.isy
     test-with-ipe/**/*.ipe
 
 tested-with:
-    GHC == 9.6.5
-  , GHC == 9.8.2
+    GHC == 9.8.2
   , GHC == 9.10.1
 
 source-repository head
@@ -400,6 +400,9 @@ library
         HGeometry.Plane.LowerEnvelope.AdjListForm
         HGeometry.Plane.LowerEnvelope.Connected
 
+        -- newer attempt:
+        HGeometry.Plane.LowerEnvelope.Connected.Regions
+
 
         HGeometry.VoronoiDiagram
 
@@ -433,7 +436,6 @@ library
         HGeometry.Plane.LowerEnvelope.Connected.Type
         HGeometry.Plane.LowerEnvelope.Connected.FromVertexForm
         -- HGeometry.Plane.LowerEnvelope.Sample
-
 
         HGeometry.Plane.LowerEnvelope.DivideAndConquer
         HGeometry.Plane.LowerEnvelope.EpsApproximation
@@ -514,6 +516,26 @@ library miso
 
     -- other-modules:
     --     Miso.String.Util
+
+
+
+--------------------------------------------------------------------------------
+-- * HGeometry GeoJSON
+
+library geojson
+    import: all-setup
+    visibility: public
+    hs-source-dirs: geojson/src
+    build-depends:
+       geojson        >= 4.1.1  && < 5.0
+    exposed-modules:
+       HGeometry.GeoJSON
+
+    -- other-modules:
+    --     HGeometry.Point.Type
+    --     HGeometry.Point.Orientation.Degenerate
+    --     HGeometry.Point.Quadrants
+
 
 
 --------------------------------------------------------------------------------
@@ -658,9 +680,11 @@ test-suite hspec
       ClosestPair.ClosestPairSpec
       IntervalTreeSpec
       LowerEnvelope.NaiveSpec
+      LowerEnvelope.RegionsSpec
       Polygon.Convex.ConvexSpec
       Polygon.TriangulateSpec
       Polygon.Triangulation.MakeMonotoneSpec
+      Polygon.VerticesSpec
       PolyLine.Simplification.ImaiIriSpec
       SegmentTreeSpec
       SegmentTree.R2Spec
@@ -693,6 +717,7 @@ test-suite with-ipe-hspec
       Polygon.Convex.ConvexSpec
       Polygon.Convex.ConvexSpec
       VoronoiDiagram.VoronoiSpec
+      Plane.LowerEnvelopeSpec
       LineSegmentSpec
       HalfLineSpec
       Polygon.Triangulation.TriangulateMonotoneSpec
