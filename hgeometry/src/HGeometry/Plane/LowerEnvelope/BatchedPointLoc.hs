@@ -1,5 +1,5 @@
 module HGeometry.LowerEnvelope.BatchedPointLoc
-  ( batchedPointLocation
+  ( -- batchedPointLocation
   ) where
 
 import           Control.Lens
@@ -7,10 +7,11 @@ import qualified Data.Vector as Boxed
 import           HGeometry.Interval
 import           HGeometry.Line
 import           HGeometry.Line.LineEQ
-import           HGeometry.LowerEnvelope.Type
+-- import           HGeometry.LowerEnvelope.Type
 import           HGeometry.Point
 
 --------------------------------------------------------------------------------
+{-
 
 -- | Given a set of n query points and a set of r planes, computes
 -- an output array A of the planes, and for each query point q an interval [i,j] so that
@@ -38,3 +39,4 @@ batchedPointLocation2 :: f (Point 2 r) -> g (LineEQ r) -> ( Boxed.Vector (LineEQ
                                                         )
 batchedPointLocation2 = undefined
 -- use some sweepline here. so maybe don't report them as a vector
+-}
