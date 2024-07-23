@@ -13,29 +13,14 @@ module HGeometry.Plane.LowerEnvelope.Connected.BruteForce
   , computeVertexForm
   ) where
 
-import           Control.Lens
-import qualified Data.Foldable as F
-import qualified Data.List as List
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map (Map)
 import qualified Data.Map as Map
-import           Data.Maybe (fromMaybe, listToMaybe)
-import           Data.Semigroup (First(..))
-import           Data.Set (Set)
-import qualified Data.Set as Set
 import           HGeometry.Combinatorial.Util
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Intersection
-import           HGeometry.Line
-import           HGeometry.Line.General
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
-import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
 import           HGeometry.Plane.LowerEnvelope.Connected.Regions
 import           HGeometry.Point
-import           HGeometry.Properties
-import           HGeometry.Vector
 
 --------------------------------------------------------------------------------
 -- * The naive O(n^4) time algorithm.
