@@ -9,26 +9,20 @@ module Plane.LowerEnvelopeSpec
 import           Control.Lens
 import           Data.Foldable
 import           Data.Foldable1
-import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Map (Map)
 import qualified Data.Map as Map
-import qualified Data.Sequence as Seq
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 import           Golden
-import           HGeometry.Box
 import           HGeometry.Duality
 import           HGeometry.Ext
-import           HGeometry.HalfLine
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope.Connected.Regions
 import           HGeometry.Point
-import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
 import           HGeometry.Vector
@@ -39,8 +33,6 @@ import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
 
--- import Test.Util
-import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -148,7 +140,7 @@ testIpe inFp outFp = do
     (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
       inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
       NonEmpty.fromList <$> readAllFrom inFp'
-    let vd = traceShowWith ("Result:",)  $ voronoiDiagram' $ view core <$> points
+    let vd = voronoiDiagram' $ view core <$> points
         vv = voronoiVertices $ view core <$> points
         out = [ iO' points
               , iO' vd
