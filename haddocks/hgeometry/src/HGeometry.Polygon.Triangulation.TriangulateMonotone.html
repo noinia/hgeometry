@@ -1,0 +1,789 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Polygon.Triangulation.TriangulateMonotone</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.Polygon.Triangulation.TriangulateMonotone</span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#YMonotonePolygon_"><span class="hs-identifier">YMonotonePolygon_</span></a></span><span>
+</span><span id="line-10"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#triangulate"><span class="hs-identifier">triangulate</span></a></span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#computeDiagonals"><span class="hs-identifier">computeDiagonals</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-comment">-- , LR(..)</span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-comment">-- , P</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-comment">-- , Stack</span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-comment">-- , chainOf</span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-comment">-- , toVtx</span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-comment">-- , seg</span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-comment">-- , process</span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-comment">-- , isInside</span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-comment">-- , mergeBy</span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-comment">-- , splitPolygon</span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- import           HGeometry.Polygon.Triangulation.Types</span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">List</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Down</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">comparing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html"><span class="hs-identifier">HGeometry.Combinatorial.Util</span></a></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html"><span class="hs-identifier">HGeometry.Ext</span></a></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Vector</span></span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Vector2</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- import           HGeometry.PlanarSubdivision.Basic (PlanarSubdivision, PolygonFaceData)</span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.PlaneGraph.html"><span class="hs-identifier">HGeometry.PlaneGraph</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.PlaneGraph.Type.html#PlaneGraph"><span class="hs-identifier">PlaneGraph</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Polygon.Class.html"><span class="hs-identifier">HGeometry.Polygon.Class</span></a></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html"><span class="hs-identifier">HGeometry.Polygon.Simple.Class</span></a></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Algorithms.DivideAndConquer.html"><span class="hs-identifier">HGeometry.Algorithms.DivideAndConquer</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Algorithms.DivideAndConquer.html#mergeSortedListsBy"><span class="hs-identifier">mergeSortedListsBy</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Lens.Util.html"><span class="hs-identifier">HGeometry.Lens.Util</span></a></span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- import           Hiraffe.Graph.Class</span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html"><span class="hs-identifier">HGeometry.Polygon.Triangulation.Types</span></a></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- | Y-monotone polygon. All straight horizontal lines intersects the polygon</span><span>
+</span><span id="line-46"></span><span class="hs-comment">--   no more than twice.</span><span>
+</span><span id="line-47"></span><span class="hs-keyword">type</span><span> </span><span id="YMonotonePolygon_"><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#YMonotonePolygon_"><span class="hs-identifier hs-var">YMonotonePolygon_</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#SimplePolygon_"><span class="hs-identifier hs-type">SimplePolygon_</span></a></span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="hs-keyword">data</span><span> </span><span id="LR"><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#LR"><span class="hs-identifier hs-var">LR</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="L"><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#L"><span class="hs-identifier hs-var">L</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="R"><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#R"><span class="hs-identifier hs-var">R</span></a></span></span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679474637"><span id="local-6989586621679474639"><span id="local-6989586621679474643"><span class="annot"><span class="annottext">Int -&gt; LR -&gt; ShowS
+[LR] -&gt; ShowS
+LR -&gt; String
+(Int -&gt; LR -&gt; ShowS)
+-&gt; (LR -&gt; String) -&gt; ([LR] -&gt; ShowS) -&gt; Show LR
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; LR -&gt; ShowS
+showsPrec :: Int -&gt; LR -&gt; ShowS
+$cshow :: LR -&gt; String
+show :: LR -&gt; String
+$cshowList :: [LR] -&gt; ShowS
+showList :: [LR] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679474647"><span id="local-6989586621679474649"><span class="annot"><span class="annottext">LR -&gt; LR -&gt; Bool
+(LR -&gt; LR -&gt; Bool) -&gt; (LR -&gt; LR -&gt; Bool) -&gt; Eq LR
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: LR -&gt; LR -&gt; Bool
+== :: LR -&gt; LR -&gt; Bool
+$c/= :: LR -&gt; LR -&gt; Bool
+/= :: LR -&gt; LR -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- | Triangulates a polygon of \(n\) vertices</span><span>
+</span><span id="line-52"></span><span class="hs-comment">--</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- running time: \(O(n \log n)\)</span><span>
+</span><span id="line-54"></span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#triangulate"><span class="hs-identifier hs-type">triangulate</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679474359"><span class="annot"><a href="#local-6989586621679474359"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679474355"><span class="annot"><a href="#local-6989586621679474355"><span class="hs-identifier hs-type">yMonotonePolygon</span></a></span></span><span> </span><span id="local-6989586621679474356"><span class="annot"><a href="#local-6989586621679474356"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span id="local-6989586621679474357"><span class="annot"><a href="#local-6989586621679474357"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-55"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#YMonotonePolygon_"><span class="hs-identifier hs-type">YMonotonePolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474355"><span class="hs-identifier hs-type">yMonotonePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474356"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474357"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679474357"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679474357"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-56"></span><span>                  </span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span>               </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679474355"><span class="hs-identifier hs-type">yMonotonePolygon</span></a></span><span>
+</span><span id="line-58"></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.PlaneGraph.Type.html#PlaneGraph"><span class="hs-identifier hs-type">PlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474359"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474356"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#PolygonEdgeType"><span class="hs-identifier hs-type">PolygonEdgeType</span></a></span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#PolygonFaceData"><span class="hs-identifier hs-type">PolygonFaceData</span></a></span><span>
+</span><span id="line-59"></span><span id="triangulate"><span class="annot"><span class="annottext">triangulate :: forall {k} (s :: k) yMonotonePolygon point r.
+(YMonotonePolygon_ yMonotonePolygon point r, Ord r, Num r) =&gt;
+yMonotonePolygon
+-&gt; PlaneGraph s point PolygonEdgeType PolygonFaceData
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#triangulate"><span class="hs-identifier hs-var hs-var">triangulate</span></a></span></span><span> </span><span id="local-6989586621679474919"><span class="annot"><span class="annottext">yMonotonePolygon
+</span><a href="#local-6989586621679474919"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">yMonotonePolygon
+-&gt; [Diagonal yMonotonePolygon]
+-&gt; PlaneGraph s point PolygonEdgeType PolygonFaceData
+forall {k} (s :: k) polygon point r (f :: * -&gt; *).
+(SimplePolygon_ polygon point r, Point_ point 2 r, Foldable f,
+ Ord r, Num r) =&gt;
+polygon
+-&gt; f (Diagonal polygon)
+-&gt; PlaneGraph s point PolygonEdgeType PolygonFaceData
+</span><a href="HGeometry.Polygon.Triangulation.Types.html#constructGraph"><span class="hs-identifier hs-var">constructGraph</span></a></span><span> </span><span class="annot"><span class="annottext">yMonotonePolygon
+</span><a href="#local-6989586621679474919"><span class="hs-identifier hs-var">pg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">yMonotonePolygon -&gt; [Diagonal yMonotonePolygon]
+forall yMonotonePolygon point r.
+(YMonotonePolygon_ yMonotonePolygon point r, Ord r, Num r) =&gt;
+yMonotonePolygon -&gt; [Diagonal yMonotonePolygon]
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#computeDiagonals"><span class="hs-identifier hs-var">computeDiagonals</span></a></span><span> </span><span class="annot"><span class="annottext">yMonotonePolygon
+</span><a href="#local-6989586621679474919"><span class="hs-identifier hs-var">pg</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-comment">-- TODO: Find a way to construct the graph in O(n) time.</span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- | Given a y-monotone polygon in counter clockwise order computes the diagonals</span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- to add to triangulate the polygon</span><span>
+</span><span id="line-64"></span><span class="hs-comment">--</span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- pre: the input polygon is y-monotone and has \(n \geq 3\) vertices</span><span>
+</span><span id="line-66"></span><span class="hs-comment">--</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- running time: \(O(n)\)</span><span>
+</span><span id="line-68"></span><span id="local-6989586621679474423"><span id="local-6989586621679474424"><span id="local-6989586621679474425"><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#computeDiagonals"><span class="hs-identifier hs-type">computeDiagonals</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#YMonotonePolygon_"><span class="hs-identifier hs-type">YMonotonePolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474423"><span class="hs-identifier hs-type">yMonotonePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474424"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474425"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679474425"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679474425"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span>                    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679474423"><span class="hs-identifier hs-type">yMonotonePolygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#Diagonal"><span class="hs-identifier hs-type">Diagonal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474423"><span class="hs-identifier hs-type">yMonotonePolygon</span></a></span><span class="hs-special">]</span></span></span></span><span>
+</span><span id="line-70"></span><span id="computeDiagonals"><span class="annot"><span class="annottext">computeDiagonals :: forall yMonotonePolygon point r.
+(YMonotonePolygon_ yMonotonePolygon point r, Ord r, Num r) =&gt;
+yMonotonePolygon -&gt; [Diagonal yMonotonePolygon]
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#computeDiagonals"><span class="hs-identifier hs-var hs-var">computeDiagonals</span></a></span></span><span> </span><span id="local-6989586621679475141"><span class="annot"><span class="annottext">yMonotonePolygon
+</span><a href="#local-6989586621679475141"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[point :+ (Int, LR)]
+-&gt; Maybe ([point :+ (Int, LR)], point :+ (Int, LR))
+forall s a. Snoc s s a a =&gt; s -&gt; Maybe (s, a)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Cons.html#unsnoc"><span class="hs-identifier hs-var">unsnoc</span></a></span><span> </span><span class="annot"><span class="annottext">[point :+ (Int, LR)]
+</span><a href="#local-6989586621679475143"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-71"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679475144"><span class="annot"><span class="annottext">point :+ (Int, LR)
+</span><a href="#local-6989586621679475144"><span class="hs-identifier hs-var">u</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679475145"><span class="annot"><span class="annottext">point :+ (Int, LR)
+</span><a href="#local-6989586621679475145"><span class="hs-identifier hs-var">v</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679475146"><span class="annot"><span class="annottext">[point :+ (Int, LR)]
+</span><a href="#local-6989586621679475146"><span class="hs-identifier hs-var">vs'</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679475147"><span class="annot"><span class="annottext">point :+ (Int, LR)
+</span><a href="#local-6989586621679475147"><span class="hs-identifier hs-var">w</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(point :+ (Int, LR))
+-&gt; (point :+ (Int, LR))
+-&gt; [point :+ (Int, LR)]
+-&gt; (point :+ (Int, LR))
+-&gt; [Vector 2 Int]
+forall {k} {point} {t :: * -&gt; *} {i} {r :: k}.
+(Dimension point ~ 2, Foldable t, Point_ point 2 (NumType point),
+ Ord (NumType point), Num (NumType point)) =&gt;
+P i point (NumType point)
+-&gt; P i point (NumType point)
+-&gt; t (P i point (NumType point))
+-&gt; P i point (NumType point)
+-&gt; [Vector 2 i]
+</span><a href="#local-6989586621679475148"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">point :+ (Int, LR)
+</span><a href="#local-6989586621679475144"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">point :+ (Int, LR)
+</span><a href="#local-6989586621679475145"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[point :+ (Int, LR)]
+</span><a href="#local-6989586621679475146"><span class="hs-identifier hs-var">vs'</span></a></span><span> </span><span class="annot"><span class="annottext">point :+ (Int, LR)
+</span><a href="#local-6989586621679475147"><span class="hs-identifier hs-var">w</span></a></span><span>
+</span><span id="line-72"></span><span>    </span><span class="annot"><span class="annottext">Maybe ([point :+ (Int, LR)], point :+ (Int, LR))
+</span><span class="hs-identifier">_</span></span><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; [Vector 2 Int]
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;computeDiagonals. polygon should contain at least 3 vertices&quot;</span></span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-74"></span><span>    </span><span class="hs-comment">-- split the polygon into two chains of vertices (with the vertices in decreasing order)</span><span>
+</span><span id="line-75"></span><span>    </span><span class="hs-comment">-- tag them with left and right, and merge the resulting list into one big decreasing list</span><span>
+</span><span id="line-76"></span><span>    </span><span id="local-6989586621679475143"><span class="annot"><span class="annottext">vs :: [point :+ (Int, LR)]
+</span><a href="#local-6989586621679475143"><span class="hs-identifier hs-var hs-var">vs</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([point :+ (Int, LR)]
+ -&gt; [point :+ (Int, LR)] -&gt; [point :+ (Int, LR)])
+-&gt; ([point :+ (Int, LR)], [point :+ (Int, LR)])
+-&gt; [point :+ (Int, LR)]
+forall a b c. (a -&gt; b -&gt; c) -&gt; (a, b) -&gt; c
+</span><span class="hs-identifier hs-var">uncurry</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((point :+ (Int, LR)) -&gt; (point :+ (Int, LR)) -&gt; Ordering)
+-&gt; [point :+ (Int, LR)]
+-&gt; [point :+ (Int, LR)]
+-&gt; [point :+ (Int, LR)]
+forall a. (a -&gt; a -&gt; Ordering) -&gt; [a] -&gt; [a] -&gt; [a]
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Algorithms.DivideAndConquer.html#mergeSortedListsBy"><span class="hs-identifier hs-var">mergeSortedListsBy</span></a></span><span> </span><span class="annot"><span class="annottext">(((point :+ (Int, LR)) -&gt; (point :+ (Int, LR)) -&gt; Ordering)
+ -&gt; [point :+ (Int, LR)]
+ -&gt; [point :+ (Int, LR)]
+ -&gt; [point :+ (Int, LR)])
+-&gt; ((point :+ (Int, LR)) -&gt; (point :+ (Int, LR)) -&gt; Ordering)
+-&gt; [point :+ (Int, LR)]
+-&gt; [point :+ (Int, LR)]
+-&gt; [point :+ (Int, LR)]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">((point :+ (Int, LR)) -&gt; (Down (NumType point), NumType point))
+-&gt; (point :+ (Int, LR)) -&gt; (point :+ (Int, LR)) -&gt; Ordering
+forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
+</span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point2_</span></span><span> </span><span id="local-6989586621679475152"><span class="annot"><span class="annottext">NumType point
+</span><a href="#local-6989586621679475152"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679475153"><span class="annot"><span class="annottext">NumType point
+</span><a href="#local-6989586621679475153"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, LR)
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NumType point -&gt; Down (NumType point)
+forall a. a -&gt; Down a
+</span><span class="hs-identifier hs-var">Down</span></span><span> </span><span class="annot"><span class="annottext">NumType point
+</span><a href="#local-6989586621679475153"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">NumType point
+</span><a href="#local-6989586621679475152"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-77"></span><span>        </span><span class="annot"><span class="annottext">(([point :+ (Int, LR)], [point :+ (Int, LR)])
+ -&gt; [point :+ (Int, LR)])
+-&gt; ([point :+ (Int, LR)], [point :+ (Int, LR)])
+-&gt; [point :+ (Int, LR)]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">yMonotonePolygon
+-&gt; ([point :+ (VertexIx yMonotonePolygon, LR)],
+    [point :+ (VertexIx yMonotonePolygon, LR)])
+forall yMonotonePolygon point r.
+(YMonotonePolygon_ yMonotonePolygon point r, Ord r) =&gt;
+yMonotonePolygon
+-&gt; ([point :+ (VertexIx yMonotonePolygon, LR)],
+    [point :+ (VertexIx yMonotonePolygon, LR)])
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#splitPolygon"><span class="hs-identifier hs-var">splitPolygon</span></a></span><span> </span><span class="annot"><span class="annottext">yMonotonePolygon
+</span><a href="#local-6989586621679475141"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span>    </span><span class="hs-comment">-- run the stack computation that actually triangulates the polygon.</span><span>
+</span><span id="line-80"></span><span>    </span><span id="local-6989586621679475148"><span class="annot"><span class="annottext">go :: P i point (NumType point)
+-&gt; P i point (NumType point)
+-&gt; t (P i point (NumType point))
+-&gt; P i point (NumType point)
+-&gt; [Vector 2 i]
+</span><a href="#local-6989586621679475148"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span id="local-6989586621679475228"><span class="annot"><span class="annottext">P i point (NumType point)
+</span><a href="#local-6989586621679475228"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span id="local-6989586621679475229"><span class="annot"><span class="annottext">P i point (NumType point)
+</span><a href="#local-6989586621679475229"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679475230"><span class="annot"><span class="annottext">t (P i point (NumType point))
+</span><a href="#local-6989586621679475230"><span class="hs-identifier hs-var">vs'</span></a></span></span><span> </span><span id="local-6989586621679475231"><span class="annot"><span class="annottext">P i point (NumType point)
+</span><a href="#local-6989586621679475231"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Vector 2 i]
+</span><a href="#local-6989586621679475232"><span class="hs-identifier hs-var">diags''</span></a></span><span> </span><span class="annot"><span class="annottext">[Vector 2 i] -&gt; [Vector 2 i] -&gt; [Vector 2 i]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[Vector 2 i]
+</span><a href="#local-6989586621679475233"><span class="hs-identifier hs-var">diags'</span></a></span><span>
+</span><span id="line-81"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-82"></span><span>        </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html#SP"><span class="hs-identifier hs-type">SP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P i point (NumType point)
+</span><span class="hs-identifier">_</span></span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span id="local-6989586621679475236"><span class="annot"><span class="annottext">[P i point (NumType point)]
+</span><a href="#local-6989586621679475236"><span class="hs-identifier hs-var">stack'</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679475233"><span class="annot"><span class="annottext">[Vector 2 i]
+</span><a href="#local-6989586621679475233"><span class="hs-identifier hs-var">diags'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(SP (Stack (P i point (NumType point))) [Vector 2 i]
+ -&gt; P i point (NumType point)
+ -&gt; SP (Stack (P i point (NumType point))) [Vector 2 i])
+-&gt; SP (Stack (P i point (NumType point))) [Vector 2 i]
+-&gt; t (P i point (NumType point))
+-&gt; SP (Stack (P i point (NumType point))) [Vector 2 i]
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b
+forall (t :: * -&gt; *) b a.
+Foldable t =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">List.foldl'</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html#SP"><span class="hs-identifier hs-type">SP</span></a></span><span> </span><span id="local-6989586621679475238"><span class="annot"><span class="annottext">Stack (P i point (NumType point))
+</span><a href="#local-6989586621679475238"><span class="hs-identifier hs-var">stack</span></a></span></span><span> </span><span id="local-6989586621679475239"><span class="annot"><span class="annottext">[Vector 2 i]
+</span><a href="#local-6989586621679475239"><span class="hs-identifier hs-var">acc</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679475240"><span class="annot"><span class="annottext">P i point (NumType point)
+</span><a href="#local-6989586621679475240"><span class="hs-identifier hs-var">v'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Vector 2 i] -&gt; [Vector 2 i] -&gt; [Vector 2 i]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[Vector 2 i]
+</span><a href="#local-6989586621679475239"><span class="hs-identifier hs-var">acc</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Vector 2 i] -&gt; [Vector 2 i])
+-&gt; SP (Stack (P i point (NumType point))) [Vector 2 i]
+-&gt; SP (Stack (P i point (NumType point))) [Vector 2 i]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">P i point (NumType point)
+-&gt; Stack (P i point (NumType point))
+-&gt; SP (Stack (P i point (NumType point))) [Vector 2 i]
+forall point r i.
+(Point_ point 2 r, Ord r, Num r) =&gt;
+P i point r
+-&gt; Stack (P i point r) -&gt; SP (Stack (P i point r)) [Vector 2 i]
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#process"><span class="hs-identifier hs-var">process</span></a></span><span> </span><span class="annot"><span class="annottext">P i point (NumType point)
+</span><a href="#local-6989586621679475240"><span class="hs-identifier hs-var">v'</span></a></span><span> </span><span class="annot"><span class="annottext">Stack (P i point (NumType point))
+</span><a href="#local-6989586621679475238"><span class="hs-identifier hs-var">stack</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-83"></span><span>                                            </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Stack (P i point (NumType point))
+-&gt; [Vector 2 i]
+-&gt; SP (Stack (P i point (NumType point))) [Vector 2 i]
+forall a b. a -&gt; b -&gt; SP a b
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html#SP"><span class="hs-identifier hs-var">SP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P i point (NumType point)
+</span><a href="#local-6989586621679475229"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">P i point (NumType point)
+-&gt; [P i point (NumType point)] -&gt; Stack (P i point (NumType point))
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">P i point (NumType point)
+</span><a href="#local-6989586621679475228"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">t (P i point (NumType point))
+</span><a href="#local-6989586621679475230"><span class="hs-identifier hs-var">vs'</span></a></span><span>
+</span><span id="line-84"></span><span>        </span><span class="hs-comment">-- add vertices from the last guy w to all 'middle' guys of the final stack</span><span>
+</span><span id="line-85"></span><span>        </span><span id="local-6989586621679475232"><span class="annot"><span class="annottext">diags'' :: [Vector 2 i]
+</span><a href="#local-6989586621679475232"><span class="hs-identifier hs-var hs-var">diags''</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(P i point (NumType point) -&gt; Vector 2 i)
+-&gt; [P i point (NumType point)] -&gt; [Vector 2 i]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P i point (NumType point)
+-&gt; P i point (NumType point) -&gt; Vector 2 i
+forall {k} i point (r :: k).
+P i point r -&gt; P i point r -&gt; Vector 2 i
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#seg"><span class="hs-identifier hs-var">seg</span></a></span><span> </span><span class="annot"><span class="annottext">P i point (NumType point)
+</span><a href="#local-6989586621679475231"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([P i point (NumType point)] -&gt; [Vector 2 i])
+-&gt; [P i point (NumType point)] -&gt; [Vector 2 i]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[P i point (NumType point)] -&gt; [P i point (NumType point)]
+forall a. HasCallStack =&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">init</span></span><span> </span><span class="annot"><span class="annottext">[P i point (NumType point)]
+</span><a href="#local-6989586621679475236"><span class="hs-identifier hs-var">stack'</span></a></span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span class="hs-keyword">type</span><span> </span><span id="P"><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-var">P</span></a></span></span><span> </span><span id="local-6989586621679475245"><span class="annot"><a href="#local-6989586621679475245"><span class="hs-identifier hs-type">i</span></a></span></span><span> </span><span id="local-6989586621679475246"><span class="annot"><a href="#local-6989586621679475246"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span id="local-6989586621679475247"><span class="annot"><a href="#local-6989586621679475247"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679475246"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679475245"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">,</span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#LR"><span class="hs-identifier hs-type">LR</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span class="annot"><span class="hs-comment">-- | Get the chain of a particular point</span></span><span>
+</span><span id="line-90"></span><span id="local-6989586621679474493"><span id="local-6989586621679474494"><span id="local-6989586621679474495"><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#chainOf"><span class="hs-identifier hs-type">chainOf</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474493"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474494"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474495"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#LR"><span class="hs-identifier hs-type">LR</span></a></span></span></span></span><span>
+</span><span id="line-91"></span><span id="chainOf"><span class="annot"><span class="annottext">chainOf :: forall {k} i point (r :: k). P i point r -&gt; LR
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#chainOf"><span class="hs-identifier hs-var hs-var">chainOf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting LR (point :+ (i, LR)) LR -&gt; (point :+ (i, LR)) -&gt; LR
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((i, LR) -&gt; Const LR (i, LR))
+-&gt; (point :+ (i, LR)) -&gt; Const LR (point :+ (i, LR))
+forall core extra extra' (f :: * -&gt; *).
+Functor f =&gt;
+(extra -&gt; f extra') -&gt; (core :+ extra) -&gt; f (core :+ extra')
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#extra"><span class="hs-identifier hs-var">extra</span></a></span><span class="annot"><span class="annottext">(((i, LR) -&gt; Const LR (i, LR))
+ -&gt; (point :+ (i, LR)) -&gt; Const LR (point :+ (i, LR)))
+-&gt; ((LR -&gt; Const LR LR) -&gt; (i, LR) -&gt; Const LR (i, LR))
+-&gt; Getting LR (point :+ (i, LR)) LR
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(LR -&gt; Const LR LR) -&gt; (i, LR) -&gt; Const LR (i, LR)
+forall s t a b. Field2 s t a b =&gt; Lens s t a b
+Lens (i, LR) (i, LR) LR LR
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Tuple.html#_2"><span class="hs-identifier hs-var">_2</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span class="annot"><span class="hs-comment">-- | Produce a diagional</span></span><span>
+</span><span id="line-94"></span><span id="local-6989586621679474488"><span id="local-6989586621679474489"><span id="local-6989586621679474490"><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#seg"><span class="hs-identifier hs-type">seg</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474488"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474489"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474490"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474488"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474489"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474490"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679474488"><span class="hs-identifier hs-type">i</span></a></span></span></span></span><span>
+</span><span id="line-95"></span><span id="seg"><span class="annot"><span class="annottext">seg :: forall {k} i point (r :: k).
+P i point r -&gt; P i point r -&gt; Vector 2 i
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#seg"><span class="hs-identifier hs-var hs-var">seg</span></a></span></span><span> </span><span id="local-6989586621679475260"><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475260"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span id="local-6989586621679475261"><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475261"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">i -&gt; i -&gt; Vector 2 i
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><span class="hs-identifier hs-var">Vector2</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P i point r -&gt; i
+</span><a href="#local-6989586621679475262"><span class="hs-identifier hs-var">toVtx</span></a></span><span> </span><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475260"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P i point r -&gt; i
+</span><a href="#local-6989586621679475262"><span class="hs-identifier hs-var">toVtx</span></a></span><span> </span><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475261"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-96"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-97"></span><span>    </span><span id="local-6989586621679475262"><span class="annot"><span class="annottext">toVtx :: P i point r -&gt; i
+</span><a href="#local-6989586621679475262"><span class="hs-identifier hs-var hs-var">toVtx</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting i (P i point r) i -&gt; P i point r -&gt; i
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((i, LR) -&gt; Const i (i, LR))
+-&gt; P i point r -&gt; Const i (P i point r)
+forall core extra extra' (f :: * -&gt; *).
+Functor f =&gt;
+(extra -&gt; f extra') -&gt; (core :+ extra) -&gt; f (core :+ extra')
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#extra"><span class="hs-identifier hs-var">extra</span></a></span><span class="annot"><span class="annottext">(((i, LR) -&gt; Const i (i, LR))
+ -&gt; P i point r -&gt; Const i (P i point r))
+-&gt; ((i -&gt; Const i i) -&gt; (i, LR) -&gt; Const i (i, LR))
+-&gt; Getting i (P i point r) i
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(i -&gt; Const i i) -&gt; (i, LR) -&gt; Const i (i, LR)
+forall s t a b. Field1 s t a b =&gt; Lens s t a b
+Lens (i, LR) (i, LR) i i
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Tuple.html#_1"><span class="hs-identifier hs-var">_1</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span class="hs-keyword">type</span><span> </span><span id="Stack"><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#Stack"><span class="hs-identifier hs-var">Stack</span></a></span></span><span> </span><span id="local-6989586621679475275"><span class="annot"><a href="#local-6989586621679475275"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679475275"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span class="annot"><span class="hs-comment">-- | The real triangulation procedure</span></span><span>
+</span><span id="line-102"></span><span id="local-6989586621679474479"><span id="local-6989586621679474480"><span id="local-6989586621679474481"><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#process"><span class="hs-identifier hs-type">process</span></a></span><span>                    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679474479"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679474480"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679474480"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679474480"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-103"></span><span>                           </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474481"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474479"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474480"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-104"></span><span>                           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#Stack"><span class="hs-identifier hs-type">Stack</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474481"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474479"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474480"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-105"></span><span>                           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html#SP"><span class="hs-identifier hs-type">SP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#Stack"><span class="hs-identifier hs-type">Stack</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474481"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474479"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474480"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679474481"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">]</span></span></span></span><span>
+</span><span id="line-106"></span><span id="process"><span class="annot"><span class="annottext">process :: forall point r i.
+(Point_ point 2 r, Ord r, Num r) =&gt;
+P i point r
+-&gt; Stack (P i point r) -&gt; SP (Stack (P i point r)) [Vector 2 i]
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#process"><span class="hs-identifier hs-var hs-var">process</span></a></span></span><span> </span><span id="local-6989586621679475342"><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475342"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679475343"><span class="annot"><span class="annottext">stack :: Stack (P i point r)
+</span><a href="#local-6989586621679475343"><span class="hs-identifier hs-var">stack</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679475344"><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475344"><span class="hs-identifier hs-var">u</span></a></span></span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span id="local-6989586621679475345"><span class="annot"><span class="annottext">[P i point r]
+</span><a href="#local-6989586621679475345"><span class="hs-identifier hs-var">ws</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-107"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">P i point r -&gt; LR
+forall {k} i point (r :: k). P i point r -&gt; LR
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#chainOf"><span class="hs-identifier hs-var">chainOf</span></a></span><span> </span><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475342"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">LR -&gt; LR -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">P i point r -&gt; LR
+forall {k} i point (r :: k). P i point r -&gt; LR
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#chainOf"><span class="hs-identifier hs-var">chainOf</span></a></span><span> </span><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475344"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Stack (P i point r)
+-&gt; [Vector 2 i] -&gt; SP (Stack (P i point r)) [Vector 2 i]
+forall a b. a -&gt; b -&gt; SP a b
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html#SP"><span class="hs-identifier hs-var">SP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475342"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">P i point r -&gt; [P i point r] -&gt; Stack (P i point r)
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">:|</span></span><span class="hs-special">[</span><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475344"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(P i point r -&gt; Vector 2 i) -&gt; [P i point r] -&gt; [Vector 2 i]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P i point r -&gt; P i point r -&gt; Vector 2 i
+forall {k} i point (r :: k).
+P i point r -&gt; P i point r -&gt; Vector 2 i
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#seg"><span class="hs-identifier hs-var">seg</span></a></span><span> </span><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475342"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([P i point r] -&gt; [Vector 2 i])
+-&gt; (Stack (P i point r) -&gt; [P i point r])
+-&gt; Stack (P i point r)
+-&gt; [Vector 2 i]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Stack (P i point r) -&gt; [P i point r]
+forall a. NonEmpty a -&gt; [a]
+</span><span class="hs-identifier hs-var">NonEmpty.init</span></span><span> </span><span class="annot"><span class="annottext">(Stack (P i point r) -&gt; [Vector 2 i])
+-&gt; Stack (P i point r) -&gt; [Vector 2 i]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Stack (P i point r)
+</span><a href="#local-6989586621679475343"><span class="hs-identifier hs-var">stack</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-108"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Stack (P i point r)
+-&gt; [Vector 2 i] -&gt; SP (Stack (P i point r)) [Vector 2 i]
+forall a b. a -&gt; b -&gt; SP a b
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html#SP"><span class="hs-identifier hs-var">SP</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475342"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">P i point r -&gt; [P i point r] -&gt; Stack (P i point r)
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">:|</span></span><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475348"><span class="hs-identifier hs-var">w</span></a></span><span class="annot"><span class="annottext">P i point r -&gt; [P i point r] -&gt; [P i point r]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[P i point r]
+</span><a href="#local-6989586621679475349"><span class="hs-identifier hs-var">rest</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(P i point r -&gt; Vector 2 i) -&gt; [P i point r] -&gt; [Vector 2 i]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P i point r -&gt; P i point r -&gt; Vector 2 i
+forall {k} i point (r :: k).
+P i point r -&gt; P i point r -&gt; Vector 2 i
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#seg"><span class="hs-identifier hs-var">seg</span></a></span><span> </span><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475342"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[P i point r]
+</span><a href="#local-6989586621679475350"><span class="hs-identifier hs-var">popped</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-109"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-110"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621679475350"><span class="annot"><span class="annottext">[P i point r]
+</span><a href="#local-6989586621679475350"><span class="hs-identifier hs-var">popped</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679475349"><span class="annot"><span class="annottext">[P i point r]
+</span><a href="#local-6989586621679475349"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ASetter
+  ([(P i point r, P i point r)], [(P i point r, P i point r)])
+  ([P i point r], [P i point r])
+  [(P i point r, P i point r)]
+  [P i point r]
+-&gt; ([(P i point r, P i point r)] -&gt; [P i point r])
+-&gt; ([(P i point r, P i point r)], [(P i point r, P i point r)])
+-&gt; ([P i point r], [P i point r])
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Setter.html#over"><span class="hs-identifier hs-var">over</span></a></span><span> </span><span class="annot"><span class="annottext">ASetter
+  ([(P i point r, P i point r)], [(P i point r, P i point r)])
+  ([P i point r], [P i point r])
+  [(P i point r, P i point r)]
+  [P i point r]
+Traversal
+  ([(P i point r, P i point r)], [(P i point r, P i point r)])
+  ([P i point r], [P i point r])
+  [(P i point r, P i point r)]
+  [P i point r]
+forall (r :: * -&gt; * -&gt; *) a b.
+Bitraversable r =&gt;
+Traversal (r a a) (r b b) a b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Traversal.html#both"><span class="hs-identifier hs-var">both</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((P i point r, P i point r) -&gt; P i point r)
+-&gt; [(P i point r, P i point r)] -&gt; [P i point r]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(P i point r, P i point r) -&gt; P i point r
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(([(P i point r, P i point r)], [(P i point r, P i point r)])
+ -&gt; ([P i point r], [P i point r]))
+-&gt; ([(P i point r, P i point r)]
+    -&gt; ([(P i point r, P i point r)], [(P i point r, P i point r)]))
+-&gt; [(P i point r, P i point r)]
+-&gt; ([P i point r], [P i point r])
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((P i point r, P i point r) -&gt; Bool)
+-&gt; [(P i point r, P i point r)]
+-&gt; ([(P i point r, P i point r)], [(P i point r, P i point r)])
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
+</span><span class="hs-identifier hs-var">List.span</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P i point r -&gt; (P i point r, P i point r) -&gt; Bool
+forall point r i.
+(Point_ point 2 r, Ord r, Num r) =&gt;
+P i point r -&gt; (P i point r, P i point r) -&gt; Bool
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#isInside"><span class="hs-identifier hs-var">isInside</span></a></span><span> </span><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475342"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-111"></span><span>                      </span><span class="annot"><span class="annottext">([(P i point r, P i point r)] -&gt; ([P i point r], [P i point r]))
+-&gt; [(P i point r, P i point r)] -&gt; ([P i point r], [P i point r])
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[P i point r] -&gt; [P i point r] -&gt; [(P i point r, P i point r)]
+forall a b. [a] -&gt; [b] -&gt; [(a, b)]
+</span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="annot"><span class="annottext">[P i point r]
+</span><a href="#local-6989586621679475345"><span class="hs-identifier hs-var">ws</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Stack (P i point r) -&gt; [P i point r]
+forall a. NonEmpty a -&gt; [a]
+</span><span class="hs-identifier hs-var">NonEmpty.toList</span></span><span> </span><span class="annot"><span class="annottext">Stack (P i point r)
+</span><a href="#local-6989586621679475343"><span class="hs-identifier hs-var">stack</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span>        </span><span id="local-6989586621679475348"><span class="annot"><span class="annottext">w :: P i point r
+</span><a href="#local-6989586621679475348"><span class="hs-identifier hs-var hs-var">w</span></a></span></span><span>             </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Stack (P i point r) -&gt; P i point r
+forall a. NonEmpty a -&gt; a
+</span><span class="hs-identifier hs-var">NonEmpty.last</span></span><span> </span><span class="annot"><span class="annottext">(Stack (P i point r) -&gt; P i point r)
+-&gt; Stack (P i point r) -&gt; P i point r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475344"><span class="hs-identifier hs-var">u</span></a></span><span class="annot"><span class="annottext">P i point r -&gt; [P i point r] -&gt; Stack (P i point r)
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">:|</span></span><span class="annot"><span class="annottext">[P i point r]
+</span><a href="#local-6989586621679475350"><span class="hs-identifier hs-var">popped</span></a></span><span>
+</span><span id="line-113"></span><span>
+</span><span id="line-114"></span><span class="annot"><span class="hs-comment">-- | test if m does not block the line segment from v to u</span></span><span>
+</span><span id="line-115"></span><span id="local-6989586621679474556"><span id="local-6989586621679474557"><span id="local-6989586621679474558"><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#isInside"><span class="hs-identifier hs-type">isInside</span></a></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679474556"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679474557"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679474557"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679474557"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-116"></span><span>                  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474558"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474556"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474557"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-117"></span><span>                  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474558"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474556"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474557"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#P"><span class="hs-identifier hs-type">P</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474558"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474556"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474557"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span></span><span>
+</span><span id="line-118"></span><span id="isInside"><span class="annot"><span class="annottext">isInside :: forall point r i.
+(Point_ point 2 r, Ord r, Num r) =&gt;
+P i point r -&gt; (P i point r, P i point r) -&gt; Bool
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#isInside"><span class="hs-identifier hs-var hs-var">isInside</span></a></span></span><span> </span><span id="local-6989586621679475424"><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475424"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679475425"><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475425"><span class="hs-identifier hs-var">u</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679475426"><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475426"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; point -&gt; CCW
+forall point r.
+(Point_ point 2 r, Num r, Ord r) =&gt;
+point -&gt; point -&gt; point -&gt; CCW
+</span><span class="hs-identifier hs-var">ccw</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475424"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">P i point r -&gt; Getting point (P i point r) point -&gt; point
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point (P i point r) point
+forall core extra core' (f :: * -&gt; *).
+Functor f =&gt;
+(core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#core"><span class="hs-identifier hs-var">core</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475426"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">P i point r -&gt; Getting point (P i point r) point -&gt; point
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point (P i point r) point
+forall core extra core' (f :: * -&gt; *).
+Functor f =&gt;
+(core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#core"><span class="hs-identifier hs-var">core</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475425"><span class="hs-identifier hs-var">u</span></a></span><span class="annot"><span class="annottext">P i point r -&gt; Getting point (P i point r) point -&gt; point
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point (P i point r) point
+forall core extra core' (f :: * -&gt; *).
+Functor f =&gt;
+(core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#core"><span class="hs-identifier hs-var">core</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-119"></span><span>                     </span><span class="annot"><span class="annottext">CCW
+</span><span class="hs-identifier hs-var">CoLinear</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-120"></span><span>                     </span><span class="annot"><span class="annottext">CCW
+</span><span class="hs-identifier hs-var">CCW</span></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">P i point r -&gt; LR
+forall {k} i point (r :: k). P i point r -&gt; LR
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#chainOf"><span class="hs-identifier hs-var">chainOf</span></a></span><span> </span><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475424"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">LR -&gt; LR -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">LR
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#R"><span class="hs-identifier hs-var">R</span></a></span><span>
+</span><span id="line-121"></span><span>                     </span><span class="annot"><span class="annottext">CCW
+</span><span class="hs-identifier hs-var">CW</span></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">P i point r -&gt; LR
+forall {k} i point (r :: k). P i point r -&gt; LR
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#chainOf"><span class="hs-identifier hs-var">chainOf</span></a></span><span> </span><span class="annot"><span class="annottext">P i point r
+</span><a href="#local-6989586621679475424"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">LR -&gt; LR -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">LR
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#L"><span class="hs-identifier hs-var">L</span></a></span><span>
+</span><span id="line-122"></span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- | When the polygon is in counter clockwise order we return (leftChain,rightChain)</span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- ordered from the top-down.</span><span>
+</span><span id="line-125"></span><span class="hs-comment">--</span><span>
+</span><span id="line-126"></span><span class="hs-comment">-- if there are multiple points with the maximum yCoord we pick the rightmost one,</span><span>
+</span><span id="line-127"></span><span class="hs-comment">-- if there are multiple point with the minimum yCoord we pick the leftmost one.</span><span>
+</span><span id="line-128"></span><span class="hs-comment">--</span><span>
+</span><span id="line-129"></span><span class="hs-comment">-- running time: \(O(n)\)</span><span>
+</span><span id="line-130"></span><span id="local-6989586621679474458"><span id="local-6989586621679474459"><span id="local-6989586621679474460"><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#splitPolygon"><span class="hs-identifier hs-type">splitPolygon</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#YMonotonePolygon_"><span class="hs-identifier hs-type">YMonotonePolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474458"><span class="hs-identifier hs-type">yMonotonePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474459"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474460"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679474460"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-131"></span><span>                </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679474458"><span class="hs-identifier hs-type">yMonotonePolygon</span></a></span><span>
+</span><span id="line-132"></span><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679474459"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474458"><span class="hs-identifier hs-type">yMonotonePolygon</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#LR"><span class="hs-identifier hs-type">LR</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-133"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679474459"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679474458"><span class="hs-identifier hs-type">yMonotonePolygon</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#LR"><span class="hs-identifier hs-type">LR</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-134"></span><span>                   </span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-135"></span><span id="splitPolygon"><span class="annot"><span class="annottext">splitPolygon :: forall yMonotonePolygon point r.
+(YMonotonePolygon_ yMonotonePolygon point r, Ord r) =&gt;
+yMonotonePolygon
+-&gt; ([point :+ (VertexIx yMonotonePolygon, LR)],
+    [point :+ (VertexIx yMonotonePolygon, LR)])
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#splitPolygon"><span class="hs-identifier hs-var hs-var">splitPolygon</span></a></span></span><span> </span><span id="local-6989586621679475498"><span class="annot"><span class="annottext">yMonotonePolygon
+</span><a href="#local-6989586621679475498"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([(Int, point)] -&gt; [point :+ (Int, LR)])
+-&gt; ([(Int, point)] -&gt; [point :+ (Int, LR)])
+-&gt; ([(Int, point)], [(Int, point)])
+-&gt; ([point :+ (Int, LR)], [point :+ (Int, LR)])
+forall a b c d. (a -&gt; b) -&gt; (c -&gt; d) -&gt; (a, c) -&gt; (b, d)
+forall (p :: * -&gt; * -&gt; *) a b c d.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
+</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LR -&gt; [(Int, point)] -&gt; [point :+ (Int, LR)]
+forall {b} {a} {core}. b -&gt; [(a, core)] -&gt; [core :+ (a, b)]
+</span><a href="#local-6989586621679475500"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">LR
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#L"><span class="hs-identifier hs-var">L</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LR -&gt; [(Int, point)] -&gt; [point :+ (Int, LR)]
+forall {b} {a} {core}. b -&gt; [(a, core)] -&gt; [core :+ (a, b)]
+</span><a href="#local-6989586621679475500"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">LR
+</span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#R"><span class="hs-identifier hs-var">R</span></a></span><span> </span><span class="annot"><span class="annottext">([(Int, point)] -&gt; [point :+ (Int, LR)])
+-&gt; ([(Int, point)] -&gt; [(Int, point)])
+-&gt; [(Int, point)]
+-&gt; [point :+ (Int, LR)]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[(Int, point)] -&gt; [(Int, point)]
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">reverse</span></span><span class="hs-special">)</span><span>
+</span><span id="line-136"></span><span>                </span><span class="annot"><span class="annottext">(([(Int, point)], [(Int, point)])
+ -&gt; ([point :+ (VertexIx yMonotonePolygon, LR)],
+     [point :+ (VertexIx yMonotonePolygon, LR)]))
+-&gt; (NonEmpty (Int, point) -&gt; ([(Int, point)], [(Int, point)]))
+-&gt; NonEmpty (Int, point)
+-&gt; ([point :+ (VertexIx yMonotonePolygon, LR)],
+    [point :+ (VertexIx yMonotonePolygon, LR)])
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((Int, point) -&gt; Bool)
+-&gt; NonEmpty (Int, point) -&gt; ([(Int, point)], [(Int, point)])
+forall a. (a -&gt; Bool) -&gt; NonEmpty a -&gt; ([a], [a])
+</span><span class="hs-identifier hs-var">NonEmpty.break</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679475503"><span class="hs-identifier hs-var">vMinY</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Bool) -&gt; ((Int, point) -&gt; Int) -&gt; (Int, point) -&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Int, point) -&gt; Int
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>                </span><span class="annot"><span class="annottext">(NonEmpty (Int, point)
+ -&gt; ([point :+ (VertexIx yMonotonePolygon, LR)],
+     [point :+ (VertexIx yMonotonePolygon, LR)]))
+-&gt; NonEmpty (Int, point)
+-&gt; ([point :+ (VertexIx yMonotonePolygon, LR)],
+    [point :+ (VertexIx yMonotonePolygon, LR)])
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IndexedGetting
+  Int (NonEmptyDList (Int, point)) yMonotonePolygon point
+-&gt; yMonotonePolygon -&gt; NonEmpty (Int, point)
+forall i a s.
+IndexedGetting i (NonEmptyDList (i, a)) s a -&gt; s -&gt; NonEmpty (i, a)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Lens.Util.html#itoNonEmptyOf"><span class="hs-identifier hs-var">itoNonEmptyOf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexIx yMonotonePolygon
+-&gt; IndexedTraversal1'
+     (VertexIx yMonotonePolygon)
+     yMonotonePolygon
+     (Vertex yMonotonePolygon)
+forall polygon.
+HasOuterBoundary polygon =&gt;
+VertexIx polygon
+-&gt; IndexedTraversal1' (VertexIx polygon) polygon (Vertex polygon)
+</span><a href="HGeometry.Polygon.Class.html#ccwOuterBoundaryFrom"><span class="hs-identifier hs-var">ccwOuterBoundaryFrom</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+VertexIx yMonotonePolygon
+</span><a href="#local-6989586621679475506"><span class="hs-identifier hs-var">vMaxY</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">yMonotonePolygon
+</span><a href="#local-6989586621679475498"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-138"></span><span>    </span><span class="hs-comment">-- rotates the list to the vtx with max ycoord, producing a</span><span>
+</span><span id="line-139"></span><span>    </span><span class="hs-comment">-- non-empty list of elements, which we break at the point with</span><span>
+</span><span id="line-140"></span><span>    </span><span class="hs-comment">-- minimum y,x coordinate.</span><span>
+</span><span id="line-141"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-142"></span><span>    </span><span id="local-6989586621679475500"><span class="annot"><span class="annottext">f :: b -&gt; [(a, core)] -&gt; [core :+ (a, b)]
+</span><a href="#local-6989586621679475500"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679475507"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679475507"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((a, core) -&gt; core :+ (a, b)) -&gt; [(a, core)] -&gt; [core :+ (a, b)]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679475508"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679475508"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679475509"><span class="annot"><span class="annottext">core
+</span><a href="#local-6989586621679475509"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">core
+</span><a href="#local-6989586621679475509"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">core -&gt; (a, b) -&gt; core :+ (a, b)
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679475508"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679475507"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>    </span><span id="local-6989586621679475506"><span class="annot"><span class="annottext">vMaxY :: Int
+</span><a href="#local-6989586621679475506"><span class="hs-identifier hs-var hs-var">vMaxY</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting (First Int) yMonotonePolygon Int -&gt; yMonotonePolygon -&gt; Int
+forall a s. Getting (First a) s a -&gt; s -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Fold.html#first1Of"><span class="hs-identifier hs-var">first1Of</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Vertex yMonotonePolygon -&gt; Vertex yMonotonePolygon -&gt; Ordering)
+-&gt; IndexedFold1
+     (VertexIx yMonotonePolygon)
+     yMonotonePolygon
+     (Vertex yMonotonePolygon)
+forall polygon.
+HasOuterBoundary polygon =&gt;
+(Vertex polygon -&gt; Vertex polygon -&gt; Ordering)
+-&gt; IndexedFold1 (VertexIx polygon) polygon (Vertex polygon)
+</span><a href="HGeometry.Polygon.Class.html#maximumVertexBy"><span class="hs-identifier hs-var">maximumVertexBy</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; Ordering
+Vertex yMonotonePolygon -&gt; Vertex yMonotonePolygon -&gt; Ordering
+forall {b}.
+(Assert
+   (OrdCond (CmpNat 2 (Dimension b)) 'True 'True 'False)
+   (TypeError ...),
+ Assert
+   (OrdCond (CmpNat 1 (Dimension b)) 'True 'True 'False)
+   (TypeError ...),
+ Ord (NumType b), Point_ b (Dimension b) (NumType b)) =&gt;
+b -&gt; b -&gt; Ordering
+</span><a href="#local-6989586621679475512"><span class="hs-identifier hs-var">incYincX</span></a></span><span class="annot"><span class="annottext">(Indexed Int point (Const (First Int) point)
+ -&gt; yMonotonePolygon -&gt; Const (First Int) yMonotonePolygon)
+-&gt; ((Int -&gt; Const (First Int) Int)
+    -&gt; Indexed Int point (Const (First Int) point))
+-&gt; Getting (First Int) yMonotonePolygon Int
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">((Int, point) -&gt; Const (First Int) (Int, point))
+-&gt; Indexed Int point (Const (First Int) point)
+forall i (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s j t.
+(Indexable i p, Functor f) =&gt;
+p (i, s) (f (j, t)) -&gt; Indexed i s (f t)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Internal.Indexed.html#withIndex"><span class="hs-identifier hs-var">withIndex</span></a></span><span class="annot"><span class="annottext">(((Int, point) -&gt; Const (First Int) (Int, point))
+ -&gt; Indexed Int point (Const (First Int) point))
+-&gt; ((Int -&gt; Const (First Int) Int)
+    -&gt; (Int, point) -&gt; Const (First Int) (Int, point))
+-&gt; (Int -&gt; Const (First Int) Int)
+-&gt; Indexed Int point (Const (First Int) point)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Int -&gt; Const (First Int) Int)
+-&gt; (Int, point) -&gt; Const (First Int) (Int, point)
+forall s t a b. Field1 s t a b =&gt; Lens s t a b
+Lens (Int, point) (Int, point) Int Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Tuple.html#_1"><span class="hs-identifier hs-var">_1</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">yMonotonePolygon
+</span><a href="#local-6989586621679475498"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-144"></span><span>    </span><span id="local-6989586621679475503"><span class="annot"><span class="annottext">vMinY :: Int
+</span><a href="#local-6989586621679475503"><span class="hs-identifier hs-var hs-var">vMinY</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting (First Int) yMonotonePolygon Int -&gt; yMonotonePolygon -&gt; Int
+forall a s. Getting (First a) s a -&gt; s -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Fold.html#first1Of"><span class="hs-identifier hs-var">first1Of</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Vertex yMonotonePolygon -&gt; Vertex yMonotonePolygon -&gt; Ordering)
+-&gt; IndexedFold1
+     (VertexIx yMonotonePolygon)
+     yMonotonePolygon
+     (Vertex yMonotonePolygon)
+forall polygon.
+HasOuterBoundary polygon =&gt;
+(Vertex polygon -&gt; Vertex polygon -&gt; Ordering)
+-&gt; IndexedFold1 (VertexIx polygon) polygon (Vertex polygon)
+</span><a href="HGeometry.Polygon.Class.html#minimumVertexBy"><span class="hs-identifier hs-var">minimumVertexBy</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; Ordering
+Vertex yMonotonePolygon -&gt; Vertex yMonotonePolygon -&gt; Ordering
+forall {b}.
+(Assert
+   (OrdCond (CmpNat 2 (Dimension b)) 'True 'True 'False)
+   (TypeError ...),
+ Assert
+   (OrdCond (CmpNat 1 (Dimension b)) 'True 'True 'False)
+   (TypeError ...),
+ Ord (NumType b), Point_ b (Dimension b) (NumType b)) =&gt;
+b -&gt; b -&gt; Ordering
+</span><a href="#local-6989586621679475512"><span class="hs-identifier hs-var">incYincX</span></a></span><span class="annot"><span class="annottext">(Indexed Int point (Const (First Int) point)
+ -&gt; yMonotonePolygon -&gt; Const (First Int) yMonotonePolygon)
+-&gt; ((Int -&gt; Const (First Int) Int)
+    -&gt; Indexed Int point (Const (First Int) point))
+-&gt; Getting (First Int) yMonotonePolygon Int
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">((Int, point) -&gt; Const (First Int) (Int, point))
+-&gt; Indexed Int point (Const (First Int) point)
+forall i (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s j t.
+(Indexable i p, Functor f) =&gt;
+p (i, s) (f (j, t)) -&gt; Indexed i s (f t)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Internal.Indexed.html#withIndex"><span class="hs-identifier hs-var">withIndex</span></a></span><span class="annot"><span class="annottext">(((Int, point) -&gt; Const (First Int) (Int, point))
+ -&gt; Indexed Int point (Const (First Int) point))
+-&gt; ((Int -&gt; Const (First Int) Int)
+    -&gt; (Int, point) -&gt; Const (First Int) (Int, point))
+-&gt; (Int -&gt; Const (First Int) Int)
+-&gt; Indexed Int point (Const (First Int) point)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Int -&gt; Const (First Int) Int)
+-&gt; (Int, point) -&gt; Const (First Int) (Int, point)
+forall s t a b. Field1 s t a b =&gt; Lens s t a b
+Lens (Int, point) (Int, point) Int Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Tuple.html#_1"><span class="hs-identifier hs-var">_1</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">yMonotonePolygon
+</span><a href="#local-6989586621679475498"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-145"></span><span>
+</span><span id="line-146"></span><span>    </span><span id="local-6989586621679475512"><span class="annot"><span class="annottext">incYincX :: b -&gt; b -&gt; Ordering
+</span><a href="#local-6989586621679475512"><span class="hs-identifier hs-var hs-var">incYincX</span></a></span></span><span> </span><span id="local-6989586621679475633"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679475633"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679475634"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679475634"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(b -&gt; NumType b) -&gt; b -&gt; b -&gt; Ordering
+forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
+</span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b -&gt; Getting (NumType b) b (NumType b) -&gt; NumType b
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (NumType b) b (NumType b)
+forall (d :: Nat) point r.
+(2 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int b (NumType b)
+</span><span class="hs-identifier hs-var">yCoord</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679475633"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679475634"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Ordering -&gt; Ordering -&gt; Ordering
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">(b -&gt; NumType b) -&gt; b -&gt; b -&gt; Ordering
+forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
+</span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b -&gt; Getting (NumType b) b (NumType b) -&gt; NumType b
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (NumType b) b (NumType b)
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int b (NumType b)
+</span><span class="hs-identifier hs-var">xCoord</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679475633"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679475634"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><span id="line-147"></span><span>
+</span><span id="line-148"></span><span>    </span><span class="hs-comment">-- Just vs' = CV.findRotateTo (\v -&gt; v^.core == vMaxY)</span><span>
+</span><span id="line-149"></span><span>    </span><span class="hs-comment">--          $ pg^.outerBoundaryVector</span><span>
+</span><span id="line-150"></span><span>
+</span><span id="line-151"></span><span>    </span><span class="hs-comment">-- vMaxY = getY F.maximumBy</span><span>
+</span><span id="line-152"></span><span>    </span><span class="hs-comment">-- vMinY = getY F.minimumBy</span><span>
+</span><span id="line-153"></span><span>    </span><span class="hs-comment">-- swap' (Point2 x y) = Point2 y x</span><span>
+</span><span id="line-154"></span><span>    </span><span class="hs-comment">-- getY ff = let p = ff (comparing (^.core.to swap')) $ pg^.outerBoundaryVector</span><span>
+</span><span id="line-155"></span><span>    </span><span class="hs-comment">--           in p^.core</span><span>
+</span><span id="line-156"></span><span>
+</span><span id="line-157"></span><span>
+</span><span id="line-158"></span><span>
+</span><span id="line-159"></span><span>
+</span><span id="line-160"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-161"></span><span>
+</span><span id="line-162"></span><span class="hs-comment">-- testPolygon = fromPoints . map ext $ [ Point2 10 10</span><span>
+</span><span id="line-163"></span><span class="hs-comment">--                                      , Point2 5 20</span><span>
+</span><span id="line-164"></span><span class="hs-comment">--                                      , Point2 3 14</span><span>
+</span><span id="line-165"></span><span class="hs-comment">--                                      , Point2 1 1</span><span>
+</span><span id="line-166"></span><span class="hs-comment">--                                      , Point2 8 8 ]</span><span>
+</span><span id="line-167"></span><span>
+</span><span id="line-168"></span><span>
+</span><span id="line-169"></span><span>
+</span><span id="line-170"></span><span>
+</span><span id="line-171"></span><span>
+</span><span id="line-172"></span><span>
+</span><span id="line-173"></span><span class="hs-comment">-- testPoly5 :: SimplePolygon () Rational</span><span>
+</span><span id="line-174"></span><span class="hs-comment">-- testPoly5 = toCounterClockWiseOrder . fromPoints $ map ext [ Point2 176 736</span><span>
+</span><span id="line-175"></span><span class="hs-comment">--                                                            , Point2 240 688</span><span>
+</span><span id="line-176"></span><span class="hs-comment">--                                                            , Point2 240 608</span><span>
+</span><span id="line-177"></span><span class="hs-comment">--                                                            , Point2 128 576</span><span>
+</span><span id="line-178"></span><span class="hs-comment">--                                                            , Point2 64 640</span><span>
+</span><span id="line-179"></span><span class="hs-comment">--                                                            , Point2 80 720</span><span>
+</span><span id="line-180"></span><span class="hs-comment">--                                                            , Point2 128 752</span><span>
+</span><span id="line-181"></span><span class="hs-comment">--                                                            ]</span><span>
+</span><span id="line-182"></span><span>
+</span><span id="line-183"></span><span>
+</span><span id="line-184"></span><span class="hs-comment">-- testPoly5 :: SimplePolygon () Rational</span><span>
+</span><span id="line-185"></span><span class="hs-comment">-- testPoly5 = toCounterClockWiseOrder . fromPoints $ map ext $ [ Point2 320 320</span><span>
+</span><span id="line-186"></span><span class="hs-comment">--                                                              , Point2 256 320</span><span>
+</span><span id="line-187"></span><span class="hs-comment">--                                                              , Point2 224 320</span><span>
+</span><span id="line-188"></span><span class="hs-comment">--                                                              , Point2 128 240</span><span>
+</span><span id="line-189"></span><span class="hs-comment">--                                                              , Point2 64 224</span><span>
+</span><span id="line-190"></span><span class="hs-comment">--                                                              , Point2 256 192</span><span>
+</span><span id="line-191"></span><span class="hs-comment">--                                                              ]</span><span>
+</span><span id="line-192"></span></pre></body></html>

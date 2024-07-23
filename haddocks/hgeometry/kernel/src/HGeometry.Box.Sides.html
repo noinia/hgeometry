@@ -1,0 +1,780 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Box.Sides</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.Box.Sides</span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier">Sides</span></a></span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier">Sides</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#north"><span class="hs-identifier">north</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#east"><span class="hs-identifier">east</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#south"><span class="hs-identifier">south</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#west"><span class="hs-identifier">west</span></a></span><span>
+</span><span id="line-10"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#topSide"><span class="hs-identifier">topSide</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#bottomSide"><span class="hs-identifier">bottomSide</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#leftSide"><span class="hs-identifier">leftSide</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#rightSide"><span class="hs-identifier">rightSide</span></a></span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#sides"><span class="hs-identifier">sides</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#sides%27"><span class="hs-identifier">sides'</span></a></span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#sideDirections"><span class="hs-identifier">sideDirections</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#sideValues"><span class="hs-identifier">sideValues</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Indexed.html#%3C.%3E"><span class="hs-operator">(&lt;.&gt;)</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.1-aa416192a766e4896bc49204f60523faac67d282183ad0e279d538496f49c17c/share/doc/html/src/Data.Functor.Apply.html"><span class="hs-identifier">Data.Functor.Apply</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Box.Class.html"><span class="hs-identifier">HGeometry.Box.Class</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Box.Corners.html"><span class="hs-identifier">HGeometry.Box.Corners</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Direction.html"><span class="hs-identifier">HGeometry.Direction</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- import HGeometry.Interval()</span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.LineSegment.html"><span class="hs-identifier">HGeometry.LineSegment</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="annot"><span class="hs-comment">-- | The four sides of a rectangle</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">data</span><span> </span><span id="Sides"><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-var">Sides</span></a></span></span><span> </span><span id="local-6989586621679347688"><span class="annot"><a href="#local-6989586621679347688"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Sides"><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-var">Sides</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_north"><span class="annot"><span class="annottext">forall a. Sides a -&gt; a
+</span><a href="HGeometry.Box.Sides.html#_north"><span class="hs-identifier hs-var hs-var">_north</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679347688"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-32"></span><span>                     </span><span class="hs-special">,</span><span> </span><span id="_east"><span class="annot"><span class="annottext">forall a. Sides a -&gt; a
+</span><a href="HGeometry.Box.Sides.html#_east"><span class="hs-identifier hs-var hs-var">_east</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679347688"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-33"></span><span>                     </span><span class="hs-special">,</span><span> </span><span id="_south"><span class="annot"><span class="annottext">forall a. Sides a -&gt; a
+</span><a href="HGeometry.Box.Sides.html#_south"><span class="hs-identifier hs-var hs-var">_south</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679347688"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-34"></span><span>                     </span><span class="hs-special">,</span><span> </span><span id="_west"><span class="annot"><span class="annottext">forall a. Sides a -&gt; a
+</span><a href="HGeometry.Box.Sides.html#_west"><span class="hs-identifier hs-var hs-var">_west</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679347688"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-35"></span><span>                     </span><span class="hs-special">}</span><span>
+</span><span id="line-36"></span><span>             </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679347956"><span id="local-6989586621679347964"><span id="local-6989586621679347968"><span class="annot"><span class="annottext">Int -&gt; Sides a -&gt; ShowS
+[Sides a] -&gt; ShowS
+Sides a -&gt; String
+(Int -&gt; Sides a -&gt; ShowS)
+-&gt; (Sides a -&gt; String) -&gt; ([Sides a] -&gt; ShowS) -&gt; Show (Sides a)
+forall a. Show a =&gt; Int -&gt; Sides a -&gt; ShowS
+forall a. Show a =&gt; [Sides a] -&gt; ShowS
+forall a. Show a =&gt; Sides a -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: forall a. Show a =&gt; Int -&gt; Sides a -&gt; ShowS
+showsPrec :: Int -&gt; Sides a -&gt; ShowS
+$cshow :: forall a. Show a =&gt; Sides a -&gt; String
+show :: Sides a -&gt; String
+$cshowList :: forall a. Show a =&gt; [Sides a] -&gt; ShowS
+showList :: [Sides a] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679347973"><span id="local-6989586621679347977"><span id="local-6989586621679347980"><span id="local-6989586621679347998"><span class="annot"><span class="annottext">ReadPrec [Sides a]
+ReadPrec (Sides a)
+Int -&gt; ReadS (Sides a)
+ReadS [Sides a]
+(Int -&gt; ReadS (Sides a))
+-&gt; ReadS [Sides a]
+-&gt; ReadPrec (Sides a)
+-&gt; ReadPrec [Sides a]
+-&gt; Read (Sides a)
+forall a. Read a =&gt; ReadPrec [Sides a]
+forall a. Read a =&gt; ReadPrec (Sides a)
+forall a. Read a =&gt; Int -&gt; ReadS (Sides a)
+forall a. Read a =&gt; ReadS [Sides a]
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+$creadsPrec :: forall a. Read a =&gt; Int -&gt; ReadS (Sides a)
+readsPrec :: Int -&gt; ReadS (Sides a)
+$creadList :: forall a. Read a =&gt; ReadS [Sides a]
+readList :: ReadS [Sides a]
+$creadPrec :: forall a. Read a =&gt; ReadPrec (Sides a)
+readPrec :: ReadPrec (Sides a)
+$creadListPrec :: forall a. Read a =&gt; ReadPrec [Sides a]
+readListPrec :: ReadPrec [Sides a]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679348003"><span id="local-6989586621679348009"><span class="annot"><span class="annottext">Sides a -&gt; Sides a -&gt; Bool
+(Sides a -&gt; Sides a -&gt; Bool)
+-&gt; (Sides a -&gt; Sides a -&gt; Bool) -&gt; Eq (Sides a)
+forall a. Eq a =&gt; Sides a -&gt; Sides a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: forall a. Eq a =&gt; Sides a -&gt; Sides a -&gt; Bool
+== :: Sides a -&gt; Sides a -&gt; Bool
+$c/= :: forall a. Eq a =&gt; Sides a -&gt; Sides a -&gt; Bool
+/= :: Sides a -&gt; Sides a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679348014"><span id="local-6989586621679348016"><span class="annot"><span class="annottext">(forall x. Sides a -&gt; Rep (Sides a) x)
+-&gt; (forall x. Rep (Sides a) x -&gt; Sides a) -&gt; Generic (Sides a)
+forall x. Rep (Sides a) x -&gt; Sides a
+forall x. Sides a -&gt; Rep (Sides a) x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+forall a x. Rep (Sides a) x -&gt; Sides a
+forall a x. Sides a -&gt; Rep (Sides a) x
+$cfrom :: forall a x. Sides a -&gt; Rep (Sides a) x
+from :: forall x. Sides a -&gt; Rep (Sides a) x
+$cto :: forall a x. Rep (Sides a) x -&gt; Sides a
+to :: forall x. Rep (Sides a) x -&gt; Sides a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679348024"><span id="local-6989586621679348030"><span id="local-6989586621679348036"><span id="local-6989586621679348040"><span id="local-6989586621679348043"><span id="local-6989586621679348046"><span id="local-6989586621679348049"><span class="annot"><span class="annottext">Eq (Sides a)
+Eq (Sides a) =&gt;
+(Sides a -&gt; Sides a -&gt; Ordering)
+-&gt; (Sides a -&gt; Sides a -&gt; Bool)
+-&gt; (Sides a -&gt; Sides a -&gt; Bool)
+-&gt; (Sides a -&gt; Sides a -&gt; Bool)
+-&gt; (Sides a -&gt; Sides a -&gt; Bool)
+-&gt; (Sides a -&gt; Sides a -&gt; Sides a)
+-&gt; (Sides a -&gt; Sides a -&gt; Sides a)
+-&gt; Ord (Sides a)
+Sides a -&gt; Sides a -&gt; Bool
+Sides a -&gt; Sides a -&gt; Ordering
+Sides a -&gt; Sides a -&gt; Sides a
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall a. Ord a =&gt; Eq (Sides a)
+forall a. Ord a =&gt; Sides a -&gt; Sides a -&gt; Bool
+forall a. Ord a =&gt; Sides a -&gt; Sides a -&gt; Ordering
+forall a. Ord a =&gt; Sides a -&gt; Sides a -&gt; Sides a
+$ccompare :: forall a. Ord a =&gt; Sides a -&gt; Sides a -&gt; Ordering
+compare :: Sides a -&gt; Sides a -&gt; Ordering
+$c&lt; :: forall a. Ord a =&gt; Sides a -&gt; Sides a -&gt; Bool
+&lt; :: Sides a -&gt; Sides a -&gt; Bool
+$c&lt;= :: forall a. Ord a =&gt; Sides a -&gt; Sides a -&gt; Bool
+&lt;= :: Sides a -&gt; Sides a -&gt; Bool
+$c&gt; :: forall a. Ord a =&gt; Sides a -&gt; Sides a -&gt; Bool
+&gt; :: Sides a -&gt; Sides a -&gt; Bool
+$c&gt;= :: forall a. Ord a =&gt; Sides a -&gt; Sides a -&gt; Bool
+&gt;= :: Sides a -&gt; Sides a -&gt; Bool
+$cmax :: forall a. Ord a =&gt; Sides a -&gt; Sides a -&gt; Sides a
+max :: Sides a -&gt; Sides a -&gt; Sides a
+$cmin :: forall a. Ord a =&gt; Sides a -&gt; Sides a -&gt; Sides a
+min :: Sides a -&gt; Sides a -&gt; Sides a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679348054"><span id="local-6989586621679348060"><span id="local-6989586621679348066"><span id="local-6989586621679348071"><span id="local-6989586621679348073"><span id="local-6989586621679348076"><span id="local-6989586621679348079"><span id="local-6989586621679348082"><span id="local-6989586621679348085"><span id="local-6989586621679348088"><span id="local-6989586621679348091"><span id="local-6989586621679348093"><span id="local-6989586621679348096"><span id="local-6989586621679348101"><span id="local-6989586621679348106"><span id="local-6989586621679348111"><span id="local-6989586621679348116"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; Sides m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Sides a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Sides a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Sides a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Sides a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Sides a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Sides a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Sides a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Sides a -&gt; a)
+-&gt; (forall a. Sides a -&gt; [a])
+-&gt; (forall a. Sides a -&gt; Bool)
+-&gt; (forall a. Sides a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; Sides a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; Sides a -&gt; a)
+-&gt; (forall a. Ord a =&gt; Sides a -&gt; a)
+-&gt; (forall a. Num a =&gt; Sides a -&gt; a)
+-&gt; (forall a. Num a =&gt; Sides a -&gt; a)
+-&gt; Foldable Sides
+forall a. Eq a =&gt; a -&gt; Sides a -&gt; Bool
+forall a. Num a =&gt; Sides a -&gt; a
+forall a. Ord a =&gt; Sides a -&gt; a
+forall m. Monoid m =&gt; Sides m -&gt; m
+forall a. Sides a -&gt; Bool
+forall a. Sides a -&gt; Int
+forall a. Sides a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; Sides a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Sides a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Sides a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Sides a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+$cfold :: forall m. Monoid m =&gt; Sides m -&gt; m
+fold :: forall m. Monoid m =&gt; Sides m -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Sides a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Sides a -&gt; m
+$cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Sides a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Sides a -&gt; m
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Sides a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Sides a -&gt; b
+$cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Sides a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Sides a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Sides a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Sides a -&gt; b
+$cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Sides a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Sides a -&gt; b
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Sides a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Sides a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Sides a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Sides a -&gt; a
+$ctoList :: forall a. Sides a -&gt; [a]
+toList :: forall a. Sides a -&gt; [a]
+$cnull :: forall a. Sides a -&gt; Bool
+null :: forall a. Sides a -&gt; Bool
+$clength :: forall a. Sides a -&gt; Int
+length :: forall a. Sides a -&gt; Int
+$celem :: forall a. Eq a =&gt; a -&gt; Sides a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; Sides a -&gt; Bool
+$cmaximum :: forall a. Ord a =&gt; Sides a -&gt; a
+maximum :: forall a. Ord a =&gt; Sides a -&gt; a
+$cminimum :: forall a. Ord a =&gt; Sides a -&gt; a
+minimum :: forall a. Ord a =&gt; Sides a -&gt; a
+$csum :: forall a. Num a =&gt; Sides a -&gt; a
+sum :: forall a. Num a =&gt; Sides a -&gt; a
+$cproduct :: forall a. Num a =&gt; Sides a -&gt; a
+product :: forall a. Num a =&gt; Sides a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679348122"><span id="local-6989586621679348124"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; Sides a -&gt; Sides b)
+-&gt; (forall a b. a -&gt; Sides b -&gt; Sides a) -&gt; Functor Sides
+forall a b. a -&gt; Sides b -&gt; Sides a
+forall a b. (a -&gt; b) -&gt; Sides a -&gt; Sides b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall a b. (a -&gt; b) -&gt; Sides a -&gt; Sides b
+fmap :: forall a b. (a -&gt; b) -&gt; Sides a -&gt; Sides b
+$c&lt;$ :: forall a b. a -&gt; Sides b -&gt; Sides a
+&lt;$ :: forall a b. a -&gt; Sides b -&gt; Sides a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679348132"><span id="local-6989586621679348138"><span id="local-6989586621679348144"><span id="local-6989586621679348149"><span class="annot"><span class="annottext">Functor Sides
+Foldable Sides
+(Functor Sides, Foldable Sides) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; Sides a -&gt; f (Sides b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    Sides (f a) -&gt; f (Sides a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; Sides a -&gt; m (Sides b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; Sides (m a) -&gt; m (Sides a))
+-&gt; Traversable Sides
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a. Monad m =&gt; Sides (m a) -&gt; m (Sides a)
+forall (f :: * -&gt; *) a. Applicative f =&gt; Sides (f a) -&gt; f (Sides a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Sides a -&gt; m (Sides b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Sides a -&gt; f (Sides b)
+$ctraverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Sides a -&gt; f (Sides b)
+traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Sides a -&gt; f (Sides b)
+$csequenceA :: forall (f :: * -&gt; *) a. Applicative f =&gt; Sides (f a) -&gt; f (Sides a)
+sequenceA :: forall (f :: * -&gt; *) a. Applicative f =&gt; Sides (f a) -&gt; f (Sides a)
+$cmapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Sides a -&gt; m (Sides b)
+mapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Sides a -&gt; m (Sides b)
+$csequence :: forall (m :: * -&gt; *) a. Monad m =&gt; Sides (m a) -&gt; m (Sides a)
+sequence :: forall (m :: * -&gt; *) a. Monad m =&gt; Sides (m a) -&gt; m (Sides a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="annot"><span class="hs-comment">-- | Access the north side</span></span><span>
+</span><span id="line-39"></span><span id="local-6989586621679347758"><span class="annot"><a href="HGeometry.Box.Sides.html#north"><span class="hs-identifier hs-type">north</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679347758"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679347758"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-40"></span><span id="north"><span class="annot"><span class="annottext">north :: forall a (f :: * -&gt; *).
+Functor f =&gt;
+(a -&gt; f a) -&gt; Sides a -&gt; f (Sides a)
+</span><a href="HGeometry.Box.Sides.html#north"><span class="hs-identifier hs-var hs-var">north</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Sides a -&gt; a)
+-&gt; (Sides a -&gt; a -&gt; Sides a) -&gt; Lens (Sides a) (Sides a) a a
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">Sides a -&gt; a
+forall a. Sides a -&gt; a
+</span><a href="HGeometry.Box.Sides.html#_north"><span class="hs-identifier hs-var">_north</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679348157"><span class="annot"><span class="annottext">Sides a
+</span><a href="#local-6989586621679348157"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679348158"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348158"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Sides a
+</span><a href="#local-6989586621679348157"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#_north"><span class="hs-identifier hs-var">_north</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679348158"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="annot"><span class="hs-comment">-- | Access the east side</span></span><span>
+</span><span id="line-43"></span><span id="local-6989586621679348159"><span class="annot"><a href="HGeometry.Box.Sides.html#east"><span class="hs-identifier hs-type">east</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679348159"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679348159"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-44"></span><span id="east"><span class="annot"><span class="annottext">east :: forall a (f :: * -&gt; *).
+Functor f =&gt;
+(a -&gt; f a) -&gt; Sides a -&gt; f (Sides a)
+</span><a href="HGeometry.Box.Sides.html#east"><span class="hs-identifier hs-var hs-var">east</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Sides a -&gt; a)
+-&gt; (Sides a -&gt; a -&gt; Sides a) -&gt; Lens (Sides a) (Sides a) a a
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">Sides a -&gt; a
+forall a. Sides a -&gt; a
+</span><a href="HGeometry.Box.Sides.html#_east"><span class="hs-identifier hs-var">_east</span></a></span><span>  </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679348162"><span class="annot"><span class="annottext">Sides a
+</span><a href="#local-6989586621679348162"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679348163"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348163"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Sides a
+</span><a href="#local-6989586621679348162"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#_east"><span class="hs-identifier hs-var">_east</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679348163"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="annot"><span class="hs-comment">-- | Access the south side</span></span><span>
+</span><span id="line-47"></span><span id="local-6989586621679348164"><span class="annot"><a href="HGeometry.Box.Sides.html#south"><span class="hs-identifier hs-type">south</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679348164"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679348164"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-48"></span><span id="south"><span class="annot"><span class="annottext">south :: forall a (f :: * -&gt; *).
+Functor f =&gt;
+(a -&gt; f a) -&gt; Sides a -&gt; f (Sides a)
+</span><a href="HGeometry.Box.Sides.html#south"><span class="hs-identifier hs-var hs-var">south</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Sides a -&gt; a)
+-&gt; (Sides a -&gt; a -&gt; Sides a) -&gt; Lens (Sides a) (Sides a) a a
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">Sides a -&gt; a
+forall a. Sides a -&gt; a
+</span><a href="HGeometry.Box.Sides.html#_south"><span class="hs-identifier hs-var">_south</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679348167"><span class="annot"><span class="annottext">Sides a
+</span><a href="#local-6989586621679348167"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679348168"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348168"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Sides a
+</span><a href="#local-6989586621679348167"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#_south"><span class="hs-identifier hs-var">_south</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679348168"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="annot"><span class="hs-comment">-- | Access the west side</span></span><span>
+</span><span id="line-51"></span><span id="local-6989586621679348169"><span class="annot"><a href="HGeometry.Box.Sides.html#west"><span class="hs-identifier hs-type">west</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679348169"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679348169"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-52"></span><span id="west"><span class="annot"><span class="annottext">west :: forall a (f :: * -&gt; *).
+Functor f =&gt;
+(a -&gt; f a) -&gt; Sides a -&gt; f (Sides a)
+</span><a href="HGeometry.Box.Sides.html#west"><span class="hs-identifier hs-var hs-var">west</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Sides a -&gt; a)
+-&gt; (Sides a -&gt; a -&gt; Sides a) -&gt; Lens (Sides a) (Sides a) a a
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">Sides a -&gt; a
+forall a. Sides a -&gt; a
+</span><a href="HGeometry.Box.Sides.html#_west"><span class="hs-identifier hs-var">_west</span></a></span><span>  </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679348172"><span class="annot"><span class="annottext">Sides a
+</span><a href="#local-6989586621679348172"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679348173"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348173"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Sides a
+</span><a href="#local-6989586621679348172"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#_west"><span class="hs-identifier hs-var">_west</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679348173"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679348179"><span id="local-6989586621679348183"><span id="local-6989586621679348186"><span class="annot"><span class="hs-identifier hs-type">Applicative</span></span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-55"></span><span>  </span><span id="local-6989586621679348189"><span class="annot"><span class="annottext">pure :: forall a. a -&gt; Sides a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">pure</span></span></span><span> </span><span id="local-6989586621679348190"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348190"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a -&gt; a -&gt; Sides a
+forall a. a -&gt; a -&gt; a -&gt; a -&gt; Sides a
+</span><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-var">Sides</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348190"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348190"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348190"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348190"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span id="local-6989586621679348191"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679348191"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679348192"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679348192"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621679348193"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679348193"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span id="local-6989586621679348194"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679348194"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679348195"><span class="annot"><span class="annottext">&lt;*&gt; :: forall a b. Sides (a -&gt; b) -&gt; Sides a -&gt; Sides b
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;*&gt;</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span id="local-6989586621679348196"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348196"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679348197"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348197"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679348198"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348198"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679348199"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348199"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; b -&gt; b -&gt; Sides b
+forall a. a -&gt; a -&gt; a -&gt; a -&gt; Sides a
+</span><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-var">Sides</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679348191"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348196"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679348192"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348197"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679348193"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348198"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679348194"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348199"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679348203"><span id="local-6989586621679348210"><span id="local-6989586621679348215"><span id="local-6989586621679348218"><span id="local-6989586621679348223"><span id="local-6989586621679348228"><span id="local-6989586621679348231"><span id="local-6989586621679348234"><span id="local-6989586621679348237"><span id="local-6989586621679348240"><span id="local-6989586621679348243"><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-59"></span><span>  </span><span id="local-6989586621679348250"><span class="annot"><span class="annottext">foldMap1 :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; Sides a -&gt; m
+</span><a href="#local-6989586621679348250"><span class="hs-identifier hs-var hs-var hs-var hs-var">foldMap1</span></a></span></span><span> </span><span id="local-6989586621679348252"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679348252"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span id="local-6989586621679348253"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348253"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679348254"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348254"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679348255"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348255"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679348256"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348256"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679348252"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348253"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; m -&gt; m
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679348252"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348254"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; m -&gt; m
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679348252"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348255"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">m -&gt; m -&gt; m
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679348252"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348256"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-60"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679348263"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.1-aa416192a766e4896bc49204f60523faac67d282183ad0e279d538496f49c17c/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-61"></span><span>  </span><span id="local-6989586621679348276"><span class="annot"><span class="annottext">traverse1 :: forall (f :: * -&gt; *) a b.
+Apply f =&gt;
+(a -&gt; f b) -&gt; Sides a -&gt; f (Sides b)
+</span><a href="#local-6989586621679348276"><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse1</span></a></span></span><span> </span><span id="local-6989586621679348278"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679348278"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span id="local-6989586621679348279"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348279"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679348280"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348280"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679348281"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348281"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679348282"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348282"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; b -&gt; b -&gt; Sides b
+forall a. a -&gt; a -&gt; a -&gt; a -&gt; Sides a
+</span><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-var">Sides</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; b -&gt; b -&gt; b -&gt; Sides b) -&gt; f b -&gt; f (b -&gt; b -&gt; b -&gt; Sides b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679348278"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348279"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">f (b -&gt; b -&gt; b -&gt; Sides b) -&gt; f b -&gt; f (b -&gt; b -&gt; Sides b)
+forall a b. f (a -&gt; b) -&gt; f a -&gt; f b
+forall (f :: * -&gt; *) a b. Apply f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.1-aa416192a766e4896bc49204f60523faac67d282183ad0e279d538496f49c17c/share/doc/html/src/Data.Functor.Bind.Class.html#%3C.%3E"><span class="hs-operator hs-var">&lt;.&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679348278"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348280"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">f (b -&gt; b -&gt; Sides b) -&gt; f b -&gt; f (b -&gt; Sides b)
+forall a b. f (a -&gt; b) -&gt; f a -&gt; f b
+forall (f :: * -&gt; *) a b. Apply f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.1-aa416192a766e4896bc49204f60523faac67d282183ad0e279d538496f49c17c/share/doc/html/src/Data.Functor.Bind.Class.html#%3C.%3E"><span class="hs-operator hs-var">&lt;.&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679348278"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348281"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">f (b -&gt; Sides b) -&gt; f b -&gt; f (Sides b)
+forall a b. f (a -&gt; b) -&gt; f a -&gt; f b
+forall (f :: * -&gt; *) a b. Apply f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.1-aa416192a766e4896bc49204f60523faac67d282183ad0e279d538496f49c17c/share/doc/html/src/Data.Functor.Bind.Class.html#%3C.%3E"><span class="hs-operator hs-var">&lt;.&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679348278"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679348282"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679347826"><span id="local-6989586621679348288"><span id="local-6989586621679348292"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="#local-6989586621679347826"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679347826"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-64"></span><span>  </span><span id="local-6989586621679348300"><span class="annot"><span class="annottext">Sides a
+</span><a href="#local-6989586621679348300"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679348301"><span class="annot"><span class="annottext">&lt;&gt; :: Sides a -&gt; Sides a -&gt; Sides a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span id="local-6989586621679348302"><span class="annot"><span class="annottext">Sides a
+</span><a href="#local-6989586621679348302"><span class="hs-identifier hs-var">s'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; a) -&gt; Sides a -&gt; Sides (a -&gt; a)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Sides a
+</span><a href="#local-6989586621679348300"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Sides (a -&gt; a) -&gt; Sides a -&gt; Sides a
+forall a b. Sides (a -&gt; b) -&gt; Sides a -&gt; Sides b
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Sides a
+</span><a href="#local-6989586621679348302"><span class="hs-identifier hs-var">s'</span></a></span><span>
+</span><span id="line-65"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679347829"><span id="local-6989586621679348309"><span id="local-6989586621679348313"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="#local-6989586621679347829"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679347829"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-66"></span><span>  </span><span id="local-6989586621679348319"><span class="annot"><span class="annottext">mempty :: Sides a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Sides a
+forall a. a -&gt; Sides a
+forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
+</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">a
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Index"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.At.html#Index"><span class="hs-identifier hs-var">Index</span></a></span></span><span>   </span><span id="local-6989586621679348320"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679348320"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.Direction.html#CardinalDirection"><span class="hs-identifier hs-type">CardinalDirection</span></a></span><span>
+</span><span id="line-70"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="IxValue"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.At.html#IxValue"><span class="hs-identifier hs-var">IxValue</span></a></span></span><span> </span><span id="local-6989586621679348321"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679348321"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679348321"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-71"></span><span>
+</span><span id="line-72"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679347836"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.At.html#Ixed"><span class="hs-identifier hs-type">Ixed</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679347836"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-73"></span><span>  </span><span id="local-6989586621679348325"><span class="annot"><span class="annottext">ix :: Index (Sides a) -&gt; Traversal' (Sides a) (IxValue (Sides a))
+</span><a href="#local-6989586621679348325"><span class="hs-identifier hs-var hs-var hs-var hs-var">ix</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-74"></span><span>    </span><span class="annot"><span class="annottext">Index (Sides a)
+CardinalDirection
+</span><a href="HGeometry.Direction.html#North"><span class="hs-identifier hs-var">North</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a -&gt; f a) -&gt; Sides a -&gt; f (Sides a)
+(IxValue (Sides a) -&gt; f (IxValue (Sides a)))
+-&gt; Sides a -&gt; f (Sides a)
+forall a (f :: * -&gt; *).
+Functor f =&gt;
+(a -&gt; f a) -&gt; Sides a -&gt; f (Sides a)
+</span><a href="HGeometry.Box.Sides.html#north"><span class="hs-identifier hs-var">north</span></a></span><span>
+</span><span id="line-75"></span><span>    </span><span class="annot"><span class="annottext">Index (Sides a)
+CardinalDirection
+</span><a href="HGeometry.Direction.html#East"><span class="hs-identifier hs-var">East</span></a></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a -&gt; f a) -&gt; Sides a -&gt; f (Sides a)
+(IxValue (Sides a) -&gt; f (IxValue (Sides a)))
+-&gt; Sides a -&gt; f (Sides a)
+forall a (f :: * -&gt; *).
+Functor f =&gt;
+(a -&gt; f a) -&gt; Sides a -&gt; f (Sides a)
+</span><a href="HGeometry.Box.Sides.html#east"><span class="hs-identifier hs-var">east</span></a></span><span>
+</span><span id="line-76"></span><span>    </span><span class="annot"><span class="annottext">Index (Sides a)
+CardinalDirection
+</span><a href="HGeometry.Direction.html#South"><span class="hs-identifier hs-var">South</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a -&gt; f a) -&gt; Sides a -&gt; f (Sides a)
+(IxValue (Sides a) -&gt; f (IxValue (Sides a)))
+-&gt; Sides a -&gt; f (Sides a)
+forall a (f :: * -&gt; *).
+Functor f =&gt;
+(a -&gt; f a) -&gt; Sides a -&gt; f (Sides a)
+</span><a href="HGeometry.Box.Sides.html#south"><span class="hs-identifier hs-var">south</span></a></span><span>
+</span><span id="line-77"></span><span>    </span><span class="annot"><span class="annottext">Index (Sides a)
+CardinalDirection
+</span><a href="HGeometry.Direction.html#West"><span class="hs-identifier hs-var">West</span></a></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a -&gt; f a) -&gt; Sides a -&gt; f (Sides a)
+(IxValue (Sides a) -&gt; f (IxValue (Sides a)))
+-&gt; Sides a -&gt; f (Sides a)
+forall a (f :: * -&gt; *).
+Functor f =&gt;
+(a -&gt; f a) -&gt; Sides a -&gt; f (Sides a)
+</span><a href="HGeometry.Box.Sides.html#west"><span class="hs-identifier hs-var">west</span></a></span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- | Constructs a Sides value that indicates the appropriate</span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- direction.</span><span>
+</span><span id="line-81"></span><span class="annot"><a href="HGeometry.Box.Sides.html#sideDirections"><span class="hs-identifier hs-type">sideDirections</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span class="annot"><a href="HGeometry.Direction.html#CardinalDirection"><span class="hs-identifier hs-type">CardinalDirection</span></a></span><span>
+</span><span id="line-82"></span><span id="sideDirections"><span class="annot"><span class="annottext">sideDirections :: Sides CardinalDirection
+</span><a href="HGeometry.Box.Sides.html#sideDirections"><span class="hs-identifier hs-var hs-var">sideDirections</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+-&gt; CardinalDirection
+-&gt; CardinalDirection
+-&gt; CardinalDirection
+-&gt; Sides CardinalDirection
+forall a. a -&gt; a -&gt; a -&gt; a -&gt; Sides a
+</span><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-var">Sides</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.html#North"><span class="hs-identifier hs-var">North</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.html#East"><span class="hs-identifier hs-var">East</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.html#South"><span class="hs-identifier hs-var">South</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="HGeometry.Direction.html#West"><span class="hs-identifier hs-var">West</span></a></span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-85"></span><span>
+</span><span id="line-86"></span><span class="annot"><span class="hs-comment">-- | The top side of the box, from left to right.</span></span><span>
+</span><span id="line-87"></span><span id="local-6989586621679347839"><span id="local-6989586621679347840"><span id="local-6989586621679347841"><span class="annot"><a href="HGeometry.Box.Sides.html#topSide"><span class="hs-identifier hs-type">topSide</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679347839"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Box.Class.html#Rectangle_"><span class="hs-identifier hs-type">Rectangle_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679347840"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679347841"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679347841"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679347839"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-88"></span><span>           </span><span class="hs-special">)</span><span>
+</span><span id="line-89"></span><span>        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679347840"><span class="hs-identifier hs-type">rectangle</span></a></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-type">ClosedLineSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679347841"><span class="hs-identifier hs-type">point</span></a></span></span></span></span><span>
+</span><span id="line-90"></span><span id="topSide"><span class="annot"><span class="annottext">topSide :: forall r rectangle point.
+(Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; ClosedLineSegment point
+</span><a href="HGeometry.Box.Sides.html#topSide"><span class="hs-identifier hs-var hs-var">topSide</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span id="local-6989586621679348417"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348417"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679348418"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348418"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="annot"><span class="annottext">point
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">point
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; ClosedLineSegment point
+forall point. point -&gt; point -&gt; ClosedLineSegment point
+</span><a href="HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-var">ClosedLineSegment</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348417"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348418"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Corners point -&gt; ClosedLineSegment point)
+-&gt; (rectangle -&gt; Corners point)
+-&gt; rectangle
+-&gt; ClosedLineSegment point
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">rectangle -&gt; Corners point
+forall r rectangle point.
+(Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; Corners point
+</span><a href="HGeometry.Box.Corners.html#corners"><span class="hs-identifier hs-var">corners</span></a></span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span class="annot"><span class="hs-comment">-- | Oriented from *left to right*</span></span><span>
+</span><span id="line-93"></span><span id="local-6989586621679348422"><span id="local-6989586621679348423"><span id="local-6989586621679348424"><span class="annot"><a href="HGeometry.Box.Sides.html#bottomSide"><span class="hs-identifier hs-type">bottomSide</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679348422"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Box.Class.html#Rectangle_"><span class="hs-identifier hs-type">Rectangle_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679348423"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679348424"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679348424"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679348422"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-94"></span><span>           </span><span class="hs-special">)</span><span>
+</span><span id="line-95"></span><span>           </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679348423"><span class="hs-identifier hs-type">rectangle</span></a></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-type">ClosedLineSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679348424"><span class="hs-identifier hs-type">point</span></a></span></span></span></span><span>
+</span><span id="line-96"></span><span id="bottomSide"><span class="annot"><span class="annottext">bottomSide :: forall r rectangle point.
+(Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; ClosedLineSegment point
+</span><a href="HGeometry.Box.Sides.html#bottomSide"><span class="hs-identifier hs-var hs-var">bottomSide</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">point
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679348492"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348492"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679348493"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348493"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; ClosedLineSegment point
+forall point. point -&gt; point -&gt; ClosedLineSegment point
+</span><a href="HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-var">ClosedLineSegment</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348493"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348492"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Corners point -&gt; ClosedLineSegment point)
+-&gt; (rectangle -&gt; Corners point)
+-&gt; rectangle
+-&gt; ClosedLineSegment point
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">rectangle -&gt; Corners point
+forall r rectangle point.
+(Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; Corners point
+</span><a href="HGeometry.Box.Corners.html#corners"><span class="hs-identifier hs-var">corners</span></a></span><span>
+</span><span id="line-97"></span><span>
+</span><span id="line-98"></span><span class="annot"><span class="hs-comment">-- | Left side of the box, from bottom to top</span></span><span>
+</span><span id="line-99"></span><span id="local-6989586621679348494"><span id="local-6989586621679348495"><span id="local-6989586621679348496"><span class="annot"><a href="HGeometry.Box.Sides.html#leftSide"><span class="hs-identifier hs-type">leftSide</span></a></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679348494"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Box.Class.html#Rectangle_"><span class="hs-identifier hs-type">Rectangle_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679348495"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679348496"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679348496"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679348494"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-100"></span><span>           </span><span class="hs-special">)</span><span>
+</span><span id="line-101"></span><span>          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679348495"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-type">ClosedLineSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679348496"><span class="hs-identifier hs-type">point</span></a></span></span></span></span><span>
+</span><span id="line-102"></span><span id="leftSide"><span class="annot"><span class="annottext">leftSide :: forall r rectangle point.
+(Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; ClosedLineSegment point
+</span><a href="HGeometry.Box.Sides.html#leftSide"><span class="hs-identifier hs-var hs-var">leftSide</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span id="local-6989586621679348564"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348564"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="annot"><span class="annottext">point
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">point
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679348565"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348565"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; ClosedLineSegment point
+forall point. point -&gt; point -&gt; ClosedLineSegment point
+</span><a href="HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-var">ClosedLineSegment</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348565"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348564"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Corners point -&gt; ClosedLineSegment point)
+-&gt; (rectangle -&gt; Corners point)
+-&gt; rectangle
+-&gt; ClosedLineSegment point
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">rectangle -&gt; Corners point
+forall r rectangle point.
+(Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; Corners point
+</span><a href="HGeometry.Box.Corners.html#corners"><span class="hs-identifier hs-var">corners</span></a></span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span class="annot"><span class="hs-comment">-- | The right side, oriented from *bottom* to top</span></span><span>
+</span><span id="line-105"></span><span id="local-6989586621679348566"><span id="local-6989586621679348567"><span id="local-6989586621679348568"><span class="annot"><a href="HGeometry.Box.Sides.html#rightSide"><span class="hs-identifier hs-type">rightSide</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679348566"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Box.Class.html#Rectangle_"><span class="hs-identifier hs-type">Rectangle_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679348567"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679348568"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679348568"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679348566"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-106"></span><span>           </span><span class="hs-special">)</span><span>
+</span><span id="line-107"></span><span>          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679348567"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-type">ClosedLineSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679348568"><span class="hs-identifier hs-type">point</span></a></span></span></span></span><span>
+</span><span id="line-108"></span><span id="rightSide"><span class="annot"><span class="annottext">rightSide :: forall r rectangle point.
+(Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; ClosedLineSegment point
+</span><a href="HGeometry.Box.Sides.html#rightSide"><span class="hs-identifier hs-var hs-var">rightSide</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679348636"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348636"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621679348637"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348637"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="annot"><span class="annottext">point
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; ClosedLineSegment point
+forall point. point -&gt; point -&gt; ClosedLineSegment point
+</span><a href="HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-var">ClosedLineSegment</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348637"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348636"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Corners point -&gt; ClosedLineSegment point)
+-&gt; (rectangle -&gt; Corners point)
+-&gt; rectangle
+-&gt; ClosedLineSegment point
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">rectangle -&gt; Corners point
+forall r rectangle point.
+(Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; Corners point
+</span><a href="HGeometry.Box.Corners.html#corners"><span class="hs-identifier hs-var">corners</span></a></span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span class="hs-comment">-- | The sides of the rectangle, in order (Top, Right, Bottom, Left). The sides</span><span>
+</span><span id="line-112"></span><span class="hs-comment">-- themselves are also oriented in clockwise order. If, you want them in the</span><span>
+</span><span id="line-113"></span><span class="hs-comment">-- same order as the functions `topSide`, `bottomSide`, `leftSide`, and</span><span>
+</span><span id="line-114"></span><span class="hs-comment">-- `rightSide`, use `sides'` instead.</span><span>
+</span><span id="line-115"></span><span id="local-6989586621679347897"><span id="local-6989586621679347898"><span id="local-6989586621679347899"><span class="annot"><a href="HGeometry.Box.Sides.html#sides"><span class="hs-identifier hs-type">sides</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679347897"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Box.Class.html#Rectangle_"><span class="hs-identifier hs-type">Rectangle_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679347898"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679347899"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679347899"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679347897"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-116"></span><span>           </span><span class="hs-special">)</span><span>
+</span><span id="line-117"></span><span>        </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679347898"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-type">ClosedLineSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679347899"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-118"></span><span id="sides"><span class="annot"><span class="annottext">sides :: forall r rectangle point.
+(Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; Sides (ClosedLineSegment point)
+</span><a href="HGeometry.Box.Sides.html#sides"><span class="hs-identifier hs-var hs-var">sides</span></a></span></span><span> </span><span id="local-6989586621679348705"><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679348705"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="annot"><a href="HGeometry.Box.Corners.html#Corners"><span class="hs-identifier hs-type">Corners</span></a></span><span> </span><span id="local-6989586621679348706"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348706"><span class="hs-identifier hs-var">nw</span></a></span></span><span> </span><span id="local-6989586621679348707"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348707"><span class="hs-identifier hs-var">ne</span></a></span></span><span> </span><span id="local-6989586621679348708"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348708"><span class="hs-identifier hs-var">se</span></a></span></span><span> </span><span id="local-6989586621679348709"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348709"><span class="hs-identifier hs-var">sw</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">rectangle -&gt; Corners point
+forall r rectangle point.
+(Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; Corners point
+</span><a href="HGeometry.Box.Corners.html#corners"><span class="hs-identifier hs-var">corners</span></a></span><span> </span><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679348705"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-119"></span><span>          </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment point
+-&gt; ClosedLineSegment point
+-&gt; ClosedLineSegment point
+-&gt; ClosedLineSegment point
+-&gt; Sides (ClosedLineSegment point)
+forall a. a -&gt; a -&gt; a -&gt; a -&gt; Sides a
+</span><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-var">Sides</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point -&gt; point -&gt; ClosedLineSegment point
+forall point. point -&gt; point -&gt; ClosedLineSegment point
+</span><a href="HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-var">ClosedLineSegment</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348706"><span class="hs-identifier hs-var">nw</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348707"><span class="hs-identifier hs-var">ne</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point -&gt; point -&gt; ClosedLineSegment point
+forall point. point -&gt; point -&gt; ClosedLineSegment point
+</span><a href="HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-var">ClosedLineSegment</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348707"><span class="hs-identifier hs-var">ne</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348708"><span class="hs-identifier hs-var">se</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-120"></span><span>                   </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point -&gt; point -&gt; ClosedLineSegment point
+forall point. point -&gt; point -&gt; ClosedLineSegment point
+</span><a href="HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-var">ClosedLineSegment</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348708"><span class="hs-identifier hs-var">se</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348709"><span class="hs-identifier hs-var">sw</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point -&gt; point -&gt; ClosedLineSegment point
+forall point. point -&gt; point -&gt; ClosedLineSegment point
+</span><a href="HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-var">ClosedLineSegment</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348709"><span class="hs-identifier hs-var">sw</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679348706"><span class="hs-identifier hs-var">nw</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span class="hs-comment">-- | The sides of the rectangle. The order of the segments is (Top, Right,</span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- Bottom, Left).  Note that the segments themselves, are oriented as described</span><span>
+</span><span id="line-124"></span><span class="hs-comment">-- by the functions topSide, bottomSide, leftSide, rightSide (basically: from</span><span>
+</span><span id="line-125"></span><span class="hs-comment">-- left to right, and from bottom to top). If you want the segments oriented</span><span>
+</span><span id="line-126"></span><span class="hs-comment">-- along the boundary of the rectangle, use the `sides` function instead.</span><span>
+</span><span id="line-127"></span><span id="local-6989586621679348710"><span id="local-6989586621679348711"><span id="local-6989586621679348712"><span class="annot"><a href="HGeometry.Box.Sides.html#sides%27"><span class="hs-identifier hs-type">sides'</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679348710"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Box.Class.html#Rectangle_"><span class="hs-identifier hs-type">Rectangle_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679348711"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679348712"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679348712"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679348710"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-128"></span><span>           </span><span class="hs-special">)</span><span>
+</span><span id="line-129"></span><span>         </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679348711"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-type">ClosedLineSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679348712"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-130"></span><span id="sides%27"><span class="annot"><span class="annottext">sides' :: forall r rectangle point.
+(Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; Sides (ClosedLineSegment point)
+</span><a href="HGeometry.Box.Sides.html#sides%27"><span class="hs-identifier hs-var hs-var">sides'</span></a></span></span><span> </span><span id="local-6989586621679348897"><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679348897"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment point
+-&gt; ClosedLineSegment point
+-&gt; ClosedLineSegment point
+-&gt; ClosedLineSegment point
+-&gt; Sides (ClosedLineSegment point)
+forall a. a -&gt; a -&gt; a -&gt; a -&gt; Sides a
+</span><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-var">Sides</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">rectangle -&gt; ClosedLineSegment point
+forall r rectangle point.
+(Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; ClosedLineSegment point
+</span><a href="HGeometry.Box.Sides.html#topSide"><span class="hs-identifier hs-var">topSide</span></a></span><span> </span><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679348897"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">rectangle -&gt; ClosedLineSegment point
+forall r rectangle point.
+(Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; ClosedLineSegment point
+</span><a href="HGeometry.Box.Sides.html#rightSide"><span class="hs-identifier hs-var">rightSide</span></a></span><span> </span><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679348897"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">rectangle -&gt; ClosedLineSegment point
+forall r rectangle point.
+(Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; ClosedLineSegment point
+</span><a href="HGeometry.Box.Sides.html#bottomSide"><span class="hs-identifier hs-var">bottomSide</span></a></span><span> </span><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679348897"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">rectangle -&gt; ClosedLineSegment point
+forall r rectangle point.
+(Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; ClosedLineSegment point
+</span><a href="HGeometry.Box.Sides.html#leftSide"><span class="hs-identifier hs-var">leftSide</span></a></span><span> </span><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679348897"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-131"></span><span>
+</span><span id="line-132"></span><span>
+</span><span id="line-133"></span><span class="hs-comment">-- | The side values of the rectangle, i.e. the coordinates of the top, right, bottom, and</span><span>
+</span><span id="line-134"></span><span class="hs-comment">-- left sides.</span><span>
+</span><span id="line-135"></span><span id="local-6989586621679347906"><span id="local-6989586621679347907"><span id="local-6989586621679347908"><span class="annot"><a href="HGeometry.Box.Sides.html#sideValues"><span class="hs-identifier hs-type">sideValues</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Box.Class.html#Rectangle_"><span class="hs-identifier hs-type">Rectangle_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679347906"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679347907"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679347907"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679347908"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-136"></span><span>                   </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679347906"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-type">Sides</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679347908"><span class="hs-identifier hs-type">r</span></a></span></span></span></span><span>
+</span><span id="line-137"></span><span id="sideValues"><span class="annot"><span class="annottext">sideValues :: forall rectangle point r.
+(Rectangle_ rectangle point, Point_ point 2 r) =&gt;
+rectangle -&gt; Sides r
+</span><a href="HGeometry.Box.Sides.html#sideValues"><span class="hs-identifier hs-var hs-var">sideValues</span></a></span></span><span> </span><span id="local-6989586621679349102"><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679349102"><span class="hs-identifier hs-var">rect</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; r -&gt; Sides r
+forall a. a -&gt; a -&gt; a -&gt; a -&gt; Sides a
+</span><a href="HGeometry.Box.Sides.html#Sides"><span class="hs-identifier hs-var">Sides</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679349102"><span class="hs-identifier hs-var">rect</span></a></span><span class="annot"><span class="annottext">rectangle -&gt; Getting r rectangle r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const r point) -&gt; rectangle -&gt; Const r rectangle
+forall box point. HasMaxPoint box point =&gt; Lens' box point
+Lens' rectangle point
+</span><a href="HGeometry.Box.Class.html#maxPoint"><span class="hs-identifier hs-var">maxPoint</span></a></span><span class="annot"><span class="annottext">((point -&gt; Const r point) -&gt; rectangle -&gt; Const r rectangle)
+-&gt; ((r -&gt; Const r r) -&gt; point -&gt; Const r point)
+-&gt; Getting r rectangle r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; point -&gt; Const r point
+forall (d :: Nat) point r.
+(2 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int point r
+</span><span class="hs-identifier hs-var">yCoord</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679349102"><span class="hs-identifier hs-var">rect</span></a></span><span class="annot"><span class="annottext">rectangle -&gt; Getting r rectangle r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const r point) -&gt; rectangle -&gt; Const r rectangle
+forall box point. HasMaxPoint box point =&gt; Lens' box point
+Lens' rectangle point
+</span><a href="HGeometry.Box.Class.html#maxPoint"><span class="hs-identifier hs-var">maxPoint</span></a></span><span class="annot"><span class="annottext">((point -&gt; Const r point) -&gt; rectangle -&gt; Const r rectangle)
+-&gt; ((r -&gt; Const r r) -&gt; point -&gt; Const r point)
+-&gt; Getting r rectangle r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; point -&gt; Const r point
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int point r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span class="hs-special">)</span><span>
+</span><span id="line-138"></span><span>                        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679349102"><span class="hs-identifier hs-var">rect</span></a></span><span class="annot"><span class="annottext">rectangle -&gt; Getting r rectangle r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const r point) -&gt; rectangle -&gt; Const r rectangle
+forall box point. HasMinPoint box point =&gt; Lens' box point
+Lens' rectangle point
+</span><a href="HGeometry.Box.Class.html#minPoint"><span class="hs-identifier hs-var">minPoint</span></a></span><span class="annot"><span class="annottext">((point -&gt; Const r point) -&gt; rectangle -&gt; Const r rectangle)
+-&gt; ((r -&gt; Const r r) -&gt; point -&gt; Const r point)
+-&gt; Getting r rectangle r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; point -&gt; Const r point
+forall (d :: Nat) point r.
+(2 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int point r
+</span><span class="hs-identifier hs-var">yCoord</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679349102"><span class="hs-identifier hs-var">rect</span></a></span><span class="annot"><span class="annottext">rectangle -&gt; Getting r rectangle r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const r point) -&gt; rectangle -&gt; Const r rectangle
+forall box point. HasMinPoint box point =&gt; Lens' box point
+Lens' rectangle point
+</span><a href="HGeometry.Box.Class.html#minPoint"><span class="hs-identifier hs-var">minPoint</span></a></span><span class="annot"><span class="annottext">((point -&gt; Const r point) -&gt; rectangle -&gt; Const r rectangle)
+-&gt; ((r -&gt; Const r r) -&gt; point -&gt; Const r point)
+-&gt; Getting r rectangle r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; point -&gt; Const r point
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int point r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span class="hs-special">)</span><span>
+</span><span id="line-139"></span></pre></body></html>

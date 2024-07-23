@@ -1,0 +1,907 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Measured.Report</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-10"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.Measured.Report</span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#Report"><span class="hs-identifier">Report</span></a></span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#Report"><span class="hs-identifier">Report</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#MkReport"><span class="hs-identifier">MkReport</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier">Report1</span></a></span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier">Report1</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#ReportList"><span class="hs-identifier">ReportList</span></a></span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#ReportList"><span class="hs-identifier">ReportList</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Coerce</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Functor.Const</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">List</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.1-aa416192a766e4896bc49204f60523faac67d282183ad0e279d538496f49c17c/share/doc/html/src/Data.Semigroup.Traversable.html"><span class="hs-identifier">Data.Semigroup.Traversable</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Measured.Class.html"><span class="hs-identifier">HGeometry.Measured.Class</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Tree.Binary.Static.html"><span class="hs-identifier">HGeometry.Tree.Binary.Static</span></a></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- | Report is a type to be used for reporting/collecting all results of a query.</span><span>
+</span><span id="line-28"></span><span class="hs-comment">--</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- The result is internally represented as a binary tree, so that we can guarantee O(1)</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- time and space (&lt;&gt;).</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">newtype</span><span> </span><span id="Report"><span class="annot"><a href="HGeometry.Measured.Report.html#Report"><span class="hs-identifier hs-var">Report</span></a></span></span><span> </span><span id="local-6989586621679191376"><span class="annot"><a href="#local-6989586621679191376"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="MkReport"><span class="annot"><a href="HGeometry.Measured.Report.html#MkReport"><span class="hs-identifier hs-var">MkReport</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-type">Report1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679191376"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679191558"><span id="local-6989586621679191565"><span id="local-6989586621679191569"><span class="annot"><span class="annottext">Int -&gt; Report a -&gt; ShowS
+[Report a] -&gt; ShowS
+Report a -&gt; String
+(Int -&gt; Report a -&gt; ShowS)
+-&gt; (Report a -&gt; String) -&gt; ([Report a] -&gt; ShowS) -&gt; Show (Report a)
+forall a. Show a =&gt; Int -&gt; Report a -&gt; ShowS
+forall a. Show a =&gt; [Report a] -&gt; ShowS
+forall a. Show a =&gt; Report a -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: forall a. Show a =&gt; Int -&gt; Report a -&gt; ShowS
+showsPrec :: Int -&gt; Report a -&gt; ShowS
+$cshow :: forall a. Show a =&gt; Report a -&gt; String
+show :: Report a -&gt; String
+$cshowList :: forall a. Show a =&gt; [Report a] -&gt; ShowS
+showList :: [Report a] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679191575"><span id="local-6989586621679191581"><span class="annot"><span class="annottext">Report a -&gt; Report a -&gt; Bool
+(Report a -&gt; Report a -&gt; Bool)
+-&gt; (Report a -&gt; Report a -&gt; Bool) -&gt; Eq (Report a)
+forall a. Eq a =&gt; Report a -&gt; Report a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: forall a. Eq a =&gt; Report a -&gt; Report a -&gt; Bool
+== :: Report a -&gt; Report a -&gt; Bool
+$c/= :: forall a. Eq a =&gt; Report a -&gt; Report a -&gt; Bool
+/= :: Report a -&gt; Report a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679191593"><span id="local-6989586621679191599"><span id="local-6989586621679191604"><span id="local-6989586621679191609"><span id="local-6989586621679191614"><span id="local-6989586621679191619"><span id="local-6989586621679191624"><span class="annot"><span class="annottext">Eq (Report a)
+Eq (Report a) =&gt;
+(Report a -&gt; Report a -&gt; Ordering)
+-&gt; (Report a -&gt; Report a -&gt; Bool)
+-&gt; (Report a -&gt; Report a -&gt; Bool)
+-&gt; (Report a -&gt; Report a -&gt; Bool)
+-&gt; (Report a -&gt; Report a -&gt; Bool)
+-&gt; (Report a -&gt; Report a -&gt; Report a)
+-&gt; (Report a -&gt; Report a -&gt; Report a)
+-&gt; Ord (Report a)
+Report a -&gt; Report a -&gt; Bool
+Report a -&gt; Report a -&gt; Ordering
+Report a -&gt; Report a -&gt; Report a
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall a. Ord a =&gt; Eq (Report a)
+forall a. Ord a =&gt; Report a -&gt; Report a -&gt; Bool
+forall a. Ord a =&gt; Report a -&gt; Report a -&gt; Ordering
+forall a. Ord a =&gt; Report a -&gt; Report a -&gt; Report a
+$ccompare :: forall a. Ord a =&gt; Report a -&gt; Report a -&gt; Ordering
+compare :: Report a -&gt; Report a -&gt; Ordering
+$c&lt; :: forall a. Ord a =&gt; Report a -&gt; Report a -&gt; Bool
+&lt; :: Report a -&gt; Report a -&gt; Bool
+$c&lt;= :: forall a. Ord a =&gt; Report a -&gt; Report a -&gt; Bool
+&lt;= :: Report a -&gt; Report a -&gt; Bool
+$c&gt; :: forall a. Ord a =&gt; Report a -&gt; Report a -&gt; Bool
+&gt; :: Report a -&gt; Report a -&gt; Bool
+$c&gt;= :: forall a. Ord a =&gt; Report a -&gt; Report a -&gt; Bool
+&gt;= :: Report a -&gt; Report a -&gt; Bool
+$cmax :: forall a. Ord a =&gt; Report a -&gt; Report a -&gt; Report a
+max :: Report a -&gt; Report a -&gt; Report a
+$cmin :: forall a. Ord a =&gt; Report a -&gt; Report a -&gt; Report a
+min :: Report a -&gt; Report a -&gt; Report a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679191633"><span id="local-6989586621679191639"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; Report a -&gt; Report b)
+-&gt; (forall a b. a -&gt; Report b -&gt; Report a) -&gt; Functor Report
+forall a b. a -&gt; Report b -&gt; Report a
+forall a b. (a -&gt; b) -&gt; Report a -&gt; Report b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall a b. (a -&gt; b) -&gt; Report a -&gt; Report b
+fmap :: forall a b. (a -&gt; b) -&gt; Report a -&gt; Report b
+$c&lt;$ :: forall a b. a -&gt; Report b -&gt; Report a
+&lt;$ :: forall a b. a -&gt; Report b -&gt; Report a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679191645"><span id="local-6989586621679191651"><span id="local-6989586621679191660"><span id="local-6989586621679191665"><span id="local-6989586621679191669"><span id="local-6989586621679191672"><span id="local-6989586621679191675"><span id="local-6989586621679191678"><span id="local-6989586621679191681"><span id="local-6989586621679191684"><span id="local-6989586621679191687"><span id="local-6989586621679191691"><span id="local-6989586621679191694"><span id="local-6989586621679191699"><span id="local-6989586621679191704"><span id="local-6989586621679191709"><span id="local-6989586621679191714"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; Report m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Report a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Report a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Report a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Report a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Report a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Report a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Report a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Report a -&gt; a)
+-&gt; (forall a. Report a -&gt; [a])
+-&gt; (forall a. Report a -&gt; Bool)
+-&gt; (forall a. Report a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; Report a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; Report a -&gt; a)
+-&gt; (forall a. Ord a =&gt; Report a -&gt; a)
+-&gt; (forall a. Num a =&gt; Report a -&gt; a)
+-&gt; (forall a. Num a =&gt; Report a -&gt; a)
+-&gt; Foldable Report
+forall a. Eq a =&gt; a -&gt; Report a -&gt; Bool
+forall a. Num a =&gt; Report a -&gt; a
+forall a. Ord a =&gt; Report a -&gt; a
+forall m. Monoid m =&gt; Report m -&gt; m
+forall a. Report a -&gt; Bool
+forall a. Report a -&gt; Int
+forall a. Report a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; Report a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Report a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Report a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Report a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+$cfold :: forall m. Monoid m =&gt; Report m -&gt; m
+fold :: forall m. Monoid m =&gt; Report m -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Report a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Report a -&gt; m
+$cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Report a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Report a -&gt; m
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Report a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Report a -&gt; b
+$cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Report a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Report a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Report a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Report a -&gt; b
+$cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Report a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Report a -&gt; b
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Report a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Report a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Report a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Report a -&gt; a
+$ctoList :: forall a. Report a -&gt; [a]
+toList :: forall a. Report a -&gt; [a]
+$cnull :: forall a. Report a -&gt; Bool
+null :: forall a. Report a -&gt; Bool
+$clength :: forall a. Report a -&gt; Int
+length :: forall a. Report a -&gt; Int
+$celem :: forall a. Eq a =&gt; a -&gt; Report a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; Report a -&gt; Bool
+$cmaximum :: forall a. Ord a =&gt; Report a -&gt; a
+maximum :: forall a. Ord a =&gt; Report a -&gt; a
+$cminimum :: forall a. Ord a =&gt; Report a -&gt; a
+minimum :: forall a. Ord a =&gt; Report a -&gt; a
+$csum :: forall a. Num a =&gt; Report a -&gt; a
+sum :: forall a. Num a =&gt; Report a -&gt; a
+$cproduct :: forall a. Num a =&gt; Report a -&gt; a
+product :: forall a. Num a =&gt; Report a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679191724"><span id="local-6989586621679191735"><span id="local-6989586621679191741"><span id="local-6989586621679191746"><span class="annot"><span class="annottext">Functor Report
+Foldable Report
+(Functor Report, Foldable Report) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; Report a -&gt; f (Report b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    Report (f a) -&gt; f (Report a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; Report a -&gt; m (Report b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    Report (m a) -&gt; m (Report a))
+-&gt; Traversable Report
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a. Monad m =&gt; Report (m a) -&gt; m (Report a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+Report (f a) -&gt; f (Report a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Report a -&gt; m (Report b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Report a -&gt; f (Report b)
+$ctraverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Report a -&gt; f (Report b)
+traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Report a -&gt; f (Report b)
+$csequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+Report (f a) -&gt; f (Report a)
+sequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+Report (f a) -&gt; f (Report a)
+$cmapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Report a -&gt; m (Report b)
+mapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; Report a -&gt; m (Report b)
+$csequence :: forall (m :: * -&gt; *) a. Monad m =&gt; Report (m a) -&gt; m (Report a)
+sequence :: forall (m :: * -&gt; *) a. Monad m =&gt; Report (m a) -&gt; m (Report a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="annot"><span class="hs-comment">-- | Get the results of a Report as a list.</span></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#Report"><span class="hs-identifier hs-type">Report</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679191368"><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679191368"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#Report"><span class="hs-identifier hs-type">Report</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679191368"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">pattern</span><span> </span><span id="Report"><span id="%24mReport"><span class="annot"><span class="annottext">$mReport :: forall {r} {a}. Report a -&gt; ([a] -&gt; r) -&gt; ((# #) -&gt; r) -&gt; r
+</span><a href="HGeometry.Measured.Report.html#Report"><span class="hs-identifier hs-var hs-var">Report</span></a></span></span></span><span> </span><span class="annot"><a href="#local-6989586621679191753"><span class="hs-identifier hs-type">xs</span></a></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">F.toList</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679191753"><span class="annot"><a href="#local-6989586621679191753"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span class="hs-pragma">{-# COMPLETE</span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#Report"><span class="hs-pragma hs-type">Report</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679191374"><span id="local-6989586621679191758"><span id="local-6989586621679191762"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#Report"><span class="hs-identifier hs-type">Report</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679191374"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#MkReport"><span class="hs-identifier hs-type">MkReport</span></a></span><span> </span><span id="local-6989586621679191769"><span class="annot"><span class="annottext">Maybe (Report1 a)
+</span><a href="#local-6989586621679191769"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679191770"><span class="annot"><span class="annottext">&lt;&gt; :: Report a -&gt; Report a -&gt; Report a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#MkReport"><span class="hs-identifier hs-type">MkReport</span></a></span><span> </span><span id="local-6989586621679191771"><span class="annot"><span class="annottext">Maybe (Report1 a)
+</span><a href="#local-6989586621679191771"><span class="hs-identifier hs-var">m'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (Report1 a) -&gt; Report a
+forall a. Maybe (Report1 a) -&gt; Report a
+</span><a href="HGeometry.Measured.Report.html#MkReport"><span class="hs-identifier hs-var">MkReport</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (Report1 a) -&gt; Report a) -&gt; Maybe (Report1 a) -&gt; Report a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe (Report1 a)
+</span><a href="#local-6989586621679191769"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Maybe (Report1 a)
+</span><a href="#local-6989586621679191771"><span class="hs-identifier hs-var">m'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-41"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe (Report1 a)
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe (Report1 a)
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Report1 a)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-42"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe (Report1 a)
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="annottext">Report1 a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Report1 a)
+</span><a href="#local-6989586621679191771"><span class="hs-identifier hs-var">m'</span></a></span><span>
+</span><span id="line-43"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="annottext">Report1 a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Maybe (Report1 a)
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Report1 a)
+</span><a href="#local-6989586621679191769"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-44"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679191772"><span class="annot"><span class="annottext">Report1 a
+</span><a href="#local-6989586621679191772"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679191773"><span class="annot"><span class="annottext">Report1 a
+</span><a href="#local-6989586621679191773"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Report1 a -&gt; Maybe (Report1 a)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Report1 a -&gt; Maybe (Report1 a)) -&gt; Report1 a -&gt; Maybe (Report1 a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Report1 a
+</span><a href="#local-6989586621679191772"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Report1 a -&gt; Report1 a -&gt; Report1 a
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">Report1 a
+</span><a href="#local-6989586621679191773"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679191382"><span id="local-6989586621679191778"><span id="local-6989586621679191782"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#Report"><span class="hs-identifier hs-type">Report</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679191382"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-47"></span><span>  </span><span id="local-6989586621679191785"><span class="annot"><span class="annottext">mempty :: Report a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (Report1 a) -&gt; Report a
+forall a. Maybe (Report1 a) -&gt; Report a
+</span><a href="HGeometry.Measured.Report.html#MkReport"><span class="hs-identifier hs-var">MkReport</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (Report1 a)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679191387"><span class="annot"><a href="HGeometry.Measured.Class.html#Measured"><span class="hs-identifier hs-type">Measured</span></a></span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#Report"><span class="hs-identifier hs-type">Report</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679191387"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-50"></span><span>  </span><span id="local-6989586621679191791"><span class="annot"><span class="annottext">measure :: a -&gt; Report a
+</span><a href="#local-6989586621679191791"><span class="hs-identifier hs-var hs-var hs-var hs-var">measure</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (Report1 a) -&gt; Report a
+forall a. Maybe (Report1 a) -&gt; Report a
+</span><a href="HGeometry.Measured.Report.html#MkReport"><span class="hs-identifier hs-var">MkReport</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (Report1 a) -&gt; Report a)
+-&gt; (a -&gt; Maybe (Report1 a)) -&gt; a -&gt; Report a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Report1 a -&gt; Maybe (Report1 a)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Report1 a -&gt; Maybe (Report1 a))
+-&gt; (a -&gt; Report1 a) -&gt; a -&gt; Maybe (Report1 a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Report1 a
+forall (f :: * -&gt; *) a. Measured f a =&gt; a -&gt; f a
+</span><a href="HGeometry.Measured.Class.html#measure"><span class="hs-identifier hs-var">measure</span></a></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679191396"><span class="annot"><a href="HGeometry.Measured.Class.html#CanInsert"><span class="hs-identifier hs-type">CanInsert</span></a></span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#Report"><span class="hs-identifier hs-type">Report</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679191396"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-53"></span><span>  </span><span id="local-6989586621679191802"><span class="annot"><span class="annottext">insertMeasure :: a -&gt; Report a -&gt; Report a
+</span><a href="#local-6989586621679191802"><span class="hs-identifier hs-var hs-var hs-var hs-var">insertMeasure</span></a></span></span><span> </span><span id="local-6989586621679191804"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679191804"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#MkReport"><span class="hs-identifier hs-type">MkReport</span></a></span><span> </span><span id="local-6989586621679191805"><span class="annot"><span class="annottext">Maybe (Report1 a)
+</span><a href="#local-6989586621679191805"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe (Report1 a)
+</span><a href="#local-6989586621679191805"><span class="hs-identifier hs-var">m</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-54"></span><span>                                   </span><span class="annot"><span class="annottext">Maybe (Report1 a)
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; Report a
+forall (f :: * -&gt; *) a. Measured f a =&gt; a -&gt; f a
+</span><a href="HGeometry.Measured.Class.html#measure"><span class="hs-identifier hs-var">measure</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679191804"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-55"></span><span>                                   </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679191806"><span class="annot"><span class="annottext">Report1 a
+</span><a href="#local-6989586621679191806"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Report1 a) -&gt; Report a
+forall a. Maybe (Report1 a) -&gt; Report a
+</span><a href="HGeometry.Measured.Report.html#MkReport"><span class="hs-identifier hs-var">MkReport</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (Report1 a) -&gt; Report a)
+-&gt; (Report1 a -&gt; Maybe (Report1 a)) -&gt; Report1 a -&gt; Report a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Report1 a -&gt; Maybe (Report1 a)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Report1 a -&gt; Report a) -&gt; Report1 a -&gt; Report a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Report1 a -&gt; Report1 a
+forall (f :: * -&gt; *) a. CanInsert f a =&gt; a -&gt; f a -&gt; f a
+</span><a href="HGeometry.Measured.Class.html#insertMeasure"><span class="hs-identifier hs-var">insertMeasure</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679191804"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Report1 a
+</span><a href="#local-6989586621679191806"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- | Type to represent reporting elements. The result is represented as a binary tree so</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- that we can support O(1) time and space (&lt;&gt;)</span><span>
+</span><span id="line-61"></span><span class="hs-keyword">newtype</span><span> </span><span id="Report1"><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-var">Report1</span></a></span></span><span> </span><span id="local-6989586621679191423"><span class="annot"><a href="#local-6989586621679191423"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Report1"><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-var">Report1</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Tree.Binary.Static.html#BinLeafTree"><span class="hs-identifier hs-type">BinLeafTree</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Const</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679191423"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679191423"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679191809"><span id="local-6989586621679191815"><span id="local-6989586621679191818"><span class="annot"><span class="annottext">Int -&gt; Report1 a -&gt; ShowS
+[Report1 a] -&gt; ShowS
+Report1 a -&gt; String
+(Int -&gt; Report1 a -&gt; ShowS)
+-&gt; (Report1 a -&gt; String)
+-&gt; ([Report1 a] -&gt; ShowS)
+-&gt; Show (Report1 a)
+forall a. Show a =&gt; Int -&gt; Report1 a -&gt; ShowS
+forall a. Show a =&gt; [Report1 a] -&gt; ShowS
+forall a. Show a =&gt; Report1 a -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: forall a. Show a =&gt; Int -&gt; Report1 a -&gt; ShowS
+showsPrec :: Int -&gt; Report1 a -&gt; ShowS
+$cshow :: forall a. Show a =&gt; Report1 a -&gt; String
+show :: Report1 a -&gt; String
+$cshowList :: forall a. Show a =&gt; [Report1 a] -&gt; ShowS
+showList :: [Report1 a] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679191825"><span id="local-6989586621679191831"><span class="annot"><span class="annottext">Report1 a -&gt; Report1 a -&gt; Bool
+(Report1 a -&gt; Report1 a -&gt; Bool)
+-&gt; (Report1 a -&gt; Report1 a -&gt; Bool) -&gt; Eq (Report1 a)
+forall a. Eq a =&gt; Report1 a -&gt; Report1 a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: forall a. Eq a =&gt; Report1 a -&gt; Report1 a -&gt; Bool
+== :: Report1 a -&gt; Report1 a -&gt; Bool
+$c/= :: forall a. Eq a =&gt; Report1 a -&gt; Report1 a -&gt; Bool
+/= :: Report1 a -&gt; Report1 a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679191844"><span id="local-6989586621679191850"><span id="local-6989586621679191855"><span id="local-6989586621679191860"><span id="local-6989586621679191865"><span id="local-6989586621679191870"><span id="local-6989586621679191875"><span class="annot"><span class="annottext">Eq (Report1 a)
+Eq (Report1 a) =&gt;
+(Report1 a -&gt; Report1 a -&gt; Ordering)
+-&gt; (Report1 a -&gt; Report1 a -&gt; Bool)
+-&gt; (Report1 a -&gt; Report1 a -&gt; Bool)
+-&gt; (Report1 a -&gt; Report1 a -&gt; Bool)
+-&gt; (Report1 a -&gt; Report1 a -&gt; Bool)
+-&gt; (Report1 a -&gt; Report1 a -&gt; Report1 a)
+-&gt; (Report1 a -&gt; Report1 a -&gt; Report1 a)
+-&gt; Ord (Report1 a)
+Report1 a -&gt; Report1 a -&gt; Bool
+Report1 a -&gt; Report1 a -&gt; Ordering
+Report1 a -&gt; Report1 a -&gt; Report1 a
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall a. Ord a =&gt; Eq (Report1 a)
+forall a. Ord a =&gt; Report1 a -&gt; Report1 a -&gt; Bool
+forall a. Ord a =&gt; Report1 a -&gt; Report1 a -&gt; Ordering
+forall a. Ord a =&gt; Report1 a -&gt; Report1 a -&gt; Report1 a
+$ccompare :: forall a. Ord a =&gt; Report1 a -&gt; Report1 a -&gt; Ordering
+compare :: Report1 a -&gt; Report1 a -&gt; Ordering
+$c&lt; :: forall a. Ord a =&gt; Report1 a -&gt; Report1 a -&gt; Bool
+&lt; :: Report1 a -&gt; Report1 a -&gt; Bool
+$c&lt;= :: forall a. Ord a =&gt; Report1 a -&gt; Report1 a -&gt; Bool
+&lt;= :: Report1 a -&gt; Report1 a -&gt; Bool
+$c&gt; :: forall a. Ord a =&gt; Report1 a -&gt; Report1 a -&gt; Bool
+&gt; :: Report1 a -&gt; Report1 a -&gt; Bool
+$c&gt;= :: forall a. Ord a =&gt; Report1 a -&gt; Report1 a -&gt; Bool
+&gt;= :: Report1 a -&gt; Report1 a -&gt; Bool
+$cmax :: forall a. Ord a =&gt; Report1 a -&gt; Report1 a -&gt; Report1 a
+max :: Report1 a -&gt; Report1 a -&gt; Report1 a
+$cmin :: forall a. Ord a =&gt; Report1 a -&gt; Report1 a -&gt; Report1 a
+min :: Report1 a -&gt; Report1 a -&gt; Report1 a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679191375"><span id="local-6989586621679191890"><span id="local-6989586621679191893"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-type">Report1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679191375"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-type">Report1</span></a></span><span> </span><span id="local-6989586621679191901"><span class="annot"><span class="annottext">BinLeafTree (Const () a) a
+</span><a href="#local-6989586621679191901"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679191902"><span class="annot"><span class="annottext">&lt;&gt; :: Report1 a -&gt; Report1 a -&gt; Report1 a
+</span><span class="hs-operator hs-var hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-type">Report1</span></a></span><span> </span><span id="local-6989586621679191903"><span class="annot"><span class="annottext">BinLeafTree (Const () a) a
+</span><a href="#local-6989586621679191903"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () a) a -&gt; Report1 a
+forall a. BinLeafTree (Const () a) a -&gt; Report1 a
+</span><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-var">Report1</span></a></span><span> </span><span class="annot"><span class="annottext">(BinLeafTree (Const () a) a -&gt; Report1 a)
+-&gt; BinLeafTree (Const () a) a -&gt; Report1 a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () a) a
+-&gt; Const () a
+-&gt; BinLeafTree (Const () a) a
+-&gt; BinLeafTree (Const () a) a
+forall v a.
+BinLeafTree v a -&gt; v -&gt; BinLeafTree v a -&gt; BinLeafTree v a
+</span><a href="HGeometry.Tree.Binary.Static.html#Node"><span class="hs-identifier hs-var">Node</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () a) a
+</span><a href="#local-6989586621679191901"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Const () a
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () a) a
+</span><a href="#local-6989586621679191903"><span class="hs-identifier hs-var">r</span></a></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679191907"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-type">Report1</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-68"></span><span>  </span><span id="local-6989586621679191912"><span class="annot"><span class="annottext">fmap :: forall a b. (a -&gt; b) -&gt; Report1 a -&gt; Report1 b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span id="local-6989586621679191913"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679191913"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-type">Report1</span></a></span><span> </span><span id="local-6989586621679191914"><span class="annot"><span class="annottext">BinLeafTree (Const () a) a
+</span><a href="#local-6989586621679191914"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () b) b -&gt; Report1 b
+forall a. BinLeafTree (Const () a) a -&gt; Report1 a
+</span><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-var">Report1</span></a></span><span> </span><span class="annot"><span class="annottext">(BinLeafTree (Const () b) b -&gt; Report1 b)
+-&gt; (BinLeafTree (Const () a) b -&gt; BinLeafTree (Const () b) b)
+-&gt; BinLeafTree (Const () a) b
+-&gt; Report1 b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () a) b -&gt; BinLeafTree (Const () b) b
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="annot"><span class="annottext">(BinLeafTree (Const () a) b -&gt; Report1 b)
+-&gt; BinLeafTree (Const () a) b -&gt; Report1 b
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; b)
+-&gt; BinLeafTree (Const () a) a -&gt; BinLeafTree (Const () a) b
+forall a b.
+(a -&gt; b)
+-&gt; BinLeafTree (Const () a) a -&gt; BinLeafTree (Const () a) b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679191913"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () a) a
+</span><a href="#local-6989586621679191914"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679191916"><span id="local-6989586621679191922"><span id="local-6989586621679191927"><span id="local-6989586621679191930"><span id="local-6989586621679191933"><span id="local-6989586621679191936"><span id="local-6989586621679191939"><span id="local-6989586621679191942"><span id="local-6989586621679191945"><span id="local-6989586621679191948"><span id="local-6989586621679191951"><span id="local-6989586621679191954"><span id="local-6989586621679191959"><span id="local-6989586621679191964"><span id="local-6989586621679191969"><span id="local-6989586621679191974"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-type">Report1</span></a></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-71"></span><span>  </span><span id="local-6989586621679191982"><span class="annot"><span class="annottext">foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Report1 a -&gt; m
+</span><a href="#local-6989586621679191982"><span class="hs-identifier hs-var hs-var hs-var hs-var">foldMap</span></a></span></span><span> </span><span id="local-6989586621679191984"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679191984"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-type">Report1</span></a></span><span> </span><span id="local-6989586621679191985"><span class="annot"><span class="annottext">BinLeafTree (Const () a) a
+</span><a href="#local-6989586621679191985"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; BinLeafTree (Const () a) a -&gt; m
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; BinLeafTree (Const () a) a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable t, Monoid m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679191984"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () a) a
+</span><a href="#local-6989586621679191985"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679191989"><span id="local-6989586621679191996"><span id="local-6989586621679192001"><span id="local-6989586621679192004"><span id="local-6989586621679192009"><span id="local-6989586621679192014"><span id="local-6989586621679192017"><span id="local-6989586621679192020"><span id="local-6989586621679192023"><span id="local-6989586621679192026"><span id="local-6989586621679192029"><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-type">Report1</span></a></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-74"></span><span>  </span><span id="local-6989586621679192036"><span class="annot"><span class="annottext">foldMap1 :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; Report1 a -&gt; m
+</span><a href="#local-6989586621679192036"><span class="hs-identifier hs-var hs-var hs-var hs-var">foldMap1</span></a></span></span><span> </span><span id="local-6989586621679192038"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679192038"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-type">Report1</span></a></span><span> </span><span id="local-6989586621679192039"><span class="annot"><span class="annottext">BinLeafTree (Const () a) a
+</span><a href="#local-6989586621679192039"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; BinLeafTree (Const () a) a -&gt; m
+forall m a.
+Semigroup m =&gt;
+(a -&gt; m) -&gt; BinLeafTree (Const () a) a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable1 t, Semigroup m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap1</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679192038"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () a) a
+</span><a href="#local-6989586621679192039"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679192046"><span id="local-6989586621679192051"><span id="local-6989586621679192056"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-type">Report1</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-77"></span><span>  </span><span id="local-6989586621679192067"><span class="annot"><span class="annottext">traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; Report1 a -&gt; f (Report1 b)
+</span><a href="#local-6989586621679192067"><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse</span></a></span></span><span> </span><span id="local-6989586621679192069"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679192069"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-type">Report1</span></a></span><span> </span><span id="local-6989586621679192070"><span class="annot"><span class="annottext">BinLeafTree (Const () a) a
+</span><a href="#local-6989586621679192070"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () b) b -&gt; Report1 b
+forall a. BinLeafTree (Const () a) a -&gt; Report1 a
+</span><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-var">Report1</span></a></span><span> </span><span class="annot"><span class="annottext">(BinLeafTree (Const () b) b -&gt; Report1 b)
+-&gt; (BinLeafTree (Const () a) b -&gt; BinLeafTree (Const () b) b)
+-&gt; BinLeafTree (Const () a) b
+-&gt; Report1 b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () a) b -&gt; BinLeafTree (Const () b) b
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="annot"><span class="annottext">(BinLeafTree (Const () a) b -&gt; Report1 b)
+-&gt; f (BinLeafTree (Const () a) b) -&gt; f (Report1 b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; f b)
+-&gt; BinLeafTree (Const () a) a -&gt; f (BinLeafTree (Const () a) b)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b)
+-&gt; BinLeafTree (Const () a) a -&gt; f (BinLeafTree (Const () a) b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679192069"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () a) a
+</span><a href="#local-6989586621679192070"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679192078"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.1-aa416192a766e4896bc49204f60523faac67d282183ad0e279d538496f49c17c/share/doc/html/src/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-type">Report1</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-80"></span><span>  </span><span id="local-6989586621679192092"><span class="annot"><span class="annottext">traverse1 :: forall (f :: * -&gt; *) a b.
+Apply f =&gt;
+(a -&gt; f b) -&gt; Report1 a -&gt; f (Report1 b)
+</span><a href="#local-6989586621679192092"><span class="hs-identifier hs-var hs-var hs-var hs-var">traverse1</span></a></span></span><span> </span><span id="local-6989586621679192094"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679192094"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-type">Report1</span></a></span><span> </span><span id="local-6989586621679192095"><span class="annot"><span class="annottext">BinLeafTree (Const () a) a
+</span><a href="#local-6989586621679192095"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () b) b -&gt; Report1 b
+forall a. BinLeafTree (Const () a) a -&gt; Report1 a
+</span><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-var">Report1</span></a></span><span> </span><span class="annot"><span class="annottext">(BinLeafTree (Const () b) b -&gt; Report1 b)
+-&gt; (BinLeafTree (Const () a) b -&gt; BinLeafTree (Const () b) b)
+-&gt; BinLeafTree (Const () a) b
+-&gt; Report1 b
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () a) b -&gt; BinLeafTree (Const () b) b
+forall a b. Coercible a b =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">coerce</span></span><span> </span><span class="annot"><span class="annottext">(BinLeafTree (Const () a) b -&gt; Report1 b)
+-&gt; f (BinLeafTree (Const () a) b) -&gt; f (Report1 b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; f b)
+-&gt; BinLeafTree (Const () a) a -&gt; f (BinLeafTree (Const () a) b)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable1 t, Apply f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Apply f =&gt;
+(a -&gt; f b)
+-&gt; BinLeafTree (Const () a) a -&gt; f (BinLeafTree (Const () a) b)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/semigroupoids-6.0.1-aa416192a766e4896bc49204f60523faac67d282183ad0e279d538496f49c17c/share/doc/html/src/Data.Semigroup.Traversable.Class.html#traverse1"><span class="hs-identifier hs-var">traverse1</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679192094"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () a) a
+</span><a href="#local-6989586621679192095"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679191388"><span class="annot"><a href="HGeometry.Measured.Class.html#Measured"><span class="hs-identifier hs-type">Measured</span></a></span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-type">Report1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679191388"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-84"></span><span>  </span><span id="local-6989586621679192097"><span class="annot"><span class="annottext">measure :: a -&gt; Report1 a
+</span><a href="HGeometry.Measured.Class.html#measure"><span class="hs-identifier hs-var hs-var hs-var hs-var">measure</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () a) a -&gt; Report1 a
+forall a. BinLeafTree (Const () a) a -&gt; Report1 a
+</span><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-var">Report1</span></a></span><span> </span><span class="annot"><span class="annottext">(BinLeafTree (Const () a) a -&gt; Report1 a)
+-&gt; (a -&gt; BinLeafTree (Const () a) a) -&gt; a -&gt; Report1 a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; BinLeafTree (Const () a) a
+forall v a. a -&gt; BinLeafTree v a
+</span><a href="HGeometry.Tree.Binary.Static.html#Leaf"><span class="hs-identifier hs-var">Leaf</span></a></span><span>
+</span><span id="line-85"></span><span>
+</span><span id="line-86"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679191397"><span class="annot"><a href="HGeometry.Measured.Class.html#CanInsert"><span class="hs-identifier hs-type">CanInsert</span></a></span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-type">Report1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679191397"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-87"></span><span>  </span><span id="local-6989586621679192104"><span class="annot"><span class="annottext">insertMeasure :: a -&gt; Report1 a -&gt; Report1 a
+</span><a href="HGeometry.Measured.Class.html#insertMeasure"><span class="hs-identifier hs-var hs-var hs-var hs-var">insertMeasure</span></a></span></span><span> </span><span id="local-6989586621679192105"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679192105"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-type">Report1</span></a></span><span> </span><span id="local-6989586621679192106"><span class="annot"><span class="annottext">BinLeafTree (Const () a) a
+</span><a href="#local-6989586621679192106"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () a) a -&gt; Report1 a
+forall a. BinLeafTree (Const () a) a -&gt; Report1 a
+</span><a href="HGeometry.Measured.Report.html#Report1"><span class="hs-identifier hs-var">Report1</span></a></span><span> </span><span class="annot"><span class="annottext">(BinLeafTree (Const () a) a -&gt; Report1 a)
+-&gt; BinLeafTree (Const () a) a -&gt; Report1 a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () a) a
+-&gt; Const () a
+-&gt; BinLeafTree (Const () a) a
+-&gt; BinLeafTree (Const () a) a
+forall v a.
+BinLeafTree v a -&gt; v -&gt; BinLeafTree v a -&gt; BinLeafTree v a
+</span><a href="HGeometry.Tree.Binary.Static.html#Node"><span class="hs-identifier hs-var">Node</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; BinLeafTree (Const () a) a
+forall v a. a -&gt; BinLeafTree v a
+</span><a href="HGeometry.Tree.Binary.Static.html#Leaf"><span class="hs-identifier hs-var">Leaf</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679192105"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Const () a
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="annot"><span class="annottext">BinLeafTree (Const () a) a
+</span><a href="#local-6989586621679192106"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- | Report is a type to be used for reporting/collecting all results of a query. The</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- result is directly represented as a list.</span><span>
+</span><span id="line-94"></span><span class="hs-keyword">newtype</span><span> </span><span id="ReportList"><span class="annot"><a href="HGeometry.Measured.Report.html#ReportList"><span class="hs-identifier hs-var">ReportList</span></a></span></span><span> </span><span id="local-6989586621679191543"><span class="annot"><a href="#local-6989586621679191543"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ReportList"><span class="annot"><a href="HGeometry.Measured.Report.html#ReportList"><span class="hs-identifier hs-var">ReportList</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679191543"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-95"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679192109"><span id="local-6989586621679192114"><span id="local-6989586621679192118"><span class="annot"><span class="annottext">Int -&gt; ReportList a -&gt; ShowS
+[ReportList a] -&gt; ShowS
+ReportList a -&gt; String
+(Int -&gt; ReportList a -&gt; ShowS)
+-&gt; (ReportList a -&gt; String)
+-&gt; ([ReportList a] -&gt; ShowS)
+-&gt; Show (ReportList a)
+forall a. Show a =&gt; Int -&gt; ReportList a -&gt; ShowS
+forall a. Show a =&gt; [ReportList a] -&gt; ShowS
+forall a. Show a =&gt; ReportList a -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: forall a. Show a =&gt; Int -&gt; ReportList a -&gt; ShowS
+showsPrec :: Int -&gt; ReportList a -&gt; ShowS
+$cshow :: forall a. Show a =&gt; ReportList a -&gt; String
+show :: ReportList a -&gt; String
+$cshowList :: forall a. Show a =&gt; [ReportList a] -&gt; ShowS
+showList :: [ReportList a] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679192122"><span id="local-6989586621679192127"><span class="annot"><span class="annottext">ReportList a -&gt; ReportList a -&gt; Bool
+(ReportList a -&gt; ReportList a -&gt; Bool)
+-&gt; (ReportList a -&gt; ReportList a -&gt; Bool) -&gt; Eq (ReportList a)
+forall a. Eq a =&gt; ReportList a -&gt; ReportList a -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: forall a. Eq a =&gt; ReportList a -&gt; ReportList a -&gt; Bool
+== :: ReportList a -&gt; ReportList a -&gt; Bool
+$c/= :: forall a. Eq a =&gt; ReportList a -&gt; ReportList a -&gt; Bool
+/= :: ReportList a -&gt; ReportList a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679192136"><span id="local-6989586621679192141"><span id="local-6989586621679192145"><span id="local-6989586621679192149"><span id="local-6989586621679192153"><span id="local-6989586621679192157"><span id="local-6989586621679192161"><span class="annot"><span class="annottext">Eq (ReportList a)
+Eq (ReportList a) =&gt;
+(ReportList a -&gt; ReportList a -&gt; Ordering)
+-&gt; (ReportList a -&gt; ReportList a -&gt; Bool)
+-&gt; (ReportList a -&gt; ReportList a -&gt; Bool)
+-&gt; (ReportList a -&gt; ReportList a -&gt; Bool)
+-&gt; (ReportList a -&gt; ReportList a -&gt; Bool)
+-&gt; (ReportList a -&gt; ReportList a -&gt; ReportList a)
+-&gt; (ReportList a -&gt; ReportList a -&gt; ReportList a)
+-&gt; Ord (ReportList a)
+ReportList a -&gt; ReportList a -&gt; Bool
+ReportList a -&gt; ReportList a -&gt; Ordering
+ReportList a -&gt; ReportList a -&gt; ReportList a
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall a. Ord a =&gt; Eq (ReportList a)
+forall a. Ord a =&gt; ReportList a -&gt; ReportList a -&gt; Bool
+forall a. Ord a =&gt; ReportList a -&gt; ReportList a -&gt; Ordering
+forall a. Ord a =&gt; ReportList a -&gt; ReportList a -&gt; ReportList a
+$ccompare :: forall a. Ord a =&gt; ReportList a -&gt; ReportList a -&gt; Ordering
+compare :: ReportList a -&gt; ReportList a -&gt; Ordering
+$c&lt; :: forall a. Ord a =&gt; ReportList a -&gt; ReportList a -&gt; Bool
+&lt; :: ReportList a -&gt; ReportList a -&gt; Bool
+$c&lt;= :: forall a. Ord a =&gt; ReportList a -&gt; ReportList a -&gt; Bool
+&lt;= :: ReportList a -&gt; ReportList a -&gt; Bool
+$c&gt; :: forall a. Ord a =&gt; ReportList a -&gt; ReportList a -&gt; Bool
+&gt; :: ReportList a -&gt; ReportList a -&gt; Bool
+$c&gt;= :: forall a. Ord a =&gt; ReportList a -&gt; ReportList a -&gt; Bool
+&gt;= :: ReportList a -&gt; ReportList a -&gt; Bool
+$cmax :: forall a. Ord a =&gt; ReportList a -&gt; ReportList a -&gt; ReportList a
+max :: ReportList a -&gt; ReportList a -&gt; ReportList a
+$cmin :: forall a. Ord a =&gt; ReportList a -&gt; ReportList a -&gt; ReportList a
+min :: ReportList a -&gt; ReportList a -&gt; ReportList a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679192166"><span id="local-6989586621679192171"><span id="local-6989586621679192177"><span class="annot"><span class="annottext">NonEmpty (ReportList a) -&gt; ReportList a
+ReportList a -&gt; ReportList a -&gt; ReportList a
+(ReportList a -&gt; ReportList a -&gt; ReportList a)
+-&gt; (NonEmpty (ReportList a) -&gt; ReportList a)
+-&gt; (forall b. Integral b =&gt; b -&gt; ReportList a -&gt; ReportList a)
+-&gt; Semigroup (ReportList a)
+forall b. Integral b =&gt; b -&gt; ReportList a -&gt; ReportList a
+forall a. NonEmpty (ReportList a) -&gt; ReportList a
+forall a. ReportList a -&gt; ReportList a -&gt; ReportList a
+forall a.
+(a -&gt; a -&gt; a)
+-&gt; (NonEmpty a -&gt; a)
+-&gt; (forall b. Integral b =&gt; b -&gt; a -&gt; a)
+-&gt; Semigroup a
+forall a b. Integral b =&gt; b -&gt; ReportList a -&gt; ReportList a
+$c&lt;&gt; :: forall a. ReportList a -&gt; ReportList a -&gt; ReportList a
+&lt;&gt; :: ReportList a -&gt; ReportList a -&gt; ReportList a
+$csconcat :: forall a. NonEmpty (ReportList a) -&gt; ReportList a
+sconcat :: NonEmpty (ReportList a) -&gt; ReportList a
+$cstimes :: forall a b. Integral b =&gt; b -&gt; ReportList a -&gt; ReportList a
+stimes :: forall b. Integral b =&gt; b -&gt; ReportList a -&gt; ReportList a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Semigroup</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679192186"><span id="local-6989586621679192191"><span id="local-6989586621679192195"><span class="annot"><span class="annottext">Semigroup (ReportList a)
+ReportList a
+Semigroup (ReportList a) =&gt;
+ReportList a
+-&gt; (ReportList a -&gt; ReportList a -&gt; ReportList a)
+-&gt; ([ReportList a] -&gt; ReportList a)
+-&gt; Monoid (ReportList a)
+[ReportList a] -&gt; ReportList a
+ReportList a -&gt; ReportList a -&gt; ReportList a
+forall a. Semigroup (ReportList a)
+forall a. ReportList a
+forall a.
+Semigroup a =&gt;
+a -&gt; (a -&gt; a -&gt; a) -&gt; ([a] -&gt; a) -&gt; Monoid a
+forall a. [ReportList a] -&gt; ReportList a
+forall a. ReportList a -&gt; ReportList a -&gt; ReportList a
+$cmempty :: forall a. ReportList a
+mempty :: ReportList a
+$cmappend :: forall a. ReportList a -&gt; ReportList a -&gt; ReportList a
+mappend :: ReportList a -&gt; ReportList a -&gt; ReportList a
+$cmconcat :: forall a. [ReportList a] -&gt; ReportList a
+mconcat :: [ReportList a] -&gt; ReportList a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Monoid</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679192200"><span id="local-6989586621679192205"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; ReportList a -&gt; ReportList b)
+-&gt; (forall a b. a -&gt; ReportList b -&gt; ReportList a)
+-&gt; Functor ReportList
+forall a b. a -&gt; ReportList b -&gt; ReportList a
+forall a b. (a -&gt; b) -&gt; ReportList a -&gt; ReportList b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall a b. (a -&gt; b) -&gt; ReportList a -&gt; ReportList b
+fmap :: forall a b. (a -&gt; b) -&gt; ReportList a -&gt; ReportList b
+$c&lt;$ :: forall a b. a -&gt; ReportList b -&gt; ReportList a
+&lt;$ :: forall a b. a -&gt; ReportList b -&gt; ReportList a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679192212"><span id="local-6989586621679192221"><span id="local-6989586621679192229"><span id="local-6989586621679192235"><span id="local-6989586621679192239"><span id="local-6989586621679192243"><span id="local-6989586621679192247"><span id="local-6989586621679192251"><span id="local-6989586621679192255"><span id="local-6989586621679192259"><span id="local-6989586621679192263"><span id="local-6989586621679192267"><span id="local-6989586621679192273"><span id="local-6989586621679192281"><span id="local-6989586621679192289"><span id="local-6989586621679192297"><span id="local-6989586621679192305"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; ReportList m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; ReportList a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; ReportList a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; ReportList a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; ReportList a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; ReportList a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; ReportList a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; ReportList a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; ReportList a -&gt; a)
+-&gt; (forall a. ReportList a -&gt; [a])
+-&gt; (forall a. ReportList a -&gt; Bool)
+-&gt; (forall a. ReportList a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; ReportList a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; ReportList a -&gt; a)
+-&gt; (forall a. Ord a =&gt; ReportList a -&gt; a)
+-&gt; (forall a. Num a =&gt; ReportList a -&gt; a)
+-&gt; (forall a. Num a =&gt; ReportList a -&gt; a)
+-&gt; Foldable ReportList
+forall a. Eq a =&gt; a -&gt; ReportList a -&gt; Bool
+forall a. Num a =&gt; ReportList a -&gt; a
+forall a. Ord a =&gt; ReportList a -&gt; a
+forall m. Monoid m =&gt; ReportList m -&gt; m
+forall a. ReportList a -&gt; Bool
+forall a. ReportList a -&gt; Int
+forall a. ReportList a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; ReportList a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; ReportList a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; ReportList a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; ReportList a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+$cfold :: forall m. Monoid m =&gt; ReportList m -&gt; m
+fold :: forall m. Monoid m =&gt; ReportList m -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; ReportList a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; ReportList a -&gt; m
+$cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; ReportList a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; ReportList a -&gt; m
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; ReportList a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; ReportList a -&gt; b
+$cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; ReportList a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; ReportList a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; ReportList a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; ReportList a -&gt; b
+$cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; ReportList a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; ReportList a -&gt; b
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; ReportList a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; ReportList a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; ReportList a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; ReportList a -&gt; a
+$ctoList :: forall a. ReportList a -&gt; [a]
+toList :: forall a. ReportList a -&gt; [a]
+$cnull :: forall a. ReportList a -&gt; Bool
+null :: forall a. ReportList a -&gt; Bool
+$clength :: forall a. ReportList a -&gt; Int
+length :: forall a. ReportList a -&gt; Int
+$celem :: forall a. Eq a =&gt; a -&gt; ReportList a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; ReportList a -&gt; Bool
+$cmaximum :: forall a. Ord a =&gt; ReportList a -&gt; a
+maximum :: forall a. Ord a =&gt; ReportList a -&gt; a
+$cminimum :: forall a. Ord a =&gt; ReportList a -&gt; a
+minimum :: forall a. Ord a =&gt; ReportList a -&gt; a
+$csum :: forall a. Num a =&gt; ReportList a -&gt; a
+sum :: forall a. Num a =&gt; ReportList a -&gt; a
+$cproduct :: forall a. Num a =&gt; ReportList a -&gt; a
+product :: forall a. Num a =&gt; ReportList a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679192316"><span id="local-6989586621679192324"><span id="local-6989586621679192330"><span id="local-6989586621679192335"><span class="annot"><span class="annottext">Functor ReportList
+Foldable ReportList
+(Functor ReportList, Foldable ReportList) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; ReportList a -&gt; f (ReportList b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    ReportList (f a) -&gt; f (ReportList a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; ReportList a -&gt; m (ReportList b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    ReportList (m a) -&gt; m (ReportList a))
+-&gt; Traversable ReportList
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+ReportList (m a) -&gt; m (ReportList a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+ReportList (f a) -&gt; f (ReportList a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; ReportList a -&gt; m (ReportList b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; ReportList a -&gt; f (ReportList b)
+$ctraverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; ReportList a -&gt; f (ReportList b)
+traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; ReportList a -&gt; f (ReportList b)
+$csequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+ReportList (f a) -&gt; f (ReportList a)
+sequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+ReportList (f a) -&gt; f (ReportList a)
+$cmapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; ReportList a -&gt; m (ReportList b)
+mapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; ReportList a -&gt; m (ReportList b)
+$csequence :: forall (m :: * -&gt; *) a.
+Monad m =&gt;
+ReportList (m a) -&gt; m (ReportList a)
+sequence :: forall (m :: * -&gt; *) a.
+Monad m =&gt;
+ReportList (m a) -&gt; m (ReportList a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679191542"><span class="annot"><a href="HGeometry.Measured.Class.html#Measured"><span class="hs-identifier hs-type">Measured</span></a></span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#ReportList"><span class="hs-identifier hs-type">ReportList</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679191542"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-98"></span><span>  </span><span id="local-6989586621679192341"><span class="annot"><span class="annottext">measure :: a -&gt; ReportList a
+</span><a href="HGeometry.Measured.Class.html#measure"><span class="hs-identifier hs-var hs-var hs-var hs-var">measure</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; ReportList a
+forall a. [a] -&gt; ReportList a
+</span><a href="HGeometry.Measured.Report.html#ReportList"><span class="hs-identifier hs-var">ReportList</span></a></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; ReportList a) -&gt; (a -&gt; [a]) -&gt; a -&gt; ReportList a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span>
+</span><span id="line-100"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679191545"><span class="annot"><a href="HGeometry.Measured.Class.html#CanInsert"><span class="hs-identifier hs-type">CanInsert</span></a></span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#ReportList"><span class="hs-identifier hs-type">ReportList</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679191545"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-101"></span><span>  </span><span id="local-6989586621679192346"><span class="annot"><span class="annottext">insertMeasure :: a -&gt; ReportList a -&gt; ReportList a
+</span><a href="HGeometry.Measured.Class.html#insertMeasure"><span class="hs-identifier hs-var hs-var hs-var hs-var">insertMeasure</span></a></span></span><span> </span><span id="local-6989586621679192347"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679192347"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#ReportList"><span class="hs-identifier hs-type">ReportList</span></a></span><span> </span><span id="local-6989586621679192348"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679192348"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; ReportList a
+forall a. [a] -&gt; ReportList a
+</span><a href="HGeometry.Measured.Report.html#ReportList"><span class="hs-identifier hs-var">ReportList</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679192347"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679192348"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679191550"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679191550"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Measured.Class.html#CanDelete"><span class="hs-identifier hs-type">CanDelete</span></a></span><span> </span><span class="annot"><a href="HGeometry.Measured.Report.html#ReportList"><span class="hs-identifier hs-type">ReportList</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679191550"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-104"></span><span>  </span><span class="hs-comment">-- | Removes the first occurance of the element</span><span>
+</span><span id="line-105"></span><span>  </span><span id="local-6989586621679192356"><span class="annot"><span class="annottext">deleteMeasure :: a -&gt; ReportList a -&gt; Maybe (ReportList a)
+</span><a href="#local-6989586621679192356"><span class="hs-identifier hs-var hs-var hs-var hs-var">deleteMeasure</span></a></span></span><span> </span><span id="local-6989586621679192358"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679192358"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Measured.Report.html#ReportList"><span class="hs-identifier hs-type">ReportList</span></a></span><span> </span><span id="local-6989586621679192359"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679192359"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReportList a -&gt; Maybe (ReportList a)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(ReportList a -&gt; Maybe (ReportList a))
+-&gt; ([a] -&gt; ReportList a) -&gt; [a] -&gt; Maybe (ReportList a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; ReportList a
+forall a. [a] -&gt; ReportList a
+</span><a href="HGeometry.Measured.Report.html#ReportList"><span class="hs-identifier hs-var">ReportList</span></a></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; Maybe (ReportList a)) -&gt; [a] -&gt; Maybe (ReportList a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+forall a. Eq a =&gt; a -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">List.delete</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679192358"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679192359"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-106"></span></pre></body></html>

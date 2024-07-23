@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Line.NonVertical.Class</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- A class representing non-vertical lines.</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.Line.NonVertical.Class</span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Line.NonVertical.Class.html#NVLine2_"><span class="hs-identifier">NVLine2_</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="HGeometry.Line.NonVertical.Class.html#NVLine2_"><span class="hs-identifier">NVLine2_</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Line.NonVertical.Class.html#slope"><span class="hs-identifier">slope</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Line.NonVertical.Class.html#intercept"><span class="hs-identifier">intercept</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Class.html"><span class="hs-identifier">HGeometry.HyperPlane.Class</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Line.Class.html"><span class="hs-identifier">HGeometry.Line.Class</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-comment">-- $setup</span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- &gt;&gt;&gt; import HGeometry.Line.LineEQ</span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="annot"><span class="hs-comment">-- | Typeclass modelling Non-vertical lines</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">type</span><span> </span><span id="NVLine2_"><span class="annot"><a href="HGeometry.Line.NonVertical.Class.html#NVLine2_"><span class="hs-identifier hs-var">NVLine2_</span></a></span></span><span> </span><span id="local-6989586621679331462"><span class="annot"><a href="#local-6989586621679331462"><span class="hs-identifier hs-type">line</span></a></span></span><span> </span><span id="local-6989586621679331463"><span class="annot"><a href="#local-6989586621679331463"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.Class.html#Line_"><span class="hs-identifier hs-type">Line_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679331462"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679331463"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Class.html#NonVerticalHyperPlane_"><span class="hs-identifier hs-type">NonVerticalHyperPlane_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679331462"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679331463"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="annot"><span class="hs-comment">-- | Match on a non-vertical line</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="HGeometry.Line.NonVertical.Class.html#NVLine2_"><span class="hs-identifier hs-type">NVLine2_</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679331390"><span id="local-6989586621679331391"><span class="annot"><a href="HGeometry.HyperPlane.Class.html#NonVerticalHyperPlane_"><span class="hs-identifier hs-type">NonVerticalHyperPlane_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679331390"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679331391"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679331391"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679331391"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679331390"><span class="hs-identifier hs-type">line</span></a></span></span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">pattern</span><span> </span><span id="NVLine2_"><span id="%24mNVLine2_"><span class="annot"><span class="annottext">$mNVLine2_ :: forall {r} {line} {r}.
+NonVerticalHyperPlane_ line 2 r =&gt;
+line -&gt; (r -&gt; r -&gt; r) -&gt; ((# #) -&gt; r) -&gt; r
+</span><a href="HGeometry.Line.NonVertical.Class.html#NVLine2_"><span class="hs-identifier hs-var hs-var">NVLine2_</span></a></span></span></span><span> </span><span class="annot"><a href="#local-6989586621679331466"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679331467"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#view"><span class="hs-identifier hs-type">view</span></a></span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Class.html#hyperPlaneCoefficients"><span class="hs-identifier hs-type">hyperPlaneCoefficients</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector2</span></span><span> </span><span id="local-6989586621679331466"><span class="annot"><a href="#local-6989586621679331466"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679331467"><span class="annot"><a href="#local-6989586621679331467"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span class="hs-pragma">{-# COMPLETE</span><span> </span><span class="annot"><a href="HGeometry.Line.NonVertical.Class.html#NVLine2_"><span class="hs-pragma hs-type">NVLine2_</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- | Lens to access the slope of a line</span><span>
+</span><span id="line-37"></span><span class="hs-comment">--</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- &gt;&gt;&gt; (LineEQ 10 20) ^. slope</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- 10</span><span>
+</span><span id="line-40"></span><span id="local-6989586621679331434"><span id="local-6989586621679331435"><span class="annot"><a href="HGeometry.Line.NonVertical.Class.html#slope"><span class="hs-identifier hs-type">slope</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Class.html#NonVerticalHyperPlane_"><span class="hs-identifier hs-type">NonVerticalHyperPlane_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679331434"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679331435"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679331434"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679331435"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-41"></span><span id="slope"><span class="annot"><span class="annottext">slope :: forall line r. NonVerticalHyperPlane_ line 2 r =&gt; Lens' line r
+</span><a href="HGeometry.Line.NonVertical.Class.html#slope"><span class="hs-identifier hs-var hs-var">slope</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Vector 2 r -&gt; f (Vector 2 r)) -&gt; line -&gt; f line
+forall hyperPlane (d :: Nat) r.
+NonVerticalHyperPlane_ hyperPlane d r =&gt;
+Lens' hyperPlane (Vector d r)
+Lens' line (Vector 2 r)
+</span><a href="HGeometry.HyperPlane.Class.html#hyperPlaneCoefficients"><span class="hs-identifier hs-var">hyperPlaneCoefficients</span></a></span><span> </span><span class="annot"><span class="annottext">((Vector 2 r -&gt; f (Vector 2 r)) -&gt; line -&gt; f line)
+-&gt; ((r -&gt; f r) -&gt; Vector 2 r -&gt; f (Vector 2 r))
+-&gt; (r -&gt; f r)
+-&gt; line
+-&gt; f line
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(r -&gt; f r) -&gt; Vector 2 r -&gt; f (Vector 2 r)
+forall vector (d :: Nat) r.
+(Vector_ vector d r, 1 &lt;= d) =&gt;
+IndexedLens' Int vector r
+IndexedLens' Int (Vector 2 r) r
+</span><span class="hs-identifier hs-var">xComponent</span></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- | Lens to access the intercept (i.e. the value at which it</span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- intersects the y-axis) of a line.</span><span>
+</span><span id="line-45"></span><span class="hs-comment">--</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- &gt;&gt;&gt; (LineEQ 10 20) ^. intercept</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- 20</span><span>
+</span><span id="line-48"></span><span id="local-6989586621679331606"><span id="local-6989586621679331607"><span class="annot"><a href="HGeometry.Line.NonVertical.Class.html#intercept"><span class="hs-identifier hs-type">intercept</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Class.html#NonVerticalHyperPlane_"><span class="hs-identifier hs-type">NonVerticalHyperPlane_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679331606"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679331607"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679331606"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679331607"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-49"></span><span id="intercept"><span class="annot"><span class="annottext">intercept :: forall line r. NonVerticalHyperPlane_ line 2 r =&gt; Lens' line r
+</span><a href="HGeometry.Line.NonVertical.Class.html#intercept"><span class="hs-identifier hs-var hs-var">intercept</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Vector 2 r -&gt; f (Vector 2 r)) -&gt; line -&gt; f line
+forall hyperPlane (d :: Nat) r.
+NonVerticalHyperPlane_ hyperPlane d r =&gt;
+Lens' hyperPlane (Vector d r)
+Lens' line (Vector 2 r)
+</span><a href="HGeometry.HyperPlane.Class.html#hyperPlaneCoefficients"><span class="hs-identifier hs-var">hyperPlaneCoefficients</span></a></span><span> </span><span class="annot"><span class="annottext">((Vector 2 r -&gt; f (Vector 2 r)) -&gt; line -&gt; f line)
+-&gt; ((r -&gt; f r) -&gt; Vector 2 r -&gt; f (Vector 2 r))
+-&gt; (r -&gt; f r)
+-&gt; line
+-&gt; f line
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(r -&gt; f r) -&gt; Vector 2 r -&gt; f (Vector 2 r)
+forall vector (d :: Nat) r.
+(Vector_ vector d r, 2 &lt;= d) =&gt;
+IndexedLens' Int vector r
+IndexedLens' Int (Vector 2 r) r
+</span><span class="hs-identifier hs-var">yComponent</span></span><span>
+</span><span id="line-50"></span></pre></body></html>

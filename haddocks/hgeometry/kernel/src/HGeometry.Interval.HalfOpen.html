@@ -1,0 +1,377 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Interval.HalfOpen</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Half-Open Intervals</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.Interval.HalfOpen</span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Interval.HalfOpen.html#HalfOpenInterval"><span class="hs-identifier">HalfOpenInterval</span></a></span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Interval.HalfOpen.html#HalfOpenInterval"><span class="hs-identifier">HalfOpenInterval</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-comment">-- import           Data.Foldable1</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Interval.Class.html"><span class="hs-identifier">HGeometry.Interval.Class</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- import           HGeometry.Interval.EndPoint</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Interval.Internal.html"><span class="hs-identifier">HGeometry.Interval.Internal</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- import HGeometry.Measured.Class</span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Intersection.html"><span class="hs-identifier">HGeometry.Intersection</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- import qualified Data.List.NonEmpty as NonEmpty</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- import           Data.List.NonEmpty (NonEmpty(..))</span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="annot"><span class="hs-comment">-- | An interval that is open on the left and closed on the right</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">data</span><span> </span><span id="HalfOpenInterval"><span class="annot"><a href="HGeometry.Interval.HalfOpen.html#HalfOpenInterval"><span class="hs-identifier hs-var">HalfOpenInterval</span></a></span></span><span> </span><span id="local-6989586621679327432"><span class="annot"><a href="#local-6989586621679327432"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="HalfOpenInterval"><span class="annot"><a href="HGeometry.Interval.HalfOpen.html#HalfOpenInterval"><span class="hs-identifier hs-var">HalfOpenInterval</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_left"><span class="annot"><span class="annottext">forall r. HalfOpenInterval r -&gt; EndPoint 'Open r
+</span><a href="HGeometry.Interval.HalfOpen.html#_left"><span class="hs-identifier hs-var hs-var">_left</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Interval.EndPoint.html#EndPoint"><span class="hs-identifier hs-type">EndPoint</span></a></span><span> </span><span class="annot"><a href="HGeometry.Interval.EndPoint.html#Open"><span class="hs-identifier hs-type">Open</span></a></span><span>   </span><span class="annot"><a href="#local-6989586621679327432"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>                                           </span><span class="hs-special">,</span><span> </span><span id="_right"><span class="annot"><span class="annottext">forall r. HalfOpenInterval r -&gt; EndPoint 'Closed r
+</span><a href="HGeometry.Interval.HalfOpen.html#_right"><span class="hs-identifier hs-var hs-var">_right</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Interval.EndPoint.html#EndPoint"><span class="hs-identifier hs-type">EndPoint</span></a></span><span> </span><span class="annot"><a href="HGeometry.Interval.EndPoint.html#Closed"><span class="hs-identifier hs-type">Closed</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327432"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>                                           </span><span class="hs-special">}</span><span>
+</span><span id="line-35"></span><span>                        </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679327589"><span id="local-6989586621679327597"><span id="local-6989586621679327601"><span class="annot"><span class="annottext">Int -&gt; HalfOpenInterval r -&gt; ShowS
+[HalfOpenInterval r] -&gt; ShowS
+HalfOpenInterval r -&gt; String
+(Int -&gt; HalfOpenInterval r -&gt; ShowS)
+-&gt; (HalfOpenInterval r -&gt; String)
+-&gt; ([HalfOpenInterval r] -&gt; ShowS)
+-&gt; Show (HalfOpenInterval r)
+forall r. Show r =&gt; Int -&gt; HalfOpenInterval r -&gt; ShowS
+forall r. Show r =&gt; [HalfOpenInterval r] -&gt; ShowS
+forall r. Show r =&gt; HalfOpenInterval r -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: forall r. Show r =&gt; Int -&gt; HalfOpenInterval r -&gt; ShowS
+showsPrec :: Int -&gt; HalfOpenInterval r -&gt; ShowS
+$cshow :: forall r. Show r =&gt; HalfOpenInterval r -&gt; String
+show :: HalfOpenInterval r -&gt; String
+$cshowList :: forall r. Show r =&gt; [HalfOpenInterval r] -&gt; ShowS
+showList :: [HalfOpenInterval r] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327606"><span id="local-6989586621679327611"><span class="annot"><span class="annottext">HalfOpenInterval r -&gt; HalfOpenInterval r -&gt; Bool
+(HalfOpenInterval r -&gt; HalfOpenInterval r -&gt; Bool)
+-&gt; (HalfOpenInterval r -&gt; HalfOpenInterval r -&gt; Bool)
+-&gt; Eq (HalfOpenInterval r)
+forall r. Eq r =&gt; HalfOpenInterval r -&gt; HalfOpenInterval r -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: forall r. Eq r =&gt; HalfOpenInterval r -&gt; HalfOpenInterval r -&gt; Bool
+== :: HalfOpenInterval r -&gt; HalfOpenInterval r -&gt; Bool
+$c/= :: forall r. Eq r =&gt; HalfOpenInterval r -&gt; HalfOpenInterval r -&gt; Bool
+/= :: HalfOpenInterval r -&gt; HalfOpenInterval r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327616"><span id="local-6989586621679327621"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; HalfOpenInterval a -&gt; HalfOpenInterval b)
+-&gt; (forall a b. a -&gt; HalfOpenInterval b -&gt; HalfOpenInterval a)
+-&gt; Functor HalfOpenInterval
+forall a b. a -&gt; HalfOpenInterval b -&gt; HalfOpenInterval a
+forall a b. (a -&gt; b) -&gt; HalfOpenInterval a -&gt; HalfOpenInterval b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall a b. (a -&gt; b) -&gt; HalfOpenInterval a -&gt; HalfOpenInterval b
+fmap :: forall a b. (a -&gt; b) -&gt; HalfOpenInterval a -&gt; HalfOpenInterval b
+$c&lt;$ :: forall a b. a -&gt; HalfOpenInterval b -&gt; HalfOpenInterval a
+&lt;$ :: forall a b. a -&gt; HalfOpenInterval b -&gt; HalfOpenInterval a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327627"><span id="local-6989586621679327633"><span id="local-6989586621679327642"><span id="local-6989586621679327647"><span id="local-6989586621679327651"><span id="local-6989586621679327654"><span id="local-6989586621679327657"><span id="local-6989586621679327660"><span id="local-6989586621679327663"><span id="local-6989586621679327666"><span id="local-6989586621679327669"><span id="local-6989586621679327673"><span id="local-6989586621679327676"><span id="local-6989586621679327681"><span id="local-6989586621679327686"><span id="local-6989586621679327691"><span id="local-6989586621679327696"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; HalfOpenInterval m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; HalfOpenInterval a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; HalfOpenInterval a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; HalfOpenInterval a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; HalfOpenInterval a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; HalfOpenInterval a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; HalfOpenInterval a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; HalfOpenInterval a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; HalfOpenInterval a -&gt; a)
+-&gt; (forall a. HalfOpenInterval a -&gt; [a])
+-&gt; (forall a. HalfOpenInterval a -&gt; Bool)
+-&gt; (forall a. HalfOpenInterval a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; HalfOpenInterval a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; HalfOpenInterval a -&gt; a)
+-&gt; (forall a. Ord a =&gt; HalfOpenInterval a -&gt; a)
+-&gt; (forall a. Num a =&gt; HalfOpenInterval a -&gt; a)
+-&gt; (forall a. Num a =&gt; HalfOpenInterval a -&gt; a)
+-&gt; Foldable HalfOpenInterval
+forall a. Eq a =&gt; a -&gt; HalfOpenInterval a -&gt; Bool
+forall a. Num a =&gt; HalfOpenInterval a -&gt; a
+forall a. Ord a =&gt; HalfOpenInterval a -&gt; a
+forall m. Monoid m =&gt; HalfOpenInterval m -&gt; m
+forall a. HalfOpenInterval a -&gt; Bool
+forall a. HalfOpenInterval a -&gt; Int
+forall a. HalfOpenInterval a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; HalfOpenInterval a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; HalfOpenInterval a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; HalfOpenInterval a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; HalfOpenInterval a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+$cfold :: forall m. Monoid m =&gt; HalfOpenInterval m -&gt; m
+fold :: forall m. Monoid m =&gt; HalfOpenInterval m -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; HalfOpenInterval a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; HalfOpenInterval a -&gt; m
+$cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; HalfOpenInterval a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; HalfOpenInterval a -&gt; m
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; HalfOpenInterval a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; HalfOpenInterval a -&gt; b
+$cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; HalfOpenInterval a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; HalfOpenInterval a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; HalfOpenInterval a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; HalfOpenInterval a -&gt; b
+$cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; HalfOpenInterval a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; HalfOpenInterval a -&gt; b
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; HalfOpenInterval a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; HalfOpenInterval a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; HalfOpenInterval a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; HalfOpenInterval a -&gt; a
+$ctoList :: forall a. HalfOpenInterval a -&gt; [a]
+toList :: forall a. HalfOpenInterval a -&gt; [a]
+$cnull :: forall a. HalfOpenInterval a -&gt; Bool
+null :: forall a. HalfOpenInterval a -&gt; Bool
+$clength :: forall a. HalfOpenInterval a -&gt; Int
+length :: forall a. HalfOpenInterval a -&gt; Int
+$celem :: forall a. Eq a =&gt; a -&gt; HalfOpenInterval a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; HalfOpenInterval a -&gt; Bool
+$cmaximum :: forall a. Ord a =&gt; HalfOpenInterval a -&gt; a
+maximum :: forall a. Ord a =&gt; HalfOpenInterval a -&gt; a
+$cminimum :: forall a. Ord a =&gt; HalfOpenInterval a -&gt; a
+minimum :: forall a. Ord a =&gt; HalfOpenInterval a -&gt; a
+$csum :: forall a. Num a =&gt; HalfOpenInterval a -&gt; a
+sum :: forall a. Num a =&gt; HalfOpenInterval a -&gt; a
+$cproduct :: forall a. Num a =&gt; HalfOpenInterval a -&gt; a
+product :: forall a. Num a =&gt; HalfOpenInterval a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679327706"><span id="local-6989586621679327715"><span id="local-6989586621679327721"><span id="local-6989586621679327726"><span class="annot"><span class="annottext">Functor HalfOpenInterval
+Foldable HalfOpenInterval
+(Functor HalfOpenInterval, Foldable HalfOpenInterval) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; HalfOpenInterval a -&gt; f (HalfOpenInterval b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    HalfOpenInterval (f a) -&gt; f (HalfOpenInterval a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; HalfOpenInterval a -&gt; m (HalfOpenInterval b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    HalfOpenInterval (m a) -&gt; m (HalfOpenInterval a))
+-&gt; Traversable HalfOpenInterval
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+HalfOpenInterval (m a) -&gt; m (HalfOpenInterval a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+HalfOpenInterval (f a) -&gt; f (HalfOpenInterval a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; HalfOpenInterval a -&gt; m (HalfOpenInterval b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; HalfOpenInterval a -&gt; f (HalfOpenInterval b)
+$ctraverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; HalfOpenInterval a -&gt; f (HalfOpenInterval b)
+traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; HalfOpenInterval a -&gt; f (HalfOpenInterval b)
+$csequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+HalfOpenInterval (f a) -&gt; f (HalfOpenInterval a)
+sequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+HalfOpenInterval (f a) -&gt; f (HalfOpenInterval a)
+$cmapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; HalfOpenInterval a -&gt; m (HalfOpenInterval b)
+mapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; HalfOpenInterval a -&gt; m (HalfOpenInterval b)
+$csequence :: forall (m :: * -&gt; *) a.
+Monad m =&gt;
+HalfOpenInterval (m a) -&gt; m (HalfOpenInterval a)
+sequence :: forall (m :: * -&gt; *) a.
+Monad m =&gt;
+HalfOpenInterval (m a) -&gt; m (HalfOpenInterval a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span> </span><span id="local-6989586621679327731"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Interval.HalfOpen.html#HalfOpenInterval"><span class="hs-identifier hs-type">HalfOpenInterval</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327731"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679327731"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="StartPointOf"><span class="annot"><a href="HGeometry.Interval.Class.html#StartPointOf"><span class="hs-identifier hs-var">StartPointOf</span></a></span></span><span> </span><span id="local-6989586621679327732"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Interval.HalfOpen.html#HalfOpenInterval"><span class="hs-identifier hs-type">HalfOpenInterval</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327732"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.Interval.EndPoint.html#EndPoint"><span class="hs-identifier hs-type">EndPoint</span></a></span><span> </span><span class="annot"><a href="HGeometry.Interval.EndPoint.html#Open"><span class="hs-identifier hs-type">Open</span></a></span><span>   </span><span class="annot"><a href="#local-6989586621679327732"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="EndPointOf"><span class="annot"><a href="HGeometry.Interval.Class.html#EndPointOf"><span class="hs-identifier hs-var">EndPointOf</span></a></span></span><span>  </span><span id="local-6989586621679327733"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Interval.HalfOpen.html#HalfOpenInterval"><span class="hs-identifier hs-type">HalfOpenInterval</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327733"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.Interval.EndPoint.html#EndPoint"><span class="hs-identifier hs-type">EndPoint</span></a></span><span> </span><span class="annot"><a href="HGeometry.Interval.EndPoint.html#Closed"><span class="hs-identifier hs-type">Closed</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327733"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679327502"><span class="annot"><a href="HGeometry.Interval.Class.html#HasStart"><span class="hs-identifier hs-type">HasStart</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Interval.HalfOpen.html#HalfOpenInterval"><span class="hs-identifier hs-type">HalfOpenInterval</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327502"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679327502"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-43"></span><span>  </span><span id="local-6989586621679327744"><span class="annot"><span class="annottext">start :: Lens' (HalfOpenInterval r) r
+</span><a href="#local-6989586621679327744"><span class="hs-identifier hs-var hs-var hs-var hs-var">start</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(EndPoint 'Open r -&gt; f (EndPoint 'Open r))
+-&gt; HalfOpenInterval r -&gt; f (HalfOpenInterval r)
+forall seg p. HasStartPoint seg p =&gt; Lens' seg p
+Lens' (HalfOpenInterval r) (EndPoint 'Open r)
+</span><a href="HGeometry.Interval.Class.html#startPoint"><span class="hs-identifier hs-var">startPoint</span></a></span><span class="annot"><span class="annottext">((EndPoint 'Open r -&gt; f (EndPoint 'Open r))
+ -&gt; HalfOpenInterval r -&gt; f (HalfOpenInterval r))
+-&gt; ((r -&gt; f r) -&gt; EndPoint 'Open r -&gt; f (EndPoint 'Open r))
+-&gt; (r -&gt; f r)
+-&gt; HalfOpenInterval r
+-&gt; f (HalfOpenInterval r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; f r) -&gt; EndPoint 'Open r -&gt; f (EndPoint 'Open r)
+(IxValue (EndPoint 'Open r) -&gt; f (IxValue (EndPoint 'Open r)))
+-&gt; EndPoint 'Open r -&gt; f (EndPoint 'Open r)
+forall endPoint endPoint'.
+IsEndPoint endPoint endPoint' =&gt;
+Lens endPoint endPoint' (IxValue endPoint) (IxValue endPoint')
+Lens
+  (EndPoint 'Open r)
+  (EndPoint 'Open r)
+  (IxValue (EndPoint 'Open r))
+  (IxValue (EndPoint 'Open r))
+</span><a href="HGeometry.Interval.EndPoint.html#_endPoint"><span class="hs-identifier hs-var">_endPoint</span></a></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679327523"><span class="annot"><a href="HGeometry.Interval.Class.html#HasEnd"><span class="hs-identifier hs-type">HasEnd</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Interval.HalfOpen.html#HalfOpenInterval"><span class="hs-identifier hs-type">HalfOpenInterval</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327523"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679327523"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-46"></span><span>  </span><span id="local-6989586621679327758"><span class="annot"><span class="annottext">end :: Lens' (HalfOpenInterval r) r
+</span><a href="#local-6989586621679327758"><span class="hs-identifier hs-var hs-var hs-var hs-var">end</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(EndPoint 'Closed r -&gt; f (EndPoint 'Closed r))
+-&gt; HalfOpenInterval r -&gt; f (HalfOpenInterval r)
+forall seg p. HasEndPoint seg p =&gt; Lens' seg p
+Lens' (HalfOpenInterval r) (EndPoint 'Closed r)
+</span><a href="HGeometry.Interval.Class.html#endPoint"><span class="hs-identifier hs-var">endPoint</span></a></span><span class="annot"><span class="annottext">((EndPoint 'Closed r -&gt; f (EndPoint 'Closed r))
+ -&gt; HalfOpenInterval r -&gt; f (HalfOpenInterval r))
+-&gt; ((r -&gt; f r) -&gt; EndPoint 'Closed r -&gt; f (EndPoint 'Closed r))
+-&gt; (r -&gt; f r)
+-&gt; HalfOpenInterval r
+-&gt; f (HalfOpenInterval r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; f r) -&gt; EndPoint 'Closed r -&gt; f (EndPoint 'Closed r)
+(IxValue (EndPoint 'Closed r) -&gt; f (IxValue (EndPoint 'Closed r)))
+-&gt; EndPoint 'Closed r -&gt; f (EndPoint 'Closed r)
+forall endPoint endPoint'.
+IsEndPoint endPoint endPoint' =&gt;
+Lens endPoint endPoint' (IxValue endPoint) (IxValue endPoint')
+Lens
+  (EndPoint 'Closed r)
+  (EndPoint 'Closed r)
+  (IxValue (EndPoint 'Closed r))
+  (IxValue (EndPoint 'Closed r))
+</span><a href="HGeometry.Interval.EndPoint.html#_endPoint"><span class="hs-identifier hs-var">_endPoint</span></a></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679327509"><span class="annot"><a href="HGeometry.Interval.Class.html#HasStartPoint"><span class="hs-identifier hs-type">HasStartPoint</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Interval.HalfOpen.html#HalfOpenInterval"><span class="hs-identifier hs-type">HalfOpenInterval</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327509"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Interval.EndPoint.html#EndPoint"><span class="hs-identifier hs-type">EndPoint</span></a></span><span> </span><span class="annot"><a href="HGeometry.Interval.EndPoint.html#Open"><span class="hs-identifier hs-type">Open</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327509"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-49"></span><span>  </span><span id="local-6989586621679327765"><span class="annot"><span class="annottext">startPoint :: Lens' (HalfOpenInterval r) (EndPoint 'Open r)
+</span><a href="HGeometry.Interval.Class.html#startPoint"><span class="hs-identifier hs-var hs-var hs-var hs-var">startPoint</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(HalfOpenInterval r -&gt; EndPoint 'Open r)
+-&gt; (HalfOpenInterval r -&gt; EndPoint 'Open r -&gt; HalfOpenInterval r)
+-&gt; Lens' (HalfOpenInterval r) (EndPoint 'Open r)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">HalfOpenInterval r -&gt; EndPoint 'Open r
+forall r. HalfOpenInterval r -&gt; EndPoint 'Open r
+</span><a href="HGeometry.Interval.HalfOpen.html#_left"><span class="hs-identifier hs-var">_left</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679327767"><span class="annot"><span class="annottext">HalfOpenInterval r
+</span><a href="#local-6989586621679327767"><span class="hs-identifier hs-var">ai</span></a></span></span><span> </span><span id="local-6989586621679327768"><span class="annot"><span class="annottext">EndPoint 'Open r
+</span><a href="#local-6989586621679327768"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HalfOpenInterval r
+</span><a href="#local-6989586621679327767"><span class="hs-identifier hs-var">ai</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="HGeometry.Interval.HalfOpen.html#_left"><span class="hs-identifier hs-var">_left</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679327768"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679327526"><span class="annot"><a href="HGeometry.Interval.Class.html#HasEndPoint"><span class="hs-identifier hs-type">HasEndPoint</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Interval.HalfOpen.html#HalfOpenInterval"><span class="hs-identifier hs-type">HalfOpenInterval</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327526"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Interval.EndPoint.html#EndPoint"><span class="hs-identifier hs-type">EndPoint</span></a></span><span> </span><span class="annot"><a href="HGeometry.Interval.EndPoint.html#Closed"><span class="hs-identifier hs-type">Closed</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327526"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-52"></span><span>  </span><span id="local-6989586621679327773"><span class="annot"><span class="annottext">endPoint :: Lens' (HalfOpenInterval r) (EndPoint 'Closed r)
+</span><a href="HGeometry.Interval.Class.html#endPoint"><span class="hs-identifier hs-var hs-var hs-var hs-var">endPoint</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(HalfOpenInterval r -&gt; EndPoint 'Closed r)
+-&gt; (HalfOpenInterval r -&gt; EndPoint 'Closed r -&gt; HalfOpenInterval r)
+-&gt; Lens' (HalfOpenInterval r) (EndPoint 'Closed r)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">HalfOpenInterval r -&gt; EndPoint 'Closed r
+forall r. HalfOpenInterval r -&gt; EndPoint 'Closed r
+</span><a href="HGeometry.Interval.HalfOpen.html#_right"><span class="hs-identifier hs-var">_right</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679327774"><span class="annot"><span class="annottext">HalfOpenInterval r
+</span><a href="#local-6989586621679327774"><span class="hs-identifier hs-var">ai</span></a></span></span><span> </span><span id="local-6989586621679327775"><span class="annot"><span class="annottext">EndPoint 'Closed r
+</span><a href="#local-6989586621679327775"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HalfOpenInterval r
+</span><a href="#local-6989586621679327774"><span class="hs-identifier hs-var">ai</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="HGeometry.Interval.HalfOpen.html#_right"><span class="hs-identifier hs-var">_right</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679327775"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679327549"><span class="annot"><a href="HGeometry.Interval.Class.html#IntervalLike_"><span class="hs-identifier hs-type">IntervalLike_</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Interval.HalfOpen.html#HalfOpenInterval"><span class="hs-identifier hs-type">HalfOpenInterval</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327549"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679327549"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679327555"><span class="annot"><a href="HGeometry.Interval.Class.html#Interval_"><span class="hs-identifier hs-type">Interval_</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Interval.HalfOpen.html#HalfOpenInterval"><span class="hs-identifier hs-type">HalfOpenInterval</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327555"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679327555"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679327560"><span id="local-6989586621679327813"><span class="annot"><a href="HGeometry.Interval.Class.html#ConstructableInterval_"><span class="hs-identifier hs-type">ConstructableInterval_</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Interval.HalfOpen.html#HalfOpenInterval"><span class="hs-identifier hs-type">HalfOpenInterval</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327560"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679327560"><span class="hs-identifier hs-type">r</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-59"></span><span>  </span><span id="local-6989586621679327822"><span class="annot"><span class="annottext">mkInterval :: StartPointOf (HalfOpenInterval r)
+-&gt; EndPointOf (HalfOpenInterval r) -&gt; HalfOpenInterval r
+</span><a href="#local-6989586621679327822"><span class="hs-identifier hs-var hs-var hs-var hs-var">mkInterval</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EndPoint 'Open r -&gt; EndPoint 'Closed r -&gt; HalfOpenInterval r
+StartPointOf (HalfOpenInterval r)
+-&gt; EndPointOf (HalfOpenInterval r) -&gt; HalfOpenInterval r
+forall r.
+EndPoint 'Open r -&gt; EndPoint 'Closed r -&gt; HalfOpenInterval r
+</span><a href="HGeometry.Interval.HalfOpen.html#HalfOpenInterval"><span class="hs-identifier hs-var">HalfOpenInterval</span></a></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679327566"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679327566"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><a href="#local-6989586621679327566"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#HasIntersectionWith"><span class="hs-operator hs-type">`HasIntersectionWith`</span></a></span><span> </span><span class="annot"><a href="HGeometry.Interval.HalfOpen.html#HalfOpenInterval"><span class="hs-identifier hs-type">HalfOpenInterval</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327566"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point1</span></span><span> </span><span id="local-6989586621679327831"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679327831"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679327832"><span class="annot"><span class="annottext">intersects :: Point 1 r -&gt; HalfOpenInterval r -&gt; Bool
+</span><a href="#local-6989586621679327832"><span class="hs-operator hs-var hs-var hs-var hs-var">`intersects`</span></a></span></span><span> </span><span id="local-6989586621679327834"><span class="annot"><span class="annottext">HalfOpenInterval r
+</span><a href="#local-6989586621679327834"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679327831"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; HalfOpenInterval r -&gt; Bool
+forall interval r.
+(Ord r, Interval_ interval r) =&gt;
+r -&gt; interval -&gt; Bool
+</span><a href="HGeometry.Interval.Class.html#stabsInterval"><span class="hs-operator hs-var">`stabsInterval`</span></a></span><span> </span><span class="annot"><span class="annottext">HalfOpenInterval r
+</span><a href="#local-6989586621679327834"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679327571"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679327571"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Interval.Internal.html#ClosedInterval"><span class="hs-identifier hs-type">ClosedInterval</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327571"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#HasIntersectionWith"><span class="hs-operator hs-type">`HasIntersectionWith`</span></a></span><span> </span><span class="annot"><a href="HGeometry.Interval.HalfOpen.html#HalfOpenInterval"><span class="hs-identifier hs-type">HalfOpenInterval</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679327571"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-65"></span><span>  </span><span id="local-6989586621679327855"><span class="annot"><span class="annottext">ClosedInterval r
+</span><a href="#local-6989586621679327855"><span class="hs-identifier hs-var">closedInt</span></a></span></span><span> </span><span id="local-6989586621679327856"><span class="annot"><span class="annottext">intersects :: ClosedInterval r -&gt; HalfOpenInterval r -&gt; Bool
+</span><a href="HGeometry.Intersection.html#intersects"><span class="hs-operator hs-var hs-var hs-var hs-var">`intersects`</span></a></span></span><span> </span><span id="local-6989586621679327857"><span class="annot"><span class="annottext">HalfOpenInterval r
+</span><a href="#local-6989586621679327857"><span class="hs-identifier hs-var">hoInt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ClosedInterval r
+</span><a href="#local-6989586621679327855"><span class="hs-identifier hs-var">closedInt</span></a></span><span class="annot"><span class="annottext">ClosedInterval r -&gt; Getting r (ClosedInterval r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (ClosedInterval r) r
+forall seg p. HasStart seg p =&gt; Lens' seg p
+Lens' (ClosedInterval r) r
+</span><a href="HGeometry.Interval.Class.html#start"><span class="hs-identifier hs-var">start</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; HalfOpenInterval r -&gt; Ordering
+forall r interval.
+(Ord r, Interval_ interval r) =&gt;
+r -&gt; interval -&gt; Ordering
+</span><a href="HGeometry.Interval.Class.html#compareInterval"><span class="hs-operator hs-var">`compareInterval`</span></a></span><span> </span><span class="annot"><span class="annottext">HalfOpenInterval r
+</span><a href="#local-6989586621679327857"><span class="hs-identifier hs-var">hoInt</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-66"></span><span>    </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ClosedInterval r
+</span><a href="#local-6989586621679327855"><span class="hs-identifier hs-var">closedInt</span></a></span><span class="annot"><span class="annottext">ClosedInterval r -&gt; Getting r (ClosedInterval r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (ClosedInterval r) r
+forall seg p. HasEnd seg p =&gt; Lens' seg p
+Lens' (ClosedInterval r) r
+</span><a href="HGeometry.Interval.Class.html#end"><span class="hs-identifier hs-var">end</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; HalfOpenInterval r -&gt; Ordering
+forall r interval.
+(Ord r, Interval_ interval r) =&gt;
+r -&gt; interval -&gt; Ordering
+</span><a href="HGeometry.Interval.Class.html#compareInterval"><span class="hs-operator hs-var">`compareInterval`</span></a></span><span> </span><span class="annot"><span class="annottext">HalfOpenInterval r
+</span><a href="#local-6989586621679327857"><span class="hs-identifier hs-var">hoInt</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-67"></span><span>            </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-68"></span><span>            </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-69"></span><span>            </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-70"></span><span>    </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-71"></span><span>    </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span> </span><span class="hs-comment">-- by invariant, closedInt^.end &gt; closedInt.start, so they don't intersect</span><span>
+</span><span id="line-72"></span></pre></body></html>

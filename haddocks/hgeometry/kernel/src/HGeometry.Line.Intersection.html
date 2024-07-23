@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  HGeometry.Line.Intersection</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Helper types for implementing line intersections</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.Line.Intersection</span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Line.Intersection.html#LineLineIntersection"><span class="hs-identifier">LineLineIntersection</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Line.Intersection.html#LineLineIntersectionG"><span class="hs-identifier">LineLineIntersectionG</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NumType</span></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="annot"><span class="hs-comment">-- | Line x Line intersections are either just points or lines.</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">data</span><span> </span><span id="LineLineIntersectionG"><span class="annot"><a href="HGeometry.Line.Intersection.html#LineLineIntersectionG"><span class="hs-identifier hs-var">LineLineIntersectionG</span></a></span></span><span> </span><span id="local-6989586621679331264"><span class="annot"><a href="#local-6989586621679331264"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679331265"><span class="annot"><a href="#local-6989586621679331265"><span class="hs-identifier hs-type">line</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Line_x_Line_Point"><span class="annot"><a href="HGeometry.Line.Intersection.html#Line_x_Line_Point"><span class="hs-identifier hs-var">Line_x_Line_Point</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679331264"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span>                                  </span><span class="hs-glyph">|</span><span> </span><span id="Line_x_Line_Line"><span class="annot"><a href="HGeometry.Line.Intersection.html#Line_x_Line_Line"><span class="hs-identifier hs-var">Line_x_Line_Line</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679331265"><span class="hs-identifier hs-type">line</span></a></span><span>
+</span><span id="line-24"></span><span>                                  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679331271"><span id="local-6989586621679331282"><span id="local-6989586621679331286"><span class="annot"><span class="annottext">Int -&gt; LineLineIntersectionG r line -&gt; ShowS
+[LineLineIntersectionG r line] -&gt; ShowS
+LineLineIntersectionG r line -&gt; String
+(Int -&gt; LineLineIntersectionG r line -&gt; ShowS)
+-&gt; (LineLineIntersectionG r line -&gt; String)
+-&gt; ([LineLineIntersectionG r line] -&gt; ShowS)
+-&gt; Show (LineLineIntersectionG r line)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall r line.
+(Show r, Show line) =&gt;
+Int -&gt; LineLineIntersectionG r line -&gt; ShowS
+forall r line.
+(Show r, Show line) =&gt;
+[LineLineIntersectionG r line] -&gt; ShowS
+forall r line.
+(Show r, Show line) =&gt;
+LineLineIntersectionG r line -&gt; String
+$cshowsPrec :: forall r line.
+(Show r, Show line) =&gt;
+Int -&gt; LineLineIntersectionG r line -&gt; ShowS
+showsPrec :: Int -&gt; LineLineIntersectionG r line -&gt; ShowS
+$cshow :: forall r line.
+(Show r, Show line) =&gt;
+LineLineIntersectionG r line -&gt; String
+show :: LineLineIntersectionG r line -&gt; String
+$cshowList :: forall r line.
+(Show r, Show line) =&gt;
+[LineLineIntersectionG r line] -&gt; ShowS
+showList :: [LineLineIntersectionG r line] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679331320"><span id="local-6989586621679331326"><span class="annot"><span class="annottext">LineLineIntersectionG r line
+-&gt; LineLineIntersectionG r line -&gt; Bool
+(LineLineIntersectionG r line
+ -&gt; LineLineIntersectionG r line -&gt; Bool)
+-&gt; (LineLineIntersectionG r line
+    -&gt; LineLineIntersectionG r line -&gt; Bool)
+-&gt; Eq (LineLineIntersectionG r line)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall r line.
+(Eq r, Eq line) =&gt;
+LineLineIntersectionG r line
+-&gt; LineLineIntersectionG r line -&gt; Bool
+$c== :: forall r line.
+(Eq r, Eq line) =&gt;
+LineLineIntersectionG r line
+-&gt; LineLineIntersectionG r line -&gt; Bool
+== :: LineLineIntersectionG r line
+-&gt; LineLineIntersectionG r line -&gt; Bool
+$c/= :: forall r line.
+(Eq r, Eq line) =&gt;
+LineLineIntersectionG r line
+-&gt; LineLineIntersectionG r line -&gt; Bool
+/= :: LineLineIntersectionG r line
+-&gt; LineLineIntersectionG r line -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679331334"><span id="local-6989586621679331338"><span id="local-6989586621679331341"><span id="local-6989586621679331356"><span class="annot"><span class="annottext">ReadPrec [LineLineIntersectionG r line]
+ReadPrec (LineLineIntersectionG r line)
+Int -&gt; ReadS (LineLineIntersectionG r line)
+ReadS [LineLineIntersectionG r line]
+(Int -&gt; ReadS (LineLineIntersectionG r line))
+-&gt; ReadS [LineLineIntersectionG r line]
+-&gt; ReadPrec (LineLineIntersectionG r line)
+-&gt; ReadPrec [LineLineIntersectionG r line]
+-&gt; Read (LineLineIntersectionG r line)
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+forall r line.
+(Read r, Read line) =&gt;
+ReadPrec [LineLineIntersectionG r line]
+forall r line.
+(Read r, Read line) =&gt;
+ReadPrec (LineLineIntersectionG r line)
+forall r line.
+(Read r, Read line) =&gt;
+Int -&gt; ReadS (LineLineIntersectionG r line)
+forall r line.
+(Read r, Read line) =&gt;
+ReadS [LineLineIntersectionG r line]
+$creadsPrec :: forall r line.
+(Read r, Read line) =&gt;
+Int -&gt; ReadS (LineLineIntersectionG r line)
+readsPrec :: Int -&gt; ReadS (LineLineIntersectionG r line)
+$creadList :: forall r line.
+(Read r, Read line) =&gt;
+ReadS [LineLineIntersectionG r line]
+readList :: ReadS [LineLineIntersectionG r line]
+$creadPrec :: forall r line.
+(Read r, Read line) =&gt;
+ReadPrec (LineLineIntersectionG r line)
+readPrec :: ReadPrec (LineLineIntersectionG r line)
+$creadListPrec :: forall r line.
+(Read r, Read line) =&gt;
+ReadPrec [LineLineIntersectionG r line]
+readListPrec :: ReadPrec [LineLineIntersectionG r line]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679331384"><span id="local-6989586621679331386"><span class="annot"><span class="annottext">(forall a b.
+ (a -&gt; b) -&gt; LineLineIntersectionG r a -&gt; LineLineIntersectionG r b)
+-&gt; (forall a b.
+    a -&gt; LineLineIntersectionG r b -&gt; LineLineIntersectionG r a)
+-&gt; Functor (LineLineIntersectionG r)
+forall a b.
+a -&gt; LineLineIntersectionG r b -&gt; LineLineIntersectionG r a
+forall a b.
+(a -&gt; b) -&gt; LineLineIntersectionG r a -&gt; LineLineIntersectionG r b
+forall r a b.
+a -&gt; LineLineIntersectionG r b -&gt; LineLineIntersectionG r a
+forall r a b.
+(a -&gt; b) -&gt; LineLineIntersectionG r a -&gt; LineLineIntersectionG r b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall r a b.
+(a -&gt; b) -&gt; LineLineIntersectionG r a -&gt; LineLineIntersectionG r b
+fmap :: forall a b.
+(a -&gt; b) -&gt; LineLineIntersectionG r a -&gt; LineLineIntersectionG r b
+$c&lt;$ :: forall r a b.
+a -&gt; LineLineIntersectionG r b -&gt; LineLineIntersectionG r a
+&lt;$ :: forall a b.
+a -&gt; LineLineIntersectionG r b -&gt; LineLineIntersectionG r a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">type</span><span> </span><span id="LineLineIntersection"><span class="annot"><a href="HGeometry.Line.Intersection.html#LineLineIntersection"><span class="hs-identifier hs-var">LineLineIntersection</span></a></span></span><span> </span><span id="local-6989586621679331389"><span class="annot"><a href="#local-6989586621679331389"><span class="hs-identifier hs-type">line</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.Line.Intersection.html#LineLineIntersectionG"><span class="hs-identifier hs-type">LineLineIntersectionG</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679331389"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679331389"><span class="hs-identifier hs-type">line</span></a></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- deriving instance (Show (Point 2 (NumType line)), Show line) =&gt; Show (LineLineIntersection line)</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- deriving instance (Eq (Point 2 (NumType line)), Eq line)     =&gt; Eq (LineLineIntersection line)</span><span>
+</span><span id="line-31"></span></pre></body></html>

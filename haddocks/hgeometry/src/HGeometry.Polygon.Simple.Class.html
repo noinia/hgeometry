@@ -1,0 +1,287 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Polygon.Simple.Class</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- A Simple polygon and some basic functions to interact with them.</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.Polygon.Simple.Class</span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#SimplePolygon_"><span class="hs-identifier">SimplePolygon_</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#signedArea"><span class="hs-identifier">signedArea</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#area2X"><span class="hs-identifier">area2X</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/data-default-class-0.1.2.0-b3568ccfdd470a357be3e0e18d023e35685c1382e092a5f0ebe48a31602b14b2/share/doc/html/src/Data.Default.Class.html"><span class="hs-identifier">Data.Default.Class</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Kind</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Constraint</span></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html"><span class="hs-identifier">HGeometry.Ext</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point.Class</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Polygon.Class.html"><span class="hs-identifier">HGeometry.Polygon.Class</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-comment">-- | A class representing simple polygons; i.e. polygons without holes</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- (and without self intersections in the boundary.)</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">class</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Class.html#Polygon_"><span class="hs-identifier hs-type">Polygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447251"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447252"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447253"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-31"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447251"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-32"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679447252"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679447253"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-33"></span><span>      </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span id="SimplePolygon_"><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#SimplePolygon_"><span class="hs-identifier hs-var">SimplePolygon_</span></a></span></span><span> </span><span id="local-6989586621679447251"><span class="annot"><a href="#local-6989586621679447251"><span class="hs-identifier hs-type">simplePolygon</span></a></span></span><span> </span><span id="local-6989586621679447252"><span class="annot"><a href="#local-6989586621679447252"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span id="local-6989586621679447253"><span class="annot"><a href="#local-6989586621679447253"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-comment">-- | Given the vertices of the polygon, in CCW order, constructs the</span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-comment">-- polygon. The vertices are numbered in the order they are given.</span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-comment">-- pre: - the vertices are given in CCW order</span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-comment">--      - at least 3 vertices, not all colinear</span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-comment">--      - no repeated vertices</span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-comment">--      - no self-inttersections</span><span>
+</span><span id="line-42"></span><span>  </span><span id="uncheckedFromCCWPoints"><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#uncheckedFromCCWPoints"><span class="hs-identifier hs-type">uncheckedFromCCWPoints</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679447364"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679447364"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679447364"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447252"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679447251"><span class="hs-identifier hs-type">simplePolygon</span></a></span></span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-comment">-- | Constraints that allow us to construct a simple polygon</span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="ConstructableSimplePolygon"><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#ConstructableSimplePolygon"><span class="hs-identifier hs-var">ConstructableSimplePolygon</span></a></span></span><span> </span><span id="local-6989586621679447251"><span class="annot"><a href="#local-6989586621679447251"><span class="hs-identifier hs-type">simplePolygon</span></a></span></span><span> </span><span id="local-6989586621679447252"><span class="annot"><a href="#local-6989586621679447252"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span id="local-6989586621679447253"><span class="annot"><a href="#local-6989586621679447253"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Constraint</span></span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="ConstructableSimplePolygon"><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#ConstructableSimplePolygon"><span class="hs-identifier hs-var">ConstructableSimplePolygon</span></a></span></span><span> </span><span id="local-6989586621679447406"><span id="local-6989586621679447407"><span id="local-6989586621679447408"><span class="annot"><a href="#local-6989586621679447406"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447407"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447408"><span class="hs-identifier hs-type">r</span></a></span></span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679447408"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679447408"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-comment">-- | Given the vertices of the polygon, constructs the polygon. This</span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-comment">-- function will make sure the polygon is a valid simple polygon,</span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-comment">-- i.e. it has at least three vertices, is given in CCW order, no</span><span>
+</span><span id="line-51"></span><span>  </span><span class="hs-comment">-- repeated vertices etc.</span><span>
+</span><span id="line-52"></span><span>  </span><span id="fromPoints"><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#fromPoints"><span class="hs-identifier hs-type">fromPoints</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679447365"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679447365"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-53"></span><span>                </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#ConstructableSimplePolygon"><span class="hs-identifier hs-type">ConstructableSimplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447251"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447252"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447253"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-54"></span><span>                </span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679447365"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447252"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679447251"><span class="hs-identifier hs-type">simplePolygon</span></a></span></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-comment">-- | Compute the centroid of a simple polygon.</span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-comment">--</span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-comment">-- running time: \(O(n)\)</span><span>
+</span><span id="line-60"></span><span>  </span><span id="centroid"><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#centroid"><span class="hs-identifier hs-type">centroid</span></a></span></span><span>      </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679447258"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679447253"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ConstructablePoint_</span></span><span> </span><span class="annot"><a href="#local-6989586621679447258"><span class="hs-identifier hs-type">point'</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679447253"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679447251"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679447258"><span class="hs-identifier hs-type">point'</span></a></span></span><span>
+</span><span id="line-61"></span><span>  </span><span id="local-6989586621679447412"><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#centroid"><span class="hs-identifier hs-var hs-var">centroid</span></a></span><span> </span><span id="local-6989586621679447783"><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679447783"><span class="hs-identifier hs-var">poly</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; point'
+forall point (d :: Nat) r.
+ConstructablePoint_ point d r =&gt;
+Vector d r -&gt; point
+</span><span class="hs-identifier hs-var">fromVector</span></span><span> </span><span class="annot"><span class="annottext">(Vector 2 r -&gt; point') -&gt; Vector 2 r -&gt; point'
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Vector 2 r] -&gt; Vector 2 r
+</span><a href="#local-6989586621679447785"><span class="hs-identifier hs-var">sum'</span></a></span><span> </span><span class="annot"><span class="annottext">[Vector 2 r]
+</span><a href="#local-6989586621679447786"><span class="hs-identifier hs-var">xs</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; r -&gt; Vector 2 r
+forall vector (d :: Nat) r.
+(Vector_ vector d r, Fractional r) =&gt;
+vector -&gt; r -&gt; vector
+</span><span class="hs-operator hs-var">^/</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">6</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">simplePolygon -&gt; r
+forall r simplePolygon point.
+(Fractional r, SimplePolygon_ simplePolygon point r) =&gt;
+simplePolygon -&gt; r
+</span><a href="HGeometry.Polygon.Simple.Class.html#signedArea"><span class="hs-identifier hs-var">signedArea</span></a></span><span> </span><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679447783"><span class="hs-identifier hs-var">poly</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-63"></span><span>      </span><span id="local-6989586621679447786"><span class="annot"><span class="annottext">xs :: [Vector 2 r]
+</span><a href="#local-6989586621679447786"><span class="hs-identifier hs-var hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679447789"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Vector 2 r) point (Vector 2 r) -&gt; Vector 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector 2 r) point (Vector 2 r)
+forall (d :: Nat) r s.
+(Dimension point ~ d, NumType point ~ r, Dimension point ~ d,
+ NumType point ~ s) =&gt;
+Lens point point (Vector d r) (Vector d s)
+forall point point' (d :: Nat) r s.
+(HasVector point point', Dimension point ~ d, NumType point ~ r,
+ Dimension point' ~ d, NumType point' ~ s) =&gt;
+Lens point point' (Vector d r) (Vector d s)
+Lens point point (Vector 2 r) (Vector 2 r)
+</span><span class="hs-identifier hs-var">vector</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; Vector 2 r -&gt; Vector 2 r
+forall r vector (d :: Nat).
+(Num r, Additive_ vector d r) =&gt;
+vector -&gt; vector -&gt; vector
+</span><span class="hs-operator hs-var">^+^</span></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679447793"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Vector 2 r) point (Vector 2 r) -&gt; Vector 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector 2 r) point (Vector 2 r)
+forall (d :: Nat) r s.
+(Dimension point ~ d, NumType point ~ r, Dimension point ~ d,
+ NumType point ~ s) =&gt;
+Lens point point (Vector d r) (Vector d s)
+forall point point' (d :: Nat) r s.
+(HasVector point point', Dimension point ~ d, NumType point ~ r,
+ Dimension point' ~ d, NumType point' ~ s) =&gt;
+Lens point point' (Vector d r) (Vector d s)
+Lens point point (Vector 2 r) (Vector 2 r)
+</span><span class="hs-identifier hs-var">vector</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; r -&gt; Vector 2 r
+forall r vector (d :: Nat).
+(Num r, Vector_ vector d r) =&gt;
+vector -&gt; r -&gt; vector
+</span><span class="hs-operator hs-var">^*</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679447789"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int point r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679447793"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
+forall (d :: Nat) point r.
+(2 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int point r
+</span><span class="hs-identifier hs-var">yCoord</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679447793"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int point r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679447789"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
+forall (d :: Nat) point r.
+(2 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int point r
+</span><span class="hs-identifier hs-var">yCoord</span></span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>           </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679447789"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679447789"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679447793"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679447793"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679447783"><span class="hs-identifier hs-var">poly</span></a></span><span> </span><span class="annot"><span class="annottext">simplePolygon
+-&gt; Getting (Endo [(point, point)]) simplePolygon (point, point)
+-&gt; [(point, point)]
+forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Fold.html#%5E.."><span class="hs-operator hs-var">^..</span></a></span><span class="annot"><span class="annottext">Getting (Endo [(point, point)]) simplePolygon (point, point)
+((Vertex simplePolygon, Vertex simplePolygon)
+ -&gt; Const
+      (Endo [(point, point)])
+      (Vertex simplePolygon, Vertex simplePolygon))
+-&gt; simplePolygon -&gt; Const (Endo [(point, point)]) simplePolygon
+forall polygon.
+HasOuterBoundary polygon =&gt;
+IndexedFold1
+  (VertexIx polygon, VertexIx polygon)
+  polygon
+  (Vertex polygon, Vertex polygon)
+IndexedFold1
+  (VertexIx simplePolygon, VertexIx simplePolygon)
+  simplePolygon
+  (Vertex simplePolygon, Vertex simplePolygon)
+</span><a href="HGeometry.Polygon.Class.html#outerBoundaryEdges"><span class="hs-identifier hs-var">outerBoundaryEdges</span></a></span><span>   </span><span class="hs-special">]</span><span>
+</span><span id="line-65"></span><span>      </span><span id="local-6989586621679447785"><span class="annot"><span class="annottext">sum' :: [Vector 2 r] -&gt; Vector 2 r
+</span><a href="#local-6989586621679447785"><span class="hs-identifier hs-var hs-var">sum'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Vector 2 r -&gt; Vector 2 r -&gt; Vector 2 r)
+-&gt; Vector 2 r -&gt; [Vector 2 r] -&gt; Vector 2 r
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; [a] -&gt; b
+forall (t :: * -&gt; *) b a.
+Foldable t =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">F.foldl'</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; Vector 2 r -&gt; Vector 2 r
+forall r vector (d :: Nat).
+(Num r, Additive_ vector d r) =&gt;
+vector -&gt; vector -&gt; vector
+</span><span class="hs-operator hs-var">(^+^)</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+forall r vector (d :: Nat). (Num r, Additive_ vector d r) =&gt; vector
+</span><span class="hs-identifier hs-var">zero</span></span></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679447373"><span id="local-6989586621679447374"><span id="local-6989586621679447375"><span id="local-6989586621679447376"><span id="local-6989586621679447839"><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#SimplePolygon_"><span class="hs-identifier hs-type">SimplePolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447373"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447374"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447375"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-68"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/data-default-class-0.1.2.0-b3568ccfdd470a357be3e0e18d023e35685c1382e092a5f0ebe48a31602b14b2/share/doc/html/src/Data.Default.Class.html#Default"><span class="hs-identifier hs-type">Default</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447376"><span class="hs-identifier hs-type">extra</span></a></span><span>
+</span><span id="line-69"></span><span>         </span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span>         </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#SimplePolygon_"><span class="hs-identifier hs-type">SimplePolygon_</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679447373"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447376"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679447374"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447375"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-71"></span><span>  </span><span id="local-6989586621679447964"><span class="annot"><span class="annottext">uncheckedFromCCWPoints :: forall (f :: * -&gt; *).
+Foldable f =&gt;
+f point -&gt; simplePolygon :+ extra
+</span><a href="HGeometry.Polygon.Simple.Class.html#uncheckedFromCCWPoints"><span class="hs-identifier hs-var hs-var hs-var hs-var">uncheckedFromCCWPoints</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">simplePolygon -&gt; extra -&gt; simplePolygon :+ extra
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">extra
+forall a. Default a =&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/data-default-class-0.1.2.0-b3568ccfdd470a357be3e0e18d023e35685c1382e092a5f0ebe48a31602b14b2/share/doc/html/src/Data.Default.Class.html#def"><span class="hs-identifier hs-var">def</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(simplePolygon -&gt; simplePolygon :+ extra)
+-&gt; (f point -&gt; simplePolygon) -&gt; f point -&gt; simplePolygon :+ extra
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">f point -&gt; simplePolygon
+forall simplePolygon point r (f :: * -&gt; *).
+(SimplePolygon_ simplePolygon point r, Foldable f) =&gt;
+f point -&gt; simplePolygon
+forall (f :: * -&gt; *). Foldable f =&gt; f point -&gt; simplePolygon
+</span><a href="HGeometry.Polygon.Simple.Class.html#uncheckedFromCCWPoints"><span class="hs-identifier hs-var">uncheckedFromCCWPoints</span></a></span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="ConstructableSimplePolygon"><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#ConstructableSimplePolygon"><span class="hs-identifier hs-var">ConstructableSimplePolygon</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679447373"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447376"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679447374"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447375"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-73"></span><span>         </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#ConstructableSimplePolygon"><span class="hs-identifier hs-type">ConstructableSimplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447373"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447374"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447375"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/data-default-class-0.1.2.0-b3568ccfdd470a357be3e0e18d023e35685c1382e092a5f0ebe48a31602b14b2/share/doc/html/src/Data.Default.Class.html#Default"><span class="hs-identifier hs-type">Default</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447376"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span>  </span><span id="local-6989586621679448057"><span class="annot"><span class="annottext">fromPoints :: forall (f :: * -&gt; *).
+(Foldable f,
+ ConstructableSimplePolygon (simplePolygon :+ extra) point r) =&gt;
+f point -&gt; Maybe (simplePolygon :+ extra)
+</span><a href="HGeometry.Polygon.Simple.Class.html#fromPoints"><span class="hs-identifier hs-var hs-var hs-var hs-var">fromPoints</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(simplePolygon -&gt; simplePolygon :+ extra)
+-&gt; Maybe simplePolygon -&gt; Maybe (simplePolygon :+ extra)
+forall a b. (a -&gt; b) -&gt; Maybe a -&gt; Maybe b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">simplePolygon -&gt; extra -&gt; simplePolygon :+ extra
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">extra
+forall a. Default a =&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/data-default-class-0.1.2.0-b3568ccfdd470a357be3e0e18d023e35685c1382e092a5f0ebe48a31602b14b2/share/doc/html/src/Data.Default.Class.html#def"><span class="hs-identifier hs-var">def</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Maybe simplePolygon -&gt; Maybe (simplePolygon :+ extra))
+-&gt; (f point -&gt; Maybe simplePolygon)
+-&gt; f point
+-&gt; Maybe (simplePolygon :+ extra)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">f point -&gt; Maybe simplePolygon
+forall simplePolygon point r (f :: * -&gt; *).
+(SimplePolygon_ simplePolygon point r, Foldable f,
+ ConstructableSimplePolygon simplePolygon point r) =&gt;
+f point -&gt; Maybe simplePolygon
+forall (f :: * -&gt; *).
+(Foldable f, ConstructableSimplePolygon simplePolygon point r) =&gt;
+f point -&gt; Maybe simplePolygon
+</span><a href="HGeometry.Polygon.Simple.Class.html#fromPoints"><span class="hs-identifier hs-var">fromPoints</span></a></span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- | Compute the signed area of a simple polygon. When the vertices</span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- are given in counter clockwise order (as they should be), the area</span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- will be positive.</span><span>
+</span><span id="line-81"></span><span id="local-6989586621679447325"><span id="local-6989586621679447326"><span id="local-6989586621679447327"><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#signedArea"><span class="hs-identifier hs-type">signedArea</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679447325"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#SimplePolygon_"><span class="hs-identifier hs-type">SimplePolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447326"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447327"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447325"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-82"></span><span>                </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679447326"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679447325"><span class="hs-identifier hs-type">r</span></a></span></span></span></span><span>
+</span><span id="line-83"></span><span id="signedArea"><span class="annot"><span class="annottext">signedArea :: forall r simplePolygon point.
+(Fractional r, SimplePolygon_ simplePolygon point r) =&gt;
+simplePolygon -&gt; r
+</span><a href="HGeometry.Polygon.Simple.Class.html#signedArea"><span class="hs-identifier hs-var hs-var">signedArea</span></a></span></span><span> </span><span id="local-6989586621679448075"><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679448075"><span class="hs-identifier hs-var">poly</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">simplePolygon -&gt; r
+forall r simplePolygon point.
+(Num r, HasOuterBoundary simplePolygon, Point_ point 2 r,
+ Vertex simplePolygon ~ point) =&gt;
+simplePolygon -&gt; r
+</span><a href="HGeometry.Polygon.Class.html#signedArea2X"><span class="hs-identifier hs-var">signedArea2X</span></a></span><span> </span><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679448075"><span class="hs-identifier hs-var">poly</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">2</span></span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- | Compute the area times 2 of a simple polygon. When the vertices</span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- are given in counter clockwise order (as they should be), the area</span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- will be positive.</span><span>
+</span><span id="line-88"></span><span class="hs-comment">--</span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- If the vertices were in clockwise order, the signed area would have</span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- be negative.</span><span>
+</span><span id="line-91"></span><span class="hs-comment">--</span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- running time: \(O(n)\)</span><span>
+</span><span id="line-93"></span><span id="local-6989586621679447394"><span id="local-6989586621679447395"><span id="local-6989586621679447396"><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#area2X"><span class="hs-identifier hs-type">area2X</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679447394"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#SimplePolygon_"><span class="hs-identifier hs-type">SimplePolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447395"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447396"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679447394"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-94"></span><span>       </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679447395"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679447394"><span class="hs-identifier hs-type">r</span></a></span></span></span></span><span>
+</span><span id="line-95"></span><span id="area2X"><span class="annot"><span class="annottext">area2X :: forall r simplePolygon point.
+(Num r, SimplePolygon_ simplePolygon point r) =&gt;
+simplePolygon -&gt; r
+</span><a href="HGeometry.Polygon.Simple.Class.html#area2X"><span class="hs-identifier hs-var hs-var">area2X</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">simplePolygon -&gt; r
+forall r simplePolygon point.
+(Num r, HasOuterBoundary simplePolygon, Point_ point 2 r,
+ Vertex simplePolygon ~ point) =&gt;
+simplePolygon -&gt; r
+</span><a href="HGeometry.Polygon.Class.html#signedArea2X"><span class="hs-identifier hs-var">signedArea2X</span></a></span><span>
+</span><span id="line-96"></span></pre></body></html>
