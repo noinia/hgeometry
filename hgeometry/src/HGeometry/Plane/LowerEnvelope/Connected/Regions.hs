@@ -27,9 +27,6 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
 
   , intersectionPoint
   , intersectionLine
-
-
-  , toPlaneGraph
   ) where
 
 import           Control.Lens
@@ -56,6 +53,7 @@ import           HGeometry.Point
 -- import           HGeometry.Polygon.Convex
 import           HGeometry.Properties
 import           HGeometry.Vector
+import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 
 --------------------------------------------------------------------------------
 -- * The Minimization Diagram, i.e. the type that we use to represent our
@@ -454,82 +452,3 @@ inCCWOrder pts = case pts of
                          cmp (a,_) (b,_) = ccwCmpAround c a b <> cmpByDistanceTo c a b
                      in List.sortBy cmp pts
   _               -> pts -- already sorted.
-
---------------------------------------------------------------------------------
--- * Operations on Maps
-
--- | Merge a bunch of maps
-unionsWithKey   :: (Foldable f, Ord k) => (k -> a-> a ->a) -> f (Map k a) -> Map k a
-unionsWithKey f = F.foldl' (Map.unionWithKey f) Map.empty
-
--- | Merge the maps. When they share a key, combine their values using a semigroup.
-mapWithKeyMerge   :: (Ord k', Semigroup v')
-                  => (k -> v -> Map k' v') -> Map k v -> Map k' v'
-mapWithKeyMerge f = getMap . Map.foldMapWithKey (\k v -> MonoidalMap $ f k v)
-
--- | A Map in which we combine conflicting elements by using their semigroup operation
--- rather than picking the left value (as is done in the default Data.Map)
-newtype MonoidalMap k v = MonoidalMap { getMap :: Map k v }
-  deriving (Show)
-
-instance (Ord k, Semigroup v) => Semigroup (MonoidalMap k v) where
-  (MonoidalMap ma) <> (MonoidalMap mb) = MonoidalMap $ Map.unionWith (<>) ma mb
-
-instance (Ord k, Semigroup v) => Monoid (MonoidalMap k v) where
-  mempty = MonoidalMap mempty
-
-
---------------------------------------------------------------------------------
-
--- -- | Triangulate the regions. Note that unbounded regions are somewhat weird now
--- triangulate        :: Region r plane -> [Region r plane]
--- triangulate region = case region of
---   Bounded vertices       -> case vertices of
---     (v0:v1:vs) -> zipWith (\u v -> Bounded [v0,u,v]) (v1:vs) vs
---     _          -> error "triangulate: absurd, <2 vertices"
---   Unbounded v vertices w -> case vertices of
---     [_]        -> [region]
---     [_,_]      -> [region]
---     (v0:v1:vs) -> let w = List.last vs
---                   in Unbounded v [v0,w] vs : zipWith (\u v -> Bounded [v0,u,v]) (v1:vs) vs
-
-
--- | A Plane graph storing vertices of type v that are identified by keys of type k, and
--- some ordered sequence of edges (which are ordered using e).
-type PlaneGraph k v e = Map k (Map e k, v)
-
-newtype E r = E (Vector 2 r)
-  deriving newtype (Show)
-
-instance (Ord r, Num r) => Eq (E r) where
-  a == b = a `compare` b == EQ
-instance (Ord r, Num r) => Ord (E r) where
-  (E v) `compare` (E u) = ccwCmpAroundWith (Vector2 0 1) origin (Point v) (Point u)
-
--- | Produce a triangulated plane graph on the bounded vertices.  every vertex is
--- represented by its point, it stores a list of its outgoing edges, and some data.
-toPlaneGraph :: (Plane_ plane r, Num r, Ord r)
-             => MinimizationDiagram r plane -> PlaneGraph (Point 2 r) (First r) (E r)
-toPlaneGraph = mapWithKeyMerge toTriangulatedGr
-
-toTriangulatedGr   :: (Plane_ plane r, Num r, Ord r)
-                   => plane -> Region r (Point 2 r)
-                   -> PlaneGraph (Point 2 r) (First r) (E r)
-toTriangulatedGr h = Map.mapWithKey (\v adjs -> (adjs, First $ evalAt v h)) . \case
-  Bounded vertices       -> case vertices of
-    (v0:v1:vs) -> triangulate v0 v1 vs
-    _          -> error "triangulate: absurd, <2 vertices"
-  Unbounded _ vertices _ -> case vertices of
-    _  :| []     -> Map.empty
-    u  :| [v]    -> Map.fromList [ (u, (uncurry Map.singleton $ edge u v))
-                                 , (v, (uncurry Map.singleton $ edge v u))
-                                 ]
-    v0 :|(v1:vs) -> triangulate v0 v1 vs
-  where
-    triangulate v0 v1 vs = Map.unionsWith (<>) $ zipWith (triangle v0) (v1:vs) vs
-
-    triangle u v w = Map.fromList [ (u, Map.fromList [ edge u v, edge u w])
-                                  , (v, Map.fromList [ edge v u, edge v w])
-                                  , (w, Map.fromList [ edge w u, edge w v])
-                                  ]
-    edge u v = ((E $ v .-. u), v)
