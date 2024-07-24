@@ -107,6 +107,8 @@ spec = describe "lower envelope tests" $ do
                  [osp|degenerate_out|]
          testIpe [osp|degenerate1.ipe|]
                  [osp|degenerate1_out|]
+         testIpe [osp|degenerate2.ipe|]
+                 [osp|degenerate2_out|]
 
          testIpeGraph [osp|foo.ipe|]
                       [osp|foo_graph_out|]
