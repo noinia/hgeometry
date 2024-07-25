@@ -193,9 +193,11 @@ data Split l a =
               [Tree a]
   deriving (Show,Eq)
 
-
-splitTree       :: Eq a => (a,a) -> Tree a -> SplitTree (Tree a) a
-splitTree (v,w) = undefined
+-- | Given an non-tree edge (v,w), split the tree usign the root to v,w paths
+splitTree     :: Eq a => (a,a) -> Tree a -> SplitTree (Tree a) a
+splitTree e t = case splitTree' e t of
+  Both split -> split
+  _          -> error "splitTree: absurd, didn't find both endpoints"
 
 data ResultF a b = NotFound
                  | Single a
@@ -217,13 +219,14 @@ data Loc a b = Here a | There b deriving (Show,Eq)
 pathLeaf :: l -> Path l a
 pathLeaf = NonEmpty.singleton . PathLeaf
 
+-- | Implementation of splitTree; i.e. tries to find both endpoints of the given edge.
 splitTree'       :: Eq a => (a,a) -> Tree a -> Result a
 splitTree' (v,w) = go
   where
     -- Handle the cases that we find one of the elemtns (identified by 'found') here.
-    here found tr u chs = case findNodes w u chs >>= unconsPath of
-      Nothing                      -> Single (found, pathLeaf tr)
-      Just (_, before,after, path) -> Both . pathLeaf $ RootSplit tr before path after
+    here found tr u chs = case findNodes w chs of
+      Nothing                    -> Single (found, pathLeaf tr)
+      Just (before, after, path) -> Both . pathLeaf $ RootSplit tr before path after
 
     go tr@(Node u chs)
       | u == v    = here V tr u chs
@@ -243,23 +246,20 @@ splitTree' (v,w) = go
 
       (Single (middle, path@(x, rightPath)), after)
         | other v w x == u -> (Both ([], Here (pathLeaf ch, middle, rightPath)), after)
-        | otherwise        -> case findNodes (other v w x) u chs of
+        | otherwise        -> case pathNode u <$> findNodes (other v w x) chs of
             Nothing       -> (Single (ch:middle,path),                       after)
             Just leftPath -> (Both ([], Here (leftPath, middle, rightPath)), after)
 
       (Both   (before, split),     after) -> (Both (ch:before, split), after)
 
--- |
-findNodes   :: Eq a
-            => a -- ^ the item to search for
-            -> a -- ^ the label of the parent
-            -> [Tree a] -- ^ the trees to search in
-            -> Maybe (Path (Tree a) a)
+-- | Search for a given element in a bunch of trees. Returns the path towards
+-- the node if we find it.
+findNodes   :: Eq a => a  -> [Tree a]  -> Maybe ([Tree a], [Tree a], Path (Tree a) a)
 findNodes v = go
   where
-    go u chs = case foldr process (Nothing, []) chs of
-                 (Nothing, _)                 -> Nothing
-                 (Just (before, path), after) -> Just (PathNode u before after <| path)
+    go chs = case foldr process (Nothing, []) chs of
+               (Nothing, _)                 -> Nothing
+               (Just (before, path), after) -> Just (before, after, path)
 
     process ch = \case
       (Nothing,             after) -> case findNode' ch of
@@ -269,41 +269,11 @@ findNodes v = go
 
     findNode' t@(Node u chs)
       | u == v    = Just (NonEmpty.singleton $ PathLeaf t)
-      | otherwise = go u chs
+      | otherwise = pathNode u <$> go chs
 
-
-
--- splitTree         :: Ord a => (a,a) -> Tree a -> SplitTree a
--- splitTree (v,w) tr =
---   where
---     m = parentMap tr
-
---   findNode $ \(Node u chs)
-
-  -- go
-  -- where
-  --   go
-{-
--- | Try to find the node indicated by the "predicate" function (i.e. the function is
--- supposed to return Just v if we find the node v, and Nothing otherwise).
-findNode   :: (Tree a -> Maybe l)
-           -> Tree a -> Maybe (a, Path l a)
-findNode f = findNode'
-  where
-    findNode' u@(Node u' chs) = case f u of
-      Just l  -> Just $ (u', Leaf l)
-      Nothing -> case foldr g (Nothing, []) chs of
-        (Nothing, _)                    -> Nothing -- not found
-        (Just (before,(x,path)), after) -> Just $ (x, Path u' before path after)
-
-    g v = \case
-      (Nothing, after)             -> case findNode' v of
-                                        Nothing   -> (Nothing,        v:after)
-                                        Just path -> (Just ([],path),   after)
-      (Just (before,path), after)  -> (Just (v:before, path),after)
-
--}
-
+-- | Smart constructor for producign a pathNode
+pathNode                        :: a -> ([Tree a], [Tree a], Path l a) -> Path l a
+pathNode u (before, after, path) = PathNode u before after <| path
 
 ----------------------------------------
 {-
