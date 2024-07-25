@@ -17,6 +17,7 @@ import qualified Data.Foldable as F
 import           Data.Kind (Type)
 import qualified Data.List as List
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Map (Map)
 import qualified Data.Map as Map
 import           Data.Maybe (fromMaybe)
@@ -148,9 +149,25 @@ planarSeparatorTree gr tr = undefined
 -- * spliting the tree
 
 -- | A path in the tree that ends at a "leaf" in which we store something of type l
-data Path l a = Leaf l
-              | Path a [Tree a] (Path l a) [Tree a]
-  deriving (Show,Eq)
+type Path l a = NonEmpty (PathNode l a)
+data PathNode l a = PathLeaf l
+                  | PathNode a [Tree a] [Tree a]
+                  deriving (Show,Eq)
+
+pattern Leaf   :: l -> Path l a
+pattern Leaf l = PathLeaf l :| []
+
+pattern Path                     :: a -> [Tree a] -> Path l a -> [Tree a] -> Path l a
+pattern Path u before path after <- (unconsPath -> Just (PathNode u before after, path))
+  where
+    Path u before path after = PathNode u before after NonEmpty.<| path
+
+unconsPath :: Path l a -> Maybe (PathNode l a, Path l a)
+unconsPath = \case
+  n@(PathNode _ _ _) :| path' -> (n,) <$> NonEmpty.nonEmpty path'
+  _                           -> Nothing
+{-# COMPLETE Leaf, Path #-}
+
 
 type EndPoint a = Vector 2 [Tree a]
 
