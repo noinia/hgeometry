@@ -192,15 +192,21 @@ parentMap                :: Ord a => Tree a -> ParentMap a
 parentMap u@(Node _ chs) = let f i ch = (root ch, (u, i))
                            in (Map.fromAscList $ zipWith f [0..] chs) <> foldMap parentMap chs
 
+-- Path from the root to the given node
 pathToRoot      :: Ord a => Tree a -> ParentMap a -> a -> Path (Tree a) a
-pathToRoot tr m = undefined
+pathToRoot tr m = go []
+  where
+    go path v = case Map.lookup v m of
+                  Nothing              -> fromMaybe (Leaf tr) $ NonEmpty.nonEmpty path
+                  Just (Node p chs, i) -> case List.splitAt (i-1) chs of
+                    (before, v':after) -> let path' = PathNode p before after : case path of
+                                                        [] -> [PathLeaf v']
+                                                        _  -> path
+                                          in go path' p
+                    _                  -> error "pathToRoot: absurd"
 
-  -- go
-  -- where
-  --   go v = case Map.lookup v m of
-  --            Nothing                -> Leaf tr  -- v is the root
-  --            Just (p@Node _ chs, i) -> case List.splitAt (i-1) chs of
-  --              (before, t )
+
+
 
 -- splitTree         :: Ord a => (a,a) -> Tree a -> SplitTree a
 -- splitTree (v,w) tr =
