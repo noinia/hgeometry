@@ -16,7 +16,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator
 import qualified Data.Foldable as F
 import           Data.Kind (Type)
 import qualified Data.List as List
-import           Data.List.NonEmpty (NonEmpty(..), (<|))
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map (Map)
 import qualified Data.Map as Map
@@ -105,7 +105,7 @@ planarSeparator gr = case trees of
     planarSeparator' tr _ = case List.break (\lvl -> accumSize lvl < half) lvls of
         (_,    [])          -> ([], Vector2 (F.toList tr) [])
                                  -- somehow we have too little weight;
-        (pref, (l1 : suff)) -> (sep, Vector2 verticesA verticesB)
+        (pref, (l1 : suff)) -> planarSeparatorTree gr tr'
           where
             k      = accumSize l1
             p  lvl = levelSize lvl + 2*(levelIndex l1  - levelIndex lvl)    <= 2 * sqrt' k
@@ -116,9 +116,9 @@ planarSeparator gr = case trees of
             tr' = trim l0 l2 tr
 
 
-            sep       = undefined
-            verticesA = undefined
-            verticesB = undefined
+            -- sep       = undefined
+            -- verticesA = undefined
+            -- verticesB = undefined
       where
             -- compute the levels, their sizes, and the sum of their sizes
         (_, lvls) = List.mapAccumL (\(Vector2 i acc) lvl ->
@@ -138,63 +138,68 @@ trim _ _ tr = tr
 -- | Given a spanning tree of the graph that has diameter r, compute
 -- a separator of size at most 2r+1
 planarSeparatorTree       :: Ord k => PlaneGraph k v e -> Tree k -> Separator k
-planarSeparatorTree gr tr = undefined
+planarSeparatorTree gr tr = (sep, foldMap F.toList <$> trees)
+  -- FIXME: continue searching
   where
-    (v,w) = Set.findMin $ graphEdges gr `Set.difference` treeEdges tr
-
+    e = Set.findMin $ graphEdges gr `Set.difference` treeEdges tr
+    (sep, trees) = fromSplitTree $ splitTree e tr
 
 --------------------------------------------------------------------------------
--- * spliting the tree
+-- * Spliting the tree
 
 -- data SplitTree l a = RootSplit l [Tree a] (Path l a) [Tree a]
 --                    | Prefix (Path (a, Split l a) a)
 --                    deriving (Show,Eq)
 -- -- still not quite right, since now we can't represent rotosplits lower than the root .
 
-type SplitTree l a = Path (Split l a) a
+type SplitTree a l = Path a (Split a l)
 
 -- | A path in the tree that ends at a "leaf" in which we store something of type l
-type Path l a = NonEmpty (PathNode l a)
+newtype Path a l = MkPath (NonEmpty (PathNode a l))
+  deriving (Show,Eq,Functor)
 
-data PathNode l a = PathLeaf l
+data PathNode a l = PathLeaf l
                   | PathNode a [Tree a] [Tree a]
-                  deriving (Show,Eq)
+                  deriving (Show,Eq,Functor)
 
--- pattern Leaf   :: l -> Path l a
--- pattern Leaf l = PathLeaf l :| []
+pattern Leaf   :: l -> Path a l
+pattern Leaf l = MkPath (PathLeaf l :| [])
 
--- pattern Path                     :: a -> [Tree a] -> Path l a -> [Tree a] -> Path l a
--- pattern Path u before path after <- (unconsPath -> Just (PathNode u before after, path))
---   where
---     Path u before path after = PathNode u before after <| path
+(<|) :: PathNode a l -> Path a l -> Path a l
+n <| (MkPath path) = MkPath $ n NonEmpty.<| path
 
-unconsPath :: Path l a -> Maybe (a,[Tree a],[Tree a], Path l a)
+pattern Path                     :: a -> [Tree a] -> Path a l -> [Tree a] -> Path a l
+pattern Path u before path after <- (unconsPath -> Just (u, before, after, path))
+  where
+    Path u before path after = PathNode u before after <| path
+
+
+unconsPath :: Path a l -> Maybe (a, [Tree a], [Tree a], Path a l)
 unconsPath = \case
-  (PathNode u before after) :| path' -> (u,before,after,) <$> NonEmpty.nonEmpty path'
-  _                                  -> Nothing
---{-# COMPLETE Leaf, Path #-}
+  MkPath (PathNode u before after :| path') -> (u,before,after,) . MkPath
+                                           <$> NonEmpty.nonEmpty path'
+  _                                         -> Nothing
+{-# COMPLETE Leaf, Path #-}
 
-
-type EndPoint a = Vector 2 [Tree a]
 
 -- | The split node where the two paths diverge
-data Split l a =
+data Split a l =
     RootSplit l -- ^ apparently root is the split we are looking for.
-              [Tree a] (Path l a) [Tree a]
+              [Tree a] (Path a l) [Tree a]
   | NodeSplit a -- ^ label of the node we are splitting
               [Tree a] -- ^ children before the left path
-              (Path l a)
+              (Path a l)
               -- ^ the value stored at the left node (i.e. the leaf) we argoing to,
               -- and the pato that goes there.
               [Tree a] -- ^ middle nodes
-              (Path l a)
+              (Path a l)
               -- ^ the value stored at the right node we argoing to, and the pato that
               -- goes there.
               [Tree a]
   deriving (Show,Eq)
 
 -- | Given an non-tree edge (v,w), split the tree usign the root to v,w paths
-splitTree     :: Eq a => (a,a) -> Tree a -> SplitTree (Tree a) a
+splitTree     :: Eq a => (a,a) -> Tree a -> SplitTree a (Tree a)
 splitTree e t = case splitTree' e t of
   Both split -> split
   _          -> error "splitTree: absurd, didn't find both endpoints"
@@ -204,8 +209,7 @@ data ResultF a b = NotFound
                  | Both b
                  deriving (Show,Eq,Functor)
 
-type Result a = ResultF (VW, Path   (Tree a) a)
-                        (SplitTree (Tree a) a)
+type Result a = ResultF (VW, Path a (Tree a) ) (SplitTree a (Tree a))
 
 data VW = V | W
 
@@ -216,26 +220,23 @@ other v w = \case
 
 data Loc a b = Here a | There b deriving (Show,Eq)
 
-pathLeaf :: l -> Path l a
-pathLeaf = NonEmpty.singleton . PathLeaf
-
 -- | Implementation of splitTree; i.e. tries to find both endpoints of the given edge.
 splitTree'       :: Eq a => (a,a) -> Tree a -> Result a
 splitTree' (v,w) = go
   where
     -- Handle the cases that we find one of the elemtns (identified by 'found') here.
-    here found tr u chs = case findNodes w chs of
-      Nothing                    -> Single (found, pathLeaf tr)
-      Just (before, after, path) -> Both . pathLeaf $ RootSplit tr before path after
+    here found tr chs = case findNodes w chs of
+      Nothing                    -> Single (found, Leaf tr)
+      Just (before, after, path) -> Both . Leaf $ RootSplit tr before path after
 
     go tr@(Node u chs)
-      | u == v    = here V tr u chs
-      | u == w    = here W tr u chs
+      | u == v    = here V tr chs
+      | u == w    = here W tr chs
       | otherwise = case foldr process (NotFound, []) chs of
           (NotFound, _)                     -> NotFound
           (Single (middle, (x,path)),after) -> Single (x, PathNode u middle after <| path)
           (Both (before, both'), after)     -> Both $ case both' of
-                Here  (lp,middle,rp)  -> pathLeaf $ (NodeSplit u before lp middle rp after)
+                Here  (lp,middle,rp)  -> Leaf $ (NodeSplit u before lp middle rp after)
                 There path            -> PathNode u before after <| path
 
     process ch@(Node u chs) = \case
@@ -245,7 +246,7 @@ splitTree' (v,w) = go
         Both split        -> (Both   ([], There split), after)
 
       (Single (middle, path@(x, rightPath)), after)
-        | other v w x == u -> (Both ([], Here (pathLeaf ch, middle, rightPath)), after)
+        | other v w x == u -> (Both ([], Here (Leaf ch, middle, rightPath)), after)
         | otherwise        -> case pathNode u <$> findNodes (other v w x) chs of
             Nothing       -> (Single (ch:middle,path),                       after)
             Just leftPath -> (Both ([], Here (leftPath, middle, rightPath)), after)
@@ -254,7 +255,7 @@ splitTree' (v,w) = go
 
 -- | Search for a given element in a bunch of trees. Returns the path towards
 -- the node if we find it.
-findNodes   :: Eq a => a  -> [Tree a]  -> Maybe ([Tree a], [Tree a], Path (Tree a) a)
+findNodes   :: Eq a => a  -> [Tree a]  -> Maybe ([Tree a], [Tree a], Path a (Tree a))
 findNodes v = go
   where
     go chs = case foldr process (Nothing, []) chs of
@@ -268,53 +269,56 @@ findNodes v = go
       (Just (before, path), after) -> (Just (ch:before, path), after)
 
     findNode' t@(Node u chs)
-      | u == v    = Just (NonEmpty.singleton $ PathLeaf t)
+      | u == v    = Just (Leaf t)
       | otherwise = pathNode u <$> go chs
 
 -- | Smart constructor for producign a pathNode
-pathNode                        :: a -> ([Tree a], [Tree a], Path l a) -> Path l a
+pathNode                        :: a -> ([Tree a], [Tree a], Path a l) -> Path a l
 pathNode u (before, after, path) = PathNode u before after <| path
 
 ----------------------------------------
-{-
-
 
 -- | Turn the split tree into a separator, and the trees inside the cycle, and outside the
 -- separator.
-fromSplitTree :: SplitTree a -> ([a],Vector 2 [Tree a])
+fromSplitTree :: SplitTree a (Tree a) -> ([a],Vector 2 [Tree a])
 fromSplitTree = \case
   Leaf split               -> fromSplit split
   Path u before path after -> let (sep,Vector2 inside outside) = fromSplitTree path
                               in (u : sep,Vector2 inside (before <> outside <> after))
 
 -- | Handling a split node
-fromSplit                                             :: Split a -> ([a],Vector 2 [Tree a])
-fromSplit (Split u before (v,lp) middle (w,rp) after) =
-    ([u,v] <> lSep <> [w] <> rSep, Vector2 inside outside)
-  where
-    (lSep, Vector2 lInside lOutside) = fromPath After  lp
-    (rSep, Vector2 rInside rOutside) = fromPath Before rp
+fromSplit :: Split a (Tree a) -> ([a],Vector 2 [Tree a])
+fromSplit = \case
+  RootSplit l before path after         -> undefined
+  NodeSplit u before lp middle rp after -> undefined
+  --   ([u,v] <> lSep <> [w] <> rSep, Vector2 inside outside)
+    where
 
-    inside  = lInside  <> rInside
-    outside = before <> lOutside <> rOutside <> after
+
+  --   (lSep, Vector2 lInside lOutside) = fromPath After  lp
+  --   (rSep, Vector2 rInside rOutside) = fromPath Before rp
+
+  --   inside  = lInside  <> rInside
+  --   outside = before <> lOutside <> rOutside <> after
 
 data Select = Before | After deriving (Show,Eq)
 
 -- | And handling the path
-fromPath     :: Select
-             -> Path (EndPoint a) a -> ([a],Vector 2 [Tree a])
-fromPath sel = go
+fromPath       :: Eq a
+               => a -> Select
+               -> Path a (Tree a) -> ([a],Vector 2 [Tree a])
+fromPath w sel = go
   where
     go = \case
-      Leaf (Vector2 before after) -> case sel of
-          Before -> ([], Vector2 before after)
-          After  -> ([], Vector2 after before)
+      Leaf (Node v chs) -> case List.break ((== w) . root) chs of
+        (before, _:after) -> case sel of
+                               Before -> ([v], Vector2 before after)
+                               After  -> ([v], Vector2 after before)
+        _                 -> error "fromPath: absurd, other endpoint not found"
       Path u before path after    -> let (sep, Vector2 inside outside) = go path
                                      in case sel of
           Before -> (u : sep, Vector2 (before <> inside) (after  <> outside))
           After  -> (u : sep, Vector2 (after  <> inside) (before <> outside))
-
--}
 
 class IsWeight w where
   data Weighted w :: Type -> Type
