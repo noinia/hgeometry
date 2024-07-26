@@ -43,7 +43,7 @@ type VerticalRayShootingStructure lineSegment =
 
 -- | The implementatyion of the vertical ray shooting data structure
 data VerticalRayShootingStructure' r lineSegment =
-    VerticalRayShootingStructure { _leftMost    :: r
+    VerticalRayShootingStructure { _leftMost    :: !r
                                  -- ^ x-coordinate of the leftmost vertex/endpoint
                                  , _sweepStruct :: V.Vector (r :+ StatusStructure lineSegment)
                                    -- ^ entry (r :+ s) means that "just" left of "r" the

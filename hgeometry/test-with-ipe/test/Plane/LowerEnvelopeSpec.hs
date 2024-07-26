@@ -20,8 +20,10 @@ import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
+import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
-import           HGeometry.Plane.LowerEnvelope.Connected.Regions
+import           HGeometry.Plane.LowerEnvelope.Connected.Graph
+import           HGeometry.Plane.LowerEnvelope.ConnectedNew
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
@@ -105,6 +107,12 @@ spec = describe "lower envelope tests" $ do
                  [osp|degenerate_out|]
          testIpe [osp|degenerate1.ipe|]
                  [osp|degenerate1_out|]
+         testIpe [osp|degenerate2.ipe|]
+                 [osp|degenerate2_out|]
+
+         testIpeGraph [osp|foo.ipe|]
+                      [osp|foo_graph_out|]
+
 
 
 -- | Computes the vertex form of the upper envelope. The z-coordinates are still flipped.
@@ -134,7 +142,7 @@ voronoiVertices = foldMap (\case
                               Unbounded _ pts _ -> Set.fromList (NonEmpty.toList pts)
                           ) . voronoiDiagram'
 
-
+-- | Build voronoi diagrams on the input points
 testIpe            :: OsPath -> OsPath -> Spec
 testIpe inFp outFp = do
     (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
@@ -148,11 +156,38 @@ testIpe inFp outFp = do
     goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
                (ipeFileGolden { name = outFp })
                (addStyleSheet opacitiesStyle $ singlePageFromContent out)
-     -- FIXME: use data/test-with-ipe/VoronoiDiagram/ as input and data/test-with-ipe/Plane/LowerEnvelope
-      -- as output dir
 
 
--- outputFile' <- addStyleSheetFrom "../hgeometry-ipe/resources/opacities.isy" outputFile
+theEdges :: PlaneGraph (Point 2 R) h (E R) -> IpeObject' Group R
+theEdges = ipeGroup . Map.foldMapWithKey (\v (adjs, _) ->
+               foldMap (\w -> [ iO $ defIO (ClosedLineSegment v w)
+                              ]) adjs)
+
+
+-- build a triangulated graph from the points in the input file
+testIpeGraph            :: OsPath -> OsPath -> Spec
+testIpeGraph inFp outFp = do
+    (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
+      inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
+      NonEmpty.fromList <$> readAllFrom inFp'
+    let vd = voronoiDiagram' $ view core <$> points
+        vv = voronoiVertices $ view core <$> points
+        gr = toPlaneGraph $ Map.mapKeysMonotonic liftPointToPlane vd
+        out = [ iO' points
+              , iO' vd
+              , iO' $ theEdges gr
+              ] <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
+    goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
+               (ipeFileGolden { name = outFp })
+               (addStyleSheet opacitiesStyle $ singlePageFromContent out)
+
+
+
+
+
+
+
+
 
 {-
 
@@ -175,21 +210,6 @@ testIpe inFp outFp = do
                  [ iO' inputs
                  , iO' trivialVD
                  ]
-
-    testIpe [osp|trivial.ipe|]
-            [osp|trivial_out|]
-    testIpe [osp|simplest.ipe|]
-            [osp|simplest_out|]
-    testIpe [osp|simpler.ipe|]
-            [osp|simpler_out|]
-    testIpe [osp|simple.ipe|]
-            [osp|simple_out|]
-    testIpe [osp|simple1.ipe|]
-            [osp|simple1_out|]
-    testIpe [osp|foo.ipe|]
-            [osp|foo_out|]
-
-
 
 
 degenerateTests :: Spec
@@ -269,39 +289,4 @@ trivialVD = VoronoiDiagram $ LowerEnvelope vInfty (Seq.fromList [bv])
                    _             -> error "absurd"
   -- order of the planes is incorrect, as is the z-coord.
 
-
-
-
-
-
-
--- testIpe      :: OsPath -> IO [IpeObject R]
--- testIpe inFp = do inFp' <- getDataFileName inFp
---                   (points :: [Point 2 R :+ _]) <- readAllFrom inFp'
-
---                   print $ (Point3 183.02716 93.61106 8869.99979 :: Point 3 R)
---                           `onSideTest`
---                           (NonVerticalHyperPlane (Vector3 282 426 (-65250)))
-
-
---                   -- mapM_ print points
---                   -- mapM_ (print . liftPointToPlane . view core) points
---                   -- let hs = liftPointToPlane . view core <$> points
---                   -- mapM_ (print . asVertex hs) $ uniqueTriplets hs
-
---                   let vv = voronoiVertices $ (view core) <$> points
---                   let vd = voronoiDiagram $ (view core) <$> points
---                   print $ vd
-
-
---                   -- print "vertices"
---                   -- mapM_ print vs
---                   pure $ [ iO' points
---                          , iO' vd
---                          ] <> [ iO'' v $ attr SStroke red | v <- vv ]
-
-
---                     -- $ (map iO' points)
---                     --      -- <> [iO' vd]
---                     -- <>
 -}

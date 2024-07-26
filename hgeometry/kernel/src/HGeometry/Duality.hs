@@ -59,3 +59,18 @@ dualLine = MkLineEQ . dualHyperPlane
 -- tangent to the unit hyperboloid.
 liftPointToPlane               :: (Point_ point 2 r, Num r) => point -> NonVerticalHyperPlane 3 r
 liftPointToPlane (Point2_ x y) = Plane (2*x) (2*y) (negate $ x*x + y*y)
+
+
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+-- we could define a newtype for the duality instead of using Ext as well
+
+-- newtype DualHyperPlane point = DualHyperPlane point
+--   deriving (Show,Read,Eq,Ord)
+
+-- instance (Point_ point d r, 1 <= d, Num r) => HyperPlane_ (DualHyperPlane point) d r where
+
+
+-- instance (Point_ point d r, 1 <= d, Num r) => NonVerticalHyperPlane_ (DualHyperPlane point) d r where
