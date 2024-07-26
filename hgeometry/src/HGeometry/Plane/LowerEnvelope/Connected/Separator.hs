@@ -10,7 +10,13 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Plane.LowerEnvelope.Connected.Separator
-  ( planarSeparator
+  ( Separator
+  , planarSeparator
+
+  , bff
+
+
+  , treeEdges
   ) where
 
 import qualified Data.Foldable as F
@@ -20,20 +26,22 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map (Map)
 import qualified Data.Map as Map
-import           Data.Maybe (fromMaybe)
+import           Data.Maybe (fromMaybe, mapMaybe)
+import           Data.Ord (Down(..))
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import           Data.Tree
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Vector
-import Data.Maybe (mapMaybe)
 
+import           Debug.Trace
 --------------------------------------------------------------------------------
 -- * BFS
 
 -- | Computes a breath first forest
 -- (O(n \log n))
-bff    :: Ord k => PlaneGraph k v e -> [Tree k]
+bff    :: (Ord k, Show k)
+       => PlaneGraph k v e -> [Tree k]
 bff gr = go (Map.keysSet gr)
   where
     go remaining = case Set.minView remaining of
@@ -49,13 +57,20 @@ toTree m = go
 
 -- | BFS from the given starting vertex, and the set of still-to-visit vertices.
 -- returns the remaining still-to-visit vertices and the tree.
-bfs      :: Ord k => PlaneGraph k v e -> k -> Set k -> (Set k, Tree k)
-bfs gr s = fmap (flip toTree s) . bfs' [s]
+bfs      :: (Ord k, Show k)
+         => PlaneGraph k v e -> k -> Set k -> (Set k, Tree k)
+bfs gr s = fmap (flip toTree s) . bfs' [s] Map.empty
   where
-    bfs' lvl remaining = foldr visit (remaining, Map.empty) lvl
+    bfs' lvl m remaining = case traceShowWith ("bfs'",) $ foldr visit ([], remaining, m) lvl of
+                             (lvl', remaining', m') -> case lvl' of
+                               [] -> (remaining',m')
+                               _  -> bfs' lvl' m' remaining'
 
-    visit v (remaining, m) = let chs = filter (flip Set.member remaining) $ neighs v
-                             in (foldr Set.delete remaining chs, Map.insert v chs m)
+    visit v (lvl,remaining, m) = let chs = filter (flip Set.member remaining) $ neighs v
+                                 in ( chs <> lvl
+                                    , foldr Set.delete remaining chs
+                                    , Map.insert v chs m
+                                    )
     neighs v = maybe [] (Map.elems . fst) $ Map.lookup v gr
 
 --------------------------------------------------------------------------------
@@ -89,14 +104,16 @@ type Separator k = ([k],Vector 2 [k])
 -- 1) there are no edges connecting subGraph A and subgraph B,
 -- 2) the size of the separator is at most sqrt(n).
 -- 3) the vertex sets of A and B have weight at most 2/3 the total weight
-planarSeparator    :: Ord k => PlaneGraph k v e -> Separator k
+planarSeparator    :: ( Ord k
+                      , Show k
+                      ) => PlaneGraph k v e -> Separator k
 planarSeparator gr = case trees of
     []                 -> ([],Vector2 [] [])
     ((tr,m):rest)
-      | m <= twoThirds -> groupComponents
+      | m <= twoThirds -> traceShow (tr,m,n,twoThirds) $ groupComponents
       | otherwise      -> planarSeparator' tr m -- we should also add the remaining vertices
   where
-    trees = List.sortOn snd . map (\t -> (t, length t)) $ bff gr
+    trees = List.sortOn (Down . snd) . map (\t -> (t, length t)) $ bff gr
     n     = sum $ map snd trees
     half = n `div` 2
     twoThirds = 2 * (n `div` 3)

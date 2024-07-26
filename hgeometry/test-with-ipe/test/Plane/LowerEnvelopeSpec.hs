@@ -1,4 +1,5 @@
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-unused-binds #-}
@@ -15,6 +16,7 @@ import qualified Data.Map as Map
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
+import           Data.Tree (Tree(..))
 import           Golden
 import           HGeometry.Duality
 import           HGeometry.Ext
@@ -23,6 +25,7 @@ import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
+import           HGeometry.Plane.LowerEnvelope.Connected.Separator
 import           HGeometry.Plane.LowerEnvelope.ConnectedNew
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
@@ -157,11 +160,26 @@ testIpe inFp outFp = do
                (ipeFileGolden { name = outFp })
                (addStyleSheet opacitiesStyle $ singlePageFromContent out)
 
-
 theEdges :: PlaneGraph (Point 2 R) h (E R) -> IpeObject' Group R
 theEdges = ipeGroup . Map.foldMapWithKey (\v (adjs, _) ->
                foldMap (\w -> [ iO $ defIO (ClosedLineSegment v w)
                               ]) adjs)
+
+drawSeparator                     :: Separator (Point 2 R) -> ( IpeObject' Group R
+                                                              , Vector 2 (IpeObject' Group R))
+drawSeparator (sep,Vector2 as bs) =
+    ( draw purple sep, Vector2 (draw red as) (draw blue bs))
+  where
+    draw c pts = ipeGroup [ iO $ defIO p ! attr SFill c
+                          | p <- pts
+                          ]
+
+
+drawTree :: Tree (Point 2 R) -> IpeObject' Group R
+drawTree = ipeGroup
+         . map (\(p,q) -> iO $ defIO (ClosedLineSegment p q) ! attr SPen (IpePen $ Named "fat")
+               )
+         . Set.toList . treeEdges
 
 
 -- build a triangulated graph from the points in the input file
@@ -173,10 +191,16 @@ testIpeGraph inFp outFp = do
     let vd = voronoiDiagram' $ view core <$> points
         vv = voronoiVertices $ view core <$> points
         gr = toPlaneGraph $ Map.mapKeysMonotonic liftPointToPlane vd
+        (sep,Vector2 as bs) = drawSeparator $ planarSeparator gr
         out = [ iO' points
               , iO' vd
               , iO' $ theEdges gr
-              ] <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
+              -- , iO $ sep ! attr SLayer "sep"
+              -- , iO $ as  ! attr SLayer "setA"
+              -- , iO $ bs  ! attr SLayer "setB"
+              ] <> [ iO' $ drawTree  t ! attr SLayer "trees"
+                   | t <- bff gr ]
+                <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
     goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
                (ipeFileGolden { name = outFp })
                (addStyleSheet opacitiesStyle $ singlePageFromContent out)
