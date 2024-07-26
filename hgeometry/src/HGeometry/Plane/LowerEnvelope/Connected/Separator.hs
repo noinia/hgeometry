@@ -295,7 +295,7 @@ splitLeaf gr (v',w') = fmap $ \(Node u chs) -> split u chs (if u == v' then w' e
 
 -- | Turn the split tree into a separator, and the trees inside the cycle, and outside the
 -- separator.
-fromSplitTree :: SplitTree a (EndPoint a) -> ([a],Vector 2 [Tree a])
+fromSplitTree               :: Eq a => SplitTree a (EndPoint a) -> ([a],Vector 2 [Tree a])
 fromSplitTree (SplitTree t) = go t
   where
     go = \case
@@ -304,27 +304,38 @@ fromSplitTree (SplitTree t) = go t
                                   in (u : sep,Vector2 inside (before <> outside <> after))
 
 -- | Handling a split node
-fromSplit :: Split a (EndPoint a) -> ([a],Vector 2 [Tree a])
+fromSplit :: Eq a => Split a (EndPoint a) -> ([a],Vector 2 [Tree a])
 fromSplit = \case
-  RootSplit l before path after         -> undefined
-  NodeSplit u before lp middle rp after -> undefined
-  --   ([u,v] <> lSep <> [w] <> rSep, Vector2 inside outside)
+  RootSplit (v,beforeV,afterV) _ path _ -> case path of
+    Leaf (_,_,_)     -> error "w is a child of v, that shouldn't really happen"
+    Path u _ path' _ -> case List.break ((== u) . root) beforeV of
+        -- edge vw lies after the path from v via u to w
+        (before, _:insideV)  -> (v : u : sep, Vector2 inside outside)
+          where
+            (sep, Vector2 insideU beforeU) = fromPath After path'
+            inside  = insideU <> insideV
+            outside = before <> beforeU <> afterV
+        -- ede vw lies before the path from v via u to w
+        _                     -> case List.break ((== u) . root) afterV of
+          (middle, _:afterU) -> (v : u : sep, Vector2 inside outside)
+            where
+              (sep, Vector2 insideU afterW) = fromPath Before path'
+              inside  = middle <> insideU
+              outside = beforeV <> afterW <> afterU
+          _                   -> error "fromSplit. Rootsplit (v,w) not found"
+  NodeSplit u before lp middle rp after -> (u : lSep <> rSep, Vector2 inside outside)
     where
+    (lSep, Vector2 lInside lOutside) = fromPath After  lp
+    (rSep, Vector2 rInside rOutside) = fromPath Before rp
 
+    inside  = lInside  <> rInside
+    outside = before <> lOutside <> rOutside <> after
 
-  --   (lSep, Vector2 lInside lOutside) = fromPath After  lp
-  --   (rSep, Vector2 rInside rOutside) = fromPath Before rp
+data Side = Before | After deriving (Show,Eq)
 
-  --   inside  = lInside  <> rInside
-  --   outside = before <> lOutside <> rOutside <> after
-
-data Select = Before | After deriving (Show,Eq)
-
--- | And handling the path
-fromPath       :: Eq a
-               => a -> Select
-               -> Path a (EndPoint a) -> ([a],Vector 2 [Tree a])
-fromPath w sel = go
+-- | And handling the path. The side indicates which side is the inside.
+fromPath       :: Side -> Path a (EndPoint a) -> ([a],Vector 2 [Tree a])
+fromPath sel = go
   where
     go = \case
       Leaf (v, before, after) -> case sel of
