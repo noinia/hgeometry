@@ -26,6 +26,7 @@ import qualified Data.Set as Set
 import           Data.Tree
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Vector
+import Data.Maybe (mapMaybe)
 
 --------------------------------------------------------------------------------
 -- * BFS
@@ -287,11 +288,23 @@ splitLeaf            :: Ord k
                      -> (k,k) -> SplitTree k (Tree k) -> SplitTree k (EndPoint k)
 splitLeaf gr (v',w') = fmap $ \(Node u chs) -> split u chs (if u == v' then w' else v')
   where
-    split v chs w = case List.break (hasEdge v) chs of
-                      (before, _:after) -> (v, before, after)
+    split v chs w = case List.break ((== w) . snd) adjacencies of
+                      (before, _:after) -> (v, mapMaybe fst before, mapMaybe fst after)
                       _                 -> error "splitLeaf: absurd. edge not found!?"
-    hasEdge v w = maybe False (F.elem (root w) . fst) $ Map.lookup v gr
-    -- note: this is linear in the number of edges out of v
+      where
+        adjacencies = annotateSubSet root chs $ maybe [] (Map.elems . fst) (Map.lookup v gr)
+
+-- | Given a tagging function, a subset, and the full set, tag the elements in the full set
+-- with whether or not they are present in the subset. Both sets should be sorted.
+annotateSubSet   :: Eq b => (a -> b) -> [a] -> [b] -> [(Maybe a,b)]
+annotateSubSet f = go
+  where
+    go []            fullSet = map (Nothing,) fullSet
+    go subSet@(x:xs) (y:ys)
+      | f x == y                         = (Just x,  y) : go xs     ys
+      | otherwise                        = (Nothing, y) : go subSet ys
+    go _             []      = [] -- this case should not really happen if the first is a subset
+
 
 -- | Turn the split tree into a separator, and the trees inside the cycle, and outside the
 -- separator.
@@ -353,14 +366,6 @@ class IsWeight w where
 instance IsWeight Int where
   data Weighted Int a = Weighted {-#UNPACK#-}!Int a deriving (Show,Eq,Functor)
   getWeight (Weighted w _) = w
-
-mkSeparator       :: (Num w, IsWeight w)
-                => (a,a) -> Tree (Weighted w a) -> Vector 2 (Tree (Weighted w a))
-mkSeparator (v,w) = go
-  where
-    go (Node u chs) = undefined
-
-
 
 
 costs :: (Num w, IsWeight w) => [Tree (Weighted w a)] -> w
