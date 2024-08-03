@@ -28,6 +28,8 @@ import           Data.Set (Set)
 import qualified Data.Set as Set
 import           Data.Tree
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
+import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Weight
+import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Util
 import           HGeometry.Vector
 
 import           Debug.Trace
@@ -214,7 +216,7 @@ collectPaths :: CycleSplitPaths a ([Tree a]) -> ([a], Vector 2 [a])
 collectPaths = \case
   RootSplit rs          -> ([], Vector2 [] []) --FIXME!
   PathSplit lPath rPath -> let NodeSplit sepL before  middleL = collectPath lPath
-                               NodeSplit sepR middleR after   = collectPath lPath
+                               NodeSplit sepR middleR after   = collectPath rPath
                            in (sepL <> sepR, Vector2 (middleL <> middleR) (before <> after))
 
 ----------------------------------------
@@ -483,52 +485,6 @@ toSeparator (Split paths before middle after) =
     getV = fmap getValue
 
 --------------------------------------------------------------------------------
-
--- | Types that can act as weight. So far just Int's.
-class IsWeight w where
-  data Weighted w :: Type -> Type
-  getWeight :: Weighted w a -> w
-  getValue  :: Weighted w a -> a
-
-instance IsWeight Int where
-  data Weighted Int a = Weighted {-#UNPACK#-}!Int a deriving (Show,Eq,Functor)
-  getWeight (Weighted w _) = w
-  getValue  (Weighted _ x) = x
-
--- instance Ord a => Ord (Weighted Int a) where
---   -- | compare by weight
---   (Weighted w x) `compare` (Weighted w' x') = w `compare` w' <> x `compare` x'
-
-
-weightOf :: (Num w, IsWeight w) => [Tree (Weighted w a)] -> w
-weightOf = sum . map (getWeight . root)
-
-
-
--- | Annotate tht tree with the size of the subtrees
-annotate              :: Tree k -> Tree (Weighted Int k)
-annotate (Node v chs) = let chs' = map annotate chs
-                        in Node (Weighted (1 + weightOf chs') v) chs'
-
-
---------------------------------------------------------------------------------
-
-root            :: Tree a -> a
-root (Node v _) = v
-
-
-
---------------------------------------------------------------------------------
-
-
-graphEdges :: Ord k => PlaneGraph k v e -> Set (k,k)
-graphEdges = Map.foldMapWithKey (\u (es,_) -> Set.fromList [ (u,v) | v <- Map.elems es, u <= v])
-
-treeEdges              :: Ord k => Tree k -> Set (k,k)
-treeEdges (Node u chs) = Set.fromList [ orient (u,v) | Node v _ <- chs ]
-                      <> foldMap treeEdges chs
-  where
-    orient (a,b) = if a <= b then (a,b) else (b,a)
 
 
 --------------------------------------------------------------------------------
