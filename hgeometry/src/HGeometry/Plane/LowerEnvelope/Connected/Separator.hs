@@ -32,6 +32,7 @@ import           Data.Set (Set)
 import qualified Data.Set as Set
 import           Data.Tree
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
+import           HGeometry.Plane.LowerEnvelope.Connected.Split
 import           HGeometry.Vector
 
 import           Debug.Trace
@@ -40,8 +41,7 @@ import           Debug.Trace
 
 -- | Computes a breath first forest
 -- (O(n \log n))
-bff    :: (Ord k, Show k)
-       => PlaneGraph k v e -> [Tree k]
+bff    :: Ord k => PlaneGraph k v e -> [Tree k]
 bff gr = go (Map.keysSet gr)
   where
     go remaining = case Set.minView remaining of
@@ -57,11 +57,10 @@ toTree m = go
 
 -- | BFS from the given starting vertex, and the set of still-to-visit vertices.
 -- returns the remaining still-to-visit vertices and the tree.
-bfs      :: (Ord k, Show k)
-         => PlaneGraph k v e -> k -> Set k -> (Set k, Tree k)
+bfs      :: Ord k => PlaneGraph k v e -> k -> Set k -> (Set k, Tree k)
 bfs gr s = fmap (flip toTree s) . bfs' [s] Map.empty
   where
-    bfs' lvl m remaining = case traceShowWith ("bfs'",) $ foldr visit ([], remaining, m) lvl of
+    bfs' lvl m remaining = case foldr visit ([], remaining, m) lvl of
                              (lvl', remaining', m') -> case lvl' of
                                [] -> (remaining',m')
                                _  -> bfs' lvl' m' remaining'
@@ -123,7 +122,7 @@ planarSeparator gr = case trees of
     planarSeparator' tr _ = case List.break (\lvl -> accumSize lvl < half) lvls of
         (_,    [])          -> ([], Vector2 (F.toList tr) [])
                                  -- somehow we have too little weight;
-        (pref, (l1 : suff)) -> planarSeparatorTree gr tr'
+        (pref, (l1 : suff)) -> planarSeparatorTree twoThirds gr tr'
           where
             k      = accumSize l1
             p  lvl = levelSize lvl + 2*(levelIndex l1  - levelIndex lvl)    <= 2 * sqrt' k
@@ -153,14 +152,19 @@ contract = undefined
 trim _ _ tr = tr
 -- TODO:
 
--- | Given a spanning tree of the graph that has diameter r, compute
--- a separator of size at most 2r+1
-planarSeparatorTree       :: Ord k => PlaneGraph k v e -> Tree k -> Separator k
-planarSeparatorTree gr tr = (sep, foldMap F.toList <$> trees)
-  -- FIXME: continue searching
-  where
-    e = Set.findMin $ graphEdges gr `Set.difference` treeEdges tr
-    (sep, trees) = fromSplitTree . splitLeaf gr e $ splitTree e tr
+-- -- | Given a spanning tree of the graph that has diameter r, compute
+-- -- a separator of size at most 2r+1
+-- planarSeparatorTree       :: (Ord k
+--                              , Show k
+--                              ) => PlaneGraph k v e -> Tree k -> Separator k
+-- planarSeparatorTree gr tr = (sep, foldMap F.toList <$> trees)
+--   -- FIXME: continue searching
+--   where
+--     e = Set.findMin $ graphEdges gr `Set.difference` treeEdges tr
+--     (sep, trees) = traceShowWith ("separator: ",)
+--                  $ fromSplitTree . splitLeaf gr e
+--                  $ traceShowWith ("splitTree",e,)
+--                    $ splitTree e $ traceShowWith ("TR",) tr
 
 --------------------------------------------------------------------------------
 -- * Spliting the tree
@@ -358,7 +362,7 @@ fromSplit = \case
     (lSep, Vector2 lInside lOutside) = fromPath After  lp
     (rSep, Vector2 rInside rOutside) = fromPath Before rp
 
-    inside  = lInside  <> rInside
+    inside  = lInside  <> middle <> rInside
     outside = before <> lOutside <> rOutside <> after
 
 data Side = Before | After deriving (Show,Eq)

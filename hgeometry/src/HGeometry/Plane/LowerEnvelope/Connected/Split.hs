@@ -20,9 +20,8 @@ import           Data.Bifunctor
 import qualified Data.Foldable as F
 import           Data.Kind (Type)
 import qualified Data.List as List
-import           Data.Map (Map)
 import qualified Data.Map as Map
-import           Data.Maybe (mapMaybe, fromMaybe)
+import           Data.Maybe (mapMaybe)
 import           Data.Monoid (First(..))
 import           Data.Ord (comparing)
 import           Data.Set (Set)
@@ -100,16 +99,20 @@ findNode' p = go
 
 data Side = L | R deriving (Show,Eq)
 
+-- TODO: splitChidlren' should need an additional argument, now we are alwasys just
+-- splitting based on the original vw.
+
 -- | Search along a path; we search among the nodees on the path and in the subtrees
 -- hanging off the path on the given side.
 findNodeAlongPath                   :: (Tree a -> NodeSplit a [Tree a])
+                                    -> (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
                                     -> (a -> Bool)
                                     -> Side -- ^ indicates which subtrees to search
                                     -> Path a [Tree a] (NodeSplit a [Tree a])
                                     -> Maybe ( Cycle' a
                                              , Path a [Tree a] (NodeSplit a [Tree a])
                                              )
-findNodeAlongPath splitLeaf' p side = go
+findNodeAlongPath splitLeaf' splitChildren' p side = go
   where
     go = \case
       Leaf (NodeSplit u before after)
@@ -120,7 +123,7 @@ findNodeAlongPath splitLeaf' p side = go
                                            (RootSplit . RootBefore u)
 
       Path (NodeSplit (u, path) before after)
-          | p u       -> Just ( cycle
+          | p u       -> Just ( cycle' u path before after
                               , Leaf $ splitLeaf' (Node u $ before <> after)
                               )
           | otherwise -> here u before after (flip PathSplit path) (PathSplit path)
@@ -140,7 +143,14 @@ findNodeAlongPath splitLeaf' p side = go
                           , Path $ NodeSplit (u, path'') (before <> before') after'
                           )
 
-    cycle = undefined
+    cycle' u path before after = case splitChildren' u before of
+      Nothing -> case splitChildren' u after of
+        Nothing                          -> error "toCycle"
+        Just (Vector2 middle after') ->
+          Split (RootSplit $ RootAfter path u) before middle after'
+      Just (Vector2 before' middle) ->
+          Split (RootSplit $ RootBefore u path) before' middle after
+
 
 --------------------------------------------------------------------------------
 -- * A Split
@@ -219,12 +229,12 @@ data InitialSplit a tree =
 
 -- | Transform an Initial split into a proper cycle by splitting the leaves.
 toCycle                           :: (tree -> NodeSplit a [tree])
-                                  -> ([tree] -> Maybe (Vector 2 [tree]))
+                                  -> (a -> [tree] -> Maybe (Vector 2 [tree]))
                                   -> InitialSplit a tree -> Cycle a [tree]
 toCycle splitLeaf' splitChildren' = \case
     InternalSplit split                -> first splitLeaves split
-    DecendantSplit v before path after -> case splitChildren' before of
-      Nothing -> case splitChildren' after of
+    DecendantSplit v before path after -> case splitChildren' v before of
+      Nothing -> case splitChildren' v after of
         Nothing                          -> error "toCycle"
         Just (Vector2 middle after') ->
           Split (RootSplit $ RootAfter (splitLeaf' <$> path) v) before middle after'
@@ -239,7 +249,7 @@ toCycle splitLeaf' splitChildren' = \case
 -- the righstmost input leaf
 splitTree                             :: (Eq a, wa ~ Weighted' a)
                                       => (Tree wa -> NodeSplit wa [Tree wa])
-                                      -> ([Tree wa] -> Maybe (Vector 2 [Tree wa]))
+                                      -> (wa -> [Tree wa] -> Maybe (Vector 2 [Tree wa]))
                                       -> (a,a)
                                       -> Tree wa
                                       -> Cycle' wa
@@ -318,11 +328,12 @@ type Weighted' = Weighted Weight
 
 -- | Tries to split the cycle at the given node
 splitCycleAt                                     :: (Tree a -> NodeSplit a [Tree a])
+                                                 -> (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
                                                  -> (a -> Bool)
                                                  -> Cycle' a
                                                  -> Maybe (Vector 2 (Cycle' a))
-splitCycleAt splitLeaf' p (Split paths before inside after) =
-    splitInterior <|> splitCycleAtPath splitLeaf' p paths before inside after
+splitCycleAt splitLeaf' splitChildren' p (Split paths before inside after) =
+    splitInterior <|> splitCycleAtPath splitLeaf' splitChildren' p paths before inside after
   where
     splitInterior =  constructCycles . first (fmap splitLeaf') <$> findNode' p inside
 
@@ -346,19 +357,24 @@ splitCycleAt splitLeaf' p (Split paths before inside after) =
 -- we get by splitting the trees there.
 splitCycleAtPath :: forall a.
                     (Tree a -> NodeSplit a [Tree a])
+                 -> (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
                  -> (a -> Bool)
                  -> CycleSplitPaths a [Tree a]
                  -> [Tree a] -> [Tree a] -> [Tree a]
                  -> Maybe (Vector 2 (Cycle' a))
-splitCycleAtPath splitLeaf' p paths before inside after = case paths of
+splitCycleAtPath splitLeaf' splitChildren' p paths before inside after = case paths of
    RootSplit (RootAfter lPath r)  ->
-     (combineR (RootSplit . flip RootAfter r)) <$> findNodeAlongPath splitLeaf' p R lPath
+     (combineR (RootSplit . flip RootAfter r)) <$>
+           findNodeAlongPath splitLeaf' splitChildren' p R lPath
    RootSplit (RootBefore r rPath) ->
-     (combineL (RootSplit . RootBefore r))     <$> findNodeAlongPath splitLeaf' p L rPath
+     (combineL (RootSplit . RootBefore r))     <$>
+           findNodeAlongPath splitLeaf' splitChildren' p L rPath
    PathSplit lPath rPath              ->
-     (combineL (flip PathSplit rPath)          <$> findNodeAlongPath splitLeaf' p R lPath)
+     (combineL (flip PathSplit rPath)          <$>
+           findNodeAlongPath splitLeaf' splitChildren' p R lPath)
      <|>
-     (combineR (PathSplit lPath)               <$> findNodeAlongPath splitLeaf' p L rPath)
+     (combineR (PathSplit lPath)               <$>
+           findNodeAlongPath splitLeaf' splitChildren' p L rPath)
   where
     -- creates a new split, where the new split is on the left, and the updated remainder
     -- of the current split is on the right.
@@ -389,11 +405,14 @@ planarSeparatorTree                     :: forall k v e.
                                         -> PlaneGraph k v e -> Tree k -> ([k], Vector 2 [k])
 planarSeparatorTree allowedWeight gr tr = go initialCycle
   where
-    e            = Set.findMin $ graphEdges gr `Set.difference` treeEdges tr
-    initialCycle = makeInsideHeaviest . splitTree splitLeaf' splitChildren' e $ annotate tr
+    e@(_,w)      = Set.findMin $ graphEdges gr `Set.difference` treeEdges tr
+    initialCycle = makeInsideHeaviest . splitTree splitLeaf' splitChildren0 e $ annotate tr
+
+    splitChildren0 = splitChildren gr (== w) . getValue
+      -- if e = (v,w), then we are splitting v's children
 
     splitLeaf' = splitLeaf gr e
-    splitChildren' = splitChildren gr e -- if e = (v,w), then we are splitting v's children
+
 
     -- compute the actual separator
     go :: Cycle' (Weighted' k) -> ([k], Vector 2 [k])
@@ -401,15 +420,18 @@ planarSeparatorTree allowedWeight gr tr = go initialCycle
       | interiorWeight cycle' <= allowedWeight = toSeparator cycle'
       | otherwise                              =
           case getFirst $ foldMap splitCycle (commonNeighbours e gr) of
-            Nothing                -> error "planarSeparatorTree: impossible"
-            Just (Weighted w cycle'')
-              | w <= allowedWeight -> toSeparator cycle''
-              | otherwise          -> go cycle''
+            Nothing                 -> error "planarSeparatorTree: impossible"
+            Just (Weighted w' cycle'')
+              | w' <= allowedWeight -> toSeparator cycle''
+              | otherwise           -> go cycle''
       where
         splitCycle   :: k -> First (Weighted' (Cycle' (Weighted' k)))
         splitCycle u = First . fmap ( F.maximumBy (comparing getWeight)
                                     . fmap (\c -> Weighted (interiorWeight c) c))
-                     $ splitCycleAt splitLeaf' ((== u) . getValue) cycle'
+                     $ splitCycleAt splitLeaf' splitChildren' p cycle'
+          where
+            p = (== u) . getValue
+            splitChildren' = splitChildren gr (== u) . getValue
 
 
 -- | Compute the wieght on the inside of the cycle
@@ -423,12 +445,6 @@ toSeparator (Split paths before inside after) =
   where
     toSep   = fmap getValue . bifoldMap (:[]) (const [])
     toList' = fmap getValue . foldMap F.toList
-
--- | Annotate the cycle with subtree sizes/weights.
-annotateWeights :: Cycle' a -> Cycle' (Weighted' a)
-annotateWeights = bimap onPaths (map annotate)
-  where
-    onPaths = bimap (Weighted 1) (map annotate)
 
 --------------------------------------------------------------------------------
 
@@ -464,10 +480,6 @@ annotate (Node v chs) = let chs' = map annotate chs
 root            :: Tree a -> a
 root (Node v _) = v
 
--- | Get the value stored at the root of a tree with weighted items.
-getValue' :: IsWeight w => Tree (Weighted w a) -> a
-getValue' = getValue . root
-
 
 
 --------------------------------------------------------------------------------
@@ -492,17 +504,18 @@ splitLeaf                         :: Ord k
                                   -> Tree (Weighted' k)
                                   -> NodeSplit (Weighted' k) [Tree (Weighted' k)]
 splitLeaf gr (v',w') (Node u chs) =
-    case splitChildren gr (if getValue u == v' then (w',v') else (v',w')) chs of
+    case splitChildren gr (if getValue u == v' then (w'==) else (v'==)) (getValue u) chs of
       Nothing                     -> error "splitLeaf: absurd. edge not found!?"
       Just (Vector2 before after) -> NodeSplit u before after
 
 -- | Split a list of children.
-splitChildren              :: Ord k
-                           => PlaneGraph k v e
-                           -> (k,k) -- ^ the edge (v,w), we split the children of v
-                           -> [Tree (Weighted' k)] -- ^ the children of the root
-                           -> Maybe (Vector 2 [Tree (Weighted' k)])
-splitChildren gr (w,v) chs = case List.break ((== w) . snd) adjacencies of
+splitChildren            :: Ord k
+                         => PlaneGraph k v e
+                         -> (k -> Bool) -- ^ the node that we are searching for/splitting with
+                         -> k -- ^ the node whose children we are splitting
+                         -> [Tree (Weighted' k)] -- ^ the children of the root
+                         -> Maybe (Vector 2 [Tree (Weighted' k)])
+splitChildren gr p v chs = case List.break (p . snd) adjacencies of
     (before, _:after) -> Just $ Vector2 (mapMaybe fst before) (mapMaybe fst after)
     _                 -> Nothing
   where

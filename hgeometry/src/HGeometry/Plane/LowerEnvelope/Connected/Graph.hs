@@ -12,12 +12,16 @@ module HGeometry.Plane.LowerEnvelope.Connected.Graph
   ( PlaneGraph
   , E(..)
   , toPlaneGraph
+  , commonNeighbours
   ) where
 
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Map (Map)
 import qualified Data.Map as Map
+import           Data.Maybe (fromMaybe)
 import           Data.Semigroup (First(..))
+import           Data.Set (Set)
+import qualified Data.Set as Set
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
@@ -70,3 +74,12 @@ toTriangulatedGr h = Map.mapWithKey (\v adjs -> (adjs, First $ evalAt v h)) . \c
                                   , (w, Map.fromList [ edge w u, edge w v])
                                   ]
     edge u v = ((E $ v .-. u), v)
+
+
+-- | Given an edge, compute the vertices that both endpoints have in common.
+-- This should be at most two vertices.
+commonNeighbours          :: Ord k => (k,k) -> PlaneGraph k v e -> Set k
+commonNeighbours (v,w) gr = fromMaybe Set.empty (combine <$> Map.lookup v gr <*> Map.lookup w gr)
+  where
+    combine (vs,_) (ws,_) = let mkSet = foldMap Set.singleton
+                            in mkSet vs `Set.intersection` mkSet ws
