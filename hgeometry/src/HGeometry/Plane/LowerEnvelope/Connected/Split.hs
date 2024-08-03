@@ -30,6 +30,8 @@ import           Data.Tree
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Vector
 
+import           Debug.Trace
+
 --------------------------------------------------------------------------------
 -- * Paths
 
@@ -42,6 +44,13 @@ instance Bifunctor NodeSplit where
   bimap f g (NodeSplit x as bs) = NodeSplit (f x) (g as) (g bs)
 instance Bifoldable NodeSplit where
   bifoldMap f g (NodeSplit x as bs) = f x <> g as <> g bs
+
+instance (Semigroup a, Semigroup trees) => Semigroup (NodeSplit a trees) where
+  (NodeSplit x befores afters) <> (NodeSplit x' befores' afters') =
+    NodeSplit (x <> x') (befores <> befores') (afters <> afters')
+instance (Monoid a, Monoid trees) => Monoid (NodeSplit a trees) where
+  mempty = NodeSplit mempty mempty mempty
+
 
 
 -- | A path in a rose tree; the last element of the path (a Leaf) stores an l, each node
@@ -71,6 +80,15 @@ trifoldMap fa ft fl = go
     go = \case
       Leaf l                          -> fl l
       Path (NodeSplit (x,path) xs ys) -> fa x <> ft xs <> ft ys <> go path
+
+-- | returns the a's left, on, and right of the path
+collectPath :: Path a [Tree a] (NodeSplit a [Tree a]) -> NodeSplit [a] [a]
+collectPath = \case
+    Leaf (NodeSplit x before after)        -> NodeSplit [x] (f before) (f after)
+    Path (NodeSplit (x,path) before after) -> NodeSplit [x] (f before) (f after)
+                                              <> collectPath path
+  where
+    f = foldMap F.toList
 
 ----------------------------------------
 
@@ -191,6 +209,14 @@ instance Bifoldable CycleSplitPaths where
     RootSplit rs          -> bifoldMap f g rs
     PathSplit lPath rPath -> let h = trifoldMap f g (bifoldMap f g) in h lPath <> h rPath
 
+-- | Collects the paths into a (partial) separator
+collectPaths :: CycleSplitPaths a ([Tree a]) -> ([a], Vector 2 [a])
+collectPaths = \case
+  RootSplit rs          -> ([], Vector2 [] []) --FIXME!
+  PathSplit lPath rPath -> let NodeSplit sepL before  middleL = collectPath lPath
+                               NodeSplit sepR middleR after   = collectPath lPath
+                           in (sepL <> sepR, Vector2 (middleL <> middleR) (before <> after))
+
 ----------------------------------------
 
 -- | In cas of a root split, one path is not really a path, just the label of the root
@@ -208,7 +234,6 @@ instance Bifunctor RootSplitPath where
     RootBefore r path -> RootBefore (f r) (trimap f g (bimap f g) path)
     RootAfter path r  -> RootAfter (trimap f g (bimap f g) path) (f r)
 
-
 instance Bifoldable RootSplitPath where
   bifoldMap f g = \case
     RootBefore r path -> f r <> trifoldMap f g (bifoldMap f g) path
@@ -216,6 +241,12 @@ instance Bifoldable RootSplitPath where
 
 -- | A root path itself is just the label of the root.
 type RootPath a = a
+
+-- | Collect on a rootsplitPath
+collectRootSplitPath :: RootSplitPath a [Tree a] -> NodeSplit [a] [a]
+collectRootSplitPath = \case
+  RootBefore x path -> NodeSplit [x] mempty mempty <> collectPath path
+  RootAfter path x  -> NodeSplit [x] mempty mempty <> collectPath path
 
 --------------------------------------------------------------------------------
 
@@ -405,8 +436,12 @@ planarSeparatorTree                     :: forall k v e.
                                         -> PlaneGraph k v e -> Tree k -> ([k], Vector 2 [k])
 planarSeparatorTree allowedWeight gr tr = go initialCycle
   where
-    e@(_,w)      = Set.findMin $ graphEdges gr `Set.difference` treeEdges tr
-    initialCycle = makeInsideHeaviest . splitTree splitLeaf' splitChildren0 e $ annotate tr
+    e@(_,w)      = traceShowWith ("(v,w)",)
+                 $ Set.findMin $ graphEdges gr `Set.difference` treeEdges tr
+    initialCycle = traceShowWith ("initialCycle",) $
+      makeInsideHeaviest
+      . traceShowWith ("beforeMakeHeaviest",)
+      . splitTree splitLeaf' splitChildren0 e $ annotate tr
 
     splitChildren0 = splitChildren gr (== w) . getValue
       -- if e = (v,w), then we are splitting v's children
@@ -440,11 +475,12 @@ interiorWeight (Split _ _ inside _) = weightOf inside
 
 -- | Turn the weighted cycle into an actual separator.
 toSeparator :: IsWeight w => Cycle' (Weighted w k) -> ([k], Vector 2 [k])
-toSeparator (Split paths before inside after) =
-    (toSep paths, Vector2 (toList' inside) (toList' before <> toList' after))
+toSeparator (Split paths before middle after) =
+    (sep, Vector2 (inside <> toList' middle) (outside <> toList' before <> toList' after))
   where
-    toSep   = fmap getValue . bifoldMap (:[]) (const [])
-    toList' = fmap getValue . foldMap F.toList
+    (sep, Vector2 inside outside) = bimap getV (fmap getV) $ collectPaths paths
+    toList' = getV . foldMap F.toList
+    getV = fmap getValue
 
 --------------------------------------------------------------------------------
 
