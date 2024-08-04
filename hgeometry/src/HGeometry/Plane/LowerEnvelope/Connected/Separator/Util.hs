@@ -27,6 +27,7 @@ import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 -- | Get the label of the root node.
 root            :: Tree a -> a
 root (Node v _) = v
+{-# INLINE root #-}
 
 --------------------------------------------------------------------------------
 

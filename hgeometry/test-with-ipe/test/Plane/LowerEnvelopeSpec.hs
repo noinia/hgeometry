@@ -1,3 +1,4 @@
+
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PartialTypeSignatures #-}
@@ -26,6 +27,7 @@ import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator
+import           HGeometry.Plane.LowerEnvelope.Connected.Split(findNode, pathToTree)
 import           HGeometry.Plane.LowerEnvelope.ConnectedNew
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
@@ -35,6 +37,7 @@ import           Ipe
 import           Ipe.Color
 import           System.OsPath
 import           Test.Hspec
+import           Test.Hspec.QuickCheck
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
 
@@ -117,6 +120,17 @@ spec = describe "lower envelope tests" $ do
                       [osp|foo_graph_out|]
 
 
+         describe "planar separator tests" $ do
+           prop "findNode on path the same" $
+             \(t :: Tree Int) ->
+               let predicates = const False : [(== x) | x <- toList t]
+                   findNodeSame t' p = case findNode p t' of
+                     Nothing    -> True
+                     Just path' -> pathToTree path' == t'
+               in all (findNodeSame t) predicates
+
+
+
 
 -- | Computes the vertex form of the upper envelope. The z-coordinates are still flipped.
 
@@ -170,7 +184,8 @@ drawSeparator                     :: Separator (Point 2 R) -> ( IpeObject' Group
 drawSeparator (sep,Vector2 as bs) =
     ( draw purple sep, Vector2 (draw red as) (draw blue bs))
   where
-    draw c pts = ipeGroup [ iO $ defIO p ! attr SFill c
+    draw c pts = ipeGroup [ iO $ defIO p ! attr SStroke c
+                                         ! attr SSize (IpeSize $ Named "large")
                           | p <- pts
                           ]
 
@@ -195,9 +210,9 @@ testIpeGraph inFp outFp = do
         out = [ iO' points
               , iO' vd
               , iO' $ theEdges gr
-              -- , iO $ sep ! attr SLayer "sep"
-              -- , iO $ as  ! attr SLayer "setA"
-              -- , iO $ bs  ! attr SLayer "setB"
+              , iO $ sep ! attr SLayer "sep"
+              , iO $ as  ! attr SLayer "setA"
+              , iO $ bs  ! attr SLayer "setB"
               ] <> [ iO' $ drawTree  t ! attr SLayer "trees"
                    | t <- bff gr ]
                 <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
