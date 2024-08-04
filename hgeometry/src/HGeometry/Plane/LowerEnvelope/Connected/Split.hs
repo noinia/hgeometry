@@ -20,7 +20,9 @@ module HGeometry.Plane.LowerEnvelope.Connected.Split
   , findNode
   , pathToTree
 
-  -- , initialSplitToTree
+  , InitialSplit(..)
+  , initialSplit
+  , initialSplitToTree
   ) where
 
 import           Control.Applicative

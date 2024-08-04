@@ -27,7 +27,11 @@ import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator
-import           HGeometry.Plane.LowerEnvelope.Connected.Split(findNode, pathToTree)
+import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Weight
+import           HGeometry.Plane.LowerEnvelope.Connected.Split (findNode, pathToTree
+                                                               , initialSplit
+                                                               , initialSplitToTree
+                                                               )
 import           HGeometry.Plane.LowerEnvelope.ConnectedNew
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
@@ -39,6 +43,7 @@ import           System.OsPath
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.Hspec.WithTempFile
+import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
@@ -128,9 +133,13 @@ spec = describe "lower envelope tests" $ do
                      Nothing    -> True
                      Just path' -> pathToTree path' == t'
                in all (findNodeSame t) predicates
-
-
-
+           prop "initialSplit identity" $
+             \(t :: Tree Int) ->
+               let allPairs = [(x,y) | x <- toList t, y <- toList t, x /= y]
+                   tw = annotate t
+                   initialSplitSame e =
+                     (getValue <$> initialSplitToTree (initialSplit e tw)) === t
+               in conjoin $ map initialSplitSame allPairs
 
 -- | Computes the vertex form of the upper envelope. The z-coordinates are still flipped.
 
@@ -207,17 +216,20 @@ testIpeGraph inFp outFp = do
         vv = voronoiVertices $ view core <$> points
         gr = toPlaneGraph $ Map.mapKeysMonotonic liftPointToPlane vd
         n  = length gr
-        (sep,Vector2 as bs) = drawSeparator $ planarSeparator gr
+        s@(sep, Vector2 as bs)   = planarSeparator gr
+        (sep',Vector2 as' bs') = drawSeparator s
         out = [ iO' points
               , iO' vd
               , iO' $ theEdges gr
-              , iO $ sep ! attr SLayer "sep"
-              , iO $ as  ! attr SLayer "setA"
-              , iO $ bs  ! attr SLayer "setB"
+              , iO $ sep' ! attr SLayer "sep"
+              , iO $ as'  ! attr SLayer "setA"
+              , iO $ bs'  ! attr SLayer "setB"
               ] <> [ iO' $ drawTree  t ! attr SLayer "trees"
                    | t <- bff gr ]
                 <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
-    it ("separator is balanced " <> show outFp) $
+    it "separator is complete" $
+      (length sep + length as + length bs) `shouldBe` n
+    it ("separator is balanced " <> show outFp <> show ("sizes",n,length as, length bs, length sep)) $
       (max (length as) (length bs) <= (2*n `div` 3)) `shouldBe` True
     it ("separator is small " <> show outFp) $
       (length sep <= 2*floor (sqrt $ fromIntegral n)) `shouldBe` True
