@@ -206,6 +206,7 @@ testIpeGraph inFp outFp = do
     let vd = voronoiDiagram' $ view core <$> points
         vv = voronoiVertices $ view core <$> points
         gr = toPlaneGraph $ Map.mapKeysMonotonic liftPointToPlane vd
+        n  = length gr
         (sep,Vector2 as bs) = drawSeparator $ planarSeparator gr
         out = [ iO' points
               , iO' vd
@@ -216,6 +217,11 @@ testIpeGraph inFp outFp = do
               ] <> [ iO' $ drawTree  t ! attr SLayer "trees"
                    | t <- bff gr ]
                 <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
+    it ("separator is balanced " <> show outFp) $
+      (max (length as) (length bs) <= (2*n `div` 3)) `shouldBe` True
+    it ("separator is small " <> show outFp) $
+      (length sep <= 2*floor (sqrt $ fromIntegral n)) `shouldBe` True
+
     goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
                (ipeFileGolden { name = outFp })
                (addStyleSheet opacitiesStyle $ singlePageFromContent out)

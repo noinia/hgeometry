@@ -30,14 +30,14 @@ import           Data.Bifunctor
 import qualified Data.Foldable as F
 import qualified Data.List as List
 import qualified Data.Map as Map
-import           Data.Maybe (mapMaybe)
+import           Data.Maybe (mapMaybe, fromMaybe)
 import           Data.Monoid (First(..))
 import           Data.Ord (comparing)
 import qualified Data.Set as Set
-import           Data.Tree
+import           Data.Tree (Tree(..))
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
-import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Weight
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Util
+import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Weight
 import           HGeometry.Vector
 
 import           Debug.Trace
@@ -107,6 +107,10 @@ collectPath = \case
                                               <> collectPath path
   where
     f = foldMap F.toList
+
+-- | Get the endpoint of the path
+endPoint :: Path a trees (NodeSplit a trees) -> a
+endPoint = foldPath (\(NodeSplit x _ _) -> x) (\_ l -> l)
 
 ----------------------------------------
 
@@ -235,14 +239,23 @@ instance Bifoldable CycleSplitPaths where
                                in f r <> h lPath <> h rPath
 
 -- | Collects the paths into a (partial) separator
-collectPaths :: CycleSplitPaths a ([Tree a]) -> ([a], Vector 2 [a])
-collectPaths = \case
-  RootSplit rs          -> ([], Vector2 [] []) --FIXME!
+collectPaths                :: (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
+                            -> CycleSplitPaths a [Tree a] -> ([a], Vector 2 [a])
+collectPaths splitChildren' = \case
+  RootSplit rs            -> collectRootSplitPath splitChildren' rs
   PathSplit r lPath rPath -> let NodeSplit sepL before  middleL = collectPath lPath
                                  NodeSplit sepR middleR after   = collectPath rPath
                              in ( r : sepL <> sepR
                                 , Vector2 (middleL <> middleR) (before <> after)
                                 )
+
+-- | the labels of the leaves at which the cyclesplit paths end. If one is a root
+-- splitpaht the root comes first.
+endPoints :: CycleSplitPaths a [Tree a] -> (a,a)
+endPoints = \case
+    RootSplit (RootBefore r path) -> (r, endPoint path)
+    RootSplit (RootAfter path r)  -> (r, endPoint path)
+    PathSplit _ lPath rPath       -> (endPoint lPath, endPoint rPath)
 
 ----------------------------------------
 
@@ -270,10 +283,23 @@ instance Bifoldable RootSplitPath where
 type RootPath a = a
 
 -- | Collect on a rootsplitPath
-collectRootSplitPath :: RootSplitPath a [Tree a] -> NodeSplit [a] [a]
-collectRootSplitPath = \case
-  RootBefore x path -> NodeSplit [x] mempty mempty <> collectPath path
-  RootAfter path x  -> NodeSplit [x] mempty mempty <> collectPath path
+collectRootSplitPath                :: (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
+                                    -> RootSplitPath a [Tree a] -> ([a], Vector 2 [a])
+collectRootSplitPath splitChildren' = fromMaybe err . \case
+    RootBefore r path -> let (NodeSplit sep inside outside, before, after) = splitPath path in
+      splitChildren' r before <&> \(Vector2 before' middle) ->
+          (r:sep, Vector2 (flatten middle <> inside) (flatten (before' <> after) <> outside))
+
+    RootAfter path r  -> let (NodeSplit sep outside inside, before, after) = splitPath path in
+      splitChildren' r after <&> \(Vector2 middle after') ->
+          (r:sep, Vector2 (flatten middle <> inside) (flatten (before <> after') <> outside))
+  where
+    err = error "collectRootSplitPath: not found!?"
+    flatten = foldMap F.toList
+
+    splitPath = \case
+      Leaf (NodeSplit _ before after)         -> (mempty,           before,after)
+      Path (NodeSplit (_,path') before after) -> (collectPath path', before, after)
 
 --------------------------------------------------------------------------------
 
@@ -491,12 +517,12 @@ planarSeparatorTree allowedWeight gr tr = go initialCycle
     -- compute the actual separator
     go :: Cycle' (Weighted' k) -> ([k], Vector 2 [k])
     go cycle'
-      | interiorWeight cycle' <= allowedWeight = toSeparator cycle'
+      | interiorWeight cycle' <= allowedWeight = toSeparator gr cycle'
       | otherwise                              =
           case getFirst $ foldMap splitCycle (commonNeighbours e gr) of
             Nothing                 -> error "planarSeparatorTree: impossible"
             Just (Weighted w' cycle'')
-              | w' <= allowedWeight -> toSeparator cycle''
+              | w' <= allowedWeight -> toSeparator gr cycle''
               | otherwise           -> go cycle''
       where
         splitCycle   :: k -> First (Weighted' (Cycle' (Weighted' k)))
@@ -513,13 +539,16 @@ interiorWeight                      :: (Num w, IsWeight w) => Cycle' (Weighted w
 interiorWeight (Split _ _ inside _) = weightOf inside
 
 -- | Turn the weighted cycle into an actual separator.
-toSeparator :: IsWeight w => Cycle' (Weighted w k) -> ([k], Vector 2 [k])
-toSeparator (Split paths before middle after) =
+toSeparator    :: Ord k => PlaneGraph k v e -> Cycle' (Weighted' k) -> ([k], Vector 2 [k])
+toSeparator gr (Split paths before middle after) =
     (sep, Vector2 (inside <> toList' middle) (outside <> toList' before <> toList' after))
   where
-    (sep, Vector2 inside outside) = bimap getV (fmap getV) $ collectPaths paths
+    (sep, Vector2 inside outside) = bimap getV (fmap getV) $ collectPaths splitChildren' paths
     toList' = getV . foldMap F.toList
     getV = fmap getValue
+
+    (_,w) = endPoints paths
+    splitChildren' = splitChildren gr (== getValue w) . getValue
 
 --------------------------------------------------------------------------------
 
