@@ -110,11 +110,9 @@ trifoldMap fa ft fl = go
 
 -- | returns the a's left, on, and right of the path
 collectPath :: Path a [Tree a] (NodeSplit a [Tree a]) -> NodeSplit [a] [a]
-collectPath = \case
-    Leaf (NodeSplit x before after)        -> NodeSplit [x] (f before) (f after)
-    Path (NodeSplit (x,path) before after) -> NodeSplit [x] (f before) (f after)
-                                              <> collectPath path
+collectPath = foldPath handle (\ns r -> handle ns <> r)
   where
+    handle (NodeSplit x before after) = NodeSplit [x] (f before) (f after)
     f = foldMap F.toList
 
 -- | Get the endpoint of the path
@@ -155,6 +153,18 @@ pathToTree' :: Path a [Tree a] (NodeSplit a [Tree a]) -> Tree a
 pathToTree' = foldPath nodeSplitToTree (\ns ch -> nodeSplitToTreeWith ns [ch])
 -- I coulud also have just used fmap nodeSplitToTree I guess. Hoping this may be slightly
 -- more efficient.
+
+-- | Computes the weight of the path on the particular side.
+pathWeight   :: (IsWeight w, Num w)
+             => Side -> Path c [Tree (Weighted w a)] (NodeSplit b [Tree (Weighted w d)]) -> w
+pathWeight s = foldPath (nodeSplitWeight s) (\ns acc -> acc + nodeSplitWeight s ns)
+
+-- | Computes the weight of a ndoesplit
+nodeSplitWeight :: (Num w, IsWeight w) => Side -> NodeSplit a [Tree (Weighted w b)] -> w
+nodeSplitWeight s (NodeSplit _ before after) = case s of
+                                                 L -> weightOf before
+                                                 R -> weightOf after
+
 
 -- | Either left or Right
 data Side = L | R deriving (Show,Eq)
@@ -263,6 +273,13 @@ collectPaths splitChildren' = \case
                                 , Vector2 (middleL <> middleR) (before <> after)
                                 )
 
+
+cycleSplitPathWeights :: (Num w, IsWeight w) => CycleSplitPaths a [Tree (Weighted w b)]-> w
+cycleSplitPathWeights = \case
+  RootSplit rs            -> rootSplitWeight rs
+  PathSplit _ lPath rPath -> pathWeight L lPath + pathWeight R rPath
+
+
 -- | the labels of the leaves at which the cyclesplit paths end. If one is a root
 -- splitpaht the root comes first.
 endPoints :: CycleSplitPaths a [Tree a] -> (a,a)
@@ -314,6 +331,12 @@ collectRootSplitPath splitChildren' = fromMaybe err . \case
     splitPath = \case
       Leaf (NodeSplit _ before after)         -> (mempty,           before,after)
       Path (NodeSplit (_,path') before after) -> (collectPath path', before, after)
+
+-- | computes the weight of the paths hanging off a rootSplit
+rootSplitWeight :: (IsWeight w, Num w) => RootSplitPath a [Tree (Weighted w b)] -> w
+rootSplitWeight = \case
+  RootBefore _ rPath -> pathWeight L rPath
+  RootAfter lPath _  -> pathWeight R lPath
 
 --------------------------------------------------------------------------------
 
@@ -566,12 +589,9 @@ planarSeparatorTree allowedWeight gr tr = go initialCycle
             splitChildren' = splitChildren getValue gr (== u) . getValue
     -- FIXME: I guess I should'n't pass e to splitLeaf' either !
 
---FIXME: I should recompute the weights after rotating the root
-
-
--- | Compute the wieght on the inside of the cycle
-interiorWeight                      :: (Num w, IsWeight w) => Cycle' (Weighted w a) -> w
-interiorWeight (Split _ _ inside _) = weightOf inside
+-- | Compute the weight on the inside of the cycle
+interiorWeight                          :: (Num w, IsWeight w) => Cycle' (Weighted w a) -> w
+interiorWeight (Split paths _ inside _) = cycleSplitPathWeights paths + weightOf inside
 
 -- | Turn the weighted cycle into an actual separator.
 toSeparator    :: Ord k => PlaneGraph k v e -> Cycle' (Weighted' k) -> ([k], Vector 2 [k])
