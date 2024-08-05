@@ -27,7 +27,6 @@ import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator
-import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Weight
 import           HGeometry.Plane.LowerEnvelope.Connected.Split (findNode, pathToTree
                                                                , initialSplit
                                                                , initialSplitToTree
@@ -136,10 +135,9 @@ spec = describe "lower envelope tests" $ do
            prop "initialSplit identity" $
              \(t :: Tree Int) ->
                let allPairs = [(x,y) | x <- toList t, y <- toList t, x /= y]
-                   tw = annotate t
                    initialSplitSame e =
-                     let s = initialSplit e tw in
-                     (treeEdges . fmap getValue $ initialSplitToTree s) === treeEdges t
+                     let s = initialSplit e t in
+                     (treeEdges $ initialSplitToTree s) === treeEdges t
                in conjoin $ map initialSplitSame allPairs
 
 -- | Computes the vertex form of the upper envelope. The z-coordinates are still flipped.
@@ -229,9 +227,10 @@ testIpeGraph inFp outFp = do
                    | t <- bff gr ]
                 <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
     it "separator is complete" $
-      (length sep + length as + length bs) `shouldBe` n
+      (Set.fromList $ sep <> as <> bs) `shouldBe` (Map.keysSet gr)
+      -- (length sep + length as + length bs) `shouldBe` n
     it ("separator is balanced " <> show outFp <> show ("sizes",n,length as, length bs, length sep)) $
-      (max (length as) (length bs) <= (2*n `div` 3)) `shouldBe` True
+      (max (length as) (length bs) <= (2*(n `div` 3))) `shouldBe` True
     it ("separator is small " <> show outFp) $
       (length sep <= 2*floor (sqrt $ fromIntegral n)) `shouldBe` True
 

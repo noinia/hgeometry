@@ -325,6 +325,10 @@ data InitialSplit a tree =
   deriving (Show,Eq)
 
 
+-- -- | Annotate the split tree with subtree weights
+-- annotateSplitTree :: InitialSplit a (Tree a) -> InitialSplit (Weighted' a) (Tree (Weighted' a))
+-- annotateSplitTree = bimap (Weighted 1) annotate
+
 -- | Transform an Initial split into a proper cycle by splitting the leaves (and the root
 -- if needed).
 toCycle                           :: (tree -> NodeSplit a [tree])
@@ -343,6 +347,10 @@ toCycle splitLeaf' splitChildren' = \case
     splitLeaves r (Vector2 lPath rPath) =
       PathSplit r (splitLeaf' <$> lPath) (splitLeaf' <$> rPath)
 
+-- | Annotates a cycle with the subtree weights.
+annotateCycle :: Cycle' a -> Cycle' (Weighted' a)
+annotateCycle = bimap (bimap (Weighted 1) (fmap annotate)) (fmap annotate)
+
 -- | Convert the initial split back into a tree.
 initialSplitToTree :: InitialSplit a (Tree a) -> Tree a
 initialSplitToTree = \case
@@ -354,19 +362,19 @@ initialSplitToTree = \case
 
 -- | the prefix should become part of the outside; in particular we put them on right of
 -- the righstmost input leaf
-splitTree                             :: (Eq a, wa ~ Weighted' a)
-                                      => (Tree wa -> NodeSplit wa [Tree wa])
-                                      -> (wa -> [Tree wa] -> Maybe (Vector 2 [Tree wa]))
+splitTree                             :: Eq a
+                                      => (Tree a -> NodeSplit a [Tree a])
+                                      -> (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
                                       -> (a,a)
-                                      -> Tree wa
-                                      -> Cycle' wa
+                                      -> Tree a
+                                      -> Cycle' a
 splitTree splitLeaf' splitChildren' e = toCycle splitLeaf' splitChildren' . initialSplit e
 
 -- | Computes the initial split.
-initialSplit         :: forall a wa. (Eq a, wa ~ Weighted' a)
-                     => (a,a) -> Tree wa -> InitialSplit wa (Tree wa)
+initialSplit         :: forall a. Eq a
+                     => (a,a) -> Tree a -> InitialSplit a (Tree a)
 initialSplit (v,w) t = maybe (error "initialSplit") reroot $
-                         findNode ((== v) . getValue) t >>= go
+                         findNode (== v) t >>= go
   where
     go = \case
       Leaf (Node u chs)                       ->
@@ -374,8 +382,8 @@ initialSplit (v,w) t = maybe (error "initialSplit") reroot $
                         Leaf $ DecendantSplit u before path after
         -- in this case we have u == v
       Path (NodeSplit (u, pathV) before after)
-        | getValue u == w -> Just . Leaf $ DecendantSplit u before pathV after
-        | otherwise       -> case findW before of
+        | u == w    -> Just . Leaf $ DecendantSplit u before pathV after
+        | otherwise -> case findW before of
             Just (NodeSplit pathW before' middle) -> let paths = Vector2 pathW pathV
                                                      in internalSplit u paths before' middle after
             Nothing -> case findW after of
@@ -383,7 +391,7 @@ initialSplit (v,w) t = maybe (error "initialSplit") reroot $
                                                       in internalSplit u paths before middle after'
               Nothing -> go pathV <&> \path' -> Path (NodeSplit (u, path') before after)
 
-    findW = findNode' ((== w) . getValue)
+    findW = findNode' (== w)
 
     internalSplit u paths before middle after =
       Just . Leaf . InternalSplit u $ Split paths before middle after
@@ -527,13 +535,14 @@ planarSeparatorTree allowedWeight gr tr = go initialCycle
     initialCycle = traceShowWith ("initialCycle",) $
       makeInsideHeaviest
       . traceShowWith ("beforeMakeHeaviest",)
-      . splitTree splitLeaf' splitChildren0 e $ annotate tr
+      . annotateCycle
+      . splitTree splitLeaf0 splitChildren0 e $ tr
 
-    splitChildren0 = splitChildren gr (== w) . getValue
+    splitLeaf0     = splitLeaf     id gr e
+    splitChildren0 = splitChildren id gr (== w)
       -- if e = (v,w), then we are splitting v's children
 
-    splitLeaf' = splitLeaf gr e
-
+    splitLeaf' = splitLeaf getValue gr e
 
     -- compute the actual separator
     go :: Cycle' (Weighted' k) -> ([k], Vector 2 [k])
@@ -554,7 +563,8 @@ planarSeparatorTree allowedWeight gr tr = go initialCycle
                      $ splitCycleAt splitLeaf' splitChildren' p cycle'
           where
             p = (== u) . getValue
-            splitChildren' = splitChildren gr (== u) . getValue
+            splitChildren' = splitChildren getValue gr (== u) . getValue
+    -- FIXME: I guess I should'n't pass e to splitLeaf' either !
 
 --FIXME: I should recompute the weights after rotating the root
 
@@ -573,7 +583,7 @@ toSeparator gr (Split paths before middle after) =
     getV = fmap getValue
 
     (_,w) = endPoints paths
-    splitChildren' = splitChildren gr (== getValue w) . getValue
+    splitChildren' = splitChildren getValue gr (== getValue w) . getValue
 
 --------------------------------------------------------------------------------
 
@@ -582,27 +592,29 @@ toSeparator gr (Split paths before middle after) =
 
 -- | Given the graph, an edge (v,w) in the graph, and a tree rooted at weither v or w
 -- split the Tree
-splitLeaf                         :: Ord k
-                                  => PlaneGraph k v e -> (k,k)
-                                  -> Tree (Weighted' k)
-                                  -> NodeSplit (Weighted' k) [Tree (Weighted' k)]
-splitLeaf gr (v',w') (Node u chs) =
-    case splitChildren gr (if getValue u == v' then (w'==) else (v'==)) (getValue u) chs of
+splitLeaf                           :: Ord k
+                                    => (a -> k)
+                                    -> PlaneGraph k v e -> (k,k)
+                                    -> Tree a
+                                    -> NodeSplit a [Tree a]
+splitLeaf f gr (v',w') (Node u chs) =
+    case splitChildren f gr (if f u == v' then (w'==) else (v'==)) (f u) chs of
       Nothing                     -> error "splitLeaf: absurd. edge not found!?"
       Just (Vector2 before after) -> NodeSplit u before after
 
 -- | Split a list of children.
 splitChildren            :: Ord k
-                         => PlaneGraph k v e
-                         -> (k -> Bool) -- ^ the node that we are searching for/splitting with
-                         -> k -- ^ the node whose children we are splitting
-                         -> [Tree (Weighted' k)] -- ^ the children of the root
-                         -> Maybe (Vector 2 [Tree (Weighted' k)])
-splitChildren gr p v chs = case List.break (p . snd) adjacencies of
+                           => (a -> k)
+                           ->  PlaneGraph k v e
+                           -> (k -> Bool) -- ^ the node that we are searching for/splitting with
+                           -> k -- ^ the node whose children we are splitting
+                           -> [Tree a] -- ^ the children of the root
+                           -> Maybe (Vector 2 [Tree a])
+splitChildren f gr p v chs = case List.break (p . snd) adjacencies of
     (before, _:after) -> Just $ Vector2 (mapMaybe fst before) (mapMaybe fst after)
     _                 -> Nothing
   where
-    adjacencies = annotateSubSet (getValue . root) chs
+    adjacencies = annotateSubSet (f . root) chs
                 $ maybe [] (Map.elems . fst) (Map.lookup v gr)
 
 
