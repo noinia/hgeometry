@@ -11,6 +11,7 @@ module Plane.LowerEnvelopeSpec
 import           Control.Lens
 import           Data.Foldable
 import           Data.Foldable1
+import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
@@ -27,10 +28,14 @@ import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator
-import           HGeometry.Plane.LowerEnvelope.Connected.Split (findNode, pathToTree
+import           HGeometry.Plane.LowerEnvelope.Connected.Split ( findNode, pathToTree
+                                                               , pathToList
                                                                , initialSplit
                                                                , initialSplitToTree
+                                                               , Split(..)
+                                                               , InitialSplit(..)
                                                                )
+-- import qualified HGeometry.Plane.LowerEnvelope.Connected.Split as Split
 import           HGeometry.Plane.LowerEnvelope.ConnectedNew
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
@@ -133,12 +138,66 @@ spec = describe "lower envelope tests" $ do
                      Just path' -> pathToTree path' == t'
                in all (findNodeSame t) predicates
            prop "initialSplit identity" $
-             \(t :: Tree Int) ->
-               let allPairs = [(x,y) | x <- toList t, y <- toList t, x /= y]
-                   initialSplitSame e =
-                     let s = initialSplit e t in
-                     (treeEdges $ initialSplitToTree s) === treeEdges t
-               in conjoin $ map initialSplitSame allPairs
+             \(t :: Tree Int) -> onAllPairs t $ \e ->
+               let s = initialSplit e t
+               in (treeEdges $ initialSplitToTree s) === treeEdges t
+           prop "initialSplit, partition" $
+             \(t0 :: Tree Int) -> let t = makeUnique t0 in onAllPairs t $ \e ->
+               let allElems    = Set.fromList $ toList t
+                   mkSet       = foldMap (foldMap Set.singleton)
+               in case initialSplit e t of
+                 DecendantSplit r before' path' after'                               ->
+                   let pathElems   = Set.fromList (pathToList path')
+                       beforeElems = mkSet before'
+                       afterElems  = mkSet after'
+                       rootElem    = Set.singleton r
+                   in formPartition allElems rootElem pathElems Set.empty
+                                             beforeElems Set.empty afterElems
+                 InternalSplit r (Split (Vector2 lPath rPath) before' middle after') ->
+                   let lPathElems  = Set.fromList $ pathToList lPath
+                       rPathElems  = Set.fromList $ pathToList rPath
+                       beforeElems = mkSet before'
+                       middleElems = mkSet middle
+                       afterElems  = mkSet after'
+                       rootElem    = Set.singleton r
+                   in formPartition allElems rootElem lPathElems rPathElems
+                                             beforeElems middleElems afterElems
+
+formPartition allElems rootElem lPathElems rPathElems
+              beforeElems middleElems afterElems  =
+  conjoin $ (allElems === Set.unions [ rootElem
+                                     , lPathElems , rPathElems
+                                     , beforeElems, middleElems, afterElems])
+  : map pairwiseDisjoint [ (rootElem,    lPathElems)
+                         , (rootElem,    rPathElems)
+                         , (rootElem,    beforeElems)
+                         , (rootElem,    middleElems)
+                         , (rootElem,    afterElems)
+                         , (lPathElems,  rPathElems)
+                         , (lPathElems,  beforeElems)
+                         , (lPathElems,  middleElems)
+                         , (lPathElems,  afterElems)
+                         , (rPathElems,  beforeElems)
+                         , (rPathElems,  middleElems)
+                         , (rPathElems,  afterElems)
+                         , (beforeElems, middleElems)
+                         , (beforeElems, afterElems)
+                         , (middleElems, afterElems)
+                         ]
+  where
+    pairwiseDisjoint (as,bs) = Set.null (Set.intersection as bs) === True
+
+
+makeUnique :: Tree Int -> Tree Int
+makeUnique = snd . go 0
+  where
+    go i (Node _ chs) = Node i <$> List.mapAccumL go (i+1) chs
+
+onAllPairs     :: Tree Int -> ((Int,Int) -> Property) -> Property
+onAllPairs t f = conjoin $ map f allPairs
+  where
+    allPairs = [(x,y) | x <- toList t, y <- toList t, x /= y]
+
 
 -- | Computes the vertex form of the upper envelope. The z-coordinates are still flipped.
 
@@ -228,11 +287,16 @@ testIpeGraph inFp outFp = do
                 <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
     it "separator is complete" $
       (Set.fromList $ sep <> as <> bs) `shouldBe` (Map.keysSet gr)
-      -- (length sep + length as + length bs) `shouldBe` n
     it ("separator is balanced " <> show outFp <> show ("sizes",n,length as, length bs, length sep)) $
       (max (length as) (length bs) <= (2*(n `div` 3))) `shouldBe` True
     it ("separator is small " <> show outFp) $
       (length sep <= 2*floor (sqrt $ fromIntegral n)) `shouldBe` True
+    it "separator is a set" $
+      length (Set.fromList sep) `shouldBe` (length sep)
+    it "A is a set" $
+      length (Set.fromList as) `shouldBe` (length as)
+    it "B is a set" $
+      length (Set.fromList bs) `shouldBe` (length bs)
 
     goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
                (ipeFileGolden { name = outFp })

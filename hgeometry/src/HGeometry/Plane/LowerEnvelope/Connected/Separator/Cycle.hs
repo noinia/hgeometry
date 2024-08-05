@@ -11,6 +11,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Plane.LowerEnvelope.Connected.Separator.Cycle
   ( Cycle(..)
+  , Cycle'
   , toCycle
   , splitTree
 
@@ -28,7 +29,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.Cycle
 
 
   , Weight
-  , Weigthed'
+  , Weighted'
   ) where
 
 import           Control.Applicative

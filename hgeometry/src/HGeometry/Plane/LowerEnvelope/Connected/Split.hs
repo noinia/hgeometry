@@ -14,6 +14,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Split
 
   , module HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
   , module HGeometry.Plane.LowerEnvelope.Connected.Separator.InitialSplit
+  , module HGeometry.Plane.LowerEnvelope.Connected.Separator.Cycle
   ) where
 
 import           Control.Applicative

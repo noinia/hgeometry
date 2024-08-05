@@ -18,15 +18,16 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
   , trimap, trifoldMap
   , foldPath
 
-  , pathToTree, pathToTree'
+  , pathToTree, pathToTree', pathToList
   , collectPath
-  , pathWeight
   , endPoint
 
   , findNode
   , findNode'
-  -- , findNodeAlongPath
+
+
   , Side(..)
+  , pathWeight
   ) where
 
 import           Control.Lens ((<&>))
@@ -118,9 +119,24 @@ collectPath = foldPath handle (\ns r -> handle ns <> r)
     handle (NodeSplit x before after) = NodeSplit [x] (f before) (f after)
     f = foldMap F.toList
 
+-- | Recombine the path into a tree
+pathToTree :: Path a [Tree a] (Tree a) -> Tree a
+pathToTree = foldPath id (\ns ch -> nodeSplitToTreeWith ns [ch])
+
+-- | Recombines a path ending in a nodesplit to a tree.
+pathToTree' :: Path a [Tree a] (NodeSplit a [Tree a]) -> Tree a
+pathToTree' = foldPath nodeSplitToTree (\ns ch -> nodeSplitToTreeWith ns [ch])
+-- I coulud also have just used fmap nodeSplitToTree I guess. Hoping this may be slightly
+-- more efficient.
+
+-- | Flatten the path into a list of elements
+pathToList :: Path a [Tree a] (Tree a) -> [a]
+pathToList = F.toList . pathToTree
+
 -- | Get the endpoint of the path
 endPoint :: Path a trees (NodeSplit a trees) -> a
 endPoint = foldPath (\(NodeSplit x _ _) -> x) (\_ l -> l)
+
 
 --------------------------------------------------------------------------------
 -- * Searching a node on a path
@@ -148,22 +164,12 @@ findNode' p = go
              path' = Path $ NodeSplit (u,path) before' after'
       Right (NodeSplit path before after) -> Right $ NodeSplit path (t:before) after
 
--- | Recombine the path into a tree
-pathToTree :: Path a [Tree a] (Tree a) -> Tree a
-pathToTree = foldPath id (\ns ch -> nodeSplitToTreeWith ns [ch])
+--------------------------------------------------------------------------------
 
--- | Recombines a path ending in a nodesplit to a tree.
-pathToTree' :: Path a [Tree a] (NodeSplit a [Tree a]) -> Tree a
-pathToTree' = foldPath nodeSplitToTree (\ns ch -> nodeSplitToTreeWith ns [ch])
--- I coulud also have just used fmap nodeSplitToTree I guess. Hoping this may be slightly
--- more efficient.
+-- | Either left or Right
+data Side = L | R deriving (Show,Eq)
 
 -- | Computes the weight of the path on the particular side.
 pathWeight   :: (IsWeight w, Num w)
              => Side -> Path c [Tree (Weighted w a)] (NodeSplit b [Tree (Weighted w d)]) -> w
 pathWeight s = foldPath (nodeSplitWeight s) (\ns acc -> acc + nodeSplitWeight s ns)
-
---------------------------------------------------------------------------------
-
--- | Either left or Right
-data Side = L | R deriving (Show,Eq)
