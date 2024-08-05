@@ -97,6 +97,9 @@ sqrt' = floor . sqrt . fromIntegral
 
 type Separator k = ([k],Vector 2 [k])
 
+
+
+
 -- | Returns a pair (separator, Vector2 verticesSubGraphA verticesSubGraphB)
 -- so that
 --
@@ -110,7 +113,7 @@ planarSeparator gr = case trees of
     []                 -> ([],Vector2 [] [])
     ((tr,m):rest)
       | m <= twoThirds -> traceShow (tr,m,n,twoThirds) $ groupComponents
-      | otherwise      -> planarSeparator' (traceShowWith ("tree",) tr) m -- we should also add the remaining vertices
+      | otherwise      -> planarSeparator' (traceShowWith ("tree",) tr) m -- FIXME: we should also add the remaining vertices
   where
     trees = List.sortOn (Down . snd) . map (\t -> (t, length t)) $ bff gr
     n     = sum $ map snd trees

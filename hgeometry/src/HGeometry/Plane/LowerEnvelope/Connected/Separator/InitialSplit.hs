@@ -32,6 +32,10 @@ data Split paths trees = Split paths trees trees trees
 instance Bifunctor Split where
   bimap f g (Split paths as bs cs) = Split (f paths) (g as) (g bs) (g cs )
 
+
+
+
+
 --------------------------------------------------------------------------------
 
 -- | Result of the initial split; we find a root split (say when w is a decentant of v)

@@ -13,6 +13,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.Weight
   ( IsWeight(..)
   , Weighted(..)
   , weightOf
+  , weightOf'
   , annotate
   ) where
 
@@ -42,7 +43,9 @@ instance IsWeight Int where
 weightOf :: (Num w, IsWeight w) => [Tree (Weighted w a)] -> w
 weightOf = sum . map (getWeight . root)
 
-
+-- | recompute get the total weight
+weightOf' :: (Num w, IsWeight w) => [Tree (Weighted w a)] -> w
+weightOf' = sum . fmap getWeight . concatMap flatten
 
 -- | Annotate tht tree with the size of the subtrees
 annotate              :: Tree k -> Tree (Weighted Int k)

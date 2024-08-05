@@ -11,6 +11,7 @@
 module HGeometry.Plane.LowerEnvelope.Connected.Split
   ( toSeparator
   , planarSeparatorTree
+  , planarSeparatorCycle
 
   , module HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
   , module HGeometry.Plane.LowerEnvelope.Connected.Separator.InitialSplit
@@ -49,17 +50,29 @@ import           Debug.Trace
 --------------------------------------------------------------------------------
 -- * Computes a planar separator
 
+
 -- | Construct a balanced separator based on the given tree. The separator hass at most
 -- 2n/3 vertices on either side, and consists of at most 2h nodes (where h) is the height
 -- of the tree.
-planarSeparatorTree                     :: forall k v e.
+planarSeparatorTree                  :: forall k v e.
+                                        ( Ord k
+                                        , Show k
+                                        )
+                                     => Weight -- ^ maximum allowed weight on the heavy -- side; i.e. the 2n/3.
+                                     -> PlaneGraph k v e -> Tree k -> ([k], Vector 2 [k])
+planarSeparatorTree allowedWeight gr = toSeparator gr . planarSeparatorCycle allowedWeight gr
+
+-- | Construct a balanced separator based on the given tree. The separator hass at most
+-- 2n/3 vertices on either side, and consists of at most 2h nodes (where h) is the height
+-- of the tree.
+planarSeparatorCycle                     :: forall k v e.
                                            ( Ord k
                                            , Show k
                                            )
                                         => Weight -- ^ maximum allowed weight on the heavy
                                                   -- side; i.e. the 2n/3.
-                                        -> PlaneGraph k v e -> Tree k -> ([k], Vector 2 [k])
-planarSeparatorTree allowedWeight gr tr = go initialCycle
+                                         -> PlaneGraph k v e -> Tree k -> Cycle' (Weighted' k)
+planarSeparatorCycle allowedWeight gr tr = go initialCycle
   where
     e@(_,w)      = traceShowWith ("(v,w)",)
                  $ Set.findMin $ graphEdges gr `Set.difference` treeEdges tr
@@ -75,16 +88,18 @@ planarSeparatorTree allowedWeight gr tr = go initialCycle
 
     splitLeaf' = splitLeaf getValue gr e
 
+    aSize c = let Vector2 as _ = snd . toSeparator gr $ c  in length as
+
     -- compute the actual separator
-    go :: Cycle' (Weighted' k) -> ([k], Vector 2 [k])
+    go :: Cycle' (Weighted' k) -> Cycle' (Weighted' k)
     go cycle'
-      | interiorWeight cycle' <= allowedWeight = toSeparator gr cycle'
+      | interiorWeight cycle' <= allowedWeight = traceShowWith ("go,weight:",interiorWeight cycle',allowedWeight,aSize cycle',) $ cycle'
       | otherwise                              =
           case getFirst $ foldMap splitCycle (commonNeighbours e gr) of
             Nothing                 -> error "planarSeparatorTree: impossible"
             Just (Weighted w' cycle'')
-              | w' <= allowedWeight -> traceShowWith ("go otherwise",cycle'',) $
-                toSeparator gr cycle''
+              | w' <= allowedWeight -> traceShowWith ("go otherwise",w',allowedWeight,aSize cycle',
+                                                     ) $ cycle''
               | otherwise           -> go cycle''
       where
         splitCycle   :: k -> First (Weighted' (Cycle' (Weighted' k)))
@@ -99,19 +114,24 @@ planarSeparatorTree allowedWeight gr tr = go initialCycle
 
 -- | Compute the weight on the inside of the cycle
 interiorWeight                          :: (Num w, IsWeight w) => Cycle' (Weighted w a) -> w
-interiorWeight (Split paths _ inside _) = cycleSplitPathWeights paths + weightOf inside
+interiorWeight (Split paths _ inside _) = cycleSplitPathWeights paths
+                                        + weightOf' inside
 
 -- | Turn the weighted cycle into an actual separator.
 toSeparator    :: Ord k => PlaneGraph k v e -> Cycle' (Weighted' k) -> ([k], Vector 2 [k])
-toSeparator gr (Split paths before middle after) =
-    (sep, Vector2 (inside <> toList' middle) (outside <> toList' before <> toList' after))
+toSeparator gr (Split paths before middle after) = bimap getV (fmap getV) $
+    (sep, Vector2 (inside  <> toList' middle)
+                  (outside <> toList' before <> toList' after)
+    )
   where
-    (sep, Vector2 inside outside) = bimap getV (fmap getV) $ collectPaths splitChildren' paths
-    toList' = getV . foldMap F.toList
+    (sep, Vector2 inside outside) = collectPaths splitChildren' paths
+    toList' = foldMap F.toList
     getV = fmap getValue
 
     (_,w) = endPoints paths
-    splitChildren' = splitChildren getValue gr (== getValue w) . getValue
+
+    splitChildren' = undefined
+    -- splitChildren' = splitChildren getValue gr (== getValue w) . getValue
 
 --------------------------------------------------------------------------------
 

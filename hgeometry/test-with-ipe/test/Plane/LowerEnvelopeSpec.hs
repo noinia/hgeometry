@@ -297,6 +297,9 @@ testIpeGraph inFp outFp = do
       length (Set.fromList as) `shouldBe` (length as)
     it "B is a set" $
       length (Set.fromList bs) `shouldBe` (length bs)
+    -- it "insideWeight == size A" $
+    --   length (Set.fromList as) `shouldBe` insideWeight sepCycle
+
 
     goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
                (ipeFileGolden { name = outFp })
