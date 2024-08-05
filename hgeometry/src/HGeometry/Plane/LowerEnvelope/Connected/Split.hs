@@ -63,7 +63,14 @@ instance (Semigroup a, Semigroup trees) => Semigroup (NodeSplit a trees) where
 instance (Monoid a, Monoid trees) => Monoid (NodeSplit a trees) where
   mempty = NodeSplit mempty mempty mempty
 
+-- | unsplit the node split into a proper Tree
+nodeSplitToTree :: NodeSplit a [Tree a] -> Tree a
+nodeSplitToTree = flip nodeSplitToTreeWith []
 
+-- | unsplit the node split into a proper Tree, adding the additional trees in the middle
+nodeSplitToTreeWith                                   :: NodeSplit a [Tree a]
+                                                      -> [Tree a] -> Tree a
+nodeSplitToTreeWith (NodeSplit u before after) middle = Node u $ before <> middle <> after
 
 -- | A path in a rose tree; the last element of the path (a Leaf) stores an l, each node
 -- in the path stores the value at that node, (and the remaining path) and the trees left
@@ -141,8 +148,13 @@ findNode' p = go
 
 -- | Recombine the path into a tree
 pathToTree :: Path a [Tree a] (Tree a) -> Tree a
-pathToTree = foldPath id (\(NodeSplit u before after) ch -> Node u $ before <> [ch] <> after)
+pathToTree = foldPath id (\ns ch -> nodeSplitToTreeWith ns [ch])
 
+-- | Recombines a path ending in a nodesplit to a tree.
+pathToTree' :: Path a [Tree a] (NodeSplit a [Tree a]) -> Tree a
+pathToTree' = foldPath nodeSplitToTree (\ns ch -> nodeSplitToTreeWith ns [ch])
+-- I coulud also have just used fmap nodeSplitToTree I guess. Hoping this may be slightly
+-- more efficient.
 
 -- | Either left or Right
 data Side = L | R deriving (Show,Eq)
@@ -422,38 +434,43 @@ type Weight = Int
 type Weighted' = Weighted Weight
 
 -- | Tries to split the cycle at the given node
-splitCycleAt                                     :: (Tree a -> NodeSplit a [Tree a])
+splitCycleAt                                     :: Show a =>
+                                                    (Tree a -> NodeSplit a [Tree a])
                                                  -> (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
                                                  -> (a -> Bool)
                                                  -> Cycle' a
                                                  -> Maybe (Vector 2 (Cycle' a))
-splitCycleAt splitLeaf' splitChildren' p (Split paths before inside after) =
+splitCycleAt splitLeaf' splitChildren' p (Split paths before inside after)
+  | traceShow ("splitCycleAt",paths,before,inside,after) False = undefined
+  | otherwise
+  =
     splitInterior <|> splitCycleAtPath splitLeaf' splitChildren' p paths before inside after
   where
-    splitInterior =  constructCycles . first (fmap splitLeaf') <$> findNode' p inside
+    splitInterior = traceShowWith ("splitInterior",) $
+      constructCycles . first (fmap splitLeaf') <$> findNode' p inside
 
-    constructCycles (NodeSplit path before' after') =
-        Vector2 (Split lPaths before              before' (after' <> after))
-                (Split rPaths (before <> before') after' after)
+    constructCycles (NodeSplit path before' after') = Vector2
+        (Split lPaths (before <> lBefore)            before' (after' <> lAfter <> after))
+        (Split rPaths (before <> rBefore <> before') after'  (rAfter <> after))
       where
-        (lPaths, rPaths) = case paths of
-          RootSplit (RootBefore r rPath) -> ( RootSplit (RootBefore r path)
-                                            , PathSplit r path rPath
-                                            )
-          RootSplit (RootAfter lPath r)  -> ( PathSplit r lPath path
-                                            , RootSplit (RootAfter path r)
-                                            )
-          PathSplit r lPath rPath        -> ( PathSplit r lPath path
-                                            , PathSplit r path rPath
-                                            )
-    -- note that in all these cases, we split at the current node. So that means
-    -- the root stays the same.
-
+        ( (lPaths, lBefore, lAfter), (rPaths, rBefore, rAfter) ) = case paths of
+          RootSplit (RootBefore r rPath) ->
+            ( (RootSplit (RootBefore r path), [],                  [pathToTree' rPath])
+            , (PathSplit r path rPath,        [],                  []                )
+            )
+          RootSplit (RootAfter lPath r)  ->
+            ( (PathSplit r lPath path,        [],                  [])
+            , (RootSplit (RootAfter path r),  [pathToTree' lPath], [])
+            )
+          PathSplit r lPath rPath        ->
+            ( (PathSplit r lPath path,        [],                  [pathToTree' rPath])
+            , (PathSplit r path rPath,        [pathToTree' lPath], [])
+            )
 
 -- | Given a predicate that indicates the node we are trying to find, looks in the
 -- subtrees hanging off of the paths/spines if we can find it, and returns the two cyclces
 -- we get by splitting the trees there.
-splitCycleAtPath :: forall a.
+splitCycleAtPath :: forall a. Show a =>
                     (Tree a -> NodeSplit a [Tree a])
                  -> (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
                  -> (a -> Bool)
@@ -467,11 +484,13 @@ splitCycleAtPath splitLeaf' splitChildren' p paths before inside after = case pa
    RootSplit (RootBefore r rPath) ->
      (combineL (RootSplit . RootBefore r))     <$>
            findNodeAlongPath splitLeaf' splitChildren' p L rPath
-   PathSplit r lPath rPath              ->
-     (combineL (\lPath' -> PathSplit r lPath' rPath)  <$>
+   PathSplit r lPath rPath              -> traceShowWith ("splitCycleAtPath, pathsplit",r,lPath,rPath,)
+     (traceShowWith ("combineL",) $
+       combineL (\lPath' -> PathSplit r lPath' rPath)  <$>
            findNodeAlongPath splitLeaf' splitChildren' p R lPath)
      <|>
-     (combineR (PathSplit r lPath)                    <$>
+     (traceShowWith ("combineR",) $
+       combineR (PathSplit r lPath)                    <$>
            findNodeAlongPath splitLeaf' splitChildren' p L rPath)
   where
     -- creates a new split, where the new split is on the left, and the updated remainder
@@ -524,16 +543,20 @@ planarSeparatorTree allowedWeight gr tr = go initialCycle
           case getFirst $ foldMap splitCycle (commonNeighbours e gr) of
             Nothing                 -> error "planarSeparatorTree: impossible"
             Just (Weighted w' cycle'')
-              | w' <= allowedWeight -> toSeparator gr cycle''
+              | w' <= allowedWeight -> traceShowWith ("go otherwise",cycle'',) $
+                toSeparator gr cycle''
               | otherwise           -> go cycle''
       where
         splitCycle   :: k -> First (Weighted' (Cycle' (Weighted' k)))
         splitCycle u = First . fmap ( F.maximumBy (comparing getWeight)
                                     . fmap (\c -> Weighted (interiorWeight c) c))
+                     $ traceShowWith ("splitCycle",u,)
                      $ splitCycleAt splitLeaf' splitChildren' p cycle'
           where
             p = (== u) . getValue
             splitChildren' = splitChildren gr (== u) . getValue
+
+--FIXME: I should recompute the weights after rotating the root
 
 
 -- | Compute the wieght on the inside of the cycle

@@ -138,7 +138,8 @@ spec = describe "lower envelope tests" $ do
                let allPairs = [(x,y) | x <- toList t, y <- toList t, x /= y]
                    tw = annotate t
                    initialSplitSame e =
-                     (getValue <$> initialSplitToTree (initialSplit e tw)) === t
+                     let s = initialSplit e tw in
+                     (treeEdges . fmap getValue $ initialSplitToTree s) === treeEdges t
                in conjoin $ map initialSplitSame allPairs
 
 -- | Computes the vertex form of the upper envelope. The z-coordinates are still flipped.
