@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  HGeometry.Plane.LowerEnvelope.Separator
+-- Module      :  HGeometry.Plane.LowerEnvelope.Separator.Split
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -12,17 +12,8 @@ module HGeometry.Plane.LowerEnvelope.Connected.Split
   ( toSeparator
   , planarSeparatorTree
 
-
-  , NodeSplit(..)
-  , Path(..)
-  , collectPath
-  , foldPath, trimap, trifoldMap
-  , findNode
-  , pathToTree
-
-  , InitialSplit(..)
-  , initialSplit
-  , initialSplitToTree
+  , module HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
+  , module HGeometry.Plane.LowerEnvelope.Connected.Separator.InitialSplit
   ) where
 
 import           Control.Applicative
@@ -38,8 +29,9 @@ import           Data.Ord (comparing)
 import qualified Data.Set as Set
 import           Data.Tree (Tree(..))
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
-import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Util
+import           HGeometry.Plane.LowerEnvelope.Connected.Separator.InitialSplit
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
+import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Util
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Weight
 import           HGeometry.Vector
 
@@ -99,17 +91,6 @@ findNodeAlongPath splitLeaf' splitChildren' p side = go
       Just (Vector2 before' middle) ->
           Split (RootSplit $ RootBefore u path) before' middle after
 
-
---------------------------------------------------------------------------------
--- * A Split
-
--- | Two paths that split the subtree into three subtrees
-data Split paths trees = Split paths trees trees trees
-  deriving (Show,Eq,Functor,Foldable)
-
-instance Bifunctor Split where
-  bimap f g (Split paths as bs cs) = Split (f paths) (g as) (g bs) (g cs )
-
 --------------------------------------------------------------------------------
 
 -- | The actual cycle
@@ -142,6 +123,7 @@ instance Bifoldable CycleSplitPaths where
     PathSplit r lPath rPath -> let h = trifoldMap f g (bifoldMap f g)
                                in f r <> h lPath <> h rPath
 
+
 -- | Collects the paths into a (partial) separator
 collectPaths                :: (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
                             -> CycleSplitPaths a [Tree a] -> ([a], Vector 2 [a])
@@ -152,8 +134,9 @@ collectPaths splitChildren' = \case
                              in ( r : sepL <> sepR
                                 , Vector2 (middleL <> middleR) (before <> after)
                                 )
+-- TODO: I don't think I need the splitChildren' here!
 
-
+-- | Computes the weights of the
 cycleSplitPathWeights :: (Num w, IsWeight w) => CycleSplitPaths a [Tree (Weighted w b)]-> w
 cycleSplitPathWeights = \case
   RootSplit rs            -> rootSplitWeight rs
@@ -193,39 +176,43 @@ instance Bifoldable RootSplitPath where
 -- | A root path itself is just the label of the root.
 type RootPath a = a
 
--- | Collect on a rootsplitPath
-collectRootSplitPath                :: (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
-                                    -> RootSplitPath a [Tree a] -> ([a], Vector 2 [a])
-collectRootSplitPath splitChildren' = fromMaybe err . \case
-    RootBefore r path -> let (NodeSplit sep inside outside, before, after) = splitPath path in
-      splitChildren' r before <&> \(Vector2 before' middle) ->
-          (r:sep, Vector2 (flatten middle <> inside) (flatten (before' <> after) <> outside))
-
-    RootAfter path r  -> let (NodeSplit sep outside inside, before, after) = splitPath path in
-      splitChildren' r after <&> \(Vector2 middle after') ->
-          (r:sep, Vector2 (flatten middle <> inside) (flatten (before <> after') <> outside))
-  where
-    err = error "collectRootSplitPath: not found!?"
-    flatten = foldMap F.toList
-
-    splitPath = \case
-      Leaf (NodeSplit _ before after)         -> (mempty,           before,after)
-      Path (NodeSplit (_,path') before after) -> (collectPath path', before, after)
-
 -- | computes the weight of the paths hanging off a rootSplit
 rootSplitWeight :: (IsWeight w, Num w) => RootSplitPath a [Tree (Weighted w b)] -> w
 rootSplitWeight = \case
   RootBefore _ rPath -> pathWeight L rPath
   RootAfter lPath _  -> pathWeight R lPath
 
---------------------------------------------------------------------------------
+-- | Collect on a rootsplitPath
+collectRootSplitPath                :: (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
+                                    -> RootSplitPath a [Tree a] -> ([a], Vector 2 [a])
+collectRootSplitPath _ = \case
+    RootBefore r     rPath -> let NodeSplit sep inside outside = collectPath rPath
+                              in (r:sep, Vector2 inside outside)
+    RootAfter  lPath r     -> let NodeSplit sep outside inside = collectPath lPath
+                              in (r:sep, Vector2 inside outside)
 
--- | Result of the initial split; we find a root split (say when w is a decentant of v)
--- or a proper node split.
-data InitialSplit a tree =
-    DecendantSplit a [tree] (Path a [tree] tree) [tree]
-  | InternalSplit a (Split (Vector 2 (Path a [tree] tree)) [tree])
-  deriving (Show,Eq)
+
+-- -- | Collect on a rootsplitPath
+-- collectRootSplitPath                :: (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
+--                                     -> RootSplitPath a [Tree a] -> ([a], Vector 2 [a])
+-- collectRootSplitPath splitChildren' = fromMaybe err . \case
+--     RootBefore r path -> let (NodeSplit sep inside outside, before, after) = splitPath path in
+--       splitChildren' r before <&> \(Vector2 before' middle) ->
+--           (r:sep, Vector2 (flatten middle <> inside) (flatten (before' <> after) <> outside))
+
+--     RootAfter path r  -> let (NodeSplit sep outside inside, before, after) = splitPath path in
+--       splitChildren' r after <&> \(Vector2 middle after') ->
+--           (r:sep, Vector2 (flatten middle <> inside) (flatten (before <> after') <> outside))
+--   where
+--     err = error "collectRootSplitPath: not found!?"
+--     flatten = foldMap F.toList
+
+--     splitPath = \case
+--       Leaf (NodeSplit _ before after)         -> (mempty,           before,after)
+--       Path (NodeSplit (_,path') before after) -> (collectPath path', before, after)
+
+
+--------------------------------------------------------------------------------
 
 
 -- -- | Annotate the split tree with subtree weights
@@ -254,15 +241,8 @@ toCycle splitLeaf' splitChildren' = \case
 annotateCycle :: Cycle' a -> Cycle' (Weighted' a)
 annotateCycle = bimap (bimap (Weighted 1) (fmap annotate)) (fmap annotate)
 
--- | Convert the initial split back into a tree.
-initialSplitToTree :: InitialSplit a (Tree a) -> Tree a
-initialSplitToTree = \case
-  DecendantSplit u before path after -> Node u (before <> [pathToTree path] <> after)
-  InternalSplit u (Split (Vector2 lPath rPath) before middle after) ->
-    Node u (before <> [pathToTree lPath] <> middle <> [pathToTree rPath] <> after)
 
 --------------------------------------------------------------------------------
-
 -- | the prefix should become part of the outside; in particular we put them on right of
 -- the righstmost input leaf
 splitTree                             :: Eq a
@@ -272,58 +252,6 @@ splitTree                             :: Eq a
                                       -> Tree a
                                       -> Cycle' a
 splitTree splitLeaf' splitChildren' e = toCycle splitLeaf' splitChildren' . initialSplit e
-
--- | Computes the initial split.
-initialSplit         :: forall a. Eq a
-                     => (a,a) -> Tree a -> InitialSplit a (Tree a)
-initialSplit (v,w) t = maybe (error "initialSplit") reroot $
-                         findNode (== v) t >>= go
-  where
-    go = \case
-      Leaf (Node u chs)                       ->
-        findW chs <&> \(NodeSplit path before after) ->
-                        Leaf $ DecendantSplit u before path after
-        -- in this case we have u == v
-      Path (NodeSplit (u, pathV) before after)
-        | u == w    -> Just . Leaf $ DecendantSplit u before pathV after
-        | otherwise -> case findW before of
-            Just (NodeSplit pathW before' middle) -> let paths = Vector2 pathW pathV
-                                                     in internalSplit u paths before' middle after
-            Nothing -> case findW after of
-              Just (NodeSplit pathW middle after') -> let paths = Vector2 pathV pathW
-                                                      in internalSplit u paths before middle after'
-              Nothing -> go pathV <&> \path' -> Path (NodeSplit (u, path') before after)
-
-    findW = findNode' (== w)
-
-    internalSplit u paths before middle after =
-      Just . Leaf . InternalSplit u $ Split paths before middle after
-
--- | Given a path to some split node; reroot the split so that the node the path leads to
--- essentially becomes the root of the tree.
-reroot :: Path a [Tree a] (InitialSplit a (Tree a)) -> InitialSplit a (Tree a)
-reroot = go []
-  where
-    addBefore up = \case
-      DecendantSplit x before path after -> DecendantSplit x (up <> before) path after
-      InternalSplit x (Split paths before middle after) ->
-        InternalSplit x (Split paths (up <> before) middle after)
-
-    go up = \case
-      Leaf ns                                -> addBefore up ns
-      Path (NodeSplit (u,path) before after) -> go [Node u (after <> up <> before)] path
-
-
--- reroot :: Path a [Tree a] (NodeSplit a [Tree a]) -> NodeSplit a [Tree a]
--- reroot = go []
---   where
---     addBefore up = \case
---       NodeSplit x before after -> NodeSplit x (up <> before) after
-
---     go up = \case
---       Leaf ns                                -> addBefore up ns
---       Path (NodeSplit (u,path) before after) -> go [Node u (after <> up <> before)] path
-
 
 
 -- | Makes sure that the inside of the cycle is heaviest.
@@ -484,9 +412,6 @@ toSeparator gr (Split paths before middle after) =
 
     (_,w) = endPoints paths
     splitChildren' = splitChildren getValue gr (== getValue w) . getValue
-
---------------------------------------------------------------------------------
-
 
 --------------------------------------------------------------------------------
 
