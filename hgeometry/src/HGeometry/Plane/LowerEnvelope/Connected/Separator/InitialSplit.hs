@@ -16,29 +16,16 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.InitialSplit
   , initialSplitToTree
   ) where
 
-import           Control.Applicative
 import           Control.Lens ((<&>))
-import           Data.Bifoldable
 import           Data.Bifunctor
-import qualified Data.Foldable as F
-import qualified Data.List as List
-import qualified Data.Map as Map
-import           Data.Maybe (mapMaybe, fromMaybe)
-import           Data.Monoid (First(..))
-import           Data.Ord (comparing)
-import qualified Data.Set as Set
 import           Data.Tree (Tree(..))
-import           HGeometry.Plane.LowerEnvelope.Connected.Graph
-import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Util
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
-import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Weight
 import           HGeometry.Vector
-
 
 --------------------------------------------------------------------------------
 -- * A Split
 
--- | Two paths that split the subtree into three subtrees
+-- | Two paths that split the subtree into three subtrees.
 data Split paths trees = Split paths trees trees trees
   deriving (Show,Eq,Functor,Foldable)
 
@@ -46,7 +33,6 @@ instance Bifunctor Split where
   bimap f g (Split paths as bs cs) = Split (f paths) (g as) (g bs) (g cs )
 
 --------------------------------------------------------------------------------
-
 
 -- | Result of the initial split; we find a root split (say when w is a decentant of v)
 -- or a proper node split.
@@ -62,8 +48,9 @@ initialSplitToTree = \case
   InternalSplit u (Split (Vector2 lPath rPath) before middle after) ->
     Node u (before <> [pathToTree lPath] <> middle <> [pathToTree rPath] <> after)
 
-
--- | Computes the initial split.
+-- | Given two elements, computes a split of the tree by the paths to these two
+-- elements. Moreover, we reroot the tree so that the node where the paths join becomes
+-- the node represented by the split.
 initialSplit         :: forall a. Eq a
                      => (a,a) -> Tree a -> InitialSplit a (Tree a)
 initialSplit (v,w) t = maybe (error "initialSplit") reroot $
@@ -78,6 +65,7 @@ initialSplit (v,w) t = maybe (error "initialSplit") reroot $
         | u == w    -> Just . Leaf $ DecendantSplit u before pathV after
         | otherwise -> case findW before of
             Just (NodeSplit pathW before' middle) -> let paths = Vector2 pathW pathV
+            -- FIXME: we should empty the first pathW's I think
                                                      in internalSplit u paths before' middle after
             Nothing -> case findW after of
               Just (NodeSplit pathW middle after') -> let paths = Vector2 pathV pathW
@@ -88,6 +76,8 @@ initialSplit (v,w) t = maybe (error "initialSplit") reroot $
 
     internalSplit u paths before middle after =
       Just . Leaf . InternalSplit u $ Split paths before middle after
+
+-- TODO, Verify: I guess the first nodes of thw two paths should have empty before's and afters.
 
 -- | Given a path to some split node; reroot the split so that the node the path leads to
 -- essentially becomes the root of the tree.
