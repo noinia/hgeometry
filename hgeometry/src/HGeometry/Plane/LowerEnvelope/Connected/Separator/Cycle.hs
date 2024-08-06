@@ -14,6 +14,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.Cycle
   , Cycle'
   , toCycle
   , splitTree
+  , missingEdge
 
   , annotateCycle
   , makeInsideHeaviest
@@ -51,6 +52,10 @@ import           Debug.Trace
 -- | The actual cycle
 type Cycle a trees = Split (CycleSplitPaths a trees) trees
 type Cycle' a = Cycle a [Tree a]
+
+-- | The edge in the cycle that is not explicitly represented
+missingEdge                     :: Cycle a [Tree a] -> (a, a)
+missingEdge (Split paths _ _ _) = endPoints' paths
 
 ----------------------------------------
 
@@ -396,11 +401,11 @@ splitCycleAtPath splitLeaf splitChildren p (Split paths before middle after) =
                      (InternalSplit u (Split (Vector2 lPath' rPath') before middle after))
 
     splitRightPath = case paths of
-      RootSplit (RootBefore u rPath) -> findNodeAlongPath p R rPath <&> \(rSplit,rPath') ->
+      RootSplit (RootBefore u rPath) -> findNodeAlongPath p L rPath <&> \(rSplit,rPath') ->
                 Vector2 (DecendantSplit u (before <> middle) rPath' after)
                         rSplit
       RootSplit (RootAfter _ _)      -> Nothing -- there is no right path to split
-      PathSplit u lPath rPath        -> findNodeAlongPath p R rPath <&> \(rSplit,rPath') ->
+      PathSplit u lPath rPath        -> findNodeAlongPath p L rPath <&> \(rSplit,rPath') ->
           let lPath' = nodeSplitToTree <$> lPath
           in Vector2 (InternalSplit u (Split (Vector2 lPath' rPath') before middle after))
                      rSplit

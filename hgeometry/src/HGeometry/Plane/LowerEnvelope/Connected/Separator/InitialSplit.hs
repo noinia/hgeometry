@@ -116,7 +116,7 @@ reroot = go []
 
 -- | Search along a path; we search among the nodees on the path and in the subtrees
 -- hanging off the path on the given side.
-findNodeAlongPath        :: forall a.
+findNodeAlongPath        :: forall a. Show a =>
                             (a -> Bool)
                          -> Side -- ^ indicates which subtrees to search
                          -> Path a [Tree a] (NodeSplit a [Tree a])
@@ -132,7 +132,9 @@ findNodeAlongPath p side = snd . foldPath leaf node
       where
         t = Node u $ before <> after
         res
-          | p u = Just ( DecendantSplit u before (error "findNodeAlongPath") after
+          | p u = Just ( DecendantSplit u before
+                                          (error $ "findNodeAlongPath " <> show u)
+                                          after
                        , Leaf t
                        )
           | otherwise = first snd <$> here ns undefined

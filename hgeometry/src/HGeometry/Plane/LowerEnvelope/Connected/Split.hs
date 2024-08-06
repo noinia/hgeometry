@@ -91,7 +91,10 @@ planarSeparatorCycle allowedWeight gr tr = go initialCycle
     go cycle'
       | interiorWeight cycle' <= allowedWeight = traceShowWith ("go,weight:",interiorWeight cycle',allowedWeight,aSize cycle',) $ cycle'
       | otherwise                              =
-          case getFirst $ foldMap splitCycle (commonNeighbours e gr) of
+          case getFirst $ foldMap splitCycle (traceShowWith ( "commonNeighs"
+                                                            ,missingEdge' cycle',
+                                                            )
+                                               $ commonNeighbours (missingEdge' cycle') gr) of
             Nothing                 -> error "planarSeparatorTree: impossible"
             Just (Weighted w' cycle'')
               | w' <= allowedWeight -> traceShowWith ("go otherwise",w',allowedWeight,aSize cycle',
@@ -102,10 +105,20 @@ planarSeparatorCycle allowedWeight gr tr = go initialCycle
         splitCycle u = First . fmap ( F.maximumBy (comparing getWeight)
                                     . fmap (\c -> Weighted (interiorWeight c) c))
                      $ traceShowWith ("splitCycle",u,)
-                     $ splitCycleAt splitLeaf1 splitChildren1 p cycle'
+                     $ splitCycleAt splitLeaf1 splitChildren1 p
+                     $ traceShowWith (\c -> ("splitting cycle with", u, "the Cycle"
+                                            , missingEdge' c)
+                                     )
+                       cycle'
           where
             p = (== u) . getValue
             splitChildren1 = splitChildren getValue gr
+
+-- | Computes the missing edge in a weighted cycle
+missingEdge'   :: IsWeight w => Cycle (Weighted w k) [Tree (Weighted w k)] -> (k, k)
+missingEdge' c = let (u,v) = missingEdge c
+                 in (getValue u, getValue v)
+
 
 -- | Compute the weight on the inside of the cycle
 interiorWeight                          :: (Num w, IsWeight w) => Cycle' (Weighted w a) -> w
