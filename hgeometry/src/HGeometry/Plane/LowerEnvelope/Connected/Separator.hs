@@ -17,6 +17,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator
 
 
   , treeEdges
+  , graphEdges
   ) where
 
 import qualified Data.Foldable as F

@@ -21,10 +21,12 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.InitialSplit
 import Control.Applicative
 import Control.Lens ((<&>))
 import Data.Bifunctor
+import Data.Maybe (maybeToList)
 import Data.Tree (Tree(..))
 import HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
 import HGeometry.Vector
 
+-- import Debug.Trace
 --------------------------------------------------------------------------------
 -- * A Split
 
@@ -123,32 +125,35 @@ findNodeAlongPath        :: forall a. Show a =>
                          -> Maybe ( InitialSplit a (Tree a)
                                   , Path a [Tree a] (Tree a)
                                   )
-findNodeAlongPath p side = snd . foldPath leaf node
+findNodeAlongPath p side = fmap (first reroot) . snd . foldPath leaf node
   where
     leaf :: NodeSplit a [Tree a] -> ( Path a [Tree a] (Tree a) -- old path
-                                    , Maybe ( InitialSplit a (Tree a)
+                                    , Maybe ( Path a [Tree a] (InitialSplit a (Tree a))
                                             , Path a [Tree a] (Tree a))) -- new path
     leaf ns@(NodeSplit u before after) = (Leaf t, res)
       where
         t = Node u $ before <> after
         res
-          | p u = Just ( DecendantSplit u before
-                                          (error $ "findNodeAlongPath " <> show u)
-                                          after
+          | p u = Just ( Leaf $ DecendantSplit u before
+                                                 (error $ "findNodeAlongPath " <> show u)
+                                                 after
                        , Leaf t
                        )
-          | otherwise = first snd <$> here ns undefined
-                        -- note the undefined is intentional here
+          | otherwise = here ns Nothing
 
     node ns@(NodeSplit u before after) (oldPath,res) =
         ( pathNode (u, oldPath) before after, res')
       where
         res'
-          | p u       = Just ( DecendantSplit u before oldPath after
-                             , Leaf $ Node u $ before <> after
+          | p u       = Just ( Leaf $ DecendantSplit u before oldPath after
+                             , Leaf $ Node u $ before <> [pathToTree oldPath] <> after
                              )
-          | otherwise = (first fst <$> here ns oldPath) <|> (extend <$> res)
-        extend = fmap (\newPath -> pathNode (u,newPath) before after)
+          | otherwise = extend <$> ((here ns (Just oldPath)) <|> res)
+        extend = bimap extend' extend'
+        extend'         :: Path a [Tree a] l -> Path a [Tree a] l
+        extend' newPath = pathNode (u,newPath) before after
+
+    pathToTree'' = fmap pathToTree . maybeToList
 
     -- Tries to search here. If found, returns a tuple in which the first element
     -- represnets the new split, and the second element is the new path. I.e. the path to
@@ -156,20 +161,23 @@ findNodeAlongPath p side = snd . foldPath leaf node
     -- as if it was an internal split and if it was a decentand split. This way we can use
     -- this function for both the node and the leaf case.
     here :: NodeSplit a [Tree a]
-         -> Path a [Tree a] (Tree a)
-         -> Maybe ( (InitialSplit a (Tree a), InitialSplit a (Tree a))
-                  , Path a [Tree a] (Tree a))
-    here (NodeSplit u before after) oldPath = case side of
+         -> Maybe (Path a [Tree a] (Tree a))
+         -> Maybe ( Path a [Tree a] (InitialSplit a (Tree a)), Path a [Tree a] (Tree a))
+    here (NodeSplit u before after) mOldPath = case side of
         L -> findNode' p before <&> \(NodeSplit path' before' after') ->
-               ( ( InternalSplit u (Split (Vector2 path' oldPath) before' after' after)
-                 , DecendantSplit u before' path' after'
-                 )
-               , Path $ NodeSplit (u, path') before' (after' <> after)
-               )
+               (Leaf $ case mOldPath of
+                     Nothing      -> DecendantSplit u before' path' (after' <> after)
+                     Just oldPath ->
+                       InternalSplit u (Split (Vector2 path' oldPath) before' after' after)
+               , Path $ NodeSplit (u, path') before' (after' <> pathToTree'' mOldPath <> after)
+              )
         -- Search on the left; i.e. in the before part
         R -> findNode' p after <&> \(NodeSplit path' before' after') ->
-              ( ( InternalSplit u (Split (Vector2 oldPath path') before before' after')
-                , DecendantSplit u before' path' after'
-                )
-              , Path $ NodeSplit (u, path') (before <> before') after'
+              (Leaf $ case mOldPath of
+                 Nothing      -> DecendantSplit u (before <> before') path' after'
+                 Just oldPath ->
+                   InternalSplit u (Split (Vector2 oldPath path') before before' after')
+              , Path $ NodeSplit (u, path') (before <> pathToTree'' mOldPath <> before') after'
               )
+
+-- seems that the root eelm gets ignored

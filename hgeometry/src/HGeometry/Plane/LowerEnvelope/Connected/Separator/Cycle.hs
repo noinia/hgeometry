@@ -38,6 +38,8 @@ import           Control.Applicative
 import           Control.Lens ((<&>))
 import           Data.Bifoldable
 import           Data.Bifunctor
+import qualified Data.Foldable as F
+import qualified Data.Set as Set
 import           Data.Tree (Tree(..))
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.InitialSplit
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
@@ -56,6 +58,11 @@ type Cycle' a = Cycle a [Tree a]
 -- | The edge in the cycle that is not explicitly represented
 missingEdge                     :: Cycle a [Tree a] -> (a, a)
 missingEdge (Split paths _ _ _) = endPoints' paths
+
+-- | Collects all 'a's
+collectAll                        :: Cycle' a -> [a]
+collectAll (Split paths bs ms as) = collectAllPaths paths <> flatten (bs <> ms <> as)
+
 
 ----------------------------------------
 
@@ -83,6 +90,10 @@ instance Bifoldable CycleSplitPaths where
     PathSplit r lPath rPath -> let h = trifoldMap f g (bifoldMap f g)
                                in f r <> h lPath <> h rPath
 
+
+collectAllPaths       :: CycleSplitPaths a [Tree a] -> [a]
+collectAllPaths paths = let (sep,Vector2 inside outside) = collectPaths undefined paths
+                        in sep <> inside <> outside
 
 -- | Collects the paths into a (partial) separator
 collectPaths                :: (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
@@ -178,12 +189,14 @@ collectRootSplitPath _ = \case
 --           (r:sep, Vector2 (flatten middle <> inside) (flatten (before <> after') <> outside))
 --   where
 --     err = error "collectRootSplitPath: not found!?"
---     flatten = foldMap F.toList
+--
 
 --     splitPath = \case
 --       Leaf (NodeSplit _ before after)         -> (mempty,           before,after)
 --       Path (NodeSplit (_,path') before after) -> (collectPath path', before, after)
 
+flatten :: [Tree a] -> [a]
+flatten = foldMap F.toList
 
 --------------------------------------------------------------------------------
 
@@ -319,10 +332,21 @@ findNodeAlongPath splitLeaf splitChildren p side =
 --------------------------------------------------------------------------------
 -- * Splitting a Cycle
 
+verify          :: (Ord a, Show a)
+                => String -> Cycle' a -> Maybe (Vector 2 (Cycle' a)) -> Maybe (Vector 2 (Cycle' a))
+verify l0 oldSplit = fmap (\(Vector2 s1 s2) -> Vector2 (verify' (l0 <> "LEFT")  oldSplit s1)
+                                                       (verify' (l0 <> "RIGHT") oldSplit s2)
+
+                          )
+verify'          :: (Ord a, Show a)
+                => String -> Cycle' a -> Cycle' a -> Cycle' a
+verify' l oldSplit s = traceShow ("VERIFY", l, collectAll' oldSplit == collectAll' s) s
+  where
+    collectAll' = Set.fromList . collectAll
 
 -- | Tries to split the cycle at the given node
 splitCycleAt                                     :: forall a.
-                                                    Show a =>
+                                                    (Show a, Ord a) =>
                                                     LeafSplitF a -> ChildrenSplitF a
                                                  -> (a -> Bool)
                                                  -> Cycle' a
@@ -333,7 +357,8 @@ splitCycleAt splitLeaf splitChildren p theSplit@(Split paths before inside after
     where
     (l,r) = endPoints paths -- the endpoints of the two paths
 
-    splitInterior = traceShowWith ("splitInterior",) $ constructCycles <$> findNode' p inside
+    splitInterior = traceShowWith ("splitInterior",)
+                  . verify "INTERIOR" theSplit $ constructCycles <$> findNode' p inside
 
     constructCycles :: NodeSplit (Path a [Tree a] (Tree a)) [Tree a]
                     -> Vector 2 (Cycle a [Tree a])
@@ -380,27 +405,28 @@ splitCycleAt splitLeaf splitChildren p theSplit@(Split paths before inside after
 -- | Given a predicate that indicates the node we are trying to find, looks in the
 -- subtrees hanging off of the paths/spines if we can find it, and returns the two cyclces
 -- we get by splitting the trees there.
-splitCycleAtPath :: forall a. Show a =>
+splitCycleAtPath :: forall a. (Show a, Ord a) =>
                     LeafSplitF a -> ChildrenSplitF a
                  -> (a -> Bool)
                  -> Cycle' a
                  -> Maybe (Vector 2 (Cycle' a))
-splitCycleAtPath splitLeaf splitChildren p (Split paths before middle after) =
-    fmap toCycle' <$> (splitLeftPath <|> splitRightPath)
+splitCycleAtPath splitLeaf splitChildren p old@(Split paths before middle after) =
+    verify "PATH" old $ fmap toCycle' <$> (splitLeftPath <|> splitRightPath)
   where
     toCycle' = toCycle splitLeaf splitChildren
 
-    splitLeftPath = case paths of
+    splitLeftPath = traceShowWith ("splitLeftPath",paths,) $ case paths of
       RootSplit (RootBefore _ _)     -> Nothing -- there is no left path to split
       RootSplit (RootAfter lPath u)  -> findNodeAlongPath p R lPath <&> \(lSplit,lPath') ->
                 Vector2 lSplit
                         (DecendantSplit u before lPath' (middle <> after))
-      PathSplit u lPath rPath        -> findNodeAlongPath p R lPath <&> \(lSplit,lPath') ->
+      PathSplit u lPath rPath        -> traceShowWith ("pathSplit",) $
+        findNodeAlongPath p R lPath <&> \(lSplit,lPath') ->
           let rPath' = nodeSplitToTree <$> rPath
           in Vector2 lSplit
                      (InternalSplit u (Split (Vector2 lPath' rPath') before middle after))
 
-    splitRightPath = case paths of
+    splitRightPath = traceShowWith ("splitRightPath", paths,) $ case paths of
       RootSplit (RootBefore u rPath) -> findNodeAlongPath p L rPath <&> \(rSplit,rPath') ->
                 Vector2 (DecendantSplit u (before <> middle) rPath' after)
                         rSplit

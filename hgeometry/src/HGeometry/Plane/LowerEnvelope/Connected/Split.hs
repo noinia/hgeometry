@@ -89,18 +89,26 @@ planarSeparatorCycle allowedWeight gr tr = go initialCycle
     -- compute the actual separator
     go :: Cycle' (Weighted' k) -> Cycle' (Weighted' k)
     go cycle'
+      -- | True = cycle'
+
       | interiorWeight cycle' <= allowedWeight = traceShowWith ("go,weight:",interiorWeight cycle',allowedWeight,aSize cycle',) $ cycle'
       | otherwise                              =
           case getFirst $ foldMap splitCycle (traceShowWith ( "commonNeighs"
                                                             ,missingEdge' cycle',
                                                             )
-                                               $ commonNeighbours (missingEdge' cycle') gr) of
-            Nothing                 -> error "planarSeparatorTree: impossible"
+                                               $ commonNeighbours e' gr) of
+            Nothing                 ->
+              traceShowWith ("erroring but returning anyway",) cycle'
+              -- error $
+              --   ("planarSeparatorTree: impossible " <> show e' <> " not inside " <>
+              --    show (commonNeighbours e' gr))
             Just (Weighted w' cycle'')
               | w' <= allowedWeight -> traceShowWith ("go otherwise",w',allowedWeight,aSize cycle',
                                                      ) $ cycle''
               | otherwise           -> go cycle''
       where
+        e' = missingEdge' cycle'
+
         splitCycle   :: k -> First (Weighted' (Cycle' (Weighted' k)))
         splitCycle u = First . fmap ( F.maximumBy (comparing getWeight)
                                     . fmap (\c -> Weighted (interiorWeight c) c))

@@ -177,7 +177,7 @@ findNode' p = go
 --------------------------------------------------------------------------------
 
 -- | Either left or Right
-data Side = L | R deriving (Show,Eq)
+data Side = L | R deriving (Show,Eq,Enum,Bounded)
 
 -- | Computes the weight of the path on the particular side.
 pathWeight   :: (IsWeight w, Num w)

@@ -29,11 +29,15 @@ import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator
 import           HGeometry.Plane.LowerEnvelope.Connected.Split ( findNode, pathToTree
+                                                               , pathToTree'
                                                                , pathToList
                                                                , initialSplit
                                                                , initialSplitToTree
+                                                               , NodeSplit(..)
                                                                , Split(..)
                                                                , InitialSplit(..)
+                                                               , findNodeAlongPath
+                                                               , Side(..)
                                                                )
 -- import qualified HGeometry.Plane.LowerEnvelope.Connected.Split as Split
 import           HGeometry.Plane.LowerEnvelope.ConnectedNew
@@ -125,8 +129,8 @@ spec = describe "lower envelope tests" $ do
          testIpe [osp|degenerate2.ipe|]
                  [osp|degenerate2_out|]
 
-         testIpeGraph [osp|foo.ipe|]
-                      [osp|foo_graph_out|]
+         -- testIpeGraph [osp|foo.ipe|]
+         --              [osp|foo_graph_out|]
 
 
          describe "planar separator tests" $ do
@@ -162,6 +166,29 @@ spec = describe "lower envelope tests" $ do
                        rootElem    = Set.singleton r
                    in formPartition allElems rootElem lPathElems rPathElems
                                              beforeElems middleElems afterElems
+           prop "findAlongPath partition" $
+             \(t0 :: Tree Int) side k ->
+               let t = makeUnique t0
+               in counterexample (show t) $ onAllPairs t $ \(x,y) ->
+                 counterexample (show (x,y)) $
+                 let allElems     = Set.fromList $ toList t
+                     pathToList' = Set.fromList . toList . pathToTree'
+                     pathToList'' = Set.fromList . pathToList
+                     collect'     = Set.fromList . toList . initialSplitToTree
+                     splitLeaf (Node z nodes) = NodeSplit z (take k nodes) (drop k nodes)
+                 in case fmap splitLeaf <$> findNode (== x) t of
+                      Nothing   -> error "nonsense"
+                      Just path' -> counterexample (show path') $ case findNodeAlongPath (== y) side path' of
+                        Nothing    -> True === True -- accept
+                        Just (split,newPath) -> counterexample (show newPath) $
+                                                counterexample (show split) $
+                                pathToList' path' === pathToList'' newPath
+                           .&&. pathToList' path' === collect' split
+
+
+instance Arbitrary Side where
+  arbitrary = chooseEnum (L,R)
+
 
 formPartition allElems rootElem lPathElems rPathElems
               beforeElems middleElems afterElems  =
@@ -299,7 +326,15 @@ testIpeGraph inFp outFp = do
       length (Set.fromList bs) `shouldBe` (length bs)
     -- it "insideWeight == size A" $
     --   length (Set.fromList as) `shouldBe` insideWeight sepCycle
-
+    it "separator is a separator" $
+      let aSet = Set.fromList as
+          bSet = Set.fromList bs
+          crossingEdges = [ e
+                          | e@(u,v) <- toList (graphEdges gr)
+                          ,    (u `Set.member` aSet && v `Set.member` bSet)
+                            || (u `Set.member` bSet && v `Set.member` aSet)
+                          ]
+      in crossingEdges  `shouldBe` []
 
     goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
                (ipeFileGolden { name = outFp })

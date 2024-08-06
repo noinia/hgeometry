@@ -30,7 +30,7 @@ class IsWeight w where
   getValue  :: Weighted w a -> a
 
 instance IsWeight Int where
-  data Weighted Int a = Weighted {-#UNPACK#-}!Int a deriving (Show,Eq,Functor)
+  data Weighted Int a = Weighted {-#UNPACK#-}!Int a deriving (Show,Eq,Ord,Functor)
   getWeight (Weighted w _) = w
   getValue  (Weighted _ x) = x
 
