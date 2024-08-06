@@ -129,8 +129,8 @@ spec = describe "lower envelope tests" $ do
          testIpe [osp|degenerate2.ipe|]
                  [osp|degenerate2_out|]
 
-         -- testIpeGraph [osp|foo.ipe|]
-         --              [osp|foo_graph_out|]
+         testIpeGraph [osp|foo.ipe|]
+                      [osp|foo_graph_out|]
 
 
          describe "planar separator tests" $ do
