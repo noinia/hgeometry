@@ -11,10 +11,12 @@
 --------------------------------------------------------------------------------
 module HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
   ( NodeSplit(..)
+  , splitRoot
   , nodeSplitToTree
   , nodeSplitToTreeWith
 
   , Path(..)
+  , pathNode
   , trimap, trifoldMap
   , foldPath
 
@@ -57,6 +59,10 @@ instance (Semigroup a, Semigroup trees) => Semigroup (NodeSplit a trees) where
 instance (Monoid a, Monoid trees) => Monoid (NodeSplit a trees) where
   mempty = NodeSplit mempty mempty mempty
 
+-- | Retrieve the splitting value
+splitRoot                   :: NodeSplit a trees -> a
+splitRoot (NodeSplit x _ _) = x
+
 -- | Computes the weight of a ndoesplit
 nodeSplitWeight :: (Num w, IsWeight w) => Side -> NodeSplit a [Tree (Weighted w b)] -> w
 nodeSplitWeight s (NodeSplit _ before after) = case s of
@@ -80,6 +86,10 @@ nodeSplitToTreeWith (NodeSplit u before after) middle = Node u $ before <> middl
 data Path a trees l = Leaf l
                     | Path (NodeSplit (a,Path a trees l) trees)
                     deriving (Show,Eq)
+
+-- | Smart constructor for construcing a path node
+pathNode                :: (a,Path a trees l) -> trees -> trees -> Path a trees l
+pathNode t before after = Path $ NodeSplit t before after
 
 instance Functor (Path a trees) where
   fmap = second
@@ -134,8 +144,8 @@ pathToList :: Path a [Tree a] (Tree a) -> [a]
 pathToList = F.toList . pathToTree
 
 -- | Get the endpoint of the path
-endPoint :: Path a trees (NodeSplit a trees) -> a
-endPoint = foldPath (\(NodeSplit x _ _) -> x) (\_ l -> l)
+endPoint :: Path a trees l -> l
+endPoint = foldPath id (\_ l -> l)
 
 
 --------------------------------------------------------------------------------

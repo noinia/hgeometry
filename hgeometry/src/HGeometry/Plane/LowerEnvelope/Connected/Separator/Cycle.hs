@@ -10,7 +10,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Plane.LowerEnvelope.Connected.Separator.Cycle
-  ( Cycle(..)
+  ( Cycle
   , Cycle'
   , toCycle
   , splitTree
@@ -24,6 +24,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.Cycle
   , collectPaths
   , cycleSplitPathWeights
   , endPoints
+  , endPoints'
 
   , RootSplitPath(..)
 
@@ -36,15 +37,7 @@ import           Control.Applicative
 import           Control.Lens ((<&>))
 import           Data.Bifoldable
 import           Data.Bifunctor
-import qualified Data.Foldable as F
-import qualified Data.List as List
-import qualified Data.Map as Map
-import           Data.Maybe (mapMaybe, fromMaybe)
-import           Data.Monoid (First(..))
-import           Data.Ord (comparing)
-import qualified Data.Set as Set
 import           Data.Tree (Tree(..))
-import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.InitialSplit
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Util
@@ -89,14 +82,14 @@ instance Bifoldable CycleSplitPaths where
 -- | Collects the paths into a (partial) separator
 collectPaths                :: (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
                             -> CycleSplitPaths a [Tree a] -> ([a], Vector 2 [a])
-collectPaths splitChildren' = \case
-  RootSplit rs            -> collectRootSplitPath splitChildren' rs
+collectPaths splitChildren = \case
+  RootSplit rs            -> collectRootSplitPath splitChildren rs
   PathSplit r lPath rPath -> let NodeSplit sepL before  middleL = collectPath lPath
                                  NodeSplit sepR middleR after   = collectPath rPath
                              in ( r : sepL <> sepR
                                 , Vector2 (middleL <> middleR) (before <> after)
                                 )
--- TODO: I don't think I need the splitChildren' here!
+-- TODO: I don't think I need the splitChildren here!
 
 -- | Computes the weights of the
 cycleSplitPathWeights :: (Num w, IsWeight w) => CycleSplitPaths a [Tree (Weighted w b)]-> w
@@ -105,13 +98,26 @@ cycleSplitPathWeights = \case
   PathSplit _ lPath rPath -> pathWeight L lPath + pathWeight R rPath
 
 
--- | the labels of the leaves at which the cyclesplit paths end. If one is a root
--- splitpaht the root comes first.
+-- | The labels of the leaves at which the cyclesplit paths end. If one is a root
+-- splitpath the root comes first.
 endPoints :: CycleSplitPaths a [Tree a] -> (a,a)
 endPoints = \case
-    RootSplit (RootBefore r path) -> (r, endPoint path)
-    RootSplit (RootAfter path r)  -> (r, endPoint path)
-    PathSplit _ lPath rPath       -> (endPoint lPath, endPoint rPath)
+    RootSplit (RootBefore r path) -> (r, endPoint' path)
+    RootSplit (RootAfter path r)  -> (r, endPoint' path)
+    PathSplit _ lPath rPath       -> (endPoint' lPath, endPoint' rPath)
+
+-- | Reports the endpoint of a path ending in a nodesplit
+endPoint' :: Path a trees (NodeSplit c trees') -> c
+endPoint' = splitRoot . endPoint
+
+-- | The labels of the leaves at which the cyclesplit paths end. Left endpoint and then
+-- right endpoint.
+endPoints' :: CycleSplitPaths a [Tree a] -> (a,a)
+endPoints' = \case
+    RootSplit (RootBefore r path) -> (r, endPoint' path)
+    RootSplit (RootAfter path r)  -> (endPoint' path, r)
+    PathSplit _ lPath rPath       -> (endPoint' lPath, endPoint' rPath)
+
 
 ----------------------------------------
 
@@ -157,13 +163,13 @@ collectRootSplitPath _ = \case
 -- -- | Collect on a rootsplitPath
 -- collectRootSplitPath                :: (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
 --                                     -> RootSplitPath a [Tree a] -> ([a], Vector 2 [a])
--- collectRootSplitPath splitChildren' = fromMaybe err . \case
+-- collectRootSplitPath splitChildren = fromMaybe err . \case
 --     RootBefore r path -> let (NodeSplit sep inside outside, before, after) = splitPath path in
---       splitChildren' r before <&> \(Vector2 before' middle) ->
+--       splitChildren r before <&> \(Vector2 before' middle) ->
 --           (r:sep, Vector2 (flatten middle <> inside) (flatten (before' <> after) <> outside))
 
 --     RootAfter path r  -> let (NodeSplit sep outside inside, before, after) = splitPath path in
---       splitChildren' r after <&> \(Vector2 middle after') ->
+--       splitChildren r after <&> \(Vector2 middle after') ->
 --           (r:sep, Vector2 (flatten middle <> inside) (flatten (before <> after') <> outside))
 --   where
 --     err = error "collectRootSplitPath: not found!?"
@@ -179,38 +185,49 @@ collectRootSplitPath _ = \case
 --------------------------------------------------------------------------------
 -- * Constructing a Cycle
 
+type LeafSplitF     a = a       -- ^ the target to search for
+                      -> Tree a -- ^ the leaf (i.e. a tree) to split
+                      -> NodeSplit a [Tree a]
+type ChildrenSplitF a = a        -- ^ the target to search for
+                     -> a        -- ^ label of the node whose
+                     -> [Tree a] -- ^ subset of the children we are splitting
+                     -> Maybe (Vector 2 [Tree a])
+
 -- | Transform an Initial split into a proper cycle by splitting the leaves (and the root
 -- if needed).
-toCycle                           :: (tree -> NodeSplit a [tree])
-                                  -> (a -> [tree] -> Maybe (Vector 2 [tree]))
-                                  -> InitialSplit a tree -> Cycle a [tree]
-toCycle splitLeaf' splitChildren' = \case
+--
+-- given are:
+-- - a function 'splitLeaf target theLeaf' that splits theLeaf based on target
+-- - a function 'splitChildren target theNodeLabel theChildren' that splits theChildren
+toCycle                          :: forall a.
+                                    LeafSplitF a -> ChildrenSplitF a
+                                 -> InitialSplit a (Tree a) -> Cycle a [Tree a]
+toCycle splitLeaf splitChildren = \case
     InternalSplit v split              -> first (splitLeaves v) split
-    DecendantSplit v before path after -> case splitChildren' v before of
-      Nothing -> case splitChildren' v after of
+    DecendantSplit v before path after -> let t = root $ endPoint path
+                                          in case splitChildren t v before of
+      Nothing -> case splitChildren t v after of
         Nothing                          -> error "toCycle"
         Just (Vector2 middle after') ->
-          Split (RootSplit $ RootAfter (splitLeaf' <$> path) v) before middle after'
+          Split (RootSplit $ RootAfter (splitLeaf v <$> path) v) before middle after'
       Just (Vector2 before' middle) ->
-          Split (RootSplit $ RootBefore v (splitLeaf' <$> path)) before' middle after
+          Split (RootSplit $ RootBefore v (splitLeaf v <$> path)) before' middle after
   where
-    splitLeaves r (Vector2 lPath rPath) =
-      PathSplit r (splitLeaf' <$> lPath) (splitLeaf' <$> rPath)
-
-
---------------------------------------------------------------------------------
+    splitLeaves :: a -> Vector 2 (Path a [Tree a] (Tree a)) -> CycleSplitPaths a [Tree a]
+    splitLeaves v (Vector2 lPath rPath) = let l = root $ endPoint lPath
+                                              r = root $ endPoint rPath
+                                          in PathSplit v (splitLeaf r <$> lPath)
+                                                         (splitLeaf l <$> rPath)
 
 --------------------------------------------------------------------------------
 -- | the prefix should become part of the outside; in particular we put them on right of
 -- the righstmost input leaf
-splitTree                             :: Eq a
-                                      => (Tree a -> NodeSplit a [Tree a])
-                                      -> (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
-                                      -> (a,a)
-                                      -> Tree a
-                                      -> Cycle' a
-splitTree splitLeaf' splitChildren' e = toCycle splitLeaf' splitChildren' . initialSplit e
-
+splitTree                           :: Eq a
+                                    => LeafSplitF a -> ChildrenSplitF a
+                                    -> (a,a)
+                                    -> Tree a
+                                    -> Cycle' a
+splitTree splitLeaf splitChildren e = toCycle splitLeaf splitChildren . initialSplit e
 
 --------------------------------------------------------------------------------
 
@@ -237,30 +254,35 @@ makeInsideHeaviest split@(Split paths before inside after)
       PathSplit r lPath rPath       -> PathSplit r rPath lPath
 
 --------------------------------------------------------------------------------
-
+{-
 -- | Search along a path; we search among the nodees on the path and in the subtrees
 -- hanging off the path on the given side.
-findNodeAlongPath                   :: (Tree a -> NodeSplit a [Tree a])
+--
+-- Note that splitLeaf should already be applied so that it only takes the remaining leaf
+findNodeAlongPath                   :: (     Tree a   -> NodeSplit a [Tree a])
                                     -> (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
                                     -> (a -> Bool)
                                     -> Side -- ^ indicates which subtrees to search
                                     -> Path a [Tree a] (NodeSplit a [Tree a])
                                     -> Maybe ( Cycle' a
-                                             , Path a [Tree a] (NodeSplit a [Tree a])
+                                             , Path a [Tree a] (Tree a)
                                              )
-findNodeAlongPath splitLeaf' splitChildren' p side = go
+findNodeAlongPath splitLeaf splitChildren p side =
+
+
+  go
   where
     go = \case
       Leaf (NodeSplit u before after)
         | p u       -> Just ( error "findNodeAlongPath; splitting the same leaf?"
-                            , Leaf $ splitLeaf' (Node u $ before <> after)
+                            , Leaf $ splitLeaf (Node u $ before <> after)
                             )
         | otherwise -> here u before after (RootSplit . flip RootAfter u)
                                            (RootSplit . RootBefore u)
 
       Path (NodeSplit (u, path) before after)
           | p u       -> Just ( cycle' u path before after
-                              , Leaf $ splitLeaf' (Node u $ before <> after)
+                              , Leaf $ splitLeaf (Node u $ before <> after)
                               )
           | otherwise -> here u before after (\path' -> PathSplit u path' path)
                                              (PathSplit u path)
@@ -269,99 +291,116 @@ findNodeAlongPath splitLeaf' splitChildren' p side = go
 
     here u before after makeL makeR = case side of
         L -> findNode' p before <&> \(NodeSplit path' before' after') ->
-                   let path'' = splitLeaf' <$> path'
+                   let path'' = splitLeaf <$> path'
                    in ( Split (makeL path'') before' after' after
                       , Path $ NodeSplit (u, path'') before' (after' <> after)
                       )
              -- Search on the left; i.e. in the before part
         R -> findNode' p after <&> \(NodeSplit path' before' after') ->
-                       let path'' = splitLeaf' <$> path'
+                       let path'' = splitLeaf <$> path'
                        in ( Split (makeR path'') before before' after'
                           , Path $ NodeSplit (u, path'') (before <> before') after'
                           )
 
-    cycle' u path before after = case splitChildren' u before of
-      Nothing -> case splitChildren' u after of
+    cycle' u path before after = case splitChildren u before of
+      Nothing -> case splitChildren u after of
         Nothing                          -> error "toCycle"
         Just (Vector2 middle after') ->
           Split (RootSplit $ RootAfter path u) before middle after'
       Just (Vector2 before' middle) ->
           Split (RootSplit $ RootBefore u path) before' middle after
+-}
 
 --------------------------------------------------------------------------------
 -- * Splitting a Cycle
 
+
 -- | Tries to split the cycle at the given node
-splitCycleAt                                     :: Show a =>
-                                                    (Tree a -> NodeSplit a [Tree a])
-                                                 -> (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
+splitCycleAt                                     :: forall a.
+                                                    Show a =>
+                                                    LeafSplitF a -> ChildrenSplitF a
                                                  -> (a -> Bool)
                                                  -> Cycle' a
                                                  -> Maybe (Vector 2 (Cycle' a))
-splitCycleAt splitLeaf' splitChildren' p (Split paths before inside after)
-  | traceShow ("splitCycleAt",paths,before,inside,after) False = undefined
-  | otherwise
-  =
-    splitInterior <|> splitCycleAtPath splitLeaf' splitChildren' p paths before inside after
-  where
-    splitInterior = traceShowWith ("splitInterior",) $
-      constructCycles . first (fmap splitLeaf') <$> findNode' p inside
+splitCycleAt splitLeaf splitChildren p theSplit@(Split paths before inside after)
+       | traceShow ("splitCycleAt",paths,before,inside,after) False = undefined
+       | otherwise = splitInterior <|> splitCycleAtPath splitLeaf splitChildren p theSplit
+    where
+    (l,r) = endPoints paths -- the endpoints of the two paths
 
-    constructCycles (NodeSplit path before' after') = Vector2
-        (Split lPaths (before <> lBefore)            before' (after' <> lAfter <> after))
-        (Split rPaths (before <> rBefore <> before') after'  (rAfter <> after))
+    splitInterior = traceShowWith ("splitInterior",) $ constructCycles <$> findNode' p inside
+
+    constructCycles :: NodeSplit (Path a [Tree a] (Tree a)) [Tree a]
+                    -> Vector 2 (Cycle a [Tree a])
+    constructCycles (NodeSplit path before' after') = Vector2 leftCycle rightCycle
       where
-        ( (lPaths, lBefore, lAfter), (rPaths, rBefore, rAfter) ) = case paths of
-          RootSplit (RootBefore r rPath) ->
-            ( (RootSplit (RootBefore r path), [],                  [pathToTree' rPath])
-            , (PathSplit r path rPath,        [],                  []                )
-            )
-          RootSplit (RootAfter lPath r)  ->
-            ( (PathSplit r lPath path,        [],                  [])
-            , (RootSplit (RootAfter path r),  [pathToTree' lPath], [])
-            )
-          PathSplit r lPath rPath        ->
-            ( (PathSplit r lPath path,        [],                  [pathToTree' rPath])
-            , (PathSplit r path rPath,        [pathToTree' lPath], [])
-            )
+        -- unsplit the leaf, and then resplit it with the new target, which is in the middle.
+        resplitLeaf :: NodeSplit a [Tree a] -> NodeSplit a [Tree a]
+        resplitLeaf = splitLeaf (root $ endPoint path) . nodeSplitToTree
+
+        -- in the left cycle we replace the right path of paths by the new path.
+        -- note that we actually have to resplit the left path, and we have to
+        -- appropriately split the new path with the left endpoint.
+        -- note that the old right path turns into an additional tree after the split/cycle.
+        leftCycle = Split lPaths before before' (after' <> lAfter <> after)
+          where
+            path' = splitLeaf l <$> path --
+            (lPaths, lAfter) = case paths of
+                RootSplit (RootBefore u rPath) -> ( RootSplit (RootBefore u path')
+                                                  , [pathToTree' rPath]
+                                                  )
+                RootSplit (RootAfter lPath u)  -> ( PathSplit u (resplitLeaf <$> lPath) path'
+                                                  , []
+                                                  )
+                PathSplit u lPath rPath        -> ( PathSplit u (resplitLeaf <$> lPath) path'
+                                                  , [pathToTree' rPath]
+                                                  )
+
+        -- symmetric to before, now the new path is the new left path though, and the old
+        -- left path becomes a new tree before the split.
+        rightCycle = Split rPaths (before <> rBefore <> before') after' after
+          where
+            path' = splitLeaf r <$> path --
+            (rPaths, rBefore) = case paths of
+              RootSplit (RootBefore u rPath) -> ( PathSplit u  path' (resplitLeaf <$> rPath)
+                                                , []
+                                                )
+              RootSplit (RootAfter lPath u)  -> ( RootSplit (RootAfter path' u)
+                                                , [pathToTree' lPath]
+                                                )
+              PathSplit u lPath rPath        -> ( PathSplit u path' (resplitLeaf <$> rPath)
+                                                , [pathToTree' lPath]
+                                                )
 
 -- | Given a predicate that indicates the node we are trying to find, looks in the
 -- subtrees hanging off of the paths/spines if we can find it, and returns the two cyclces
 -- we get by splitting the trees there.
 splitCycleAtPath :: forall a. Show a =>
-                    (Tree a -> NodeSplit a [Tree a])
-                 -> (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
+                    LeafSplitF a -> ChildrenSplitF a
                  -> (a -> Bool)
-                 -> CycleSplitPaths a [Tree a]
-                 -> [Tree a] -> [Tree a] -> [Tree a]
+                 -> Cycle' a
                  -> Maybe (Vector 2 (Cycle' a))
-splitCycleAtPath splitLeaf' splitChildren' p paths before inside after = case paths of
-   RootSplit (RootAfter lPath r)  ->
-     (combineR (RootSplit . flip RootAfter r)) <$>
-           findNodeAlongPath splitLeaf' splitChildren' p R lPath
-   RootSplit (RootBefore r rPath) ->
-     (combineL (RootSplit . RootBefore r))     <$>
-           findNodeAlongPath splitLeaf' splitChildren' p L rPath
-   PathSplit r lPath rPath              -> traceShowWith ("splitCycleAtPath, pathsplit",r,lPath,rPath,)
-     (traceShowWith ("combineL",) $
-       combineL (\lPath' -> PathSplit r lPath' rPath)  <$>
-           findNodeAlongPath splitLeaf' splitChildren' p R lPath)
-     <|>
-     (traceShowWith ("combineR",) $
-       combineR (PathSplit r lPath)                    <$>
-           findNodeAlongPath splitLeaf' splitChildren' p L rPath)
+splitCycleAtPath splitLeaf splitChildren p (Split paths before middle after) =
+    fmap toCycle' <$> (splitLeftPath <|> splitRightPath)
   where
-    -- creates a new split, where the new split is on the left, and the updated remainder
-    -- of the current split is on the right.
-    combineL                 :: ( Path a [Tree a] (NodeSplit a [Tree a]) ->
-                                                            CycleSplitPaths a [Tree a])
-                             -> (Cycle' a, Path a [Tree a] (NodeSplit a [Tree a]))
-                             -> Vector 2 (Cycle' a)
-    combineL f (split,path') = Vector2 split (mkSplit . f $ path')
-    -- creates a new split, where the new split is on the right
-    combineR                 :: ( Path a [Tree a] (NodeSplit a [Tree a]) ->
-                                                            CycleSplitPaths a [Tree a])
-                             -> (Cycle' a, Path a [Tree a] (NodeSplit a [Tree a]))
-                             -> Vector 2 (Cycle' a)
-    combineR f (split, path') = Vector2 (mkSplit . f $ path') split
-    mkSplit paths' = Split paths' before inside after
+    toCycle' = toCycle splitLeaf splitChildren
+
+    splitLeftPath = case paths of
+      RootSplit (RootBefore _ _)     -> Nothing -- there is no left path to split
+      RootSplit (RootAfter lPath u)  -> findNodeAlongPath p R lPath <&> \(lSplit,lPath') ->
+                Vector2 lSplit
+                        (DecendantSplit u before lPath' (middle <> after))
+      PathSplit u lPath rPath        -> findNodeAlongPath p R lPath <&> \(lSplit,lPath') ->
+          let rPath' = nodeSplitToTree <$> rPath
+          in Vector2 lSplit
+                     (InternalSplit u (Split (Vector2 lPath' rPath') before middle after))
+
+    splitRightPath = case paths of
+      RootSplit (RootBefore u rPath) -> findNodeAlongPath p R rPath <&> \(rSplit,rPath') ->
+                Vector2 (DecendantSplit u (before <> middle) rPath' after)
+                        rSplit
+      RootSplit (RootAfter _ _)      -> Nothing -- there is no right path to split
+      PathSplit u lPath rPath        -> findNodeAlongPath p R rPath <&> \(rSplit,rPath') ->
+          let lPath' = nodeSplitToTree <$> lPath
+          in Vector2 (InternalSplit u (Split (Vector2 lPath' rPath') before middle after))
+                     rSplit

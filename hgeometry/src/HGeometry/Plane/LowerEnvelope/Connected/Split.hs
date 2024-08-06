@@ -18,14 +18,11 @@ module HGeometry.Plane.LowerEnvelope.Connected.Split
   , module HGeometry.Plane.LowerEnvelope.Connected.Separator.Cycle
   ) where
 
-import           Control.Applicative
-import           Control.Lens ((<&>))
-import           Data.Bifoldable
 import           Data.Bifunctor
 import qualified Data.Foldable as F
 import qualified Data.List as List
 import qualified Data.Map as Map
-import           Data.Maybe (mapMaybe, fromMaybe)
+import           Data.Maybe (mapMaybe)
 import           Data.Monoid (First(..))
 import           Data.Ord (comparing)
 import qualified Data.Set as Set
@@ -82,11 +79,10 @@ planarSeparatorCycle allowedWeight gr tr = go initialCycle
       . annotateCycle
       . splitTree splitLeaf0 splitChildren0 e $ tr
 
-    splitLeaf0     = splitLeaf     id gr e
-    splitChildren0 = splitChildren id gr (== w)
-      -- if e = (v,w), then we are splitting v's children
+    splitLeaf0     = splitLeaf     id gr
+    splitChildren0 = splitChildren id gr
 
-    splitLeaf' = splitLeaf getValue gr e
+    splitLeaf1 = splitLeaf getValue gr
 
     aSize c = let Vector2 as _ = snd . toSeparator gr $ c  in length as
 
@@ -106,11 +102,10 @@ planarSeparatorCycle allowedWeight gr tr = go initialCycle
         splitCycle u = First . fmap ( F.maximumBy (comparing getWeight)
                                     . fmap (\c -> Weighted (interiorWeight c) c))
                      $ traceShowWith ("splitCycle",u,)
-                     $ splitCycleAt splitLeaf' splitChildren' p cycle'
+                     $ splitCycleAt splitLeaf1 splitChildren1 p cycle'
           where
             p = (== u) . getValue
-            splitChildren' = splitChildren getValue gr (== u) . getValue
-    -- FIXME: I guess I should'n't pass e to splitLeaf' either !
+            splitChildren1 = splitChildren getValue gr
 
 -- | Compute the weight on the inside of the cycle
 interiorWeight                          :: (Num w, IsWeight w) => Cycle' (Weighted w a) -> w
@@ -124,38 +119,62 @@ toSeparator gr (Split paths before middle after) = bimap getV (fmap getV) $
                   (outside <> toList' before <> toList' after)
     )
   where
-    (sep, Vector2 inside outside) = collectPaths splitChildren' paths
+    (sep, Vector2 inside outside) = collectPaths splitChildren1 paths
     toList' = foldMap F.toList
     getV = fmap getValue
 
     (_,w) = endPoints paths
 
-    splitChildren' = undefined
-    -- splitChildren' = splitChildren getValue gr (== getValue w) . getValue
+    splitChildren1 = undefined
+    -- splitChildren1 = splitChildren getValue gr (== getValue w) . getValue
 
 --------------------------------------------------------------------------------
 
--- | Given the graph, an edge (v,w) in the graph, and a tree rooted at weither v or w
--- split the Tree
-splitLeaf                           :: Ord k
-                                    => (a -> k)
-                                    -> PlaneGraph k v e -> (k,k)
-                                    -> Tree a
-                                    -> NodeSplit a [Tree a]
-splitLeaf f gr (v',w') (Node u chs) =
-    case splitChildren f gr (if f u == v' then (w'==) else (v'==)) (f u) chs of
+-- | Given a projection funciton, the graph, the node we are trying to find, and the
+-- subtree we are searching in, constructs a nodeSplit by splitting the subtree basedo n
+-- the target.
+splitLeaf        :: Ord k
+                 => (a -> k) -> PlaneGraph k v e
+                 -> a -- ^ the node we are trying to find
+                 -> Tree a -> NodeSplit a [Tree a]
+splitLeaf f gr t = splitLeaf' f gr (f t ==)
+
+-- | Split a list of children.
+splitChildren          :: Ord k
+                       => (a -> k)
+                       -> PlaneGraph k v e
+                       -> a -- ^ the node that we are searching for/splitting with
+                       -> a -- ^ the labe lof the root node whose children we are splitting
+                       -> [Tree a] -- ^ the children of the root
+                       -> Maybe (Vector 2 [Tree a])
+splitChildren f gr t r = splitChildren' f gr (f t ==) (f r)
+
+--------------------------------------------------------------------------------
+
+
+-- | Given a projection funciton, the graph, the node we are trying to find, and the
+-- subtree we are searching in, constructs a nodeSplit by splitting the subtree basedo n
+-- the target.
+splitLeaf'                     :: Ord k
+                               => (a -> k)
+                               -> PlaneGraph k v e
+                               -> (k -> Bool) -- ^ the node we are trying to find
+                               -> Tree a
+                               -> NodeSplit a [Tree a]
+splitLeaf' f gr p (Node u chs) = case splitChildren' f gr p (f u) chs of
       Nothing                     -> error "splitLeaf: absurd. edge not found!?"
       Just (Vector2 before after) -> NodeSplit u before after
 
+
 -- | Split a list of children.
-splitChildren            :: Ord k
+splitChildren'            :: Ord k
                            => (a -> k)
                            ->  PlaneGraph k v e
                            -> (k -> Bool) -- ^ the node that we are searching for/splitting with
                            -> k -- ^ the node whose children we are splitting
                            -> [Tree a] -- ^ the children of the root
                            -> Maybe (Vector 2 [Tree a])
-splitChildren f gr p v chs = case List.break (p . snd) adjacencies of
+splitChildren' f gr p v chs = case List.break (p . snd) adjacencies of
     (before, _:after) -> Just $ Vector2 (mapMaybe fst before) (mapMaybe fst after)
     _                 -> Nothing
   where
