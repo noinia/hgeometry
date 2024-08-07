@@ -147,12 +147,12 @@ missingEdge' c = let (u,v) = missingEdge c
 
 -- | Compute the weight on the inside of the cycle
 interiorWeight                          :: (Num w, IsWeight w) => Cycle' (Weighted w a) -> w
-interiorWeight (Split paths _ inside _) = cycleSplitPathWeights paths
+interiorWeight (Cycle paths _ inside _) = cycleSplitPathWeights paths
                                         + weightOf' inside
 
 -- | Turn the weighted cycle into an actual separator.
 toSeparator    :: PlaneGraph k v e -> Cycle' (Weighted' k) -> ([k], Vector 2 [k])
-toSeparator gr (Split paths before middle after) = bimap getV (fmap getV) $
+toSeparator gr (Cycle paths before middle after) = bimap getV (fmap getV) $
     (sep, Vector2 (inside  <> toList' middle)
                   (outside <> toList' before <> toList' after)
     )

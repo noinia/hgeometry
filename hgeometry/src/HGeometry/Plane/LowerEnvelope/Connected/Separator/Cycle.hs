@@ -10,7 +10,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Plane.LowerEnvelope.Connected.Separator.Cycle
-  ( Cycle
+  ( Cycle(MkCycle,Cycle)
   , Cycle'
   , toCycle
   , splitTree
@@ -50,17 +50,29 @@ import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
--- | The actual cycle
-type Cycle a trees = Split (CycleSplitPaths a trees) trees
 type Cycle' a = Cycle a [Tree a]
+
+-- | The actual cycle
+newtype Cycle a trees = MkCycle (Split (CycleSplitPaths a trees) trees)
+  deriving (Show,Eq)
+
+pattern Cycle :: CycleSplitPaths a trees -> trees -> trees -> trees -> Cycle a trees
+pattern Cycle paths before middle after = MkCycle (Split paths before middle after)
+{-# COMPLETE Cycle #-}
+
+instance Functor (Cycle a) where
+  fmap = second
+instance Bifunctor Cycle where
+  bimap f g (MkCycle split) = MkCycle $ bimap (bimap f g) g split
+
 
 -- | The edge in the cycle that is not explicitly represented
 missingEdge                     :: Cycle a [Tree a] -> (a, a)
-missingEdge (Split paths _ _ _) = endPoints' paths
+missingEdge (Cycle paths _ _ _) = endPoints' paths
 
 -- | Collects all 'a's
 collectAll                        :: Cycle' a -> [a]
-collectAll (Split paths bs ms as) = collectAllPaths paths <> flatten (bs <> ms <> as)
+collectAll (Cycle paths bs ms as) = collectAllPaths paths <> flatten (bs <> ms <> as)
 
 
 
@@ -221,7 +233,7 @@ type ChildrenSplitF a = a        -- ^ the target to search for
 toCycle                          :: forall a.
                                     LeafSplitF a -> ChildrenSplitF a
                                  -> InitialSplit a (Tree a) -> Cycle a [Tree a]
-toCycle splitLeaf splitChildren = \case
+toCycle splitLeaf splitChildren = MkCycle . \case
     InternalSplit v split              -> first (splitLeaves v) split
     DecendantSplit v before path after -> let t = rootLabel $ endPoint path
                                           in case splitChildren t v before of
@@ -255,15 +267,15 @@ type Weighted' = Weighted Weight
 
 
 -- | Annotates a cycle with the subtree weights.
-annotateCycle :: Cycle' a -> Cycle' (Weighted Int a)
-annotateCycle = bimap (bimap (Weighted 1) (fmap annotate)) (fmap annotate)
+annotateCycle :: Cycle a [Tree a] -> Cycle (Weighted Int a) [Tree (Weighted Int a)]
+annotateCycle = bimap (Weighted 1) (fmap annotate)
 
 -- | Makes sure that the inside of the cycle is heaviest.
 makeInsideHeaviest                                         :: Cycle' (Weighted' a)
                                                            -> Cycle' (Weighted' a)
-makeInsideHeaviest split@(Split paths before inside after)
+makeInsideHeaviest split@(Cycle paths before inside after)
   | weightOf inside < weightOf before + weightOf after =
-      Split (shift paths) [] (after <> before) inside
+      Cycle (shift paths) [] (after <> before) inside
   | otherwise = split
   where
     -- shift the paths
@@ -352,7 +364,7 @@ splitCycleAt                                     :: forall a.
                                                  -> (a -> Bool)
                                                  -> Cycle' a
                                                  -> Maybe (Vector 2 (Cycle' a))
-splitCycleAt splitLeaf splitChildren p theSplit@(Split paths before inside after)
+splitCycleAt splitLeaf splitChildren p theSplit@(Cycle paths before inside after)
        | traceShow ("splitCycleAt",paths,before,inside,after) False = undefined
        | otherwise = splitInterior <|> splitCycleAtPath splitLeaf splitChildren p theSplit
     where
@@ -373,7 +385,7 @@ splitCycleAt splitLeaf splitChildren p theSplit@(Split paths before inside after
         -- note that we actually have to resplit the left path, and we have to
         -- appropriately split the new path with the left endpoint.
         -- note that the old right path turns into an additional tree after the split/cycle.
-        leftCycle = Split lPaths before before' (after' <> lAfter <> after)
+        leftCycle = Cycle lPaths before before' (after' <> lAfter <> after)
           where
             path' = splitLeaf l <$> path --
             (lPaths, lAfter) = case paths of
@@ -389,7 +401,7 @@ splitCycleAt splitLeaf splitChildren p theSplit@(Split paths before inside after
 
         -- symmetric to before, now the new path is the new left path though, and the old
         -- left path becomes a new tree before the split.
-        rightCycle = Split rPaths (before <> rBefore <> before') after' after
+        rightCycle = Cycle rPaths (before <> rBefore <> before') after' after
           where
             path' = splitLeaf r <$> path --
             (rPaths, rBefore) = case paths of
@@ -411,7 +423,7 @@ splitCycleAtPath :: forall a. (Show a, Ord a) =>
                  -> (a -> Bool)
                  -> Cycle' a
                  -> Maybe (Vector 2 (Cycle' a))
-splitCycleAtPath splitLeaf splitChildren p old@(Split paths before middle after) =
+splitCycleAtPath splitLeaf splitChildren p old@(Cycle paths before middle after) =
     verify "PATH" old $ fmap toCycle' <$> (splitLeftPath <|> splitRightPath)
   where
     toCycle' = toCycle splitLeaf splitChildren
