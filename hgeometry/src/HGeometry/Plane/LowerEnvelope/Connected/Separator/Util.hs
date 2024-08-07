@@ -10,8 +10,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Plane.LowerEnvelope.Connected.Separator.Util
-  ( root
-  , graphEdges
+  ( graphEdges
   , treeEdges
   ) where
 
@@ -21,13 +20,6 @@ import qualified Data.Set as Set
 import           Data.Tree
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 
-
---------------------------------------------------------------------------------
-
--- | Get the label of the root node.
-root            :: Tree a -> a
-root (Node v _) = v
-{-# INLINE root #-}
 
 --------------------------------------------------------------------------------
 

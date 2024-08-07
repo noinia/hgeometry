@@ -43,7 +43,6 @@ import qualified Data.Set as Set
 import           Data.Tree (Tree(..))
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.InitialSplit
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
-import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Util
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Weight
 import           HGeometry.Vector
 
@@ -62,6 +61,8 @@ missingEdge (Split paths _ _ _) = endPoints' paths
 -- | Collects all 'a's
 collectAll                        :: Cycle' a -> [a]
 collectAll (Split paths bs ms as) = collectAllPaths paths <> flatten (bs <> ms <> as)
+
+
 
 
 ----------------------------------------
@@ -124,7 +125,7 @@ endPoints = \case
 
 -- | Reports the endpoint of a path ending in a nodesplit
 endPoint' :: Path a trees (NodeSplit c trees') -> c
-endPoint' = splitRoot . endPoint
+endPoint' = splitRootLabel . endPoint
 
 -- | The labels of the leaves at which the cyclesplit paths end. Left endpoint and then
 -- right endpoint.
@@ -222,7 +223,7 @@ toCycle                          :: forall a.
                                  -> InitialSplit a (Tree a) -> Cycle a [Tree a]
 toCycle splitLeaf splitChildren = \case
     InternalSplit v split              -> first (splitLeaves v) split
-    DecendantSplit v before path after -> let t = root $ endPoint path
+    DecendantSplit v before path after -> let t = rootLabel $ endPoint path
                                           in case splitChildren t v before of
       Nothing -> case splitChildren t v after of
         Nothing                          -> error "toCycle"
@@ -232,8 +233,8 @@ toCycle splitLeaf splitChildren = \case
           Split (RootSplit $ RootBefore v (splitLeaf v <$> path)) before' middle after
   where
     splitLeaves :: a -> Vector 2 (Path a [Tree a] (Tree a)) -> CycleSplitPaths a [Tree a]
-    splitLeaves v (Vector2 lPath rPath) = let l = root $ endPoint lPath
-                                              r = root $ endPoint rPath
+    splitLeaves v (Vector2 lPath rPath) = let l = rootLabel $ endPoint lPath
+                                              r = rootLabel $ endPoint rPath
                                           in PathSplit v (splitLeaf r <$> lPath)
                                                          (splitLeaf l <$> rPath)
 
@@ -366,7 +367,7 @@ splitCycleAt splitLeaf splitChildren p theSplit@(Split paths before inside after
       where
         -- unsplit the leaf, and then resplit it with the new target, which is in the middle.
         resplitLeaf :: NodeSplit a [Tree a] -> NodeSplit a [Tree a]
-        resplitLeaf = splitLeaf (root $ endPoint path) . nodeSplitToTree
+        resplitLeaf = splitLeaf (rootLabel $ endPoint path) . nodeSplitToTree
 
         -- in the left cycle we replace the right path of paths by the new path.
         -- note that we actually have to resplit the left path, and we have to

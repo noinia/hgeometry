@@ -14,7 +14,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator
   , planarSeparator
 
   , bff
-
+  , connectedComponents
 
   , treeEdges
   , graphEdges
@@ -97,6 +97,12 @@ sqrt' = floor . sqrt . fromIntegral
 --                    -> ([VertexIx planarGraph], Vector 2 [VertexIx planarGraph])
 
 type Separator k = ([k],Vector 2 [k])
+type Size = Int
+
+-- | Computes the connected components; for each component we report a BFS tree. The trees
+-- are reported on decreasing size
+connectedComponents :: Ord k => PlaneGraph k v e -> [(Tree k,Size)]
+connectedComponents = List.sortOn (Down . snd) . map (\t -> (t, length t)) . bff
 
 
 
@@ -116,7 +122,7 @@ planarSeparator gr = case trees of
       | m <= twoThirds -> traceShow (tr,m,n,twoThirds) $ groupComponents
       | otherwise      -> planarSeparator' (traceShowWith ("tree",) tr) m -- FIXME: we should also add the remaining vertices
   where
-    trees = List.sortOn (Down . snd) . map (\t -> (t, length t)) $ bff gr
+    trees = connectedComponents gr
     n     = sum $ map snd trees
     half = n `div` 2
     twoThirds = 2 * (n `div` 3)

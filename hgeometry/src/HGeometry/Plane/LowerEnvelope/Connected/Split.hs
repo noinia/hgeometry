@@ -12,10 +12,12 @@ module HGeometry.Plane.LowerEnvelope.Connected.Split
   ( toSeparator
   , planarSeparatorTree
   , planarSeparatorCycle
+  , planarSeparatorCycles
 
   , module HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
   , module HGeometry.Plane.LowerEnvelope.Connected.Separator.InitialSplit
   , module HGeometry.Plane.LowerEnvelope.Connected.Separator.Cycle
+  , module HGeometry.Plane.LowerEnvelope.Connected.Separator.Weight
   ) where
 
 import           Data.Bifunctor
@@ -214,7 +216,7 @@ splitChildren' f gr p v chs = case List.break (p . snd) adjacencies of
     (before, _:after) -> Just $ Vector2 (mapMaybe fst before) (mapMaybe fst after)
     _                 -> Nothing
   where
-    adjacencies = annotateSubSet (f . root) chs
+    adjacencies = annotateSubSet (f . rootLabel) chs
                 $ maybe [] (Map.elems . fst) (Map.lookup v gr)
 
 

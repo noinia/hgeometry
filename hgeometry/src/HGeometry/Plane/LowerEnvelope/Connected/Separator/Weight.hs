@@ -19,7 +19,6 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.Weight
 
 import Data.Kind (Type)
 import Data.Tree
-import HGeometry.Plane.LowerEnvelope.Connected.Separator.Util (root)
 
 --------------------------------------------------------------------------------
 
@@ -41,7 +40,7 @@ instance IsWeight Int where
 
 -- | Get the total weight
 weightOf :: (Num w, IsWeight w) => [Tree (Weighted w a)] -> w
-weightOf = sum . map (getWeight . root)
+weightOf = sum . map (getWeight . rootLabel)
 
 -- | recompute get the total weight
 weightOf' :: (Num w, IsWeight w) => [Tree (Weighted w a)] -> w

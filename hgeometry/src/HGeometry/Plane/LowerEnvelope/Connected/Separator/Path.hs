@@ -11,7 +11,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
   ( NodeSplit(..)
-  , splitRoot
+  , splitRootLabel
   , nodeSplitToTree
   , nodeSplitToTreeWith
 
@@ -19,6 +19,8 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
   , pathNode
   , trimap, trifoldMap
   , foldPath
+  , pathElements
+  , pathElementsTree, pathElementsNS
 
   , pathToTree, pathToTree', pathToList
   , collectPath
@@ -36,6 +38,8 @@ import           Control.Lens ((<&>))
 import           Data.Bifoldable
 import           Data.Bifunctor
 import qualified Data.Foldable as F
+import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Tree
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Weight
 
@@ -60,8 +64,8 @@ instance (Monoid a, Monoid trees) => Monoid (NodeSplit a trees) where
   mempty = NodeSplit mempty mempty mempty
 
 -- | Retrieve the splitting value
-splitRoot                   :: NodeSplit a trees -> a
-splitRoot (NodeSplit x _ _) = x
+splitRootLabel                   :: NodeSplit a trees -> a
+splitRootLabel (NodeSplit x _ _) = x
 
 -- | Computes the weight of a ndoesplit
 nodeSplitWeight :: (Num w, IsWeight w) => Side -> NodeSplit a [Tree (Weighted w b)] -> w
@@ -147,6 +151,20 @@ pathToList = F.toList . pathToTree
 endPoint :: Path a trees l -> l
 endPoint = foldPath id (\_ l -> l)
 
+-- | A list of elements on the path
+pathElements :: Path a trees l -> ([a],l)
+pathElements = foldPath ([],) (\s (xs,l) -> (splitRootLabel s : xs, l))
+
+-- | The elements of a path ending in a tree
+pathElementsTree :: Path a trees (Tree a) -> NonEmpty a
+pathElementsTree = (\(xs,t) -> xs |> rootLabel t) . pathElements
+
+-- | The elements of a path ending in a splitnode
+pathElementsNS :: Path a trees (NodeSplit a trees') -> NonEmpty a
+pathElementsNS = (\(xs,t) -> xs |> splitRootLabel t) . pathElements
+
+(|>) :: Foldable t => t a -> a -> NonEmpty a
+xs |> x = foldr (NonEmpty.<|) (NonEmpty.singleton x) xs
 
 --------------------------------------------------------------------------------
 -- * Searching a node on a path
