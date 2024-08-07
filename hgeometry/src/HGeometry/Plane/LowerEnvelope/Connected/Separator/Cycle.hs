@@ -284,6 +284,10 @@ makeInsideHeaviest split@(Cycle paths before inside after)
       RootSplit (RootAfter path r)  -> RootSplit (RootBefore r path)
       PathSplit r lPath rPath       -> PathSplit r rPath lPath
 
+    -- rev = mapPath rev' rev'
+    -- rev' (NodeSplit x before after) = NodeSplit x after befor
+
+
 --------------------------------------------------------------------------------
 {-
 -- | Search along a path; we search among the nodees on the path and in the subtrees
@@ -353,9 +357,18 @@ verify l0 oldSplit = fmap (\(Vector2 s1 s2) -> Vector2 (verify' (l0 <> "LEFT")  
                           )
 verify'          :: (Ord a, Show a)
                 => String -> Cycle' a -> Cycle' a -> Cycle' a
-verify' l oldSplit s = traceShow ("VERIFY", l, collectAll' oldSplit == collectAll' s) s
+verify' l oldSplit s = traceShow ("VERIFY", l
+                                 , collectAll' oldSplit == collectAll' s
+                                 , collectAllX oldSplit `Set.difference` collectAllX s
+                                 , collectAllP oldSplit `Set.difference` collectAllP s
+                                 ) s
   where
     collectAll' = Set.fromList . collectAll
+
+    collectAllX (Cycle paths bs ms as) = Set.fromList $ flatten (bs <> ms <> as)
+    collectAllP (Cycle paths bs ms as) = Set.fromList $ collectAllPaths paths
+
+
 
 -- | Tries to split the cycle at the given node
 splitCycleAt                                     :: forall a.
@@ -431,20 +444,26 @@ splitCycleAtPath splitLeaf splitChildren p old@(Cycle paths before middle after)
     splitLeftPath = traceShowWith ("splitLeftPath",paths,) $ case paths of
       RootSplit (RootBefore _ _)     -> Nothing -- there is no left path to split
       RootSplit (RootAfter lPath u)  -> findNodeAlongPath p R lPath <&> \(lSplit,lPath') ->
-                Vector2 lSplit
+                Vector2 (extend u (before <> middle) after lSplit)
                         (DecendantSplit u before lPath' (middle <> after))
       PathSplit u lPath rPath        -> traceShowWith ("pathSplit",) $
         findNodeAlongPath p R lPath <&> \(lSplit,lPath') ->
           let rPath' = nodeSplitToTree <$> rPath
-          in Vector2 lSplit
+          in Vector2 (extend u before (middle <> after) lSplit)
                      (InternalSplit u (Split (Vector2 lPath' rPath') before middle after))
 
     splitRightPath = traceShowWith ("splitRightPath", paths,) $ case paths of
       RootSplit (RootBefore u rPath) -> findNodeAlongPath p L rPath <&> \(rSplit,rPath') ->
                 Vector2 (DecendantSplit u (before <> middle) rPath' after)
-                        rSplit
+                        (extend u (before <> middle) after rSplit)
       RootSplit (RootAfter _ _)      -> Nothing -- there is no right path to split
+
+
       PathSplit u lPath rPath        -> findNodeAlongPath p L rPath <&> \(rSplit,rPath') ->
           let lPath' = nodeSplitToTree <$> lPath
           in Vector2 (InternalSplit u (Split (Vector2 lPath' rPath') before middle after))
-                     rSplit
+                     (extend u (before <> middle) after rSplit)
+
+-- | Extends and reroots the split
+extend :: a -> [Tree a] -> [Tree a] -> InitialSplit a (Tree a) -> InitialSplit a (Tree a)
+extend u before after = reroot . extendWith u before after . Leaf

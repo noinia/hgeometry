@@ -16,9 +16,10 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
   , nodeSplitToTreeWith
 
   , Path(..)
+  , extendWith
   , pathNode
   , trimap, trifoldMap
-  , foldPath
+  , foldPath, mapPath
   , pathElements
   , pathElementsTree, pathElementsNS
 
@@ -95,6 +96,11 @@ data Path a trees l = Leaf l
 pathNode                :: (a,Path a trees l) -> trees -> trees -> Path a trees l
 pathNode t before after = Path $ NodeSplit t before after
 
+-- | Extends a path
+extendWith                        :: a -> trees -> trees -> Path a trees l -> Path a trees l
+extendWith u before after newPath = pathNode (u,newPath) before after
+
+
 instance Functor (Path a trees) where
   fmap = second
 instance Bifunctor (Path a) where
@@ -107,6 +113,12 @@ foldPath leaf node = go
     go = \case
       Leaf l                                 -> leaf l
       Path (NodeSplit (x,path) before after) -> node (NodeSplit x before after) (go path)
+
+-- | Map over the path
+mapPath :: (l -> l')
+        -> (NodeSplit a trees -> NodeSplit a' trees') -> Path a trees l -> Path a' trees' l'
+mapPath fl fn = foldPath (Leaf . fl) (\ns path -> let NodeSplit x bs as = fn ns
+                                                  in Path $ NodeSplit (x,path) bs as)
 
 -- | Trimap over a path
 trimap :: (a -> a') -> (trees -> trees') -> (l -> l') -> Path a trees l -> Path a' trees' l'

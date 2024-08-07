@@ -16,6 +16,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.InitialSplit
   , initialSplitToTree
 
   , findNodeAlongPath
+  , reroot
   ) where
 
 import Control.Applicative
@@ -150,8 +151,8 @@ findNodeAlongPath p side = fmap (first reroot) . snd . foldPath leaf node
                              )
           | otherwise = extend <$> ((here ns (Just oldPath)) <|> res)
         extend = bimap extend' extend'
-        extend'         :: Path a [Tree a] l -> Path a [Tree a] l
-        extend' newPath = pathNode (u,newPath) before after
+        extend' :: Path a [Tree a] l -> Path a [Tree a] l
+        extend' = extendWith u before after
 
     pathToTree'' = fmap pathToTree . maybeToList
 
@@ -179,5 +180,3 @@ findNodeAlongPath p side = fmap (first reroot) . snd . foldPath leaf node
                    InternalSplit u (Split (Vector2 oldPath path') before before' after')
               , Path $ NodeSplit (u, path') (before <> pathToTree'' mOldPath <> before') after'
               )
-
--- seems that the root eelm gets ignored

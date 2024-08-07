@@ -28,20 +28,11 @@ import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator
-import           HGeometry.Plane.LowerEnvelope.Connected.Split ( findNode, pathToTree
-                                                               , pathToTree'
-                                                               , pathToList
-                                                               , initialSplit
-                                                               , initialSplitToTree
-                                                               , NodeSplit(..)
-                                                               , Split(..)
-                                                               , InitialSplit(..)
-                                                               , findNodeAlongPath
-                                                               , Side(..)
-                                                               )
--- import qualified HGeometry.Plane.LowerEnvelope.Connected.Split as Split
+import qualified HGeometry.Plane.LowerEnvelope.Connected.Split as Split
+import           HGeometry.Plane.LowerEnvelope.Connected.Split hiding (Path)
 import           HGeometry.Plane.LowerEnvelope.ConnectedNew
 import           HGeometry.Point
+import           HGeometry.PolyLine
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
 import           HGeometry.Vector
@@ -54,6 +45,7 @@ import           Test.Hspec.WithTempFile
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -290,6 +282,45 @@ drawTree = ipeGroup
                )
          . Set.toList . treeEdges
 
+drawCycle                     :: Cycle' (Point 2 R)
+                              -> IpeObject' Group R
+drawCycle (Cycle paths _ _ _) = drawPaths paths
+  where
+    -- drawRoot r = iO $ defIO r
+    --                     ! attr SStroke darkmagenta
+    --                     ! attr SSize   (IpeSize $ Named "large")
+
+    drawPaths :: CycleSplitPaths (Point 2 R) [Tree (Point 2 R)] -> IpeObject' Group R
+    drawPaths = \case
+      RootSplit rs            -> drawRs rs
+      PathSplit r lPath rPath -> ipeGroup [ drawPath seagreen   r lPath
+                                          , drawPath darkorange r rPath
+                                          ]
+
+    drawPath        :: IpeColor R
+                    -> Point 2 R
+                    -> Split.Path (Point 2 R) trees (NodeSplit (Point 2 R) [Tree (Point 2 R)])
+                    -> IpeObject R
+    drawPath c r path' = iO $
+                      defIO (polyLineFromPoints (r NonEmpty.<| pathElementsNS path')
+                              :: PolyLine (Point 2 R))
+                        ! attr SStroke c
+                        ! attr SPen    (IpePen $ Named "fat")
+
+    drawRs = \case
+      RootBefore r path' -> ipeGroup [drawPath darkorange r path']
+      RootAfter path' r  -> ipeGroup [drawPath seagreen   r path']
+
+
+drawCycles :: NonEmpty (Cycle' (Weighted' (Point 2 R))) -> [IpeObject R]
+drawCycles = zipWith (\i c -> iO $ drawCycle c
+                                       ! attr SLayer (layerName' i)) [1..]
+                       . map (bimap getValue (fmap (fmap getValue)))
+                       . toList
+  where
+    layerName' :: Int -> LayerName
+    layerName' = review layerName . Text.pack . ("cycle" <>) . show
+
 
 -- build a triangulated graph from the points in the input file
 testIpeGraph            :: OsPath -> OsPath -> Spec
@@ -301,6 +332,10 @@ testIpeGraph inFp outFp = do
         vv = voronoiVertices $ view core <$> points
         gr = toPlaneGraph $ Map.mapKeysMonotonic liftPointToPlane vd
         n  = length gr
+        ((tr,_):_) = connectedComponents gr
+        allowedWeight = (2*n) `div` 3
+        cycles' = traceShowWith ("thecycles",) $ planarSeparatorCycles allowedWeight gr tr
+
         s@(sep, Vector2 as bs)   = planarSeparator gr
         (sep',Vector2 as' bs') = drawSeparator s
         out = [ iO' points
@@ -311,7 +346,11 @@ testIpeGraph inFp outFp = do
               , iO $ bs'  ! attr SLayer "setB"
               ] <> [ iO' $ drawTree  t ! attr SLayer "trees"
                    | t <- bff gr ]
-                <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
+                <> drawCycles cycles'
+                <> [ iO $ defIO v ! attr SLayer "vertices"
+                                  ! attr SStroke red
+                   | v <- Set.toAscList vv
+                   ]
     it "separator is complete" $
       (Set.fromList $ sep <> as <> bs) `shouldBe` (Map.keysSet gr)
     it ("separator is balanced " <> show outFp <> show ("sizes",n,length as, length bs, length sep)) $
