@@ -161,8 +161,8 @@ spec = describe "lower envelope tests" $ do
            prop "findAlongPath partition" $
              \(t0 :: Tree Int) side k ->
                let t = makeUnique t0
-               in counterexample (show t) $ onAllPairs t $ \(x,y) ->
-                 counterexample (show (x,y)) $
+               in counterexample' t $ onAllPairs t $ \(x,y) ->
+                 counterexample' (x,y) $
                  let allElems     = Set.fromList $ toList t
                      pathToList' = Set.fromList . toList . pathToTree'
                      pathToList'' = Set.fromList . pathToList
@@ -170,12 +170,49 @@ spec = describe "lower envelope tests" $ do
                      splitLeaf (Node z nodes) = NodeSplit z (take k nodes) (drop k nodes)
                  in case fmap splitLeaf <$> findNode (== x) t of
                       Nothing   -> error "nonsense"
-                      Just path' -> counterexample (show path') $ case findNodeAlongPath (== y) side path' of
+                      Just path' -> counterexample' path' $ case findNodeAlongPath (== y) side path' of
                         Nothing    -> True === True -- accept
-                        Just (split,newPath) -> counterexample (show newPath) $
-                                                counterexample (show split) $
+                        Just (split,newPath) -> counterexample' newPath $
+                                                counterexample' split $
                                 pathToList' path' === pathToList'' newPath
                            .&&. pathToList' path' === collect' split
+           prop "splitCycleAt partition" $
+             \(t0 :: Tree Int) k l ->
+               let t = makeUnique t0
+                   splitLeaf _ (Node z nodes) = NodeSplit z (take k nodes) (drop k nodes)
+                   splitChildren _ _ chs = Just $ Vector2 (take l chs) (drop l chs)
+
+               in onAllPairs t $ \e@(x,y) ->
+                  counterexample' (x,y) $
+                 let allElems     = Set.fromList $ toList t
+                     theCycle     = toCycle splitLeaf splitChildren $ initialSplit e t
+                     toSplitElems = toList $ allElems `Set.difference` (Set.fromList [x,y])
+                     theTest z = counterexample' z $ counterexample' ("thecycle:",theCycle) $
+                       case splitCycleAt splitLeaf splitChildren (==z) theCycle of
+                         Nothing              -> discard
+                         Just (Vector2 cl cr) ->
+                           counterexample' cl $
+                             collectAll' cl       === collectAll' theCycle
+                         -- .&&. collectAll' cr       === collectAll' theCycle
+                 in conjoin $ map theTest toSplitElems
+           prop "toCycle partition" $
+             \(t0 :: Tree Int) (k :: Int) (l:: Int) ->
+               let t = makeUnique t0
+                   splitLeaf _ (Node z nodes) = NodeSplit z (take k nodes) (drop k nodes)
+                   splitChildren _ _ chs = Just $ Vector2 (take l chs) (drop l chs)
+
+               in counterexample' t $ onAllPairs t $ \e@(x,y) ->
+                  counterexample' (x,y) $
+                  let allElems     = Set.fromList $ toList t
+                      theCycle     = toCycle splitLeaf splitChildren $ initialSplit e t
+                  in collectAll' theCycle === allElems
+
+-- counterexample'   :: Show a => a -> Property
+counterexample' x = counterexample (show x)
+
+
+collectAll' :: Ord a => Cycle' a -> Set a
+collectAll' = Set.fromList . collectAll
 
 
 instance Arbitrary Side where

@@ -23,6 +23,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.Cycle
 
   , CycleSplitPaths(..)
   , collectPaths
+  , collectAll
   , cycleSplitPathWeights
   , endPoints
   , endPoints'
