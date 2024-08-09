@@ -10,7 +10,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Plane.LowerEnvelope.Connected.Separator
-  ( Separator
+  ( Separator(..)
   , planarSeparator
 
   , bff
@@ -33,6 +33,7 @@ import qualified Data.Set as Set
 import           Data.Tree
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Util
+import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Type
 import           HGeometry.Plane.LowerEnvelope.Connected.Split
 import           HGeometry.Vector
 
@@ -96,7 +97,6 @@ sqrt' = floor . sqrt . fromIntegral
 --                    => planarGraph
 --                    -> ([VertexIx planarGraph], Vector 2 [VertexIx planarGraph])
 
-type Separator k = ([k],Vector 2 [k])
 type Size = Int
 
 -- | Computes the connected components; for each component we report a BFS tree. The trees
@@ -115,9 +115,9 @@ connectedComponents = List.sortOn (Down . snd) . map (\t -> (t, length t)) . bff
 -- 3) the vertex sets of A and B have weight at most 2/3 the total weight
 planarSeparator    :: ( Ord k
                       , Show k
-                      ) => PlaneGraph k v e -> Separator k
+                      ) => PlaneGraph k v e -> Separator [k]
 planarSeparator gr = case trees of
-    []                 -> ([],Vector2 [] [])
+    []                 -> mempty
     ((tr,m):rest)
       | m <= twoThirds -> traceShow (tr,m,n,twoThirds) $ groupComponents
       | otherwise      -> planarSeparator' (traceShowWith ("tree",) tr) m -- FIXME: we should also add the remaining vertices
@@ -130,7 +130,7 @@ planarSeparator gr = case trees of
     groupComponents = undefined
 
     planarSeparator' tr _ = case List.break (\lvl -> accumSize lvl < half) lvls of
-        (_,    [])          -> ([], Vector2 (F.toList tr) [])
+        (_,    [])          -> Separator [] (F.toList tr) []
                                  -- somehow we have too little weight;
         (pref, (l1 : suff)) -> planarSeparatorTree twoThirds gr tr'
           where

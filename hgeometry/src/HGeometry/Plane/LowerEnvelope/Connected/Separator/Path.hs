@@ -24,7 +24,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
   , pathElementsTree, pathElementsNS
 
   , pathToTree, pathToTree', pathToList
-  , collectPath
+  , collectPathWith,  pathValues, pathWeight
   , endPoint
 
   , findNode
@@ -32,7 +32,8 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
 
 
   , Side(..)
-  , pathWeight
+  , nodeSplitWeightOn
+  , pathWeightOn
   ) where
 
 import           Control.Lens ((<&>))
@@ -68,11 +69,34 @@ instance (Monoid a, Monoid trees) => Monoid (NodeSplit a trees) where
 splitRootLabel                   :: NodeSplit a trees -> a
 splitRootLabel (NodeSplit x _ _) = x
 
--- | Computes the weight of a ndoesplit
-nodeSplitWeight :: (Num w, IsWeight w) => Side -> NodeSplit a [Tree (Weighted w b)] -> w
-nodeSplitWeight s (NodeSplit _ before after) = case s of
-                                                 L -> weightOf before
-                                                 R -> weightOf after
+-- | Computes the weight of a nodesplit on a particular side.
+nodeSplitWeightOn      :: (Num w, IsWeight w) => Side -> NodeSplit a [Tree a] -> w
+nodeSplitWeightOn s ns = let NodeSplit _ before after = nodeSplitWeight ns
+                         in case s of
+                              L -> before
+                              R -> after
+
+-- | Collects the weights
+nodeSplitWeight :: (Functor f, Foldable f, Foldable tree, Functor tree, IsWeight w, Num w)
+                => NodeSplit a (f (tree a)) -> NodeSplit w w
+nodeSplitWeight = bimap getWeight getWeight . collectWithWeight
+
+-- | Collects all values
+nodeSplitValues :: (Functor f, Foldable f, Foldable tree, Functor tree)
+                => NodeSplit a (f (tree a)) -> NodeSplit [a] [a]
+nodeSplitValues = collectNodeSplitWith (:[])
+
+-- | Collect weights and values.
+collectWithWeight :: (Functor f, Foldable f, Foldable tree, Functor tree, IsWeight w, Num w)
+                  => NodeSplit a (f (tree a))
+                  -> NodeSplit (Weighted w [a]) (Weighted w [a])
+collectWithWeight = collectNodeSplitWith (\x -> withWeight 1 [x])
+
+-- | Measure a nodesplit with a given measuring function.
+collectNodeSplitWith   :: (Monoid w, Foldable f, Foldable tree)
+                       => (a -> w) -> NodeSplit a (f (tree a)) -> NodeSplit w w
+collectNodeSplitWith f = bimap f (foldMap (\t -> foldMap f t))
+
 
 -- | unsplit the node split into a proper Tree
 nodeSplitToTree :: NodeSplit a [Tree a] -> Tree a
@@ -138,12 +162,22 @@ trifoldMap fa ft fl = go
 
 ----------------------------------------
 
--- | returns the a's left, on, and right of the path
-collectPath :: Path a [Tree a] (NodeSplit a [Tree a]) -> NodeSplit [a] [a]
-collectPath = foldPath handle (\ns r -> handle ns <> r)
-  where
-    handle (NodeSplit x before after) = NodeSplit [x] (f before) (f after)
-    f = foldMap F.toList
+-- | Collect a list of path values
+pathValues :: Path a [Tree a] (NodeSplit a [Tree a]) -> NodeSplit [a] [a]
+pathValues = collectPathWith (:[])
+
+-- | Collects the weight on the path
+pathWeight :: Path a [Tree a] (NodeSplit a [Tree a]) -> NodeSplit Int Int
+pathWeight = bimap getWeight getWeight . collectPathWith (\x -> withWeight 1 [x])
+
+
+-- | Collect on a node split
+collectPathWith   :: (Monoid w, Foldable f, Foldable tree, Foldable g, Foldable tree')
+                  => (a -> w)
+                  -> Path a (f (tree a)) (NodeSplit a (g (tree' a)))
+                  -> NodeSplit w w
+collectPathWith f = foldPath (collectNodeSplitWith f) (\ns r -> collectNodeSplitWith f ns <> r)
+
 
 -- | Recombine the path into a tree
 pathToTree :: Path a [Tree a] (Tree a) -> Tree a
@@ -210,6 +244,10 @@ findNode' p = go
 data Side = L | R deriving (Show,Eq,Enum,Bounded)
 
 -- | Computes the weight of the path on the particular side.
-pathWeight   :: (IsWeight w, Num w)
-             => Side -> Path c [Tree (Weighted w a)] (NodeSplit b [Tree (Weighted w d)]) -> w
-pathWeight s = foldPath (nodeSplitWeight s) (\ns acc -> acc + nodeSplitWeight s ns)
+-- pathWeight   :: (IsWeight w, Num w)
+--              => Side -> Path c [Tree (Weighted w a)] (NodeSplit b [Tree (Weighted w d)]) -> w
+pathWeightOn     :: Side -> Path a [Tree a] (NodeSplit a [Tree a]) -> Int
+pathWeightOn s p = let NodeSplit _ before after = pathWeight p
+                   in case s of
+                        L -> before
+                        R -> after

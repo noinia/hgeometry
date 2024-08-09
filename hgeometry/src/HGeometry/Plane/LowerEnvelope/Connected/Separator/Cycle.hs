@@ -15,6 +15,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.Cycle
   , toCycle
   , splitTree
   , missingEdge
+  , toSeparator
 
   , annotateCycle
   , makeInsideHeaviest
@@ -22,7 +23,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.Cycle
   , splitCycleAt
 
   , CycleSplitPaths(..)
-  , collectPaths
+  , collectPathsWith
   , collectAll
   , cycleSplitPathWeights
   , endPoints
@@ -45,6 +46,7 @@ import           Data.Tree (Tree(..))
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.InitialSplit
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Weight
+import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Type
 import           HGeometry.Vector
 
 import           Debug.Trace
@@ -76,7 +78,12 @@ collectAll                        :: Cycle' a -> [a]
 collectAll (Cycle paths bs ms as) = collectAllPaths paths <> flatten (bs <> ms <> as)
 
 
-
+-- | Turn the cycle into an actual separator.
+toSeparator                                  :: Cycle' a -> Separator [a]
+toSeparator (Cycle paths before middle after) =
+    (toList' <$> Separator [] middle (before <> after)) <> collectPathsWith (:[]) paths
+  where
+    toList' = foldMap F.toList
 
 ----------------------------------------
 
@@ -105,27 +112,29 @@ instance Bifoldable CycleSplitPaths where
                                in f r <> h lPath <> h rPath
 
 
-collectAllPaths       :: CycleSplitPaths a [Tree a] -> [a]
-collectAllPaths paths = let (sep,Vector2 inside outside) = collectPaths undefined paths
-                        in sep <> inside <> outside
+
+-- | Collects all a's
+collectAllPaths :: CycleSplitPaths a [Tree a] -> [a]
+collectAllPaths = F.fold . collectPathsWith (:[])
 
 -- | Collects the paths into a (partial) separator
-collectPaths                :: (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
-                            -> CycleSplitPaths a [Tree a] -> ([a], Vector 2 [a])
-collectPaths splitChildren = \case
-  RootSplit rs            -> collectRootSplitPath splitChildren rs
-  PathSplit r lPath rPath -> let NodeSplit sepL before  middleL = collectPath lPath
-                                 NodeSplit sepR middleR after   = collectPath rPath
-                             in ( r : sepL <> sepR
-                                , Vector2 (middleL <> middleR) (before <> after)
-                                )
--- TODO: I don't think I need the splitChildren here!
+collectPathsWith   :: Monoid w => (a -> w) -> CycleSplitPaths a [Tree a] -> Separator w
+collectPathsWith f = \case
+  RootSplit rs            -> collectRootSplitPathWith f rs
+  PathSplit r lPath rPath -> let NodeSplit sepL before  middleL = collectPathWith f lPath
+                                 NodeSplit sepR middleR after   = collectPathWith f rPath
+                             in Separator (f r <> sepL <> sepR)
+                                          (middleL <> middleR) (before <> after)
 
 -- | Computes the weights of the
-cycleSplitPathWeights :: (Num w, IsWeight w) => CycleSplitPaths a [Tree (Weighted w b)]-> w
+cycleSplitPathWeights :: CycleSplitPaths a [Tree a]-> Weight
 cycleSplitPathWeights = \case
   RootSplit rs            -> rootSplitWeight rs
-  PathSplit _ lPath rPath -> pathWeight L lPath + pathWeight R rPath
+  PathSplit _ lPath rPath -> pathWeightOn L lPath + pathWeightOn R rPath
+
+
+
+
 
 
 -- | The labels of the leaves at which the cyclesplit paths end. If one is a root
@@ -175,39 +184,18 @@ instance Bifoldable RootSplitPath where
 type RootPath a = a
 
 -- | computes the weight of the paths hanging off a rootSplit
-rootSplitWeight :: (IsWeight w, Num w) => RootSplitPath a [Tree (Weighted w b)] -> w
+rootSplitWeight :: RootSplitPath a [Tree a] -> Weight
 rootSplitWeight = \case
-  RootBefore _ rPath -> pathWeight L rPath
-  RootAfter lPath _  -> pathWeight R lPath
+  RootBefore _ rPath -> pathWeightOn L rPath
+  RootAfter lPath _  -> pathWeightOn R lPath
 
 -- | Collect on a rootsplitPath
-collectRootSplitPath                :: (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
-                                    -> RootSplitPath a [Tree a] -> ([a], Vector 2 [a])
-collectRootSplitPath _ = \case
-    RootBefore r     rPath -> let NodeSplit sep inside outside = collectPath rPath
-                              in (r:sep, Vector2 inside outside)
-    RootAfter  lPath r     -> let NodeSplit sep outside inside = collectPath lPath
-                              in (r:sep, Vector2 inside outside)
-
-
--- -- | Collect on a rootsplitPath
--- collectRootSplitPath                :: (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
---                                     -> RootSplitPath a [Tree a] -> ([a], Vector 2 [a])
--- collectRootSplitPath splitChildren = fromMaybe err . \case
---     RootBefore r path -> let (NodeSplit sep inside outside, before, after) = splitPath path in
---       splitChildren r before <&> \(Vector2 before' middle) ->
---           (r:sep, Vector2 (flatten middle <> inside) (flatten (before' <> after) <> outside))
-
---     RootAfter path r  -> let (NodeSplit sep outside inside, before, after) = splitPath path in
---       splitChildren r after <&> \(Vector2 middle after') ->
---           (r:sep, Vector2 (flatten middle <> inside) (flatten (before <> after') <> outside))
---   where
---     err = error "collectRootSplitPath: not found!?"
---
-
---     splitPath = \case
---       Leaf (NodeSplit _ before after)         -> (mempty,           before,after)
---       Path (NodeSplit (_,path') before after) -> (collectPath path', before, after)
+collectRootSplitPathWith   :: Monoid w => (a -> w) -> RootSplitPath a [Tree a] -> Separator w
+collectRootSplitPathWith f = \case
+    RootBefore r     rPath -> let NodeSplit sep inside outside = collectPathWith f rPath
+                              in Separator (f r <> sep) inside outside
+    RootAfter  lPath r     -> let NodeSplit sep outside inside = collectPathWith f lPath
+                              in Separator (f r <> sep) inside outside
 
 flatten :: [Tree a] -> [a]
 flatten = foldMap F.toList
@@ -266,14 +254,12 @@ splitTree splitLeaf splitChildren e = toCycle splitLeaf splitChildren . initialS
 type Weight = Int
 type Weighted' = Weighted Weight
 
-
 -- | Annotates a cycle with the subtree weights.
-annotateCycle :: Cycle a [Tree a] -> Cycle (Weighted Int a) [Tree (Weighted Int a)]
+annotateCycle :: Cycle a [Tree a] -> Cycle (Weighted Weight a) [Tree (Weighted Weight a)]
 annotateCycle = bimap (Weighted 1) (fmap annotate)
 
 -- | Makes sure that the inside of the cycle is heaviest.
-makeInsideHeaviest                                         :: Cycle' (Weighted' a)
-                                                           -> Cycle' (Weighted' a)
+makeInsideHeaviest                                         :: Cycle' a -> Cycle' a
 makeInsideHeaviest split@(Cycle paths before inside after)
   | weightOf inside < weightOf before + weightOf after =
       Cycle (shift paths) [] (after <> before) inside
@@ -438,8 +424,7 @@ splitCycleAtPath :: forall a. (Show a, Ord a) =>
                  -> (a -> Bool)
                  -> Cycle' a
                  -> Maybe (Vector 2 (Cycle' a))
-splitCycleAtPath splitLeaf splitChildren p old@(Cycle paths before middle after) =
-    -- verify "PATH" old $
+splitCycleAtPath splitLeaf splitChildren p (Cycle paths before middle after) =
     fmap toCycle' <$> (splitLeftPath <|> splitRightPath)
   where
     toCycle' = toCycle splitLeaf splitChildren

@@ -9,8 +9,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Plane.LowerEnvelope.Connected.Split
-  ( toSeparator
-  , planarSeparatorTree
+  ( planarSeparatorTree
   , planarSeparatorCycle
   , planarSeparatorCycles
 
@@ -18,13 +17,15 @@ module HGeometry.Plane.LowerEnvelope.Connected.Split
   , module HGeometry.Plane.LowerEnvelope.Connected.Separator.InitialSplit
   , module HGeometry.Plane.LowerEnvelope.Connected.Separator.Cycle
   , module HGeometry.Plane.LowerEnvelope.Connected.Separator.Weight
+  , module HGeometry.Plane.LowerEnvelope.Connected.Separator.Type
+  , interiorWeight
   ) where
 
 import           Data.Bifunctor
 import qualified Data.Foldable as F
 import qualified Data.List as List
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import           Data.Maybe (mapMaybe)
 import           Data.Monoid (First(..))
@@ -35,6 +36,7 @@ import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Cycle
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.InitialSplit
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Path
+import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Type
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Util
 import           HGeometry.Plane.LowerEnvelope.Connected.Separator.Weight
 import           HGeometry.Vector
@@ -60,25 +62,22 @@ planarSeparatorTree                  :: forall k v e.
                                         , Show k
                                         )
                                      => Weight -- ^ maximum allowed weight on the heavy -- side; i.e. the 2n/3.
-                                     -> PlaneGraph k v e -> Tree k -> ([k], Vector 2 [k])
-planarSeparatorTree allowedWeight gr = toSeparator gr . planarSeparatorCycle allowedWeight gr
+                                     -> PlaneGraph k v e -> Tree k -> Separator [k]
+planarSeparatorTree allowedWeight gr = toSeparator . planarSeparatorCycle allowedWeight gr
 
 
 -- | Computes the initial cycle
 initialCycle       :: (Ord k, Show k) => PlaneGraph k v e -> Tree k
-                   -> Weighted' (Cycle' (Weighted' k))
-initialCycle gr tr = withInteriorWeight . makeInsideHeaviest . annotateCycle
+                   -> Weighted' (Cycle' k)
+initialCycle gr tr = withInteriorWeight . makeInsideHeaviest -- . annotateCycle
                    $ splitTree (splitLeaf id gr) (splitChildren id gr) e tr
   where
     -- compute a non-tree edge
     e = Set.findMin $ graphEdges gr `Set.difference` treeEdges tr
 
 -- | Annotate the cycle with its interior weight
-withInteriorWeight   :: Cycle' (Weighted' k) -> Weighted' (Cycle' (Weighted' k))
-withInteriorWeight c = Weighted (aSize c) c
-  where
-    aSize c = let Vector2 as _ = snd . toSeparator undefined $ c  in length as
-
+withInteriorWeight   :: Cycle' k -> Weighted Weight (Cycle' k)
+withInteriorWeight c = withWeight (interiorWeight c) c
 
 
 -- | Constructs the cycle representing the separator.
@@ -86,13 +85,13 @@ planarSeparatorCycle                   :: ( Ord k, Show k)
                                        => Weight -- ^ maximum allowed weight on the heavy
                                        -- side; i.e. the 2n/3.
                                        -> PlaneGraph k v e -> Tree k
-                                       -> Cycle' (Weighted' k)
+                                       -> Cycle' k
 planarSeparatorCycle allowedWeight gr = NonEmpty.last
                                       . showCycles
                                       . NonEmpty.fromList . NonEmpty.take 10  -- remove this
                                       . planarSeparatorCycles allowedWeight gr
   where
-    showCycles cs = traceShow ("CYCLES", fmap missingEdge' cs
+    showCycles cs = traceShow ("CYCLES", fmap missingEdge cs
                               ) cs
 
 
@@ -104,18 +103,18 @@ planarSeparatorCycles                     :: forall k v e.
                                           => Weight -- ^ maximum allowed weight on the heavy
                                                     -- side; i.e. the 2n/3.
                                           -> PlaneGraph k v e -> Tree k
-                                          -> NonEmpty (Cycle' (Weighted' k))
+                                          -> NonEmpty (Cycle' k)
 planarSeparatorCycles allowedWeight gr tr = NonEmpty.unfoldr shrink $ initialCycle gr tr
   where
-    splitLeaf''     = splitLeaf getValue gr
-    splitChildren'' = splitChildren getValue gr
+    splitLeaf''     = splitLeaf id gr
+    splitChildren'' = splitChildren id gr
 
-    shrink                :: Weighted' (Cycle' (Weighted' k))
-                          -> (Cycle' (Weighted' k), Maybe (Weighted' (Cycle' (Weighted' k))))
+    shrink                :: Weighted' (Cycle' k)
+                          -> (Cycle' k, Maybe (Weighted' (Cycle' k)))
     shrink (Weighted w c) = (c, shrunken)
       where
         shrunken
-          | w <= allowedWeight = Nothing -- we are done
+          | w <= allowedWeight = traceShow "DONE" Nothing -- we are done
           | otherwise          =
             case getFirst $ foldMap splitCycle (commonNeighbours e gr) of
               Nothing                 ->
@@ -125,46 +124,24 @@ planarSeparatorCycles allowedWeight gr tr = NonEmpty.unfoldr shrink $ initialCyc
                 --    show (commonNeighbours e' gr))
               res@(Just _) -> res
 
-        e = missingEdge' c
+        e = missingEdge c
 
-        splitCycle   :: k -> First (Weighted' (Cycle' (Weighted' k)))
+        splitCycle   :: k -> First (Weighted' (Cycle' k))
         splitCycle u = First
                      . fmap (F.maximumBy (comparing getWeight) . fmap withInteriorWeight)
-                     .  splitCycleAt splitLeaf'' splitChildren'' ((== u) . getValue)
+                     .  splitCycleAt splitLeaf'' splitChildren'' (== u)
                      . traceShowWith annotateWithMissingEdge
                      $ c
 
     -- aSize c = let Vector2 as _ = snd . toSeparator gr $ c  in length as
 
-annotateWithMissingEdge c = ("withMissingEdge ",missingEdge' c,"of ",c)
+annotateWithMissingEdge c = ("withMissingEdge ",missingEdge c,"of ",c)
 
-
--- | Computes the missing edge in a weighted cycle
-missingEdge'   :: IsWeight w => Cycle (Weighted w k) [Tree (Weighted w k)] -> (k, k)
-missingEdge' c = let (u,v) = missingEdge c
-                 in (getValue u, getValue v)
 
 
 -- | Compute the weight on the inside of the cycle
-interiorWeight                          :: (Num w, IsWeight w) => Cycle' (Weighted w a) -> w
-interiorWeight (Cycle paths _ inside _) = cycleSplitPathWeights paths
-                                        + weightOf' inside
-
--- | Turn the weighted cycle into an actual separator.
-toSeparator    :: PlaneGraph k v e -> Cycle' (Weighted' k) -> ([k], Vector 2 [k])
-toSeparator gr (Cycle paths before middle after) = bimap getV (fmap getV) $
-    (sep, Vector2 (inside  <> toList' middle)
-                  (outside <> toList' before <> toList' after)
-    )
-  where
-    (sep, Vector2 inside outside) = collectPaths splitChildren1 paths
-    toList' = foldMap F.toList
-    getV = fmap getValue
-
-    (_,w) = endPoints paths
-
-    splitChildren1 = undefined
-    -- splitChildren1 = splitChildren getValue gr (== getValue w) . getValue
+interiorWeight                          :: Cycle' a -> Weight
+interiorWeight (Cycle paths _ inside _) = cycleSplitPathWeights paths + weightOf inside
 
 --------------------------------------------------------------------------------
 

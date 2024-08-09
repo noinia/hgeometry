@@ -32,7 +32,7 @@ import qualified HGeometry.Plane.LowerEnvelope.Connected.Split as Split
 import           HGeometry.Plane.LowerEnvelope.Connected.Split hiding (Path)
 import           HGeometry.Plane.LowerEnvelope.ConnectedNew
 import           HGeometry.Point
-import           HGeometry.PolyLine
+import           HGeometry.PolyLine(PolyLine,polyLineFromPoints)
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
 import           HGeometry.Vector
@@ -100,6 +100,8 @@ instance ( Point_ point 2 r, Fractional r, Ord r
                                               ! attr SOpacity (Text.pack "10%")
                  ]
 
+
+
 spec :: Spec
 spec = describe "lower envelope tests" $ do
          testIpe [osp|trivial.ipe|]
@@ -133,6 +135,21 @@ spec = describe "lower envelope tests" $ do
                      Nothing    -> True
                      Just path' -> pathToTree path' == t'
                in all (findNodeSame t) predicates
+           -- prop "pathWeight and collectPath agree" $
+           --   \(t :: Tree Int) ->
+           --     let predicates = const False : [(== x) | x <- toList t]
+           --         findNodeSame t' p = case findNode p t' of
+           --           Nothing    -> True
+           --           Just path' -> let SplitNode a b c = bimap length length $ collectPath path'
+
+           --                         in
+
+
+           --             pathToTree path' == t'
+           --     in all (findNodeSame t) predicates
+
+
+
            prop "initialSplit identity" $
              \(t :: Tree Int) -> onAllPairs t $ \e ->
                let s = initialSplit e t
@@ -213,6 +230,7 @@ spec = describe "lower envelope tests" $ do
                   let allElems     = Set.fromList $ toList t
                       theCycle     = toCycle splitLeaf splitChildren $ initialSplit e t
                   in collectAll' theCycle === allElems
+
 
 
 
@@ -319,10 +337,10 @@ theEdges = ipeGroup . Map.foldMapWithKey (\v (adjs, _) ->
                foldMap (\w -> [ iO $ defIO (ClosedLineSegment v w)
                               ]) adjs)
 
-drawSeparator                     :: Separator (Point 2 R) -> ( IpeObject' Group R
-                                                              , Vector 2 (IpeObject' Group R))
-drawSeparator (sep,Vector2 as bs) =
-    ( draw purple sep, Vector2 (draw red as) (draw blue bs))
+drawSeparator                       :: Separator [Point 2 R] -> Separator (IpeObject' Group R)
+
+drawSeparator (Separator sep as bs) = Separator (draw purple sep)
+                                                (draw red as) (draw blue bs)
   where
     draw c pts = ipeGroup [ iO $ defIO p ! attr SStroke c
                                          ! attr SSize (IpeSize $ Named "large")
@@ -366,10 +384,9 @@ drawCycle (Cycle paths _ _ _) = drawPaths paths
       RootAfter path' r  -> ipeGroup [drawPath seagreen   r path']
 
 
-drawCycles :: NonEmpty (Cycle' (Weighted' (Point 2 R))) -> [IpeObject R]
+drawCycles :: NonEmpty (Cycle' (Point 2 R)) -> [IpeObject R]
 drawCycles = zipWith (\i c -> iO $ drawCycle c
                                        ! attr SLayer (layerName' i)) [1..]
-                       . map (bimap getValue (fmap (fmap getValue)))
                        . toList
   where
     layerName' :: Int -> LayerName
@@ -389,9 +406,10 @@ testIpeGraph inFp outFp = do
         ((tr,_):_) = connectedComponents gr
         allowedWeight = (2*n) `div` 3
         cycles' = traceShowWith ("thecycles",) $ planarSeparatorCycles allowedWeight gr tr
+        finalCycle = NonEmpty.last cycles'
 
-        s@(sep, Vector2 as bs)   = planarSeparator gr
-        (sep',Vector2 as' bs') = drawSeparator s
+        s@(Separator sep as bs)  = planarSeparator gr
+        (Separator sep' as' bs') = drawSeparator s
         out = [ iO' points
               , iO' vd
               , iO' $ theEdges gr
@@ -417,8 +435,8 @@ testIpeGraph inFp outFp = do
       length (Set.fromList as) `shouldBe` (length as)
     it "B is a set" $
       length (Set.fromList bs) `shouldBe` (length bs)
-    -- it "insideWeight == size A" $
-    --   length (Set.fromList as) `shouldBe` insideWeight sepCycle
+    it "interiorWeight == size A" $
+      length (Set.fromList as) `shouldBe` interiorWeight finalCycle
     it "separator is a separator" $
       let aSet = Set.fromList as
           bSet = Set.fromList bs
@@ -428,6 +446,7 @@ testIpeGraph inFp outFp = do
                             || (u `Set.member` bSet && v `Set.member` aSet)
                           ]
       in crossingEdges  `shouldBe` []
+    -- it "separator weight "
 
     goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
                (ipeFileGolden { name = outFp })
