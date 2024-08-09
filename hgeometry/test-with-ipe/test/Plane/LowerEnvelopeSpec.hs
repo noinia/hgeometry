@@ -176,11 +176,17 @@ spec = describe "lower envelope tests" $ do
                                                 counterexample' split $
                                 pathToList' path' === pathToList'' newPath
                            .&&. pathToList' path' === collect' split
-           prop "splitCycleAt partition" $
+           it "cycleAt partition specific" $
+             case splitCycleAt (splitLeaf' 0) (splitChildren' 0) (==2) myCycle of
+               Nothing              -> error "impossible"
+               Just (Vector2 cl _) ->
+                 collectAll' cl       `shouldBe` collectAll' myCycle
+
+           modifyMaxSize (const 50) $ prop "splitCycleAt partition" $
              \(t0 :: Tree Int) k l ->
                let t = makeUnique t0
-                   splitLeaf _ (Node z nodes) = NodeSplit z (take k nodes) (drop k nodes)
-                   splitChildren _ _ chs = Just $ Vector2 (take l chs) (drop l chs)
+                   splitLeaf = splitLeaf' k
+                   splitChildren = splitChildren' l
 
                in onAllPairs t $ \e@(x,y) ->
                   counterexample' (x,y) $
@@ -189,23 +195,34 @@ spec = describe "lower envelope tests" $ do
                      toSplitElems = toList $ allElems `Set.difference` (Set.fromList [x,y])
                      theTest z = counterexample' z $ counterexample' ("thecycle:",theCycle) $
                        case splitCycleAt splitLeaf splitChildren (==z) theCycle of
-                         Nothing              -> discard
+                         Nothing              -> True === True --
                          Just (Vector2 cl cr) ->
                            counterexample' cl $
                              collectAll' cl       === collectAll' theCycle
-                         -- .&&. collectAll' cr       === collectAll' theCycle
+                          .&&. collectAll' cr       === collectAll' theCycle
                  in conjoin $ map theTest toSplitElems
+
            prop "toCycle partition" $
              \(t0 :: Tree Int) (k :: Int) (l:: Int) ->
                let t = makeUnique t0
-                   splitLeaf _ (Node z nodes) = NodeSplit z (take k nodes) (drop k nodes)
-                   splitChildren _ _ chs = Just $ Vector2 (take l chs) (drop l chs)
+                   splitLeaf = splitLeaf' k
+                   splitChildren = splitChildren' l
 
                in counterexample' t $ onAllPairs t $ \e@(x,y) ->
                   counterexample' (x,y) $
                   let allElems     = Set.fromList $ toList t
                       theCycle     = toCycle splitLeaf splitChildren $ initialSplit e t
                   in collectAll' theCycle === allElems
+
+
+
+splitLeaf' k _ (Node z nodes) = NodeSplit z (take k nodes) (drop k nodes)
+splitChildren' l _ _ chs = Just $ Vector2 (take l chs) (drop l chs)
+
+myCycle :: Cycle' Int
+myCycle = MkCycle (Split (PathSplit 0 (Leaf (NodeSplit 1 [] [Node {rootLabel = 2, subForest = []}])) (Leaf (NodeSplit 3 [] []))) [] [] [])
+
+
 
 -- counterexample'   :: Show a => a -> Property
 counterexample' x = counterexample (show x)
