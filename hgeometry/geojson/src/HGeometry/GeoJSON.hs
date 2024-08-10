@@ -139,3 +139,6 @@ instance SimplePolygon_ GeoPolygon GeoPositionWithoutCRS' Double where
 -- just make instances
 
 -}
+
+-- parseGeoJSONFile      :: OsPath -> IO ()
+-- parseGeoJSONFile path =
