@@ -21,6 +21,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Split
   , interiorWeight
   ) where
 
+import           Control.Lens (view)
 import           Data.Bifunctor
 import qualified Data.Foldable as F
 import qualified Data.List as List
@@ -76,7 +77,8 @@ initialCycle gr tr = withInteriorWeight . makeInsideHeaviest -- . annotateCycle
     e = Set.findMin $ graphEdges gr `Set.difference` treeEdges tr
 
 -- | Annotate the cycle with its interior weight
-withInteriorWeight   :: Cycle' k -> Weighted Weight (Cycle' k)
+withInteriorWeight   :: Show k =>
+  Cycle' k -> Weighted Weight (Cycle' k)
 withInteriorWeight c = withWeight (interiorWeight c) c
 
 
@@ -88,10 +90,10 @@ planarSeparatorCycle                   :: ( Ord k, Show k)
                                        -> Cycle' k
 planarSeparatorCycle allowedWeight gr = NonEmpty.last
                                       . showCycles
-                                      . NonEmpty.fromList . NonEmpty.take 10  -- remove this
+                                      . NonEmpty.fromList . NonEmpty.take 10  -- FIXME remove this
                                       . planarSeparatorCycles allowedWeight gr
   where
-    showCycles cs = traceShow ("CYCLES", fmap missingEdge cs
+    showCycles cs = traceShow ("CYCLES", fmap missingEdge cs, length cs
                               ) cs
 
 
@@ -122,7 +124,7 @@ planarSeparatorCycles allowedWeight gr tr = NonEmpty.unfoldr shrink $ initialCyc
                 -- error $
                 --   ("planarSeparatorTree: impossible " <> show e' <> " not inside " <>
                 --    show (commonNeighbours e' gr))
-              res@(Just _) -> res
+              res@(Just _) -> traceShowWith ("shrunken",) res
 
         e = missingEdge c
 
@@ -140,8 +142,10 @@ annotateWithMissingEdge c = ("withMissingEdge ",missingEdge c,"of ",c)
 
 
 -- | Compute the weight on the inside of the cycle
-interiorWeight                          :: Cycle' a -> Weight
-interiorWeight (Cycle paths _ inside _) = cycleSplitPathWeights paths + weightOf inside
+interiorWeight :: Show a =>
+  Cycle' a -> Weight
+interiorWeight = view inside . separatorWeight
+
 
 --------------------------------------------------------------------------------
 

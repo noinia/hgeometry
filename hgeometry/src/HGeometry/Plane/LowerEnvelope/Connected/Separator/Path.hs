@@ -81,16 +81,16 @@ nodeSplitWeight :: (Functor f, Foldable f, Foldable tree, Functor tree, IsWeight
                 => NodeSplit a (f (tree a)) -> NodeSplit w w
 nodeSplitWeight = bimap getWeight getWeight . collectWithWeight
 
--- | Collects all values
-nodeSplitValues :: (Functor f, Foldable f, Foldable tree, Functor tree)
-                => NodeSplit a (f (tree a)) -> NodeSplit [a] [a]
-nodeSplitValues = collectNodeSplitWith (:[])
+-- -- | Collects all values
+-- nodeSplitValues :: (Functor f, Foldable f, Foldable tree, Functor tree)
+--                 => NodeSplit a (f (tree a)) -> NodeSplit [a] [a]
+-- nodeSplitValues = collectNodeSplitWith (:[])
 
 -- | Collect weights and values.
 collectWithWeight :: (Functor f, Foldable f, Foldable tree, Functor tree, IsWeight w, Num w)
                   => NodeSplit a (f (tree a))
                   -> NodeSplit (Weighted w [a]) (Weighted w [a])
-collectWithWeight = collectNodeSplitWith (\x -> withWeight 1 [x])
+collectWithWeight = collectNodeSplitWith weigh
 
 -- | Measure a nodesplit with a given measuring function.
 collectNodeSplitWith   :: (Monoid w, Foldable f, Foldable tree)
@@ -168,7 +168,7 @@ pathValues = collectPathWith (:[])
 
 -- | Collects the weight on the path
 pathWeight :: Path a [Tree a] (NodeSplit a [Tree a]) -> NodeSplit Int Int
-pathWeight = bimap getWeight getWeight . collectPathWith (\x -> withWeight 1 [x])
+pathWeight = bimap getWeight getWeight . collectPathWith weigh
 
 
 -- | Collect on a node split
@@ -186,7 +186,7 @@ pathToTree = foldPath id (\ns ch -> nodeSplitToTreeWith ns [ch])
 -- | Recombines a path ending in a nodesplit to a tree.
 pathToTree' :: Path a [Tree a] (NodeSplit a [Tree a]) -> Tree a
 pathToTree' = foldPath nodeSplitToTree (\ns ch -> nodeSplitToTreeWith ns [ch])
--- I coulud also have just used fmap nodeSplitToTree I guess. Hoping this may be slightly
+-- I could also have just used fmap nodeSplitToTree I guess. Hoping this may be slightly
 -- more efficient.
 
 -- | Flatten the path into a list of elements

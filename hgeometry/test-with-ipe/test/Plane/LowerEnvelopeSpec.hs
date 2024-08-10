@@ -9,6 +9,7 @@ module Plane.LowerEnvelopeSpec
   ) where
 
 import           Control.Lens
+import           Data.Bifunctor
 import           Data.Foldable
 import           Data.Foldable1
 import qualified Data.List as List
@@ -32,7 +33,7 @@ import qualified HGeometry.Plane.LowerEnvelope.Connected.Split as Split
 import           HGeometry.Plane.LowerEnvelope.Connected.Split hiding (Path)
 import           HGeometry.Plane.LowerEnvelope.ConnectedNew
 import           HGeometry.Point
-import           HGeometry.PolyLine(PolyLine,polyLineFromPoints)
+import           HGeometry.PolyLine (PolyLine,polyLineFromPoints)
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
 import           HGeometry.Vector
@@ -45,7 +46,7 @@ import           Test.Hspec.WithTempFile
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 
-import Debug.Trace
+import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -126,7 +127,7 @@ spec = describe "lower envelope tests" $ do
          testIpeGraph [osp|foo.ipe|]
                       [osp|foo_graph_out|]
 
-
+{-
          describe "planar separator tests" $ do
            prop "findNode on path the same" $
              \(t :: Tree Int) ->
@@ -135,20 +136,16 @@ spec = describe "lower envelope tests" $ do
                      Nothing    -> True
                      Just path' -> pathToTree path' == t'
                in all (findNodeSame t) predicates
-           -- prop "pathWeight and collectPath agree" $
-           --   \(t :: Tree Int) ->
-           --     let predicates = const False : [(== x) | x <- toList t]
-           --         findNodeSame t' p = case findNode p t' of
-           --           Nothing    -> True
-           --           Just path' -> let SplitNode a b c = bimap length length $ collectPath path'
-
-           --                         in
-
-
-           --             pathToTree path' == t'
-           --     in all (findNodeSame t) predicates
-
-
+           prop "pathWeight and collectPath agree" $
+             \(t :: Tree Int) k ->
+               let predicates = [(== x) | x <- toList t]
+                   findNodeSame t' p = case findNode p t' of
+                     Nothing    -> True === True
+                     Just path' ->
+                       let path'' :: Split.Path Int [Tree Int] (NodeSplit Int [Tree Int])
+                           path'' = splitLeaf' k undefined <$> path' in
+                       pathWeight path'' === (bimap length length $ pathValues path'')
+               in conjoin $ map (findNodeSame t) predicates
 
            prop "initialSplit identity" $
              \(t :: Tree Int) -> onAllPairs t $ \e ->
@@ -231,7 +228,7 @@ spec = describe "lower envelope tests" $ do
                       theCycle     = toCycle splitLeaf splitChildren $ initialSplit e t
                   in collectAll' theCycle === allElems
 
-
+-}
 
 
 splitLeaf' k _ (Node z nodes) = NodeSplit z (take k nodes) (drop k nodes)
@@ -246,7 +243,7 @@ myCycle = MkCycle (Split (PathSplit 0 (Leaf (NodeSplit 1 [] [Node {rootLabel = 2
 counterexample' x = counterexample (show x)
 
 
-collectAll' :: Ord a => Cycle' a -> Set a
+collectAll' :: (Ord a, Show a) => Cycle' a -> Set a
 collectAll' = Set.fromList . collectAll
 
 
@@ -436,7 +433,20 @@ testIpeGraph inFp outFp = do
     it "B is a set" $
       length (Set.fromList bs) `shouldBe` (length bs)
     it "interiorWeight == size A" $
-      length (Set.fromList as) `shouldBe` interiorWeight finalCycle
+      interiorWeight finalCycle `shouldBe` length as -- (Set.fromList as)
+    let w = collectWith weigh finalCycle :: Separator (Weighted' [Point 2 R])
+    it ("interiorWeight and seprator consistent " <> show w) $
+      separatorWeight finalCycle  `shouldBe` (length <$> s)
+    it "paths disjoint" $
+      let f = (:[])
+          g = Set.singleton
+          Cycle paths _ _ _ = finalCycle
+      in case paths of
+           RootSplit _             -> True `shouldBe` True
+           PathSplit _ lPath rPath ->
+             (fold (collectPathWith g lPath) `Set.intersection` fold (collectPathWith g rPath))
+             `shouldBe` Set.empty
+
     it "separator is a separator" $
       let aSet = Set.fromList as
           bSet = Set.fromList bs

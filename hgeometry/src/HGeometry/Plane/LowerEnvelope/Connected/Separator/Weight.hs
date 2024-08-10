@@ -13,7 +13,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.Weight
   ( HasWeight(..)
   , IsWeight(..)
   , Weighted(..)
-  , weightOf
+  , weigh
   , weightOf'
   , annotate
   ) where
@@ -40,6 +40,10 @@ instance IsWeight Int where
   withWeight = Weighted
   getWeight (Weighted w _) = w
   getValue  (Weighted _ x) = x
+
+-- | Weight some element
+weigh   :: (Num w, IsWeight w) => a -> Weighted w [a]
+weigh x = withWeight 1 [x]
 
 instance (Semigroup a, IsWeight w, Num w) => Semigroup (Weighted w a) where
   wx <> wy = withWeight (getWeight wx + getWeight wy) (getValue wx <> getValue wy)

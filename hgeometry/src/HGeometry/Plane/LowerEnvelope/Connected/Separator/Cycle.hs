@@ -15,7 +15,8 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.Cycle
   , toCycle
   , splitTree
   , missingEdge
-  , toSeparator
+  , collectWith
+  , toSeparator, separatorWeight
 
   , annotateCycle
   , makeInsideHeaviest
@@ -25,7 +26,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator.Cycle
   , CycleSplitPaths(..)
   , collectPathsWith
   , collectAll
-  , cycleSplitPathWeights
+  -- , cycleSplitPathWeights
   , endPoints
   , endPoints'
 
@@ -74,16 +75,36 @@ missingEdge                     :: Cycle a [Tree a] -> (a, a)
 missingEdge (Cycle paths _ _ _) = endPoints' paths
 
 -- | Collects all 'a's
-collectAll                        :: Cycle' a -> [a]
-collectAll (Cycle paths bs ms as) = collectAllPaths paths <> flatten (bs <> ms <> as)
+collectAll  :: Show a =>
+  Cycle' a -> [a]
+collectAll = F.fold . toSeparator
+
+-- | Collect stuff about  the separtor
+collectWith                                     :: (Show a, Show w,
+                                                     Monoid w
+                                                   )
+                                                => (a -> w)
+                                                -> Cycle' a -> Separator w
+collectWith f (Cycle paths before middle after) = here <> collectPathsWith f paths
+  where
+    f'   = foldMap (foldMap f)
+    here = traceShowWith ("collectWith, here",) $ Separator mempty (f' middle) (f' $ before <> after)
+
+
+----------------------------------------
 
 
 -- | Turn the cycle into an actual separator.
-toSeparator                                  :: Cycle' a -> Separator [a]
-toSeparator (Cycle paths before middle after) =
-    (toList' <$> Separator [] middle (before <> after)) <> collectPathsWith (:[]) paths
-  where
-    toList' = foldMap F.toList
+toSeparator :: Show a =>
+  Cycle' a -> Separator [a]
+toSeparator = fmap (getValue @Weight) . collectWith weigh
+  -- collectWith (:[])
+
+-- | Computes the weight of the separator, interior, and exterior
+separatorWeight :: Show a =>
+  Cycle' a -> Separator Weight
+separatorWeight = fmap getWeight . collectWith weigh
+
 
 ----------------------------------------
 
@@ -114,28 +135,24 @@ instance Bifoldable CycleSplitPaths where
 
 
 -- | Collects all a's
-collectAllPaths :: CycleSplitPaths a [Tree a] -> [a]
+collectAllPaths :: Show a =>
+  CycleSplitPaths a [Tree a] -> [a]
 collectAllPaths = F.fold . collectPathsWith (:[])
 
 -- | Collects the paths into a (partial) separator
-collectPathsWith   :: Monoid w => (a -> w) -> CycleSplitPaths a [Tree a] -> Separator w
+collectPathsWith   :: (Show a, Show w,
+                       Monoid w
+                      )
+                   => (a -> w) -> CycleSplitPaths a [Tree a] -> Separator w
 collectPathsWith f = \case
   RootSplit rs            -> collectRootSplitPathWith f rs
-  PathSplit r lPath rPath -> let NodeSplit sepL before  middleL = collectPathWith f lPath
-                                 NodeSplit sepR middleR after   = collectPathWith f rPath
-                             in Separator (f r <> sepL <> sepR)
+  PathSplit r lPath rPath -> let ll@(NodeSplit sepL before  middleL) = collectPathWith f lPath
+                                 rr@(NodeSplit sepR middleR after)   = collectPathWith f rPath
+                             in traceShowWith ("collectPathsWith",r,lPath,rPath,
+                                               ll,rr,
+                                              ) $
+                               Separator (f r <> sepL <> sepR)
                                           (middleL <> middleR) (before <> after)
-
--- | Computes the weights of the
-cycleSplitPathWeights :: CycleSplitPaths a [Tree a]-> Weight
-cycleSplitPathWeights = \case
-  RootSplit rs            -> rootSplitWeight rs
-  PathSplit _ lPath rPath -> pathWeightOn L lPath + pathWeightOn R rPath
-
-
-
-
-
 
 -- | The labels of the leaves at which the cyclesplit paths end. If one is a root
 -- splitpath the root comes first.
@@ -259,79 +276,18 @@ annotateCycle :: Cycle a [Tree a] -> Cycle (Weighted Weight a) [Tree (Weighted W
 annotateCycle = bimap (Weighted 1) (fmap annotate)
 
 -- | Makes sure that the inside of the cycle is heaviest.
-makeInsideHeaviest                                         :: Cycle' a -> Cycle' a
-makeInsideHeaviest split@(Cycle paths before inside after)
-  | weightOf inside < weightOf before + weightOf after =
-      Cycle (shift paths) [] (after <> before) inside
-  | otherwise = split
+makeInsideHeaviest                                     :: Show a =>
+  Cycle' a -> Cycle' a
+makeInsideHeaviest c@(Cycle paths before inside after)
+    | interiorWeight < exteriorWeight = Cycle (shift paths) [] (after <> before) inside
+    | otherwise                       = c
   where
+    Separator _ interiorWeight exteriorWeight = separatorWeight c
     -- shift the paths
     shift = \case
       RootSplit (RootBefore r path) -> RootSplit (RootAfter path r)
       RootSplit (RootAfter path r)  -> RootSplit (RootBefore r path)
       PathSplit r lPath rPath       -> PathSplit r rPath lPath
-
-    -- rev = mapPath rev' rev'
-    -- rev' (NodeSplit x before after) = NodeSplit x after befor
-
-
---------------------------------------------------------------------------------
-{-
--- | Search along a path; we search among the nodees on the path and in the subtrees
--- hanging off the path on the given side.
---
--- Note that splitLeaf should already be applied so that it only takes the remaining leaf
-findNodeAlongPath                   :: (     Tree a   -> NodeSplit a [Tree a])
-                                    -> (a -> [Tree a] -> Maybe (Vector 2 [Tree a]))
-                                    -> (a -> Bool)
-                                    -> Side -- ^ indicates which subtrees to search
-                                    -> Path a [Tree a] (NodeSplit a [Tree a])
-                                    -> Maybe ( Cycle' a
-                                             , Path a [Tree a] (Tree a)
-                                             )
-findNodeAlongPath splitLeaf splitChildren p side =
-
-
-  go
-  where
-    go = \case
-      Leaf (NodeSplit u before after)
-        | p u       -> Just ( error "findNodeAlongPath; splitting the same leaf?"
-                            , Leaf $ splitLeaf (Node u $ before <> after)
-                            )
-        | otherwise -> here u before after (RootSplit . flip RootAfter u)
-                                           (RootSplit . RootBefore u)
-
-      Path (NodeSplit (u, path) before after)
-          | p u       -> Just ( cycle' u path before after
-                              , Leaf $ splitLeaf (Node u $ before <> after)
-                              )
-          | otherwise -> here u before after (\path' -> PathSplit u path' path)
-                                             (PathSplit u path)
-                         <|> ( fmap (\path' -> Path $ NodeSplit (u,path') before after)
-                              <$> go path)
-
-    here u before after makeL makeR = case side of
-        L -> findNode' p before <&> \(NodeSplit path' before' after') ->
-                   let path'' = splitLeaf <$> path'
-                   in ( Split (makeL path'') before' after' after
-                      , Path $ NodeSplit (u, path'') before' (after' <> after)
-                      )
-             -- Search on the left; i.e. in the before part
-        R -> findNode' p after <&> \(NodeSplit path' before' after') ->
-                       let path'' = splitLeaf <$> path'
-                       in ( Split (makeR path'') before before' after'
-                          , Path $ NodeSplit (u, path'') (before <> before') after'
-                          )
-
-    cycle' u path before after = case splitChildren u before of
-      Nothing -> case splitChildren u after of
-        Nothing                          -> error "toCycle"
-        Just (Vector2 middle after') ->
-          Split (RootSplit $ RootAfter path u) before middle after'
-      Just (Vector2 before' middle) ->
-          Split (RootSplit $ RootBefore u path) before' middle after
--}
 
 --------------------------------------------------------------------------------
 -- * Splitting a Cycle
