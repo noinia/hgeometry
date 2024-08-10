@@ -1,20 +1,17 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 module HGeometry.GeoJSON
-  (
-
+  ( GeoPositionWithoutCRS'
+  , RestGeoPosition(..)
+  , _GeoPositionWithoutCRS
   ) where
 
 import           Control.Lens
 import           Data.Geospatial
 import           Data.LinearRing
-import qualified Data.Sequence as Seq
 import           HGeometry.Ext
 import           HGeometry.Point.Class
-import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Properties
 import           HGeometry.Vector
-import Data.Foldable1
 
 --------------------------------------------------------------------------------
 -- * PointXY
