@@ -12,6 +12,7 @@ import           Data.Foldable1
 import           Data.Functor.Apply (Apply, (<.*>), MaybeApply(..))
 import           Data.Geospatial
 import           Data.LinearRing
+import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (fromMaybe)
 import           Data.Semigroup.Traversable
 import           Data.Sequence (Seq(..))
@@ -98,7 +99,6 @@ _GeoPositionWithoutCRS = prism' toGeoP fromGeoP
 type instance NumType   GeoPolygon = Double
 
 type instance Dimension GeoPolygon = 2
-
 
 instance Wrapped GeoPolygon
 instance Rewrapped GeoPolygon GeoPolygon
@@ -208,6 +208,12 @@ _SimplePolygonContainer :: Iso (SimplePolygonF Seq1 point) (SimplePolygonF Seq1 
                                (Seq1 point) (Seq1 point')
 _SimplePolygonContainer = coerced
 
+_RingAsSimplePolygon' :: Iso' (LinearRing GeoPositionWithoutCRS)
+                             (SimplePolygonF Seq1 GeoPositionWithoutCRS')
+_RingAsSimplePolygon' = _RingSeq1 . go . from _SimplePolygonContainer
+  where
+    go = iso (fmap (view $ singular _GeoPositionWithoutCRS))
+             (fmap (view $ singular (re _GeoPositionWithoutCRS)))
 
 -- instance HasDirectedTraversals Seq where
 
@@ -264,34 +270,54 @@ instance HasVertices GeoPolygon GeoPolygon where
   vertices = _Wrapped .> traversed1Seq <.> _RingAsSimplePolygon .> vertices
           <. singular _GeoPositionWithoutCRS
 -- TODO: the internal ones should be reversed
-{-
+
+withRing   :: Int -> IndexedLens' Int GeoPolygon (SimplePolygonF Seq1 GeoPositionWithoutCRS)
+withRing i = _Wrapped .> singular (iix i) <. _RingAsSimplePolygon
+
+firstRing :: IndexedLens' Int GeoPolygon (SimplePolygonF Seq1 GeoPositionWithoutCRS)
+firstRing = withRing 0
+
+-- | unsafe conversion wrapping an edge
+edge' :: Iso' (GeoPositionWithoutCRS, GeoPositionWithoutCRS)
+              (GeoPositionWithoutCRS', GeoPositionWithoutCRS')
+edge' = iso (\(u,v) -> (u^?!_GeoPositionWithoutCRS, v^?!_GeoPositionWithoutCRS))
+            (\(u,v) -> (u^?!re _GeoPositionWithoutCRS, v^?!re _GeoPositionWithoutCRS))
+
+reIndexEdge :: Indexable ( (Int,Int) , (Int,Int)) p
+            => (Indexed (Int,(Int,Int)) a b -> r) -> p a b -> r
+reIndexEdge = reindexed (\(i,(u,v)) -> ((i,u), (i,v)))
+
 instance HasOuterBoundary GeoPolygon where
-  outerBoundaryVertexAt v@(i,_)
-    | i == 0    = vertexAt v
-    | otherwise = \_ pg -> pure pg
+  outerBoundaryVertexAt (i,j)
+    | i == 0    = firstRing <.> singular (vertexAt j) <. singular _GeoPositionWithoutCRS
+    | otherwise = error "outerBoundaryVertex: not on first ring"
   -- the first ring is outer boundary apparently
-  ccwOuterBoundaryFrom v@(i,_)
-    | i == 0    = _Wrapped .> traversed1Seq <.> _RingAsSimplePolygon .> ccwOuterBoundaryFrom v
-                  <. singular _GeoPositionWithoutCRS
-    | otherwise = \_ pg -> pure pg
-  cwOuterBoundaryFrom v@(i,_)
-    | i == 0    = _Wrapped .> traversed1Seq <.> _RingAsSimplePolygon .> cwOuterBoundaryFrom v
-                  <. singular _GeoPositionWithoutCRS
-    | otherwise = \_ pg -> pure pg
 
-  outerBoundaryEdges = undefined
-    -- _Wrapped .> traversed1Seq <.> _RingAsSimplePolygon .> outerBoundaryEdges
+  ccwOuterBoundaryFrom (i,j)
+    | i == 0    = firstRing <.> ccwOuterBoundaryFrom j <. singular _GeoPositionWithoutCRS
+    | otherwise = error "ccwOuterBoundaryFrom: not on first ring"
 
-  outerBoundaryEdgeAt v@(i,_)
-    | i == 0    = undefined -- _Wrapped .> traversed1Seq <.> _RingAsSimplePolygon . outerBoundaryEdgeAt v
-    | otherwise = \_ pg -> pure pg
+  outerBoundary = firstRing <.> vertices <. singular _GeoPositionWithoutCRS
+
+  cwOuterBoundaryFrom (i,j)
+    | i == 0    = firstRing <.> cwOuterBoundaryFrom j <. singular _GeoPositionWithoutCRS
+    | otherwise = error "cwOuterBoundaryFrom: not on first ring"
+
+  outerBoundaryEdges = reIndexEdge
+                     $ firstRing <.> outerBoundaryEdges <. edge'
 
 
+  outerBoundaryEdgeAt (_,j) = reIndexEdge
+                            $ firstRing <.> outerBoundaryEdgeAt j <. edge'
 
 instance Polygon_ GeoPolygon GeoPositionWithoutCRS' Double where
-  area = _
-  ccwPredecessorOf ()= _
-  ccwSuccessorOf   = _
+  area pg = case toNonEmptyOf (_Wrapped.from _Seq1Seq.traverse1._RingAsSimplePolygon') pg of
+    outer :| inners -> area outer - sum (map area inners)
+
+  -- ccwPredecessorOf (i,j) = withRing i <.> ccwPredecessorOf j <. singular _GeoPositionWithoutCRS
+  -- ccwSuccessorOf   (i,j) = withRing i <.> ccwSuccessorOf   j <. singular _GeoPositionWithoutCRS
+
+{-
 
 instance SimplePolygon_ GeoPolygon GeoPositionWithoutCRS' Double where
   uncheckedFromCCWPoints = undefined

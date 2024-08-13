@@ -19,6 +19,7 @@ extra-source-files:
 data-files:
     data/**/*.in
     data/**/*.out
+    data/**/**.geojson
 
 tested-with:
     GHC == 9.6.5
@@ -199,7 +200,8 @@ executable hgeometry-geojson
   import:         setup, miso-setup
   hs-source-dirs: geojson
   main-is:        Main.hs
-  -- other-modules:
+  other-modules:
+          Paths_hgeometry_examples
   --      Miso.Event.Extra
 
 --------------------------------------------------------------------------------
