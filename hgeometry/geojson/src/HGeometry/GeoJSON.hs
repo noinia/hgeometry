@@ -263,14 +263,29 @@ instance HasVertices' GeoPolygon where
 instance HasVertices GeoPolygon GeoPolygon where
   vertices = _Wrapped .> traversed1Seq <.> _RingAsSimplePolygon .> vertices
           <. singular _GeoPositionWithoutCRS
+-- TODO: the internal ones should be reversed
 {-
 instance HasOuterBoundary GeoPolygon where
   outerBoundaryVertexAt v@(i,_)
     | i == 0    = vertexAt v
     | otherwise = \_ pg -> pure pg
   -- the first ring is outer boundary apparently
-  ccwOuterBoundaryFrom i = undefined
-  cwOuterBoundaryFrom  i = undefined
+  ccwOuterBoundaryFrom v@(i,_)
+    | i == 0    = _Wrapped .> traversed1Seq <.> _RingAsSimplePolygon .> ccwOuterBoundaryFrom v
+                  <. singular _GeoPositionWithoutCRS
+    | otherwise = \_ pg -> pure pg
+  cwOuterBoundaryFrom v@(i,_)
+    | i == 0    = _Wrapped .> traversed1Seq <.> _RingAsSimplePolygon .> cwOuterBoundaryFrom v
+                  <. singular _GeoPositionWithoutCRS
+    | otherwise = \_ pg -> pure pg
+
+  outerBoundaryEdges = undefined
+    -- _Wrapped .> traversed1Seq <.> _RingAsSimplePolygon .> outerBoundaryEdges
+
+  outerBoundaryEdgeAt v@(i,_)
+    | i == 0    = undefined -- _Wrapped .> traversed1Seq <.> _RingAsSimplePolygon . outerBoundaryEdgeAt v
+    | otherwise = \_ pg -> pure pg
+
 
 
 instance Polygon_ GeoPolygon GeoPositionWithoutCRS' Double where
