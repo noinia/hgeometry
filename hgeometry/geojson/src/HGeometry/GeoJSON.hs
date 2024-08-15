@@ -310,9 +310,9 @@ instance HasOuterBoundary GeoPolygon where
   outerBoundaryEdgeAt (_,j) = reIndexEdge
                             $ firstRing <.> outerBoundaryEdgeAt j <. edge'
 
-instance Polygon_ GeoPolygon GeoPositionWithoutCRS' Double where
-  area pg = case toNonEmptyOf (_Wrapped.from _Seq1Seq.traverse1._RingAsSimplePolygon') pg of
-    outer :| inners -> area outer - sum (map area inners)
+-- instance Polygon_ GeoPolygon GeoPositionWithoutCRS' Double where
+--   area pg = case toNonEmptyOf (_Wrapped.from _Seq1Seq.traverse1._RingAsSimplePolygon') pg of
+--     outer :| inners -> area outer - sum (map area inners)
 
   -- ccwPredecessorOf (i,j) = withRing i <.> ccwPredecessorOf j <. singular _GeoPositionWithoutCRS
   -- ccwSuccessorOf   (i,j) = withRing i <.> ccwSuccessorOf   j <. singular _GeoPositionWithoutCRS
