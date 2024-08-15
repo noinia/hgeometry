@@ -8,6 +8,7 @@ module HGeometry.GeoJSON
 import           Control.Lens
 import           Data.Bifunctor
 import           Data.Coerce
+import qualified Data.Foldable as F
 import           Data.Foldable1
 import           Data.Functor.Apply (Apply, (<.*>), MaybeApply(..))
 import           Data.Geospatial
@@ -263,7 +264,7 @@ instance HasVertices' GeoPolygon where
   vertexAt (i,j) = _Wrapped .> iix i <.> _RingAsSimplePolygon .> vertexAt j
                  <. _GeoPositionWithoutCRS
 
-  numVertices (GeoPolygon ss) = foldl' (\a s -> a + ringLength s - 1) 0 ss
+  numVertices (GeoPolygon ss) = F.foldl' (\a s -> a + ringLength s - 1) 0 ss
   -- -- the ring incluces a copy of the first element, so it overestimates the length by 1
 
 instance HasVertices GeoPolygon GeoPolygon where
