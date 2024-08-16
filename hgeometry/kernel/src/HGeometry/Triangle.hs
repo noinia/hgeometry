@@ -15,6 +15,7 @@ module HGeometry.Triangle
   ) where
 
 import Control.Lens
+import Data.Foldable1
 import GHC.Generics (Generic)
 import HGeometry.Box.Boxable
 import HGeometry.Intersection
@@ -31,11 +32,21 @@ import Text.Read
 -- | Triangles in d-dimensional space
 newtype Triangle point = MkTriangle (Vector 3 point)
   deriving (Generic)
+  deriving newtype (Functor,Foldable)
 
 -- | Construct a triangle from its three points
 pattern Triangle       :: point -> point -> point -> Triangle point
 pattern Triangle a b c = MkTriangle (Vector3 a b c)
 {-# COMPLETE Triangle #-}
+
+instance Traversable Triangle where
+  traverse f (MkTriangle v) = MkTriangle <$> traverse f v
+
+instance Foldable1 Triangle where
+  foldMap1 f (MkTriangle v) = foldMap1 f v
+
+instance Traversable1 Triangle where
+  traverse1 f (MkTriangle v) = MkTriangle <$> traverse1 f v
 
 
 deriving instance Eq  (Vector 3 point) => Eq (Triangle point)
