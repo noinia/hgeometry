@@ -535,7 +535,12 @@ library geojson
     visibility: public
     hs-source-dirs: geojson/src
     build-depends:
-       geojson        >= 4.1.1  && < 5.0
+         geojson        >= 4.1.1  && < 5.0
+       -- , hgeometry-combinatorial
+       , hgeometry:vector
+       , hgeometry:point
+       , hgeometry:kernel
+       , hgeometry
     exposed-modules:
        HGeometry.GeoJSON
 

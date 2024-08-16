@@ -19,6 +19,7 @@ extra-source-files:
 data-files:
     data/**/*.in
     data/**/*.out
+    data/**/**.geojson
 
 tested-with:
     GHC == 9.6.5
@@ -48,6 +49,7 @@ common setup
       , hgeometry:ipe
       , hgeometry:svg
       , hgeometry:miso
+      , hgeometry:geojson
       , hiraffe                   >= 0.1
       , containers                >= 0.6
       , vector                    >= 0.13
@@ -71,6 +73,9 @@ common setup
       , transformers              >= 0.6.0.0
       , infinite-list             >= 0.1.1         && < 0.2
       , text                      >= 2.0
+      , file-io
+      , filepath
+      , geojson                   >= 4.1.1
 
       -- , dependent-map             >= 0.4
       -- , dependent-sum             >= 0.7.1
@@ -186,6 +191,17 @@ executable hgeometry-polyLineDrawing
   hs-source-dirs: polyLineDrawing
   main-is:        Main.hs
   -- other-modules:
+  --      Miso.Event.Extra
+
+--------------------------------------------------------------------------------
+-- * GeoJSON example
+
+executable hgeometry-geojson
+  import:         setup, miso-setup
+  hs-source-dirs: geojson
+  main-is:        Main.hs
+  other-modules:
+          Paths_hgeometry_examples
   --      Miso.Event.Extra
 
 --------------------------------------------------------------------------------

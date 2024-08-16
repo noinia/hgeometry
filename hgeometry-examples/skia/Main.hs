@@ -52,9 +52,10 @@ import           SkiaCanvas ( mouseCoordinates, dimensions, canvasKitRefs, surfa
                             , Canvas
                             )
 
-import           SkiaCanvas.CanvasKit.Image
+import           HGeometry.GeoJSON
 import           SkiaCanvas.CanvasKit hiding (Style(..))
 import           SkiaCanvas.CanvasKit.GeomPrims (ltrbRect)
+import           SkiaCanvas.CanvasKit.Image
 import           SkiaCanvas.CanvasKit.Paint (SkPaintRef)
 import           SkiaCanvas.CanvasKit.Picture (serialize, withPicture, drawPicture)
 import           SkiaCanvas.CanvasKit.PictureRecorder (recordAsPicture)

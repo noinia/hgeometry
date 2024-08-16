@@ -61,6 +61,9 @@ instance Monoid c => HasFromFoldable (Const c) where
 instance HasFromFoldable1 NonEmpty where
   fromNonEmpty = id
 
+instance HasFromFoldable1 Seq.Seq where
+  fromNonEmpty = Seq.fromList . F.toList
+
 instance HasFromFoldable Vector.Vector  where
   fromList = Vector.fromList
 
