@@ -37,6 +37,8 @@ numPoints = 1000
 samples   :: StatefulGen g IO => g -> IO [Point 2 Double]
 samples g = replicateM numPoints (samplePoint sampler g)
 
+-- | Example that samples 1000 points inside some polygon, and writes the ouput to an ipe
+-- file.
 main :: IO ()
 main = do
   pts <- samples globalStdGen

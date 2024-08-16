@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HGeometry.Polygon.Simple.Sample
+-- Copyright   :  (C) Frank Staals, Owen Graves,  David Himmelstrup
+-- License     :  see the LICENSE file
+-- Maintainer  :  Frank Staals
+--
+-- Functionality to sample points uniformly at random from within a simple polygon.
+--
+--------------------------------------------------------------------------------
 module HGeometry.Polygon.Simple.Sample
   ( samplePolygon
   , samplePolygons
@@ -24,18 +34,13 @@ import           System.Random.Stateful
 
 --------------------------------------------------------------------------------
 
--- | A dat a structure that can be used to efficiently sample values of type v.
+-- | A data structure that can be used to efficiently sample values of type v.
 data Sampler w v = Sampler !w -- ^ the total weight
                            (Map.Map w v)
   deriving (Show,Read,Eq,Functor,Foldable)
 
 instance Traversable (Sampler w) where
   traverse f (Sampler w m) = Sampler w <$> traverse f m
-
-
--- | Helper data type
-data Weighted w v = Weighted !w v deriving (Show)
-
 
 -- | Build a sampler
 --
@@ -44,6 +49,9 @@ buildSampler    :: (Foldable1 nonEmpty, Num w, Ord w) => nonEmpty (w, v) -> Samp
 buildSampler xs = let Weighted total xs'       = foldr f (Weighted 0 []) xs
                       f (w,x) (Weighted t acc) = Weighted (w+t) ((t,x):acc)
                   in Sampler total (Map.fromDescList xs')
+
+-- | Helper data type
+data Weighted w v = Weighted !w v deriving (Show)
 
 -- | Sample a value from the sampler
 --
@@ -101,6 +109,8 @@ sampleTriangle (fmap doubleP -> Triangle v1 v2 v3) g =
                   u = v2 .-. v1
                   v = v3 .-. v1
               in v1 .+^ (a*^u) .+^ (b*^v)
+-- the idea is based on
+-- https://blogs.sas.com/content/iml/2020/10/19/random-points-in-triangle.html
 
 -- | Convert to a point with double coordiantes
 doubleP :: (Point_ point 2 r, Real r) => point -> Point 2 Double
