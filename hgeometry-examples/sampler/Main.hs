@@ -1,20 +1,17 @@
 {-# LANGUAGE QuasiQuotes #-}
 module Main(main) where
 
-import           Control.Lens
-import           Control.Monad (replicateM)
-import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Maybe
-import           HGeometry.Point
-import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Simple
-import           HGeometry.Polygon.Simple.Sample
-import           HGeometry.Transformation
-import           HGeometry.Triangle
-import           Ipe
-import qualified System.File.OsPath as File
-import           System.OsPath
-import           System.Random.Stateful
+import Control.Monad (replicateM)
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.Maybe
+import HGeometry.Point
+import HGeometry.Polygon.Simple
+import HGeometry.Polygon.Simple.Sample
+import HGeometry.Transformation
+import HGeometry.Triangle
+import Ipe
+import System.OsPath
+import System.Random.Stateful
 --------------------------------------------------------------------------------
 
 type R = Double
