@@ -1,10 +1,13 @@
 module HGeometry.Polygon.Simple.Sample
   ( samplePolygon
   , samplePolygons
+
+  , Sampler
+  , samplePoint
+  , triangleSampler
   ) where
 
 import           Control.Lens
-import qualified Data.Foldable as F
 import           Data.Foldable1
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
@@ -39,8 +42,8 @@ data Weighted w v = Weighted !w v deriving (Show)
 -- O(n)
 buildSampler    :: (Foldable1 nonEmpty, Num w, Ord w) => nonEmpty (w, v) -> Sampler w v
 buildSampler xs = let Weighted total xs'       = foldr f (Weighted 0 []) xs
-                      f (w,x) (Weighted t acc) = Weighted (w+t) ((w,x):acc)
-                  in Sampler total (Map.fromAscList xs')
+                      f (w,x) (Weighted t acc) = Weighted (w+t) ((t,x):acc)
+                  in Sampler total (Map.fromDescList xs')
 
 -- | Sample a value from the sampler
 --
