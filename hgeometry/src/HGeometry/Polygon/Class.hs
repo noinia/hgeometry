@@ -22,8 +22,9 @@ module HGeometry.Polygon.Class
   , HasEdges(..), HasEdges'(..)
   ) where
 
-import Control.Lens
+import Control.Lens hiding (holes)
 import Data.Function (on)
+import Data.Kind (Type)
 import HGeometry.Ext
 import HGeometry.Lens.Util
 -- import qualified Data.Functor.Apply as Apply
@@ -32,6 +33,7 @@ import HGeometry.LineSegment
 import HGeometry.Point
 import HGeometry.Properties
 import HGeometry.Vector
+import HGeometry.Polygon.Simple.Type
 import Hiraffe.Graph
 
 
@@ -230,12 +232,16 @@ class ( HasOuterBoundary polygon
       , Point_ point 2 r
       , NumType polygon ~ r, Dimension polygon ~ 2
       ) => Polygon_ polygon point r where
+  type HoleIx polygon :: Type
+  type HoleIx polygon = Int
+
+  -- ^ Traversal over the holes in the polygon. Each hole is a simple polygon
+  holes :: IndexedTraversal' (HoleIx polygon) polygon (SimplePolygon point)
 
   -- | The area of a polygon
   --
   -- running time: \(O(n)\)
   area :: Fractional r => polygon -> r
-
 
   -- | Finds the extreme points, minimum and maximum, in a given direction
   --
@@ -260,6 +266,8 @@ class ( HasOuterBoundary polygon
 --------------------------------------------------------------------------------
 
 instance Polygon_ polygon point r  => Polygon_ (polygon :+ extra) point r where
+  type HoleIx (polygon :+ extra) = HoleIx polygon
+  holes = core .> holes
   area = area . view core
   extremes u = extremes u . view core
   ccwPredecessorOf u = core .> ccwPredecessorOf u
