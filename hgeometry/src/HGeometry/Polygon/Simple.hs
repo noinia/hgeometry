@@ -70,13 +70,12 @@ instance ( VertexContainer f point
   ccwOuterBoundaryFrom i = _SimplePolygonF.traverseRightFrom i
   cwOuterBoundaryFrom  i = _SimplePolygonF.traverseLeftFrom  i
 
+instance HasHoles (SimplePolygonF f point)
+
 instance ( Point_ point 2 r
          , HasFromFoldable1 f
          , VertexContainer f point
          ) => Polygon_ (SimplePolygonF f point) point r where
-
-  -- there are no holes
-  holes = \_ pg -> pure pg
 
   ccwPredecessorOf u = \pvFv pg -> let n = numVertices pg
                                        p = (pred u) `mod` n

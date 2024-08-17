@@ -32,12 +32,15 @@ asTriangle pg = case pg^..vertices of
 -- | The area of a polygon
 --
 -- running time: \(O(n)\)
-area :: (Polygon_ polygon point r, Fractional r) => polygon -> r
+area :: ( Polygon_ polygon point r
+        , SimplePolygon_ (Hole polygon) point r
+        , Fractional r) => polygon -> r
 area = (/2) . area2X
 
 -- | Computes the double area of a polygon
 area2X      :: ( Polygon_ polygon point r
                , Num r
                , Point_ point 2 r
+               , SimplePolygon_ (Hole polygon) point r
                ) => polygon -> r
 area2X poly = signedArea2X poly - sumOf (holes.to signedArea2X) poly
