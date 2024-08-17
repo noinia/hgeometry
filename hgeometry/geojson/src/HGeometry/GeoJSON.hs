@@ -25,6 +25,7 @@ import           HGeometry.Foldable.Util
 import           HGeometry.Point.Class
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple
+import           HGeometry.Polygon.WithHoles
 import           HGeometry.Properties
 import           HGeometry.Sequence.NonEmpty
 import           HGeometry.Vector

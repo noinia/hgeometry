@@ -24,17 +24,11 @@ module HGeometry.Polygon.Simple
   , module HGeometry.Polygon.Simple.Class
   ) where
 
-import           Control.DeepSeq (NFData)
 import           Control.Lens
 import qualified Data.Foldable as F
-import           Data.Functor.Classes
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
-import           Data.Semigroup.Foldable
-import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
-import           GHC.Generics
 import           HGeometry.Boundary
-import           HGeometry.Box
 import           HGeometry.Cyclic
 import           HGeometry.Foldable.Util
 import           HGeometry.Intersection
@@ -45,8 +39,6 @@ import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Simple.Type
 import           HGeometry.Polygon.Simple.Implementation
 import           HGeometry.Polygon.Simple.InPolygon
-import           HGeometry.Properties
-import           HGeometry.Transformation
 import           HGeometry.Vector.NonEmpty.Util ()
 
 --------------------------------------------------------------------------------
