@@ -22,7 +22,7 @@ module HGeometry.Polygon.Convex.Implementation
   ) where
 
 import Control.DeepSeq (NFData)
-import Control.Lens
+import Control.Lens hiding (holes)
 import Data.Kind (Type)
 import Data.Vector.NonEmpty (NonEmptyVector)
 import HGeometry.Boundary
@@ -107,7 +107,8 @@ instance ( HasOuterBoundary (SimplePolygonF f point)
 instance ( SimplePolygon_ (SimplePolygonF f point) point r
          , Point_ point 2 r
          ) => Polygon_ (ConvexPolygonF f point) point r where
-  area = areaSimplePolygon
+  type HoleIx (ConvexPolygonF f point) = HoleIx (SimplePolygonF f point)
+  holes = _UncheckedConvexPolygon.holes
   extremes u p = (maxInDirection ((-1) *^ u) p, maxInDirection u p)
   ccwPredecessorOf u = _UncheckedConvexPolygon.ccwPredecessorOf u
   ccwSuccessorOf   u = _UncheckedConvexPolygon.ccwSuccessorOf u

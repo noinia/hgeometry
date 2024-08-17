@@ -78,8 +78,6 @@ instance ( Point_ point 2 r
   -- there are no holes
   holes = \_ pg -> pure pg
 
-  area = areaSimplePolygon
-
   ccwPredecessorOf u = \pvFv pg -> let n = numVertices pg
                                        p = (pred u) `mod` n
                                        l = singular $ vertexAt p

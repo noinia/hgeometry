@@ -235,13 +235,14 @@ class ( HasOuterBoundary polygon
   type HoleIx polygon :: Type
   type HoleIx polygon = Int
 
+
+
+
   -- ^ Traversal over the holes in the polygon. Each hole is a simple polygon
   holes :: IndexedTraversal' (HoleIx polygon) polygon (SimplePolygon point)
 
-  -- | The area of a polygon
-  --
-  -- running time: \(O(n)\)
-  area :: Fractional r => polygon -> r
+    -- signedArea2X pg -
+
 
   -- | Finds the extreme points, minimum and maximum, in a given direction
   --
@@ -268,7 +269,6 @@ class ( HasOuterBoundary polygon
 instance Polygon_ polygon point r  => Polygon_ (polygon :+ extra) point r where
   type HoleIx (polygon :+ extra) = HoleIx polygon
   holes = core .> holes
-  area = area . view core
   extremes u = extremes u . view core
   ccwPredecessorOf u = core .> ccwPredecessorOf u
   ccwSuccessorOf   u = core .> ccwSuccessorOf   u
