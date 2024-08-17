@@ -157,11 +157,36 @@ _UncheckedRingSimplePolygon' = _RingViewL1
 _UncheckedRingSimplePolygon :: Iso' (LinearRing GeoPositionWithoutCRS)
                                     (SimplePolygonF (Cyclic ViewL1) GeoPositionWithoutCRS')
 _UncheckedRingSimplePolygon  = _UncheckedRingSimplePolygon' . convert
+
+-- | Convert the points
+convert :: Iso'  (SimplePolygonF (Cyclic ViewL1) GeoPositionWithoutCRS)
+                 (SimplePolygonF (Cyclic ViewL1) GeoPositionWithoutCRS')
+convert = iso (over vertices (view _GeoPositionWithoutCRS'))
+              (over vertices (view $ from _GeoPositionWithoutCRS'))
+
+
+-- | Treat a LinearRing as a simple polygon
+_InnerRingSimplePolygon :: Iso' (LinearRing GeoPositionWithoutCRS)
+                                (SimplePolygonF (Cyclic ViewL1) GeoPositionWithoutCRS')
+_InnerRingSimplePolygon  = _RingViewL1 . reversed . from _UncheckedSimplePolygon . convert
+
+-- | Helper type
+type GeoPolygonalDomain = PolygonalDomainF Seq (Cyclic ViewL1) GeoPositionWithoutCRS'
+
+-- | Interpret the GeoPolygon as a Polygonal domain
+_GeoPolygonPolygonalDomain :: Iso' GeoPolygon GeoPolygonalDomain
+_GeoPolygonPolygonalDomain = iso toPD fromPD
   where
-    convert :: Iso'  (SimplePolygonF (Cyclic ViewL1) GeoPositionWithoutCRS)
-                     (SimplePolygonF (Cyclic ViewL1) GeoPositionWithoutCRS')
-    convert = iso (over vertices (view _GeoPositionWithoutCRS'))
-                  (over vertices (view $ from _GeoPositionWithoutCRS'))
+    toPD (GeoPolygon rings) = case rings of
+      Seq.Empty          -> error "invalid"
+      (outer :<| inners) ->  PolygonalDomain (outer^._UncheckedRingSimplePolygon)
+                                             (inners&traversed %~ view _InnerRingSimplePolygon)
+
+    fromPD (PolygonalDomain outer inners) =
+      let outer'  = outer^.from _UncheckedRingSimplePolygon
+          inners' = inners&traversed %~ review _UncheckedRingSimplePolygon
+      in GeoPolygon $ outer' <| inners'
+
 
 -- --------------------------------------------------------------------------------
 
