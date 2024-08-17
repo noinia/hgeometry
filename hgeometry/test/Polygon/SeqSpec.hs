@@ -8,7 +8,7 @@ import qualified Data.Sequence as Seq
 import qualified Data.Vector.NonEmpty as NV
 import           HGeometry.Cyclic
 import           HGeometry.Point
-import           HGeometry.Polygon.Class
+import           HGeometry.Polygon
 import           HGeometry.Polygon.Instances ()
 import           HGeometry.Polygon.Simple
 import           HGeometry.Sequence.NonEmpty

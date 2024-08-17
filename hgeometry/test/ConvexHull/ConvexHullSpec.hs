@@ -1,6 +1,5 @@
 module ConvexHull.ConvexHullSpec where
 
-import           Control.Lens
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified HGeometry.ConvexHull.DivideAndConquer as DivideAndConquer
@@ -8,13 +7,11 @@ import qualified HGeometry.ConvexHull.GrahamScan as GrahamScan
 import qualified HGeometry.ConvexHull.JarvisMarch as JarvisMarch
 import qualified HGeometry.ConvexHull.QuickHull as QuickHull
 import           HGeometry.Cyclic
-import           HGeometry.Ext
 import           HGeometry.Instances ()
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
-import           Hiraffe.Graph
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
@@ -111,7 +108,8 @@ myPoints = NonEmpty.fromList $
            ]
 
 
-mPoint2 ~[x,y] = Point2 x y
+mPoint2 [x,y] = Point2 x y
+mPoint2 _     = error "absurd"
 
 testPoints = NonEmpty.fromList
   [ mPoint2 [0, 10]
