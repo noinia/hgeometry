@@ -15,6 +15,7 @@ module HGeometry.Polygon.WithHoles
   ( PolygonalDomainF(PolygonalDomain)
   , PolygonalDomain
   , outerBoundaryPolygon
+  , theHoles
   ) where
 
 import           Control.DeepSeq (NFData)
