@@ -12,9 +12,7 @@
 module HGeometry.Polygon.Simple.Implementation
   (
   -- * Polygon
-    areaSimplePolygon
-
-  , isCounterClockwise
+    isCounterClockwise
   , toCounterClockwiseOrder
   -- * Show
   , showsPrecSimplePolygon
@@ -36,11 +34,6 @@ import           HGeometry.Polygon.Simple.Class
 
 --------------------------------------------------------------------------------
 -- * Polygon_
-
-areaSimplePolygon :: ( Fractional r
-                     , SimplePolygon_ simplePolygon point r
-                     ) => simplePolygon -> r
-areaSimplePolygon = signedArea
 
 
 -- | Test if the outer boundary of the polygon is in clockwise or counter

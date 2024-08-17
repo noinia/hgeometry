@@ -2,15 +2,14 @@ module Polygon.VerticesSpec
   ( spec
   ) where
 
-import           Control.Lens
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe
-import           HGeometry.Ext
-import           HGeometry.Point
-import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Simple
-import           Test.Hspec
+import Control.Lens
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.Maybe
+import HGeometry.Ext
+import HGeometry.Point
+import HGeometry.Polygon.Class
+import HGeometry.Polygon.Simple
+import Test.Hspec
 
 --------------------------------------------------------------------------------
 

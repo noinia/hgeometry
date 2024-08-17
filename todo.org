@@ -69,6 +69,10 @@ consistent results
 * TODO our Melkman algorithm also just works when given a polyline.
 See if we can generalize its type signatures
 
+* TODO 2d linear programming
+* TODO port the visibility polygon stuff
+* TODO port the shortest path in simple polygon stuff
+
 * DONE ccwPredecessorOf’ and ‘ccwSuccessorOf’ convex polygon
 * TODO additional quickcheck tests
 
@@ -113,9 +117,17 @@ intersecting halflines with boxes seems to go wrong somehow.
 ** DONE triangiulate non-monotone
 *** DONE split into non-monotone parts
 *** DONE graph representation
+** TODO triangulate a polygon with holes
+
 ** TODO triangulate world demo/benchmark
 ** TODO polygons with holes
-*** TODO represent polygons with holes
+*** DONE represent polygons with holes
+*** TODO inpolygon test
+make sure we can report in which hole we are as well
+*** TODO some tests
+*** TODO render them to ipe
+*** TODO intersect with a line or with a segment
+
 * DONE polyline simplification
 ** DONE imai iri
 ** DONE DP

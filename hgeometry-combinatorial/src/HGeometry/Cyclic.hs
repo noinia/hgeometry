@@ -24,6 +24,7 @@ import           Control.DeepSeq (NFData)
 import           Control.Lens
 import           Control.Monad (forM_)
 import qualified Data.Foldable as F
+import           Data.Functor.Apply (Apply, (<.*>), (<*.>), MaybeApply(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (isJust)
 import           Data.Semigroup.Foldable
@@ -33,8 +34,10 @@ import qualified Data.Vector.Mutable as MV
 import qualified Data.Vector.NonEmpty as NV
 import           GHC.Generics (Generic)
 import           HGeometry.Foldable.Util
+import           HGeometry.Sequence.NonEmpty
 import           HGeometry.StringSearch.KMP (isSubStringOf)
 import           HGeometry.Vector.NonEmpty.Util ()
+
 --------------------------------------------------------------------------------
 
 -- | A cyclic sequence type
@@ -69,7 +72,7 @@ type instance Index   (Cyclic v a) = Index   (v a)
 type instance IxValue (Cyclic v a) = IxValue (v a)
 
 instance (Index (v a) ~ Int, Foldable v, Ixed (v a)) => Ixed (Cyclic v a) where
-  ix i = \f (Cyclic v) -> let n = F.length v
+  ix i = \f (Cyclic v) -> let n  = F.length v
                           in Cyclic <$> ix (i `mod` n) f v
 
 -- | Turn the cyclic vector into a circular Vector
@@ -104,6 +107,30 @@ instance HasDirectedTraversals NV.NonEmptyVector where
     where
       n        = F.length v
       indices' = NonEmpty.fromList [s,s-1..(s-n+1)]
+
+-- | Helper to build traversal1's
+wrapMaybeApply :: (Indexable Int p, Apply f) => p a (f b) -> p a (MaybeApply f b)
+wrapMaybeApply = rmap (MaybeApply . Left)
+
+
+instance HasDirectedTraversals ViewL1 where
+  traverseRightFrom i = \paFb xs -> let i'    = i `mod` F.length xs
+                                        paFb' = wrapMaybeApply paFb
+                                        combine (x :<< sa) sb = x :<< (sa <> sb)
+                                    in case splitL1At i' xs of
+      Nothing            -> traversed1 paFb xs
+      Just (pref,x,suff) -> combine <$>  reindexed (+i') traversed1 paFb (x :<< suff)
+                                    <.*> itraversed paFb' pref
+
+  traverseLeftFrom i = \paFb xs ->
+                         let i'    = i `mod` F.length xs
+                             paFb' = wrapMaybeApply paFb
+                             combine r1 rs = viewl1 $ r1 <>> rs
+                         in case splitL1At i' xs of
+      Nothing            -> backwards traversed1 paFb xs
+      Just (pref,x,suff) -> combine <$>  backwards traversed1 paFb (pref :>> x)
+                                    <.*> backwards (reindexed (\j -> 1 + i' + j) itraversed)
+                                                   paFb' suff
 
 -- | traverse the vector in the given order
 traverseByOrder                 :: NonEmpty.NonEmpty Int

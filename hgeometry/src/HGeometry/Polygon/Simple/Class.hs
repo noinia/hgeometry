@@ -11,7 +11,7 @@
 module HGeometry.Polygon.Simple.Class
   ( SimplePolygon_(..)
 
-  , signedArea, area2X
+  -- , signedArea, area2X
   ) where
 
 import           Control.Lens
@@ -58,7 +58,7 @@ class ( Polygon_ simplePolygon point r
   --
   -- running time: \(O(n)\)
   centroid      :: (Fractional r, ConstructablePoint_ point' 2 r) => simplePolygon -> point'
-  centroid poly = fromVector $ sum' xs ^/ (6 * signedArea poly)
+  centroid poly = fromVector $ sum' xs ^/ (3 * signedArea2X poly)
     where
       xs = [ (p^.vector ^+^ q^.vector) ^* (p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord)
            | (p,q) <- poly ^..outerBoundaryEdges   ]
@@ -75,21 +75,10 @@ instance ( SimplePolygon_ simplePolygon point r
 
 --------------------------------------------------------------------------------
 
--- | Compute the signed area of a simple polygon. When the vertices
--- are given in counter clockwise order (as they should be), the area
--- will be positive.
-signedArea      :: (Fractional r, SimplePolygon_ simplePolygon point r)
-                => simplePolygon -> r
-signedArea poly = signedArea2X poly / 2
 
--- | Compute the area times 2 of a simple polygon. When the vertices
--- are given in counter clockwise order (as they should be), the area
--- will be positive.
---
--- If the vertices were in clockwise order, the signed area would have
--- be negative.
---
--- running time: \(O(n)\)
-area2X :: (Num r, SimplePolygon_ simplePolygon point r)
-       => simplePolygon -> r
-area2X = signedArea2X
+-- -- | Compute the signed area of a simple polygon. When the vertices
+-- -- are given in counter clockwise order (as they should be), the area
+-- -- will be positive.
+-- signedArea      :: (Fractional r, SimplePolygon_ simplePolygon point r)
+--                 => simplePolygon -> r
+-- signedArea poly = signedArea2X poly / 2

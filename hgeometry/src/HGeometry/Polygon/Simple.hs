@@ -1,6 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE QuantifiedConstraints #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Polygon.Simple
@@ -20,19 +21,14 @@ module HGeometry.Polygon.Simple
   , HasInPolygon(..)
   , inSimplePolygon
   , hasNoSelfIntersections
+  , module HGeometry.Polygon.Simple.Class
   ) where
 
-import           Control.DeepSeq (NFData)
 import           Control.Lens
 import qualified Data.Foldable as F
-import           Data.Functor.Classes
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
-import           Data.Semigroup.Foldable
-import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
-import           GHC.Generics
 import           HGeometry.Boundary
-import           HGeometry.Box
 import           HGeometry.Cyclic
 import           HGeometry.Foldable.Util
 import           HGeometry.Intersection
@@ -40,71 +36,16 @@ import           HGeometry.LineSegment.Intersection.BentleyOttmann
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple.Class
+import           HGeometry.Polygon.Simple.Type
 import           HGeometry.Polygon.Simple.Implementation
 import           HGeometry.Polygon.Simple.InPolygon
-import           HGeometry.Properties
-import           HGeometry.Transformation
 import           HGeometry.Vector.NonEmpty.Util ()
 
 --------------------------------------------------------------------------------
 
--- | Simple polygons just store their vertices in CCCW order
-newtype SimplePolygonF f point = MkSimplePolygon (f point)
-  deriving stock (Generic)
-  deriving newtype (NFData,Functor,Foldable,Foldable1,Eq,Ord,Eq1,Ord1)
-
-
--- | By default we store simple polygons as non-empty circular vectors.
-type SimplePolygon = SimplePolygonF (Cyclic NonEmptyVector)
-
-type instance Dimension (SimplePolygonF f point) = 2
-type instance NumType   (SimplePolygonF f point) = NumType point
-
--- TODO: should we use allow cyclic shifts?
--- deriving instance Eq (f point)  => Eq (SimplePolygonF f point)
--- deriving instance Ord (f point) => Ord (SimplePolygonF f point)
-
-
--- | Access the container
-_SimplePolygonF :: Iso (SimplePolygonF f point) (SimplePolygonF f' point')
-                       (f point)                (f' point' )
-_SimplePolygonF = iso (\(MkSimplePolygon vs) -> vs) MkSimplePolygon
-
-instance Traversable f => Traversable (SimplePolygonF f) where
-  traverse f (MkSimplePolygon vs) = MkSimplePolygon <$> traverse f vs
-instance Traversable1 f => Traversable1 (SimplePolygonF f) where
-  traverse1 f (MkSimplePolygon vs) = MkSimplePolygon <$> traverse1 f vs
-
-instance (ShiftedEq (f point), ElemCyclic (f point) ~ point
-         ) => ShiftedEq (SimplePolygonF f point) where
-  type ElemCyclic (SimplePolygonF f point) = point
-  isShiftOf p q = isShiftOf (p^._SimplePolygonF) (q^._SimplePolygonF)
-
--- | shortcut for all default properties of f we need to store the vertices.
-type VertexContainer f point = ( IxValue (f point) ~ point
-                               , Index (f point) ~ Int
-                               , TraversableWithIndex Int f
-                               , Traversable1 f
-                               , Ixed (f point)
-                               , HasDirectedTraversals f
-                               )
-
 instance ( VertexContainer f point
          ) => HasVertices (SimplePolygonF f point) (SimplePolygonF f point') where
   vertices = _SimplePolygonF . traversed1
-
-instance ( VertexContainer f point
-         ) => HasPoints (SimplePolygonF f point) (SimplePolygonF f point') point point' where
-  allPoints = _SimplePolygonF . traversed1
-
-instance ( VertexContainer f point
-         , DefaultTransformByConstraints (SimplePolygonF f point) 2 r
-         , Point_ point 2 r
-         ) => IsTransformable (SimplePolygonF f point)
-
-instance ( VertexContainer f point
-         , Point_ point 2 r
-         ) => IsBoxable (SimplePolygonF f point)
 
 instance ( VertexContainer f point
          ) => HasVertices' (SimplePolygonF f point) where
@@ -121,11 +62,13 @@ instance ( VertexContainer f point
   ccwOuterBoundaryFrom i = _SimplePolygonF.traverseRightFrom i
   cwOuterBoundaryFrom  i = _SimplePolygonF.traverseLeftFrom  i
 
+instance HasHoles (SimplePolygonF f point)
+
 instance ( Point_ point 2 r
          , HasFromFoldable1 f
          , VertexContainer f point
          ) => Polygon_ (SimplePolygonF f point) point r where
-  area = areaSimplePolygon
+
   ccwPredecessorOf u = \pvFv pg -> let n = numVertices pg
                                        p = (pred u) `mod` n
                                        l = singular $ vertexAt p
@@ -167,12 +110,6 @@ instance (SimplePolygon_ (SimplePolygonF f) point r, Fractional r, Ord r)
          => HasSquaredEuclideanDistance (SimplePolygonF f point) where
   pointClosestToWithDistance = pointClosestToWithDistanceSimplePolygon
 -}
-
---------------------------------------------------------------------------------
-
--- | Get the underlying cyclic vector.
-toCyclic :: SimplePolygonF (Cyclic v) point -> Cyclic v point
-toCyclic = view _SimplePolygonF
 
 --------------------------------------------------------------------------------
 

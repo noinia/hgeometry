@@ -16,14 +16,18 @@ module HGeometry.Polygon.Class
   , outerBoundaryEdgeSegmentAt, outerBoundaryEdgeSegments
   , outerBoundaryWithNeighbours
 
+  , Hole
+  , HasHoles(..)
+
   , Polygon_(..)
 
   , HasVertices(..), HasVertices'(..)
   , HasEdges(..), HasEdges'(..)
   ) where
 
-import Control.Lens
+import Control.Lens hiding (holes)
 import Data.Function (on)
+import Data.Kind (Type)
 import HGeometry.Ext
 import HGeometry.Lens.Util
 -- import qualified Data.Functor.Apply as Apply
@@ -32,8 +36,10 @@ import HGeometry.LineSegment
 import HGeometry.Point
 import HGeometry.Properties
 import HGeometry.Vector
+import HGeometry.Polygon.Simple.Type
 import Hiraffe.Graph
-
+import Data.Vector.NonEmpty.Internal (NonEmptyVector)
+import HGeometry.Cyclic (Cyclic)
 
 --------------------------------------------------------------------------------
 -- ^ A class for items that have an outer boundary.
@@ -216,12 +222,31 @@ outerBoundaryWithNeighbours = ifolding1 $
 
 --------------------------------------------------------------------------------
 
--- class HasHoles face face' where
---   type HoleIx face
---   type Hole face
---   holes :: IndexedTraversal (HoleIx face) face face' (Hole face) (Hole face')
+-- | A hole is a simple polygon
+type Hole polygon = SimplePolygonF (HoleF polygon) (Vertex polygon)
 
---------------------------------------------------------------------------------
+-- | Accessing the holes in a polygon (if there are any.)
+--
+-- the default implementation assumes there are no holes
+class HasHoles polygon where
+  {-# MINIMAL #-}
+
+  -- | Type we use to index holes.
+  type HoleIx polygon :: Type
+  type HoleIx polygon = ()
+
+  -- | The functor used in the holes
+  type HoleF polygon :: Type -> Type
+  type HoleF polygon = Cyclic NonEmptyVector
+
+  -- ^ Traversal over the holes in the polygon. Each hole is a simple polygon.
+  holes :: IndexedTraversal' (HoleIx polygon) polygon (Hole polygon)
+  holes = \_ pg -> pure pg
+
+  -- ^ Access a particular hole. This is supposed to be an affine traversal.
+  holeAt   :: HoleIx polygon -> IndexedTraversal' (HoleIx polygon) polygon (Hole polygon)
+  holeAt _ = \_ pg -> pure pg
+
 
 -- | A class representing (planar) polygons. The edges of the polygon
 -- may not intersect.
@@ -229,12 +254,10 @@ class ( HasOuterBoundary polygon
       , Vertex      polygon ~ point
       , Point_ point 2 r
       , NumType polygon ~ r, Dimension polygon ~ 2
+      , HasHoles polygon
       ) => Polygon_ polygon point r where
 
-  -- | The area of a polygon
-  --
-  -- running time: \(O(n)\)
-  area :: Fractional r => polygon -> r
+    -- signedArea2X pg -
 
 
   -- | Finds the extreme points, minimum and maximum, in a given direction
@@ -259,8 +282,13 @@ class ( HasOuterBoundary polygon
 -- end of te Polygon_ class
 --------------------------------------------------------------------------------
 
+instance HasHoles polygon => HasHoles (polygon :+ extra) where
+  type HoleIx (polygon :+ extra) = HoleIx polygon
+  type HoleF  (polygon :+ extra) = HoleF  polygon
+  holes    = core .> holes
+  holeAt i = core .> holeAt i
+
 instance Polygon_ polygon point r  => Polygon_ (polygon :+ extra) point r where
-  area = area . view core
   extremes u = extremes u . view core
   ccwPredecessorOf u = core .> ccwPredecessorOf u
   ccwSuccessorOf   u = core .> ccwSuccessorOf   u
