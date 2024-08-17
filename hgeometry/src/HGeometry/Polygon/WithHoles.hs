@@ -187,8 +187,7 @@ error' s u = error $ s <> ", vertex " <> show u <> " not on outer boundary"
 mapEdge       :: (Int,Int) -> (VtxIx,VtxIx)
 mapEdge (u,v) = (Outer u, Outer v)
 
-
-instance (Point_ point 2 r
+instance ( Point_ point 2 r
          , HasFromFoldable1 f
          , VertexContainer f point
          , HoleContainer h f point
