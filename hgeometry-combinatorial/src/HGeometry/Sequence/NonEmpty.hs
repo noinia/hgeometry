@@ -13,6 +13,9 @@ module HGeometry.Sequence.NonEmpty
   , viewl1, viewr1
   , (|>>)
   , (<>>)
+  -- , (<<>)
+  , splitL1At
+  , splitR1At
   ) where
 
 import           Control.DeepSeq
@@ -93,7 +96,6 @@ instance IsList (ViewL1 a) where
   fromList = maybe (error "ViewL1 fromList; empty List") fromNonEmpty . NonEmpty.nonEmpty
   {-# INLINE fromList #-}
 
-
 --------------------------------------------------------------------------------
 
 -- | NonEmpty ViewR
@@ -166,11 +168,14 @@ instance IsList (ViewR1 a) where
 infixl 5 |>>
 infixl 5 <>>
 
--- | Append a Sequence to a ViewR
+-- | Append a Sequence to a ViewR1
 (<>>)               :: ViewR1 a -> Seq a -> ViewR1 a
 l@(ys :>> y) <>> rs = case Sequence.viewr rs of
                         Sequence.EmptyR   -> l
                         rs' Sequence.:> r -> (ys <> (y :<| rs')) :>> r
+
+
+
 
 -- | View the leftmost element
 viewl1            :: ViewR1 a -> ViewL1 a
@@ -184,6 +189,29 @@ viewr1 (l :<< ls) = case Sequence.viewr ls of
                       Sequence.EmptyR   -> Sequence.empty :>> l
                       mid Sequence.:> r -> (l :<| mid)    :>> r
 
+
+--------------------------------------------------------------------------------
+
+-- | Given an index i, and a viewL1 s, attempts to split s at index i. Returns nothing if
+-- the index is out of range.
+splitL1At             :: Int -> ViewL1 a -> Maybe (Seq a, a, Seq a)
+splitL1At i (x :<< s) = clampRange i (x <| s) <&> \s' -> case Sequence.splitAt i s' of
+  (pref, y :<| suff) -> (pref, y, suff)
+  _                  -> error "splitL1At: absurd"
+
+-- | Given an index i, and a viewL1 s, attempts to split s at index i. Returns nothing if
+-- the index is out of range.
+splitR1At             :: Int -> ViewR1 a -> Maybe (Seq a, a, Seq a)
+splitR1At i (s :>> x) = clampRange i (s |> x) <&> \s' -> case Sequence.splitAt i s' of
+  (pref, y :<| suff) -> (pref, y, suff)
+  _                  -> error "splitR1At: absurd"
+
+-- | Helper to make sure the index is within range.
+clampRange :: Foldable t => Int -> t a -> Maybe (t a)
+clampRange i s
+  | i < 0           = Nothing
+  | i >= F.length s = Nothing
+  | otherwise       = Just s
 
 --------------------------------------------------------------------------------
 

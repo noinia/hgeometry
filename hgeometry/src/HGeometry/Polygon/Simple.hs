@@ -20,6 +20,7 @@ module HGeometry.Polygon.Simple
   , HasInPolygon(..)
   , inSimplePolygon
   , hasNoSelfIntersections
+  , module HGeometry.Polygon.Simple.Class
   ) where
 
 import           Control.DeepSeq (NFData)
