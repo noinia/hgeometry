@@ -8,7 +8,7 @@ import           HGeometry
 import           HGeometry.Ext
 import           HGeometry.Number.Real.Rational
 import           HGeometry.PlaneGraph
-import           HGeometry.Polygon.Class
+import           HGeometry.Polygon
 import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Triangulation
 import qualified HGeometry.Polygon.Triangulation.MakeMonotone as MM
