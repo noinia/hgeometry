@@ -45,7 +45,7 @@ data PointLocationResult = Inside
 data PointLocationResultWith edge = StrictlyInside
                                   | OnBoundaryEdge !edge
                                   | StrictlyOutside
-                                  deriving (Show,Read,Eq)
+                                  deriving (Show,Read,Eq,Functor)
 
 
 -- | Forget on which edge the point was.

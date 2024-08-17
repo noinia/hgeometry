@@ -58,6 +58,20 @@ data PolygonalDomainF (h     :: Type -> Type)
                     (h (SimplePolygonF f point)) -- ^ the holes
   deriving stock (Generic)
 
+instance ( NFData    (SimplePolygonF f point)
+         , NFData (h (SimplePolygonF f point))
+         ) => NFData (PolygonalDomainF h f point)
+
+deriving instance ( Show    (SimplePolygonF f point)
+                  , Show (h (SimplePolygonF f point))
+                  ) => Show (PolygonalDomainF h f point)
+deriving instance ( Read    (SimplePolygonF f point)
+                  , Read (h (SimplePolygonF f point))
+                  ) => Read (PolygonalDomainF h f point)
+deriving instance ( Eq    (SimplePolygonF f point)
+                  , Eq (h (SimplePolygonF f point))
+                  ) => Eq (PolygonalDomainF h f point)
+
 -- | The simple polygon representing the outer boundary
 outerBoundaryPolygon :: Lens' (PolygonalDomainF h f point) (SimplePolygonF f point)
 outerBoundaryPolygon = lens (\(PolygonalDomain outer _)    -> outer)
@@ -199,3 +213,30 @@ instance ( Point_ point 2 r
   ccwSuccessorOf = \case
     Outer u   -> reindexed Outer     $ outerBoundaryPolygon .> ccwSuccessorOf u
     Inner i j -> reindexed (Inner i) $ singular (holeAt i)  .> ccwSuccessorOf j
+
+{-
+
+instance ( SimplePolygon_ (SimplePolygonF f point) point r
+         , HolesContainer h f point
+         )
+         => HasInPolygon (PolygonalDomainF h f point) point r where
+  inPolygon q pg = case q `inPolygon` (pg^.outerBoundaryPolygon) of
+                     Inside  -> case getResult $ ifoldMapOf holes (testInHole q) pg of
+                       Outside -> Inside
+                       res     -> res
+                     res     -> Outer <$> res
+    where
+      testInHole q i pg = Intersect $ Inner i <$> q `inPolygon` (pg^.outerBoundaryPolygon)
+
+
+newtype Intersect = Intersect { getResult :: PointLocationResultWith Vtx }
+
+instance Semigroup Intersect where
+  (Intersect Outside) <> r = r
+  (Intersect Inside)
+
+
+instance Semigroup Monoid where
+  mempty = Intersect Outside
+
+-}
