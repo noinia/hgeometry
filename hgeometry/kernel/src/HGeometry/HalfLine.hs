@@ -18,6 +18,8 @@ module HGeometry.HalfLine
 import Control.Lens
 import GHC.Generics (Generic)
 import GHC.TypeLits
+import HGeometry.HalfSpace
+import HGeometry.HyperPlane
 import HGeometry.Intersection
 import HGeometry.Interval.Class
 import HGeometry.Line.Intersection
@@ -113,6 +115,25 @@ instance ( Ord r, Fractional r, Point_ point 2 r
     where
       m = supportingLine hl
     -- the left side is suposedly the halfplane containing the halfLine
+
+--------------------------------------------------------------------------------
+
+instance ( Point_ point d r
+         , Has_ Metric_ d r
+         , Ord r, Fractional r
+         , MkHyperPlaneConstraints d r
+         ) => HasSquaredEuclideanDistance (HalfLine point) where
+  pointClosestTo q hl@(HalfLine p v)
+      | r `intersects` h = r
+      | otherwise        = p'
+    where
+      p' = p^.asPoint
+      r  = pointClosestTo q (supportingLine hl)
+      h  = HalfSpace Positive (fromPointAndNormal p' v) :: HalfSpace d r
+  -- main idea: compute the point closest to the supporting line of the halfline.  if this
+  -- point lies in the halfspace h defined by the ray (e.g. for which the ray is the
+  -- normal), then we've actually found the point closest to the ray. Otherwise the origin
+  -- of the ray is simply the closest point.
 
 
 

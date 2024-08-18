@@ -215,6 +215,19 @@ executable hgeometry-sampler
           -- Paths_hgeometry_examples
   --      Miso.Event.Extra
 
+--------------------------------------------------------------------------------
+-- * Raytracer example
+
+executable hgeometry-raytracer
+  import:         setup, miso-setup
+  build-depends:
+          JuicyPixels     >= 3.3.9  && < 4
+  hs-source-dirs: raytracer
+  main-is:        Main.hs
+  other-modules:
+          Paths_hgeometry_examples
+  --      Miso.Event.Extra
+
 
 
 --------------------------------------------------------------------------------

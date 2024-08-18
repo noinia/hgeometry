@@ -3,20 +3,21 @@
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 module HGeometry.HyperPlaneSpec where
 
-import           Control.Lens hiding (unsnoc)
-import           Data.Maybe (isJust)
-import           GHC.TypeNats
-import           HGeometry.HyperPlane
-import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Intersection
-import           HGeometry.Kernel.Instances ()
-import           HGeometry.Line
-import           HGeometry.Number.Real.Rational
-import           HGeometry.Point
-import           HGeometry.Vector
-import           Test.Hspec
-import           Test.Hspec.QuickCheck
-import           Test.QuickCheck ((===), (==>))
+import Control.Lens hiding (unsnoc)
+import Data.Maybe (isJust)
+import GHC.TypeNats
+import HGeometry.HalfSpace
+import HGeometry.HyperPlane
+import HGeometry.HyperPlane.NonVertical
+import HGeometry.Intersection
+import HGeometry.Kernel.Instances ()
+import HGeometry.Line
+import HGeometry.Number.Real.Rational
+import HGeometry.Point
+import HGeometry.Vector
+import Test.Hspec
+import Test.Hspec.QuickCheck
+import Test.QuickCheck ((===), (==>))
 
 --------------------------------------------------------------------------------
 
@@ -88,6 +89,16 @@ spec = describe "HyperPlane Tests" $ do
            asNonVerticalHyperPlane (HyperPlane2 0 (-1) 0) `shouldBe`
              Nothing
 
+         prop "normal vector ok" $
+           \(p :: Point 3 R) (n :: Vector 3 R) ->
+             (quadrance n > 0) ==>
+               normalVector (fromPointAndNormal p n :: HyperPlane 3 R) === n
+
+         prop "normal vector ok for non-vertical" $
+           \(p :: Point 3 R) (n :: Vector 3 R) ->
+             (quadrance n > 0 && n^.zComponent /= 0) ==>
+               normalVector (fromPointAndNormal p n :: NonVerticalHyperPlane 3 R) === n
+
          prop "onside test non-vertical hyperplane2 (i.e. lines)" $
            \(h :: HyperPlane 2 R) (q :: Point 2 R) ->
              isNonVertical h ==>
@@ -154,6 +165,19 @@ spec = describe "HyperPlane Tests" $ do
            \(l :: LineEQ R) (m :: LineEQ R) ->
              (l `intersects` m) `shouldBe` (asHyp l `intersects` asHyp m)
 
+         prop "fromPointAnNormal and sideTest consistent for HyperPlane in R^3" $
+           \(p :: Point 3 R) n ->
+             allOf components (>0) n ==>
+             ((p .+^ n) `onSideTest` (fromPointAndNormal p n :: HyperPlane 3 R))
+             `shouldBe` GT
+
+         prop "fromPointAnNormal and intersects halfSpace consistent in R^3" $
+           \(p :: Point 3 R) n ->
+             allOf components (>0) n ==>
+             ((p .+^ n) `intersects` (HalfSpace Positive (fromPointAndNormal p n)
+                                      :: HalfSpace 3 R
+                                     ))
+             `shouldBe` True
 
          prop "fromPointAnNormal and sideTest consistent for HyperPlane " $
            \(p :: Point 2 R) n ->

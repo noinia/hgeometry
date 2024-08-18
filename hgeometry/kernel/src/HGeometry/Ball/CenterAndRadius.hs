@@ -22,15 +22,15 @@ module HGeometry.Ball.CenterAndRadius
   ) where
 
 
-import           Control.Lens
-import           HGeometry.Ball.Class
-import           HGeometry.Intersection
-import           HGeometry.LineSegment
--- import qualified HGeometry.Number.Radical as Radical
-import           HGeometry.Point
-import           HGeometry.Properties (NumType, Dimension)
-import           HGeometry.Vector
-
+import Control.Lens
+import HGeometry.Ball.Class
+import HGeometry.HalfLine
+import HGeometry.HyperPlane
+import HGeometry.Intersection
+import HGeometry.LineSegment
+import HGeometry.Point
+import HGeometry.Properties (NumType, Dimension)
+import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
@@ -88,10 +88,17 @@ instance ( Point_ point d r, Point_ point' d r
          , Ord r, Fractional r
          , Has_ Metric_ d r
          , HasSquaredEuclideanDistance point'
+         , MkHyperPlaneConstraints d r
          ) => (ClosedLineSegment point') `HasIntersectionWith` (Ball point) where
   intersects s (Ball c r) = squaredEuclideanDistTo c s <= r
 
-
+instance ( Point_ point d r, Point_ point' d r
+         , Ord r, Fractional r
+         , Has_ Metric_ d r
+         , HasSquaredEuclideanDistance point'
+         , MkHyperPlaneConstraints d r
+         ) => (HalfLine point') `HasIntersectionWith` (Ball point) where
+  intersects hl (Ball c r) = squaredEuclideanDistTo c hl <= r
 
 --------------------------------------------------------------------------------
 

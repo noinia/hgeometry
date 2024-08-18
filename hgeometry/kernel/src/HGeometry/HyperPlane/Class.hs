@@ -129,8 +129,7 @@ class ( NumType hyperPlane ~ r
   normalVector :: (Num r, Eq r, 1 <= d) => hyperPlane -> Vector d r
   default normalVector :: (KnownNat d, Num r, Eq r, 1 <= d)
                        => hyperPlane -> Vector d r
-  normalVector h = let a = suffix $ hyperPlaneEquation h
-                   in if signum (a^.last) == 1 then a else negated a
+  normalVector h = negated . suffix $ hyperPlaneEquation h
   {-# INLINE normalVector #-}
   -- https://en.wikipedia.org/wiki/Normal_(geometry)#Hypersurfaces_in_n-dimensional_space
   -- states that: if the hyperplane is defined as the solution set of a single linear equation

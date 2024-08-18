@@ -117,6 +117,8 @@ instance ( MkHyperPlaneConstraints d r
          , 2 <= d
          ) => HyperPlane_ (NonVerticalHyperPlane d r) d r where
 
+  -- normalVector h = let a = suffix $ hyperPlaneEquation h
+  --                  in if signum (a^.last) == 1 then a else negated a
 
 instance ( MkHyperPlaneConstraints d r
          , Fractional r, Eq r
