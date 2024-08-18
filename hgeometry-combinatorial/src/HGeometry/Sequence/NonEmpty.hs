@@ -96,6 +96,9 @@ instance IsList (ViewL1 a) where
   fromList = maybe (error "ViewL1 fromList; empty List") fromNonEmpty . NonEmpty.nonEmpty
   {-# INLINE fromList #-}
 
+instance Reversing (ViewL1 a) where
+  reversing (x :<< s) = viewl1 $ Sequence.reverse s :>> x
+
 --------------------------------------------------------------------------------
 
 -- | NonEmpty ViewR
@@ -160,6 +163,10 @@ instance IsList (ViewR1 a) where
   {-# INLINE toList #-}
   fromList = maybe (error "ViewR1 fromList; empty List") fromNonEmpty . NonEmpty.nonEmpty
   {-# INLINE fromList #-}
+
+instance Reversing (ViewR1 a) where
+  reversing (s :>> x) = viewr1 $ x :<< Sequence.reverse s
+
 
 -- | snoc an element to the right
 (|>>) :: ViewR1 a -> a -> ViewR1 a
