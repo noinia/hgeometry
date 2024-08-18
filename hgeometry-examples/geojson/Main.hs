@@ -9,6 +9,7 @@ import           HGeometry.GeoJSON
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple
+import           HGeometry.Polygon.WithHoles
 -- import           HGeometry.Vector ()
 import           Ipe
 import           Paths_hgeometry_examples
@@ -35,7 +36,7 @@ main = do
   case res of
     Left err          -> print err
     Right fCollection -> do
-      mapM_ print $ fCollection^..geofeatures.traverse.geometry._Polygon
+      mapM_ print $ fCollection^..geofeatures.traverse.geometry._Polygon._GeoPolygonPolygonalDomain.asSimplePolygon
       -- let outFp = [osp|foo.ipe|]
       --     out   = [ iO $ toPolygon pg
       --             | pg <- fCollection^..geofeatures.traverse.geometry._Polygon

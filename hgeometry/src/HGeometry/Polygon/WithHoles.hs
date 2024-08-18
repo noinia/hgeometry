@@ -14,6 +14,7 @@
 module HGeometry.Polygon.WithHoles
   ( PolygonalDomainF(PolygonalDomain)
   , PolygonalDomain
+  , asSimplePolygon
   , outerBoundaryPolygon
   , theHoles
   ) where
@@ -240,3 +241,14 @@ instance Semigroup Monoid where
   mempty = Intersect Outside
 
 -}
+
+--------------------------------------------------------------------------------
+
+
+-- | interpret a simple polygon as a Polygonal domain.
+asSimplePolygon :: (HasFromFoldable h, HoleContainer h f point)
+                 => Prism' (PolygonalDomainF h f point) (SimplePolygonF f point)
+asSimplePolygon = prism' (flip PolygonalDomain (fromList []))
+                         (\pd -> if nullOf holes pd then Just (pd^.outerBoundaryPolygon)
+                                 else Nothing
+                         )

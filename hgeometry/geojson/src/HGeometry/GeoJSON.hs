@@ -3,6 +3,9 @@ module HGeometry.GeoJSON
   ( GeoPositionWithoutCRS'
   , RestGeoPosition(..)
   , _GeoPositionWithoutCRS
+
+
+  , _GeoPolygonPolygonalDomain
   ) where
 
 import           Control.Lens
