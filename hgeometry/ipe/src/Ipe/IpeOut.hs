@@ -16,7 +16,7 @@
 --------------------------------------------------------------------------------
 module Ipe.IpeOut where
 
-import           Control.Lens hiding (Simple)
+import           Control.Lens hiding (Simple, holes)
 import           Data.Foldable (toList)
 import           Data.Kind
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -29,6 +29,7 @@ import           HGeometry.BezierSpline
 import           HGeometry.Box
 import           HGeometry.Ellipse (Ellipse, circleToEllipse)
 import           HGeometry.Ext
+import           HGeometry.Foldable.Util
 import           HGeometry.HalfLine
 import           HGeometry.Intersection
 import           HGeometry.Line
@@ -36,8 +37,10 @@ import           HGeometry.LineSegment
 import           HGeometry.Number.Radical
 import           HGeometry.Point
 import           HGeometry.PolyLine
+import           HGeometry.Polygon
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
+import           HGeometry.Polygon.WithHoles
 import           HGeometry.Properties
 import           Ipe.Attributes
 import           Ipe.Color (IpeColor(..))
@@ -163,9 +166,12 @@ instance HasDefaultIpeOut (SimplePolygon (Point 2 r)) where
   type DefaultIpeOut (SimplePolygon (Point 2 r)) = Path
   defIO = ipePolygon
 
--- instance HasDefaultIpeOut (SomePolygon p r) where
---   type DefaultIpeOut (SomePolygon p r) = Path
---   defIO = either defIO defIO
+instance (HoleContainer h f (Point 2 r)
+         , HasFromFoldable1 f
+         )
+       => HasDefaultIpeOut (PolygonalDomainF h f (Point 2 r)) where
+  type DefaultIpeOut (PolygonalDomainF h f (Point 2 r)) = Path
+  defIO = ipePolygon
 
 instance HasDefaultIpeOut (ConvexPolygon (Point 2 r)) where
   type DefaultIpeOut (ConvexPolygon (Point 2 r)) = Path
@@ -286,18 +292,30 @@ pathSegment = PolyLineSegment . fmap (^.asPoint) . lineSegmentToPolyLine
   where
     lineSegmentToPolyLine s = polyLineFromPoints . NonEmpty.fromList $ [s^.start, s^.end]
 
+-- | Render as a polygon
+ipePolygon    :: Polygon_ polygon point r => IpeOut polygon Path r
+ipePolygon pg = Path (outer <| inners) :+ mempty
+  where
+    outer  = toPolygonPathSegment pg
+    inners = toPolygonPathSegment <$> toSequenceOf holes pg
+    toSequenceOf l = foldMapOf l Seq.singleton
+
+-- | Helper type to build a path segment
+toPolygonPathSegment :: ( HasOuterBoundary polygon, Point_ point 2 r, Vertex polygon ~ point)
+                     => polygon -> PathSegment r
+toPolygonPathSegment = PolygonPath . uncheckedFromCCWPoints
+                     . toNonEmptyOf (outerBoundary.asPoint)
+  -- this feels a bit silly, I feel we should directly be able to construct
+  -- the polygon just using the outerBoundaryFold, but whatever.
 
 -- | Draw a polygon
-ipePolygon    :: IpeOut (SimplePolygon (Point 2 r)) Path r
-ipePolygon pg = pg^.re _asSimplePolygon :+ mempty
--- (first (const ()) -> pg) = case pg of
---                SimplePolygon{} -> pg^.re _asSimplePolygon :+ mempty
---                -- MultiPolygon{}  -> pg^.re _asMultiPolygon  :+ mempty
+ipeSimplePolygon'    :: IpeOut (SimplePolygon (Point 2 r)) Path r
+ipeSimplePolygon' pg = pg^.re _asSimplePolygon :+ mempty
 
 
 -- | Draw a Rectangle
 ipeRectangle   :: Num r => IpeOut (Rectangle (Point 2 r)) Path r
-ipeRectangle r = ipePolygon $ uncheckedFromCCWPoints [tl,tr,br,bl]
+ipeRectangle r = ipeSimplePolygon' $ uncheckedFromCCWPoints [tl,tr,br,bl]
   where
     Corners tl tr br bl = corners r
 
