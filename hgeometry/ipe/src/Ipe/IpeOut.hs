@@ -309,13 +309,13 @@ toPolygonPathSegment = PolygonPath . uncheckedFromCCWPoints
   -- the polygon just using the outerBoundaryFold, but whatever.
 
 -- | Draw a polygon
-ipeSimplePolygon'    :: IpeOut (SimplePolygon (Point 2 r)) Path r
-ipeSimplePolygon' pg = pg^.re _asSimplePolygon :+ mempty
+ipeSimplePolygon    :: IpeOut (SimplePolygon (Point 2 r)) Path r
+ipeSimplePolygon pg = pg^.re _asSimplePolygon :+ mempty
 
 
 -- | Draw a Rectangle
 ipeRectangle   :: Num r => IpeOut (Rectangle (Point 2 r)) Path r
-ipeRectangle r = ipeSimplePolygon' $ uncheckedFromCCWPoints [tl,tr,br,bl]
+ipeRectangle r = ipeSimplePolygon $ uncheckedFromCCWPoints [tl,tr,br,bl]
   where
     Corners tl tr br bl = corners r
 

@@ -149,7 +149,7 @@ offset s = translateBy theOffset s
 drawFace         :: ( PlaneGraph_ planeGraph vertex, Point_ vertex 2 r
                     , Show (Face planeGraph), Ord r, Fractional r)
                  => planeGraph -> FaceIx planeGraph -> SimplePolygon (vertex :+ VertexIx planeGraph) -> [IpeObject r]
-drawFace gr f pg = [ iO $ ipePolygon pg' ! attr SLayer "face"
+drawFace gr f pg = [ iO $ ipeSimplePolygon pg' ! attr SLayer "face"
                    , iO $ ipeLabel (tshow (gr^?!faceAt f) :+ c) ! attr SLayer "faceLabel"
                    ]
   where
