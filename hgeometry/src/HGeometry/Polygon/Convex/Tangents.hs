@@ -23,15 +23,13 @@ import           Data.Monoid
 import           Data.Ord (comparing)
 import           Data.Semigroup.Foldable (Foldable1 (..))
 import           HGeometry.Ext
--- import           Data.Vector.Circular (CircularVector)
--- import qualified Data.Vector.Circular as CV
--- import qualified Data.Vector.Circular.Util as CV
 import           HGeometry.LineSegment
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex.Class
-import           HGeometry.Vector
 import           HGeometry.Polygon.Convex.Implementation (findMaxWith)
+import           HGeometry.Vector
+
 --------------------------------------------------------------------------------
 
 -- | Given a convex polygon poly, and a point outside the polygon, find the
