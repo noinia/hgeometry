@@ -13,7 +13,6 @@
 --------------------------------------------------------------------------------
 module HGeometry.Cyclic
   ( Cyclic(..)
-  , toCircularVector
   , HasDirectedTraversals(..)
   , ShiftedEq(..)
   ) where
@@ -29,7 +28,6 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (isJust)
 import           Data.Semigroup.Foldable
 import qualified Data.Vector as V
-import           Data.Vector.Circular (CircularVector(..))
 import qualified Data.Vector.Mutable as MV
 import qualified Data.Vector.NonEmpty as NV
 import           GHC.Generics (Generic)
@@ -74,11 +72,6 @@ type instance IxValue (Cyclic v a) = IxValue (v a)
 instance (Index (v a) ~ Int, Foldable v, Ixed (v a)) => Ixed (Cyclic v a) where
   ix i = \f (Cyclic v) -> let n  = F.length v
                           in Cyclic <$> ix (i `mod` n) f v
-
--- | Turn the cyclic vector into a circular Vector
-toCircularVector            :: Cyclic NV.NonEmptyVector a -> CircularVector a
-toCircularVector (Cyclic v) = CircularVector v 0
-
 
 -- | Class that models that some type has a cyclic traversal starting
 -- from a particular index.
