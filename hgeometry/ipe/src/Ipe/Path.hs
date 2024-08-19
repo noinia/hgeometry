@@ -101,6 +101,8 @@ instance Fractional r => IsTransformable (PathSegment r) where
 -- | A path is a non-empty sequence of PathSegments.
 newtype Path r = Path { _pathSegments :: Seq.Seq (PathSegment r) }
                  deriving (Show,Eq,Functor,Foldable,Traversable)
+                 deriving newtype (Semigroup)
+
 makeLenses ''Path
 
 type instance NumType   (Path r) = r

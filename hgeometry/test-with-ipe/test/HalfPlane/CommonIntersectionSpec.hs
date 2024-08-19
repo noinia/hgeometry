@@ -144,7 +144,7 @@ myIpeTest input = [ iO $ draw $ commonIntersection input
 asConstraint    :: forall r. (Fractional r, Ord r)
                 => IpeOut (HalfPlane r) Group r
 asConstraint h = ipeGroup [ iO $ defIO seg
-                          , iO $ ipePolygon poly ! attr SFill gray
+                          , iO $ ipeSimplePolygon poly ! attr SFill gray
                           ]
   where
     l = h^.boundingHyperPlane

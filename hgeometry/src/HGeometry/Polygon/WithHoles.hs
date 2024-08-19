@@ -14,8 +14,10 @@
 module HGeometry.Polygon.WithHoles
   ( PolygonalDomainF(PolygonalDomain)
   , PolygonalDomain
+  , asSimplePolygon
   , outerBoundaryPolygon
   , theHoles
+  , HoleContainer
   ) where
 
 import           Control.DeepSeq (NFData)
@@ -142,6 +144,7 @@ type HoleContainer h f point =
   , Index   (h (SimplePolygonF f point)) ~ Int
   , IxValue (h (SimplePolygonF f point)) ~ SimplePolygonF f point
   , Ixed    (h (SimplePolygonF f point))
+  , VertexContainer f point
   )
 
 instance ( HoleContainer h f point
@@ -161,9 +164,7 @@ data VtxIx = Outer {-#UNPACK#-}!Int
 inner :: (Int,Int) -> VtxIx
 inner = uncurry Inner
 
-instance ( HoleContainer h f point
-         , VertexContainer f point
-         ) => HasVertices' (PolygonalDomainF h f point) where
+instance HoleContainer h f point => HasVertices' (PolygonalDomainF h f point) where
   type Vertex   (PolygonalDomainF h f point) = point
   type VertexIx (PolygonalDomainF h f point) = VtxIx
 
@@ -173,7 +174,7 @@ instance ( HoleContainer h f point
 
   numVertices pg = numVertices (pg^.outerBoundaryPolygon) + sumOf (holes.to numVertices) pg
 
-instance ( HoleContainer h f point, VertexContainer f point
+instance ( HoleContainer h f point
          ) => HasOuterBoundary (PolygonalDomainF h f point) where
   outerBoundary        = reindexed Outer $ outerBoundaryPolygon .> outerBoundary
   ccwOuterBoundaryFrom = \case
@@ -203,7 +204,6 @@ mapEdge (u,v) = (Outer u, Outer v)
 
 instance ( Point_ point 2 r
          , HasFromFoldable1 f
-         , VertexContainer f point
          , HoleContainer h f point
          ) => Polygon_ (PolygonalDomainF h f point) point r where
   extremes u = extremes u . view outerBoundaryPolygon
@@ -240,3 +240,14 @@ instance Semigroup Monoid where
   mempty = Intersect Outside
 
 -}
+
+--------------------------------------------------------------------------------
+
+
+-- | interpret a simple polygon as a Polygonal domain.
+asSimplePolygon :: (HasFromFoldable h, HoleContainer h f point)
+                 => Prism' (PolygonalDomainF h f point) (SimplePolygonF f point)
+asSimplePolygon = prism' (flip PolygonalDomain (fromList []))
+                         (\pd -> if nullOf holes pd then Just (pd^.outerBoundaryPolygon)
+                                 else Nothing
+                         )

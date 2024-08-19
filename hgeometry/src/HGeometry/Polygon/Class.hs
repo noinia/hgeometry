@@ -28,6 +28,7 @@ module HGeometry.Polygon.Class
 import Control.Lens hiding (holes)
 import Data.Function (on)
 import Data.Kind (Type)
+import Data.Void
 import HGeometry.Ext
 import HGeometry.Lens.Util
 -- import qualified Data.Functor.Apply as Apply
@@ -228,12 +229,12 @@ type Hole polygon = SimplePolygonF (HoleF polygon) (Vertex polygon)
 -- | Accessing the holes in a polygon (if there are any.)
 --
 -- the default implementation assumes there are no holes
-class HasHoles polygon where
+class VertexContainer (HoleF polygon) (Vertex polygon) => HasHoles polygon where
   {-# MINIMAL #-}
 
   -- | Type we use to index holes.
   type HoleIx polygon :: Type
-  type HoleIx polygon = ()
+  type HoleIx polygon = Void
 
   -- | The functor used in the holes
   type HoleF polygon :: Type -> Type
