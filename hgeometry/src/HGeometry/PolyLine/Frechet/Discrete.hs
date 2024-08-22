@@ -12,27 +12,22 @@ module HGeometry.PolyLine.Frechet.Discrete
   ( frechetDistanceWith
   ) where
 
-import           Control.Lens
-import           Data.Array
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           HGeometry.Point
-import           HGeometry.PolyLine.Class
-import           Hiraffe.Graph
+import Control.Lens
+import Data.Array
+import Hiraffe.Graph
 
-import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | Computes the discrete frechet distance with respect to the given distance function.
 --
 -- O(nm*(I+T)), where I is the time to index one of the vertices and T is the time to
 -- evaluate the distance function.
-frechetDistanceWith :: ( PolyLine_ polyLine  point
-                       , PolyLine_ polyLine' point'
+frechetDistanceWith :: ( HasVertices' polyLine
+                       , HasVertices' polyLine'
                        , Ord r
                        , VertexIx polyLine ~ Int, VertexIx polyLine' ~ Int
                        )
-                    => (point -> point' -> r)
+                    => (Vertex polyLine -> Vertex polyLine' -> r)
                     -> polyLine -> polyLine'
                     -> r
 frechetDistanceWith dist' polyP polyQ = fd (n,m)
