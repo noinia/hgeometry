@@ -38,14 +38,14 @@
 </span><span id="line-38"></span><span class="hs-comment">-- | Compute all intersections (naively)</span><span>
 </span><span id="line-39"></span><span class="hs-comment">--</span><span>
 </span><span id="line-40"></span><span class="hs-comment">-- \(O(n^2)\)</span><span>
-</span><span id="line-41"></span><span id="local-6989586621679460945"><span id="local-6989586621679460946"><span id="local-6989586621679460947"><span id="local-6989586621679460951"><span class="annot"><a href="HGeometry.LineSegment.Intersection.Naive.html#intersections"><span class="hs-identifier hs-type">intersections</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679460945"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679460945"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-42"></span><span>                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LineSegment_</span></span><span> </span><span class="annot"><a href="#local-6989586621679460946"><span class="hs-identifier hs-type">lineSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679460947"><span class="hs-identifier hs-type">point</span></a></span><span>
-</span><span id="line-43"></span><span>                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679460946"><span class="hs-identifier hs-type">lineSegment</span></a></span><span>
-</span><span id="line-44"></span><span>                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679460947"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679460945"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-45"></span><span>                 </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.LineSegment.Intersection.Types.html#IntersectConstraints"><span class="hs-identifier hs-type">IntersectConstraints</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679460946"><span class="hs-identifier hs-type">lineSegment</span></a></span><span>
-</span><span id="line-46"></span><span>                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679460951"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-41"></span><span id="local-6989586621679461330"><span id="local-6989586621679461331"><span id="local-6989586621679461332"><span id="local-6989586621679461336"><span class="annot"><a href="HGeometry.LineSegment.Intersection.Naive.html#intersections"><span class="hs-identifier hs-type">intersections</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679461330"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679461330"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-42"></span><span>                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LineSegment_</span></span><span> </span><span class="annot"><a href="#local-6989586621679461331"><span class="hs-identifier hs-type">lineSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679461332"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-43"></span><span>                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679461331"><span class="hs-identifier hs-type">lineSegment</span></a></span><span>
+</span><span id="line-44"></span><span>                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679461332"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679461330"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-45"></span><span>                 </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.LineSegment.Intersection.Types.html#IntersectConstraints"><span class="hs-identifier hs-type">IntersectConstraints</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679461331"><span class="hs-identifier hs-type">lineSegment</span></a></span><span>
+</span><span id="line-46"></span><span>                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679461336"><span class="hs-identifier hs-type">f</span></a></span><span>
 </span><span id="line-47"></span><span>                 </span><span class="hs-special">)</span><span>
-</span><span id="line-48"></span><span>              </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679460951"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679460946"><span class="hs-identifier hs-type">lineSegment</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.LineSegment.Intersection.Types.html#Intersections"><span class="hs-identifier hs-type">Intersections</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679460945"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679460946"><span class="hs-identifier hs-type">lineSegment</span></a></span></span></span></span></span><span>
+</span><span id="line-48"></span><span>              </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679461336"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679461331"><span class="hs-identifier hs-type">lineSegment</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.LineSegment.Intersection.Types.html#Intersections"><span class="hs-identifier hs-type">Intersections</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679461330"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679461331"><span class="hs-identifier hs-type">lineSegment</span></a></span></span></span></span></span><span>
 </span><span id="line-49"></span><span id="intersections"><span class="annot"><span class="annottext">intersections :: forall r lineSegment point (f :: * -&gt; *).
 (Ord r, Fractional r, LineSegment_ lineSegment point,
  Eq lineSegment, Point_ point 2 r, IntersectConstraints lineSegment,
@@ -79,7 +79,7 @@ Two lineSegment
 -&gt; Map
      (Point 2 (NumType (IxValue (EndPointOf lineSegment))))
      (Associated lineSegment)
-</span><a href="#local-6989586621679461124"><span class="hs-identifier hs-var">collect</span></a></span><span> </span><span class="annot"><span class="annottext">([Two lineSegment] -&gt; Intersections r lineSegment)
+</span><a href="#local-6989586621679461509"><span class="hs-identifier hs-var">collect</span></a></span><span> </span><span class="annot"><span class="annottext">([Two lineSegment] -&gt; Intersections r lineSegment)
 -&gt; (f lineSegment -&gt; [Two lineSegment])
 -&gt; f lineSegment
 -&gt; Intersections r lineSegment
@@ -88,13 +88,13 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 forall (f :: * -&gt; *) a. Foldable f =&gt; f a -&gt; [Two a]
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html#uniquePairs"><span class="hs-identifier hs-var">uniquePairs</span></a></span><span>
 </span><span id="line-50"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-51"></span><span>    </span><span id="local-6989586621679461124"><span class="annot"><span class="annottext">collect :: Two lineSegment
+</span><span id="line-51"></span><span>    </span><span id="local-6989586621679461509"><span class="annot"><span class="annottext">collect :: Two lineSegment
 -&gt; Map
      (Point 2 (NumType (IxValue (EndPointOf lineSegment))))
      (Associated lineSegment)
-</span><a href="#local-6989586621679461124"><span class="hs-identifier hs-var hs-var">collect</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679461466"><span class="annot"><span class="annottext">lineSegment
-</span><a href="#local-6989586621679461466"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679461467"><span class="annot"><span class="annottext">lineSegment
-</span><a href="#local-6989586621679461467"><span class="hs-identifier hs-var">s'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">lineSegment
+</span><a href="#local-6989586621679461509"><span class="hs-identifier hs-var hs-var">collect</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679461851"><span class="annot"><span class="annottext">lineSegment
+</span><a href="#local-6989586621679461851"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679461852"><span class="annot"><span class="annottext">lineSegment
+</span><a href="#local-6989586621679461852"><span class="hs-identifier hs-var">s'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">lineSegment
 -&gt; lineSegment
 -&gt; Maybe
      (IntersectionPoint
@@ -105,8 +105,8 @@ forall lineSegment point r.
 lineSegment
 -&gt; lineSegment -&gt; Maybe (IntersectionPoint (Point 2 r) lineSegment)
 </span><a href="HGeometry.LineSegment.Intersection.Types.html#intersectionPointOf"><span class="hs-identifier hs-var">intersectionPointOf</span></a></span><span> </span><span class="annot"><span class="annottext">lineSegment
-</span><a href="#local-6989586621679461466"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">lineSegment
-</span><a href="#local-6989586621679461467"><span class="hs-identifier hs-var">s'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679461851"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">lineSegment
+</span><a href="#local-6989586621679461852"><span class="hs-identifier hs-var">s'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-52"></span><span>                           </span><span class="annot"><span class="annottext">Maybe
   (IntersectionPoint
      (Point 2 (NumType (IxValue (EndPointOf lineSegment)))) lineSegment)
@@ -115,9 +115,9 @@ lineSegment
   (Associated lineSegment)
 forall a. Monoid a =&gt; a
 </span><span class="hs-identifier hs-var">mempty</span></span><span>
-</span><span id="line-53"></span><span>                           </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679461468"><span class="annot"><span class="annottext">IntersectionPoint
+</span><span id="line-53"></span><span>                           </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679461853"><span class="annot"><span class="annottext">IntersectionPoint
   (Point 2 (NumType (IxValue (EndPointOf lineSegment)))) lineSegment
-</span><a href="#local-6989586621679461468"><span class="hs-identifier hs-var">ip</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 (NumType (IxValue (EndPointOf lineSegment)))
+</span><a href="#local-6989586621679461853"><span class="hs-identifier hs-var">ip</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 (NumType (IxValue (EndPointOf lineSegment)))
 -&gt; Associated lineSegment
 -&gt; Map
      (Point 2 (NumType (IxValue (EndPointOf lineSegment))))
@@ -125,7 +125,7 @@ forall a. Monoid a =&gt; a
 forall k a. k -&gt; a -&gt; Map k a
 </span><span class="hs-identifier hs-var">Map.singleton</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IntersectionPoint
   (Point 2 (NumType (IxValue (EndPointOf lineSegment)))) lineSegment
-</span><a href="#local-6989586621679461468"><span class="hs-identifier hs-var">ip</span></a></span><span class="annot"><span class="annottext">IntersectionPoint
+</span><a href="#local-6989586621679461853"><span class="hs-identifier hs-var">ip</span></a></span><span class="annot"><span class="annottext">IntersectionPoint
   (Point 2 (NumType (IxValue (EndPointOf lineSegment)))) lineSegment
 -&gt; Getting
      (Point 2 (NumType (IxValue (EndPointOf lineSegment))))
@@ -146,7 +146,7 @@ Functor f =&gt;
 -&gt; f (IntersectionPoint point2 lineSegment)
 </span><a href="HGeometry.LineSegment.Intersection.Types.html#intersectionPoint"><span class="hs-identifier hs-var">intersectionPoint</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IntersectionPoint
   (Point 2 (NumType (IxValue (EndPointOf lineSegment)))) lineSegment
-</span><a href="#local-6989586621679461468"><span class="hs-identifier hs-var">ip</span></a></span><span class="annot"><span class="annottext">IntersectionPoint
+</span><a href="#local-6989586621679461853"><span class="hs-identifier hs-var">ip</span></a></span><span class="annot"><span class="annottext">IntersectionPoint
   (Point 2 (NumType (IxValue (EndPointOf lineSegment)))) lineSegment
 -&gt; Getting
      (Associated lineSegment)
