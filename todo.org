@@ -1,4 +1,4 @@
-** TODO make a constructable point class, getting rid of the Default ext constraints
+** DONE make a constructable point class, getting rid of the Default ext constraints
 
 ** DONE make everything public sublibraries of hgeometry
 hopefully this will also make the CI story easier
@@ -127,6 +127,13 @@ make sure we can report in which hole we are as well
 *** TODO some tests
 *** TODO render them to ipe
 *** TODO intersect with a line or with a segment
+* TODO avoid binary files in the tests ; replace them with json files or so
+(in particular, the arbitrary instances for polygon)
+
+* TODO update the readme
+** TODO add other libraries
+
+* TODO the type for convex hull seems wrong/not general enough; why don't we accept an Foldable1 ?
 
 * DONE polyline simplification
 ** DONE imai iri
@@ -139,7 +146,7 @@ make sure we can report in which hole we are as well
 
 * TODO 3d-lower-envelope
 ** TODO naive
-*** TODO triangulated envelope
+*** DONE triangulated envelope
 *** TODO handle degeneracies
 *** TODO handle all colinear
 *** TODO cyclic sorting of the edges
@@ -172,7 +179,7 @@ guaranteed to appear: )
 
 ** TODO batch point-location by sweeping scheme
 
-** TODO vertices -> adjrep
+** DONE vertices -> adjrep
 
 ** TODO 3d convex hull
 
@@ -263,3 +270,19 @@ a faster sorting algo; since we are now using vector-algorithms's
 introsort rather than mergesort.
 >
 Still, it's nice that we are faster :).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+* old tests
