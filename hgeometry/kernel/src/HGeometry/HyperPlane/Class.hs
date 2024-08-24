@@ -167,16 +167,16 @@ class ( NumType hyperPlane ~ r
   -- >>> Point2 1 3 `onSideTest` myLineAgain
   -- EQ
   -- >>> Point2 1 5 `onSideTest` myLineAgain
-  -- GT
+  -- LT
   -- >>> Point2 4 5 `onSideTest` myLineAgain
-  -- LT
+  -- GT
   -- >>> Point2 0 0 `onSideTest` HyperPlane2 1 (-1) 0
-  -- LT
+  -- GT
   --
   -- >>> Point2 1 1 `onSideTest` myVerticalLine
-  -- LT
-  -- >>> Point2 10 1 `onSideTest` myVerticalLine
   -- GT
+  -- >>> Point2 10 1 `onSideTest` myVerticalLine
+  -- LT
   -- >>> Point2 5 20 `onSideTest` myVerticalLine
   -- EQ
   --
@@ -316,15 +316,13 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
   -- | Test if a point q lies above a non-vertical hyperplane h (i.e. verticalSideTest q h
   -- == GT), on the hyperplane (== EQ), or below (LT).
   --
-  -- >>> Point2 0 2 `verticalSideTest` myLineAgain
+  -- >>> Point2 0 2 `verticalSideTest` myLineAsNV
   -- EQ
-  -- >>> Point2 1 3 `verticalSideTest` myLineAgain
+  -- >>> Point2 1 3 `verticalSideTest` myLineAsNV
   -- EQ
-  -- >>> Point2 1 5 `verticalSideTest` myLineAgain
+  -- >>> Point2 1 5 `verticalSideTest` myLineAsNV
   -- GT
-  -- >>> Point2 4 5 `verticalSideTest` myLineAgain
-  -- LT
-  -- >>> Point2 0 0 `verticalSideTest` HyperPlane2 1 (-1) 0
+  -- >>> Point2 4 5 `verticalSideTest` myLineAsNV
   -- LT
   --
   -- >>> Point2 0 1 `verticalSideTest` myOtherNVLine
