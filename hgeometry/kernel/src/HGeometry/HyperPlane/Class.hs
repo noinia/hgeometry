@@ -49,8 +49,9 @@ import Prelude hiding (head,last)
 -- >>> let myLineAsNV  = NonVerticalHyperPlane (Vector2 1 2) :: NonVerticalHyperPlane 2 Double
 -- >>> let myVerticalLine = HyperPlane (Vector3 5 (-1) 0)    :: HyperPlane 2 Double
 --
--- >>> let myOtherLine = HyperPlane2 4 3 2                   :: HyperPlane 2 Double
--- >>> let myPlane     = HyperPlane3 10 2 3 (-1)             :: HyperPlane 3 Double
+-- >>> let myOtherLine   = HyperPlane2 4 3 2                   :: HyperPlane 2 Double
+-- >>> let myOtherNVLine = NonVerticalHyperPlane (Vector2 (-3/2 :: Double) (-2))
+-- >>> let myPlane       = HyperPlane3 10 2 3 (-1)             :: HyperPlane 3 Double
 --
 --
 -- 'myLine', 'myLineAgain', and 'myLineAsNV' all represent the line y = 1*x + 2
@@ -158,14 +159,8 @@ class ( NumType hyperPlane ~ r
   q `onHyperPlane` h = (== 0) $ evalHyperPlaneEquation h q
   {-# INLINE onHyperPlane #-}
 
-  -- | Test if a point lies on a hyperplane. For non-vertical hyperplanes, returns whether
-  -- the point is *above* the hyperplane or not with respect to the d^th
-  -- dimension. (I.e. if (and only if) q lies above the hyperplane h, then q `onSideTest`
-  -- h return GT.)
-  --
-  -- For vertical hyperplanes (with respect to dimension d), we return 'LT' when the point
-  -- is on the "left".
-  --
+  -- | Test if a point lies on a hyperplane. Returns the sign when evaluating the
+  -- hyperplane equation.
   --
   -- >>> Point2 0 2 `onSideTest` myLineAgain
   -- EQ
@@ -194,15 +189,10 @@ class ( NumType hyperPlane ~ r
   -- >>> Point2 1 (-4) `onSideTest` myOtherLine
   -- LT
   onSideTest     :: (Point_ point d r, Ord r, Num r) => point -> hyperPlane -> Ordering
-  onSideTest q h
-    | (hyperPlaneEquation h)^.last <= 0 = 0 `compare` evalHyperPlaneEquation h q
-    | otherwise                         = evalHyperPlaneEquation h q `compare` 0
+  onSideTest q h = evalHyperPlaneEquation h q `compare` 0
   {-# INLINE onSideTest #-}
-  -- if ad is positive, it seems the sign of the comparison should
-  -- flip i.e. so that we should have evalHyperPlaneEquation h q
-  -- `compare` 0 instead. This still seems very werid to me.
 
--- | Produce a point that lies on the hyperplane. No gurantees are given abot which point
+-- | Produce a point that lies on the hyperplane. No gurantees are given about which point
 --
 -- >>> pointOn myLine
 -- Point2 (-2.0) 0.0
@@ -323,6 +313,38 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
   -- Just (Vector2 (-1.5) (-2.0))
   hyperPlaneCoefficients :: Lens' hyperPlane (Vector d r)
 
+  -- | Test if a point q lies above a non-vertical hyperplane h (i.e. verticalSideTest q h
+  -- == GT), on the hyperplane (== EQ), or below (LT).
+  --
+  -- >>> Point2 0 2 `verticalSideTest` myLineAgain
+  -- EQ
+  -- >>> Point2 1 3 `verticalSideTest` myLineAgain
+  -- EQ
+  -- >>> Point2 1 5 `verticalSideTest` myLineAgain
+  -- GT
+  -- >>> Point2 4 5 `verticalSideTest` myLineAgain
+  -- LT
+  -- >>> Point2 0 0 `verticalSideTest` HyperPlane2 1 (-1) 0
+  -- LT
+  --
+  -- >>> Point2 0 1 `verticalSideTest` myOtherNVLine
+  -- GT
+  -- >>> Point2 0 (-2) `verticalSideTest` myOtherNVLine
+  -- EQ
+  -- >>> Point2 1 (-3.5) `verticalSideTest` myOtherNVLine
+  -- EQ
+  -- >>> Point2 1 (-4) `verticalSideTest` myOtherNVLine
+  -- LT
+  verticalSideTest   :: (1 <= d, Point_ point d r, Ord r, Num r)
+                     => point -> hyperPlane -> Ordering
+  default verticalSideTest :: ( Point_ point d r
+                              , Num r, Ord r
+                              , 1 <= d
+                              , 1 + (d-1) ~ d -- silly silly agian :(
+                              , Has_ Metric_ d r
+                              , Has_ Additive_ (d-1) r
+                              ) => point -> hyperPlane -> Ordering
+  verticalSideTest q h = (q^.dCoord) `compare` evalAt (projectPoint q :: Point (d-1) r) h
 
 --------------------------------------------------------------------------------
 -- * Functions on Hyperplanes
@@ -373,3 +395,5 @@ instance (NonVerticalHyperPlane_  hyperPlane d r)
   {-# INLINE evalAt #-}
   hyperPlaneCoefficients = core.hyperPlaneCoefficients
   {-# INLINE hyperPlaneCoefficients #-}
+  verticalSideTest q = verticalSideTest q . view core
+  {-# INLINE verticalSideTest #-}

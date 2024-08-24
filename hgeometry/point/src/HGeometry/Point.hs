@@ -30,6 +30,7 @@ module HGeometry.Point
 
   , coord
   , xCoord, yCoord, zCoord, wCoord
+  , dCoord
 
   , projectPoint
 

@@ -163,37 +163,3 @@ testIpe inFp outFp = do
     goldenWith [osp|data/test-with-ipe/VoronoiDiagram/|]
                (ipeContentGolden { name = outFp })
                out
-
-
-
-
-
--- testIpe      :: OsPath -> IO [IpeObject R]
--- testIpe inFp = do inFp' <- getDataFileName inFp
---                   (points :: [Point 2 R :+ _]) <- readAllFrom inFp'
-
---                   print $ (Point3 183.02716 93.61106 8869.99979 :: Point 3 R)
---                           `onSideTest`
---                           (NonVerticalHyperPlane (Vector3 282 426 (-65250)))
-
-
---                   -- mapM_ print points
---                   -- mapM_ (print . liftPointToPlane . view core) points
---                   -- let hs = liftPointToPlane . view core <$> points
---                   -- mapM_ (print . asVertex hs) $ uniqueTriplets hs
-
---                   let vv = voronoiVertices $ (view core) <$> points
---                   let vd = voronoiDiagram $ (view core) <$> points
---                   print $ vd
-
-
---                   -- print "vertices"
---                   -- mapM_ print vs
---                   pure $ [ iO' points
---                          , iO' vd
---                          ] <> [ iO'' v $ attr SStroke red | v <- vv ]
-
-
---                     -- $ (map iO' points)
---                     --      -- <> [iO' vd]
---                     -- <>

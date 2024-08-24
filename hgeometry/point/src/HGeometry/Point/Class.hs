@@ -22,6 +22,7 @@ module HGeometry.Point.Class
   , pointFromList
   , coord
   , xCoord, yCoord, zCoord, wCoord
+  , dCoord
 
   -- , projectPoint
   -- , PointFor
@@ -317,6 +318,17 @@ zCoord = coord @3
 wCoord :: (4 <= d, Point_ point d r) => IndexedLens' Int point r
 wCoord = coord @4
 {-# INLINABLE wCoord #-}
+
+-- | Shorthand to access the last coordinate
+--
+-- >>> (Point2 1 2 :: Point 2 Int) ^. dCoord
+-- 2
+-- >>> (Point4 1 2 3 4 :: Point 4 Int) ^. dCoord
+-- 4
+-- >>> (Point4 1 2 3 4 :: Point 4 Int) & dCoord %~ (+1)
+-- Point4 1 2 3 5
+dCoord :: forall point d r. (1 <= d, Point_ point d r) => IndexedLens' Int point r
+dCoord = coord @d
 
 --------------------------------------------------------------------------------
 
