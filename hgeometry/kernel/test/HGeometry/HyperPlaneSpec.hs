@@ -89,15 +89,24 @@ spec = describe "HyperPlane Tests" $ do
            asNonVerticalHyperPlane (HyperPlane2 0 (-1) 0) `shouldBe`
              Nothing
 
+--------------------------------------------------------------------------------
          prop "normal vector ok" $
            \(p :: Point 3 R) (n :: Vector 3 R) ->
              (quadrance n > 0) ==>
-               normalVector (fromPointAndNormal p n :: HyperPlane 3 R) === n
+               normalVector (fromPointAndNormal p n :: HyperPlane 3 R) `isScalarMultipleOf` n
 
          prop "normal vector ok for non-vertical" $
            \(p :: Point 3 R) (n :: Vector 3 R) ->
              (quadrance n > 0 && n^.zComponent /= 0) ==>
-               normalVector (fromPointAndNormal p n :: NonVerticalHyperPlane 3 R) === n
+               normalVector (fromPointAndNormal p n :: NonVerticalHyperPlane 3 R) `isScalarMultipleOf` n
+
+-- Note that the normal vector we start with and the one we get back from 'normalVector'
+--do not have to be identical: Take an arbitrary hyperplane, and consider its two normal
+--vectors , and pick the negative one (i.e. pointing into the negative halfspace.; then
+--build the plane using this negative normal. We then want the 'normalVector' function to
+--return the positive normal vector instead.
+--------------------------------------------------------------------------------
+
 
          prop "onside test non-vertical hyperplane2 (i.e. lines)" $
            \(h :: HyperPlane 2 R) (q :: Point 2 R) ->
