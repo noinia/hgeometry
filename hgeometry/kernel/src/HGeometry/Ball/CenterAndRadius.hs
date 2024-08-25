@@ -24,10 +24,10 @@ module HGeometry.Ball.CenterAndRadius
   , IntersectionOf(..)
   ) where
 
-import Prelude hiding (sqrt)
 import Control.Lens
 import HGeometry.Ball.Class
 import HGeometry.HalfLine
+import HGeometry.HalfSpace
 import HGeometry.HyperPlane
 import HGeometry.Intersection
 import HGeometry.Line.PointAndVector
@@ -36,6 +36,7 @@ import HGeometry.Number.Radical
 import HGeometry.Point
 import HGeometry.Properties (NumType, Dimension)
 import HGeometry.Vector
+import Prelude hiding (sqrt)
 
 --------------------------------------------------------------------------------
 
@@ -158,18 +159,43 @@ instance ( Point_ point d r
 
 ----------------------------------------
 
-data instance IntersectionOf (ClosedLineSegment point) (Ball point) =
-    LineSegment_x_Ball_Point   point
-  | LineSegment_x_Ball_Segment (ClosedLineSegment point)
+type instance Intersection (HalfLine point') (Ball point) =
+  Maybe (IntersectionOf (LinePV (Dimension point) (NumType point)) (Ball point))
 
-deriving instance (Show point, Show (ClosedLineSegment point))
-               => Show (IntersectionOf (ClosedLineSegment point) (Ball point))
-deriving instance (Eq point, Eq (ClosedLineSegment point))
-               => Eq (IntersectionOf (ClosedLineSegment point) (Ball point))
+instance ( Point_ point d r, Point_ point' d r
+         , Ord r, Fractional r, Radical r
+         , Has_ Metric_ d r
+         , MkHyperPlaneConstraints d r
+         , HasSquaredEuclideanDistance point'
+         ) => (HalfLine point') `IsIntersectableWith` (Ball point) where
+  intersect (HalfLine p v) b = intersect (LinePV p' v) b >>= \case
+      Line_x_Ball_Point q
+        | q `intersects` h    -> Just $ Line_x_Ball_Point q
+        | otherwise           -> Nothing
+      Line_x_Ball_Segment seg@(ClosedLineSegment a c) ->
+        case (a `intersects` h, c `intersects` h) of
+          (False,False) -> Nothing
+          (False,True)  -> Just $ Line_x_Ball_Segment (ClosedLineSegment p' c)
+          (True,False)  -> Just $ Line_x_Ball_Segment (ClosedLineSegment a  p')
+          (True,True)   -> Just $ Line_x_Ball_Segment seg
+    where
+      h :: HalfSpace d r
+      h  = HalfSpace Positive (fromPointAndNormal p' v)
+      p' = p^.asPoint
+
+type instance Intersection (ClosedLineSegment point') (Ball point) =
+  Maybe (IntersectionOf (LinePV (Dimension point) (NumType point)) (Ball point))
+
+-- data instance IntersectionOf (ClosedLineSegment point) (Ball point) =
+--     LineSegment_x_Ball_Point   point
+--   | LineSegment_x_Ball_Segment (ClosedLineSegment point)
+
+-- deriving instance (Show point, Show (ClosedLineSegment point))
+--                => Show (IntersectionOf (ClosedLineSegment point) (Ball point))
+-- deriving instance (Eq point, Eq (ClosedLineSegment point))
+--                => Eq (IntersectionOf (ClosedLineSegment point) (Ball point))
 
 
-type instance Intersection (ClosedLineSegment point) (Ball point) =
-  Maybe (IntersectionOf (ClosedLineSegment point) (Ball point))
 
 
 
