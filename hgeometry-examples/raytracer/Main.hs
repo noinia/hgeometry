@@ -80,6 +80,12 @@ outputDimensions = Vector2 outputWidth (ceiling $ fromIntegral outputWidth / asp
 refreshRate :: Double
 refreshRate = 10
 
+
+viewportDims :: Vector 2 Double
+viewportDims = let Vector2 w h = fromIntegral <$> outputDimensions
+                   desiredHeight = 2
+               in Vector2 desiredHeight (desiredHeight * (h/w))
+
 --------------------------------------------------------------------------------
 
 amountOfWork (Vector2 w h) = w * h

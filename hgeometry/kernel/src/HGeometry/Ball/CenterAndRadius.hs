@@ -19,15 +19,20 @@ module HGeometry.Ball.CenterAndRadius
 
   , _BallSphere
   , _DiskCircle
+
+
+  , IntersectionOf(..)
   ) where
 
-
+import Prelude hiding (sqrt)
 import Control.Lens
 import HGeometry.Ball.Class
 import HGeometry.HalfLine
 import HGeometry.HyperPlane
 import HGeometry.Intersection
+import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment
+import HGeometry.Number.Radical
 import HGeometry.Point
 import HGeometry.Properties (NumType, Dimension)
 import HGeometry.Vector
@@ -51,6 +56,7 @@ instance Point_ point (Dimension point) (NumType point) => Ball_ (Ball point) po
   fromCenterAndSquaredRadius = Ball
 
 --------------------------------------------------------------------------------
+-- * Point in ball
 
 type instance Intersection (Point d r) (Ball point) = Maybe (Point d r)
 
@@ -67,22 +73,18 @@ instance ( Point_ point d r
   intersect q b | q `intersects` b = Just q
                 | otherwise        = Nothing
 
--- type instance Intersection (Line point) (Ball point) =
---   Maybe (IntersectionOf (LineSegment point) (Ball point))
 
-data instance IntersectionOf (ClosedLineSegment point) (Ball point) =
-    Line_x_Ball_Point   point
-  | Line_x_Ball_Segment (ClosedLineSegment point)
+--------------------------------------------------------------------------------
+-- * Testing if a line/ ray /linesegment intersects a ball
 
-deriving instance (Show point, Show (ClosedLineSegment point))
-               => Show (IntersectionOf (ClosedLineSegment point) (Ball point))
-deriving instance (Eq point, Eq (ClosedLineSegment point))
-               => Eq (IntersectionOf (ClosedLineSegment point) (Ball point))
+-- essentially this is all just computing  the squared euclidean distance
+-- between the object and the center, and testing if it is at most r
 
-
-type instance Intersection (ClosedLineSegment point) (Ball point) =
-  Maybe (IntersectionOf (ClosedLineSegment point) (Ball point))
-
+instance ( Point_ point d r
+         , Ord r, Fractional r
+         , Has_ Metric_ d r
+         ) => (LinePV d r) `HasIntersectionWith` (Ball point) where
+  intersects l (Ball c r) = squaredEuclideanDistTo c l <= r
 
 instance ( Point_ point d r, Point_ point' d r
          , Ord r, Fractional r
@@ -99,6 +101,82 @@ instance ( Point_ point d r, Point_ point' d r
          , MkHyperPlaneConstraints d r
          ) => (HalfLine point') `HasIntersectionWith` (Ball point) where
   intersects hl (Ball c r) = squaredEuclideanDistTo c hl <= r
+
+----------------------------------------
+
+type instance Intersection (LinePV d r) (Ball point) =
+  Maybe (IntersectionOf (LinePV d r) (Ball point))
+
+data instance IntersectionOf (LinePV d r) (Ball point) =
+    Line_x_Ball_Point   (Point d r)
+  | Line_x_Ball_Segment (ClosedLineSegment (Point d r))
+
+deriving instance (Show r, Has_ Additive_ d r) => Show (IntersectionOf (LinePV d r) (Ball point))
+deriving instance (Eq r, Eq (Vector d r))      => Eq   (IntersectionOf (LinePV d r) (Ball point))
+
+
+instance ( Point_ point d r
+         , Ord r, Fractional r, Radical r
+         , Has_ Metric_ d r
+         ) => (LinePV d r) `IsIntersectableWith` (Ball point) where
+  intersect (LinePV p v) (Ball c' r) = case discr `compare` 0 of
+      LT -> Nothing
+      EQ -> Just $ Line_x_Ball_Point q0 -- line touches in q
+      GT -> Just $ Line_x_Ball_Segment (ClosedLineSegment q1 q2)
+    where
+      -- main idea: let q = p + \lambda v be an intersection point, we also have
+      -- squaredEuclideanDist q c' == squaredRadius (=r) this yields some quadratic
+      -- equation in \lambda, which we just solve using the ABC formula. In particular, we have
+      --
+      -- (sum_i=1^d (p+\lambda v_i - c'_i)^2 = r)
+      -- (sum_i=1^d (\lambda v_i + (p_i- c'_i))^2  - r = 0 )
+      -- (sum_i=1^d ((\lambda v_i)^2 + 2\lambda v_i(p_i- c'_i) + (p_i- c'_i)^2)  - r = 0 )
+      -- (sum_i=1^d (v_i^2\lambda^2 + 2v_i(p_i- c'_i)\lambda  + (p_i- c'_i)^2)  - r = 0 )
+      -- (lambda^2 sum_i=1^d v_i^2\ + \lambda sum_i=1^d 2v_i(p_i- c'_i)  + sum_i=1^d (p_i- c'_i)^2)  - r = 0 )
+
+
+      a = v `dot` v -- sum_i v_i^2
+      b = 2 * (v `dot` u) -- sum_i v_i(p_i-c_i)
+      c = (u `dot` u) - r -- sum_i (p_i-c_i)^2  - radius^2
+
+      u = p .-. (c'^.asPoint) -- helper
+
+      discr  = b^2 - 4*a*c
+      discr' = sqrt discr
+      da = 2*a
+
+      lambda1 = ((negate discr') - b) / da -- the two solutions
+      lambda2 = (discr'          - b) / da --
+      -- note: v must have non-zero length; and thus a (and therefore da) are non-zero.
+
+      q1 = p .+^ (lambda1 *^ v)
+      q2 = p .+^ (lambda2 *^ v)
+
+      -- if the discr is zer0 there is only one solution:
+      lambda0 = (negate b) / da
+      q0 = p .+^ (lambda0 *^ v)
+
+----------------------------------------
+
+data instance IntersectionOf (ClosedLineSegment point) (Ball point) =
+    LineSegment_x_Ball_Point   point
+  | LineSegment_x_Ball_Segment (ClosedLineSegment point)
+
+deriving instance (Show point, Show (ClosedLineSegment point))
+               => Show (IntersectionOf (ClosedLineSegment point) (Ball point))
+deriving instance (Eq point, Eq (ClosedLineSegment point))
+               => Eq (IntersectionOf (ClosedLineSegment point) (Ball point))
+
+
+type instance Intersection (ClosedLineSegment point) (Ball point) =
+  Maybe (IntersectionOf (ClosedLineSegment point) (Ball point))
+
+
+
+
+
+
+
 
 --------------------------------------------------------------------------------
 
