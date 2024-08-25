@@ -35,22 +35,22 @@ spec = do
 
 
       it "closest point to ray" $
-        let ray      = HalfLine (Point3 0 (1/2) 10000) (Vector3 0 0 (-1))
+        let ray      = HalfLine (Point3 (0 :: R) (1/2) 10000) (Vector3 0 0 (-1))
         in pointClosestTo (origin :: Point 3 R) ray `shouldBe` (Point3 0 (1/2) 0)
 
       it "closest point to line" $
-        let ray      = LinePV (Point3 0 (1/2) 10000) (Vector3 0 0 (-1))
+        let ray      = LinePV (Point3 (0 :: R) (1/2) 10000) (Vector3 0 0 (-1))
         in pointClosestTo (origin :: Point 3 R) ray `shouldBe` (Point3 0 (1/2) 0)
 
       it "proper halfspace" $
-        let p = Point3 0 (1/2) 10000
+        let p = Point3 0 (1/2) 10000  :: Point 3 R
             v = Vector3 0 0 (-1)
             h = HalfSpace Positive (fromPointAndNormal p v) :: HalfSpace 3 R
         in (h^.boundingHyperPlane.to normalVector) `shouldBe` v
 
 
       it "ball intersects ray" $
-        let ray      = HalfLine (Point3 0 (1/2) 10000) (Vector3 0 0 (-1))
+        let ray      = HalfLine (Point3 (0 :: R) (1/2) 10000) (Vector3 0 0 (-1))
         in (ray `intersects` (unitBall :: Ball (Point 3 R))) `shouldBe`  True
 
 
