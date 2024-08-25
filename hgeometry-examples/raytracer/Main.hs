@@ -16,6 +16,7 @@ import           HGeometry.Vector
 import           Paths_hgeometry_examples
 import qualified System.File.OsPath as File
 import           System.OsPath
+import           System.ProgressBar
 
 --------------------------------------------------------------------------------
 
@@ -40,27 +41,56 @@ ballColor r (b :+ c)
 shootRay   :: Ray -> Scene -> Color
 shootRay r = fromMaybe backgroundColor . getFirst . foldMap (First . ballColor r)
 
-render                     :: Vector 2 Int -> Scene -> Image PixelRGBA8
-render (Vector2 w h) scene = generateImage f w h
+renderPixel                         :: Vector 2 Int -> Scene -> Int -> Int -> PixelRGBA8
+renderPixel (Vector2 w h) scene x y = shootRay ray scene
   where
-    f     :: Int -> Int -> PixelRGBA8
-    f x y = let ray = rayThrough x y
-            in shootRay ray scene
+    ray = rayThrough x y
 
-    clamped     :: Int -> Int -> Word8
-    clamped x m = fromIntegral $ (255 * x) `div` m
+    -- clamped     :: Int -> Int -> Word8
+    -- clamped x m = fromIntegral $ (255 * x) `div` m
+
+renderWithProgress :: IO () -> Vector 2 Int -> Scene -> IO (Image PixelRGBA8)
+renderWithProgress reportProgress dims@(Vector2 w h) scene =
+    withImage w h $ \x y -> let !pix = renderPixel dims scene x y
+                            in pix <$ reportProgress
+
+--------------------------------------------------------------------------------
+-- * Settings
 
 backgroundColor :: PixelRGBA8
 backgroundColor = PixelRGBA8 maxBound maxBound maxBound 0
 
 theScene :: Scene
-theScene = [ Ball (Point3 128 128 128) 20 :+ PixelRGBA8 200 0 0 255
+theScene = [ Ball (Point3 128 128 128) 50 :+ PixelRGBA8 200 0 0 255
            ]
+
 
 cameraPos = Point3 0 0 10000
 
 
+aspectRatio :: Rational
+aspectRatio = 16 / 9
+
+outputWidth :: Int
+outputWidth = 400
+
+outputDimensions :: Vector 2 Int
+outputDimensions = Vector2 outputWidth (ceiling $ fromIntegral outputWidth / aspectRatio)
+
+refreshRate :: Double
+refreshRate = 10
+
+--------------------------------------------------------------------------------
+
+amountOfWork (Vector2 w h) = w * h
+
 main :: IO ()
 main = do
-  let bs = encodePng $ render (Vector2 640 480) theScene
+  let initialProgress = Progress 0 (amountOfWork outputDimensions) ()
+  progressBar <- newProgressBar defStyle refreshRate initialProgress
+
+  imageData <- renderWithProgress (incProgress progressBar 1)
+                                  outputDimensions theScene
+
+  let bs = encodePng imageData
   File.writeFile [osp|foo.png|] bs
