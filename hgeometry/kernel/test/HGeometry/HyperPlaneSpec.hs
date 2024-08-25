@@ -100,11 +100,37 @@ spec = describe "HyperPlane Tests" $ do
              (quadrance n > 0 && n^.zComponent /= 0) ==>
                normalVector (fromPointAndNormal p n :: NonVerticalHyperPlane 3 R) `isScalarMultipleOf` n
 
+
+
+
+
+
 -- Note that the normal vector we start with and the one we get back from 'normalVector'
 --do not have to be identical: Take an arbitrary hyperplane, and consider its two normal
 --vectors , and pick the negative one (i.e. pointing into the negative halfspace.; then
 --build the plane using this negative normal. We then want the 'normalVector' function to
 --return the positive normal vector instead.
+--------------------------------------------------------------------------------
+         prop "fromPointAnNormal and sideTest consistent for HyperPlane " $
+           \(p :: Point 2 R) n ->
+             allOf components (>0) n ==>
+             ((p .+^ n) `onSideTest` (fromPointAndNormal p n :: HyperPlane 2 R))
+             `shouldBe` GT
+         prop "fromPointAnNormal and sideTest consistent for NonVerticalHyperPlane " $
+           \(p :: Point 2 R) n ->
+             allOf components (>0) n ==>
+             ((p .+^ n) `onSideTest` (fromPointAndNormal p n :: NonVerticalHyperPlane 2 R))
+             `shouldBe` GT
+         prop "fromPointAnNormal and sideTest consistent for LineEQ" $
+           \(p :: Point 2 R) n ->
+             allOf components (>0) n ==>
+             ((p .+^ n) `onSideTest` (fromPointAndNormal p n :: LineEQ R))
+             `shouldBe` GT
+         prop "normalVector and fromPointAndNormal consistent (HyperPlane 2 R)" $
+           \(p :: Point 2 R) n ->
+             allOf components (>0) n ==>
+             normalVector (fromPointAndNormal p n :: HyperPlane 2 R) `shouldBe` n
+
 --------------------------------------------------------------------------------
 
          prop "onside test NonVertical Hyperplanes i.e. lines) consitent " $
@@ -162,41 +188,22 @@ spec = describe "HyperPlane Tests" $ do
                                      ))
              `shouldBe` True
 
-         prop "fromPointAnNormal and sideTest consistent for HyperPlane " $
-           \(p :: Point 2 R) n ->
-             allOf components (>0) n ==>
-             ((p .+^ n) `onSideTest` (fromPointAndNormal p n :: HyperPlane 2 R))
-             `shouldBe` GT
-         prop "fromPointAnNormal and sideTest consistent for NonVerticalHyperPlane " $
-           \(p :: Point 2 R) n ->
-             allOf components (>0) n ==>
-             ((p .+^ n) `onSideTest` (fromPointAndNormal p n :: NonVerticalHyperPlane 2 R))
-             `shouldBe` GT
-         prop "fromPointAnNormal and sideTest consistent for LineEQ" $
-           \(p :: Point 2 R) n ->
-             allOf components (>0) n ==>
-             ((p .+^ n) `onSideTest` (fromPointAndNormal p n :: LineEQ R))
-             `shouldBe` GT
-         prop "normalVector and fromPointAndNormal consistent (HyperPlane 2 R)" $
-           \(p :: Point 2 R) n ->
-             allOf components (>0) n ==>
-             normalVector (fromPointAndNormal p n :: HyperPlane 2 R) `shouldBe` n
 
-         prop "nonVertical sidetest means above (NonVHyperplane 2)" $
+         prop "nonVertical verticalsidetest means above (NonVHyperplane 2)" $
            \(q :: Point 2 R) (h :: NonVerticalHyperPlane 2 R) ->
              let y  = evalAt (projectPoint q) h
                  q' = q&yCoord .~ y+1
-             in (q' `onSideTest` h) `shouldBe` GT
-         prop "nonVertical sidetest means above (NonVHyperplane 3)" $
+             in (q' `verticalSideTest` h) `shouldBe` GT
+         prop "nonVertical verticalsidetest means above (NonVHyperplane 3)" $
            \(q :: Point 3 R) (h :: NonVerticalHyperPlane 3 R) ->
              let z  = evalAt (projectPoint q) h
                  q' = q&zCoord .~ z+1
-             in (q' `onSideTest` h) `shouldBe` GT
-         prop "nonVertical sidetest means above LineEQ " $
+             in (q' `verticalSideTest` h) `shouldBe` GT
+         prop "nonVertical verticalsidetest means above LineEQ " $
            \(q :: Point 2 R) (h :: LineEQ R) ->
              let y  = evalAt (projectPoint q) h
                  q' = q&yCoord .~ y+1
-             in (q' `onSideTest` h) `shouldBe` GT
+             in (q' `verticalSideTest` h) `shouldBe` GT
 
 
          -- prop "intersect nonvertical conistent" $

@@ -167,29 +167,29 @@ class ( NumType hyperPlane ~ r
   -- >>> Point2 1 3 `onSideTest` myLineAgain
   -- EQ
   -- >>> Point2 1 5 `onSideTest` myLineAgain
-  -- LT
+  -- GT
   -- >>> Point2 4 5 `onSideTest` myLineAgain
-  -- GT
+  -- LT
   -- >>> Point2 0 0 `onSideTest` HyperPlane2 1 (-1) 0
-  -- GT
+  -- LT
   --
   -- >>> Point2 1 1 `onSideTest` myVerticalLine
-  -- GT
-  -- >>> Point2 10 1 `onSideTest` myVerticalLine
   -- LT
+  -- >>> Point2 10 1 `onSideTest` myVerticalLine
+  -- GT
   -- >>> Point2 5 20 `onSideTest` myVerticalLine
   -- EQ
   --
   -- >>> Point2 0 1 `onSideTest` myOtherLine
-  -- GT
+  -- LT
   -- >>> Point2 0 (-2) `onSideTest` myOtherLine
   -- EQ
   -- >>> Point2 1 (-3.5) `onSideTest` myOtherLine
   -- EQ
   -- >>> Point2 1 (-4) `onSideTest` myOtherLine
-  -- LT
+  -- GT
   onSideTest     :: (Point_ point d r, Ord r, Num r) => point -> hyperPlane -> Ordering
-  onSideTest q h = evalHyperPlaneEquation h q `compare` 0
+  onSideTest q h = 0 `compare` evalHyperPlaneEquation h q
   {-# INLINE onSideTest #-}
 
 -- | Produce a point that lies on the hyperplane. No gurantees are given about which point
