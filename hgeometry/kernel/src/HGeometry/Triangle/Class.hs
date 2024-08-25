@@ -17,10 +17,9 @@ module HGeometry.Triangle.Class
   ) where
 
 import Control.Lens
-import Data.Ord
 import HGeometry.HalfSpace
-import HGeometry.HyperPlane
 import HGeometry.Point
+import HGeometry.Line.PointAndVector
 import HGeometry.Properties (NumType, Dimension)
 import HGeometry.Vector
 
@@ -87,22 +86,19 @@ toCounterClockwiseTriangle t@(Triangle_ a b c)
 --
 -- >>> let t = Triangle origin (Point2 0 (-1)) (Point2 (-1) 0) :: Triangle (Point 2 Int)
 -- >>> mapM_ print $ intersectingHalfPlanes t
--- HalfSpace Negative (HyperPlane [0,0,1])
--- HalfSpace Positive (HyperPlane [-1,-1,-1])
--- HalfSpace Negative (HyperPlane [0,-1,0])
+-- HalfSpace Positive (LinePV (Point2 0 0) (Vector2 (-1) 0))
+-- HalfSpace Positive (LinePV (Point2 (-1) 0) (Vector2 1 (-1)))
+-- HalfSpace Positive (LinePV (Point2 0 (-1)) (Vector2 0 1))
 intersectingHalfPlanes :: ( Triangle_ triangle point
                           , Point_ point 2 r
                           , Num r, Ord r
                           )
                        => triangle
-                       -> Vector 3 (HalfSpace 2 r)
+                       -> Vector 3 (HalfSpaceF (LinePV 2 r))
 intersectingHalfPlanes (toCounterClockwiseTriangle -> Triangle_ u v w) =
     Vector3 (leftPlane u v) (leftPlane v w) (leftPlane w u)
   where
-    leftPlane p q = let dir = if (p^.xCoord, Down $ p^.yCoord) <= (q^.xCoord, Down $ q^.yCoord)
-                                 -- for verical planes, the left side counts as below
-                              then Positive else Negative
-                    in HalfSpace dir . hyperPlaneThrough $ Vector2 p q
+    leftPlane p q = leftHalfPlane $ LinePV (p^.asPoint) (q .-. p)
 
 
 -- | Given a point q and a triangle, q inside the triangle, get the baricentric

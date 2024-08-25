@@ -97,5 +97,3 @@ upperHalfSpaceOf                  :: (Ord r, Num r, Point_ point 3 r)
 upperHalfSpaceOf (Triangle p q r) = HalfSpace Positive h
   where
     h = hyperPlaneThrough $ Vector3 p q r
-    -- c = p&zCoord -~ 1
-    -- s  = if c `onSideTest` h /= GT then Positive else Negative

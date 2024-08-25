@@ -64,14 +64,10 @@ spec = describe "intersection tests" $ do
           it "intersecting halfspaces" $
             let t = Triangle origin (Point2 0 (-1)) (Point2 (-1) 0) :: Triangle (Point 2 Int)
             in (show <$> intersectingHalfPlanes t) `shouldBe`
-               (Vector3 "HalfSpace Negative (HyperPlane [0,0,1])"
-                        "HalfSpace Positive (HyperPlane [-1,-1,-1])"
-                        "HalfSpace Negative (HyperPlane [0,-1,0])"
+               (Vector3 "HalfSpace Positive (LinePV (Point2 0 0) (Vector2 (-1) 0))"
+                        "HalfSpace Positive (LinePV (Point2 (-1) 0) (Vector2 1 (-1)))"
+                        "HalfSpace Positive (LinePV (Point2 0 (-1)) (Vector2 0 1))"
                )
--- (Vector2 ))
-
--- undefined undefined undefined
---                )
 
 --------------------------------------------------------------------------------
 

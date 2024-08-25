@@ -48,7 +48,7 @@ asVertex planes defs = case definers defs of
 
 -- | test if v lies below (or on) all the given planes
 belowAll   :: (Plane_ plane r, Ord r, Num r, Foldable f) => Point 3 r -> f plane -> Bool
-belowAll v = all (\h -> onSideTest v h /= GT)
+belowAll v = all (\h -> verticalSideTest v h /= GT)
 {-# INLINE belowAll #-}
 
 

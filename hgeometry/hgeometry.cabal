@@ -340,6 +340,8 @@ library
     exposed-modules:
         HGeometry
 
+        HGeometry.Graphics.Camera
+
         -- HGeometry.DelaunayTriangulation
 
         HGeometry.PlaneGraph
@@ -715,6 +717,7 @@ test-suite hspec
       RangeTreeSpec
       VerticalRayShootingSpec
       LineSegment.BentheyOttmanNeighbourSpec
+      Graphics.CameraSpec
 
   hs-source-dirs: test
   build-depends:
@@ -751,6 +754,8 @@ test-suite with-ipe-hspec
       HalfPlane.CommonIntersectionSpec
       Line.LowerEnvelopeSpec
       Paths_hgeometry
+      BallSpec
+
   autogen-modules:
       Paths_hgeometry
   hs-source-dirs:   test-with-ipe/test

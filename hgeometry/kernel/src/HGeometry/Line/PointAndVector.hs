@@ -17,9 +17,13 @@ module HGeometry.Line.PointAndVector
   , HasSupportingLine(..)
   , fromLinearFunction
   , toLinearFunction
+
+
   , SideTestUpDown(..), OnSideUpDownTest(..)
   , liesAbove, liesBelow
   , SideTest(..), onSide
+  , leftHalfPlane, rightHalfPlane
+
 
   , bisector
   , perpendicularTo, isPerpendicularTo
@@ -34,12 +38,14 @@ import           Data.Ord (comparing)
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
 import           HGeometry.Ext
+import           HGeometry.Sign
 import           HGeometry.HyperPlane.Class
 import           HGeometry.Intersection
 import           HGeometry.Line.Class
 import           HGeometry.Line.Intersection
 import           HGeometry.Line.LineEQ
 import           HGeometry.Point
+import           HGeometry.HalfSpace
 -- import           HGeometry.Point.EuclideanDistance
 -- import           HGeometry.Point.Orientation.Degenerate
 import           HGeometry.Properties (NumType, Dimension)
@@ -347,9 +353,8 @@ bisector p q = let v = q .-. p
                    h = view asPoint $ p .+^ (v ^/ 2)
                in perpendicularTo (LinePV h v)
 
--- | Given a line l with anchor point p and vector v, get the line
--- perpendicular to l that also goes through p. The resulting line m is
--- oriented such that v points into the left halfplane of m.
+-- | Given a line l with anchor point p and vector v, get the line m perpendicular to l
+-- that also goes through p. The line is oriented *into* the right halfplane of l.
 --
 -- >>> perpendicularTo $ LinePV (Point2 3 4) (Vector2 (-1) 2)
 -- LinePV (Point2 3 4) (Vector2 2 1)
@@ -392,6 +397,20 @@ cmpSlope :: forall r. (Num r, Ord r
 
 
 --------------------------------------------------------------------------------
+
+-- | Given the oriented line, computes the halfspace left of the line.
+leftHalfPlane   :: (Num r, Ord r) => LinePV 2 r -> HalfSpaceF (LinePV 2 r)
+leftHalfPlane l = HalfSpace sign l
+  where
+    sign = let (LinePV p v) = perpendicularTo l
+           in case onSideTest (p .+^ v) l of
+                LT -> Positive
+                _  -> Negative
+
+-- | Given the oriented line, computes the halfspace right of the line.
+rightHalfPlane   :: (Num r, Ord r) => LinePV 2 r -> HalfSpaceF (LinePV 2 r)
+rightHalfPlane l = let HalfSpace s _ = leftHalfPlane l
+                   in HalfSpace (flipSign s) l
 
 {-
 -- | Lines are transformable, via line segments

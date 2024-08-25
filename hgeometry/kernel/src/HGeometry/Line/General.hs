@@ -56,6 +56,8 @@ instance HyperPlane_ (VerticalOrLineEQ r) 2 r where
     VerticalLineThrough x -> Vector3 1 0 (-x)
     NonVertical l         -> hyperPlaneEquation l
   onHyperPlane = onLine
+
+  -- FIXME: remove this implementation; just use the default
   onSideTest q = \case
     VerticalLineThrough x -> (q^.xCoord) `compare` x
     NonVertical l         -> onSideTest q l

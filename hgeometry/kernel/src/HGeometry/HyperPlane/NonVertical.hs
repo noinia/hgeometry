@@ -113,12 +113,14 @@ asNonVerticalHyperPlane' e
 
 
 
-instance ( MkHyperPlaneConstraints d r
+instance ( MkHyperPlaneConstraints d r, Has_ Additive_ (d-1) r
          , 2 <= d
          ) => HyperPlane_ (NonVerticalHyperPlane d r) d r where
 
+  -- normalVector h = let a = suffix $ hyperPlaneEquation h
+  --                  in if signum (a^.last) == 1 then a else negated a
 
-instance ( MkHyperPlaneConstraints d r
+instance ( MkHyperPlaneConstraints d r, Has_ Additive_ (d-1) r
          , Fractional r, Eq r
          , 2 <= d
          ) => ConstructableHyperPlane_ (NonVerticalHyperPlane d r) d r where
@@ -134,7 +136,7 @@ instance ( MkHyperPlaneConstraints d r
   {-# INLINE hyperPlaneFromEquation #-}
 
 
-instance ( MkHyperPlaneConstraints d r, 1 + (d-1) ~ d
+instance ( MkHyperPlaneConstraints d r, 1 + (d-1) ~ d, Has_ Additive_ (d-1) r
          , Num r
          , 2 <= d
          ) => NonVerticalHyperPlane_ (NonVerticalHyperPlane d r) d r where

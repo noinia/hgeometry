@@ -60,7 +60,7 @@ verifyOnPlane h1 h2 h3 = case intersectionPoint (Three h1 h2 h3) of
 
 -- | copied from the module
 belowAll   :: (Plane_ plane r, Ord r, Num r, Foldable f) => Point 3 r -> f plane -> Bool
-belowAll v = all (\h -> onSideTest v h /= GT)
+belowAll v = all (\h -> verticalSideTest v h /= GT)
 
 myEnv = bruteForceLowerEnvelope inputs
 -- myTriEnv = triangulatedLowerEnvelope inputs

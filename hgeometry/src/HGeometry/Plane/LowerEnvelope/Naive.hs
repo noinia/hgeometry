@@ -68,7 +68,7 @@ asVertex hs t@(Three h1 h2 h3) = do v <- intersectionPoint t
 
 -- | test if v lies below (or on) all the planes in hs
 belowAll   :: (Plane_ plane r, Ord r, Num r, Foldable f) => Point 3 r -> f plane -> Bool
-belowAll v = all (\h -> onSideTest v h /= GT)
+belowAll v = all (\h -> verticalSideTest v h /= GT)
 {-# INLINE belowAll #-}
 
 
