@@ -6,20 +6,37 @@
 -- Maintainer  :  Frank Staals
 --------------------------------------------------------------------------------
 module HGeometry.Set.Util
-  ( splitOn, splitBy
+  ( toggle
+
+  , splitOn, splitBy
   , fromListBy
   , join
   , insertBy
   , deleteAllBy
   , queryBy
+  , toggleBy
   ) where
 
+import           Data.Functor.Identity
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Set.Internal as Internal
 import           HGeometry.Ord.Dynamic
 
 --------------------------------------------------------------------------------
+
+-- | Insert the element if it is present, or delete it otherwise.
+--
+-- >>> toggle 5 $ Set.fromList [1,2,3,6]
+-- fromList [1,2,3,5,6]
+-- >>> toggle 5 $ Set.fromList [1,2,3,5,6]
+-- fromList [1,2,3,6]
+toggle   :: Ord a => a -> Set a -> Set a
+toggle x = runIdentity . Set.alterF (Identity . not) x
+
+
+--------------------------------------------------------------------------------
+-- * Operations related to consistent orderings
 
 -- data S = S String deriving Show
 -- cmpS :: S -> S -> Ordering
@@ -104,6 +121,10 @@ insertBy cmp x s = withOrd cmp $ liftOrd1 (Set.insert $ O x) s
 deleteAllBy         :: (a -> a -> Ordering) -> a -> Set a -> Set a
 deleteAllBy cmp x s = withOrd cmp $ liftOrd1 (Set.delete $ O x) s
 
+-- | Flips an element by the given order
+toggleBy         :: (a -> a -> Ordering) -> a -> Set a -> Set a
+toggleBy cmp x s = withOrd cmp $ liftOrd1 (toggle $ O x) s
+
 -- | Run a query, eg. lookupGE, on the set with the given ordering.
 --
 -- Note: The 'Algorithms.BinarySearch.binarySearchIn' function may be
@@ -119,6 +140,8 @@ queryBy           :: (a -> a -> Ordering)
                   -> (forall b. Ord b => b -> Set b -> t b)
                   -> a -> Set a -> t a
 queryBy cmp fs q s = withOrd cmp $ liftOrd1 (fs $ O q) s
+
+
 
 
 
