@@ -23,6 +23,7 @@ module HGeometry.Point.Orientation.Degenerate(
   , insertIntoCyclicOrder
   ) where
 
+import           Control.Lens ((^.))
 import qualified Data.CircularList as C
 import qualified Data.List as L
 import qualified HGeometry.CircularList.Util as CU
@@ -68,12 +69,13 @@ instance Show CCW where
 -- >>> ccw (Point2 0 0.3) (Point2 1 0.6) (Point2 2 (0.9::Rational))
 -- CoLinear
 --
-ccw       :: (Point_ point 2 r, Num r, Ord r)
-          => point -> point -> point -> CCW
+ccw       :: (Point_ point 2 r, Point_ point' 2 r, Point_ point'' 2 r, Num r, Ord r)
+          => point -> point' -> point'' -> CCW
 ccw p q r = CCWWrap $ (ux*vy) `compare` (uy*vx)
      where
-       Vector2 ux uy = q .-. p
-       Vector2 vx vy = r .-. p
+       Vector2 ux uy = (q^.vector) ^-^ pv
+       Vector2 vx vy = (r^.vector) ^-^ pv
+       pv = p^.vector
 {-# INLINE ccw #-}
 
 -- | Given three points p q and r determine if the line from p to r via q is straight/colinear.
@@ -95,8 +97,8 @@ isCoLinear p q r = (ux * vy) == (uy * vx)
 -- p, the closest one to p is reported first.
 --
 -- \( O(n log n) \)
-sortAround   :: (Point_ point 2 r, Num r, Ord r)
-             => point -> [point] -> [point]
+sortAround   :: (Point_ center 2 r, Point_ point 2 r, Num r, Ord r)
+             => center -> [point] -> [point]
 sortAround c = L.sortBy (ccwCmpAround c <> cmpByDistanceTo c)
 {-# INLINE sortAround #-}
 
@@ -105,11 +107,12 @@ sortAround c = L.sortBy (ccwCmpAround c <> cmpByDistanceTo c)
 -- direction.
 --
 -- pre: the points p,q /= c
-ccwCmpAroundWith                              :: ( Point_ point 2 r
+ccwCmpAroundWith                              :: ( Point_ center 2 r
+                                                 , Point_ point 2 r
                                                  , Ord r, Num r
                                                  )
                                               => Vector 2 r
-                                              -> point
+                                              -> center
                                               -> point -> point
                                               -> Ordering
 ccwCmpAroundWith z@(Vector2 zx zy) c q r =
@@ -154,11 +157,11 @@ ccwCmpAroundWith z@(Vector2 zx zy) c q r =
 -- direction.
 --
 -- pre: the points p,q /= c
-cwCmpAroundWith     :: ( Point_ point 2 r
+cwCmpAroundWith     :: ( Point_ center 2 r, Point_ point 2 r
                        , Ord r, Num r
                        )
                     => Vector 2 r
-                    -> point
+                    -> center
                     -> point -> point
                     -> Ordering
 cwCmpAroundWith z c = flip (ccwCmpAroundWith z c)
@@ -166,15 +169,15 @@ cwCmpAroundWith z c = flip (ccwCmpAroundWith z c)
 
 -- | Counter clockwise ordering of the points around c. Points are ordered with
 -- respect to the positive x-axis.
-ccwCmpAround :: (Point_ point 2 r, Ord r, Num r)
-             => point -> point -> point -> Ordering
+ccwCmpAround :: (Point_ center 2 r, Point_ point 2 r, Ord r, Num r)
+             => center -> point -> point -> Ordering
 ccwCmpAround = ccwCmpAroundWith (Vector2 1 0)
 {-# INLINE ccwCmpAround #-}
 
 -- | Clockwise ordering of the points around c. Points are ordered with
 -- respect to the positive x-axis.
-cwCmpAround :: (Point_ point 2 r, Ord r, Num r)
-            => point -> point -> point -> Ordering
+cwCmpAround :: (Point_ center 2 r, Point_ point 2 r, Ord r, Num r)
+            => center -> point -> point -> Ordering
 cwCmpAround = cwCmpAroundWith (Vector2 1 0)
 {-# INLINE cwCmpAround #-}
 
@@ -182,8 +185,8 @@ cwCmpAround = cwCmpAroundWith (Vector2 1 0)
 -- Given a center c, a new point p, and a list of points ps, sorted in
 -- counter clockwise order around c. Insert p into the cyclic order. The focus
 -- of the returned cyclic list is the new point p.
-insertIntoCyclicOrder   :: (Point_ point 2 r, Ord r, Num r)
-                        => point -> point
+insertIntoCyclicOrder   :: (Point_ center 2 r, Point_ point 2 r, Ord r, Num r)
+                        => center -> point
                         -> C.CList point -> C.CList point
 insertIntoCyclicOrder c = CU.insertOrdBy (ccwCmpAround c <> cmpByDistanceTo c)
 {-# INLINE insertIntoCyclicOrder #-}

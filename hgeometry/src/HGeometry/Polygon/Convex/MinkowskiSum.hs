@@ -48,7 +48,7 @@ minkowskiSum p q = uncheckedFromCCWPoints $ merge' (theVertices p) (theVertices 
     v .+. w = v .+^ (w^.vector) :+ w
 
     cmpAngle v v' w w' =
-      ccwCmpAround origin (Point $ v' .-. v) (Point $ w' .-. w)
+      ccwCmpAround (origin :: Point 2 _) (Point $ v' .-. v) (Point $ w' .-. w)
 
     merge' vs0@(v:|vs1) ws0@(w:|ws1) = go vs1 ws1
       where

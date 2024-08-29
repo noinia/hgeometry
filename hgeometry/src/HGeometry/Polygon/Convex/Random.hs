@@ -91,7 +91,7 @@ randomConvex                 :: (MonadState g m, RandomGen g)
 randomConvex n _vMax | n < 3 =
   error "HGeometry.Polygon.Convex.randomConvex: At least 3 edges are required."
 randomConvex n vMax         = do
-  (v:|vs) <- NonEmpty.fromList . sortAround origin <$> randomEdges n vMax
+  (v:|vs) <- NonEmpty.fromList . sortAround (origin :: Point 2 _) <$> randomEdges n vMax
   let theVertices = over coordinates ((/ realToFrac vMax) . realToFrac)
                  <$> NonEmpty.scanl (\p u -> p .+^ (u^.vector)) v vs
       pRational = uncheckedFromCCWPoints theVertices

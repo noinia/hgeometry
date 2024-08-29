@@ -29,9 +29,9 @@ import           HGeometry.Vector
 -- * Distances
 
 -- | Squared Euclidean distance between two points
-squaredEuclideanDist     :: (Num r, Point_ point d r, Metric_ (Vector d r) d r)
-                         => point -> point -> r
-squaredEuclideanDist p q = quadrance $ p .-. q
+squaredEuclideanDist     :: (Num r, Point_ point d r, Point_ point' d r, Metric_ (Vector d r) d r)
+                         => point -> point' -> r
+squaredEuclideanDist p q = quadrance $ (p^.vector) ^-^ (q^.vector)
 {-# INLINE squaredEuclideanDist #-}
 
 -- | Euclidean distance between two points
@@ -41,8 +41,10 @@ euclideanDist p q = Radical.sqrt $ squaredEuclideanDist p q
 {-# INLINE euclideanDist #-}
 
 -- | Compare two points by their distance to the first argument
-cmpByDistanceTo   :: (Ord r, Num r, Point_ point d r, Metric_ (Vector d r) d r)
-                  => point -> point -> point -> Ordering
+cmpByDistanceTo   :: ( Ord r, Num r, Point_ point d r, Point_ center d r
+                     , Metric_ (Vector d r) d r
+                     )
+                  => center -> point -> point -> Ordering
 cmpByDistanceTo c = comparing (squaredEuclideanDist c)
 {-# INLINE cmpByDistanceTo #-}
 
