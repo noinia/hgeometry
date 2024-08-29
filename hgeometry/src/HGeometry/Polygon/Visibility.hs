@@ -1,4 +1,4 @@
-{-# LANGUAGE PartialTypeSignatures #-}
+{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Polygon.Visibility
@@ -15,13 +15,19 @@ module HGeometry.Polygon.Visibility
   ) where
 
 import           Control.Lens
+import           Data.Coerce
 import qualified Data.Foldable as F
+import           Data.Foldable1
 import qualified Data.List as List
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import           Data.Maybe (fromMaybe)
+import           Data.Ord (comparing)
+import           Data.Proxy
+import           Data.Reflection
 import qualified Data.Set as Set
-import           Data.Vector (Vector)
+import qualified Data.Vector as V
 import           HGeometry.Algorithms.DivideAndConquer (mergeSortedListsBy)
 import           HGeometry.Foldable.Sort
 import           HGeometry.HalfLine
@@ -38,12 +44,89 @@ import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Simple.Implementation
 import           HGeometry.Polygon.Simple.InPolygon
 import           HGeometry.Polygon.Simple.Type
+import           HGeometry.Properties
 import qualified HGeometry.Set.Util as Set
+import           HGeometry.Vector
+import           Unsafe.Coerce (unsafeCoerce)
 import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.Vector as Builder
 import           Witherable
 
 --------------------------------------------------------------------------------
+
+newtype CCWAround c point = CCWAround { unCCWAround :: point }
+  deriving newtype (Show,Eq)
+
+instance ( Reifies c (Point 2 r, Vector 2 r)
+         , Point_ point 2 r, Eq point, Ord r, Num r
+         ) => Ord (CCWAround c point) where
+  (CCWAround p) `compare` (CCWAround q) = let (c,v) = reflect (Proxy @c) in
+    ccwCmpAroundWith v c p q  <> cmpByDistanceTo c p q
+
+-- | Construct some ray shooting structure around the center point
+data VisibilityStructure center point segment = VisibilityStructure
+    { _centerPt         :: !center
+    , _initialDirection :: !(Vector 2 (NumType center))
+    , _theMap           :: !(Either segment
+                                    (Map.Map (CCWAround () (Point 2 (NumType center)))
+                                             (point, segment))
+                            )
+    -- ^ invariant: If there are no points we are at a Left, otherwise at a Right. So, the
+    -- Map in the right is never empty.
+    --
+    -- if there are no points, we hit some 'seg' stored in the Left at infinity.
+    --
+    -- Otherwise, the points p_1...,p_n in the map are ordered CCW around the center,
+    -- starting from the initial direction. For any angle theta in the angular interval
+    -- around the center defined by (p_i,p_{i+1}), a ray starting in the center going in
+    -- that direction would it segment first. For alpha = the angle corresponding to p_i,
+    -- p_i would be the closest point.
+    }
+
+-- instance Functor (VisibilityStructure center point) where
+-- instance Foldable (VisibilityStructure center point) where
+-- instance Traversable (VisibilityStructure center point) where
+--   VisibilityStructure ()
+
+
+--------------------------------------------------------------------------------
+
+coerceMap   :: Proxy c -> Map.Map (CCWAround c' point) seg -> Map.Map (CCWAround c point) seg
+coerceMap _ = unsafeCoerce
+-- we only use this to inject the center and direction into the Ord
+
+-- | Returns the predecessor point p_i and the segment that we hit (if there are any
+-- points), or just our segment at infinity otherwise.
+queryVisibilityStructure :: ( Point_ point 2 r
+                            , Point_ center 2 r
+                            , Point_ query 2 r
+                            , Num r, Ord r, Eq point
+                            )
+                         => query
+                         -> VisibilityStructure center point segment
+                         -> Either segment (point, segment)
+queryVisibilityStructure q (VisibilityStructure c v em) = em <&> \m ->
+  reify (c^.asPoint,v) $ \proxy -> case Map.lookupLE (CCWAround $ q^.asPoint)
+                                                     (coerceMap proxy m) of
+      Nothing  -> case Map.lookupMax m of
+                    Nothing -> error "queryVisibilityStructure. absurd"-- map is empty
+                    Just res -> snd res
+      Just res -> snd res
+
+--------------------------------------------------------------------------------
+
+
+
+-- | Computes the closest endpoint among all segments
+closestEndPoint  :: (LineSegment_ lineSegment point, Point_ point 2 r, Point_ center 2 r
+                    , Ord r, Num r, Foldable1 nonEmpty
+                    , HasSquaredEuclideanDistance point
+                    ) => center -> nonEmpty lineSegment -> point
+closestEndPoint c = minimumBy (cmpByDistanceTo c) . foldMap1 (\s -> s^.start :| [s^.end])
+
+
+
+
 
 -- visibilityGraph :: polygon ->
 
@@ -79,43 +162,47 @@ visiblePointsFrom p' obstacleEdges queryPoints = case F.toList queryPoints of
       queryEvents    = sortEvents $ foldMap toEvent  queryPoints
       endPointEvents = sortEvents $ foldMap toEvents obstacleEdges
 
-      sortEvents = F.toList . sortBy @Vector eventCmp . Builder.build @Vector
+      sortEvents = F.toList . sortBy @V.Vector eventCmp . Builder.build @V.Vector
 
       eventCmp e1 e2 = let a1 = eventPoint e1
                            a2 = eventPoint e2
                        in ccwCmpAroundWith v p a1 a2 <> cmpByDistanceTo  p a1 a2
 
       initial = Set.fromDistinctAscList . map snd . F.toList
-              . sortBy @Vector (cmpToRay ray)
+              . sortBy @V.Vector (cmpToRay ray)
               $ mapMaybe (\s -> (,s) <$> ray `intersect` s) obstacleEdges
 
 
+-- | Given the initial halfine, compare the two intersection points to order the segments.
 cmpToRay :: HalfLine (Point 2 r)
-         -> (HalfLineLineSegmentIntersection (Point 2 r) edge, edge )
-         -> (HalfLineLineSegmentIntersection (Point 2 r) edge, edge )
+         -> (HalfLineLineSegmentIntersection (Point 2 r) edge, edge)
+         -> (HalfLineLineSegmentIntersection (Point 2 r) edge, edge)
          -> Ordering
 cmpToRay ray@(HalfLine p _) (x1,_) (x2,_) = undefined
 
 
 
 -- | Handle an event in the sweep line algorithm
-handle                                    :: ( HasSupportingLine obstacleEdge
-                                             , LineSegment_ obstacleEdge point
+handle                                    :: ( HasSupportingLine edge
+                                             , LineSegment_ edge point
                                              , Point_ point 2 r, Ord r, Num r
-                                             , LinePV 2 r `IsIntersectableWith` obstacleEdge
-                                             , Intersection (LinePV 2 r) obstacleEdge ~
-                                               Maybe (LineLineSegmentIntersection obstacleEdge)
+                                             , LinePV 2 r `IsIntersectableWith` edge
+                                             , Intersection (LinePV 2 r) edge ~
+                                               Maybe (LineLineSegmentIntersection edge)
                                              )
                                           => Point 2 r
-                                          -> Event r queryPoint obstacleEdge
-                                          -> (Set.Set obstacleEdge, [queryPoint])
-                                          -> (Set.Set obstacleEdge, [queryPoint])
+                                          -> Event r queryPoint edge
+                                          -> (Set.Set edge, [queryPoint])
+                                          -> (Set.Set edge, [queryPoint])
 handle p evt acc@(statusStructure,output) = case evt of
     Query q' q
       | isVisible q' -> (statusStructure, q : output)
       | otherwise    -> acc
     EndPoint q' seg  -> let cmp = cmpSegs (LinePV q' (q' .-. p))
                         in (Set.toggleBy cmp seg statusStructure, output)
+    -- note that we are comparing against a line rather than a halfline, since we are
+    -- promissed the segments intersect the ray anyway. Furthermore, any segment
+    -- can intersect a line only once.
   where
     -- to test if q' is visible we find the closest segment in the status structre
     -- and test if p and q' lie on the same side of this segment.
@@ -143,7 +230,7 @@ toEvent      :: Point_ queryPoint 2 r => queryPoint -> Builder.Builder (Event r 
 toEvent q    = Builder.singleton $ Query (q^.asPoint) q
 
 -- | Turn a segment into two events (correspoinding to its endpoints)
-toEvents      :: (LineSegment_ lineSegment endPoint, Point_ endPoint 2 r)
+toEvents      :: (LineSegment_ lineSegment point, Point_ point 2 r)
               => lineSegment -> Builder.Builder (Event r queryPoint lineSegment)
 toEvents seg = Builder.singleton (EndPoint (seg^.start.asPoint) seg)
             <> Builder.singleton (EndPoint (seg^.end.asPoint)   seg)
@@ -153,25 +240,25 @@ toEvents seg = Builder.singleton (EndPoint (seg^.start.asPoint) seg)
 
 -- | Compare the the two obstacle edges by their distance along the line to p (the origin
 -- of the line.)
-cmpSegs                      :: ( LinePV 2 r `IsIntersectableWith` obstacleEdge
-                                , Intersection (LinePV 2 r) obstacleEdge ~
-                                  Maybe (LineLineSegmentIntersection obstacleEdge)
-                                , LineSegment_ obstacleEdge point
+cmpSegs                      :: ( LinePV 2 r `IsIntersectableWith` edge
+                                , Intersection (LinePV 2 r) edge ~
+                                  Maybe (LineLineSegmentIntersection edge)
+                                , LineSegment_ edge point
                                 , Point_ point 2 r, Ord r, Num r
                                 )
                              => LinePV 2 r -- ^ treat the line as a ray actually!
-                             -> obstacleEdge -> obstacleEdge -> Ordering
+                             -> edge -> edge -> Ordering
 cmpSegs l@(LinePV _ _) e1 e2 = cmpIntersection l (f $ l `intersect` e1) (f $ l `intersect` e2)
   where
     f = fromMaybe (error "cmpSegs: precondition failed, no intersection")
 
 -- | Compares the intersection points by distance to p
-cmpIntersection                      :: ( LineSegment_ obstacleEdge point
+cmpIntersection                      :: ( LineSegment_ edge point
                                         , Point_ point 2 r, Ord r, Num r
                                         )
                                      => LinePV 2 r
-                                     -> LineLineSegmentIntersection obstacleEdge
-                                     -> LineLineSegmentIntersection obstacleEdge
+                                     -> LineLineSegmentIntersection edge
+                                     -> LineLineSegmentIntersection edge
                                      -> Ordering
 cmpIntersection l@(LinePV p _) x1 x2 = cmpByDistanceTo p (f x1) (f x2)
   -- FIXME: what do we do at equality; we should then essentially try again at an epsilon
