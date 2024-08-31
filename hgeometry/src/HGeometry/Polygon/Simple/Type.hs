@@ -1,5 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 --------------------------------------------------------------------------------
 -- |
@@ -21,9 +22,12 @@ module HGeometry.Polygon.Simple.Type
 
 import           Control.DeepSeq (NFData)
 import           Control.Lens
+import           Data.Aeson
+import qualified Data.Aeson as Aeson
 import qualified Data.Foldable as F
 import           Data.Functor.Classes
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.List.NonEmpty (NonEmpty)
 import qualified Data.Map as Map
 import           Data.Semigroup.Foldable
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
@@ -32,6 +36,7 @@ import           HGeometry.Boundary
 import           HGeometry.Box
 import           HGeometry.Cyclic
 import           HGeometry.Foldable.Util
+import qualified HGeometry.Foldable.Util as F
 import           HGeometry.Intersection
 import           HGeometry.Point
 import           HGeometry.Properties
@@ -71,6 +76,15 @@ instance (ShiftedEq (f point), ElemCyclic (f point) ~ point
          ) => ShiftedEq (SimplePolygonF f point) where
   type ElemCyclic (SimplePolygonF f point) = point
   isShiftOf p q = isShiftOf (p^._SimplePolygonF) (q^._SimplePolygonF)
+
+instance (Foldable f, ToJSON point) => ToJSON (SimplePolygonF f point) where
+  toJSON pg =  object [ "tag"           Aeson..= ("SimplePolygon" :: String)
+                      , "vertices"      Aeson..= F.toList pg
+                      ]
+instance (HasFromFoldable1 f, FromJSON point) => FromJSON (SimplePolygonF f point) where
+  parseJSON = withObject "SimplePolygon" $ \o -> do
+                ("SimplePolygon" :: String) <- o .: "tag"
+                MkSimplePolygon . F.fromNonEmpty @f @point <$> o .: "vertices"
 
 -- | shortcut for all default properties of f we need to store the vertices.
 type VertexContainer f point = ( IxValue (f point) ~ point

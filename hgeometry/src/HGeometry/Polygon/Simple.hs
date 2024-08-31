@@ -36,9 +36,9 @@ import           HGeometry.LineSegment.Intersection.BentleyOttmann
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple.Class
-import           HGeometry.Polygon.Simple.Type
 import           HGeometry.Polygon.Simple.Implementation
 import           HGeometry.Polygon.Simple.InPolygon
+import           HGeometry.Polygon.Simple.Type
 import           HGeometry.Vector.NonEmpty.Util ()
 
 --------------------------------------------------------------------------------

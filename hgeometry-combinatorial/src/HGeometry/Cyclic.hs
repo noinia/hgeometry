@@ -22,6 +22,7 @@ module HGeometry.Cyclic
 import           Control.DeepSeq (NFData)
 import           Control.Lens
 import           Control.Monad (forM_)
+import           Data.Aeson
 import qualified Data.Foldable as F
 import           Data.Functor.Apply (Apply, (<.*>), MaybeApply(..))
 import qualified Data.List.NonEmpty as NonEmpty
@@ -40,7 +41,7 @@ import           HGeometry.Vector.NonEmpty.Util ()
 
 -- | A cyclic sequence type
 newtype Cyclic v a = Cyclic (v a)
- deriving newtype (Functor,Foldable,Foldable1,NFData,Eq)
+ deriving newtype (Functor,Foldable,Foldable1,NFData,Eq,ToJSON,FromJSON)
  deriving stock (Generic)
 -- not sure if we want this Eq instance or not .
 

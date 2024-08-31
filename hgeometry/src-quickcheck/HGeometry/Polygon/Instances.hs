@@ -9,35 +9,26 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Polygon.Instances
-  (
-
+  ( allSimplePolygons
   ) where
 
--- import           HGeometry.LineSegment.Intersection
-import           Control.Lens hiding (elements)
-import           System.Random.Stateful
-import           Control.Monad.State
--- import           Control.Monad.Random (Random, evalRand, mkStdGen)
-import qualified Data.ByteString as BS
-import           Data.Maybe
-import           Data.Ord
-import           Data.Ratio
-import           HGeometry.Number.Real.Rational
-import           Data.Serialize
-import           HGeometry
-import           HGeometry.Intersection
-import           HGeometry.Triangle
--- import           HGeometry.Boundary
-import           HGeometry.Polygon.Simple
-import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Monotone
--- import           Hiraffe.Graph
-import           Paths_hgeometry
-import           System.IO.Unsafe
--- import           Test.Hspec
-import           Test.QuickCheck
-import           Test.QuickCheck.Instances ()
-
+import Control.Lens hiding (elements)
+import Control.Monad.State
+import Data.Aeson (eitherDecodeFileStrict)
+import Data.Ord
+import Data.Ratio
+import HGeometry
+import HGeometry.Intersection
+import HGeometry.Number.Real.Rational
+import HGeometry.Polygon.Class
+import HGeometry.Polygon.Monotone
+import HGeometry.Polygon.Simple
+import HGeometry.Triangle
+import Paths_hgeometry
+import System.IO.Unsafe
+import System.Random.Stateful
+import Test.QuickCheck
+import Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
 
@@ -50,15 +41,18 @@ allSimplePolygons' = allSimplePolygonsWith realToFrac
   -- self-intersecting polygons
 
 {-# NOINLINE allSimplePolygonsWith #-}
-allSimplePolygonsWith   :: (Ord r, Fractional r) => (Double -> r) -> [SimplePolygon (Point 2 r)]
+allSimplePolygonsWith   :: forall r.
+                            (Ord r, Fractional r) => (Double -> r) -> [SimplePolygon (Point 2 r)]
 allSimplePolygonsWith f = unsafePerformIO $ do
-  inp <- BS.readFile =<< getDataFileName "polygons.simple"
-  case decode inp of
-    Left msg -> error msg
-    Right pts -> pure . catMaybes $
-      [ fromPoints [ Point2 (f x) (f y) | (x,y) <- lst ]
-      | lst <- pts
-      ]
+  fp <- getDataFileName "polygons.simple.json"
+  eitherDecodeFileStrict fp >>= \case
+    Left msg  -> error msg
+    Right pgs -> pure [ pg&allPoints %~ \p -> p&coordinates %~ f
+                      | (pg :: SimplePolygon (Point 2 Double)) <- pgs
+                      ]
+
+-- tojson = encodeFile "out.json" $ allSimplePolygons
+
 
 {-
 
