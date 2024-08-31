@@ -37,11 +37,11 @@ spec = describe "visibility graph / visibility polygon" $ do
              (concat
              [ [iO $ defIO myPolygon ! attr SLayer "polygon"
                ]
-             , [ iO $ defIO (drawVisibilityEdge e myPolygon) ! attr SStroke red
-                                                             ! attr SLayer "visibilityGraph"
+             -- , [ iO $ defIO (drawVisibilityEdge e myPolygon) ! attr SStroke red
+             --                                                 ! attr SLayer "visibilityGraph"
 
-               | e <- visibilityGraph myPolygon
-               ]
+             --   | e <- visibilityGraph myPolygon
+             --   ]
              , [ iO $ defIO (drawVisibilityEdge e myPolygon) ! attr SStroke red
                                                              ! attr SLayer "naive"
 

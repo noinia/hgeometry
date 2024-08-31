@@ -46,6 +46,7 @@ import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Simple.Implementation
 import           HGeometry.Polygon.Simple.InPolygon
 import           HGeometry.Polygon.Simple.Type
+import           HGeometry.Polygon.Visibility.Naive (visibilityGraphWith)
 import           HGeometry.Properties
 import qualified HGeometry.Set.Util as Set
 import           HGeometry.Vector
@@ -53,7 +54,6 @@ import           Unsafe.Coerce (unsafeCoerce)
 import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.Vector as Builder
 import           Witherable
-
 --------------------------------------------------------------------------------
 
 newtype CCWAround c point = CCWAround { unCCWAround :: point }
@@ -135,7 +135,7 @@ closestEndPoint c = minimumBy (cmpByDistanceTo c) . foldMap1 (\s -> s^.start :| 
 
 -- | Algorithm to compute the visibilityGraph of a simple polygon
 --
--- O(n^3) (for now )
+-- \(O(n^2 \log n)\)
 visibilityGraph     :: ( SimplePolygon_ simplePolygon point r
                        , HasIntersectionWith point simplePolygon
                        , Ord r, Fractional r
@@ -146,8 +146,7 @@ visibilityGraph     :: ( SimplePolygon_ simplePolygon point r
                                  (ClosedLineSegment point))
                        )
                     => simplePolygon -> [Vector 2 (VertexIx simplePolygon)]
-visibilityGraph pg  = (uncurry Vector2 <$> pg^..outerBoundaryEdges.asIndex)
-                      <> mapMaybe liesInsidePolygon candidateEdges
+visibilityGraph pg  = visibilityGraphWith pg candidateEdges
   where
     candidateEdges = ifoldMapOf vertices edgesFromV pg
 
@@ -155,9 +154,6 @@ visibilityGraph pg  = (uncurry Vector2 <$> pg^..outerBoundaryEdges.asIndex)
                   <$> visiblePointsFrom v (pg^..outerBoundaryEdgeSegments)
                                           (toExt <$> pg^..vertices.withIndex)
 
-    liesInsidePolygon (Vector2 (u :+ i) (v :+ j))
-      | u .+^ ((v .-. u) ^/ 2) `intersects` pg = Just (Vector2 i j)
-      | otherwise                              = Nothing
 
 
 -- asIndexedExt   :: (Indexable i p, Functor f)
