@@ -199,48 +199,49 @@ spansIntersect s s' = f xCoord && f yCoord
     f         :: (forall aPoint. Point_ aPoint 2 r => Getter aPoint r) -> Bool
     f coord'' = spanIn coord'' s `intersects` spanIn coord'' s'
 
-instance ( Point_ point 2 r, Num r,  Ord r
+instance ( Point_ point 2 r, Point_ point' 2 r, Num r,  Ord r
          , Functor endPoint
          , IxValue (endPoint point) ~ point, EndPoint_ (endPoint point)
+         , IxValue (endPoint point') ~ point', EndPoint_ (endPoint point')
          , IxValue (endPoint r) ~ r, EndPoint_ (endPoint r)
          , HasIntersectionWith (Interval endPoint r) (Interval endPoint r)
          ) =>
-         LineSegment endPoint point `HasIntersectionWith` LineSegment endPoint point where
+         LineSegment endPoint point `HasIntersectionWith` LineSegment endPoint point' where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
                       && spansIntersect s s'
   {-# INLINE intersects #-}
 
-instance ( Point_ point 2 r, Num r,  Ord r
+instance ( Point_ point 2 r, Point_ point' 2 r, Num r,  Ord r
          ) =>
-         LineSegment AnEndPoint point `HasIntersectionWith` ClosedLineSegment point where
+         LineSegment AnEndPoint point `HasIntersectionWith` ClosedLineSegment point' where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
                       && spansIntersect s s'
   {-# INLINE intersects #-}
 
-instance ( Point_ point 2 r, Num r,  Ord r
+instance ( Point_ point 2 r, Point_ point' 2 r, Num r,  Ord r
          ) =>
-         LineSegment AnEndPoint point `HasIntersectionWith` OpenLineSegment point where
+         LineSegment AnEndPoint point `HasIntersectionWith` OpenLineSegment point' where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
                       && spansIntersect s s'
   {-# INLINE intersects #-}
 
-instance ( Point_ point 2 r, Num r,  Ord r
+instance ( Point_ point 2 r, Point_ point' 2 r, Num r,  Ord r
          ) =>
-         ClosedLineSegment point `HasIntersectionWith` LineSegment AnEndPoint point where
+         ClosedLineSegment point `HasIntersectionWith` LineSegment AnEndPoint point' where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
                       && spansIntersect s s'
   {-# INLINE intersects #-}
 
-instance ( Point_ point 2 r, Num r,  Ord r
+instance ( Point_ point 2 r, Point_ point' 2 r, Num r,  Ord r
          ) =>
-         ClosedLineSegment point `HasIntersectionWith` OpenLineSegment point where
+         ClosedLineSegment point `HasIntersectionWith` OpenLineSegment point' where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
                       && spansIntersect s s'
   {-# INLINE intersects #-}
 
-instance ( Point_ point 2 r, Num r,  Ord r
+instance ( Point_ point 2 r, Point_ point' 2 r, Num r,  Ord r
          ) =>
-         OpenLineSegment point `HasIntersectionWith` LineSegment AnEndPoint point where
+         OpenLineSegment point `HasIntersectionWith` LineSegment AnEndPoint point' where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
                       && spansIntersect s s'
   {-# INLINE intersects #-}
