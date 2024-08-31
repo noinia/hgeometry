@@ -39,8 +39,11 @@ source-repository head
 --------------------------------------------------------------------------------
 
 common all-setup
-    ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
-                -fspecialise-aggressively -fexpose-all-unfoldings
+    ghc-options: -O2 -fspecialise-aggressively -fexpose-all-unfoldings
+                 -Wall
+                 -fno-warn-unticked-promoted-constructors
+                 -fno-warn-type-defaults
+                 -fno-warn-partial-type-signatures
 
     build-depends:
         base                      >= 4.16.1.0      && < 5

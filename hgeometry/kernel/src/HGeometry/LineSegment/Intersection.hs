@@ -184,17 +184,19 @@ fmap' f = \case
 
 -- | Test if the spans (i.e. the projections onto the x-axis and on the yaxis) of the
 -- segments intersect
-spansIntersect      :: forall endPoint endPoint' point r.
-                       ( Point_ point 2 r, Ord r, Num r, Functor endPoint, Functor endPoint'
+spansIntersect      :: forall endPoint endPoint' point point' r.
+                       ( Point_ point 2 r, Point_ point' 2 r
+                       , Ord r, Num r, Functor endPoint, Functor endPoint'
                        , IxValue (endPoint point) ~ point
                        , EndPoint_ (endPoint point)
-                       , IxValue (endPoint' point) ~ point
-                       , EndPoint_ (endPoint' point)
+                       , IxValue (endPoint' point') ~ point'
+                       , EndPoint_ (endPoint' point')
                        , HasIntersectionWith (Interval endPoint r) (Interval endPoint' r)
-                       ) => LineSegment endPoint point -> LineSegment endPoint' point -> Bool
+                       )
+                    => LineSegment endPoint point -> LineSegment endPoint' point' -> Bool
 spansIntersect s s' = f xCoord && f yCoord
   where
-    f         :: Getter point r -> Bool
+    f         :: (forall aPoint. Point_ aPoint 2 r => Getter aPoint r) -> Bool
     f coord'' = spanIn coord'' s `intersects` spanIn coord'' s'
 
 instance ( Point_ point 2 r, Num r,  Ord r
@@ -243,9 +245,9 @@ instance ( Point_ point 2 r, Num r,  Ord r
                       && spansIntersect s s'
   {-# INLINE intersects #-}
 
-instance ( Point_ point 2 r, Num r,  Ord r
+instance ( Point_ point 2 r, Point_ point' 2 r, Num r,  Ord r
          ) =>
-         OpenLineSegment point `HasIntersectionWith` ClosedLineSegment point where
+         OpenLineSegment point `HasIntersectionWith` ClosedLineSegment point' where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
                       && spansIntersect s s'
   {-# INLINE intersects #-}
