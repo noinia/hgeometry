@@ -11,7 +11,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Polygon.Visibility
   ( visiblePointsFrom
-
+  , visibilityGraph
   ) where
 
 import           Control.Lens
@@ -29,12 +29,14 @@ import           Data.Reflection
 import qualified Data.Set as Set
 import qualified Data.Vector as V
 import           HGeometry.Algorithms.DivideAndConquer (mergeSortedListsBy)
+import           HGeometry.Ext
 import           HGeometry.Foldable.Sort
 import           HGeometry.HalfLine
 import           HGeometry.HyperPlane.Class
 import           HGeometry.Intersection
 import           HGeometry.Line
-import           HGeometry.LineSegment (LineSegment_, start, end
+import           HGeometry.LineSegment ( LineSegment_, start, end
+                                       , ClosedLineSegment
                                        , LineLineSegmentIntersection(..)
                                        , HalfLineLineSegmentIntersection(..)
                                        )
@@ -126,9 +128,47 @@ closestEndPoint c = minimumBy (cmpByDistanceTo c) . foldMap1 (\s -> s^.start :| 
 
 
 
+--------------------------------------------------------------------------------
 
 
--- visibilityGraph :: polygon ->
+
+
+-- | Algorithm to compute the visibilityGraph of a simple polygon
+--
+-- O(n^3) (for now )
+visibilityGraph     :: ( SimplePolygon_ simplePolygon point r
+                       , HasIntersectionWith point simplePolygon
+                       , Ord r, Fractional r
+                       , HasSquaredEuclideanDistance point
+                       , HalfLine (Point 2 r) `IsIntersectableWith` ClosedLineSegment point
+                       , Intersection (HalfLine (Point 2 r)) (ClosedLineSegment point)
+                         ~ Maybe (HalfLineLineSegmentIntersection (Point 2 r)
+                                 (ClosedLineSegment point))
+                       )
+                    => simplePolygon -> [Vector 2 (VertexIx simplePolygon)]
+visibilityGraph pg  = (uncurry Vector2 <$> pg^..outerBoundaryEdges.asIndex)
+                      <> mapMaybe liesInsidePolygon candidateEdges
+  where
+    candidateEdges = ifoldMapOf vertices edgesFromV pg
+
+    edgesFromV i v = (Vector2 (v :+ i))
+                  <$> visiblePointsFrom v (pg^..outerBoundaryEdgeSegments)
+                                          (toExt <$> pg^..vertices.withIndex)
+
+    liesInsidePolygon (Vector2 (u :+ i) (v :+ j))
+      | u .+^ ((v .-. u) ^/ 2) `intersects` pg = Just (Vector2 i j)
+      | otherwise                              = Nothing
+
+
+-- asIndexedExt   :: (Indexable i p, Functor f)
+--                => p (i, s) (f (t :+ j))
+--                -> Indexed i s (f t)
+-- asIndexedExt f = Indexed $ \i a -> snd <$> indexed f i (i, a)
+-- {-# INLINE asIndexedExt #-}
+
+-- asExtPoint = to $ \(i,p) -> p :+ i
+toExt (i,p) = p :+ i
+
 
 -- | O((n+m)\log (n+m))
 --
@@ -139,6 +179,7 @@ visiblePointsFrom :: forall point r queryPoint obstacleEdge endPoint f g.
                      , Ord r, Num r
                      , LineSegment_ obstacleEdge endPoint
                      , HasSupportingLine obstacleEdge
+                     , HasSquaredEuclideanDistance obstacleEdge
                      , Foldable f, Witherable f, Foldable g
                      , LinePV 2 r `IsIntersectableWith` obstacleEdge
                      , Intersection (LinePV 2 r) obstacleEdge ~
@@ -174,12 +215,15 @@ visiblePointsFrom p' obstacleEdges queryPoints = case F.toList queryPoints of
 
 
 -- | Given the initial halfine, compare the two intersection points to order the segments.
-cmpToRay :: HalfLine (Point 2 r)
+cmpToRay :: ( LineSegment_ edge point, Point_ point 2 r
+            , Ord r, Num r
+            , HasSquaredEuclideanDistance edge
+            )
+         => HalfLine (Point 2 r)
          -> (HalfLineLineSegmentIntersection (Point 2 r) edge, edge)
          -> (HalfLineLineSegmentIntersection (Point 2 r) edge, edge)
          -> Ordering
-cmpToRay ray@(HalfLine p _) (x1,_) (x2,_) = undefined
-
+cmpToRay (HalfLine p _) = comparing (squaredEuclideanDistTo p . fst)
 
 
 -- | Handle an event in the sweep line algorithm

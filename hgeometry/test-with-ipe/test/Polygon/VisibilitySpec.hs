@@ -2,28 +2,29 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Polygon.VisibilitySpec where
 
-import Control.Lens
-import Data.Maybe
-import Golden
-import HGeometry.Ball
-import HGeometry.Combinatorial.Util
-import HGeometry.Ext
-import HGeometry.HalfLine
-import HGeometry.Intersection
-import HGeometry.LineSegment
-import HGeometry.Number.Real.Rational
-import HGeometry.PlaneGraph.Class
-import HGeometry.Point
-import HGeometry.Polygon
-import HGeometry.Polygon.Simple
-import HGeometry.Polygon.Visibility
-import HGeometry.Vector
-import Ipe
-import Ipe.Color
-import System.OsPath
-import Test.Hspec
-import Test.Hspec.WithTempFile
-import Test.QuickCheck.Instances ()
+import           Control.Lens
+import           Data.Maybe
+import           Golden
+import           HGeometry.Ball
+import           HGeometry.Combinatorial.Util
+import           HGeometry.Ext
+import           HGeometry.HalfLine
+import           HGeometry.Intersection
+import           HGeometry.LineSegment
+import           HGeometry.Number.Real.Rational
+import           HGeometry.PlaneGraph.Class
+import           HGeometry.Point
+import           HGeometry.Polygon
+import           HGeometry.Polygon.Simple
+import           HGeometry.Polygon.Visibility
+import qualified HGeometry.Polygon.Visibility.Naive as Naive
+import           HGeometry.Vector
+import           Ipe
+import           Ipe.Color
+import           System.OsPath
+import           Test.Hspec
+import           Test.Hspec.WithTempFile
+import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
 
@@ -41,39 +42,15 @@ spec = describe "visibility graph / visibility polygon" $ do
 
                | e <- visibilityGraph myPolygon
                ]
+             , [ iO $ defIO (drawVisibilityEdge e myPolygon) ! attr SStroke red
+                                                             ! attr SLayer "naive"
+
+               | e <- Naive.visibilityGraph myPolygon
+               ]
              ])
 
-drawVisibilityEdge (Two u v) pg = ClosedLineSegment (pg^?!vertexAt u) (pg^?!vertexAt v)
+drawVisibilityEdge (Vector2 u v) pg = ClosedLineSegment (pg^?!vertexAt u) (pg^?!vertexAt v)
 
--- | Naive algorithm to compute the visibilityGraph of a simple polygon
---
--- O(n^3)
-visibilityGraph     :: ( SimplePolygon_ simplePolygon point r
-                       , HasIntersectionWith point simplePolygon
-                       , Ord r, Fractional r
-                        )
-                    => simplePolygon -> [Two (VertexIx simplePolygon)]
-visibilityGraph pg  = (uncurry Two <$> pg^..outerBoundaryEdges.asIndex)
-                      <> mapMaybe liesInsidePolygon candidateEdges
-  where
-    candidateEdges = visibilityGraph' (pg^..outerBoundaryEdgeSegments)
-                                      ((\(i,v) -> v :+ i) <$> pg^..vertices.withIndex)
-    liesInsidePolygon (Two (u :+ i) (v :+ j))
-      | u .+^ ((v .-. u) ^/ 2) `intersects` pg = Just (Two i j)
-      | otherwise                              = Nothing
-
-
--- | computes the edges of the visibility graph among the points
---
--- O(n^2m), where n is the number of vertices, m is the number of obstacle edges.
-visibilityGraph'           :: ( Foldable f, Foldable g
-                              , Point_ vertex 2 r
-                              , OpenLineSegment vertex `HasIntersectionWith` obstacleEdge
-                              )  => f obstacleEdge -> g vertex -> [Two vertex]
-visibilityGraph' obstacles = filter areMutuallyVisible . uniquePairs
-  where
-    areMutuallyVisible (Two u v) =
-      all (not . (intersects (OpenLineSegment u v))) obstacles
 
 
 myPolygon :: SimplePolygon (Point 2 R)

@@ -19,7 +19,7 @@ import HGeometry.Interval
 import HGeometry.Line
 import HGeometry.LineSegment.Internal
 import HGeometry.Point
-import HGeometry.Properties (NumType)
+import HGeometry.Properties (NumType, Dimension)
 
 --------------------------------------------------------------------------------
 -- * Line x LineSegment Intersection
@@ -434,3 +434,14 @@ compareColinearInterval l@(LinePV p _) seg = case p `onSide` mStart of
     mStart = m&anchorPoint .~ seg^.start.asPoint
     mEnd   = m&anchorPoint .~ seg^.end.asPoint
     -- the left side is the side in which the vector v points.
+
+type instance NumType   (HalfLineLineSegmentIntersection point edge) = NumType point
+type instance Dimension (HalfLineLineSegmentIntersection point edge) = Dimension point
+
+instance ( HasSquaredEuclideanDistance point
+         , HasSquaredEuclideanDistance segment
+         , NumType point ~ NumType segment, Dimension point ~ Dimension segment
+         ) => HasSquaredEuclideanDistance (HalfLineLineSegmentIntersection point segment) where
+  pointClosestToWithDistance q = \case
+    HalfLine_x_LineSegment_Point p         -> pointClosestToWithDistance q p
+    HalfLine_x_LineSegment_LineSegment seg -> pointClosestToWithDistance q seg
