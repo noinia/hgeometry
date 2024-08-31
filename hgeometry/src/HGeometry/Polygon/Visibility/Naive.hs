@@ -37,7 +37,7 @@ visibilityGraph    :: ( SimplePolygon_ simplePolygon point r
                    => simplePolygon -> [Vector 2 (VertexIx simplePolygon)]
 visibilityGraph pg = visibilityGraphWith pg
                    $ visibilityGraphWrtObstacles (pg^..outerBoundaryEdgeSegments)
-                                                 ((\(i,v) -> v :+ i) <$> pg^..vertices.withIndex)
+                                                 (pg^..vertices.asIndexedExt)
 
 -- | Given a polygon, and candidate visibility edges (edges guaranteed not to intersect)
 -- the boundary; test if the edges are actually inside the polygon (as well as adding the

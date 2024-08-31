@@ -144,6 +144,10 @@ visibilityGraph     :: ( SimplePolygon_ simplePolygon point r
                        , Intersection (HalfLine (Point 2 r)) (ClosedLineSegment point)
                          ~ Maybe (HalfLineLineSegmentIntersection (Point 2 r)
                                  (ClosedLineSegment point))
+
+
+                       , Show r, Show point
+
                        )
                     => simplePolygon -> [Vector 2 (VertexIx simplePolygon)]
 visibilityGraph pg  = visibilityGraphWith pg candidateEdges
@@ -152,18 +156,11 @@ visibilityGraph pg  = visibilityGraphWith pg candidateEdges
 
     edgesFromV i v = (Vector2 (v :+ i))
                   <$> visiblePointsFrom v (pg^..outerBoundaryEdgeSegments)
-                                          (toExt <$> pg^..vertices.withIndex)
+                                          (pg^..vertices.asIndexedExt)
 
 
-
--- asIndexedExt   :: (Indexable i p, Functor f)
---                => p (i, s) (f (t :+ j))
---                -> Indexed i s (f t)
--- asIndexedExt f = Indexed $ \i a -> snd <$> indexed f i (i, a)
--- {-# INLINE asIndexedExt #-}
-
--- asExtPoint = to $ \(i,p) -> p :+ i
-toExt (i,p) = p :+ i
+-- -- asExtPoint = to $ \(i,p) -> p :+ i
+-- toExt (i,p) = p :+ i
 
 
 -- | O((n+m)\log (n+m))
@@ -183,6 +180,9 @@ visiblePointsFrom :: forall point r queryPoint obstacleEdge endPoint f g.
                      , IsIntersectableWith (HalfLine (Point 2 r)) obstacleEdge
                      , Intersection (HalfLine (Point 2 r)) obstacleEdge
                        ~ Maybe (HalfLineLineSegmentIntersection (Point 2 r) obstacleEdge)
+
+                     , Show r, Show endPoint, Show obstacleEdge
+
                      )
                   => point -> f obstacleEdge -> g queryPoint -> [queryPoint]
 visiblePointsFrom p' obstacleEdges queryPoints = case F.toList queryPoints of
@@ -229,6 +229,9 @@ handle                                    :: ( HasSupportingLine edge
                                              , LinePV 2 r `IsIntersectableWith` edge
                                              , Intersection (LinePV 2 r) edge ~
                                                Maybe (LineLineSegmentIntersection edge)
+
+                                , Show r, Show point, Show edge
+
                                              )
                                           => Point 2 r
                                           -> Event r queryPoint edge
@@ -285,12 +288,17 @@ cmpSegs                      :: ( LinePV 2 r `IsIntersectableWith` edge
                                   Maybe (LineLineSegmentIntersection edge)
                                 , LineSegment_ edge point
                                 , Point_ point 2 r, Ord r, Num r
+
+                                , Show r, Show point, Show edge
                                 )
                              => LinePV 2 r -- ^ treat the line as a ray actually!
                              -> edge -> edge -> Ordering
 cmpSegs l@(LinePV _ _) e1 e2 = cmpIntersection l (f $ l `intersect` e1) (f $ l `intersect` e2)
   where
-    f = fromMaybe (error "cmpSegs: precondition failed, no intersection")
+    -- f = fromMaybe (error "cmpSegs: precondition failed, no intersection")
+    f = fromMaybe (error $ "cmpSegs: precondition failed, no intersection "
+                  <> show (l,e1,e2)
+                  )
 
 -- | Compares the intersection points by distance to p
 cmpIntersection                      :: ( LineSegment_ edge point
