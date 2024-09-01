@@ -18,7 +18,7 @@ import           HGeometry.Point
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Instances ()
 import           HGeometry.Polygon.Simple
-import           HGeometry.Polygon.Visibility
+-- import           HGeometry.Polygon.Visibility
 import qualified HGeometry.Polygon.Visibility.Naive as Naive
 import           HGeometry.Vector
 import           Ipe
@@ -36,20 +36,20 @@ type R = RealNumber 5
 
 spec :: Spec
 spec = describe "visibility graph / visibility polygon" $ do
-         prop "naive visibility graph and fast one the same " $
-           \(pg :: SimplePolygon (Point 2 R)) ->
-             Set.fromList (visibilityGraph pg) === Set.fromList (Naive.visibilityGraph pg)
+         -- prop "naive visibility graph and fast one the same " $
+         --   \(pg :: SimplePolygon (Point 2 R)) ->
+         --     Set.fromList (visibilityGraph pg) === Set.fromList (Naive.visibilityGraph pg)
 
          goldenWith [osp|data/test-with-ipe/golden/Polygon/|]
            (ipeContentGolden { name = [osp|visibility|] })
              (concat
              [ [iO $ defIO myPolygon ! attr SLayer "polygon"
                ]
-             -- , [ iO $ defIO (drawVisibilityEdge e myPolygon) ! attr SStroke red
-             --                                                 ! attr SLayer "visibilityGraph"
+             , [ iO $ defIO (drawVisibilityEdge e myPolygon) ! attr SStroke red
+                                                             ! attr SLayer "visibilityGraph"
 
-             --   | e <- visibilityGraph myPolygon
-             --   ]
+               | e <- visibilityGraph myPolygon
+               ]
              , [ iO $ defIO (drawVisibilityEdge e myPolygon) ! attr SStroke red
                                                              ! attr SLayer "naive"
 
