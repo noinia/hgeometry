@@ -12,7 +12,7 @@
 </span><span id="line-12"></span><span>  </span><span class="annot"><a href="Ipe.Layer.html#LayerName"><span class="hs-identifier">LayerName</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Layer.html#LayerName"><span class="hs-identifier">LayerName</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Layer.html#layerName"><span class="hs-identifier">layerName</span></a></span><span>
 </span><span id="line-13"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-14"></span><span>
-</span><span id="line-15"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
 </span><span id="line-16"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
 </span><span id="line-17"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">GHC.Exts</span></span><span>
 </span><span id="line-18"></span><span>
@@ -20,7 +20,7 @@
 </span><span id="line-20"></span><span>
 </span><span id="line-21"></span><span class="annot"><span class="hs-comment">-- | Defines an Layer in Ipe.</span></span><span>
 </span><span id="line-22"></span><span class="hs-keyword">newtype</span><span> </span><span id="LayerName"><span class="annot"><a href="Ipe.Layer.html#LayerName"><span class="hs-identifier hs-var">LayerName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="LayerName"><span class="annot"><a href="Ipe.Layer.html#LayerName"><span class="hs-identifier hs-var">LayerName</span></a></span></span><span> </span><span class="hs-special">{</span><span id="_layerName"><span class="annot"><span class="annottext">LayerName -&gt; Text
-</span><a href="Ipe.Layer.html#_layerName"><span class="hs-identifier hs-var hs-var">_layerName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679397584"><span id="local-6989586621679397590"><span id="local-6989586621679397594"><span class="annot"><span class="annottext">Int -&gt; LayerName -&gt; ShowS
+</span><a href="Ipe.Layer.html#_layerName"><span class="hs-identifier hs-var hs-var">_layerName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679397675"><span id="local-6989586621679397681"><span id="local-6989586621679397685"><span class="annot"><span class="annottext">Int -&gt; LayerName -&gt; ShowS
 [LayerName] -&gt; ShowS
 LayerName -&gt; String
 (Int -&gt; LayerName -&gt; ShowS)
@@ -35,7 +35,7 @@ $cshow :: LayerName -&gt; String
 show :: LayerName -&gt; String
 $cshowList :: [LayerName] -&gt; ShowS
 showList :: [LayerName] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679397598"><span id="local-6989586621679397602"><span id="local-6989586621679397605"><span id="local-6989586621679397615"><span class="annot"><span class="annottext">ReadPrec [LayerName]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679397689"><span id="local-6989586621679397693"><span id="local-6989586621679397696"><span id="local-6989586621679397706"><span class="annot"><span class="annottext">ReadPrec [LayerName]
 ReadPrec LayerName
 Int -&gt; ReadS LayerName
 ReadS [LayerName]
@@ -55,7 +55,7 @@ $creadPrec :: ReadPrec LayerName
 readPrec :: ReadPrec LayerName
 $creadListPrec :: ReadPrec [LayerName]
 readListPrec :: ReadPrec [LayerName]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679397619"><span id="local-6989586621679397624"><span class="annot"><span class="annottext">LayerName -&gt; LayerName -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679397710"><span id="local-6989586621679397715"><span class="annot"><span class="annottext">LayerName -&gt; LayerName -&gt; Bool
 (LayerName -&gt; LayerName -&gt; Bool)
 -&gt; (LayerName -&gt; LayerName -&gt; Bool) -&gt; Eq LayerName
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -63,7 +63,7 @@ $c== :: LayerName -&gt; LayerName -&gt; Bool
 == :: LayerName -&gt; LayerName -&gt; Bool
 $c/= :: LayerName -&gt; LayerName -&gt; Bool
 /= :: LayerName -&gt; LayerName -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679397632"><span id="local-6989586621679397637"><span id="local-6989586621679397641"><span id="local-6989586621679397645"><span id="local-6989586621679397649"><span id="local-6989586621679397653"><span id="local-6989586621679397657"><span class="annot"><span class="annottext">Eq LayerName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679397723"><span id="local-6989586621679397728"><span id="local-6989586621679397732"><span id="local-6989586621679397736"><span id="local-6989586621679397740"><span id="local-6989586621679397744"><span id="local-6989586621679397748"><span class="annot"><span class="annottext">Eq LayerName
 Eq LayerName =&gt;
 (LayerName -&gt; LayerName -&gt; Ordering)
 -&gt; (LayerName -&gt; LayerName -&gt; Bool)
@@ -100,18 +100,18 @@ $cmax :: LayerName -&gt; LayerName -&gt; LayerName
 max :: LayerName -&gt; LayerName -&gt; LayerName
 $cmin :: LayerName -&gt; LayerName -&gt; LayerName
 min :: LayerName -&gt; LayerName -&gt; LayerName
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679397663"><span class="annot"><span class="annottext">String -&gt; LayerName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679397754"><span class="annot"><span class="annottext">String -&gt; LayerName
 (String -&gt; LayerName) -&gt; IsString LayerName
 forall a. (String -&gt; a) -&gt; IsString a
 $cfromString :: String -&gt; LayerName
 fromString :: String -&gt; LayerName
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var">IsString</span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-23"></span><span>
-</span><span id="line-24"></span><span class="annot"><a href="Ipe.Layer.html#layerName"><span class="hs-identifier hs-type">layerName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Type.html#Iso%27"><span class="hs-identifier hs-type">Iso'</span></a></span><span> </span><span class="annot"><a href="Ipe.Layer.html#LayerName"><span class="hs-identifier hs-type">LayerName</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-24"></span><span class="annot"><a href="Ipe.Layer.html#layerName"><span class="hs-identifier hs-type">layerName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Type.html#Iso%27"><span class="hs-identifier hs-type">Iso'</span></a></span><span> </span><span class="annot"><a href="Ipe.Layer.html#LayerName"><span class="hs-identifier hs-type">LayerName</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
 </span><span id="line-25"></span><span id="layerName"><span class="annot"><span class="annottext">layerName :: Iso' LayerName Text
 </span><a href="Ipe.Layer.html#layerName"><span class="hs-identifier hs-var hs-var">layerName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(LayerName -&gt; Text) -&gt; (Text -&gt; LayerName) -&gt; Iso' LayerName Text
 forall s a b t. (s -&gt; a) -&gt; (b -&gt; t) -&gt; Iso s t a b
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-6eec07dfa16b863ab004b7c8ae8536ba6a793ca92f6ae40f2a5eb6f8b181d7a9/share/doc/html/src/Control.Lens.Iso.html#iso"><span class="hs-identifier hs-var">iso</span></a></span><span> </span><span class="annot"><span class="annottext">LayerName -&gt; Text
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Iso.html#iso"><span class="hs-identifier hs-var">iso</span></a></span><span> </span><span class="annot"><span class="annottext">LayerName -&gt; Text
 </span><a href="Ipe.Layer.html#_layerName"><span class="hs-identifier hs-var">_layerName</span></a></span><span> </span><span class="annot"><span class="annottext">Text -&gt; LayerName
 </span><a href="Ipe.Layer.html#LayerName"><span class="hs-identifier hs-var">LayerName</span></a></span><span>
 </span><span id="line-26"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Ipe.Layer.html#layerName"><span class="hs-pragma hs-type">layerName</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
