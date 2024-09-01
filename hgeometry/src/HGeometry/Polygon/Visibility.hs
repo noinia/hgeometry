@@ -50,10 +50,13 @@ import           HGeometry.Polygon.Visibility.Naive (visibilityGraphWith)
 import           HGeometry.Properties
 import qualified HGeometry.Set.Util as Set
 import           HGeometry.Vector
+import           Prelude hiding (filter)
 import           Unsafe.Coerce (unsafeCoerce)
 import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.Vector as Builder
 import           Witherable
+
+import           Debug.Pretty.Simple
 --------------------------------------------------------------------------------
 
 newtype CCWAround c point = CCWAround { unCCWAround :: point }
@@ -158,11 +161,6 @@ visibilityGraph pg  = visibilityGraphWith pg candidateEdges
                   <$> visiblePointsFrom v (pg^..outerBoundaryEdgeSegments)
                                           (pg^..vertices.asIndexedExt)
 
-
--- -- asExtPoint = to $ \(i,p) -> p :+ i
--- toExt (i,p) = p :+ i
-
-
 -- | O((n+m)\log (n+m))
 --
 -- pre; the obstacle edges are pairewise disjoint (except for possibly at endpoints)
@@ -181,33 +179,44 @@ visiblePointsFrom :: forall point r queryPoint obstacleEdge endPoint f g.
                      , Intersection (HalfLine (Point 2 r)) obstacleEdge
                        ~ Maybe (HalfLineLineSegmentIntersection (Point 2 r) obstacleEdge)
 
-                     , Show r, Show endPoint, Show obstacleEdge
+                     , Show r, Show endPoint, Show obstacleEdge, Show point, Show queryPoint
 
                      )
                   => point -> f obstacleEdge -> g queryPoint -> [queryPoint]
-visiblePointsFrom p' obstacleEdges queryPoints = case F.toList queryPoints of
-  []       -> []
-  (q0 : _) -> snd $ foldr (handle p) (initial,[]) events -- run the sweep
-    where
-      p   = p'^.asPoint :: Point 2 r
-      v   = (q0^.asPoint) .-. p
-      ray = HalfLine p v
+visiblePointsFrom p' obstacleEdges queryPoints =
+  case dropWhile (samePositionAs p') $ F.toList queryPoints of
+    []       -> []
+    (q0 : _) -> snd $ foldr (handle p) (initial,[]) events -- run the sweep
+      where
+        p   = p'^.asPoint :: Point 2 r
+        v   = (q0^.asPoint) .-. p
+        ray = HalfLine p v
 
-      -- sort the events cyclically around p
-      events = mergeSortedListsBy eventCmp queryEvents endPointEvents
+        -- sort the events cyclically around p
+        events = pTraceShowWith ("events",) $
+          dropWhile (samePositionAs p . eventPoint) $
+          mergeSortedListsBy eventCmp queryEvents endPointEvents
 
-      queryEvents    = sortEvents $ foldMap toEvent  queryPoints
-      endPointEvents = sortEvents $ foldMap toEvents obstacleEdges
 
-      sortEvents = F.toList . sortBy @V.Vector eventCmp . Builder.build @V.Vector
+        queryEvents    = sortEvents $ foldMap toEvent      queryPoints
+        endPointEvents = sortEvents $ foldMap (toEvents p) obstacleEdges
 
-      eventCmp e1 e2 = let a1 = eventPoint e1
-                           a2 = eventPoint e2
-                       in ccwCmpAroundWith v p a1 a2 <> cmpByDistanceTo  p a1 a2
+        sortEvents = F.toList . sortBy @V.Vector eventCmp . Builder.build @V.Vector
 
-      initial = Set.fromDistinctAscList . map snd . F.toList
-              . sortBy @V.Vector (cmpToRay ray)
-              $ mapMaybe (\s -> (,s) <$> ray `intersect` s) obstacleEdges
+        eventCmp e1 e2 = let a1 = eventPoint e1
+                             a2 = eventPoint e2
+                         in ccwCmpAroundWith v p a1 a2 <> cmpByDistanceTo  p a1 a2
+
+        initial = pTraceShowWith ("initial",p,ray,) $
+
+          Set.fromDistinctAscList . map snd . F.toList
+                . sortBy @V.Vector (cmpToRay ray)
+                $ mapMaybe (\s -> (,s) <$> ray `intersect` s) obstacleEdges
+
+-- | test two points lie on the same location.
+samePositionAs     :: (Point_ point 2 r, Point_ point' 2 r, Eq r, Num r)
+                   => point -> point' -> Bool
+samePositionAs p q = p^.vector == q^.vector
 
 
 -- | Given the initial halfine, compare the two intersection points to order the segments.
@@ -230,7 +239,7 @@ handle                                    :: ( HasSupportingLine edge
                                              , Intersection (LinePV 2 r) edge ~
                                                Maybe (LineLineSegmentIntersection edge)
 
-                                , Show r, Show point, Show edge
+                                , Show r, Show point, Show edge, Show queryPoint
 
                                              )
                                           => Point 2 r
@@ -239,13 +248,16 @@ handle                                    :: ( HasSupportingLine edge
                                           -> (Set.Set edge, [queryPoint])
 handle p evt acc@(statusStructure,output) = case evt of
     Query q' q
-      | isVisible q' -> (statusStructure, q : output)
-      | otherwise    -> acc
-    EndPoint q' seg  -> let cmp = cmpSegs (LinePV q' (q' .-. p))
-                        in (Set.toggleBy cmp seg statusStructure, output)
+      | isVisible q' -> pTraceShowWith ("queryVis",) (statusStructure, q : output)
+      | otherwise    -> pTraceShowWith ("queryInvis",) acc
+    EndPoint q' seg  -> let cmp = cmpSegs (LinePV p (q' .-. p))
+                        in pTraceShowWith ("endPointEvent",q',output,statusStructure,)
+                          (Set.toggleBy cmp seg statusStructure, output)
     -- note that we are comparing against a line rather than a halfline, since we are
     -- promissed the segments intersect the ray anyway. Furthermore, any segment
     -- can intersect a line only once.
+    ColinearSegment q' seg ->
+
   where
     -- to test if q' is visible we find the closest segment in the status structre
     -- and test if p and q' lie on the same side of this segment.
@@ -258,8 +270,11 @@ handle p evt acc@(statusStructure,output) = case evt of
 --------------------------------------------------------------------------------
 -- * Events
 
-data Event r queryPoint seg = Query    !(Point 2 r) queryPoint
-                            | EndPoint !(Point 2 r) seg
+
+data Event r queryPoint seg = ColinearSegment !(Point 2 r) seg
+-- note that we put the ColineaerSegments first, so that they get handled first.
+                            | Query           !(Point 2 r) queryPoint
+                            | EndPoint        !(Point 2 r) seg
                             deriving (Show)
 
 -- | Project out the point corresponding to the event
@@ -272,11 +287,18 @@ eventPoint = \case
 toEvent      :: Point_ queryPoint 2 r => queryPoint -> Builder.Builder (Event r queryPoint seg)
 toEvent q    = Builder.singleton $ Query (q^.asPoint) q
 
--- | Turn a segment into two events (correspoinding to its endpoints)
-toEvents      :: (LineSegment_ lineSegment point, Point_ point 2 r)
-              => lineSegment -> Builder.Builder (Event r queryPoint lineSegment)
-toEvents seg = Builder.singleton (EndPoint (seg^.start.asPoint) seg)
-            <> Builder.singleton (EndPoint (seg^.end.asPoint)   seg)
+-- | Turn a segment into events (correspoinding to its endpoints) (or a single special
+-- event in case of colinear segments).
+toEvents        :: (LineSegment_ lineSegment point, Point_ point 2 r, Ord r, Num r)
+                => Point 2 r -> lineSegment -> Builder.Builder (Event r queryPoint lineSegment)
+toEvents c seg = case ccw c s e of
+                   CoLinear -> Builder.singleton (ColinearSegment closest seg)
+                   _        -> Builder.singleton (EndPoint () seg)
+                            <> Builder.singleton (EndPoint (seg^.end.asPoint)   seg)
+  where
+    s = seg^.start.asPoint
+    e = seg^.end.asPoint
+    closest = if squaredEuclideanDist c s <= squaredEuclideanDist c e then s else e
 
 --------------------------------------------------------------------------------
 -- * Comparing Segments with respect to a given sweep ray
