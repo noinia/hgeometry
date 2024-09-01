@@ -17,6 +17,7 @@ module HGeometry.Point.PointF
 import           Control.DeepSeq
 import           Control.Lens
 import           Control.Monad (replicateM)
+import           Data.Aeson
 import           Data.Functor.Classes
 import           Data.List (intersperse)
 import           Data.Proxy
@@ -32,13 +33,14 @@ import           HGeometry.Vector
 import           System.Random (Random (..))
 import           System.Random.Stateful (UniformRange(..), Uniform(..))
 import           Text.Read (Read (..), readListPrecDefault)
-
 --------------------------------------------------------------------------------
 
 -- | A Point wraps a vector
 newtype PointF v = Point { toVec :: v }
                  deriving stock   (Generic)
-                 deriving newtype (Eq, Ord, Random, NFData, Bounded, Enum, FromYAML, ToYAML)
+                 deriving newtype ( Eq, Ord, Random, NFData, Bounded, Enum, FromYAML, ToYAML
+                                  , ToJSON, FromJSON
+                                  )
 -- don't derive functor, or so here. since that will be confusing.
 
 type instance Dimension (PointF v) = Dimension v

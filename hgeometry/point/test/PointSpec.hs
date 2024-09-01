@@ -81,7 +81,8 @@ spec = do
 
   describe "Sort Arround a Point test" $ do
     it "Sort around origin" $
-      sortAround origin [ Point2 (-3) (-3)
+      sortAround (origin :: Point 2 Int)
+                        [ Point2 (-3) (-3)
                         , Point2 (-1) (-5)
                         , Point2 5    5
                         , Point2 6    (-4)
@@ -110,13 +111,15 @@ spec = do
                  , Point2 26   (-2)
                  ]
     it "degenerate points on horizontal line" $
-      sortAround origin [ Point2 2    (0 :: Int)
+      sortAround (origin :: Point 2 Int)
+                        [ Point2 2    (0 :: Int)
                         , Point2 (-1) 0
                         , Point2 10   0
                         ]
       `shouldBe` [ Point2 2 0, Point2 10 0, Point2 (-1) 0 ]
     it "degenerate points on vertical line" $
-      sortAround origin [ Point2 0 (2 :: Int)
+      sortAround (origin :: Point 2 Int)
+                        [ Point2 0 (2 :: Int)
                         , Point2 0 (-1)
                         , Point2 0 10
                         ]
@@ -125,7 +128,7 @@ spec = do
 
   describe "Insert point in ciclically ordered list" $ do
     it "insert" $
-      insertIntoCyclicOrder (ext origin) (ext $ Point2 (-4) (-5))  (
+      insertIntoCyclicOrder (origin :: Point 2 Int) (ext $ Point2 (-4) (-5))  (
         C.fromList $ map ext [ Point2 20   (0 :: Int)
                              , Point2 10   1
                              , Point2 2    2

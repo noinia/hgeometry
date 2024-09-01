@@ -101,7 +101,7 @@ fromCCWList :: [plane] -> Definers plane
 fromCCWList = Definers
 
 -- | Smart constructor for creating the definers of three planes
-definers                                    :: (Plane_ plane r, Ord r, Fractional r)
+definers                                    :: forall plane r.(Plane_ plane r, Ord r, Fractional r)
                                             => Three plane -> Maybe (Point 3 r, Definers plane)
 definers (Three h1@(Plane_ a1 b1 c1) h2 h3) =
     do l12 <- intersectionLine h1 h2
@@ -117,7 +117,7 @@ definers (Three h1@(Plane_ a1 b1 c1) h2 h3) =
              -- h' are the other two planes. That Means hMin is the first definer (in the
              -- CCW order). What remains is to determine the order in which the remaining
              -- planes h and h' appear in the order.
-             (hTwo,hThree) = case ccwCmpAroundWith (Vector2 0 1) origin
+             (hTwo,hThree) = case ccwCmpAroundWith (Vector2 0 1) (origin :: Point 2 r)
                                                    (Point vMinH) (Point vMinH') of
                                LT -> (h,h')
                                EQ -> error "definers: weird degeneracy?"
@@ -151,7 +151,7 @@ findNeighbours h (Definers defs) = withNeighs <$> List.elemIndex h defs
 
 -- | Adds a plane to the definers. In particular, places it in the right cyclic order.
 -- pre: the plane is an actual definer; i.e. it also goes through the vertex.
-insertPlane :: (Plane_ plane r, Eq plane, Ord r, Fractional r)
+insertPlane :: forall plane r. (Plane_ plane r, Eq plane, Ord r, Fractional r)
             => Point 2 r -- ^ the projection of the vertex
             -> plane     -- ^ the plane that is a definer
             -> Definers plane -> Definers plane
@@ -180,7 +180,7 @@ insertPlane (Point2 x y) plane (Definers planes) = Definers $ go plane planes
     --      h0 is the final plane that also started the cyclic order.
     -- hs are the remaining planes in the yclic order.
     insert hPrev h hs h0 = case hs of
-      [] -> case ccwCmpAroundWith up origin (Point u) (Point w) of
+      [] -> case ccwCmpAroundWith up (origin :: Point 2 r) (Point u) (Point w) of
               GT -> [h] -- insert h and finish
               _  -> [] -- h is dominated; don't insert it
         where
@@ -189,7 +189,7 @@ insertPlane (Point2 x y) plane (Definers planes) = Definers $ go plane planes
           err = error "insertPlane: insert basecase. absurd"
       (hNxt:hs')
         | h == hNxt  -> hs -- duplicate plane; exit early
-        | otherwise  -> case ccwCmpAroundWith up origin (Point u) (Point w) of
+        | otherwise  -> case ccwCmpAroundWith up (origin :: Point 2 r) (Point u) (Point w) of
           GT -> h : finish h hs h0
           -- we've inserted h, so drop the planes that are dominated by h
           _  -> hNxt : insert hNxt h hs' h0 -- try to insert at a later position
@@ -202,7 +202,7 @@ insertPlane (Point2 x y) plane (Definers planes) = Definers $ go plane planes
     -- this is essentially List.dropWhile, but we may need the h0 plane in the end.
     finish hNew hs h0 = case hs of
       []      -> []
-      (h:hs') -> case ccwCmpAroundWith up origin (Point u) (Point w) of
+      (h:hs') -> case ccwCmpAroundWith up (origin :: Point 2 r) (Point u) (Point w) of
                    LT -> hs  -- hNew's region indeed ends before h's region ends, so keep
                              -- h and the remaining planes
                    _  -> finish hNew hs' h0 -- hNew dominates h, so drop h.
@@ -283,7 +283,7 @@ singleVertex h (v,defs) = fromMaybe (error "singleVertex: absurd") $
 --
 -- computes the actual region R. In particular, we compute the direction that the
 -- unbounded edges have.
-unboundedRegion              :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
+unboundedRegion              :: forall plane r.(Plane_ plane r, Ord r, Fractional r, Ord plane)
                              => plane
                              -> NonEmpty (Point 2 r)
                              -> (Point 2 r, Definers plane) -> (Point 2 r, Definers plane)
@@ -294,11 +294,11 @@ unboundedRegion h chain v@(v',_) u@(u',_)  = Unbounded wv chain wu
     (u1,_,u2) = singleVertex h u
 
     z  = u' .-. v'
-    wv = case ccwCmpAroundWith z origin (Point $ negated v1) (Point $ negated v2) of
+    wv = case ccwCmpAroundWith z (origin :: Point 2 r) (Point $ negated v1) (Point $ negated v2) of
            LT -> v1
            EQ -> v2 -- this probably shouldn't happen
            GT -> v2
-    wu = case ccwCmpAroundWith z origin (Point u1) (Point u2) of
+    wu = case ccwCmpAroundWith z (origin :: Point 2 r) (Point u1) (Point u2) of
            LT -> u2
            EQ -> u1 -- this probably shouldn't happen
            GT -> u1

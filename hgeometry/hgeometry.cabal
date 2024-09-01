@@ -22,8 +22,8 @@ extra-doc-files:
 -- extra-source-files:
 data-dir: data
 data-files:
-    polygons.simple
-    polygons.multi
+    polygons.simple.json
+    -- polygons.multi
     ipe/basic.isy
     ipe/opacities.isy
     test-with-ipe/**/*.ipe
@@ -39,8 +39,11 @@ source-repository head
 --------------------------------------------------------------------------------
 
 common all-setup
-    ghc-options: -O2 -Wall -fno-warn-unticked-promoted-constructors -fno-warn-type-defaults
-                -fspecialise-aggressively -fexpose-all-unfoldings
+    ghc-options: -O2 -fspecialise-aggressively -fexpose-all-unfoldings
+                 -Wall
+                 -fno-warn-unticked-promoted-constructors
+                 -fno-warn-type-defaults
+                 -fno-warn-partial-type-signatures
 
     build-depends:
         base                      >= 4.16.1.0      && < 5
@@ -77,7 +80,9 @@ common all-setup
       , ghc-typelits-natnormalise >= 0.7.7         && < 1
       , ghc-typelits-knownnat     >= 0.7.6         && < 1
 
-      , entropy >= 0.4.1.10
+      -- , entropy                   >= 0.4.1.10      && < 0.5
+      -- , pretty-simple             >= 4.1.2.0       && < 5
+
 
     default-language: GHC2021
 
@@ -97,6 +102,7 @@ common all-setup
       , LambdaCase
       , ViewPatterns
       , FunctionalDependencies
+      , PartialTypeSignatures
 
 common point-setup
     build-depends:
@@ -363,6 +369,8 @@ library
 
         HGeometry.Polygon.WithHoles
 
+        -- HGeometry.Polygon.Visibility
+        HGeometry.Polygon.Visibility.Naive
 
         HGeometry.PolyLine
         HGeometry.PolyLine.Class
@@ -743,6 +751,7 @@ test-suite with-ipe-hspec
       Polygon.Simple.InPolygonSpec
       Polygon.Convex.ConvexSpec
       Polygon.Convex.ConvexSpec
+      Polygon.VisibilitySpec
       VoronoiDiagram.VoronoiSpec
       Plane.LowerEnvelopeSpec
       LineSegmentSpec

@@ -39,7 +39,7 @@ newtype E r = E (Vector 2 r)
 instance (Ord r, Num r) => Eq (E r) where
   a == b = a `compare` b == EQ
 instance (Ord r, Num r) => Ord (E r) where
-  (E v) `compare` (E u) = ccwCmpAroundWith (Vector2 0 1) origin (Point v) (Point u)
+  (E v) `compare` (E u) = ccwCmpAroundWith (Vector2 0 1) (origin :: Point 2 r) (Point v) (Point u)
 
 -- | Produce a triangulated plane graph on the bounded vertices.  every vertex is
 -- represented by its point, it stores a list of its outgoing edges, and some data.

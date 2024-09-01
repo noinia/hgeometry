@@ -36,9 +36,9 @@ import           HGeometry.LineSegment.Intersection.BentleyOttmann
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple.Class
-import           HGeometry.Polygon.Simple.Type
 import           HGeometry.Polygon.Simple.Implementation
 import           HGeometry.Polygon.Simple.InPolygon
+import           HGeometry.Polygon.Simple.Type
 import           HGeometry.Vector.NonEmpty.Util ()
 
 --------------------------------------------------------------------------------
@@ -53,6 +53,30 @@ instance ( VertexContainer f point
   type VertexIx (SimplePolygonF f point) = Int
   vertexAt i = _SimplePolygonF . iix i
   numVertices = F.length . view _SimplePolygonF
+
+-- instance VertexContainer f point => HasEdges' (SimplePolygonF f point) where
+--   -- ^ An edge (v_i,v_{i+1})
+--   type Edge   (SimplePolygonF f point) = (point, point)
+--    -- ^ every edge (v_i,v_{i+1}) is identified by (the index of) its preceding vertex v_i
+--   type EdgeIx (SimplePolygonF f point) = Int
+--   edgeAt i = \pEfE pg -> indexed pEfE i (pg^?!vertexAt i, pg^?!vertexAt (succ i))
+--                          <&> \(u',v') -> pg&vertexAt i        .~ u'
+--                                            &vertexAt (succ i) .~ v'
+--     -- we first just run the function pEfE on the particular edge in question,
+--     -- we get some updated vertices out of this; which we then update appropriately.
+--   {-# INLINE edgeAt #-}
+--   numEdges = numVertices
+
+-- instance VertexContainer f point
+--        => HasEdges (SimplePolygonF f point) (SimplePolygonF f point) where
+--   -- ^ Warning for when using this as a traversal: when applying the function on an edge
+--   -- (v_i,v_{i+1}) that modifies vertex v_{i+1}, this modification is discarded.
+--   edges = \pEfE pg -> let pvFv i v = fst <$> indexed pEfE i (v, pg^?!vertexAt (succ i))
+--                       in vertices pvFv pg
+--
+-- I've uncommented these for now; since the above behaviour would be inconsistent between
+-- edgeAt (which would modify both vertices), and edges, which would modify only one vertex.
+-- that is a bit too weird.
 
 instance ( VertexContainer f point
          ) => HasOuterBoundary (SimplePolygonF f point) where

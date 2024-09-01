@@ -19,7 +19,7 @@ import HGeometry.Interval
 import HGeometry.Line
 import HGeometry.LineSegment.Internal
 import HGeometry.Point
-import HGeometry.Properties (NumType)
+import HGeometry.Properties (NumType, Dimension)
 
 --------------------------------------------------------------------------------
 -- * Line x LineSegment Intersection
@@ -184,68 +184,71 @@ fmap' f = \case
 
 -- | Test if the spans (i.e. the projections onto the x-axis and on the yaxis) of the
 -- segments intersect
-spansIntersect      :: forall endPoint endPoint' point r.
-                       ( Point_ point 2 r, Ord r, Num r, Functor endPoint, Functor endPoint'
+spansIntersect      :: forall endPoint endPoint' point point' r.
+                       ( Point_ point 2 r, Point_ point' 2 r
+                       , Ord r, Num r, Functor endPoint, Functor endPoint'
                        , IxValue (endPoint point) ~ point
                        , EndPoint_ (endPoint point)
-                       , IxValue (endPoint' point) ~ point
-                       , EndPoint_ (endPoint' point)
+                       , IxValue (endPoint' point') ~ point'
+                       , EndPoint_ (endPoint' point')
                        , HasIntersectionWith (Interval endPoint r) (Interval endPoint' r)
-                       ) => LineSegment endPoint point -> LineSegment endPoint' point -> Bool
+                       )
+                    => LineSegment endPoint point -> LineSegment endPoint' point' -> Bool
 spansIntersect s s' = f xCoord && f yCoord
   where
-    f         :: Getter point r -> Bool
+    f         :: (forall aPoint. Point_ aPoint 2 r => Getter aPoint r) -> Bool
     f coord'' = spanIn coord'' s `intersects` spanIn coord'' s'
 
-instance ( Point_ point 2 r, Num r,  Ord r
+instance ( Point_ point 2 r, Point_ point' 2 r, Num r,  Ord r
          , Functor endPoint
          , IxValue (endPoint point) ~ point, EndPoint_ (endPoint point)
+         , IxValue (endPoint point') ~ point', EndPoint_ (endPoint point')
          , IxValue (endPoint r) ~ r, EndPoint_ (endPoint r)
          , HasIntersectionWith (Interval endPoint r) (Interval endPoint r)
          ) =>
-         LineSegment endPoint point `HasIntersectionWith` LineSegment endPoint point where
+         LineSegment endPoint point `HasIntersectionWith` LineSegment endPoint point' where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
                       && spansIntersect s s'
   {-# INLINE intersects #-}
 
-instance ( Point_ point 2 r, Num r,  Ord r
+instance ( Point_ point 2 r, Point_ point' 2 r, Num r,  Ord r
          ) =>
-         LineSegment AnEndPoint point `HasIntersectionWith` ClosedLineSegment point where
+         LineSegment AnEndPoint point `HasIntersectionWith` ClosedLineSegment point' where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
                       && spansIntersect s s'
   {-# INLINE intersects #-}
 
-instance ( Point_ point 2 r, Num r,  Ord r
+instance ( Point_ point 2 r, Point_ point' 2 r, Num r,  Ord r
          ) =>
-         LineSegment AnEndPoint point `HasIntersectionWith` OpenLineSegment point where
+         LineSegment AnEndPoint point `HasIntersectionWith` OpenLineSegment point' where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
                       && spansIntersect s s'
   {-# INLINE intersects #-}
 
-instance ( Point_ point 2 r, Num r,  Ord r
+instance ( Point_ point 2 r, Point_ point' 2 r, Num r,  Ord r
          ) =>
-         ClosedLineSegment point `HasIntersectionWith` LineSegment AnEndPoint point where
+         ClosedLineSegment point `HasIntersectionWith` LineSegment AnEndPoint point' where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
                       && spansIntersect s s'
   {-# INLINE intersects #-}
 
-instance ( Point_ point 2 r, Num r,  Ord r
+instance ( Point_ point 2 r, Point_ point' 2 r, Num r,  Ord r
          ) =>
-         ClosedLineSegment point `HasIntersectionWith` OpenLineSegment point where
+         ClosedLineSegment point `HasIntersectionWith` OpenLineSegment point' where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
                       && spansIntersect s s'
   {-# INLINE intersects #-}
 
-instance ( Point_ point 2 r, Num r,  Ord r
+instance ( Point_ point 2 r, Point_ point' 2 r, Num r,  Ord r
          ) =>
-         OpenLineSegment point `HasIntersectionWith` LineSegment AnEndPoint point where
+         OpenLineSegment point `HasIntersectionWith` LineSegment AnEndPoint point' where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
                       && spansIntersect s s'
   {-# INLINE intersects #-}
 
-instance ( Point_ point 2 r, Num r,  Ord r
+instance ( Point_ point 2 r, Point_ point' 2 r, Num r,  Ord r
          ) =>
-         OpenLineSegment point `HasIntersectionWith` ClosedLineSegment point where
+         OpenLineSegment point `HasIntersectionWith` ClosedLineSegment point' where
   s `intersects `s' = supportingLine s `intersects` s' && supportingLine s' `intersects` s
                       && spansIntersect s s'
   {-# INLINE intersects #-}
@@ -431,3 +434,14 @@ compareColinearInterval l@(LinePV p _) seg = case p `onSide` mStart of
     mStart = m&anchorPoint .~ seg^.start.asPoint
     mEnd   = m&anchorPoint .~ seg^.end.asPoint
     -- the left side is the side in which the vector v points.
+
+type instance NumType   (HalfLineLineSegmentIntersection point edge) = NumType point
+type instance Dimension (HalfLineLineSegmentIntersection point edge) = Dimension point
+
+instance ( HasSquaredEuclideanDistance point
+         , HasSquaredEuclideanDistance segment
+         , NumType point ~ NumType segment, Dimension point ~ Dimension segment
+         ) => HasSquaredEuclideanDistance (HalfLineLineSegmentIntersection point segment) where
+  pointClosestToWithDistance q = \case
+    HalfLine_x_LineSegment_Point p         -> pointClosestToWithDistance q p
+    HalfLine_x_LineSegment_LineSegment seg -> pointClosestToWithDistance q seg

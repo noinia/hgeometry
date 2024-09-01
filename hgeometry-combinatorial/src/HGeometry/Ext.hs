@@ -178,3 +178,13 @@ instance AsExt (c :+ e) where
 --   _Ext = iso (\(CoreOnly c) -> ext c) (CoreOnly . view core)
 
 --------------------------------------------------------------------------------
+
+-- | Helper to run an indexed something into an Ext in which the index is the extra info
+--
+-- >>> "foobar" ^.. ifolded . asIndexedExt
+-- ['f' :+ 0,'o' :+ 1,'o' :+ 2,'b' :+ 3,'a' :+ 4,'r' :+ 5]
+asIndexedExt   :: (Indexable i p, Functor f)
+               => p (s :+ i) (f (t :+ j))
+               -> Indexed i s (f t)
+asIndexedExt f = Indexed $ \i a -> view core <$> indexed f i (a :+ i)
+{-# INLINE asIndexedExt #-}

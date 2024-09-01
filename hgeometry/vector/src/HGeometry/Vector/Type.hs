@@ -17,6 +17,7 @@ module HGeometry.Vector.Type
 
 import           Control.DeepSeq
 import           Control.Lens
+import           Data.Aeson
 import           Data.Coerce
 import qualified Data.Functor.Apply as Apply
 import           Data.Kind (Type)
@@ -24,6 +25,7 @@ import qualified Data.List as List
 import           Data.Proxy
 import           Data.Semigroup.Foldable
 import           Data.These
+import qualified Data.Vector as Array
 import           Data.YAML
 import           Data.Zip
 import           GHC.Generics (Generic)
@@ -109,6 +111,13 @@ instance FromYAML r => FromYAML (Vector 1 r) where
         [pos] -> Vector1 <$> parseYAML pos
         _     -> failAtNode node "expected exactly 1 element"
 
+instance FromJSON r => FromJSON (Vector 1 r) where
+  parseJSON = withArray "Vector1" (f . Array.toList)
+    where
+      f = \case
+        [x] -> Vector1 <$> parseJSON x
+        _   -> fail "expected exactly 1 element"
+
 --------------------------------------------------------------------------------
 
 newtype instance Vector 2 r = MkVector2 (Linear.V2 r)
@@ -157,6 +166,13 @@ instance FromYAML r => FromYAML (Vector 2 r) where
       f = \case
         [posX,posY] -> Vector2 <$> parseYAML posX <*> parseYAML posY
         _           -> failAtNode node "expected exactly 2 elements"
+
+instance FromJSON r => FromJSON (Vector 2 r) where
+  parseJSON = withArray "Vector2" (f . Array.toList)
+    where
+      f = \case
+        [x,y] -> Vector2 <$> parseJSON x <*> parseJSON y
+        _     -> fail "expected exactly 2 elements"
 
 --------------------------------------------------------------------------------
 
@@ -208,6 +224,13 @@ instance FromYAML r => FromYAML (Vector 3 r) where
       f = \case
         [posX,posY,posZ] -> Vector3 <$> parseYAML posX <*> parseYAML posY <*> parseYAML posZ
         _                -> failAtNode node "expected exactly 3 elements"
+
+instance FromJSON r => FromJSON (Vector 3 r) where
+  parseJSON = withArray "Vector3" (f . Array.toList)
+    where
+      f = \case
+        [x,y,z] -> Vector3 <$> parseJSON x <*> parseJSON y <*> parseJSON z
+        _       -> fail "expected exactly 3 elements"
 
 
 -- | cross product
@@ -269,6 +292,12 @@ instance FromYAML r => FromYAML (Vector 4 r) where
           Vector4 <$> parseYAML posX <*> parseYAML posY <*> parseYAML posZ  <*> parseYAML posW
         _                     -> failAtNode node "expected exactly 4 elements"
 
+instance FromJSON r => FromJSON (Vector 4 r) where
+  parseJSON = withArray "Vector4" (f . Array.toList)
+    where
+      f = \case
+        [x,y,z,w] -> Vector4 <$> parseJSON x <*> parseJSON y <*> parseJSON z <*> parseJSON w
+        _         -> fail "expected exactly 4 elements"
 
 --------------------------------------------------------------------------------
 -- * Linear Instances
@@ -324,3 +353,6 @@ instance ( HasComponents (Vector d r) (Vector d r)
 
 instance (ToYAML r, HasComponents (Vector d r) (Vector d r)) => ToYAML (Vector d r) where
   toYAML = toYAML . toListOf components
+
+instance (ToJSON r, HasComponents (Vector d r) (Vector d r)) => ToJSON (Vector d r) where
+  toJSON = toJSON . toListOf components

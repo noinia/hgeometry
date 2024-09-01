@@ -184,7 +184,9 @@ dartSegments = theFold
 
 -- | Renders all edges as line segments.
 edgeSegments :: forall planeGraph vertex.
-                ( PlaneGraph_ planeGraph vertex
+                ( HasEdges planeGraph planeGraph
+                , BidirGraph_ planeGraph
+                , vertex ~ Vertex planeGraph
                 , Point_ vertex 2 (NumType vertex)
                 )
              => IndexedFold (EdgeIx planeGraph) planeGraph (ClosedLineSegment vertex)
