@@ -4,16 +4,12 @@ module Polygon.VisibilitySpec where
 
 import           Control.Lens
 import           Data.Maybe
-import qualified Data.Set as Set
+-- import qualified Data.Set as Set
 import           Golden
-import           HGeometry.Ball
-import           HGeometry.Combinatorial.Util
+import           Data.List.NonEmpty (NonEmpty(..))
 import           HGeometry.Ext
-import           HGeometry.HalfLine
-import           HGeometry.Intersection
 import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
-import           HGeometry.PlaneGraph.Class
 import           HGeometry.Point
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Instances ()
@@ -25,10 +21,12 @@ import           Ipe
 import           Ipe.Color
 import           System.OsPath
 import           Test.Hspec
-import           Test.Hspec.QuickCheck
+-- import           Test.Hspec.QuickCheck
 import           Test.Hspec.WithTempFile
-import           Test.QuickCheck ((===))
+import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
+-- import qualified Data.Text as Text
+
 
 --------------------------------------------------------------------------------
 
@@ -39,27 +37,43 @@ spec = describe "visibility graph / visibility polygon" $ do
          -- prop "naive visibility graph and fast one the same " $
          --   \(pg :: SimplePolygon (Point 2 R)) ->
          --     Set.fromList (visibilityGraph pg) === Set.fromList (Naive.visibilityGraph pg)
-
+         polygonPages <- runIO readInputPolygons
          goldenWith [osp|data/test-with-ipe/golden/Polygon/|]
-           (ipeContentGolden { name = [osp|visibility|] })
-             (concat
-             [ [iO $ defIO myPolygon ! attr SLayer "polygon"
-               ]
-             , [ iO $ defIO (drawVisibilityEdge e myPolygon) ! attr SStroke red
-                                                             ! attr SLayer "visibilityGraph"
+           (ipeFileGolden { name = [osp|visibility|] })
+             (ipeFile $ perPage <$> polygonPages)
 
-               | e <- visibilityGraph myPolygon
-               ]
-             , [ iO $ defIO (drawVisibilityEdge e myPolygon) ! attr SStroke red
-                                                             ! attr SLayer "naive"
+readInputPolygons :: IO (NonEmpty (IpePage R))
+readInputPolygons = do
+  Right file <- readIpeFile [osp|data/test-with-ipe/golden/Polygon/visibilityInputPolygons.ipe|]
+  pure $ file^.pages
 
-               | e <- Naive.visibilityGraph myPolygon
-               ]
-             ])
 
+perPage      :: IpePage R -> IpePage R
+perPage page = fromContent . foldMap (drawSingle . (^.core)) $ readAll page
+
+drawSingle    :: SimplePolygon (Point 2 R) -> [IpeObject R]
+drawSingle pg = concat
+  [ [ iO $ defIO (drawVisibilityEdge e pg) ! attr SStroke red
+                                           ! attr SLayer "naive"
+
+    | e <- Naive.visibilityGraph pg
+    ]
+             -- , [ iO $ defIO (drawVisibilityEdge e pg) ! attr SStroke red
+             --                                          ! attr SLayer "visibilityGraph"
+
+             --   | e <- visibilityGraph pg
+             --   ]
+  , [iO $ defIO pg ! attr SLayer "polygon" ]
+  ]
+
+
+
+
+
+drawVisibilityEdge :: Vector 2 Int -> SimplePolygon (Point 2 R) -> ClosedLineSegment (Point 2 R)
 drawVisibilityEdge (Vector2 u v) pg = ClosedLineSegment (pg^?!vertexAt u) (pg^?!vertexAt v)
 
-
+--------------------------------------------------------------------------------
 
 myPolygon :: SimplePolygon (Point 2 R)
 myPolygon = fromJust
@@ -74,3 +88,10 @@ myPolygon = fromJust
                        ]
 
 -- out = pg
+
+-- | Generates some input files
+createFile :: IO ()
+createFile = do
+  pgs <- sample' arbitrary
+  writeIpeFile [osp|visibilityInputPolygons.ipe|] $
+                 ipeFile $ fmap (\pg -> fromContent [ iO $ defIO pg ]) (myPolygon :| pgs)
