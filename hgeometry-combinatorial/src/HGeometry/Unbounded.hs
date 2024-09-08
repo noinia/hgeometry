@@ -37,6 +37,7 @@ import qualified Data.Traversable     as T
 -- >>> data Top a = ValT a | Top
 newtype Top a = GTop (Maybe a)
                 deriving (Eq,Functor,F.Foldable,T.Traversable,Applicative,Monad,Eq1)
+                deriving newtype (Semigroup,Monoid)
 
 -- | @Top a@ values are isomorphing to @Maybe a@ values.
 topToMaybe :: Top a -> Maybe a
@@ -49,6 +50,8 @@ pattern Top    :: Top a
 pattern Top    = GTop Nothing
 
 {-# COMPLETE ValT, Top #-}
+
+
 
 
 instance Ord1 Top where
@@ -102,6 +105,7 @@ _TopMaybe = iso topToMaybe GTop
 -- >>> data Bottom a = Bottom | ValB a
 newtype Bottom a = GBottom (Maybe a)
                  deriving (Eq,Ord,Functor,F.Foldable,T.Traversable,Applicative,Monad,Eq1,Ord1)
+                 deriving newtype (Semigroup,Monoid)
 
 -- | `Bottom a` values are isomorphing to `Maybe a` values.
 bottomToMaybe :: Bottom a -> Maybe a
