@@ -89,13 +89,8 @@ planarSeparatorCycle                   :: ( Ord k, Show k)
                                        -> PlaneGraph k v e -> Tree k
                                        -> Cycle' k
 planarSeparatorCycle allowedWeight gr = NonEmpty.last
-                                      . showCycles
                                       . NonEmpty.fromList . NonEmpty.take 10  -- FIXME remove this
                                       . planarSeparatorCycles allowedWeight gr
-  where
-    showCycles cs = traceShow ("CYCLES", fmap missingEdge cs, length cs
-                              ) cs
-
 
 -- | Constructs the sequence of growing cycles (i.e. shrinking in reverse order)
 planarSeparatorCycles                     :: forall k v e.
@@ -116,15 +111,11 @@ planarSeparatorCycles allowedWeight gr tr = NonEmpty.unfoldr shrink $ initialCyc
     shrink (Weighted w c) = (c, shrunken)
       where
         shrunken
-          | w <= allowedWeight = traceShow "DONE" Nothing -- we are done
+          | w <= allowedWeight = Nothing -- we are done
           | otherwise          =
             case getFirst $ foldMap splitCycle (commonNeighbours e gr) of
-              Nothing                 ->
-                traceShowWith ("erroring but returning anyway",) Nothing
-                -- error $
-                --   ("planarSeparatorTree: impossible " <> show e' <> " not inside " <>
-                --    show (commonNeighbours e' gr))
-              res@(Just _) -> traceShowWith ("shrunken",) res
+              Nothing      -> error "planarSeparatorTree: impossible edge not inside cycle"
+              res@(Just _) -> res
 
         e = missingEdge c
 
@@ -132,12 +123,11 @@ planarSeparatorCycles allowedWeight gr tr = NonEmpty.unfoldr shrink $ initialCyc
         splitCycle u = First
                      . fmap (F.maximumBy (comparing getWeight) . fmap withInteriorWeight)
                      .  splitCycleAt splitLeaf'' splitChildren'' (== u)
-                     . traceShowWith annotateWithMissingEdge
                      $ c
 
     -- aSize c = let Vector2 as _ = snd . toSeparator gr $ c  in length as
 
-annotateWithMissingEdge c = ("withMissingEdge ",missingEdge c,"of ",c)
+-- annotateWithMissingEdge c = ("withMissingEdge ",missingEdge c,"of ",c)
 
 
 

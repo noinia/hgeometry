@@ -117,6 +117,7 @@ spec = describe "lower envelope tests" $ do
                  [osp|simple1_out|]
          testIpe [osp|foo.ipe|]
                  [osp|foo_out|]
+
          testIpe [osp|degenerate.ipe|]
                  [osp|degenerate_out|]
          testIpe [osp|degenerate1.ipe|]
@@ -124,17 +125,28 @@ spec = describe "lower envelope tests" $ do
          testIpe [osp|degenerate2.ipe|]
                  [osp|degenerate2_out|]
 
+         testIpe [osp|foo_debug.ipe|]
+                 [osp|foo_debug_out|]
+
+
          testIpeGraph [osp|simple1.ipe|]
                       [osp|simple1_graph_out|]
          testIpeGraph [osp|foo_simple.ipe|]
                       [osp|foo_simple_graph_out|]
+         testIpeGraph [osp|foo_simple1.ipe|]
+                      [osp|foo_simple1_graph_out|]
+
+
+         testIpeGraph [osp|foo_issue.ipe|]
+                      [osp|foo_issue_graph_out|]
+
+         -- testIpeGraph [osp|foo_debug.ipe|]
+         --              [osp|foo_debug_graph_out|]
+
 
          -- testIpeGraph [osp|foo.ipe|]
          --              [osp|foo_graph_out|]
 
-
-
-{-
          describe "planar separator tests" $ do
            prop "findNode on path the same" $
              \(t :: Tree Int) ->
@@ -234,8 +246,6 @@ spec = describe "lower envelope tests" $ do
                   let allElems     = Set.fromList $ toList t
                       theCycle     = toCycle splitLeaf splitChildren $ initialSplit e t
                   in collectAll' theCycle === allElems
-
--}
 
 
 splitLeaf' k _ (Node z nodes) = NodeSplit z (take k nodes) (drop k nodes)
@@ -403,8 +413,39 @@ testIpeGraph inFp outFp = do
     (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
       inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
       NonEmpty.fromList <$> readAllFrom inFp'
+    describe ("testIpeGraph for" <> show inFp) $ do
+      separatorTests points
+
+      let vd = voronoiDiagram' $ view core <$> points
+          vv = voronoiVertices $ view core <$> points
+          gr = toPlaneGraph $ Map.mapKeysMonotonic liftPointToPlane vd
+          n  = length gr
+          ((tr,_):_) = connectedComponents gr
+          allowedWeight = (2*n) `div` 3
+          cycles' = planarSeparatorCycles allowedWeight gr tr
+
+          (Separator sep' as' bs') = drawSeparator $ planarSeparator gr
+          out = [ iO' points
+                , iO' vd
+                , iO' $ theEdges gr
+                , iO $ sep' ! attr SLayer "sep"
+                , iO $ as'  ! attr SLayer "setA"
+                , iO $ bs'  ! attr SLayer "setB"
+                ] <> [ iO' $ drawTree  t ! attr SLayer "trees"
+                     | t <- bff gr ]
+                  <> drawCycles cycles'
+                  <> [ iO $ defIO v ! attr SLayer "vertices"
+                                    ! attr SStroke red
+                     | v <- Set.toAscList vv
+                     ]
+
+      goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
+                 (ipeFileGolden { name = outFp })
+                 (addStyleSheet opacitiesStyle $ singlePageFromContent out)
 
 
+separatorTests        :: NonEmpty (Point 2 R :+ _) -> Spec
+separatorTests points = describe "separatorTests" $ do
     let vd = voronoiDiagram' $ view core <$> points
         vv = voronoiVertices $ view core <$> points
         gr = toPlaneGraph $ Map.mapKeysMonotonic liftPointToPlane vd
@@ -412,30 +453,21 @@ testIpeGraph inFp outFp = do
         n  = length gr
         ((tr,_):_) = connectedComponents gr
         allowedWeight = (2*n) `div` 3
-        cycles' = traceShowWith ("thecycles",) $ planarSeparatorCycles allowedWeight gr tr
+        cycles' = planarSeparatorCycles allowedWeight gr tr
         finalCycle = NonEmpty.last cycles'
 
-        s@(Separator sep as bs)  = traceShowWith ("theSeparator",) $ planarSeparator gr
-        (Separator sep' as' bs') = drawSeparator s
-        out = [ iO' points
-              , iO' vd
-              , iO' $ theEdges gr
-              , iO $ sep' ! attr SLayer "sep"
-              , iO $ as'  ! attr SLayer "setA"
-              , iO $ bs'  ! attr SLayer "setB"
-              ] <> [ iO' $ drawTree  t ! attr SLayer "trees"
-                   | t <- bff gr ]
-                <> drawCycles cycles'
-                <> [ iO $ defIO v ! attr SLayer "vertices"
-                                  ! attr SStroke red
-                   | v <- Set.toAscList vv
-                   ]
+        s@(Separator sep as bs)  = planarSeparator gr
+
     it "separator is complete" $
       (Set.fromList $ sep <> as <> bs) `shouldBe` (Map.keysSet gr)
-    it ("separator is balanced " <> show outFp <> show ("sizes",n,length as, length bs, length sep)) $
-      (max (length as) (length bs) <= (2*(n `div` 3))) `shouldBe` True
-    it ("separator is small " <> show outFp) $
-      (length sep <= 2*floor (sqrt $ fromIntegral n)) `shouldBe` True
+    describe "separator is balanced " $ do
+      it "size as ok" $
+        length as `shouldBeAtMost` allowedWeight
+      it "size bs ok" $
+        length bs `shouldBeAtMost` allowedWeight
+
+    it "separator is small " $
+      length sep `shouldBeAtMost` (2*floor (sqrt $ fromIntegral n))
     it "separator is a set" $
       length (Set.fromList sep) `shouldBe` (length sep)
     it "A is a set" $
@@ -445,7 +477,7 @@ testIpeGraph inFp outFp = do
     it "interiorWeight == size A" $
       interiorWeight finalCycle `shouldBe` length as -- (Set.fromList as)
     let w = collectWith weigh finalCycle :: Separator (Weighted' [Point 2 R])
-    it ("interiorWeight and seprator consistent " <> show w) $
+    it "interiorWeight and seprator consistent " $
       (length <$> s)  `shouldBe` separatorWeight finalCycle
     it "paths disjoint" $
       let f = (:[])
@@ -468,119 +500,9 @@ testIpeGraph inFp outFp = do
       in crossingEdges  `shouldBe` []
     -- it "separator weight "
 
-    goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
-               (ipeFileGolden { name = outFp })
-               (addStyleSheet opacitiesStyle $ singlePageFromContent out)
 
 
 
 
-
-
-
-
-
-{-
-
-
-    -- prop "voronoi vertex is center disk" $ \c ->
-    --   voronoiVertices inputs
-    it "vertices of a trivial voronoi diagram" $
-      voronoiVertices inputs `shouldBe` [Point2 5 5]
-    -- it "a trivial voronoi diagram" $
-    --   voronoiDiagram inputs `shouldBe` trivialVD
-
-    it "geometries of the trivial VD correct" $
-      trivialVD^..edgeGeometries
-      `shouldBe` [Left (HalfLine (Point2 5 5) (Vector2 1 0))
-                 ,Left (HalfLine (Point2 5 5) (Vector2 0 (-1)))
-                 ,Left (HalfLine (Point2 5 5) (Vector2 (-1) 1))
-                 ]
-    goldenWith [osp|data/test-with-ipe/golden/|]
-               (ipeContentGolden { name = [osp|trivalVoronoi|] })
-                 [ iO' inputs
-                 , iO' trivialVD
-                 ]
-
-
-degenerateTests :: Spec
-degenerateTests = describe "degnereate inputs" $ do
-  it "single point diagram" $
-    voronoiDiagram (NonEmpty.singleton $ Point2 1 (2 :: R))
-    `shouldBe`
-    AllColinear undefined  -- TODO
-  it "two point diagram" $
-    voronoiDiagram (NonEmpty.fromList [Point2 1 (2 :: R), Point2 3 2])
-    `shouldBe`
-    AllColinear undefined -- TODO
-  it "multiple parallel point diagram" $
-    voronoiDiagram (NonEmpty.fromList [ Point2 x (2 :: R)
-                                      | x <- fromInteger <$> [1..10]
-                                      ])
-    `shouldBe`
-    AllColinear undefined -- TODO
-
-             -- goldenWith [osp|data/test-with-ipe/golden/|]
-  --            (ipeContentGolden { name = [osp|voronoi|] })
-  --              [ iO' inputs
-  --              ]
-  --              , iO' trivialVD
-
-
-
-grow             :: (Num r, Point_ point d r) => r -> Box point -> Box point
-grow d (Box p q) = Box (p&coordinates %~ subtract d)
-                       (q&coordinates %~ (+d))
-
-
-instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r
-         , Show r, Show point
-         )
-         => HasDefaultIpeOut (VoronoiDiagram point) where
-  type DefaultIpeOut (VoronoiDiagram point) = Group
-  defIO = \case
-    AllColinear _pts -> ipeGroup []
-    ConnectedVD vd  -> defIO vd
-
-
-instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r
-         , Show r, Show point
-         )
-         => HasDefaultIpeOut (VoronoiDiagram' point) where
-  type DefaultIpeOut (VoronoiDiagram' point) = Group
-  defIO vd = ipeGroup $ vd^..edgeGeometries.to render
-    where
-      bRect = boundingBox $ defaultBox :| [grow 1 $ boundingBox vd]
-      render = \case
-        Left hl   -> iO $ ipeHalfLineIn bRect hl
-        Right seg -> iO' seg
-
-inputs :: [Point 2 R]
-inputs = [origin, Point2 10 10, Point2 10 0]
-
-
-trivialVD :: VoronoiDiagram' (Point 2 R)
-trivialVD = VoronoiDiagram $ LowerEnvelope vInfty (Seq.fromList [bv])
-  where
-    vInfty = UnboundedVertex $ Seq.fromList [Edge 1 h2 h3
-                                            ,Edge 1 h3 h1
-                                            ,Edge 1 h1 h2
-                                            ]
-    bv = Vertex (Point3 5 5 0)
-                (Set.fromList planes)
-                (Seq.fromList $
-                 [ Edge 0 h2 h1
-                 , Edge 0 h3 h2
-                 , Edge 0 h1 h3
-                 ]
-                )
-    planes = map (\p -> liftPointToPlane p :+ p) inputs
-    (h1,h2,h3) = case planes of
-                   [h1',h2',h3'] -> (h1',h2',h3')
-                   _             -> error "absurd"
-  -- order of the planes is incorrect, as is the z-coord.
-
--}
-
-
--- theCycles = MkCycle (Split (PathSplit (Point2 185.53069 265.10268) (Leaf (NodeSplit (Point2 206.67542 216.34034) [] [])) (Leaf (NodeSplit (Point2 274.77811 175.72864) [] []))) [] [] []) :| []
+shouldBeAtMost     :: (Ord a, Show a, HasCallStack) => a -> a -> Expectation
+shouldBeAtMost x y = shouldSatisfy x (<= y)

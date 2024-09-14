@@ -120,7 +120,7 @@ planarSeparator gr = case trees of
     []                 -> mempty
     ((tr,m):rest)
       | m <= twoThirds -> traceShow (tr,m,n,twoThirds) $ groupComponents
-      | otherwise      -> planarSeparator' (traceShowWith ("tree",) tr) m -- FIXME: we should also add the remaining vertices
+      | otherwise      -> planarSeparator' tr m -- FIXME: we should also add the remaining vertices
   where
     trees = connectedComponents gr
     n     = sum $ map snd trees

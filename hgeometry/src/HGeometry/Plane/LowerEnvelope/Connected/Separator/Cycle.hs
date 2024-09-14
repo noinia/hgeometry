@@ -88,7 +88,7 @@ collectWith                                     :: (Show a, Show w,
 collectWith f (Cycle paths before middle after) = here <> collectPathsWith f paths
   where
     f'   = foldMap (foldMap f)
-    here = traceShowWith ("collectWith, here",) $ Separator mempty (f' middle) (f' $ before <> after)
+    here = Separator mempty (f' middle) (f' $ before <> after)
 
 
 ----------------------------------------
@@ -147,10 +147,7 @@ collectPathsWith f = \case
   RootSplit rs            -> collectRootSplitPathWith f rs
   PathSplit r lPath rPath -> let ll@(NodeSplit sepL before  middleL) = collectPathWith f lPath
                                  rr@(NodeSplit sepR middleR after)   = collectPathWith f rPath
-                             in traceShowWith ("collectPathsWith",r,lPath,rPath,
-                                               ll,rr,
-                                              ) $
-                               Separator (f r <> sepL <> sepR)
+                             in Separator (f r <> sepL <> sepR)
                                           (middleL <> middleR) (before <> after)
 
 -- | The labels of the leaves at which the cyclesplit paths end. If one is a root
@@ -291,27 +288,6 @@ makeInsideHeaviest c@(Cycle paths before inside after)
 --------------------------------------------------------------------------------
 -- * Splitting a Cycle
 
-verify          :: (Ord a, Show a)
-                => String -> Cycle' a -> Maybe (Vector 2 (Cycle' a)) -> Maybe (Vector 2 (Cycle' a))
-verify l0 oldSplit = fmap (\(Vector2 s1 s2) -> Vector2 (verify' (l0 <> "LEFT")  oldSplit s1)
-                                                       (verify' (l0 <> "RIGHT") oldSplit s2)
-
-                          )
-verify'          :: (Ord a, Show a)
-                => String -> Cycle' a -> Cycle' a -> Cycle' a
-verify' l oldSplit s = traceShow ("VERIFY", l
-                                 , collectAll' oldSplit == collectAll' s
-                                 , collectAllX oldSplit `Set.difference` collectAllX s
-                                 , collectAllP oldSplit `Set.difference` collectAllP s
-                                 ) s
-  where
-    collectAll' = Set.fromList . collectAll
-
-    collectAllX (Cycle paths bs ms as) = Set.fromList $ flatten (bs <> ms <> as)
-    collectAllP (Cycle paths bs ms as) = Set.fromList $ collectAllPaths paths
-
-
-
 -- | Tries to split the cycle at the given node
 splitCycleAt                                     :: forall a.
                                                     (Show a, Ord a) =>
@@ -319,15 +295,12 @@ splitCycleAt                                     :: forall a.
                                                  -> (a -> Bool)
                                                  -> Cycle' a
                                                  -> Maybe (Vector 2 (Cycle' a))
-splitCycleAt splitLeaf splitChildren p theSplit@(Cycle paths before inside after)
-       -- | traceShow ("splitCycleAt",paths,before,inside,after) False = undefined
-       | otherwise = splitInterior <|> splitCycleAtPath splitLeaf splitChildren p theSplit
+splitCycleAt splitLeaf splitChildren p theSplit@(Cycle paths before inside after) =
+      splitInterior <|> splitCycleAtPath splitLeaf splitChildren p theSplit
     where
     (l,r) = endPoints paths -- the endpoints of the two paths
 
-    splitInterior = -- traceShowWith ("splitInterior",)
-                  -- . verify "INTERIOR" theSplit $
-                    constructCycles <$> findNode' p inside
+    splitInterior = constructCycles <$> findNode' p inside
 
     constructCycles :: NodeSplit (Path a [Tree a] (Tree a)) [Tree a]
                     -> Vector 2 (Cycle a [Tree a])
