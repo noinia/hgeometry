@@ -124,8 +124,15 @@ spec = describe "lower envelope tests" $ do
          testIpe [osp|degenerate2.ipe|]
                  [osp|degenerate2_out|]
 
-         testIpeGraph [osp|foo.ipe|]
-                      [osp|foo_graph_out|]
+         testIpeGraph [osp|simple1.ipe|]
+                      [osp|simple1_graph_out|]
+         testIpeGraph [osp|foo_simple.ipe|]
+                      [osp|foo_simple_graph_out|]
+
+         -- testIpeGraph [osp|foo.ipe|]
+         --              [osp|foo_graph_out|]
+
+
 
 {-
          describe "planar separator tests" $ do
@@ -396,16 +403,19 @@ testIpeGraph inFp outFp = do
     (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
       inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
       NonEmpty.fromList <$> readAllFrom inFp'
+
+
     let vd = voronoiDiagram' $ view core <$> points
         vv = voronoiVertices $ view core <$> points
         gr = toPlaneGraph $ Map.mapKeysMonotonic liftPointToPlane vd
+
         n  = length gr
         ((tr,_):_) = connectedComponents gr
         allowedWeight = (2*n) `div` 3
         cycles' = traceShowWith ("thecycles",) $ planarSeparatorCycles allowedWeight gr tr
         finalCycle = NonEmpty.last cycles'
 
-        s@(Separator sep as bs)  = planarSeparator gr
+        s@(Separator sep as bs)  = traceShowWith ("theSeparator",) $ planarSeparator gr
         (Separator sep' as' bs') = drawSeparator s
         out = [ iO' points
               , iO' vd
@@ -436,7 +446,7 @@ testIpeGraph inFp outFp = do
       interiorWeight finalCycle `shouldBe` length as -- (Set.fromList as)
     let w = collectWith weigh finalCycle :: Separator (Weighted' [Point 2 R])
     it ("interiorWeight and seprator consistent " <> show w) $
-      separatorWeight finalCycle  `shouldBe` (length <$> s)
+      (length <$> s)  `shouldBe` separatorWeight finalCycle
     it "paths disjoint" $
       let f = (:[])
           g = Set.singleton
@@ -571,3 +581,6 @@ trivialVD = VoronoiDiagram $ LowerEnvelope vInfty (Seq.fromList [bv])
   -- order of the planes is incorrect, as is the z-coord.
 
 -}
+
+
+-- theCycles = MkCycle (Split (PathSplit (Point2 185.53069 265.10268) (Leaf (NodeSplit (Point2 206.67542 216.34034) [] [])) (Leaf (NodeSplit (Point2 274.77811 175.72864) [] []))) [] [] []) :| []

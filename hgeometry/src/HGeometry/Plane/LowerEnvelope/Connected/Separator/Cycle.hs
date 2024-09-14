@@ -95,8 +95,7 @@ collectWith f (Cycle paths before middle after) = here <> collectPathsWith f pat
 
 
 -- | Turn the cycle into an actual separator.
-toSeparator :: Show a =>
-  Cycle' a -> Separator [a]
+toSeparator :: Show a => Cycle' a -> Separator [a]
 toSeparator = fmap (getValue @Weight) . collectWith weigh
   -- collectWith (:[])
 

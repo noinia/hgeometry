@@ -75,8 +75,7 @@ fromVertexForm' lEnv = LowerEnvelope v0 boundedVs
 
     -- computes all outgoing edges of all bounded vertices, they are grouped by face
     allEdges :: [FaceEdges plane]
-    allEdges = traceShowWith ("allEdges",) .
-      fmap (faceToEdges . sortAlongBoundary)
+    allEdges = fmap (faceToEdges . sortAlongBoundary)
              . groupOnCheap definingPlane
              $ foldMap (^._3) boundedVs'
 
@@ -149,7 +148,7 @@ extractEdgeDefs                   :: (Ord plane
 extractEdgeDefs h u uDefs v vDefs
   -- | traceShow ("extractEdgeDefs",h,u,uDefs,v,vDefs) False = undefined
   -- | otherwise
-  = case traceShowWith ("commons",) commons of
+  = case commons of
     []   -> Nothing
     [h'] -> Just $ EdgeDefs h' hu hv
     _    -> error "extractEdgeDefs: unhandled degeneracy. u and v have >2 planes in common."
@@ -162,10 +161,7 @@ extractEdgeDefs h u uDefs v vDefs
     hu = from' u uOnlies
     hv = from' v vOnlies
 
-    from' x hss
-      |traceShow ("from'",x,hss) False = undefined
-      | otherwise
-      = case hss of
+    from' x hss = case hss of
       []   -> error "extractEdgeDefs: absurd, too few definers"
       [h'] -> h'
       _hs  -> error $ "extractEdgeDefs: unhandled degeneracy. More than 3 planes at a vertex. "
