@@ -444,6 +444,8 @@ testIpeGraph inFp outFp = do
                  (addStyleSheet opacitiesStyle $ singlePageFromContent out)
 
 
+
+
 separatorTests        :: NonEmpty (Point 2 R :+ _) -> Spec
 separatorTests points = describe "separatorTests" $ do
     let vd = voronoiDiagram' $ view core <$> points
@@ -500,6 +502,24 @@ separatorTests points = describe "separatorTests" $ do
       in crossingEdges  `shouldBe` []
     -- it "separator weight "
 
+
+
+
+-- FIXME: write some proper shrinker; since apparently we may return something that is
+-- not a separator
+
+-- separatorIsSeparatorTest = prop "separator is a separator" $
+--                              \(MyGraph gr) -> separatorIsSeparator gr
+
+
+separatorIsSeparator gr = null crossingEdges
+  where
+    (Separator sep as bs)  = Set.fromList <$> planarSeparator gr
+    crossingEdges = [ e
+                    | e@(u,v) <- toList (graphEdges gr)
+                    ,    (u `Set.member` as && v `Set.member` bs)
+                      || (u `Set.member` bs && v `Set.member` as)
+                    ]
 
 
 
