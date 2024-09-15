@@ -13,6 +13,7 @@ import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.Plane.LowerEnvelope
 import qualified Data.Set as Set
+import qualified Data.Vector as Vector
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Sequence as Seq
 import           HGeometry.Number.Real.Rational
@@ -20,6 +21,7 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import           HGeometry.Point
 import           HGeometry.Vector
 import           HGeometry.Box
+import           HGeometry.Line.General
 import           HGeometry.HalfLine
 import           HGeometry.VoronoiDiagram
 import           Ipe
@@ -83,13 +85,22 @@ degenerateTests = describe "degnereate inputs" $ do
   it "two point diagram" $
     voronoiDiagram (NonEmpty.fromList [Point2 1 (2 :: R), Point2 3 2])
     `shouldBe`
-    AllColinear (Alternating (Point2 1 2) (V.fromList [(VerticalLineThrough 2, Point2 3 r)]))
+    AllColinear (Alternating (Point2 1 2) (Vector.fromList [(VerticalLineThrough 2, Point2 3 2)]))
   it "multiple parallel point diagram" $
     voronoiDiagram (NonEmpty.fromList [ Point2 x (2 :: R)
                                       | x <- fromInteger <$> [1..10]
                                       ])
     `shouldBe`
-    AllColinear (Alternating origin mempty) -- TODO
+    AllColinear (Alternating (Point2 1 2) . Vector.fromList $
+                 [(VerticalLineThrough 1.5,Point2 2 2)
+                 ,(VerticalLineThrough 2.5,Point2 3 2)
+                 ,(VerticalLineThrough 3.5,Point2 4 2)
+                 ,(VerticalLineThrough 4.5,Point2 5 2)
+                 ,(VerticalLineThrough 5.5,Point2 6 2)
+                 ,(VerticalLineThrough 6.5,Point2 7 2)
+                 ,(VerticalLineThrough 7.5,Point2 8 2)
+                 ,(VerticalLineThrough 8.5,Point2 9 2)
+                 ,(VerticalLineThrough 9.5,Point2 10 2)])
 
              -- goldenWith [osp|data/test-with-ipe/golden/|]
   --            (ipeContentGolden { name = [osp|voronoi|] })
