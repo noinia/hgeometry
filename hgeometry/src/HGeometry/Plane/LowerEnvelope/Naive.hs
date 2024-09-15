@@ -8,12 +8,10 @@ module HGeometry.Plane.LowerEnvelope.Naive
 
 import           Control.Lens
 import           Data.Either (partitionEithers)
-import qualified Data.Foldable as F
 import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe
-import qualified Data.Set as Set
 import qualified Data.Vector as Vector
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
@@ -52,7 +50,7 @@ lowerEnvelope = lowerEnvelopeWith bruteForceLowerEnvelope
 --
 -- \(O(T(n) + n \log n)\).
 lowerEnvelopeWith                        :: ( Plane_ plane r
-                                            , Ord r, Fractional r, Foldable1 nonEmpty, Ord plane
+                                            , Ord r, Fractional r, Foldable1 nonEmpty
                                           )
                                          => (NonEmpty plane -> MinimizationDiagram r plane)
                                          -> nonEmpty plane -> LowerEnvelope plane
@@ -62,7 +60,7 @@ lowerEnvelopeWith minimizationDiagram hs = case distinguish (toNonEmpty hs) of
   where
     fromLines = firstWithNeighbors (\h _ h' -> fromMaybe err $ intersectionLine h h')
               . fmap (view extra) . view Line._Alternating
-              . Line.lowerEnvelope
+              . Line.lowerEnvelope @Vector.Vector
     err = error "lowerEnvelopeWith. absurd: neighbouring planes must intersect"
 
 

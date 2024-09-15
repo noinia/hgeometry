@@ -22,13 +22,11 @@ module HGeometry.VoronoiDiagram.ViaLowerEnvelope
 import           Control.Lens
 import           Control.Subcategory.Functor
 import           Data.Foldable1
-import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Vector as Vector
-import           HGeometry.Box
 import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
@@ -80,9 +78,6 @@ asMap = LowerEnvelope.asMap . view _VoronoiDiagramLowerEnvelope
 
 --------------------------------------------------------------------------------
 
--- instance (Ord (NumType point), Num (NumType point)) => IsBoxable (VoronoiDiagram' point) where
---   boundingBox vd = projectPoint <$> boundingBox (vd^._VoronoiDiagramLowerEnvelope)
-
 --------------------------------------------------------------------------------
 
 -- | Computes the Voronoi Diagram, by lifting the points to planes, and computing
@@ -117,16 +112,16 @@ voronoiDiagramWith lowerEnv pts = case lowerEnv . fmap (\p -> pointToPlane p :+ 
 
 
 -- | Compute the vertices of the Voronoi diagram
-voronoiVertices :: ( Point_ point 2 r, Functor f, Ord point
-                   , Ord r, Fractional r, Foldable1 f
-                   , Show point, Show r
-                   , Ord point
-                   ) => f point -> Set (Point 2 r)
+voronoiVertices    :: ( Point_ point 2 r, Functor f, Ord point
+                      , Ord r, Fractional r, Foldable1 f
+                      , Show point, Show r
+                      , Ord point
+                      ) => f point -> Set (Point 2 r)
 voronoiVertices pts = case voronoiDiagram pts of
     AllColinear _  -> mempty
     ConnectedVD vd -> foldMap (\case
-                                  Bounded pts       -> Set.fromList pts
-                                  Unbounded _ pts _ -> Set.fromList (NonEmpty.toList pts)
+                                  Bounded vs       -> Set.fromList vs
+                                  Unbounded _ vs _ -> Set.fromList (NonEmpty.toList vs)
                               ) (asMap vd)
 
 --------------------------------------------------------------------------------
