@@ -41,16 +41,253 @@
 </span><span id="line-41"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-42"></span><span>
 </span><span id="line-43"></span><span class="annot"><span class="hs-comment">-- | The lower envelope of a set of lines</span></span><span>
-</span><span id="line-44"></span><span class="hs-keyword">newtype</span><span> </span><span id="LowerEnvelopeF"><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-var">LowerEnvelopeF</span></a></span></span><span> </span><span id="local-6989586621679515652"><span class="annot"><a href="#local-6989586621679515652"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621679515653"><span class="annot"><a href="#local-6989586621679515653"><span class="hs-identifier hs-type">vertex</span></a></span></span><span> </span><span id="local-6989586621679515654"><span class="annot"><a href="#local-6989586621679515654"><span class="hs-identifier hs-type">line</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="LowerEnvelope"><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelope"><span class="hs-identifier hs-var">LowerEnvelope</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515652"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515653"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515654"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-45"></span><span>
-</span><span id="line-46"></span><span class="annot"><span class="hs-comment">-- | A lower envelope, where the data structure is a vector.</span></span><span>
-</span><span id="line-47"></span><span class="hs-keyword">type</span><span> </span><span id="LowerEnvelope"><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelope"><span class="hs-identifier hs-var">LowerEnvelope</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.html#Vector"><span class="hs-identifier hs-type">Vector.Vector</span></a></span><span>
-</span><span id="line-48"></span><span>
-</span><span id="line-49"></span><span class="hs-comment">-- | projection function that turns a lower envelope into an alternating &quot;list&quot; of lines</span><span>
-</span><span id="line-50"></span><span class="hs-comment">-- and vertices.</span><span>
-</span><span id="line-51"></span><span id="local-6989586621679515565"><span id="local-6989586621679515566"><span id="local-6989586621679515567"><span id="local-6989586621679515569"><span id="local-6989586621679515570"><span id="local-6989586621679515571"><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#_Alternating"><span class="hs-identifier hs-type">_Alternating</span></a></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Type.html#Iso"><span class="hs-identifier hs-type">Iso</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515565"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515566"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515567"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515569"><span class="hs-identifier hs-type">f'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515570"><span class="hs-identifier hs-type">vertex'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515571"><span class="hs-identifier hs-type">line'</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-52"></span><span>                     </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515565"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515566"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515567"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span>     </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515569"><span class="hs-identifier hs-type">f'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515570"><span class="hs-identifier hs-type">vertex'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515571"><span class="hs-identifier hs-type">line'</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span>
-</span><span id="line-53"></span><span id="_Alternating"><span class="annot"><span class="annottext">_Alternating :: forall (f :: * -&gt; *) vertex line (f' :: * -&gt; *) vertex' line'
+</span><span id="line-44"></span><span class="hs-keyword">newtype</span><span> </span><span id="LowerEnvelopeF"><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-var">LowerEnvelopeF</span></a></span></span><span> </span><span id="local-6989586621679492930"><span class="annot"><a href="#local-6989586621679492930"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621679492931"><span class="annot"><a href="#local-6989586621679492931"><span class="hs-identifier hs-type">vertex</span></a></span></span><span> </span><span id="local-6989586621679492932"><span class="annot"><a href="#local-6989586621679492932"><span class="hs-identifier hs-type">line</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="LowerEnvelope"><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelope"><span class="hs-identifier hs-var">LowerEnvelope</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492930"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492931"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492932"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">newtype</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679493004"><span id="local-6989586621679493009"><span class="annot"><span class="annottext">(forall a b.
+ (a -&gt; b) -&gt; LowerEnvelopeF f vertex a -&gt; LowerEnvelopeF f vertex b)
+-&gt; (forall a b.
+    a -&gt; LowerEnvelopeF f vertex b -&gt; LowerEnvelopeF f vertex a)
+-&gt; Functor (LowerEnvelopeF f vertex)
+forall a b.
+a -&gt; LowerEnvelopeF f vertex b -&gt; LowerEnvelopeF f vertex a
+forall a b.
+(a -&gt; b) -&gt; LowerEnvelopeF f vertex a -&gt; LowerEnvelopeF f vertex b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+forall (f :: * -&gt; *) vertex a b.
+Functor f =&gt;
+a -&gt; LowerEnvelopeF f vertex b -&gt; LowerEnvelopeF f vertex a
+forall (f :: * -&gt; *) vertex a b.
+Functor f =&gt;
+(a -&gt; b) -&gt; LowerEnvelopeF f vertex a -&gt; LowerEnvelopeF f vertex b
+$cfmap :: forall (f :: * -&gt; *) vertex a b.
+Functor f =&gt;
+(a -&gt; b) -&gt; LowerEnvelopeF f vertex a -&gt; LowerEnvelopeF f vertex b
+fmap :: forall a b.
+(a -&gt; b) -&gt; LowerEnvelopeF f vertex a -&gt; LowerEnvelopeF f vertex b
+$c&lt;$ :: forall (f :: * -&gt; *) vertex a b.
+Functor f =&gt;
+a -&gt; LowerEnvelopeF f vertex b -&gt; LowerEnvelopeF f vertex a
+&lt;$ :: forall a b.
+a -&gt; LowerEnvelopeF f vertex b -&gt; LowerEnvelopeF f vertex a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679493018"><span id="local-6989586621679493023"><span id="local-6989586621679493027"><span class="annot"><span class="annottext">(forall a. Functor (LowerEnvelopeF f a)) =&gt;
+(forall a b c d.
+ (a -&gt; b)
+ -&gt; (c -&gt; d) -&gt; LowerEnvelopeF f a c -&gt; LowerEnvelopeF f b d)
+-&gt; (forall a b c.
+    (a -&gt; b) -&gt; LowerEnvelopeF f a c -&gt; LowerEnvelopeF f b c)
+-&gt; (forall b c a.
+    (b -&gt; c) -&gt; LowerEnvelopeF f a b -&gt; LowerEnvelopeF f a c)
+-&gt; Bifunctor (LowerEnvelopeF f)
+forall a. Functor (LowerEnvelopeF f a)
+forall a b c.
+(a -&gt; b) -&gt; LowerEnvelopeF f a c -&gt; LowerEnvelopeF f b c
+forall b c a.
+(b -&gt; c) -&gt; LowerEnvelopeF f a b -&gt; LowerEnvelopeF f a c
+forall a b c d.
+(a -&gt; b)
+-&gt; (c -&gt; d) -&gt; LowerEnvelopeF f a c -&gt; LowerEnvelopeF f b d
+forall (f :: * -&gt; *) a. Functor f =&gt; Functor (LowerEnvelopeF f a)
+forall (f :: * -&gt; *) a b c.
+Functor f =&gt;
+(a -&gt; b) -&gt; LowerEnvelopeF f a c -&gt; LowerEnvelopeF f b c
+forall (f :: * -&gt; *) b c a.
+Functor f =&gt;
+(b -&gt; c) -&gt; LowerEnvelopeF f a b -&gt; LowerEnvelopeF f a c
+forall (f :: * -&gt; *) a b c d.
+Functor f =&gt;
+(a -&gt; b)
+-&gt; (c -&gt; d) -&gt; LowerEnvelopeF f a c -&gt; LowerEnvelopeF f b d
+forall (p :: * -&gt; * -&gt; *).
+(forall a. Functor (p a)) =&gt;
+(forall a b c d. (a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d)
+-&gt; (forall a b c. (a -&gt; b) -&gt; p a c -&gt; p b c)
+-&gt; (forall b c a. (b -&gt; c) -&gt; p a b -&gt; p a c)
+-&gt; Bifunctor p
+$cbimap :: forall (f :: * -&gt; *) a b c d.
+Functor f =&gt;
+(a -&gt; b)
+-&gt; (c -&gt; d) -&gt; LowerEnvelopeF f a c -&gt; LowerEnvelopeF f b d
+bimap :: forall a b c d.
+(a -&gt; b)
+-&gt; (c -&gt; d) -&gt; LowerEnvelopeF f a c -&gt; LowerEnvelopeF f b d
+$cfirst :: forall (f :: * -&gt; *) a b c.
+Functor f =&gt;
+(a -&gt; b) -&gt; LowerEnvelopeF f a c -&gt; LowerEnvelopeF f b c
+first :: forall a b c.
+(a -&gt; b) -&gt; LowerEnvelopeF f a c -&gt; LowerEnvelopeF f b c
+$csecond :: forall (f :: * -&gt; *) b c a.
+Functor f =&gt;
+(b -&gt; c) -&gt; LowerEnvelopeF f a b -&gt; LowerEnvelopeF f a c
+second :: forall b c a.
+(b -&gt; c) -&gt; LowerEnvelopeF f a b -&gt; LowerEnvelopeF f a c
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Bifunctor</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679493036"><span id="local-6989586621679493045"><span id="local-6989586621679493053"><span id="local-6989586621679493059"><span id="local-6989586621679493063"><span id="local-6989586621679493067"><span id="local-6989586621679493071"><span id="local-6989586621679493075"><span id="local-6989586621679493079"><span id="local-6989586621679493083"><span id="local-6989586621679493087"><span id="local-6989586621679493091"><span id="local-6989586621679493097"><span id="local-6989586621679493105"><span id="local-6989586621679493113"><span id="local-6989586621679493121"><span id="local-6989586621679493129"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; LowerEnvelopeF f vertex m -&gt; m)
+-&gt; (forall m a.
+    Monoid m =&gt;
+    (a -&gt; m) -&gt; LowerEnvelopeF f vertex a -&gt; m)
+-&gt; (forall m a.
+    Monoid m =&gt;
+    (a -&gt; m) -&gt; LowerEnvelopeF f vertex a -&gt; m)
+-&gt; (forall a b.
+    (a -&gt; b -&gt; b) -&gt; b -&gt; LowerEnvelopeF f vertex a -&gt; b)
+-&gt; (forall a b.
+    (a -&gt; b -&gt; b) -&gt; b -&gt; LowerEnvelopeF f vertex a -&gt; b)
+-&gt; (forall b a.
+    (b -&gt; a -&gt; b) -&gt; b -&gt; LowerEnvelopeF f vertex a -&gt; b)
+-&gt; (forall b a.
+    (b -&gt; a -&gt; b) -&gt; b -&gt; LowerEnvelopeF f vertex a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; LowerEnvelopeF f vertex a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; LowerEnvelopeF f vertex a -&gt; a)
+-&gt; (forall a. LowerEnvelopeF f vertex a -&gt; [a])
+-&gt; (forall a. LowerEnvelopeF f vertex a -&gt; Bool)
+-&gt; (forall a. LowerEnvelopeF f vertex a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; LowerEnvelopeF f vertex a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; LowerEnvelopeF f vertex a -&gt; a)
+-&gt; (forall a. Ord a =&gt; LowerEnvelopeF f vertex a -&gt; a)
+-&gt; (forall a. Num a =&gt; LowerEnvelopeF f vertex a -&gt; a)
+-&gt; (forall a. Num a =&gt; LowerEnvelopeF f vertex a -&gt; a)
+-&gt; Foldable (LowerEnvelopeF f vertex)
+forall a. Eq a =&gt; a -&gt; LowerEnvelopeF f vertex a -&gt; Bool
+forall a. Num a =&gt; LowerEnvelopeF f vertex a -&gt; a
+forall a. Ord a =&gt; LowerEnvelopeF f vertex a -&gt; a
+forall m. Monoid m =&gt; LowerEnvelopeF f vertex m -&gt; m
+forall a. LowerEnvelopeF f vertex a -&gt; Bool
+forall a. LowerEnvelopeF f vertex a -&gt; Int
+forall a. LowerEnvelopeF f vertex a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; LowerEnvelopeF f vertex a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; LowerEnvelopeF f vertex a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; LowerEnvelopeF f vertex a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; LowerEnvelopeF f vertex a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+forall (f :: * -&gt; *) vertex a.
+(Foldable f, Eq a) =&gt;
+a -&gt; LowerEnvelopeF f vertex a -&gt; Bool
+forall (f :: * -&gt; *) vertex a.
+(Foldable f, Num a) =&gt;
+LowerEnvelopeF f vertex a -&gt; a
+forall (f :: * -&gt; *) vertex a.
+(Foldable f, Ord a) =&gt;
+LowerEnvelopeF f vertex a -&gt; a
+forall (f :: * -&gt; *) vertex m.
+(Foldable f, Monoid m) =&gt;
+LowerEnvelopeF f vertex m -&gt; m
+forall (f :: * -&gt; *) vertex a.
+Foldable f =&gt;
+LowerEnvelopeF f vertex a -&gt; Bool
+forall (f :: * -&gt; *) vertex a.
+Foldable f =&gt;
+LowerEnvelopeF f vertex a -&gt; Int
+forall (f :: * -&gt; *) vertex a.
+Foldable f =&gt;
+LowerEnvelopeF f vertex a -&gt; [a]
+forall (f :: * -&gt; *) vertex a.
+Foldable f =&gt;
+(a -&gt; a -&gt; a) -&gt; LowerEnvelopeF f vertex a -&gt; a
+forall (f :: * -&gt; *) vertex m a.
+(Foldable f, Monoid m) =&gt;
+(a -&gt; m) -&gt; LowerEnvelopeF f vertex a -&gt; m
+forall (f :: * -&gt; *) vertex b a.
+Foldable f =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; LowerEnvelopeF f vertex a -&gt; b
+forall (f :: * -&gt; *) vertex a b.
+Foldable f =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; LowerEnvelopeF f vertex a -&gt; b
+$cfold :: forall (f :: * -&gt; *) vertex m.
+(Foldable f, Monoid m) =&gt;
+LowerEnvelopeF f vertex m -&gt; m
+fold :: forall m. Monoid m =&gt; LowerEnvelopeF f vertex m -&gt; m
+$cfoldMap :: forall (f :: * -&gt; *) vertex m a.
+(Foldable f, Monoid m) =&gt;
+(a -&gt; m) -&gt; LowerEnvelopeF f vertex a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; LowerEnvelopeF f vertex a -&gt; m
+$cfoldMap' :: forall (f :: * -&gt; *) vertex m a.
+(Foldable f, Monoid m) =&gt;
+(a -&gt; m) -&gt; LowerEnvelopeF f vertex a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; LowerEnvelopeF f vertex a -&gt; m
+$cfoldr :: forall (f :: * -&gt; *) vertex a b.
+Foldable f =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; LowerEnvelopeF f vertex a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; LowerEnvelopeF f vertex a -&gt; b
+$cfoldr' :: forall (f :: * -&gt; *) vertex a b.
+Foldable f =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; LowerEnvelopeF f vertex a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; LowerEnvelopeF f vertex a -&gt; b
+$cfoldl :: forall (f :: * -&gt; *) vertex b a.
+Foldable f =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; LowerEnvelopeF f vertex a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; LowerEnvelopeF f vertex a -&gt; b
+$cfoldl' :: forall (f :: * -&gt; *) vertex b a.
+Foldable f =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; LowerEnvelopeF f vertex a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; LowerEnvelopeF f vertex a -&gt; b
+$cfoldr1 :: forall (f :: * -&gt; *) vertex a.
+Foldable f =&gt;
+(a -&gt; a -&gt; a) -&gt; LowerEnvelopeF f vertex a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; LowerEnvelopeF f vertex a -&gt; a
+$cfoldl1 :: forall (f :: * -&gt; *) vertex a.
+Foldable f =&gt;
+(a -&gt; a -&gt; a) -&gt; LowerEnvelopeF f vertex a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; LowerEnvelopeF f vertex a -&gt; a
+$ctoList :: forall (f :: * -&gt; *) vertex a.
+Foldable f =&gt;
+LowerEnvelopeF f vertex a -&gt; [a]
+toList :: forall a. LowerEnvelopeF f vertex a -&gt; [a]
+$cnull :: forall (f :: * -&gt; *) vertex a.
+Foldable f =&gt;
+LowerEnvelopeF f vertex a -&gt; Bool
+null :: forall a. LowerEnvelopeF f vertex a -&gt; Bool
+$clength :: forall (f :: * -&gt; *) vertex a.
+Foldable f =&gt;
+LowerEnvelopeF f vertex a -&gt; Int
+length :: forall a. LowerEnvelopeF f vertex a -&gt; Int
+$celem :: forall (f :: * -&gt; *) vertex a.
+(Foldable f, Eq a) =&gt;
+a -&gt; LowerEnvelopeF f vertex a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; LowerEnvelopeF f vertex a -&gt; Bool
+$cmaximum :: forall (f :: * -&gt; *) vertex a.
+(Foldable f, Ord a) =&gt;
+LowerEnvelopeF f vertex a -&gt; a
+maximum :: forall a. Ord a =&gt; LowerEnvelopeF f vertex a -&gt; a
+$cminimum :: forall (f :: * -&gt; *) vertex a.
+(Foldable f, Ord a) =&gt;
+LowerEnvelopeF f vertex a -&gt; a
+minimum :: forall a. Ord a =&gt; LowerEnvelopeF f vertex a -&gt; a
+$csum :: forall (f :: * -&gt; *) vertex a.
+(Foldable f, Num a) =&gt;
+LowerEnvelopeF f vertex a -&gt; a
+sum :: forall a. Num a =&gt; LowerEnvelopeF f vertex a -&gt; a
+$cproduct :: forall (f :: * -&gt; *) vertex a.
+(Foldable f, Num a) =&gt;
+LowerEnvelopeF f vertex a -&gt; a
+product :: forall a. Num a =&gt; LowerEnvelopeF f vertex a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="annot"><span class="hs-comment">-- | A lower envelope, where the data structure is a vector.</span></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">type</span><span> </span><span id="LowerEnvelope"><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelope"><span class="hs-identifier hs-var">LowerEnvelope</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.html#Vector"><span class="hs-identifier hs-type">Vector.Vector</span></a></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- | projection function that turns a lower envelope into an alternating &quot;list&quot; of lines</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- and vertices.</span><span>
+</span><span id="line-52"></span><span id="local-6989586621679492800"><span id="local-6989586621679492801"><span id="local-6989586621679492802"><span id="local-6989586621679492803"><span id="local-6989586621679492804"><span id="local-6989586621679492805"><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#_Alternating"><span class="hs-identifier hs-type">_Alternating</span></a></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Type.html#Iso"><span class="hs-identifier hs-type">Iso</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492800"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492801"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492802"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492803"><span class="hs-identifier hs-type">f'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492804"><span class="hs-identifier hs-type">vertex'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492805"><span class="hs-identifier hs-type">line'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span>                     </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492800"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492801"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492802"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span>     </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492803"><span class="hs-identifier hs-type">f'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492804"><span class="hs-identifier hs-type">vertex'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492805"><span class="hs-identifier hs-type">line'</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span>
+</span><span id="line-54"></span><span id="_Alternating"><span class="annot"><span class="annottext">_Alternating :: forall (f :: * -&gt; *) vertex line (f' :: * -&gt; *) vertex' line'
        (p :: * -&gt; * -&gt; *) (f :: * -&gt; *).
 (Profunctor p, Functor f) =&gt;
 p (Alternating f vertex line) (f (Alternating f' vertex' line'))
@@ -66,89 +303,50 @@ Iso
   (Alternating f vertex line)
   (Alternating f' vertex' line')
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Iso.html#coerced"><span class="hs-identifier hs-var">coerced</span></a></span><span>
-</span><span id="line-54"></span><span>
-</span><span id="line-55"></span><span id="local-6989586621679515597"><span id="local-6989586621679515598"><span id="local-6989586621679515599"><span id="local-6989586621679515815"><span id="local-6989586621679515821"><span id="local-6989586621679515825"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679515597"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679515598"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679515599"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679515597"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-56"></span><span>                  </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515598"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515599"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515597"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span>
-</span><span id="line-57"></span><span>
-</span><span id="line-58"></span><span id="local-6989586621679515607"><span id="local-6989586621679515608"><span id="local-6989586621679515609"><span id="local-6989586621679515831"><span id="local-6989586621679515836"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679515607"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679515608"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679515609"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679515607"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-59"></span><span>                  </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515608"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515609"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515607"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
-</span><span id="line-60"></span><span>
-</span><span id="line-61"></span><span id="local-6989586621679515617"><span id="local-6989586621679515618"><span id="local-6989586621679515619"><span id="local-6989586621679515848"><span id="local-6989586621679515853"><span id="local-6989586621679515857"><span id="local-6989586621679515861"><span id="local-6989586621679515865"><span id="local-6989586621679515869"><span id="local-6989586621679515873"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679515617"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679515618"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679515619"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679515617"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-62"></span><span>                  </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515618"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515619"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515617"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span></span></span></span><span>
-</span><span id="line-63"></span><span>
-</span><span id="line-64"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679515627"><span id="local-6989586621679515628"><span id="local-6989586621679515882"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679515627"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515627"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515628"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-65"></span><span>  </span><span id="local-6989586621679515888"><span class="annot"><span class="annottext">fmap :: forall a b.
-(a -&gt; b) -&gt; LowerEnvelopeF f r a -&gt; LowerEnvelopeF f r b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fmap</span></span></span><span> </span><span id="local-6989586621679515889"><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621679515889"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(r -&gt; r)
--&gt; (a -&gt; b) -&gt; LowerEnvelopeF f r a -&gt; LowerEnvelopeF f r b
-forall a b c d.
-(a -&gt; b)
--&gt; (c -&gt; d) -&gt; LowerEnvelopeF f a c -&gt; LowerEnvelopeF f b d
-forall (p :: * -&gt; * -&gt; *) a b c d.
-Bifunctor p =&gt;
-(a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
-</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r
-forall a. a -&gt; a
-</span><span class="hs-identifier hs-var">id</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621679515889"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span id="local-6989586621679492827"><span id="local-6989586621679492828"><span id="local-6989586621679492829"><span id="local-6989586621679493147"><span id="local-6989586621679493153"><span id="local-6989586621679493157"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679492827"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679492828"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679492829"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679492827"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span>                  </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492828"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492829"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492827"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span id="local-6989586621679492837"><span id="local-6989586621679492838"><span id="local-6989586621679492839"><span id="local-6989586621679493163"><span id="local-6989586621679493168"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679492837"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679492838"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679492839"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679492837"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span><span>                  </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492838"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492839"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492837"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span id="local-6989586621679492847"><span id="local-6989586621679492848"><span id="local-6989586621679492849"><span id="local-6989586621679493180"><span id="local-6989586621679493185"><span id="local-6989586621679493189"><span id="local-6989586621679493193"><span id="local-6989586621679493197"><span id="local-6989586621679493201"><span id="local-6989586621679493205"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679492847"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679492848"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679492849"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679492847"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>                  </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492848"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492849"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492847"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span></span></span></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span>
 </span><span id="line-66"></span><span>
-</span><span id="line-67"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679515630"><span id="local-6989586621679515897"><span id="local-6989586621679515900"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679515630"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515630"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-68"></span><span>  </span><span id="local-6989586621679515905"><span class="annot"><span class="annottext">bimap :: forall a b c d.
-(a -&gt; b)
--&gt; (c -&gt; d) -&gt; LowerEnvelopeF f a c -&gt; LowerEnvelopeF f b d
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var">bimap</span></span></span><span> </span><span id="local-6989586621679515906"><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621679515906"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679515907"><span class="annot"><span class="annottext">c -&gt; d
-</span><a href="#local-6989586621679515907"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelope"><span class="hs-identifier hs-type">LowerEnvelope</span></a></span><span> </span><span id="local-6989586621679515908"><span class="annot"><span class="annottext">Alternating f a c
-</span><a href="#local-6989586621679515908"><span class="hs-identifier hs-var">alt</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Alternating f b d -&gt; LowerEnvelopeF f b d
-forall (f :: * -&gt; *) vertex line.
-Alternating f vertex line -&gt; LowerEnvelopeF f vertex line
-</span><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelope"><span class="hs-identifier hs-var">LowerEnvelope</span></a></span><span> </span><span class="annot"><span class="annottext">(Alternating f b d -&gt; LowerEnvelopeF f b d)
--&gt; Alternating f b d -&gt; LowerEnvelopeF f b d
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; (c -&gt; d) -&gt; Alternating f a c -&gt; Alternating f b d
-forall a b c d.
-(a -&gt; b) -&gt; (c -&gt; d) -&gt; Alternating f a c -&gt; Alternating f b d
-forall (p :: * -&gt; * -&gt; *) a b c d.
-Bifunctor p =&gt;
-(a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
-</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621679515906"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">c -&gt; d
-</span><a href="#local-6989586621679515907"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">Alternating f a c
-</span><a href="#local-6989586621679515908"><span class="hs-identifier hs-var">alt</span></a></span><span>
-</span><span id="line-69"></span><span>
-</span><span id="line-70"></span><span>
-</span><span id="line-71"></span><span class="hs-comment">-- -- | change the functor type of the Lower envelope</span><span>
-</span><span id="line-72"></span><span class="hs-comment">-- mapF                       :: (f (vertex, line) -&gt; g (vertex, line))</span><span>
-</span><span id="line-73"></span><span class="hs-comment">--                            -&gt; LowerEnvelopeF f vertex line -&gt; LowerEnvelopeF g vertex line</span><span>
-</span><span id="line-74"></span><span class="hs-comment">-- mapF f = _Alternating %~ Alternating.mapF f</span><span>
-</span><span id="line-75"></span><span>
-</span><span id="line-76"></span><span class="hs-comment">-- (LowerEnvelope alt) = LowerEnvelope (Alternating.mapF f alt)</span><span>
-</span><span id="line-77"></span><span>
-</span><span id="line-78"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-79"></span><span>
-</span><span id="line-80"></span><span class="hs-comment">-- | Computes the lower envelope of a set of \(n\) lines.</span><span>
-</span><span id="line-81"></span><span class="hs-comment">--</span><span>
-</span><span id="line-82"></span><span class="hs-comment">-- pre: the input is a set (so no duplicates)</span><span>
-</span><span id="line-83"></span><span class="hs-comment">--</span><span>
-</span><span id="line-84"></span><span class="hs-comment">-- running time: \(O(n\log n)\)</span><span>
-</span><span id="line-85"></span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#lowerEnvelope"><span class="hs-identifier hs-type">lowerEnvelope</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679515666"><span class="annot"><a href="#local-6989586621679515666"><span class="hs-identifier hs-type">g</span></a></span></span><span> </span><span id="local-6989586621679515661"><span class="annot"><a href="#local-6989586621679515661"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621679515658"><span class="annot"><a href="#local-6989586621679515658"><span class="hs-identifier hs-type">line</span></a></span></span><span> </span><span id="local-6989586621679515659"><span class="annot"><a href="#local-6989586621679515659"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span>
-</span><span id="line-86"></span><span>                    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonVerticalHyperPlane_</span></span><span> </span><span class="annot"><a href="#local-6989586621679515658"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679515659"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-87"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679515659"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679515659"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-88"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679515661"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679515661"><span class="hs-identifier hs-type">f</span></a></span><span>
-</span><span id="line-89"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsIntersectableWith</span></span><span> </span><span class="annot"><a href="#local-6989586621679515658"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515658"><span class="hs-identifier hs-type">line</span></a></span><span>
-</span><span id="line-90"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Intersection</span></span><span> </span><span class="annot"><a href="#local-6989586621679515658"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515658"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LineLineIntersection</span></span><span> </span><span class="annot"><a href="#local-6989586621679515658"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-91"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Foldable.Util.html#HasFromFoldable"><span class="hs-identifier hs-type">HasFromFoldable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515666"><span class="hs-identifier hs-type">g</span></a></span><span>
-</span><span id="line-92"></span><span>                    </span><span class="hs-special">)</span><span>
-</span><span id="line-93"></span><span>                 </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679515661"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515658"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515666"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679515659"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679515658"><span class="hs-identifier hs-type">line</span></a></span><span>
-</span><span id="line-94"></span><span id="lowerEnvelope"><span class="annot"><span class="annottext">lowerEnvelope :: forall (g :: * -&gt; *) (f :: * -&gt; *) line r.
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- -- | change the functor type of the Lower envelope</span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- mapF                       :: (f (vertex, line) -&gt; g (vertex, line))</span><span>
+</span><span id="line-70"></span><span class="hs-comment">--                            -&gt; LowerEnvelopeF f vertex line -&gt; LowerEnvelopeF g vertex line</span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- mapF f = _Alternating %~ Alternating.mapF f</span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- (LowerEnvelope alt) = LowerEnvelope (Alternating.mapF f alt)</span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- | Computes the lower envelope of a set of \(n\) lines.</span><span>
+</span><span id="line-78"></span><span class="hs-comment">--</span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- pre: the input is a set (so no duplicates)</span><span>
+</span><span id="line-80"></span><span class="hs-comment">--</span><span>
+</span><span id="line-81"></span><span class="hs-comment">-- running time: \(O(n\log n)\)</span><span>
+</span><span id="line-82"></span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#lowerEnvelope"><span class="hs-identifier hs-type">lowerEnvelope</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679492858"><span class="annot"><a href="#local-6989586621679492858"><span class="hs-identifier hs-type">g</span></a></span></span><span> </span><span id="local-6989586621679492853"><span class="annot"><a href="#local-6989586621679492853"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621679492850"><span class="annot"><a href="#local-6989586621679492850"><span class="hs-identifier hs-type">line</span></a></span></span><span> </span><span id="local-6989586621679492851"><span class="annot"><a href="#local-6989586621679492851"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-83"></span><span>                    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonVerticalHyperPlane_</span></span><span> </span><span class="annot"><a href="#local-6989586621679492850"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679492851"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-84"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679492851"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679492851"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-85"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679492853"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679492853"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-86"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsIntersectableWith</span></span><span> </span><span class="annot"><a href="#local-6989586621679492850"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492850"><span class="hs-identifier hs-type">line</span></a></span><span>
+</span><span id="line-87"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Intersection</span></span><span> </span><span class="annot"><a href="#local-6989586621679492850"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492850"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LineLineIntersection</span></span><span> </span><span class="annot"><a href="#local-6989586621679492850"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Foldable.Util.html#HasFromFoldable"><span class="hs-identifier hs-type">HasFromFoldable</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492858"><span class="hs-identifier hs-type">g</span></a></span><span>
+</span><span id="line-89"></span><span>                    </span><span class="hs-special">)</span><span>
+</span><span id="line-90"></span><span>                 </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679492853"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492850"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492858"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679492851"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679492850"><span class="hs-identifier hs-type">line</span></a></span><span>
+</span><span id="line-91"></span><span id="lowerEnvelope"><span class="annot"><span class="annottext">lowerEnvelope :: forall (g :: * -&gt; *) (f :: * -&gt; *) line r.
 (NonVerticalHyperPlane_ line 2 r, Fractional r, Ord r, Foldable1 f,
  Functor f, IsIntersectableWith line line,
  Intersection line line ~ Maybe (LineLineIntersection line),
  HasFromFoldable g) =&gt;
 f line -&gt; LowerEnvelopeF g (Point 2 r) line
 </span><a href="HGeometry.Line.LowerEnvelope.html#lowerEnvelope"><span class="hs-identifier hs-var hs-var">lowerEnvelope</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty line -&gt; LowerEnvelopeF g (Point 2 r) line
-</span><a href="#local-6989586621679516013"><span class="hs-identifier hs-var">construct</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty line -&gt; LowerEnvelopeF g (Point 2 r) line)
+</span><a href="#local-6989586621679493315"><span class="hs-identifier hs-var">construct</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty line -&gt; LowerEnvelopeF g (Point 2 r) line)
 -&gt; (f line -&gt; NonEmpty line)
 -&gt; f line
 -&gt; LowerEnvelopeF g (Point 2 r) line
@@ -172,7 +370,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r :+ line) -&gt; NonEmpty (Point 2 r :+ line)
 forall a. NonEmpty a -&gt; NonEmpty a
 </span><span class="hs-identifier hs-var">NonEmpty.reverse</span></span><span>
-</span><span id="line-95"></span><span>              </span><span class="annot"><span class="annottext">(NonEmpty (Point 2 r :+ line) -&gt; NonEmpty (Point 2 r :+ line))
+</span><span id="line-92"></span><span>              </span><span class="annot"><span class="annottext">(NonEmpty (Point 2 r :+ line) -&gt; NonEmpty (Point 2 r :+ line))
 -&gt; (f line -&gt; NonEmpty (Point 2 r :+ line))
 -&gt; f line
 -&gt; NonEmpty (Point 2 r :+ line)
@@ -182,7 +380,7 @@ forall r point (f :: * -&gt; *).
 (Ord r, Num r, Point_ point 2 r, Foldable1 f) =&gt;
 f point -&gt; NonEmpty point
 </span><a href="HGeometry.ConvexHull.GrahamScan.html#upperHull%27"><span class="hs-identifier hs-var">CH.upperHull'</span></a></span><span>
-</span><span id="line-96"></span><span>              </span><span class="annot"><span class="annottext">(f (Point 2 r :+ line) -&gt; NonEmpty (Point 2 r :+ line))
+</span><span id="line-93"></span><span>              </span><span class="annot"><span class="annottext">(f (Point 2 r :+ line) -&gt; NonEmpty (Point 2 r :+ line))
 -&gt; (f line -&gt; f (Point 2 r :+ line))
 -&gt; f line
 -&gt; NonEmpty (Point 2 r :+ line)
@@ -190,26 +388,26 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(line -&gt; Point 2 r :+ line) -&gt; f line -&gt; f (Point 2 r :+ line)
 forall a b. (a -&gt; b) -&gt; f a -&gt; f b
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679516019"><span class="annot"><span class="annottext">line
-</span><a href="#local-6989586621679516019"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">line -&gt; Point 2 r
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679493321"><span class="annot"><span class="annottext">line
+</span><a href="#local-6989586621679493321"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">line -&gt; Point 2 r
 forall hyperPlane (d :: Natural) r.
 (NonVerticalHyperPlane_ hyperPlane d r, Num r, 1 &lt;= d) =&gt;
 hyperPlane -&gt; Point d r
 </span><span class="hs-identifier hs-var">dualPoint</span></span><span> </span><span class="annot"><span class="annottext">line
-</span><a href="#local-6989586621679516019"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; line -&gt; Point 2 r :+ line
+</span><a href="#local-6989586621679493321"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; line -&gt; Point 2 r :+ line
 forall core extra. core -&gt; extra -&gt; core :+ extra
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">line
-</span><a href="#local-6989586621679516019"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-97"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-98"></span><span>    </span><span id="local-6989586621679516013"><span class="annot"><span class="annottext">construct :: NonEmpty line -&gt; LowerEnvelopeF g (Point 2 r) line
-</span><a href="#local-6989586621679516013"><span class="hs-identifier hs-var hs-var">construct</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679516022"><span class="annot"><span class="annottext">line
-</span><a href="#local-6989586621679516022"><span class="hs-identifier hs-var">l0</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span> </span><span id="local-6989586621679516024"><span class="annot"><span class="annottext">[line]
-</span><a href="#local-6989586621679516024"><span class="hs-identifier hs-var">ls</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679516025"><span class="annot"><span class="annottext">vertices' :: [(Point 2 r, line)]
-</span><a href="#local-6989586621679516025"><span class="hs-identifier hs-var hs-var">vertices'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">line -&gt; [line] -&gt; [(Point 2 r, line)]
-</span><a href="#local-6989586621679516026"><span class="hs-identifier hs-var">computeVertices</span></a></span><span> </span><span class="annot"><span class="annottext">line
-</span><a href="#local-6989586621679516022"><span class="hs-identifier hs-var">l0</span></a></span><span> </span><span class="annot"><span class="annottext">[line]
-</span><a href="#local-6989586621679516024"><span class="hs-identifier hs-var">ls</span></a></span><span>
-</span><span id="line-99"></span><span>                           </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Alternating g (Point 2 r) line -&gt; LowerEnvelopeF g (Point 2 r) line
+</span><a href="#local-6989586621679493321"><span class="hs-identifier hs-var">l</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-94"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-95"></span><span>    </span><span id="local-6989586621679493315"><span class="annot"><span class="annottext">construct :: NonEmpty line -&gt; LowerEnvelopeF g (Point 2 r) line
+</span><a href="#local-6989586621679493315"><span class="hs-identifier hs-var hs-var">construct</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679493324"><span class="annot"><span class="annottext">line
+</span><a href="#local-6989586621679493324"><span class="hs-identifier hs-var">l0</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span> </span><span id="local-6989586621679493326"><span class="annot"><span class="annottext">[line]
+</span><a href="#local-6989586621679493326"><span class="hs-identifier hs-var">ls</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679493327"><span class="annot"><span class="annottext">vertices' :: [(Point 2 r, line)]
+</span><a href="#local-6989586621679493327"><span class="hs-identifier hs-var hs-var">vertices'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">line -&gt; [line] -&gt; [(Point 2 r, line)]
+</span><a href="#local-6989586621679493328"><span class="hs-identifier hs-var">computeVertices</span></a></span><span> </span><span class="annot"><span class="annottext">line
+</span><a href="#local-6989586621679493324"><span class="hs-identifier hs-var">l0</span></a></span><span> </span><span class="annot"><span class="annottext">[line]
+</span><a href="#local-6989586621679493326"><span class="hs-identifier hs-var">ls</span></a></span><span>
+</span><span id="line-96"></span><span>                           </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Alternating g (Point 2 r) line -&gt; LowerEnvelopeF g (Point 2 r) line
 forall (f :: * -&gt; *) vertex line.
 Alternating f vertex line -&gt; LowerEnvelopeF f vertex line
 </span><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelope"><span class="hs-identifier hs-var">LowerEnvelope</span></a></span><span> </span><span class="annot"><span class="annottext">(Alternating g (Point 2 r) line
@@ -220,19 +418,19 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">line -&gt; g (Point 2 r, line) -&gt; Alternating g (Point 2 r) line
 forall (f :: * -&gt; *) sep a. a -&gt; f (sep, a) -&gt; Alternating f sep a
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-var">Alternating</span></a></span><span> </span><span class="annot"><span class="annottext">line
-</span><a href="#local-6989586621679516022"><span class="hs-identifier hs-var">l0</span></a></span><span> </span><span class="annot"><span class="annottext">(g (Point 2 r, line) -&gt; Alternating g (Point 2 r) line)
+</span><a href="#local-6989586621679493324"><span class="hs-identifier hs-var">l0</span></a></span><span> </span><span class="annot"><span class="annottext">(g (Point 2 r, line) -&gt; Alternating g (Point 2 r) line)
 -&gt; g (Point 2 r, line) -&gt; Alternating g (Point 2 r) line
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[(Point 2 r, line)] -&gt; g (Point 2 r, line)
 forall a. [a] -&gt; g a
 forall (f :: * -&gt; *) a. HasFromFoldable f =&gt; [a] -&gt; f a
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Foldable.Util.html#fromList"><span class="hs-identifier hs-var">fromList</span></a></span><span> </span><span class="annot"><span class="annottext">[(Point 2 r, line)]
-</span><a href="#local-6989586621679516025"><span class="hs-identifier hs-var">vertices'</span></a></span><span>
-</span><span id="line-100"></span><span>
-</span><span id="line-101"></span><span>    </span><span class="annot"><a href="#local-6989586621679516026"><span class="hs-identifier hs-type">computeVertices</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679515658"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679515658"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679515659"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679515658"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
-</span><span id="line-102"></span><span>    </span><span id="local-6989586621679516026"><span class="annot"><span class="annottext">computeVertices :: line -&gt; [line] -&gt; [(Point 2 r, line)]
-</span><a href="#local-6989586621679516026"><span class="hs-identifier hs-var hs-var">computeVertices</span></a></span></span><span> </span><span id="local-6989586621679516029"><span class="annot"><span class="annottext">line
-</span><a href="#local-6989586621679516029"><span class="hs-identifier hs-var">l0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(line, [(Point 2 r, line)]) -&gt; [(Point 2 r, line)]
+</span><a href="#local-6989586621679493327"><span class="hs-identifier hs-var">vertices'</span></a></span><span>
+</span><span id="line-97"></span><span>
+</span><span id="line-98"></span><span>    </span><span class="annot"><a href="#local-6989586621679493328"><span class="hs-identifier hs-type">computeVertices</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679492850"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679492850"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679492851"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679492850"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-99"></span><span>    </span><span id="local-6989586621679493328"><span class="annot"><span class="annottext">computeVertices :: line -&gt; [line] -&gt; [(Point 2 r, line)]
+</span><a href="#local-6989586621679493328"><span class="hs-identifier hs-var hs-var">computeVertices</span></a></span></span><span> </span><span id="local-6989586621679493331"><span class="annot"><span class="annottext">line
+</span><a href="#local-6989586621679493331"><span class="hs-identifier hs-var">l0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(line, [(Point 2 r, line)]) -&gt; [(Point 2 r, line)]
 forall a b. (a, b) -&gt; b
 </span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">((line, [(Point 2 r, line)]) -&gt; [(Point 2 r, line)])
 -&gt; ([line] -&gt; (line, [(Point 2 r, line)]))
@@ -244,97 +442,97 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 forall (t :: * -&gt; *) s a b.
 Traversable t =&gt;
 (s -&gt; a -&gt; (s, b)) -&gt; s -&gt; t a -&gt; (s, t b)
-</span><span class="hs-identifier hs-var">List.mapAccumL</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679516032"><span class="annot"><span class="annottext">line
-</span><a href="#local-6989586621679516032"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679516033"><span class="annot"><span class="annottext">line
-</span><a href="#local-6989586621679516033"><span class="hs-identifier hs-var">l'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">line
-</span><a href="#local-6989586621679516033"><span class="hs-identifier hs-var">l'</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe (LineLineIntersection line) -&gt; Point 2 r
-</span><a href="#local-6989586621679516034"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (LineLineIntersection line) -&gt; Point 2 r)
+</span><span class="hs-identifier hs-var">List.mapAccumL</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679493334"><span class="annot"><span class="annottext">line
+</span><a href="#local-6989586621679493334"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679493335"><span class="annot"><span class="annottext">line
+</span><a href="#local-6989586621679493335"><span class="hs-identifier hs-var">l'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">line
+</span><a href="#local-6989586621679493335"><span class="hs-identifier hs-var">l'</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Maybe (LineLineIntersection line) -&gt; Point 2 r
+</span><a href="#local-6989586621679493336"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (LineLineIntersection line) -&gt; Point 2 r)
 -&gt; Maybe (LineLineIntersection line) -&gt; Point 2 r
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">line
-</span><a href="#local-6989586621679516032"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">line -&gt; line -&gt; Intersection line line
+</span><a href="#local-6989586621679493334"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">line -&gt; line -&gt; Intersection line line
 forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
 </span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="annot"><span class="annottext">line
-</span><a href="#local-6989586621679516033"><span class="hs-identifier hs-var">l'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">line
-</span><a href="#local-6989586621679516033"><span class="hs-identifier hs-var">l'</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">line
-</span><a href="#local-6989586621679516029"><span class="hs-identifier hs-var">l0</span></a></span><span>
-</span><span id="line-103"></span><span>    </span><span class="hs-comment">-- we scan through the lines from left to right: we maintain the previous line l, as</span><span>
-</span><span id="line-104"></span><span>    </span><span class="hs-comment">-- we encounter an new line l' we report a pair (p,l') where p is the intersection</span><span>
-</span><span id="line-105"></span><span>    </span><span class="hs-comment">-- point p of l and l'. Our last line l' becomes the new state.</span><span>
-</span><span id="line-106"></span><span>    </span><span class="annot"><a href="#local-6989586621679516034"><span class="hs-identifier hs-type">pt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LineLineIntersection</span></span><span> </span><span class="annot"><a href="#local-6989586621679515658"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679515659"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-107"></span><span>    </span><span id="local-6989586621679516034"><span class="annot"><span class="annottext">pt :: Maybe (LineLineIntersection line) -&gt; Point 2 r
-</span><a href="#local-6989586621679516034"><span class="hs-identifier hs-var hs-var">pt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
-</span><span id="line-108"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Line_x_Line_Point</span></span><span> </span><span id="local-6989586621679516037"><span class="annot"><span class="annottext">Point 2 (NumType line)
-</span><a href="#local-6989586621679516037"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679493335"><span class="hs-identifier hs-var">l'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">line
+</span><a href="#local-6989586621679493335"><span class="hs-identifier hs-var">l'</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">line
+</span><a href="#local-6989586621679493331"><span class="hs-identifier hs-var">l0</span></a></span><span>
+</span><span id="line-100"></span><span>    </span><span class="hs-comment">-- we scan through the lines from left to right: we maintain the previous line l, as</span><span>
+</span><span id="line-101"></span><span>    </span><span class="hs-comment">-- we encounter an new line l' we report a pair (p,l') where p is the intersection</span><span>
+</span><span id="line-102"></span><span>    </span><span class="hs-comment">-- point p of l and l'. Our last line l' becomes the new state.</span><span>
+</span><span id="line-103"></span><span>    </span><span class="annot"><a href="#local-6989586621679493336"><span class="hs-identifier hs-type">pt</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LineLineIntersection</span></span><span> </span><span class="annot"><a href="#local-6989586621679492850"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679492851"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-104"></span><span>    </span><span id="local-6989586621679493336"><span class="annot"><span class="annottext">pt :: Maybe (LineLineIntersection line) -&gt; Point 2 r
+</span><a href="#local-6989586621679493336"><span class="hs-identifier hs-var hs-var">pt</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-105"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Line_x_Line_Point</span></span><span> </span><span id="local-6989586621679493339"><span class="annot"><span class="annottext">Point 2 (NumType line)
+</span><a href="#local-6989586621679493339"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r
 Point 2 (NumType line)
-</span><a href="#local-6989586621679516037"><span class="hs-identifier hs-var">p</span></a></span><span>
-</span><span id="line-109"></span><span>      </span><span class="annot"><span class="annottext">Maybe (LineLineIntersection line)
+</span><a href="#local-6989586621679493339"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-106"></span><span>      </span><span class="annot"><span class="annottext">Maybe (LineLineIntersection line)
 </span><span class="hs-identifier">_</span></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Point 2 r
 forall a. HasCallStack =&gt; String -&gt; a
 </span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;lowerEnvelope: absurd: lines don't intersect&quot;</span></span><span>
-</span><span id="line-110"></span><span>
-</span><span id="line-111"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-112"></span><span>
-</span><span id="line-113"></span><span class="annot"><span class="hs-comment">-- | Commputes the line directly above the query point x</span></span><span>
-</span><span id="line-114"></span><span id="local-6989586621679515753"><span id="local-6989586621679515754"><span id="local-6989586621679515755"><span id="local-6989586621679515756"><span id="local-6989586621679515757"><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#lineAt"><span class="hs-identifier hs-type">lineAt</span></a></span><span>                                          </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679515753"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-115"></span><span>                                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679515754"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515755"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515753"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-116"></span><span>                                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;=</span></span><span> </span><span class="annot"><a href="#local-6989586621679515755"><span class="hs-identifier hs-type">d</span></a></span><span>
-</span><span id="line-117"></span><span>                                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Algorithms.BinarySearch.html#BinarySearch"><span class="hs-identifier hs-type">BinarySearch</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679515756"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679515754"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679515757"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-118"></span><span>                                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Algorithms.BinarySearch.html#Elem"><span class="hs-identifier hs-type">Elem</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679515756"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679515754"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679515757"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679515754"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679515757"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-119"></span><span>                                                   </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679515753"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515756"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515754"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515757"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679515757"><span class="hs-identifier hs-type">line</span></a></span></span></span></span></span></span><span>
-</span><span id="line-120"></span><span id="lineAt"><span class="annot"><span class="annottext">lineAt :: forall r vertex (d :: Natural) (f :: * -&gt; *) line.
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span class="annot"><span class="hs-comment">-- | Commputes the line directly above the query point x</span></span><span>
+</span><span id="line-111"></span><span id="local-6989586621679492951"><span id="local-6989586621679492952"><span id="local-6989586621679492953"><span id="local-6989586621679492954"><span id="local-6989586621679492955"><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#lineAt"><span class="hs-identifier hs-type">lineAt</span></a></span><span>                                          </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679492951"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-112"></span><span>                                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679492952"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492953"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492951"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-113"></span><span>                                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;=</span></span><span> </span><span class="annot"><a href="#local-6989586621679492953"><span class="hs-identifier hs-type">d</span></a></span><span>
+</span><span id="line-114"></span><span>                                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Algorithms.BinarySearch.html#BinarySearch"><span class="hs-identifier hs-type">BinarySearch</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679492954"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679492952"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679492955"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-115"></span><span>                                                   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Algorithms.BinarySearch.html#Elem"><span class="hs-identifier hs-type">Elem</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679492954"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679492952"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679492955"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679492952"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679492955"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-116"></span><span>                                                   </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679492951"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492954"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492952"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492955"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679492955"><span class="hs-identifier hs-type">line</span></a></span></span></span></span></span></span><span>
+</span><span id="line-117"></span><span id="lineAt"><span class="annot"><span class="annottext">lineAt :: forall r vertex (d :: Natural) (f :: * -&gt; *) line.
 (Ord r, Point_ vertex d r, 1 &lt;= d, BinarySearch (f (vertex, line)),
  Elem (f (vertex, line)) ~ (vertex, line)) =&gt;
 r -&gt; LowerEnvelopeF f vertex line -&gt; line
-</span><a href="HGeometry.Line.LowerEnvelope.html#lineAt"><span class="hs-identifier hs-var hs-var">lineAt</span></a></span></span><span> </span><span id="local-6989586621679516113"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679516113"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679516114"><span class="annot"><span class="annottext">env :: LowerEnvelopeF f vertex line
-</span><a href="#local-6989586621679516114"><span class="hs-identifier hs-var">env</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelope"><span class="hs-identifier hs-type">LowerEnvelope</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span id="local-6989586621679516115"><span class="annot"><span class="annottext">line
-</span><a href="#local-6989586621679516115"><span class="hs-identifier hs-var">l0</span></a></span></span><span> </span><span class="annot"><span class="annottext">f (vertex, line)
+</span><a href="HGeometry.Line.LowerEnvelope.html#lineAt"><span class="hs-identifier hs-var hs-var">lineAt</span></a></span></span><span> </span><span id="local-6989586621679493415"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679493415"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679493416"><span class="annot"><span class="annottext">env :: LowerEnvelopeF f vertex line
+</span><a href="#local-6989586621679493416"><span class="hs-identifier hs-var">env</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelope"><span class="hs-identifier hs-type">LowerEnvelope</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span id="local-6989586621679493417"><span class="annot"><span class="annottext">line
+</span><a href="#local-6989586621679493417"><span class="hs-identifier hs-var">l0</span></a></span></span><span> </span><span class="annot"><span class="annottext">f (vertex, line)
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">r -&gt; LowerEnvelopeF f vertex line -&gt; Maybe (vertex, line)
 forall r vertex (d :: Natural) (f :: * -&gt; *) line.
 (Ord r, Point_ vertex d r, 1 &lt;= d, BinarySearch (f (vertex, line)),
  Elem (f (vertex, line)) ~ (vertex, line)) =&gt;
 r -&gt; LowerEnvelopeF f vertex line -&gt; Maybe (vertex, line)
 </span><a href="HGeometry.Line.LowerEnvelope.html#lookupLEVertex"><span class="hs-identifier hs-var">lookupLEVertex</span></a></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679516113"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">LowerEnvelopeF f vertex line
-</span><a href="#local-6989586621679516114"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-121"></span><span>    </span><span class="annot"><span class="annottext">Maybe (vertex, line)
+</span><a href="#local-6989586621679493415"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">LowerEnvelopeF f vertex line
+</span><a href="#local-6989586621679493416"><span class="hs-identifier hs-var">env</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-118"></span><span>    </span><span class="annot"><span class="annottext">Maybe (vertex, line)
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">line
-</span><a href="#local-6989586621679516115"><span class="hs-identifier hs-var">l0</span></a></span><span>
-</span><span id="line-122"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">vertex
-</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679516116"><span class="annot"><span class="annottext">line
-</span><a href="#local-6989586621679516116"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">line
-</span><a href="#local-6989586621679516116"><span class="hs-identifier hs-var">l</span></a></span><span>
-</span><span id="line-123"></span><span>
-</span><span id="line-124"></span><span class="annot"><span class="hs-comment">-- | returns the rightmost vertex v for which v_x &lt; x.</span></span><span>
-</span><span id="line-125"></span><span id="local-6989586621679515779"><span id="local-6989586621679515780"><span id="local-6989586621679515781"><span id="local-6989586621679515782"><span id="local-6989586621679515783"><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#lookupLEVertex"><span class="hs-identifier hs-type">lookupLEVertex</span></a></span><span>                                      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679515779"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-126"></span><span>                                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679515780"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515781"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515779"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-127"></span><span>                                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;=</span></span><span> </span><span class="annot"><a href="#local-6989586621679515781"><span class="hs-identifier hs-type">d</span></a></span><span>
-</span><span id="line-128"></span><span>                                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Algorithms.BinarySearch.html#BinarySearch"><span class="hs-identifier hs-type">BinarySearch</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679515782"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679515780"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679515783"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-129"></span><span>                                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Algorithms.BinarySearch.html#Elem"><span class="hs-identifier hs-type">Elem</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679515782"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679515780"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679515783"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679515780"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679515783"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-130"></span><span>                                                       </span><span class="hs-special">)</span><span>
-</span><span id="line-131"></span><span>                                                    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679515779"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515782"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515780"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679515783"><span class="hs-identifier hs-type">line</span></a></span><span>
-</span><span id="line-132"></span><span>                                                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679515780"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679515783"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
-</span><span id="line-133"></span><span id="lookupLEVertex"><span class="annot"><span class="annottext">lookupLEVertex :: forall r vertex (d :: Natural) (f :: * -&gt; *) line.
+</span><a href="#local-6989586621679493417"><span class="hs-identifier hs-var">l0</span></a></span><span>
+</span><span id="line-119"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">vertex
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679493418"><span class="annot"><span class="annottext">line
+</span><a href="#local-6989586621679493418"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">line
+</span><a href="#local-6989586621679493418"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-120"></span><span>
+</span><span id="line-121"></span><span class="annot"><span class="hs-comment">-- | returns the rightmost vertex v for which v_x &lt; x.</span></span><span>
+</span><span id="line-122"></span><span id="local-6989586621679492977"><span id="local-6989586621679492978"><span id="local-6989586621679492979"><span id="local-6989586621679492980"><span id="local-6989586621679492981"><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#lookupLEVertex"><span class="hs-identifier hs-type">lookupLEVertex</span></a></span><span>                                      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679492977"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-123"></span><span>                                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679492978"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492979"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492977"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-124"></span><span>                                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;=</span></span><span> </span><span class="annot"><a href="#local-6989586621679492979"><span class="hs-identifier hs-type">d</span></a></span><span>
+</span><span id="line-125"></span><span>                                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Algorithms.BinarySearch.html#BinarySearch"><span class="hs-identifier hs-type">BinarySearch</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679492980"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679492978"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679492981"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-126"></span><span>                                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Algorithms.BinarySearch.html#Elem"><span class="hs-identifier hs-type">Elem</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679492980"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679492978"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679492981"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679492978"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679492981"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-127"></span><span>                                                       </span><span class="hs-special">)</span><span>
+</span><span id="line-128"></span><span>                                                    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679492977"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelopeF"><span class="hs-identifier hs-type">LowerEnvelopeF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492980"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492978"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679492981"><span class="hs-identifier hs-type">line</span></a></span><span>
+</span><span id="line-129"></span><span>                                                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679492978"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679492981"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-130"></span><span id="lookupLEVertex"><span class="annot"><span class="annottext">lookupLEVertex :: forall r vertex (d :: Natural) (f :: * -&gt; *) line.
 (Ord r, Point_ vertex d r, 1 &lt;= d, BinarySearch (f (vertex, line)),
  Elem (f (vertex, line)) ~ (vertex, line)) =&gt;
 r -&gt; LowerEnvelopeF f vertex line -&gt; Maybe (vertex, line)
-</span><a href="HGeometry.Line.LowerEnvelope.html#lookupLEVertex"><span class="hs-identifier hs-var hs-var">lookupLEVertex</span></a></span></span><span> </span><span id="local-6989586621679516184"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679516184"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelope"><span class="hs-identifier hs-type">LowerEnvelope</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><span class="annottext">line
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679516185"><span class="annot"><span class="annottext">f (vertex, line)
-</span><a href="#local-6989586621679516185"><span class="hs-identifier hs-var">ls</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-134"></span><span>  </span><span class="annot"><span class="annottext">(Elem (f (vertex, line)) -&gt; Bool)
+</span><a href="HGeometry.Line.LowerEnvelope.html#lookupLEVertex"><span class="hs-identifier hs-var hs-var">lookupLEVertex</span></a></span></span><span> </span><span id="local-6989586621679493486"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679493486"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.LowerEnvelope.html#LowerEnvelope"><span class="hs-identifier hs-type">LowerEnvelope</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sequence.Alternating.html#Alternating"><span class="hs-identifier hs-type">Alternating</span></a></span><span> </span><span class="annot"><span class="annottext">line
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679493487"><span class="annot"><span class="annottext">f (vertex, line)
+</span><a href="#local-6989586621679493487"><span class="hs-identifier hs-var">ls</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-131"></span><span>  </span><span class="annot"><span class="annottext">(Elem (f (vertex, line)) -&gt; Bool)
 -&gt; f (vertex, line) -&gt; Maybe (Elem (f (vertex, line)))
 forall v. BinarySearch v =&gt; (Elem v -&gt; Bool) -&gt; v -&gt; Maybe (Elem v)
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Algorithms.BinarySearch.html#binarySearchLastIn"><span class="hs-identifier hs-var">binarySearchLastIn</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Bool)
 -&gt; ((vertex, line) -&gt; Bool) -&gt; (vertex, line) -&gt; Bool
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679516188"><span class="annot"><span class="annottext">vertex
-</span><a href="#local-6989586621679516188"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">line
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679493490"><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679493490"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">line
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">vertex
-</span><a href="#local-6989586621679516188"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">vertex -&gt; Getting r vertex r -&gt; r
+</span><a href="#local-6989586621679493490"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">vertex -&gt; Getting r vertex r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r vertex r
 forall (d :: Natural) point r.
@@ -344,6 +542,6 @@ IndexedLens' Int vertex r
 </span><span class="hs-identifier hs-var">xCoord</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679516184"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">f (vertex, line)
-</span><a href="#local-6989586621679516185"><span class="hs-identifier hs-var">ls</span></a></span><span>
-</span><span id="line-135"></span></pre></body></html>
+</span><a href="#local-6989586621679493486"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">f (vertex, line)
+</span><a href="#local-6989586621679493487"><span class="hs-identifier hs-var">ls</span></a></span><span>
+</span><span id="line-132"></span></pre></body></html>
