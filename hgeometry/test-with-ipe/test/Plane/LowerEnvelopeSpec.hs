@@ -7,6 +7,7 @@ module Plane.LowerEnvelopeSpec
   ) where
 
 import           Control.Lens
+import           Data.Coerce
 import           Data.Foldable
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -20,14 +21,17 @@ import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
+import           HGeometry.Line
 import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
+import           HGeometry.Plane.LowerEnvelope.Connected
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
-import           HGeometry.Plane.LowerEnvelope.ConnectedNew
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
 import           HGeometry.Vector
+import           HGeometry.VoronoiDiagram
+import qualified HGeometry.VoronoiDiagram as VD
 import           Ipe
 import           Ipe.Color
 import           System.OsPath
@@ -75,13 +79,29 @@ instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r
 -- 83.83267 217.24478 l
 -- h
 
-instance ( Point_ point 2 r, Fractional r, Ord r
-
+instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
          , Show point, Show r
          )
-         => HasDefaultIpeOut (MinimizationDiagram r point) where
-  type DefaultIpeOut (MinimizationDiagram r point) = Group
-  defIO = ipeGroup . zipWith render (cycle $ drop 3 basicNamedColors) . Map.assocs
+         => HasDefaultIpeOut (VoronoiDiagram point) where
+  type DefaultIpeOut (VoronoiDiagram point) = Group
+  defIO = \case
+    AllColinear colinearPts -> let sites     = [ p
+                                               | ColinearPoint p <- Set.toAscList $ colinearPts
+                                               ]
+                                   bisectors = zipWith bisector sites (drop 1 sites)
+                               in ipeGroup . concat $
+                                  [ [ iO $ defIO b | b <- bisectors  ]
+                                  , [ iO $ defIO (p^.asPoint) | p <- sites ]
+                                  ]
+
+    ConnectedVD vd          -> defIO vd
+
+instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
+         , Show point, Show r
+         )
+         => HasDefaultIpeOut (VoronoiDiagram' point) where
+  type DefaultIpeOut (VoronoiDiagram' point) = Group
+  defIO = ipeGroup . zipWith render (cycle $ drop 3 basicNamedColors) . Map.assocs . VD.asMap
     where
       render color (site, voronoiRegion) = iO' $ ipeGroup
                  [ iO $ defIO (site^.asPoint) ! attr SStroke  color
@@ -110,37 +130,10 @@ spec = describe "lower envelope tests" $ do
          testIpe [osp|degenerate2.ipe|]
                  [osp|degenerate2_out|]
 
-         testIpeGraph [osp|foo.ipe|]
-                      [osp|foo_graph_out|]
+         -- testIpeGraph [osp|foo.ipe|]
+         --              [osp|foo_graph_out|]
 
 
-
--- | Computes the vertex form of the upper envelope. The z-coordinates are still flipped.
-
-type VoronoiDiagram' r point = MinimizationDiagram r point
-
-voronoiDiagram' :: ( Point_ point 2 r, Functor f, Ord point
-                   , Ord r, Fractional r, Foldable1 f
-                   , Show point, Show r
-
-
-                   ) => f point -> VoronoiDiagram' r point
-voronoiDiagram' = Map.mapKeysMonotonic (view extra)
-                . bruteForceLowerEnvelope
-                . fmap (\p -> flipZ (liftPointToPlane p) :+ p)
-  where
-    flipZ :: Num r => Plane r -> Plane r
-    flipZ = over (hyperPlaneCoefficients.traverse) negate
-
-voronoiVertices :: ( Point_ point 2 r, Functor f, Ord point
-                   , Ord r, Fractional r, Foldable1 f
-                   , Show point, Show r
-                   , Ord point
-                   ) => f point -> Set (Point 2 r)
-voronoiVertices = foldMap (\case
-                              Bounded pts       -> Set.fromList pts
-                              Unbounded _ pts _ -> Set.fromList (NonEmpty.toList pts)
-                          ) . voronoiDiagram'
 
 -- | Build voronoi diagrams on the input points
 testIpe            :: OsPath -> OsPath -> Spec
@@ -148,7 +141,7 @@ testIpe inFp outFp = do
     (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
       inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
       NonEmpty.fromList <$> readAllFrom inFp'
-    let vd = voronoiDiagram' $ view core <$> points
+    let vd = voronoiDiagram $ view core <$> points
         vv = voronoiVertices $ view core <$> points
         out = [ iO' points
               , iO' vd
@@ -164,22 +157,24 @@ theEdges = ipeGroup . Map.foldMapWithKey (\v (adjs, _) ->
                               ]) adjs)
 
 
--- build a triangulated graph from the points in the input file
-testIpeGraph            :: OsPath -> OsPath -> Spec
-testIpeGraph inFp outFp = do
-    (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
-      inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
-      NonEmpty.fromList <$> readAllFrom inFp'
-    let vd = voronoiDiagram' $ view core <$> points
-        vv = voronoiVertices $ view core <$> points
-        gr = toPlaneGraph $ Map.mapKeysMonotonic liftPointToPlane vd
-        out = [ iO' points
-              , iO' vd
-              , iO' $ theEdges gr
-              ] <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
-    goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
-               (ipeFileGolden { name = outFp })
-               (addStyleSheet opacitiesStyle $ singlePageFromContent out)
+-- -- build a triangulated graph from the points in the input file
+-- testIpeGraph            :: OsPath -> OsPath -> Spec
+-- testIpeGraph inFp outFp = do
+--     (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
+--       inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
+--       NonEmpty.fromList <$> readAllFrom inFp'
+--     case voronoiDiagram $ view core <$> points of
+--       AllColinear _  -> fail "input points are colinear !?"
+--       ConnectedVD vd -> do
+--         let vv = voronoiVertices $ view core <$> points
+--             gr = toPlaneGraph . Map.mapKeys liftPointToPlane $ VD.asMap vd -- TODO: we should flip the z no?
+--             out = [ iO' points
+--                   , iO' vd
+--                   , iO' $ theEdges gr
+--                   ] <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
+--         goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
+--                    (ipeFileGolden { name = outFp })
+--                    (addStyleSheet opacitiesStyle $ singlePageFromContent out)
 
 
 

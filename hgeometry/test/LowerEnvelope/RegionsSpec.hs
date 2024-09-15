@@ -7,7 +7,7 @@ import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Instances ()
 import           HGeometry.Number.Real.Rational
-import           HGeometry.Plane.LowerEnvelope.ConnectedNew
+import           HGeometry.Plane.LowerEnvelope.Connected
 import           HGeometry.Point
 import           HGeometry.Vector
 import           Test.Hspec
@@ -40,7 +40,7 @@ spec = describe "lowerEnvelope tests" $ do
          it "singleton diagram" $ do
            let v = Point2 10 10 :: Point 2 R
            [h1,h2,h3] <- pure inputs
-           bruteForceLowerEnvelope inputs `shouldBe`
+           (asMap $ bruteForceLowerEnvelope inputs) `shouldBe`
              Map.fromList
                [ (h1, Unbounded (Vector2 1 1)    (NonEmpty.singleton v) (Vector2 0 1))
                , (h2, Unbounded (Vector2 (-1) 0) (NonEmpty.singleton v) (Vector2 (-1) (-1)))

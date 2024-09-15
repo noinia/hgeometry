@@ -13,10 +13,12 @@
 module HGeometry.VoronoiDiagram.ViaLowerEnvelope
   ( VoronoiDiagram(..)
   , VoronoiDiagram'(..)
+  , asMap
   , ColinearPoint
   , voronoiDiagram
   , voronoiVertices
   -- , edgeGeometries
+  , ColinearPoint(..)
   ) where
 
 import           Control.Lens
