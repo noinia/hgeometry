@@ -14,8 +14,6 @@ module HGeometry.VoronoiDiagram
   , voronoiDiagram
   , voronoiVertices
   , asMap
-
-  , ColinearPoint(..)
   ) where
 
 import HGeometry.VoronoiDiagram.ViaLowerEnvelope

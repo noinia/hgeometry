@@ -29,6 +29,7 @@ import           System.OsPath
 import           Test.Hspec
 import           Test.QuickCheck.Instances ()
 import           Plane.LowerEnvelopeSpec () -- imports the ipe instances for Voronoi Diagram
+import           HGeometry.Sequence.Alternating (Alternating(..))
 -- import Test.Util
 
 --------------------------------------------------------------------------------
@@ -58,6 +59,8 @@ spec = describe "Voronoi diagram tests" $ do
                  , iO' trivialVD
                  ]
 
+    degenerateTests
+
     testIpe [osp|trivial.ipe|]
             [osp|trivial_out|]
     testIpe [osp|simplest.ipe|]
@@ -71,25 +74,22 @@ spec = describe "Voronoi diagram tests" $ do
     testIpe [osp|foo.ipe|]
             [osp|foo_out|]
 
-
-
-
 degenerateTests :: Spec
 degenerateTests = describe "degnereate inputs" $ do
   it "single point diagram" $
     voronoiDiagram (NonEmpty.singleton $ Point2 1 (2 :: R))
     `shouldBe`
-    AllColinear undefined  -- TODO
+    AllColinear (Alternating (Point2 1 2) mempty)
   it "two point diagram" $
     voronoiDiagram (NonEmpty.fromList [Point2 1 (2 :: R), Point2 3 2])
     `shouldBe`
-    AllColinear undefined -- TODO
+    AllColinear (Alternating (Point2 1 2) (V.fromList [(VerticalLineThrough 2, Point2 3 r)]))
   it "multiple parallel point diagram" $
     voronoiDiagram (NonEmpty.fromList [ Point2 x (2 :: R)
                                       | x <- fromInteger <$> [1..10]
                                       ])
     `shouldBe`
-    AllColinear undefined -- TODO
+    AllColinear (Alternating origin mempty) -- TODO
 
              -- goldenWith [osp|data/test-with-ipe/golden/|]
   --            (ipeContentGolden { name = [osp|voronoi|] })

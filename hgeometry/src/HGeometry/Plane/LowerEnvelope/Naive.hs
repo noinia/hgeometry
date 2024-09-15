@@ -12,6 +12,7 @@ import qualified Data.Foldable as F
 import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
+import           Data.Maybe
 import qualified Data.Set as Set
 import qualified Data.Vector as Vector
 import           HGeometry.Ext
@@ -22,8 +23,8 @@ import           HGeometry.Line.General
 import qualified HGeometry.Line.LowerEnvelope as Line
 import           HGeometry.Plane.LowerEnvelope.Connected
 import           HGeometry.Plane.LowerEnvelope.Type
+import           HGeometry.Sequence.Alternating (firstWithNeighbors)
 import           HGeometry.Vector
-
 --------------------------------------------------------------------------------
 
 -- | Brute force implementation that computes the lower envelope, by explicitly
@@ -59,9 +60,10 @@ lowerEnvelopeWith minimizationDiagram hs = case distinguish (toNonEmpty hs) of
     Left lines'                   -> ParallelStrips . fromLines $ lines'
     Right (Vector3 h1 h2 h3, hs') -> ConnectedEnvelope $ minimizationDiagram (h1 :| h2 : h3 : hs')
   where
-    fromLines = Set.fromDistinctAscList . F.toList
-              . fmap (ParallelPlane . view extra)
-              . Line.lowerEnvelope @Vector.Vector
+    fromLines = firstWithNeighbors (\h _ h' -> fromMaybe err $ intersectionLine h h')
+              . fmap (view extra) . view Line._Alternating
+              . Line.lowerEnvelope
+    err = error "lowerEnvelopeWith. absurd: neighbouring planes must intersect"
 
 
 -- | We distinguish whether the planes are all parallel (left), and thus actually just

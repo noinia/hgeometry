@@ -29,6 +29,7 @@ import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
+import           HGeometry.Sequence.Alternating (separators)
 import           HGeometry.Vector
 import           HGeometry.VoronoiDiagram
 import qualified HGeometry.VoronoiDiagram as VD
@@ -38,7 +39,6 @@ import           System.OsPath
 import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
-
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -85,10 +85,8 @@ instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
          => HasDefaultIpeOut (VoronoiDiagram point) where
   type DefaultIpeOut (VoronoiDiagram point) = Group
   defIO = \case
-    AllColinear colinearPts -> let sites     = [ p
-                                               | ColinearPoint p <- Set.toAscList $ colinearPts
-                                               ]
-                                   bisectors = zipWith bisector sites (drop 1 sites)
+    AllColinear colinearPts -> let sites     = toList colinearPts
+                                   bisectors = toList $ separators colinearPts
                                in ipeGroup . concat $
                                   [ [ iO $ defIO b | b <- bisectors  ]
                                   , [ iO $ defIO (p^.asPoint) | p <- sites ]
