@@ -52,8 +52,8 @@ spec = describe "Voronoi diagram tests" $ do
     --              ]
 
 
-    goldenWith [osp|data/test-with-ipe/golden/|]
-               (ipeContentGolden { name = [osp|trivalVoronoi|] })
+    goldenWith [osp|data/test-with-ipe/VoronoiDiagram/|]
+               (ipeContentGolden { name = [osp|trivialVoronoi|] })
                  [ iO' inputs
                  , iO' trivialVD
                  ]
@@ -166,5 +166,5 @@ testIpe inFp outFp = do
               , iO' vd
               ] <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
     goldenWith [osp|data/test-with-ipe/VoronoiDiagram/|]
-               (ipeContentGolden { name = outFp })
-               out
+               (ipeFileGolden { name = outFp })
+               (addStyleSheet opacitiesStyle $ singlePageFromContent out)
