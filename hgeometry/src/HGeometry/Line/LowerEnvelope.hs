@@ -42,6 +42,7 @@ import           HGeometry.Sequence.Alternating
 
 -- | The lower envelope of a set of lines
 newtype LowerEnvelopeF f vertex line = LowerEnvelope (Alternating f vertex line)
+  deriving newtype (Functor, Bifunctor, Foldable)
 
 -- | A lower envelope, where the data structure is a vector.
 type LowerEnvelope = LowerEnvelopeF Vector.Vector
@@ -61,11 +62,7 @@ deriving instance ( Eq line, Eq (f (vertex, line))
 deriving instance ( Ord line, Ord (f (vertex, line))
                   ) => Ord (LowerEnvelopeF f vertex line)
 
-instance Functor f => Functor (LowerEnvelopeF f r) where
-  fmap f = bimap id f
 
-instance Functor f => Bifunctor (LowerEnvelopeF f) where
-  bimap f g (LowerEnvelope alt) = LowerEnvelope $ bimap f g alt
 
 
 -- -- | change the functor type of the Lower envelope

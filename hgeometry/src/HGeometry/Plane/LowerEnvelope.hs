@@ -15,7 +15,7 @@ module HGeometry.Plane.LowerEnvelope
   -- , module HGeometry.Plane.LowerEnvelope.Naive
   ) where
 
-import HGeometry.Plane.LowerEnvelope.AdjListForm
+-- import HGeometry.Plane.LowerEnvelope.AdjListForm
 import HGeometry.Plane.LowerEnvelope.Naive
 import HGeometry.Plane.LowerEnvelope.Type
 

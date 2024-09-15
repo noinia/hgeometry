@@ -21,18 +21,18 @@ module HGeometry.VoronoiDiagram.ViaLowerEnvelope
 
 import           Control.Lens
 import           Data.Foldable1
+import qualified Data.Map as Map
+import           Data.Set (Set)
 import qualified Data.Set as Set
 import           HGeometry.Box
 import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Plane.LowerEnvelope.AdjListForm
-import           HGeometry.Plane.LowerEnvelope.Naive (lowerEnvelopeVertexForm)
-import           HGeometry.Plane.LowerEnvelope.VertexForm (VertexForm, vertices')
+import           HGeometry.Plane.LowerEnvelope.Connected.Regions
+import           HGeometry.Plane.LowerEnvelope.Naive (lowerEnvelope, LowerEnvelope(..))
 import           HGeometry.Point
 import           HGeometry.Properties
-
 --------------------------------------------------------------------------------
 
 -- | A Voronoi diagram
@@ -59,8 +59,7 @@ instance Wrapped (ColinearPoint point) where
 --------------------------------------------------------------------------------
 
 -- | A connected VoronoiDiagram
-newtype VoronoiDiagram' point =
-  VoronoiDiagram (LowerEnvelope' (Plane (NumType point) :+ point))
+newtype VoronoiDiagram' point = VoronoiDiagram (MinimizationDiagram (NumType point) point)
 
 deriving instance (Show point, Show (NumType point)) => Show (VoronoiDiagram' point)
 deriving instance (Eq point, Eq (NumType point))     => Eq   (VoronoiDiagram' point)
@@ -70,50 +69,59 @@ type instance Dimension (VoronoiDiagram' point) = 2 -- Dimension point
 
 -- | Iso to Access the underlying LowerEnvelope
 _VoronoiDiagramLowerEnvelope :: Iso (VoronoiDiagram' point) (VoronoiDiagram' point')
-                                    (LowerEnvelope' (Plane (NumType point) :+ point))
-                                    (LowerEnvelope' (Plane (NumType point') :+ point'))
+                                    (MinimizationDiagram (NumType point) point)
+                                    (MinimizationDiagram (NumType point') point')
 _VoronoiDiagramLowerEnvelope = coerced
 
 --------------------------------------------------------------------------------
 
-instance (Ord (NumType point), Num (NumType point)) => IsBoxable (VoronoiDiagram' point) where
-  boundingBox vd = projectPoint <$> boundingBox (vd^._VoronoiDiagramLowerEnvelope)
+-- instance (Ord (NumType point), Num (NumType point)) => IsBoxable (VoronoiDiagram' point) where
+--   boundingBox vd = projectPoint <$> boundingBox (vd^._VoronoiDiagramLowerEnvelope)
 
 --------------------------------------------------------------------------------
 
 -- | Computes the Voronoi Diagram, by lifting the points to planes, and computing
 -- the lower envelope of these planes.
 --
+-- O(n^4) ( we currently use the brute force implentation...) TODO: switch to something faster
+
 -- \(O(n\log n)\)
-voronoiDiagram     :: ( Point_ point 2 r, Functor f, Ord point
-                      , Ord r, Fractional r, Foldable1 f
-                      , Show point, Show r
-                      ) => f point -> VoronoiDiagram point
-voronoiDiagram pts = case lowerEnvelope' . fmap (\p -> liftPointToPlane p :+ p) $ pts of
-                       ParallelStrips strips -> AllColinear $ Set.mapMonotonic getPoint strips
-                       ConnectedEnvelope env -> ConnectedVD $ VoronoiDiagram env
-  where
-    lowerEnvelope' hs = fromVertexForm hs $ upperEnvelopeVertexForm hs
-    getPoint = view (_Wrapped'.extra.to ColinearPoint)
+voronoiDiagram :: ( Point_ point 2 r, Functor f, Ord point
+                  , Ord r, Fractional r, Foldable1 f
+                  , Show point, Show r
+                  ) => f point -> VoronoiDiagram point
+voronoiDiagram = voronoiDiagramWith lowerEnvelope
 
--- | Computes all voronoi vertices
-voronoiVertices :: ( Point_ point 2 r, Functor f, Ord point
-                   , Ord r, Fractional r, Foldable f
-                   ) => f point -> [Point 2 r]
-voronoiVertices = map (projectPoint . fst)
-                . itoListOf vertices'
-                . upperEnvelopeVertexForm
-                . fmap (\p -> liftPointToPlane p :+ p)
--- FIXME: get rid of the ord point constraint
+-- | Given a function to compute a lower envelope; construct use it to construct the
+-- Voronoi diagram.
+voronoiDiagramWith :: ( Point_ point 2 r, Functor nonEmpty, Ord point
+                      , Ord r, Fractional r, Foldable1 nonEmpty
+                      )
+                   => (nonEmpty (Plane 3 r :+ point) -> LowerEnvelope r (Plane 3 r :+ point))
 
--- | Computes the vertex form of the upper envelope. The z-coordinates are still flipped.
-upperEnvelopeVertexForm :: ( Plane_ plane r
-                           , Ord r, Fractional r, Foldable f, Functor f, Ord plane
-                           ) => f plane -> VertexForm plane
-upperEnvelopeVertexForm = lowerEnvelopeVertexForm . fmap flipZ
+                   -> nonEmpty point
+                   -> VoronoiDiagram point
+voronoiDiagramWith lowerEnv pts = case lowerEnv . fmap (\p -> pointToPlane p :+ p) $ pts of
+    ParallelStrips strips -> AllColinear $ Set.mapMonotonic getPoint strips
+    ConnectedEnvelope env -> ConnectedVD . VoronoiDiagram . Map.mapKeys (view extra) $ env
   where
+    -- lifts the point to a plane; so that the lower envelope corresponds to the VD
+    pointToPlane = flipZ . liftPointToPlane
     flipZ = over (hyperPlaneCoefficients.traverse) negate
 
+    getPoint = view (_Wrapped'.extra.to ColinearPoint)
+
+
+-- | Compute the vertices of the Voronoi diagram
+voronoiVertices :: ( Point_ point 2 r, Functor f, Ord point
+                   , Ord r, Fractional r, Foldable1 f
+                   , Show point, Show r
+                   , Ord point
+                   ) => f point -> Set (Point 2 r)
+voronoiVertices = foldMap (\case
+                              Bounded pts       -> Set.fromList pts
+                              Unbounded _ pts _ -> Set.fromList (NonEmpty.toList pts)
+                          ) . voronoiDiagram'
 
 --------------------------------------------------------------------------------
 
