@@ -89,7 +89,7 @@ degenerateTests = describe "degnereate inputs" $ do
   it "two point diagram" $
     voronoiDiagram (NonEmpty.fromList [Point2 1 (2 :: R), Point2 3 2])
     `shouldBe`
-    AllColinear (Alternating (Point2 1 2) (Vector.fromList [(VerticalLineThrough 2, Point2 3 2)])g)
+    AllColinear (Alternating (Point2 1 2) (Vector.fromList [(VerticalLineThrough 2, Point2 3 2)]))
   it "multiple parallel point diagram" $
     voronoiDiagram (NonEmpty.fromList [ Point2 x (2 :: R)
                                       | x <- fromInteger <$> [1..10]
