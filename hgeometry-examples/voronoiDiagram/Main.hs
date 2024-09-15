@@ -3,11 +3,12 @@
 module Main(main) where
 
 import           Control.Lens hiding (view, element)
+import           Data.Foldable (toList)
 import qualified Data.IntMap as IntMap
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
+import qualified Data.Set as Set
 import           GHC.TypeNats
-import           HGeometry.VoronoiDiagram
 import           HGeometry.Ext
 import           HGeometry.Miso.OrphanInstances ()
 import           HGeometry.Miso.Svg
@@ -15,6 +16,7 @@ import           HGeometry.Miso.Svg.Canvas (Canvas, blankCanvas, mouseCoordinate
 import qualified HGeometry.Miso.Svg.Canvas as Canvas
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
+import           HGeometry.VoronoiDiagram
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
 import           Miso
 import           Miso.String (MisoString,ToMisoString(..), ms)
@@ -26,7 +28,7 @@ type R = RealNumber 5
 
 data Model = Model { _canvas   :: Canvas R
                    , _points   :: IntMap.IntMap (Point 2 R)
-                   , _diagram  :: Maybe [Point 2 R]
+                   , _diagram  :: Maybe (Set.Set (Point 2 R))
                    } deriving (Eq)
 makeLenses ''Model
 
@@ -96,7 +98,7 @@ viewModel m = div_ [ ]
     canvasBody = [ g_ [] [ draw v [ fill_ "red"
                                   ]
                          ]
-                 | v <- m^..diagram.traverse.traverse ]
+                 | v <- m^..diagram.traverse.to toList.traverse ]
               <> [ g_ [] [ draw p [ fill_ "black"
                                   ]
                          , textAt p [] (ms i)

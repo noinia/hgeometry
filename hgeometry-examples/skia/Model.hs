@@ -28,6 +28,7 @@ import           Color
 import           Control.Lens hiding (view, element)
 import           Data.Default.Class
 import qualified Data.IntMap as IntMap
+import qualified Data.Set as Set
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
@@ -94,7 +95,7 @@ data Model = Model { _canvas       :: SkiaCanvas.Canvas R
 
                    , _planeGraphs  :: IntMap.IntMap (PlaneGraph' R)
 
-                   , _diagram      :: Maybe [Point 2 R]
+                   , _diagram      :: Maybe (Set.Set (Point 2 R))
                    , __layers      :: Layers
                    , _stroke       :: !StrokeFill
                    , _fill         :: !StrokeFill
