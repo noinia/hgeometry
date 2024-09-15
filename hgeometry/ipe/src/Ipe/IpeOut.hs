@@ -33,6 +33,7 @@ import           HGeometry.Foldable.Util
 import           HGeometry.HalfLine
 import           HGeometry.Intersection
 import           HGeometry.Line
+import           HGeometry.Line.General
 import           HGeometry.LineSegment
 import           HGeometry.Number.Radical
 import           HGeometry.Point
@@ -157,6 +158,16 @@ instance HasDefaultIpeOut (PolyLine (Point 2 r)) where
 instance (Fractional r, Ord r, Show r) => HasDefaultIpeOut (LinePV 2 r) where
   type DefaultIpeOut (LinePV 2 r) = Path
   defIO = ipeLine
+
+instance (Fractional r, Ord r, Show r) => HasDefaultIpeOut (LineEQ r) where
+  type DefaultIpeOut (LineEQ r) = Path
+  defIO (LineEQ a b) = ipeLine $ fromLinearFunction a b
+
+instance (Fractional r, Ord r, Show r) => HasDefaultIpeOut (VerticalOrLineEQ r) where
+  type DefaultIpeOut (VerticalOrLineEQ r) = Path
+  defIO = \case
+    VerticalLineThrough x -> ipeLine $ verticalLine x
+    NonVertical l         -> defIO l
 
 instance (Fractional r, Ord r, Point_ point 2 r,Show r, Show point) => HasDefaultIpeOut (HalfLine point) where
   type DefaultIpeOut (HalfLine point) = Path

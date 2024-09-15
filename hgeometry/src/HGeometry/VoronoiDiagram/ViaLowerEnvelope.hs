@@ -13,31 +13,39 @@
 module HGeometry.VoronoiDiagram.ViaLowerEnvelope
   ( VoronoiDiagram(..)
   , VoronoiDiagram'(..)
-  , ColinearPoint
+  , asMap
   , voronoiDiagram
   , voronoiVertices
-  , edgeGeometries
+  -- , edgeGeometries
   ) where
 
 import           Control.Lens
+import           Control.Subcategory.Functor
 import           Data.Foldable1
+import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Map as Map
+import           Data.Set (Set)
 import qualified Data.Set as Set
-import           HGeometry.Box
+import qualified Data.Vector as Vector
 import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Plane.LowerEnvelope.AdjListForm
-import           HGeometry.Plane.LowerEnvelope.Naive (lowerEnvelopeVertexForm)
-import           HGeometry.Plane.LowerEnvelope.VertexForm (VertexForm, vertices')
+import           HGeometry.Line.General
+import           HGeometry.Plane.LowerEnvelope ( MinimizationDiagram, Region(..)
+                                               , lowerEnvelope, LowerEnvelope(..)
+                                               )
+import qualified HGeometry.Plane.LowerEnvelope as LowerEnvelope
 import           HGeometry.Point
 import           HGeometry.Properties
+import           HGeometry.Sequence.Alternating (Alternating(..))
 
 --------------------------------------------------------------------------------
 
 -- | A Voronoi diagram
-data VoronoiDiagram point = AllColinear !(Set.Set (ColinearPoint point))
-                          | ConnectedVD !(VoronoiDiagram' point)
+data VoronoiDiagram point =
+    AllColinear !(Alternating Vector.Vector (VerticalOrLineEQ (NumType point)) point)
+  | ConnectedVD !(VoronoiDiagram' point)
 
 deriving instance (Show point, Show (NumType point)) => Show (VoronoiDiagram point)
 deriving instance (Eq point, Eq (NumType point))     => Eq   (VoronoiDiagram point)
@@ -45,22 +53,11 @@ deriving instance (Eq point, Eq (NumType point))     => Eq   (VoronoiDiagram poi
 type instance NumType   (VoronoiDiagram point) = NumType point
 type instance Dimension (VoronoiDiagram point) = 2 -- Dimension point
 
--- | Just a newtype around point; used to model a set of points that are all colinear in
--- the Vornoi diagram.
-newtype ColinearPoint point = ColinearPoint point
-                       deriving (Show,Eq)
-
-instance Wrapped (ColinearPoint point) where
-  type Unwrapped (ColinearPoint point)  = point
-  _Wrapped' = coerced
-
--- instance Rewrapped (ColinearPoint point) point
 
 --------------------------------------------------------------------------------
 
 -- | A connected VoronoiDiagram
-newtype VoronoiDiagram' point =
-  VoronoiDiagram (LowerEnvelope' (Plane (NumType point) :+ point))
+newtype VoronoiDiagram' point = VoronoiDiagram (MinimizationDiagram (NumType point) point)
 
 deriving instance (Show point, Show (NumType point)) => Show (VoronoiDiagram' point)
 deriving instance (Eq point, Eq (NumType point))     => Eq   (VoronoiDiagram' point)
@@ -70,58 +67,70 @@ type instance Dimension (VoronoiDiagram' point) = 2 -- Dimension point
 
 -- | Iso to Access the underlying LowerEnvelope
 _VoronoiDiagramLowerEnvelope :: Iso (VoronoiDiagram' point) (VoronoiDiagram' point')
-                                    (LowerEnvelope' (Plane (NumType point) :+ point))
-                                    (LowerEnvelope' (Plane (NumType point') :+ point'))
+                                    (MinimizationDiagram (NumType point) point)
+                                    (MinimizationDiagram (NumType point') point')
 _VoronoiDiagramLowerEnvelope = coerced
 
---------------------------------------------------------------------------------
+-- | Get, for each point, its Voronoi region
+asMap :: (Point_ point 2 r, Ord point)
+      => VoronoiDiagram' point -> Map.Map point (Region r (Point 2 r))
+asMap = LowerEnvelope.asMap . view _VoronoiDiagramLowerEnvelope
 
-instance (Ord (NumType point), Num (NumType point)) => IsBoxable (VoronoiDiagram' point) where
-  boundingBox vd = projectPoint <$> boundingBox (vd^._VoronoiDiagramLowerEnvelope)
+--------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
 
 -- | Computes the Voronoi Diagram, by lifting the points to planes, and computing
 -- the lower envelope of these planes.
 --
+-- O(n^4) ( we currently use the brute force implentation...) TODO: switch to something faster
+
 -- \(O(n\log n)\)
-voronoiDiagram     :: ( Point_ point 2 r, Functor f, Ord point
-                      , Ord r, Fractional r, Foldable1 f
-                      , Show point, Show r
-                      ) => f point -> VoronoiDiagram point
-voronoiDiagram pts = case lowerEnvelope' . fmap (\p -> liftPointToPlane p :+ p) $ pts of
-                       ParallelStrips strips -> AllColinear $ Set.mapMonotonic getPoint strips
-                       ConnectedEnvelope env -> ConnectedVD $ VoronoiDiagram env
-  where
-    lowerEnvelope' hs = fromVertexForm hs $ upperEnvelopeVertexForm hs
-    getPoint = view (_Wrapped'.extra.to ColinearPoint)
+voronoiDiagram :: ( Point_ point 2 r, Functor f, Ord point
+                  , Ord r, Fractional r, Foldable1 f
+                  , Show point, Show r
+                  ) => f point -> VoronoiDiagram point
+voronoiDiagram = voronoiDiagramWith lowerEnvelope
 
--- | Computes all voronoi vertices
-voronoiVertices :: ( Point_ point 2 r, Functor f, Ord point
-                   , Ord r, Fractional r, Foldable f
-                   ) => f point -> [Point 2 r]
-voronoiVertices = map (projectPoint . fst)
-                . itoListOf vertices'
-                . upperEnvelopeVertexForm
-                . fmap (\p -> liftPointToPlane p :+ p)
--- FIXME: get rid of the ord point constraint
+-- | Given a function to compute a lower envelope; construct use it to construct the
+-- Voronoi diagram.
+voronoiDiagramWith :: ( Point_ point 2 r, Functor nonEmpty, Ord point
+                      , Ord r, Fractional r, Foldable1 nonEmpty
+                      )
+                   => (nonEmpty (Plane r :+ point) -> LowerEnvelope (Plane r :+ point))
 
--- | Computes the vertex form of the upper envelope. The z-coordinates are still flipped.
-upperEnvelopeVertexForm :: ( Plane_ plane r
-                           , Ord r, Fractional r, Foldable f, Functor f, Ord plane
-                           ) => f plane -> VertexForm plane
-upperEnvelopeVertexForm = lowerEnvelopeVertexForm . fmap flipZ
+                   -> nonEmpty point
+                   -> VoronoiDiagram point
+voronoiDiagramWith lowerEnv pts = case lowerEnv . fmap (\p -> pointToPlane p :+ p) $ pts of
+    ParallelStrips strips -> AllColinear $ fmap (^.extra) strips
+    ConnectedEnvelope env -> ConnectedVD . VoronoiDiagram . cmap (^.extra) $ env
   where
+    -- lifts the point to a plane; so that the lower envelope corresponds to the VD
+    pointToPlane = flipZ . liftPointToPlane
     flipZ = over (hyperPlaneCoefficients.traverse) negate
 
 
+
+-- | Compute the vertices of the Voronoi diagram
+voronoiVertices    :: ( Point_ point 2 r, Functor f, Ord point
+                      , Ord r, Fractional r, Foldable1 f
+                      , Show point, Show r
+                      , Ord point
+                      ) => f point -> Set (Point 2 r)
+voronoiVertices pts = case voronoiDiagram pts of
+    AllColinear _  -> mempty
+    ConnectedVD vd -> foldMap (\case
+                                  Bounded vs       -> Set.fromList vs
+                                  Unbounded _ vs _ -> Set.fromList (NonEmpty.toList vs)
+                              ) (asMap vd)
+
 --------------------------------------------------------------------------------
 
--- | Get the halflines and line segments representing the VoronoiDiagram
-edgeGeometries :: (Point_ point 2 r, Ord r, Fractional r
+-- -- | Get the halflines and line segments representing the VoronoiDiagram
+-- edgeGeometries :: (Point_ point 2 r, Ord r, Fractional r
 
-                  , Show point, Show r
-                  )
-               => Fold (VoronoiDiagram' point) (EdgeGeometry (Point 2 r))
-edgeGeometries = _VoronoiDiagramLowerEnvelope.projectedEdgeGeometries
--- TODO: figure out if this can be an indexed fold
+--                   , Show point, Show r
+--                   )
+--                => Fold (VoronoiDiagram' point) (EdgeGeometry (Point 2 r))
+-- edgeGeometries = _VoronoiDiagramLowerEnvelope.projectedEdgeGeometries
+-- -- TODO: figure out if this can be an indexed fold

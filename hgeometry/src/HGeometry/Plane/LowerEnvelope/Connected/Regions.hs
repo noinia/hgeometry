@@ -10,10 +10,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Plane.LowerEnvelope.Connected.Regions
-  ( MinimizationDiagram
-  , Region(..)
-  , CircularList
-  , fromVertexForm
+  ( fromVertexForm
 
   , Definers
   , fromCCWList
@@ -37,106 +34,13 @@ import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Intersection
 import           HGeometry.Line
+import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
+import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
+import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector
-import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
-import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
-
---------------------------------------------------------------------------------
--- * The Minimization Diagram, i.e. the type that we use to represent our
--- lower envelope
-
--- | A minimization daigram just maps every plane on the lower envelope to the region
--- above which it is minimal. Every plane has at most one such a region.
-type MinimizationDiagram r plane = Map plane (Region r (Point 2 r))
-
-type instance NumType   (MinimizationDiagram r plane) = r
-type instance Dimension (MinimizationDiagram r plane) = 2
--- TODO: this is a bit of hack; maybe use a newtype instead. We only need these instances
--- to actually print the thing in ipe.
-
--- | A region in the minimization diagram. The boundary is given in CCW order; i.e. the
--- region is to the left of the boundary.
-data Region r point = Bounded   (CircularList point)
-                    | Unbounded (Vector 2 r)
-                                -- ^ vector indicating the direction of the unbounded edge
-                                -- incident to the first vertex. Note that this vector
-                                -- thus points INTO vertex v.
-                                (NonEmpty point)
-                                -- ^ the vertices in CCW order,
-                                (Vector 2 r)
-                                -- ^ the vector indicating the direction of the unbounded
-                                -- edge incident to the last vertex. The vector points
-                                -- away from the vertex (i.e. towards +infty).
-                      deriving stock (Show,Eq,Functor,Foldable,Traversable)
-
-type instance NumType   (Region r point) = r
-type instance Dimension (Region r point) = Dimension point
-
--- | bounded regions are really circular lists, but we just represent them as lists for
--- now.
-type CircularList a = [a]
-
-
---------------------------------------------------------------------------------
--- *  The planes defining a vertex
-
--- | The vertices of a lower envelope is just a Map with every vertex its definers,
--- i.e. the planes that define the vertex in CCW order around it.
-type VertexForm r plane = Map (Point 3 r) (Definers plane)
-
-----------------------------------------
--- *  The planes defining a vertex
-
--- | in CCW order, starting with the plane that is minimal at the vertical up direction
--- from their common vertex.
-newtype Definers plane = Definers [plane]
-  deriving stock (Show,Eq,Ord)
-  deriving newtype (Functor,Foldable)
-
--- | Given the planes in order, starting with the one that is closest in the up direction,
--- construct the Definers.
-fromCCWList :: [plane] -> Definers plane
-fromCCWList = Definers
-
--- | Smart constructor for creating the definers of three planes
-definers                                    :: forall plane r.(Plane_ plane r, Ord r, Fractional r)
-                                            => Three plane -> Maybe (Point 3 r, Definers plane)
-definers (Three h1@(Plane_ a1 b1 c1) h2 h3) =
-    do l12 <- intersectionLine h1 h2
-       l13 <- intersectionLine h1 h3
-       intersect l12 l13 >>= \case
-         Line_x_Line_Line _             -> Nothing
-         Line_x_Line_Point (Point2 x y) -> Just ( Point3 x y (a1 * x + b1* y + c1)
-                                                , Definers [hMin, hTwo, hThree]
-                                                )
-           where
-             (hMin,h,h')   = extractMinOn (evalAt $ Point2 x (y+1)) h1 h2 h3
-             -- we compute the plane hMin that is cheapest directly above the vertex h and
-             -- h' are the other two planes. That Means hMin is the first definer (in the
-             -- CCW order). What remains is to determine the order in which the remaining
-             -- planes h and h' appear in the order.
-             (hTwo,hThree) = case ccwCmpAroundWith (Vector2 0 1) (origin :: Point 2 r)
-                                                   (Point vMinH) (Point vMinH') of
-                               LT -> (h,h')
-                               EQ -> error "definers: weird degeneracy?"
-                               GT -> (h',h)
-
-             vMinH  = fromMaybe err $ intersectionVector h  hMin
-             vMinH' = fromMaybe err $ intersectionVector h' hMin
-             err = error "definers: absurd"
-
--- | given three elements, returns the minimum element in the first argument and the
--- remaining two elements in the second and third argument (in arbitrary order).
-extractMinOn         :: Ord a => (c -> a) -> c -> c -> c -> (c, c, c)
-extractMinOn f a b c = let (m,ab)  = min' a b
-                           (mi,c') = min' m c
-                       in (mi, ab, c')
-  where
-    min' x y
-      | f x <= f y = (x,y)
-      | otherwise  = (y,x)
+import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm
 
 ----------------------------------------
 
@@ -231,7 +135,8 @@ mergeDefiners (Point3 x y _) = foldr (insertPlane $ Point2 x y)
 -- \(O(h\log h)\) assuming that the input is degenerate.
 fromVertexForm :: (Plane_ plane r, Ord plane, Ord r, Fractional r)
                => VertexForm r plane -> MinimizationDiagram r plane
-fromVertexForm = Map.mapWithKey sortAroundBoundary . mapWithKeyMerge (\v defs ->
+fromVertexForm = MinimizationDiagram
+               . Map.mapWithKey sortAroundBoundary . mapWithKeyMerge (\v defs ->
                     Map.fromList [ (h, Set.singleton (v,defs))
                                  | h <- F.toList defs
                                  ])

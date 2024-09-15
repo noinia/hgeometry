@@ -21,7 +21,7 @@ import           Data.Semigroup (First(..))
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
-import           HGeometry.Plane.LowerEnvelope.Connected.Regions
+import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Point
 import           HGeometry.Vector
 
@@ -45,8 +45,7 @@ instance (Ord r, Num r) => Ord (E r) where
 -- represented by its point, it stores a list of its outgoing edges, and some data.
 toPlaneGraph :: (Plane_ plane r, Num r, Ord r)
              => MinimizationDiagram r plane -> PlaneGraph (Point 2 r) (First r) (E r)
-toPlaneGraph = mapWithKeyMerge toTriangulatedGr
-
+toPlaneGraph = mapWithKeyMerge toTriangulatedGr . asMap
 
 
 toTriangulatedGr   :: (Plane_ plane r, Num r, Ord r)

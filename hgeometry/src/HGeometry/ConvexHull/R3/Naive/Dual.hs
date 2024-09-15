@@ -36,7 +36,7 @@ type UpperHull point = LowerEnvelope (NonVerticalHyperPlane 3 (NumType point) :+
 
 -- | Computes the upper hull of a set of points in R^3
 --
--- O(n^4)
+-- \(O(n^4)\)
 upperHull :: ( Point_ point 3 r
              , Ord r, Fractional r
              , Foldable1 f, Functor f
@@ -48,7 +48,7 @@ upperHull = lowerEnvelope . fmap (\p -> dualHyperPlane p :+ p)
 
 type Facet point = [point]
 
--- | Outputs the facet sof the upper hull.
+-- | Outputs the facets of the upper hull.
 facets :: UpperHull point -> [Facet point]
 facets = \case
     ParallelStrips _      -> error "facets: parallel strips; no bounded facets"

@@ -13,6 +13,7 @@ module HGeometry.Sequence.Alternating
   ( Alternating(..)
   , fromNonEmptyWith
   , mapF
+  , firstWithNeighbors
   , withNeighbours
   , mergeAlternating
   , insertBreakPoints
@@ -21,6 +22,7 @@ module HGeometry.Sequence.Alternating
   , consElemWith
   , unconsAlt
   , snocElemWith
+  , separators
   ) where
 
 import           Control.DeepSeq
@@ -194,3 +196,19 @@ snocElemWith f (Alternating x0 xs) y = Alternating x0 $ view (re _Snoc) (xs, (s,
     s = case xs^?_last of
           Nothing    -> f x0 y
           Just (_,x) -> f x  y
+
+
+--------------------------------------------------------------------------------
+
+-- | Map over the separators of the alterating together with the neighbours
+firstWithNeighbors                       :: Traversable f
+                                         => (a -> sep -> a -> sep')
+                                         -> Alternating f sep a -> Alternating f sep' a
+firstWithNeighbors f (Alternating x0 xs) = Alternating x0 xs'
+  where
+    (_, xs') = List.mapAccumL (\x (sep,y) -> (y, (f x sep y, y))) x0 xs
+
+
+-- | Get the separators out of the alternating
+separators                    :: Functor f => Alternating f sep a -> f sep
+separators (Alternating _ xs) = fmap fst xs

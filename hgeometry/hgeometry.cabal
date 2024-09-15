@@ -76,6 +76,7 @@ common all-setup
       , HsYAML                    >= 0.2           && < 1
       , semialign                 >= 1.3           && < 1.4
       , these                     >= 1.0.1         && < 1.3
+      , subcategories             >= 0.2           && < 0.3
 
       , ghc-typelits-natnormalise >= 0.7.7         && < 1
       , ghc-typelits-knownnat     >= 0.7.6         && < 1
@@ -389,8 +390,8 @@ library
 
         HGeometry.ConvexHull.Melkman
 
-        HGeometry.ConvexHull.R3.Naive
-        HGeometry.ConvexHull.R3.Naive.Dual
+        -- HGeometry.ConvexHull.R3.Naive
+        -- HGeometry.ConvexHull.R3.Naive.Dual
 
         HGeometry.BezierSpline
 
@@ -413,12 +414,7 @@ library
 
         HGeometry.Plane.LowerEnvelope
         HGeometry.Plane.LowerEnvelope.Naive
-        HGeometry.Plane.LowerEnvelope.VertexForm
-        HGeometry.Plane.LowerEnvelope.AdjListForm
         HGeometry.Plane.LowerEnvelope.Connected
-
-        -- newer attempt:
-        HGeometry.Plane.LowerEnvelope.ConnectedNew
         HGeometry.Plane.LowerEnvelope.Connected.Graph
 
 
@@ -452,22 +448,17 @@ library
         HGeometry.LineSegment.Intersection.Types
 
         HGeometry.Plane.LowerEnvelope.Type
-        HGeometry.Plane.LowerEnvelope.Connected.Type
-        HGeometry.Plane.LowerEnvelope.Connected.FromVertexForm
         -- HGeometry.Plane.LowerEnvelope.Sample
-
-        --- files corresponding to the newer attempt
+        HGeometry.Plane.LowerEnvelope.Connected.Type
         HGeometry.Plane.LowerEnvelope.Connected.Primitives
+        HGeometry.Plane.LowerEnvelope.Connected.VertexForm
         HGeometry.Plane.LowerEnvelope.Connected.Regions
         HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
         HGeometry.Plane.LowerEnvelope.Connected.BruteForce
         HGeometry.Plane.LowerEnvelope.Connected.Separator
 
-        HGeometry.Plane.LowerEnvelope.DivideAndConquer
-        HGeometry.Plane.LowerEnvelope.EpsApproximation
-
-        -- HGeometry.Plane.LowerEnvelope.AtMostThree
-        -- HGeometry.Plane.LowerEnvelope.Triangulate
+        -- HGeometry.Plane.LowerEnvelope.DivideAndConquer
+        -- HGeometry.Plane.LowerEnvelope.EpsApproximation
 
         HGeometry.VoronoiDiagram.ViaLowerEnvelope
 
@@ -710,7 +701,6 @@ test-suite hspec
       ConvexHull.MelkmanSpec
       ClosestPair.ClosestPairSpec
       IntervalTreeSpec
-      LowerEnvelope.NaiveSpec
       LowerEnvelope.RegionsSpec
       Polygon.Convex.ConvexSpec
       Polygon.TriangulateSpec
