@@ -12,7 +12,6 @@ import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe
-import qualified Data.Vector as Vector
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
@@ -21,6 +20,7 @@ import           HGeometry.Line.General
 import qualified HGeometry.Line.LowerEnvelope as Line
 import           HGeometry.Plane.LowerEnvelope.Connected
 import           HGeometry.Plane.LowerEnvelope.Type
+import           HGeometry.Point
 import           HGeometry.Sequence.Alternating (firstWithNeighbors)
 import           HGeometry.Vector
 --------------------------------------------------------------------------------
@@ -49,7 +49,8 @@ lowerEnvelope = lowerEnvelopeWith bruteForceLowerEnvelope
 -- lower envelope algorithm to compute the lower envelope of the (parallel) planes.
 --
 -- \(O(T(n) + n \log n)\).
-lowerEnvelopeWith                        :: ( Plane_ plane r
+lowerEnvelopeWith                        :: forall nonEmpty plane r.
+                                            ( Plane_ plane r
                                             , Ord r, Fractional r, Foldable1 nonEmpty
                                           )
                                          => (NonEmpty plane -> MinimizationDiagram r plane)
@@ -60,9 +61,14 @@ lowerEnvelopeWith minimizationDiagram hs = case distinguish (toNonEmpty hs) of
   where
     fromLines = firstWithNeighbors (\h _ h' -> fromMaybe err $ intersectionLine h h')
               . fmap (view extra) . view Line._Alternating
-              . Line.lowerEnvelope @Vector.Vector
+              . lowerEnvelope'
     err = error "lowerEnvelopeWith. absurd: neighbouring planes must intersect"
 
+    lowerEnvelope' :: NonEmpty (LineEQ r :+ plane)
+                   -> Line.LowerEnvelope (Point 2 r) (LineEQ r :+ plane)
+    lowerEnvelope' = Line.lowerEnvelope
+    -- for whatever reason GHC 9.8 does not want to compile this without the type signature
+    -- things are fine with 9.10 though; so maybe at some point we an just inline this.
 
 -- | We distinguish whether the planes are all parallel (left), and thus actually just
 -- define a 2D lower envelope of lines, or that the planes actually have a connected lower
