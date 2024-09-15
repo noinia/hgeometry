@@ -75,6 +75,10 @@ spec = describe "Voronoi diagram tests" $ do
             [osp|simple1_out|]
     testIpe [osp|foo.ipe|]
             [osp|foo_out|]
+    testIpe [osp|colinear.ipe|]
+            [osp|colinear_out|]
+    testIpe [osp|pair.ipe|]
+            [osp|pair_out|]
 
 degenerateTests :: Spec
 degenerateTests = describe "degnereate inputs" $ do
