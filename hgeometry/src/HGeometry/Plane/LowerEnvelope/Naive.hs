@@ -2,52 +2,29 @@
 module HGeometry.Plane.LowerEnvelope.Naive
   ( lowerEnvelope
   , lowerEnvelopeWith
-  -- , lowerEnvelopeVertexForm
-  -- , triangulatedLowerEnvelope
-
-  -- , asVertex
-  -- , belowAll
-  , LowerEnvelope(..)
   ) where
 
 --------------------------------------------------------------------------------
 
 import           Control.Lens
-import           Control.Monad (guard)
 import           Data.Either (partitionEithers)
 import qualified Data.Foldable as F
 import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Set as Set
 import qualified Data.Vector as Vector
-import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line
 import           HGeometry.Line.General
 import qualified HGeometry.Line.LowerEnvelope as Line
-import           HGeometry.Plane.LowerEnvelope.Connected.BruteForce (bruteForceLowerEnvelope)
-import           HGeometry.Plane.LowerEnvelope.Connected.Primitives (intersectionLine)
-import           HGeometry.Plane.LowerEnvelope.Connected.Regions (MinimizationDiagram)
-import           HGeometry.Point
+import           HGeometry.Plane.LowerEnvelope.Connected
+import           HGeometry.Plane.LowerEnvelope.Type
 import           HGeometry.Vector
---------------------------------------------------------------------------------
-
--- | The lower enevelope of planes in R^3. (Or rather, its minimization diagram)
-data LowerEnvelope r plane =
-    ParallelStrips    !(Set.Set (ParallelPlane plane))
-  | ConnectedEnvelope !(MinimizationDiagram r plane)
-
--- | Just a newtype around plane, to be used to model parallel strips in the Lower envelope.
-newtype ParallelPlane plane =
-  ParallelPlane plane deriving (Show,Eq)
 
 --------------------------------------------------------------------------------
-
-
 
 -- | Brute force implementation that computes the lower envelope, by explicitly
 -- considering every triple of planes.
@@ -56,13 +33,11 @@ newtype ParallelPlane plane =
 --
 --
 -- running time: \(O(n^4 )\)
-lowerEnvelope    :: ( Plane_ plane r
-                    , Ord r, Fractional r, Foldable1 f, Functor f, Ord plane
-                    , Show plane, Show r
-                    ) => f plane -> LowerEnvelope r plane
-lowerEnvelope hs = undefined
-
-  -- fromVertexForm hs $ lowerEnvelopeVertexForm hs
+lowerEnvelope :: ( Plane_ plane r
+                 , Ord r, Fractional r, Foldable1 f, Functor f, Ord plane
+                 , Show plane, Show r
+                 ) => f plane -> LowerEnvelope plane
+lowerEnvelope = lowerEnvelopeWith bruteForceLowerEnvelope
 
 --------------------------------------------------------------------------------
 
@@ -77,10 +52,9 @@ lowerEnvelope hs = undefined
 -- \(O(T(n) + n \log n)\).
 lowerEnvelopeWith                        :: ( Plane_ plane r
                                             , Ord r, Fractional r, Foldable1 nonEmpty, Ord plane
-                                            , Show plane, Show r
                                           )
                                          => (NonEmpty plane -> MinimizationDiagram r plane)
-                                         -> nonEmpty plane -> LowerEnvelope r plane
+                                         -> nonEmpty plane -> LowerEnvelope plane
 lowerEnvelopeWith minimizationDiagram hs = case distinguish (toNonEmpty hs) of
     Left lines'                   -> ParallelStrips . fromLines $ lines'
     Right (Vector3 h1 h2 h3, hs') -> ConnectedEnvelope $ minimizationDiagram (h1 :| h2 : h3 : hs')
@@ -134,10 +108,10 @@ findDifferent    :: (Eq r, Num r
 findDifferent xs = case partitionEithers $ map distinguishParallel xs of
     (_,[])                  -> Left $ VerticalLineThrough 0  -- all planes happen to be paralell
     (pars0, (l :+ h) : rest) -> case List.span (isParallelTo l) rest of
-        (_,[])                      -> Left l -- degnerate; planes are all parralel
-        (pars1, (l' :+ h') : rest') -> Right ( Vector2 h h'
-                                             , pars0 <> map (view extra) (pars1 <> rest')
-                                             )
+        (_,[])                     -> Left l -- degnerate; planes are all parralel
+        (pars1, (_ :+ h') : rest') -> Right ( Vector2 h h'
+                                            , pars0 <> map (view extra) (pars1 <> rest')
+                                            )
   where
     distinguishParallel (m :+ h) = case m of
       Nothing -> Left h

@@ -13,7 +13,6 @@ module HGeometry.VoronoiDiagram
   , VoronoiDiagram'(..)
   , voronoiDiagram
   , voronoiVertices
-  , edgeGeometries
   ) where
 
 import HGeometry.VoronoiDiagram.ViaLowerEnvelope

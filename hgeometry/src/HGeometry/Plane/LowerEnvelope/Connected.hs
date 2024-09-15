@@ -1,37 +1,24 @@
-{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  HGeometry.LowerEnvelope.Connected
+-- Module      :  HGeometry.Plane.LowerEnvelope.Connected
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
--- A Representation of the Lower envelope of planes in Adjacency-list
--- form.
+-- A Representation of the Lower envelope of planes as a bunch of convex regions
 --
 --------------------------------------------------------------------------------
 module HGeometry.Plane.LowerEnvelope.Connected
-  ( LowerEnvelope'(LowerEnvelope)
-  , theUnboundedVertex, boundedVertices
-
-  , singleton
-  , fromVertexForm'
-
-  , BoundedVertexF(Vertex)
-  , location, definers, location2
-
-  , UnboundedVertex(UnboundedVertex)
-  , unboundedVertexId
-  , HasUnboundedEdges(..)
-
-  , EdgeGeometry
-  , projectedEdgeGeometries, projectedEdgeGeometry
+  ( MinimizationDiagram
+  , asMap
+  , Region(..)
+  , CircularList
+  , module HGeometry.Plane.LowerEnvelope.Connected.Primitives
+  , module HGeometry.Plane.LowerEnvelope.Connected.Regions
+  , module HGeometry.Plane.LowerEnvelope.Connected.BruteForce
   ) where
 
-import           HGeometry.Plane.LowerEnvelope.Type
-import           HGeometry.Plane.LowerEnvelope.Connected.Type
-import           HGeometry.Plane.LowerEnvelope.Connected.FromVertexForm
-import           HGeometry.Vector.NonEmpty.Util ()
-
-
---------------------------------------------------------------------------------
+import HGeometry.Plane.LowerEnvelope.Connected.BruteForce
+import HGeometry.Plane.LowerEnvelope.Connected.Primitives
+import HGeometry.Plane.LowerEnvelope.Connected.Regions
+import HGeometry.Plane.LowerEnvelope.Connected.Type

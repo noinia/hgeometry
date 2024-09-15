@@ -20,6 +20,7 @@ import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.Plane.LowerEnvelope.Connected.Regions
+import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Point
 
 --------------------------------------------------------------------------------

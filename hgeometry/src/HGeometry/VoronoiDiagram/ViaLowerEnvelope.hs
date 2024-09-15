@@ -16,11 +16,14 @@ module HGeometry.VoronoiDiagram.ViaLowerEnvelope
   , ColinearPoint
   , voronoiDiagram
   , voronoiVertices
-  , edgeGeometries
+  -- , edgeGeometries
   ) where
 
 import           Control.Lens
+import           Control.Subcategory.Functor
 import           Data.Foldable1
+import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import           Data.Set (Set)
 import qualified Data.Set as Set
@@ -29,10 +32,13 @@ import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Plane.LowerEnvelope.Connected.Regions
-import           HGeometry.Plane.LowerEnvelope.Naive (lowerEnvelope, LowerEnvelope(..))
+import           HGeometry.Plane.LowerEnvelope ( MinimizationDiagram, Region(..)
+                                               , lowerEnvelope, LowerEnvelope(..)
+                                               )
+import qualified HGeometry.Plane.LowerEnvelope as LowerEnvelope
 import           HGeometry.Point
 import           HGeometry.Properties
+
 --------------------------------------------------------------------------------
 
 -- | A Voronoi diagram
@@ -73,6 +79,11 @@ _VoronoiDiagramLowerEnvelope :: Iso (VoronoiDiagram' point) (VoronoiDiagram' poi
                                     (MinimizationDiagram (NumType point') point')
 _VoronoiDiagramLowerEnvelope = coerced
 
+-- | Get, for each point, its Voronoi region
+asMap :: (Point_ point 2 r, Ord point)
+      => VoronoiDiagram' point -> Map.Map point (Region r (Point 2 r))
+asMap = LowerEnvelope.asMap . view _VoronoiDiagramLowerEnvelope
+
 --------------------------------------------------------------------------------
 
 -- instance (Ord (NumType point), Num (NumType point)) => IsBoxable (VoronoiDiagram' point) where
@@ -97,13 +108,13 @@ voronoiDiagram = voronoiDiagramWith lowerEnvelope
 voronoiDiagramWith :: ( Point_ point 2 r, Functor nonEmpty, Ord point
                       , Ord r, Fractional r, Foldable1 nonEmpty
                       )
-                   => (nonEmpty (Plane 3 r :+ point) -> LowerEnvelope r (Plane 3 r :+ point))
+                   => (nonEmpty (Plane r :+ point) -> LowerEnvelope (Plane r :+ point))
 
                    -> nonEmpty point
                    -> VoronoiDiagram point
 voronoiDiagramWith lowerEnv pts = case lowerEnv . fmap (\p -> pointToPlane p :+ p) $ pts of
     ParallelStrips strips -> AllColinear $ Set.mapMonotonic getPoint strips
-    ConnectedEnvelope env -> ConnectedVD . VoronoiDiagram . Map.mapKeys (view extra) $ env
+    ConnectedEnvelope env -> ConnectedVD . VoronoiDiagram . cmap (view extra) $ env
   where
     -- lifts the point to a plane; so that the lower envelope corresponds to the VD
     pointToPlane = flipZ . liftPointToPlane
@@ -118,18 +129,20 @@ voronoiVertices :: ( Point_ point 2 r, Functor f, Ord point
                    , Show point, Show r
                    , Ord point
                    ) => f point -> Set (Point 2 r)
-voronoiVertices = foldMap (\case
-                              Bounded pts       -> Set.fromList pts
-                              Unbounded _ pts _ -> Set.fromList (NonEmpty.toList pts)
-                          ) . voronoiDiagram'
+voronoiVertices pts = case voronoiDiagram pts of
+    AllColinear _  -> mempty
+    ConnectedVD vd -> foldMap (\case
+                                  Bounded pts       -> Set.fromList pts
+                                  Unbounded _ pts _ -> Set.fromList (NonEmpty.toList pts)
+                              ) (asMap vd)
 
 --------------------------------------------------------------------------------
 
--- | Get the halflines and line segments representing the VoronoiDiagram
-edgeGeometries :: (Point_ point 2 r, Ord r, Fractional r
+-- -- | Get the halflines and line segments representing the VoronoiDiagram
+-- edgeGeometries :: (Point_ point 2 r, Ord r, Fractional r
 
-                  , Show point, Show r
-                  )
-               => Fold (VoronoiDiagram' point) (EdgeGeometry (Point 2 r))
-edgeGeometries = _VoronoiDiagramLowerEnvelope.projectedEdgeGeometries
--- TODO: figure out if this can be an indexed fold
+--                   , Show point, Show r
+--                   )
+--                => Fold (VoronoiDiagram' point) (EdgeGeometry (Point 2 r))
+-- edgeGeometries = _VoronoiDiagramLowerEnvelope.projectedEdgeGeometries
+-- -- TODO: figure out if this can be an indexed fold

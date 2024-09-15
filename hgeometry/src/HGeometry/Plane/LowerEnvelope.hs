@@ -9,13 +9,12 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Plane.LowerEnvelope
-  (  module HGeometry.Plane.LowerEnvelope.Naive
-  ,  module HGeometry.Plane.LowerEnvelope.Type
-  ,  module HGeometry.Plane.LowerEnvelope.AdjListForm
-  -- , module HGeometry.Plane.LowerEnvelope.Naive
+  ( module HGeometry.Plane.LowerEnvelope.Naive
+  , module HGeometry.Plane.LowerEnvelope.Type
+  , module HGeometry.Plane.LowerEnvelope.Connected
   ) where
 
--- import HGeometry.Plane.LowerEnvelope.AdjListForm
+import HGeometry.Plane.LowerEnvelope.Connected
 import HGeometry.Plane.LowerEnvelope.Naive
 import HGeometry.Plane.LowerEnvelope.Type
 
