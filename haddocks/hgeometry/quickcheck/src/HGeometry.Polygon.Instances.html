@@ -55,43 +55,43 @@ forall a b. (Real a, Fractional b) =&gt; a -&gt; b
 </span><span id="line-41"></span><span>  </span><span class="hs-comment">-- self-intersecting polygons</span><span>
 </span><span id="line-42"></span><span>
 </span><span id="line-43"></span><span class="hs-pragma">{-# NOINLINE</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Instances.html#allSimplePolygonsWith"><span class="hs-pragma hs-type">allSimplePolygonsWith</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
-</span><span id="line-44"></span><span class="annot"><a href="HGeometry.Polygon.Instances.html#allSimplePolygonsWith"><span class="hs-identifier hs-type">allSimplePolygonsWith</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679124357"><span class="annot"><a href="#local-6989586621679124357"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span>
-</span><span id="line-45"></span><span>                            </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679124357"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679124357"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679124357"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679124357"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-44"></span><span class="annot"><a href="HGeometry.Polygon.Instances.html#allSimplePolygonsWith"><span class="hs-identifier hs-type">allSimplePolygonsWith</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679124165"><span class="annot"><a href="#local-6989586621679124165"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-45"></span><span>                            </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679124165"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679124165"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679124165"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679124165"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
 </span><span id="line-46"></span><span id="allSimplePolygonsWith"><span class="annot"><span class="annottext">allSimplePolygonsWith :: forall r.
 (Ord r, Fractional r) =&gt;
 (Double -&gt; r) -&gt; [SimplePolygon (Point 2 r)]
-</span><a href="HGeometry.Polygon.Instances.html#allSimplePolygonsWith"><span class="hs-identifier hs-var hs-var">allSimplePolygonsWith</span></a></span></span><span> </span><span id="local-6989586621679124993"><span class="annot"><span class="annottext">Double -&gt; r
-</span><a href="#local-6989586621679124993"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO [SimplePolygon (Point 2 r)] -&gt; [SimplePolygon (Point 2 r)]
+</span><a href="HGeometry.Polygon.Instances.html#allSimplePolygonsWith"><span class="hs-identifier hs-var hs-var">allSimplePolygonsWith</span></a></span></span><span> </span><span id="local-6989586621679124801"><span class="annot"><span class="annottext">Double -&gt; r
+</span><a href="#local-6989586621679124801"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO [SimplePolygon (Point 2 r)] -&gt; [SimplePolygon (Point 2 r)]
 forall a. IO a -&gt; a
 </span><span class="hs-identifier hs-var">unsafePerformIO</span></span><span> </span><span class="annot"><span class="annottext">(IO [SimplePolygon (Point 2 r)] -&gt; [SimplePolygon (Point 2 r)])
 -&gt; IO [SimplePolygon (Point 2 r)] -&gt; [SimplePolygon (Point 2 r)]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-47"></span><span>  </span><span id="local-6989586621679124995"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679124995"><span class="hs-identifier hs-var">fp</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO FilePath
+</span><span id="line-47"></span><span>  </span><span id="local-6989586621679124803"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679124803"><span class="hs-identifier hs-var">fp</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO FilePath
 </span><a href="Paths_hgeometry.html#getDataFileName"><span class="hs-identifier hs-var">getDataFileName</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;polygons.simple.json&quot;</span></span><span>
 </span><span id="line-48"></span><span>  </span><span class="annot"><span class="annottext">FilePath -&gt; IO (Either FilePath [SimplePolygon (Point 2 Double)])
 forall a. FromJSON a =&gt; FilePath -&gt; IO (Either FilePath a)
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/aeson-2.2.3.0-1c8aef26e709e9d7e3f4748286a2b84a6d9f092862ecbfc366cf5e2812662537/share/doc/html/src/Data.Aeson.html#eitherDecodeFileStrict"><span class="hs-identifier hs-var">eitherDecodeFileStrict</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679124995"><span class="hs-identifier hs-var">fp</span></a></span><span> </span><span class="annot"><span class="annottext">IO (Either FilePath [SimplePolygon (Point 2 Double)])
+</span><a href="#local-6989586621679124803"><span class="hs-identifier hs-var">fp</span></a></span><span> </span><span class="annot"><span class="annottext">IO (Either FilePath [SimplePolygon (Point 2 Double)])
 -&gt; (Either FilePath [SimplePolygon (Point 2 Double)]
     -&gt; IO [SimplePolygon (Point 2 r)])
 -&gt; IO [SimplePolygon (Point 2 r)]
 forall a b. IO a -&gt; (a -&gt; IO b) -&gt; IO b
 forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
 </span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
-</span><span id="line-49"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679124997"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679124997"><span class="hs-identifier hs-var">msg</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO [SimplePolygon (Point 2 r)]
+</span><span id="line-49"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679124805"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679124805"><span class="hs-identifier hs-var">msg</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO [SimplePolygon (Point 2 r)]
 forall a. HasCallStack =&gt; FilePath -&gt; a
 </span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621679124997"><span class="hs-identifier hs-var">msg</span></a></span><span>
-</span><span id="line-50"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679124999"><span class="annot"><span class="annottext">[SimplePolygon (Point 2 Double)]
-</span><a href="#local-6989586621679124999"><span class="hs-identifier hs-var">pgs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[SimplePolygon (Point 2 r)] -&gt; IO [SimplePolygon (Point 2 r)]
+</span><a href="#local-6989586621679124805"><span class="hs-identifier hs-var">msg</span></a></span><span>
+</span><span id="line-50"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679124807"><span class="annot"><span class="annottext">[SimplePolygon (Point 2 Double)]
+</span><a href="#local-6989586621679124807"><span class="hs-identifier hs-var">pgs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[SimplePolygon (Point 2 r)] -&gt; IO [SimplePolygon (Point 2 r)]
 forall a. a -&gt; IO a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Double)
-</span><a href="#local-6989586621679125000"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Double)
+</span><a href="#local-6989586621679124808"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Double)
 -&gt; (SimplePolygon (Point 2 Double) -&gt; SimplePolygon (Point 2 r))
 -&gt; SimplePolygon (Point 2 r)
 forall a b. a -&gt; (a -&gt; b) -&gt; b
@@ -125,9 +125,9 @@ Traversal1
 -&gt; SimplePolygon (Point 2 Double)
 -&gt; SimplePolygon (Point 2 r)
 forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679125004"><span class="annot"><span class="annottext">Point 2 Double
-</span><a href="#local-6989586621679125004"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 Double
-</span><a href="#local-6989586621679125004"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Point 2 Double -&gt; (Point 2 Double -&gt; Point 2 r) -&gt; Point 2 r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679124812"><span class="annot"><span class="annottext">Point 2 Double
+</span><a href="#local-6989586621679124812"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 Double
+</span><a href="#local-6989586621679124812"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Point 2 Double -&gt; (Point 2 Double -&gt; Point 2 r) -&gt; Point 2 r
 forall a b. a -&gt; (a -&gt; b) -&gt; b
 </span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Double -&gt; Identity r) -&gt; Point 2 Double -&gt; Identity (Point 2 r)
 (NumType (Point 2 Double) -&gt; Identity (NumType (Point 2 r)))
@@ -145,10 +145,10 @@ IndexedTraversal1
 -&gt; (Double -&gt; r) -&gt; Point 2 Double -&gt; Point 2 r
 forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="annot"><span class="annottext">Double -&gt; r
-</span><a href="#local-6989586621679124993"><span class="hs-identifier hs-var">f</span></a></span><span>
-</span><span id="line-51"></span><span>                      </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679125000"><span class="annot"><span class="annottext">SimplePolygon (Point 2 Double)
-</span><a href="#local-6989586621679125000"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[SimplePolygon (Point 2 Double)]
-</span><a href="#local-6989586621679124999"><span class="hs-identifier hs-var">pgs</span></a></span><span>
+</span><a href="#local-6989586621679124801"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-51"></span><span>                      </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679124808"><span class="annot"><span class="annottext">SimplePolygon (Point 2 Double)
+</span><a href="#local-6989586621679124808"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[SimplePolygon (Point 2 Double)]
+</span><a href="#local-6989586621679124807"><span class="hs-identifier hs-var">pgs</span></a></span><span>
 </span><span id="line-52"></span><span>                      </span><span class="hs-special">]</span><span>
 </span><span id="line-53"></span><span>
 </span><span id="line-54"></span><span class="hs-comment">-- tojson = encodeFile &quot;out.json&quot; $ allSimplePolygons</span><span>
@@ -178,13 +178,13 @@ allMultiPolygonsWith f = unsafePerformIO $ do
 -}</span><span>
 </span><span id="line-79"></span><span>
 </span><span id="line-80"></span><span class="annot"><span class="hs-comment">-- | Shifts the polygon to the left by n.</span></span><span>
-</span><span id="line-81"></span><span id="local-6989586621679124412"><span id="local-6989586621679124413"><span id="local-6989586621679124414"><span class="annot"><a href="HGeometry.Polygon.Instances.html#rotateLeft"><span class="hs-identifier hs-type">rotateLeft</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Class.html#SimplePolygon_"><span class="hs-identifier hs-type">SimplePolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679124412"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679124413"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679124414"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679124412"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679124412"><span class="hs-identifier hs-type">simplePolygon</span></a></span></span></span></span><span>
+</span><span id="line-81"></span><span id="local-6989586621679124220"><span id="local-6989586621679124221"><span id="local-6989586621679124222"><span class="annot"><a href="HGeometry.Polygon.Instances.html#rotateLeft"><span class="hs-identifier hs-type">rotateLeft</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Class.html#SimplePolygon_"><span class="hs-identifier hs-type">SimplePolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679124220"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679124221"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679124222"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679124220"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679124220"><span class="hs-identifier hs-type">simplePolygon</span></a></span></span></span></span><span>
 </span><span id="line-82"></span><span id="rotateLeft"><span class="annot"><span class="annottext">rotateLeft :: forall simplePolygon point r.
 SimplePolygon_ simplePolygon point r =&gt;
 Int -&gt; simplePolygon -&gt; simplePolygon
-</span><a href="HGeometry.Polygon.Instances.html#rotateLeft"><span class="hs-identifier hs-var hs-var">rotateLeft</span></a></span></span><span> </span><span id="local-6989586621679125203"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125203"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679125204"><span class="annot"><span class="annottext">simplePolygon
-</span><a href="#local-6989586621679125204"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[point] -&gt; simplePolygon
+</span><a href="HGeometry.Polygon.Instances.html#rotateLeft"><span class="hs-identifier hs-var hs-var">rotateLeft</span></a></span></span><span> </span><span id="local-6989586621679125011"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679125011"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679125012"><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679125012"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[point] -&gt; simplePolygon
 forall simplePolygon point r (f :: * -&gt; *).
 (SimplePolygon_ simplePolygon point r, Foldable f) =&gt;
 f point -&gt; simplePolygon
@@ -192,7 +192,7 @@ forall (f :: * -&gt; *). Foldable f =&gt; f point -&gt; simplePolygon
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Class.html#uncheckedFromCCWPoints"><span class="hs-identifier hs-var">uncheckedFromCCWPoints</span></a></span><span> </span><span class="annot"><span class="annottext">([point] -&gt; simplePolygon) -&gt; [point] -&gt; simplePolygon
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">simplePolygon
-</span><a href="#local-6989586621679125204"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679125012"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">simplePolygon
 -&gt; Getting (Endo [point]) simplePolygon point -&gt; [point]
 forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Fold.html#%5E.."><span class="hs-operator hs-var">^..</span></a></span><span class="annot"><span class="annottext">VertexIx simplePolygon
@@ -203,29 +203,29 @@ HasOuterBoundary polygon =&gt;
 VertexIx polygon
 -&gt; IndexedTraversal1' (VertexIx polygon) polygon (Vertex polygon)
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Class.html#ccwOuterBoundaryFrom"><span class="hs-identifier hs-var">ccwOuterBoundaryFrom</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125203"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679125011"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Integral a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">`mod`</span></span><span> </span><span class="annot"><span class="annottext">simplePolygon -&gt; Int
 forall graph. HasVertices' graph =&gt; graph -&gt; Int
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#numVertices"><span class="hs-identifier hs-var">numVertices</span></a></span><span> </span><span class="annot"><span class="annottext">simplePolygon
-</span><a href="#local-6989586621679125204"><span class="hs-identifier hs-var">pg</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679125012"><span class="hs-identifier hs-var">pg</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-83"></span><span>
 </span><span id="line-84"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Arbitrary.html#Arbitrary"><span class="hs-identifier hs-type">Arbitrary</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-85"></span><span>  </span><span id="local-6989586621679125350"><span class="annot"><span class="annottext">arbitrary :: Gen (SimplePolygon (Point 2 Rational))
-</span><a href="#local-6989586621679125350"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-86"></span><span>    </span><span id="local-6989586621679125352"><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125352"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[SimplePolygon (Point 2 Rational)]
+</span><span id="line-85"></span><span>  </span><span id="local-6989586621679125158"><span class="annot"><span class="annottext">arbitrary :: Gen (SimplePolygon (Point 2 Rational))
+</span><a href="#local-6989586621679125158"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-86"></span><span>    </span><span id="local-6989586621679125160"><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125160"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[SimplePolygon (Point 2 Rational)]
 -&gt; Gen (SimplePolygon (Point 2 Rational))
 forall a. HasCallStack =&gt; [a] -&gt; Gen a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Gen.html#elements"><span class="hs-identifier hs-var">elements</span></a></span><span> </span><span class="annot"><span class="annottext">[SimplePolygon (Point 2 Rational)]
 </span><a href="HGeometry.Polygon.Instances.html#allSimplePolygons%27"><span class="hs-identifier hs-var">allSimplePolygons'</span></a></span><span>
-</span><span id="line-87"></span><span>    </span><span id="local-6989586621679125354"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125354"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; Gen Int
+</span><span id="line-87"></span><span>    </span><span id="local-6989586621679125162"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679125162"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; Gen Int
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Gen.html#chooseInt"><span class="hs-identifier hs-var">chooseInt</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational) -&gt; Int
 forall graph. HasVertices' graph =&gt; graph -&gt; Int
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#numVertices"><span class="hs-identifier hs-var">numVertices</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125352"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679125160"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
@@ -245,48 +245,48 @@ forall simplePolygon point r.
 SimplePolygon_ simplePolygon point r =&gt;
 Int -&gt; simplePolygon -&gt; simplePolygon
 </span><a href="HGeometry.Polygon.Instances.html#rotateLeft"><span class="hs-identifier hs-var">rotateLeft</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125354"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125352"><span class="hs-identifier hs-var">p</span></a></span><span>
-</span><span id="line-89"></span><span>  </span><span id="local-6989586621679125357"><span class="annot"><span class="annottext">shrink :: SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125162"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125160"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-89"></span><span>  </span><span id="local-6989586621679125165"><span class="annot"><span class="annottext">shrink :: SimplePolygon (Point 2 Rational)
 -&gt; [SimplePolygon (Point 2 Rational)]
-</span><a href="#local-6989586621679125357"><span class="hs-identifier hs-var hs-var hs-var hs-var">shrink</span></a></span></span><span> </span><span id="local-6989586621679125359"><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125359"><span class="hs-identifier hs-var">p</span></a></span></span><span>
+</span><a href="#local-6989586621679125165"><span class="hs-identifier hs-var hs-var hs-var hs-var">shrink</span></a></span></span><span> </span><span id="local-6989586621679125167"><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125167"><span class="hs-identifier hs-var">p</span></a></span></span><span>
 </span><span id="line-90"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational) -&gt; Bool
 forall {graph}. HasVertices' graph =&gt; graph -&gt; Bool
 </span><a href="HGeometry.Polygon.Instances.html#isTriangle"><span class="hs-identifier hs-var">isTriangle</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125359"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125167"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
 -&gt; [SimplePolygon (Point 2 Rational)]
 </span><a href="HGeometry.Polygon.Instances.html#simplifyP"><span class="hs-identifier hs-var">simplifyP</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125359"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><a href="#local-6989586621679125167"><span class="hs-identifier hs-var">p</span></a></span><span>
 </span><span id="line-91"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
 -&gt; [SimplePolygon (Point 2 Rational)]
 </span><a href="HGeometry.Polygon.Instances.html#cutEars"><span class="hs-identifier hs-var">cutEars</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125359"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">[SimplePolygon (Point 2 Rational)]
+</span><a href="#local-6989586621679125167"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">[SimplePolygon (Point 2 Rational)]
 -&gt; [SimplePolygon (Point 2 Rational)]
 -&gt; [SimplePolygon (Point 2 Rational)]
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
 -&gt; [SimplePolygon (Point 2 Rational)]
 </span><a href="HGeometry.Polygon.Instances.html#simplifyP"><span class="hs-identifier hs-var">simplifyP</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125359"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><a href="#local-6989586621679125167"><span class="hs-identifier hs-var">p</span></a></span><span>
 </span><span id="line-92"></span><span>
-</span><span id="line-93"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679125365"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Arbitrary.html#Arbitrary"><span class="hs-identifier hs-type">Arbitrary</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-94"></span><span>  </span><span id="local-6989586621679125511"><span class="annot"><span class="annottext">arbitrary :: Gen (SimplePolygon (Point 2 Double))
+</span><span id="line-93"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679125173"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Arbitrary.html#Arbitrary"><span class="hs-identifier hs-type">Arbitrary</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-94"></span><span>  </span><span id="local-6989586621679125319"><span class="annot"><span class="annottext">arbitrary :: Gen (SimplePolygon (Point 2 Double))
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Arbitrary.html#arbitrary"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-95"></span><span>    </span><span id="local-6989586621679125512"><span class="annot"><span class="annottext">SimplePolygon (Point 2 Double)
-</span><a href="#local-6989586621679125512"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[SimplePolygon (Point 2 Double)]
+</span><span id="line-95"></span><span>    </span><span id="local-6989586621679125320"><span class="annot"><span class="annottext">SimplePolygon (Point 2 Double)
+</span><a href="#local-6989586621679125320"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[SimplePolygon (Point 2 Double)]
 -&gt; Gen (SimplePolygon (Point 2 Double))
 forall a. HasCallStack =&gt; [a] -&gt; Gen a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Gen.html#elements"><span class="hs-identifier hs-var">elements</span></a></span><span> </span><span class="annot"><span class="annottext">[SimplePolygon (Point 2 Double)]
 </span><a href="HGeometry.Polygon.Instances.html#allSimplePolygons"><span class="hs-identifier hs-var">allSimplePolygons</span></a></span><span>
-</span><span id="line-96"></span><span>    </span><span id="local-6989586621679125513"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125513"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; Gen Int
+</span><span id="line-96"></span><span>    </span><span id="local-6989586621679125321"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679125321"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; Gen Int
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Gen.html#chooseInt"><span class="hs-identifier hs-var">chooseInt</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Double) -&gt; Int
 forall graph. HasVertices' graph =&gt; graph -&gt; Int
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#numVertices"><span class="hs-identifier hs-var">numVertices</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Double)
-</span><a href="#local-6989586621679125512"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679125320"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
@@ -305,15 +305,15 @@ forall simplePolygon point r.
 SimplePolygon_ simplePolygon point r =&gt;
 Int -&gt; simplePolygon -&gt; simplePolygon
 </span><a href="HGeometry.Polygon.Instances.html#rotateLeft"><span class="hs-identifier hs-var">rotateLeft</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125513"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Double)
-</span><a href="#local-6989586621679125512"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><a href="#local-6989586621679125321"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Double)
+</span><a href="#local-6989586621679125320"><span class="hs-identifier hs-var">p</span></a></span><span>
 </span><span id="line-98"></span><span>  </span><span class="hs-comment">-- shrink p</span><span>
 </span><span id="line-99"></span><span>  </span><span class="hs-comment">--   | isTriangle p = simplifyP p</span><span>
 </span><span id="line-100"></span><span>  </span><span class="hs-comment">--   | otherwise = cutEars p ++ simplifyP p</span><span>
 </span><span id="line-101"></span><span>
 </span><span id="line-102"></span><span>
-</span><span id="line-103"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679124482"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Arbitrary.html#Arbitrary"><span class="hs-identifier hs-type">Arbitrary</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Number.Real.Rational.html#RealNumber"><span class="hs-identifier hs-type">RealNumber</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679124482"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-glyph">::</span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-104"></span><span>  </span><span id="local-6989586621679125538"><span class="annot"><span class="annottext">arbitrary :: Gen (SimplePolygon (Point 2 (RealNumber p)))
+</span><span id="line-103"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679124290"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Arbitrary.html#Arbitrary"><span class="hs-identifier hs-type">Arbitrary</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Number.Real.Rational.html#RealNumber"><span class="hs-identifier hs-type">RealNumber</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679124290"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-glyph">::</span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-104"></span><span>  </span><span id="local-6989586621679125346"><span class="annot"><span class="annottext">arbitrary :: Gen (SimplePolygon (Point 2 (RealNumber p)))
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Arbitrary.html#arbitrary"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ASetter
   (SimplePolygon (Point 2 Rational))
   (SimplePolygon (Point 2 (RealNumber p)))
@@ -376,7 +376,7 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Gen (SimplePolygon (Point 2 Rational))
 forall a. Arbitrary a =&gt; Gen a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Arbitrary.html#arbitrary"><span class="hs-identifier hs-var">arbitrary</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Gen.html#Gen"><span class="hs-identifier hs-type">Gen</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-106"></span><span>  </span><span id="local-6989586621679125584"><span class="annot"><span class="annottext">shrink :: SimplePolygon (Point 2 (RealNumber p))
+</span><span id="line-106"></span><span>  </span><span id="local-6989586621679125392"><span class="annot"><span class="annottext">shrink :: SimplePolygon (Point 2 (RealNumber p))
 -&gt; [SimplePolygon (Point 2 (RealNumber p))]
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Arbitrary.html#shrink"><span class="hs-identifier hs-var hs-var hs-var hs-var">shrink</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(SimplePolygon (Point 2 Rational)
  -&gt; SimplePolygon (Point 2 (RealNumber p)))
@@ -456,12 +456,12 @@ forall a. Arbitrary a =&gt; a -&gt; [a]
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 (RealNumber p))
 -&gt; SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125585"><span class="hs-identifier hs-var">trunc</span></a></span><span>
+</span><a href="#local-6989586621679125393"><span class="hs-identifier hs-var">trunc</span></a></span><span>
 </span><span id="line-108"></span><span>    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-109"></span><span>      </span><span class="annot"><a href="#local-6989586621679125585"><span class="hs-identifier hs-type">trunc</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Number.Real.Rational.html#RealNumber"><span class="hs-identifier hs-type">RealNumber</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679124482"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-glyph">::</span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span>
-</span><span id="line-110"></span><span>      </span><span id="local-6989586621679125585"><span class="annot"><span class="annottext">trunc :: SimplePolygon (Point 2 (RealNumber p))
+</span><span id="line-109"></span><span>      </span><span class="annot"><a href="#local-6989586621679125393"><span class="hs-identifier hs-type">trunc</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Number.Real.Rational.html#RealNumber"><span class="hs-identifier hs-type">RealNumber</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679124290"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-glyph">::</span><span class="annot"><span class="hs-identifier hs-type">Nat</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span>
+</span><span id="line-110"></span><span>      </span><span id="local-6989586621679125393"><span class="annot"><span class="annottext">trunc :: SimplePolygon (Point 2 (RealNumber p))
 -&gt; SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125585"><span class="hs-identifier hs-var hs-var">trunc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ASetter
+</span><a href="#local-6989586621679125393"><span class="hs-identifier hs-var hs-var">trunc</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ASetter
   (SimplePolygon (Point 2 (RealNumber p)))
   (SimplePolygon (Point 2 Rational))
   (RealNumber p)
@@ -527,15 +527,15 @@ forall a b. (Real a, Fractional b) =&gt; a -&gt; b
 </span><span id="line-120"></span><span class="annot"><a href="HGeometry.Polygon.Instances.html#simplifyP"><span class="hs-identifier hs-type">simplifyP</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span>  </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
 </span><span id="line-121"></span><span id="simplifyP"><span class="annot"><span class="annottext">simplifyP :: SimplePolygon (Point 2 Rational)
 -&gt; [SimplePolygon (Point 2 Rational)]
-</span><a href="HGeometry.Polygon.Instances.html#simplifyP"><span class="hs-identifier hs-var hs-var">simplifyP</span></a></span></span><span> </span><span id="local-6989586621679125586"><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125586"><span class="hs-identifier hs-var">pg</span></a></span></span><span>
+</span><a href="HGeometry.Polygon.Instances.html#simplifyP"><span class="hs-identifier hs-var hs-var">simplifyP</span></a></span></span><span> </span><span id="local-6989586621679125394"><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125394"><span class="hs-identifier hs-var">pg</span></a></span></span><span>
 </span><span id="line-122"></span><span>      </span><span class="hs-comment">-- Scale up polygon such that each coordinate is a whole number.</span><span>
 </span><span id="line-123"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679125587"><span class="hs-identifier hs-var">lcmP</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Bool
+</span><a href="#local-6989586621679125395"><span class="hs-identifier hs-var">lcmP</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Rational
 </span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125586"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125394"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
 -&gt; (SimplePolygon (Point 2 Rational)
     -&gt; SimplePolygon (Point 2 Rational))
 -&gt; SimplePolygon (Point 2 Rational)
@@ -566,17 +566,17 @@ IndexedTraversal1
 forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Point 2 Rational -&gt; Point 2 Rational
 forall {r}. Num r =&gt; r -&gt; Point 2 r -&gt; Point 2 r
-</span><a href="#local-6989586621679125589"><span class="hs-identifier hs-var">multP</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679125587"><span class="hs-identifier hs-var">lcmP</span></a></span><span>  </span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679125397"><span class="hs-identifier hs-var">multP</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679125395"><span class="hs-identifier hs-var">lcmP</span></a></span><span>  </span><span class="hs-special">]</span><span>
 </span><span id="line-124"></span><span>        </span><span class="hs-comment">-- unsafeFromCircularVector $ CV.map (over core (multP lcmP)) vs]</span><span>
 </span><span id="line-125"></span><span>
 </span><span id="line-126"></span><span>      </span><span class="hs-comment">-- Scale down polygon maintaining each coordinate as a whole number</span><span>
 </span><span id="line-127"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679125590"><span class="hs-identifier hs-var">gcdP</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Bool
+</span><a href="#local-6989586621679125398"><span class="hs-identifier hs-var">gcdP</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Rational
 </span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125586"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125394"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
 -&gt; (SimplePolygon (Point 2 Rational)
     -&gt; SimplePolygon (Point 2 Rational))
 -&gt; SimplePolygon (Point 2 Rational)
@@ -607,20 +607,20 @@ IndexedTraversal1
 forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Point 2 Rational -&gt; Point 2 Rational
 forall {r}. Fractional r =&gt; r -&gt; Point 2 r -&gt; Point 2 r
-</span><a href="#local-6989586621679125591"><span class="hs-identifier hs-var">divP</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679125590"><span class="hs-identifier hs-var">gcdP</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679125399"><span class="hs-identifier hs-var">divP</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679125398"><span class="hs-identifier hs-var">gcdP</span></a></span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-128"></span><span>
 </span><span id="line-129"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679125592"><span class="hs-identifier hs-var">minX</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Bool
+</span><a href="#local-6989586621679125400"><span class="hs-identifier hs-var">minX</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Rational
 </span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679125594"><span class="hs-identifier hs-var">minY</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Bool
+</span><a href="#local-6989586621679125402"><span class="hs-identifier hs-var">minY</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Rational
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125586"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125394"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
 -&gt; (SimplePolygon (Point 2 Rational)
     -&gt; SimplePolygon (Point 2 Rational))
 -&gt; SimplePolygon (Point 2 Rational)
@@ -650,13 +650,13 @@ IndexedTraversal1
 -&gt; SimplePolygon (Point 2 Rational)
 forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational -&gt; Point 2 Rational
-</span><a href="#local-6989586621679125595"><span class="hs-identifier hs-var">align</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679125403"><span class="hs-identifier hs-var">align</span></a></span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-130"></span><span>      </span><span class="hs-comment">-- = [unsafeFromCircularVector $ CV.map (over core align) vs]</span><span>
 </span><span id="line-131"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-132"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679125596"><span class="annot"><span class="annottext">pg' :: SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125596"><span class="hs-identifier hs-var hs-var">pg'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125586"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><span id="line-132"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679125404"><span class="annot"><span class="annottext">pg' :: SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125404"><span class="hs-identifier hs-var hs-var">pg'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125394"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
 -&gt; (SimplePolygon (Point 2 Rational)
     -&gt; SimplePolygon (Point 2 Rational))
 -&gt; SimplePolygon (Point 2 Rational)
@@ -687,17 +687,17 @@ IndexedTraversal1
 forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational -&gt; Point 2 Rational
 forall {a}. Integral a =&gt; Point 2 (Ratio a) -&gt; Point 2 (Ratio a)
-</span><a href="#local-6989586621679125597"><span class="hs-identifier hs-var">_div2</span></a></span><span>
+</span><a href="#local-6989586621679125405"><span class="hs-identifier hs-var">_div2</span></a></span><span>
 </span><span id="line-133"></span><span>            </span><span class="hs-comment">-- unsafeFromCircularVector $ CV.map (over core _div2) vs</span><span>
 </span><span id="line-134"></span><span>      </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125596"><span class="hs-identifier hs-var">pg'</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">[Point 2 Rational] -&gt; Bool
+</span><a href="#local-6989586621679125404"><span class="hs-identifier hs-var">pg'</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">[Point 2 Rational] -&gt; Bool
 forall (f :: * -&gt; *) point r.
 (Foldable f, Functor f, Point_ point 2 r, Ord r, Real r) =&gt;
 f point -&gt; Bool
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.html#hasNoSelfIntersections"><span class="hs-identifier hs-var">hasNoSelfIntersections</span></a></span><span> </span><span class="annot"><span class="annottext">([Point 2 Rational] -&gt; Bool) -&gt; [Point 2 Rational] -&gt; Bool
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125596"><span class="hs-identifier hs-var">pg'</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125404"><span class="hs-identifier hs-var">pg'</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
 -&gt; Getting
      (Endo [Point 2 Rational])
      (SimplePolygon (Point 2 Rational))
@@ -728,8 +728,8 @@ IndexedTraversal1
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#vertices"><span class="hs-identifier hs-var">vertices</span></a></span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-135"></span><span>    </span><span class="hs-comment">-- otherwise = []</span><span>
 </span><span id="line-136"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-137"></span><span>    </span><span id="local-6989586621679125592"><span class="annot"><span class="annottext">minX :: Rational
-</span><a href="#local-6989586621679125592"><span class="hs-identifier hs-var hs-var">minX</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting
+</span><span id="line-137"></span><span>    </span><span id="local-6989586621679125400"><span class="annot"><span class="annottext">minX :: Rational
+</span><a href="#local-6989586621679125400"><span class="hs-identifier hs-var hs-var">minX</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting
   (First Rational) (SimplePolygon (Point 2 Rational)) Rational
 -&gt; SimplePolygon (Point 2 Rational) -&gt; Rational
 forall a s. Getting (First a) s a -&gt; s -&gt; a
@@ -769,9 +769,9 @@ forall (d :: Natural) point r.
 IndexedLens' Int point r
 IndexedLens' Int (Point 2 Rational) Rational
 </span><span class="hs-identifier hs-var">xCoord</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125586"><span class="hs-identifier hs-var">pg</span></a></span><span>
-</span><span id="line-138"></span><span>    </span><span id="local-6989586621679125594"><span class="annot"><span class="annottext">minY :: Rational
-</span><a href="#local-6989586621679125594"><span class="hs-identifier hs-var hs-var">minY</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting
+</span><a href="#local-6989586621679125394"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-138"></span><span>    </span><span id="local-6989586621679125402"><span class="annot"><span class="annottext">minY :: Rational
+</span><a href="#local-6989586621679125402"><span class="hs-identifier hs-var hs-var">minY</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting
   (First Rational) (SimplePolygon (Point 2 Rational)) Rational
 -&gt; SimplePolygon (Point 2 Rational) -&gt; Rational
 forall a s. Getting (First a) s a -&gt; s -&gt; a
@@ -811,7 +811,7 @@ forall (d :: Natural) point r.
 IndexedLens' Int point r
 IndexedLens' Int (Point 2 Rational) Rational
 </span><span class="hs-identifier hs-var">yCoord</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125586"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><a href="#local-6989586621679125394"><span class="hs-identifier hs-var">pg</span></a></span><span>
 </span><span id="line-139"></span><span>
 </span><span id="line-140"></span><span>      </span><span class="hs-comment">-- F.minimumBy (comparing (view (core.xCoord))) vs ^. core.xCoord</span><span>
 </span><span id="line-141"></span><span>    </span><span class="hs-comment">-- minY = F.minimumBy (comparing (view (core.yCoord))) vs ^. core.yCoord</span><span>
@@ -819,69 +819,69 @@ IndexedLens' Int (Point 2 Rational) Rational
 </span><span id="line-143"></span><span>    </span><span class="hs-comment">-- vs = p ^. outerBoundaryVector</span><span>
 </span><span id="line-144"></span><span>
 </span><span id="line-145"></span><span>
-</span><span id="line-146"></span><span>    </span><span id="local-6989586621679125587"><span class="annot"><span class="annottext">lcmP :: Rational
-</span><a href="#local-6989586621679125587"><span class="hs-identifier hs-var hs-var">lcmP</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational) -&gt; Rational
+</span><span id="line-146"></span><span>    </span><span id="local-6989586621679125395"><span class="annot"><span class="annottext">lcmP :: Rational
+</span><a href="#local-6989586621679125395"><span class="hs-identifier hs-var hs-var">lcmP</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational) -&gt; Rational
 </span><a href="HGeometry.Polygon.Instances.html#lcmPoint"><span class="hs-identifier hs-var">lcmPoint</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125586"><span class="hs-identifier hs-var">pg</span></a></span><span>
-</span><span id="line-147"></span><span>    </span><span id="local-6989586621679125590"><span class="annot"><span class="annottext">gcdP :: Rational
-</span><a href="#local-6989586621679125590"><span class="hs-identifier hs-var hs-var">gcdP</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational) -&gt; Rational
+</span><a href="#local-6989586621679125394"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-147"></span><span>    </span><span id="local-6989586621679125398"><span class="annot"><span class="annottext">gcdP :: Rational
+</span><a href="#local-6989586621679125398"><span class="hs-identifier hs-var hs-var">gcdP</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational) -&gt; Rational
 </span><a href="HGeometry.Polygon.Instances.html#gcdPoint"><span class="hs-identifier hs-var">gcdPoint</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125586"><span class="hs-identifier hs-var">pg</span></a></span><span>
-</span><span id="line-148"></span><span>    </span><span class="annot"><a href="#local-6989586621679125595"><span class="hs-identifier hs-type">align</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span>
-</span><span id="line-149"></span><span>    </span><span id="local-6989586621679125595"><span class="annot"><span class="annottext">align :: Point 2 Rational -&gt; Point 2 Rational
-</span><a href="#local-6989586621679125595"><span class="hs-identifier hs-var hs-var">align</span></a></span></span><span> </span><span id="local-6989586621679125607"><span class="annot"><span class="annottext">Point 2 Rational
-</span><a href="#local-6989586621679125607"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 2 Rational -&gt; Point 2 Rational
+</span><a href="#local-6989586621679125394"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-148"></span><span>    </span><span class="annot"><a href="#local-6989586621679125403"><span class="hs-identifier hs-type">align</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span>
+</span><span id="line-149"></span><span>    </span><span id="local-6989586621679125403"><span class="annot"><span class="annottext">align :: Point 2 Rational -&gt; Point 2 Rational
+</span><a href="#local-6989586621679125403"><span class="hs-identifier hs-var hs-var">align</span></a></span></span><span> </span><span id="local-6989586621679125415"><span class="annot"><span class="annottext">Point 2 Rational
+</span><a href="#local-6989586621679125415"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 2 Rational -&gt; Point 2 Rational
 forall v. v -&gt; PointF v
 </span><span class="hs-identifier hs-var">Point</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 Rational
-</span><a href="#local-6989586621679125607"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational -&gt; Point 2 Rational -&gt; Vector 2 Rational
+</span><a href="#local-6989586621679125415"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational -&gt; Point 2 Rational -&gt; Vector 2 Rational
 forall point (d :: Natural) r.
 (Affine_ point d r, Num r) =&gt;
 point -&gt; point -&gt; Vector d r
 </span><span class="hs-operator hs-var">.-.</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Point 2 Rational
 forall r. r -&gt; r -&gt; Point 2 r
 </span><span class="hs-identifier hs-var">Point2</span></span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679125592"><span class="hs-identifier hs-var">minX</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679125594"><span class="hs-identifier hs-var">minY</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679125400"><span class="hs-identifier hs-var">minX</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679125402"><span class="hs-identifier hs-var">minY</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-150"></span><span>
-</span><span id="line-151"></span><span>    </span><span id="local-6989586621679125589"><span class="annot"><span class="annottext">multP :: r -&gt; Point 2 r -&gt; Point 2 r
-</span><a href="#local-6989586621679125589"><span class="hs-identifier hs-var hs-var">multP</span></a></span></span><span> </span><span id="local-6989586621679125614"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679125614"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point2</span></span><span> </span><span id="local-6989586621679125615"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679125615"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679125616"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679125616"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Point 2 r
+</span><span id="line-151"></span><span>    </span><span id="local-6989586621679125397"><span class="annot"><span class="annottext">multP :: r -&gt; Point 2 r -&gt; Point 2 r
+</span><a href="#local-6989586621679125397"><span class="hs-identifier hs-var hs-var">multP</span></a></span></span><span> </span><span id="local-6989586621679125422"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679125422"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point2</span></span><span> </span><span id="local-6989586621679125423"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679125423"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679125424"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679125424"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Point 2 r
 forall r. r -&gt; r -&gt; Point 2 r
 </span><span class="hs-identifier hs-var">Point2</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679125615"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+</span><a href="#local-6989586621679125423"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679125614"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679125616"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+</span><a href="#local-6989586621679125422"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679125424"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679125614"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-152"></span><span>    </span><span id="local-6989586621679125591"><span class="annot"><span class="annottext">divP :: r -&gt; Point 2 r -&gt; Point 2 r
-</span><a href="#local-6989586621679125591"><span class="hs-identifier hs-var hs-var">divP</span></a></span></span><span> </span><span id="local-6989586621679125624"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679125624"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point2</span></span><span> </span><span id="local-6989586621679125625"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679125625"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679125626"><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679125626"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Point 2 r
+</span><a href="#local-6989586621679125422"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-152"></span><span>    </span><span id="local-6989586621679125399"><span class="annot"><span class="annottext">divP :: r -&gt; Point 2 r -&gt; Point 2 r
+</span><a href="#local-6989586621679125399"><span class="hs-identifier hs-var hs-var">divP</span></a></span></span><span> </span><span id="local-6989586621679125432"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679125432"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point2</span></span><span> </span><span id="local-6989586621679125433"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679125433"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679125434"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679125434"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Point 2 r
 forall r. r -&gt; r -&gt; Point 2 r
 </span><span class="hs-identifier hs-var">Point2</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679125625"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+</span><a href="#local-6989586621679125433"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
 forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679125624"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679125626"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+</span><a href="#local-6989586621679125432"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679125434"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
 forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">r
-</span><a href="#local-6989586621679125624"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-153"></span><span>    </span><span id="local-6989586621679125597"><span class="annot"><span class="annottext">_div2 :: Point 2 (Ratio a) -&gt; Point 2 (Ratio a)
-</span><a href="#local-6989586621679125597"><span class="hs-identifier hs-var hs-var">_div2</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point2</span></span><span> </span><span id="local-6989586621679125652"><span class="annot"><span class="annottext">Ratio a
-</span><a href="#local-6989586621679125652"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679125653"><span class="annot"><span class="annottext">Ratio a
-</span><a href="#local-6989586621679125653"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ratio a -&gt; Ratio a -&gt; Point 2 (Ratio a)
+</span><a href="#local-6989586621679125432"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-153"></span><span>    </span><span id="local-6989586621679125405"><span class="annot"><span class="annottext">_div2 :: Point 2 (Ratio a) -&gt; Point 2 (Ratio a)
+</span><a href="#local-6989586621679125405"><span class="hs-identifier hs-var hs-var">_div2</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point2</span></span><span> </span><span id="local-6989586621679125460"><span class="annot"><span class="annottext">Ratio a
+</span><a href="#local-6989586621679125460"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679125461"><span class="annot"><span class="annottext">Ratio a
+</span><a href="#local-6989586621679125461"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ratio a -&gt; Ratio a -&gt; Point 2 (Ratio a)
 forall r. r -&gt; r -&gt; Point 2 r
 </span><span class="hs-identifier hs-var">Point2</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ratio a -&gt; a
 forall a. Ratio a -&gt; a
 </span><span class="hs-identifier hs-var">numerator</span></span><span> </span><span class="annot"><span class="annottext">Ratio a
-</span><a href="#local-6989586621679125652"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679125460"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Integral a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">`div`</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Ratio a
@@ -890,7 +890,7 @@ forall a. Integral a =&gt; a -&gt; a -&gt; Ratio a
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Ratio a -&gt; a
 forall a. Ratio a -&gt; a
 </span><span class="hs-identifier hs-var">numerator</span></span><span> </span><span class="annot"><span class="annottext">Ratio a
-</span><a href="#local-6989586621679125653"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679125461"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Integral a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">`div`</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Ratio a
@@ -901,15 +901,15 @@ forall a. Integral a =&gt; a -&gt; a -&gt; Ratio a
 </span><span id="line-155"></span><span>
 </span><span id="line-156"></span><span class="annot"><a href="HGeometry.Polygon.Instances.html#lcmPoint"><span class="hs-identifier hs-type">lcmPoint</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span>
 </span><span id="line-157"></span><span id="lcmPoint"><span class="annot"><span class="annottext">lcmPoint :: SimplePolygon (Point 2 Rational) -&gt; Rational
-</span><a href="HGeometry.Polygon.Instances.html#lcmPoint"><span class="hs-identifier hs-var hs-var">lcmPoint</span></a></span></span><span> </span><span id="local-6989586621679125657"><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125657"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Rational
+</span><a href="HGeometry.Polygon.Instances.html#lcmPoint"><span class="hs-identifier hs-var hs-var">lcmPoint</span></a></span></span><span> </span><span id="local-6989586621679125465"><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125465"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Rational
 forall a b. (Real a, Fractional b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679125658"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><a href="#local-6989586621679125466"><span class="hs-identifier hs-var">t</span></a></span><span>
 </span><span id="line-158"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-159"></span><span>    </span><span id="local-6989586621679125659"><span class="annot"><span class="annottext">vs :: [Point 2 Rational]
-</span><a href="#local-6989586621679125659"><span class="hs-identifier hs-var hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125657"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><span id="line-159"></span><span>    </span><span id="local-6989586621679125467"><span class="annot"><span class="annottext">vs :: [Point 2 Rational]
+</span><a href="#local-6989586621679125467"><span class="hs-identifier hs-var hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125465"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
 -&gt; Getting
      (Endo [Point 2 Rational])
      (SimplePolygon (Point 2 Rational))
@@ -937,39 +937,39 @@ IndexedTraversal1
   (Vertex (SimplePolygon (Point 2 Rational)))
   (Vertex (SimplePolygon (Point 2 Rational)))
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Class.html#outerBoundary"><span class="hs-identifier hs-var">outerBoundary</span></a></span><span>
-</span><span id="line-160"></span><span>    </span><span id="local-6989586621679125661"><span class="annot"><span class="annottext">lst :: [Integer]
-</span><a href="#local-6989586621679125661"><span class="hs-identifier hs-var hs-var">lst</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 Rational -&gt; [Integer]) -&gt; [Point 2 Rational] -&gt; [Integer]
+</span><span id="line-160"></span><span>    </span><span id="local-6989586621679125469"><span class="annot"><span class="annottext">lst :: [Integer]
+</span><a href="#local-6989586621679125469"><span class="hs-identifier hs-var hs-var">lst</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 Rational -&gt; [Integer]) -&gt; [Point 2 Rational] -&gt; [Integer]
 forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
-</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point2</span></span><span> </span><span id="local-6989586621679125663"><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679125663"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679125664"><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679125664"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Rational -&gt; Integer
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point2</span></span><span> </span><span id="local-6989586621679125471"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679125471"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679125472"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679125472"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Rational -&gt; Integer
 forall a. Ratio a -&gt; a
 </span><span class="hs-identifier hs-var">denominator</span></span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679125663"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Integer
+</span><a href="#local-6989586621679125471"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Integer
 forall a. Ratio a -&gt; a
 </span><span class="hs-identifier hs-var">denominator</span></span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679125664"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Point 2 Rational]
-</span><a href="#local-6989586621679125659"><span class="hs-identifier hs-var">vs</span></a></span><span>
-</span><span id="line-161"></span><span>    </span><span id="local-6989586621679125658"><span class="annot"><span class="annottext">t :: Integer
-</span><a href="#local-6989586621679125658"><span class="hs-identifier hs-var hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Integer -&gt; Integer -&gt; Integer) -&gt; [Integer] -&gt; Integer
+</span><a href="#local-6989586621679125472"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Point 2 Rational]
+</span><a href="#local-6989586621679125467"><span class="hs-identifier hs-var">vs</span></a></span><span>
+</span><span id="line-161"></span><span>    </span><span id="local-6989586621679125466"><span class="annot"><span class="annottext">t :: Integer
+</span><a href="#local-6989586621679125466"><span class="hs-identifier hs-var hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Integer -&gt; Integer -&gt; Integer) -&gt; [Integer] -&gt; Integer
 forall a. (a -&gt; a -&gt; a) -&gt; [a] -&gt; a
 forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; a -&gt; a) -&gt; t a -&gt; a
 </span><span class="hs-identifier hs-var">foldl1</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
 forall a. Integral a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">lcm</span></span><span> </span><span class="annot"><span class="annottext">[Integer]
-</span><a href="#local-6989586621679125661"><span class="hs-identifier hs-var">lst</span></a></span><span>
+</span><a href="#local-6989586621679125469"><span class="hs-identifier hs-var">lst</span></a></span><span>
 </span><span id="line-162"></span><span>
 </span><span id="line-163"></span><span class="annot"><a href="HGeometry.Polygon.Instances.html#gcdPoint"><span class="hs-identifier hs-type">gcdPoint</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span>
 </span><span id="line-164"></span><span id="gcdPoint"><span class="annot"><span class="annottext">gcdPoint :: SimplePolygon (Point 2 Rational) -&gt; Rational
-</span><a href="HGeometry.Polygon.Instances.html#gcdPoint"><span class="hs-identifier hs-var hs-var">gcdPoint</span></a></span></span><span> </span><span id="local-6989586621679125668"><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125668"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Rational
+</span><a href="HGeometry.Polygon.Instances.html#gcdPoint"><span class="hs-identifier hs-var hs-var">gcdPoint</span></a></span></span><span> </span><span id="local-6989586621679125476"><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125476"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Rational
 forall a b. (Real a, Fractional b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">Integer
-</span><a href="#local-6989586621679125669"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><a href="#local-6989586621679125477"><span class="hs-identifier hs-var">t</span></a></span><span>
 </span><span id="line-165"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-166"></span><span>    </span><span id="local-6989586621679125670"><span class="annot"><span class="annottext">vs :: [Point 2 Rational]
-</span><a href="#local-6989586621679125670"><span class="hs-identifier hs-var hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125668"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><span id="line-166"></span><span>    </span><span id="local-6989586621679125478"><span class="annot"><span class="annottext">vs :: [Point 2 Rational]
+</span><a href="#local-6989586621679125478"><span class="hs-identifier hs-var hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125476"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
 -&gt; Getting
      (Endo [Point 2 Rational])
      (SimplePolygon (Point 2 Rational))
@@ -997,35 +997,35 @@ IndexedTraversal1
   (Vertex (SimplePolygon (Point 2 Rational)))
   (Vertex (SimplePolygon (Point 2 Rational)))
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Class.html#outerBoundary"><span class="hs-identifier hs-var">outerBoundary</span></a></span><span>
-</span><span id="line-167"></span><span>    </span><span id="local-6989586621679125671"><span class="annot"><span class="annottext">lst :: [Integer]
-</span><a href="#local-6989586621679125671"><span class="hs-identifier hs-var hs-var">lst</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 Rational -&gt; [Integer]) -&gt; [Point 2 Rational] -&gt; [Integer]
+</span><span id="line-167"></span><span>    </span><span id="local-6989586621679125479"><span class="annot"><span class="annottext">lst :: [Integer]
+</span><a href="#local-6989586621679125479"><span class="hs-identifier hs-var hs-var">lst</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 Rational -&gt; [Integer]) -&gt; [Point 2 Rational] -&gt; [Integer]
 forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
-</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point2</span></span><span> </span><span id="local-6989586621679125672"><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679125672"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679125673"><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679125673"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Rational -&gt; Integer
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point2</span></span><span> </span><span id="local-6989586621679125480"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679125480"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679125481"><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679125481"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Rational -&gt; Integer
 forall a. Ratio a -&gt; a
 </span><span class="hs-identifier hs-var">denominator</span></span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679125672"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Integer
+</span><a href="#local-6989586621679125480"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Integer
 forall a. Ratio a -&gt; a
 </span><span class="hs-identifier hs-var">denominator</span></span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679125673"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Point 2 Rational]
-</span><a href="#local-6989586621679125670"><span class="hs-identifier hs-var">vs</span></a></span><span>
-</span><span id="line-168"></span><span>    </span><span id="local-6989586621679125669"><span class="annot"><span class="annottext">t :: Integer
-</span><a href="#local-6989586621679125669"><span class="hs-identifier hs-var hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Integer -&gt; Integer -&gt; Integer) -&gt; [Integer] -&gt; Integer
+</span><a href="#local-6989586621679125481"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Point 2 Rational]
+</span><a href="#local-6989586621679125478"><span class="hs-identifier hs-var">vs</span></a></span><span>
+</span><span id="line-168"></span><span>    </span><span id="local-6989586621679125477"><span class="annot"><span class="annottext">t :: Integer
+</span><a href="#local-6989586621679125477"><span class="hs-identifier hs-var hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Integer -&gt; Integer -&gt; Integer) -&gt; [Integer] -&gt; Integer
 forall a. (a -&gt; a -&gt; a) -&gt; [a] -&gt; a
 forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; a -&gt; a) -&gt; t a -&gt; a
 </span><span class="hs-identifier hs-var">foldl1</span></span><span> </span><span class="annot"><span class="annottext">Integer -&gt; Integer -&gt; Integer
 forall a. Integral a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">gcd</span></span><span> </span><span class="annot"><span class="annottext">[Integer]
-</span><a href="#local-6989586621679125671"><span class="hs-identifier hs-var">lst</span></a></span><span>
+</span><a href="#local-6989586621679125479"><span class="hs-identifier hs-var">lst</span></a></span><span>
 </span><span id="line-169"></span><span>
 </span><span id="line-170"></span><span class="hs-comment">-- remove vertex i, thereby dropping a vertex</span><span>
 </span><span id="line-171"></span><span class="annot"><a href="HGeometry.Polygon.Instances.html#cutEarAt"><span class="hs-identifier hs-type">cutEarAt</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span>
 </span><span id="line-172"></span><span id="cutEarAt"><span class="annot"><span class="annottext">cutEarAt :: SimplePolygon (Point 2 Rational)
 -&gt; Int -&gt; SimplePolygon (Point 2 Rational)
-</span><a href="HGeometry.Polygon.Instances.html#cutEarAt"><span class="hs-identifier hs-var hs-var">cutEarAt</span></a></span></span><span> </span><span id="local-6989586621679125676"><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125676"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span id="local-6989586621679125677"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125677"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Point 2 Rational] -&gt; SimplePolygon (Point 2 Rational)
+</span><a href="HGeometry.Polygon.Instances.html#cutEarAt"><span class="hs-identifier hs-var hs-var">cutEarAt</span></a></span></span><span> </span><span id="local-6989586621679125484"><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125484"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span id="local-6989586621679125485"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679125485"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Point 2 Rational] -&gt; SimplePolygon (Point 2 Rational)
 forall simplePolygon point r (f :: * -&gt; *).
 (SimplePolygon_ simplePolygon point r, Foldable f) =&gt;
 f point -&gt; simplePolygon
@@ -1033,10 +1033,10 @@ forall (f :: * -&gt; *).
 Foldable f =&gt;
 f (Point 2 Rational) -&gt; SimplePolygon (Point 2 Rational)
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Class.html#uncheckedFromCCWPoints"><span class="hs-identifier hs-var">uncheckedFromCCWPoints</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 Rational]
-</span><a href="#local-6989586621679125678"><span class="hs-identifier hs-var">vs</span></a></span><span>
+</span><a href="#local-6989586621679125486"><span class="hs-identifier hs-var">vs</span></a></span><span>
 </span><span id="line-173"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-174"></span><span>    </span><span id="local-6989586621679125678"><span class="annot"><span class="annottext">vs :: [Point 2 Rational]
-</span><a href="#local-6989586621679125678"><span class="hs-identifier hs-var hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IndexedGetting
+</span><span id="line-174"></span><span>    </span><span id="local-6989586621679125486"><span class="annot"><span class="annottext">vs :: [Point 2 Rational]
+</span><a href="#local-6989586621679125486"><span class="hs-identifier hs-var hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IndexedGetting
   Int
   (Endo [Point 2 Rational])
   (SimplePolygon (Point 2 Rational))
@@ -1071,54 +1071,54 @@ IndexedTraversal1
   (SimplePolygon (Point 2 Rational))
   (Vertex (SimplePolygon (Point 2 Rational)))
   (Vertex (SimplePolygon (Point 2 Rational)))
-</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Class.html#outerBoundary"><span class="hs-identifier hs-var">outerBoundary</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679125680"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125680"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span id="local-6989586621679125681"><span class="annot"><span class="annottext">Point 2 Rational
-</span><a href="#local-6989586621679125681"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679125682"><span class="annot"><span class="annottext">[Point 2 Rational]
-</span><a href="#local-6989586621679125682"><span class="hs-identifier hs-var">vs'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125677"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Class.html#outerBoundary"><span class="hs-identifier hs-var">outerBoundary</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679125488"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679125488"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span id="local-6989586621679125489"><span class="annot"><span class="annottext">Point 2 Rational
+</span><a href="#local-6989586621679125489"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679125490"><span class="annot"><span class="annottext">[Point 2 Rational]
+</span><a href="#local-6989586621679125490"><span class="hs-identifier hs-var">vs'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679125485"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125680"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">[Point 2 Rational]
-</span><a href="#local-6989586621679125682"><span class="hs-identifier hs-var">vs'</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Point 2 Rational
-</span><a href="#local-6989586621679125681"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">Point 2 Rational -&gt; [Point 2 Rational] -&gt; [Point 2 Rational]
+</span><a href="#local-6989586621679125488"><span class="hs-identifier hs-var">j</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">[Point 2 Rational]
+</span><a href="#local-6989586621679125490"><span class="hs-identifier hs-var">vs'</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Point 2 Rational
+</span><a href="#local-6989586621679125489"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">Point 2 Rational -&gt; [Point 2 Rational] -&gt; [Point 2 Rational]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[Point 2 Rational]
-</span><a href="#local-6989586621679125682"><span class="hs-identifier hs-var">vs'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125676"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><a href="#local-6989586621679125490"><span class="hs-identifier hs-var">vs'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125484"><span class="hs-identifier hs-var">pg</span></a></span><span>
 </span><span id="line-175"></span><span>
 </span><span id="line-176"></span><span class="annot"><a href="HGeometry.Polygon.Instances.html#cutEars"><span class="hs-identifier hs-type">cutEars</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Simple.Type.html#SimplePolygon"><span class="hs-identifier hs-type">SimplePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
 </span><span id="line-177"></span><span id="cutEars"><span class="annot"><span class="annottext">cutEars :: SimplePolygon (Point 2 Rational)
 -&gt; [SimplePolygon (Point 2 Rational)]
-</span><a href="HGeometry.Polygon.Instances.html#cutEars"><span class="hs-identifier hs-var hs-var">cutEars</span></a></span></span><span> </span><span id="local-6989586621679125683"><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125683"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational) -&gt; Bool
+</span><a href="HGeometry.Polygon.Instances.html#cutEars"><span class="hs-identifier hs-var hs-var">cutEars</span></a></span></span><span> </span><span id="local-6989586621679125491"><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125491"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational) -&gt; Bool
 forall {graph}. HasVertices' graph =&gt; graph -&gt; Bool
 </span><a href="HGeometry.Polygon.Instances.html#isTriangle"><span class="hs-identifier hs-var">isTriangle</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125683"><span class="hs-identifier hs-var">pg</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679125491"><span class="hs-identifier hs-var">pg</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
 </span><span id="line-178"></span><span>           </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
 -&gt; Int -&gt; SimplePolygon (Point 2 Rational)
 </span><a href="HGeometry.Polygon.Instances.html#cutEarAt"><span class="hs-identifier hs-var">cutEarAt</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125683"><span class="hs-identifier hs-var">pg</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125684"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679125684"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125684"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679125491"><span class="hs-identifier hs-var">pg</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679125492"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679125492"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679125492"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">..</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125685"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679125493"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Bool
-</span><a href="#local-6989586621679125686"><span class="hs-identifier hs-var">isEar</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125684"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679125494"><span class="hs-identifier hs-var">isEar</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679125492"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="hs-special">]</span><span>
 </span><span id="line-179"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-180"></span><span>    </span><span id="local-6989586621679125685"><span class="annot"><span class="annottext">n :: Int
-</span><a href="#local-6989586621679125685"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational) -&gt; Int
+</span><span id="line-180"></span><span>    </span><span id="local-6989586621679125493"><span class="annot"><span class="annottext">n :: Int
+</span><a href="#local-6989586621679125493"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational) -&gt; Int
 forall graph. HasVertices' graph =&gt; graph -&gt; Int
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#numVertices"><span class="hs-identifier hs-var">numVertices</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125683"><span class="hs-identifier hs-var">pg</span></a></span><span>
-</span><span id="line-181"></span><span>    </span><span id="local-6989586621679125686"><span class="annot"><span class="annottext">isEar :: Int -&gt; Bool
-</span><a href="#local-6989586621679125686"><span class="hs-identifier hs-var hs-var">isEar</span></a></span></span><span> </span><span id="local-6989586621679125687"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125687"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679125688"><span class="annot"><span class="annottext">prev :: Point 2 Rational
-</span><a href="#local-6989586621679125688"><span class="hs-identifier hs-var hs-var">prev</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125683"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125491"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><span id="line-181"></span><span>    </span><span id="local-6989586621679125494"><span class="annot"><span class="annottext">isEar :: Int -&gt; Bool
+</span><a href="#local-6989586621679125494"><span class="hs-identifier hs-var hs-var">isEar</span></a></span></span><span> </span><span id="local-6989586621679125495"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679125495"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679125496"><span class="annot"><span class="annottext">prev :: Point 2 Rational
+</span><a href="#local-6989586621679125496"><span class="hs-identifier hs-var hs-var">prev</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125491"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
 -&gt; Getting
      (Point 2 Rational)
      (SimplePolygon (Point 2 Rational))
@@ -1135,16 +1135,16 @@ HasOuterBoundary polygon =&gt;
 VertexIx polygon
 -&gt; IndexedGetter (VertexIx polygon) polygon (Vertex polygon)
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Class.html#outerBoundaryVertexAt"><span class="hs-identifier hs-var">outerBoundaryVertexAt</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125687"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679125495"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Integral a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">`mod`</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125685"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-182"></span><span>                  </span><span id="local-6989586621679125690"><span class="annot"><span class="annottext">cur :: Point 2 Rational
-</span><a href="#local-6989586621679125690"><span class="hs-identifier hs-var hs-var">cur</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125683"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125493"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-182"></span><span>                  </span><span id="local-6989586621679125498"><span class="annot"><span class="annottext">cur :: Point 2 Rational
+</span><a href="#local-6989586621679125498"><span class="hs-identifier hs-var hs-var">cur</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125491"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
 -&gt; Getting
      (Point 2 Rational)
      (SimplePolygon (Point 2 Rational))
@@ -1162,10 +1162,10 @@ VertexIx polygon
 -&gt; IndexedGetter (VertexIx polygon) polygon (Vertex polygon)
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Class.html#outerBoundaryVertexAt"><span class="hs-identifier hs-var">outerBoundaryVertexAt</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 VertexIx (SimplePolygon (Point 2 Rational))
-</span><a href="#local-6989586621679125687"><span class="hs-identifier hs-var">i</span></a></span><span>
-</span><span id="line-183"></span><span>                  </span><span id="local-6989586621679125691"><span class="annot"><span class="annottext">nxt :: Point 2 Rational
-</span><a href="#local-6989586621679125691"><span class="hs-identifier hs-var hs-var">nxt</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125683"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125495"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-183"></span><span>                  </span><span id="local-6989586621679125499"><span class="annot"><span class="annottext">nxt :: Point 2 Rational
+</span><a href="#local-6989586621679125499"><span class="hs-identifier hs-var hs-var">nxt</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125491"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
 -&gt; Getting
      (Point 2 Rational)
      (SimplePolygon (Point 2 Rational))
@@ -1182,32 +1182,32 @@ HasOuterBoundary polygon =&gt;
 VertexIx polygon
 -&gt; IndexedGetter (VertexIx polygon) polygon (Vertex polygon)
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Class.html#outerBoundaryVertexAt"><span class="hs-identifier hs-var">outerBoundaryVertexAt</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125687"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679125495"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Integral a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">`mod`</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125685"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-184"></span><span>                  </span><span id="local-6989586621679125693"><span class="annot"><span class="annottext">triangle :: Triangle (Point 2 Rational)
-</span><a href="#local-6989586621679125693"><span class="hs-identifier hs-var hs-var">triangle</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 Rational
+</span><a href="#local-6989586621679125493"><span class="hs-identifier hs-var">n</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-184"></span><span>                  </span><span id="local-6989586621679125501"><span class="annot"><span class="annottext">triangle :: Triangle (Point 2 Rational)
+</span><a href="#local-6989586621679125501"><span class="hs-identifier hs-var hs-var">triangle</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 Rational
 -&gt; Point 2 Rational
 -&gt; Point 2 Rational
 -&gt; Triangle (Point 2 Rational)
 forall point. point -&gt; point -&gt; point -&gt; Triangle point
 </span><span class="hs-identifier hs-var">Triangle</span></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational
-</span><a href="#local-6989586621679125688"><span class="hs-identifier hs-var">prev</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational
-</span><a href="#local-6989586621679125690"><span class="hs-identifier hs-var">cur</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational
-</span><a href="#local-6989586621679125691"><span class="hs-identifier hs-var">nxt</span></a></span><span>
+</span><a href="#local-6989586621679125496"><span class="hs-identifier hs-var">prev</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational
+</span><a href="#local-6989586621679125498"><span class="hs-identifier hs-var">cur</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational
+</span><a href="#local-6989586621679125499"><span class="hs-identifier hs-var">nxt</span></a></span><span>
 </span><span id="line-185"></span><span>              </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Point 2 Rational -&gt; Point 2 Rational -&gt; Point 2 Rational -&gt; CCW
 forall point r point' point''.
 (Point_ point 2 r, Point_ point' 2 r, Point_ point'' 2 r, Num r,
  Ord r) =&gt;
 point -&gt; point' -&gt; point'' -&gt; CCW
 </span><span class="hs-identifier hs-var">ccw</span></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational
-</span><a href="#local-6989586621679125688"><span class="hs-identifier hs-var">prev</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational
-</span><a href="#local-6989586621679125690"><span class="hs-identifier hs-var">cur</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational
-</span><a href="#local-6989586621679125691"><span class="hs-identifier hs-var">nxt</span></a></span><span> </span><span class="annot"><span class="annottext">CCW -&gt; CCW -&gt; Bool
+</span><a href="#local-6989586621679125496"><span class="hs-identifier hs-var">prev</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational
+</span><a href="#local-6989586621679125498"><span class="hs-identifier hs-var">cur</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational
+</span><a href="#local-6989586621679125499"><span class="hs-identifier hs-var">nxt</span></a></span><span> </span><span class="annot"><span class="annottext">CCW -&gt; CCW -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">CCW
 </span><span class="hs-identifier hs-var">CCW</span></span><span> </span><span class="hs-comment">-- left turn.</span><span>
@@ -1233,61 +1233,61 @@ IndexedTraversal1
   (Vertex (SimplePolygon (Point 2 Rational)))
   (Vertex (SimplePolygon (Point 2 Rational)))
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Class.html#outerBoundary"><span class="hs-identifier hs-var">outerBoundary</span></a></span><span>
-</span><span id="line-188"></span><span>                       </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679125699"><span class="annot"><span class="annottext">Point 2 Rational
-</span><a href="#local-6989586621679125699"><span class="hs-identifier hs-var">pt</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 Rational
-</span><a href="#local-6989586621679125699"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational -&gt; [Point 2 Rational] -&gt; Bool
+</span><span id="line-188"></span><span>                       </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679125507"><span class="annot"><span class="annottext">Point 2 Rational
+</span><a href="#local-6989586621679125507"><span class="hs-identifier hs-var">pt</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 Rational
+</span><a href="#local-6989586621679125507"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational -&gt; [Point 2 Rational] -&gt; Bool
 forall a. Eq a =&gt; a -&gt; [a] -&gt; Bool
 forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
 </span><span class="hs-operator hs-var">`elem`</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 Rational
-</span><a href="#local-6989586621679125688"><span class="hs-identifier hs-var">prev</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 Rational
-</span><a href="#local-6989586621679125690"><span class="hs-identifier hs-var">cur</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 Rational
-</span><a href="#local-6989586621679125691"><span class="hs-identifier hs-var">nxt</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621679125496"><span class="hs-identifier hs-var">prev</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 Rational
+</span><a href="#local-6989586621679125498"><span class="hs-identifier hs-var">cur</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 Rational
+</span><a href="#local-6989586621679125499"><span class="hs-identifier hs-var">nxt</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 Rational
-</span><a href="#local-6989586621679125699"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational -&gt; Triangle (Point 2 Rational) -&gt; Bool
+</span><a href="#local-6989586621679125507"><span class="hs-identifier hs-var">pt</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Rational -&gt; Triangle (Point 2 Rational) -&gt; Bool
 forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
 </span><span class="hs-operator hs-var">`intersects`</span></span><span> </span><span class="annot"><span class="annottext">Triangle (Point 2 Rational)
-</span><a href="#local-6989586621679125693"><span class="hs-identifier hs-var">triangle</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
-</span><a href="#local-6989586621679125683"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><a href="#local-6989586621679125501"><span class="hs-identifier hs-var">triangle</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (Point 2 Rational)
+</span><a href="#local-6989586621679125491"><span class="hs-identifier hs-var">pg</span></a></span><span>
 </span><span id="line-189"></span><span>
 </span><span id="line-190"></span><span id="isTriangle"><span class="annot"><span class="annottext">isTriangle :: graph -&gt; Bool
-</span><a href="HGeometry.Polygon.Instances.html#isTriangle"><span class="hs-identifier hs-var hs-var">isTriangle</span></a></span></span><span> </span><span id="local-6989586621679125707"><span class="annot"><span class="annottext">graph
-</span><a href="#local-6989586621679125707"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">graph -&gt; Int
+</span><a href="HGeometry.Polygon.Instances.html#isTriangle"><span class="hs-identifier hs-var hs-var">isTriangle</span></a></span></span><span> </span><span id="local-6989586621679125515"><span class="annot"><span class="annottext">graph
+</span><a href="#local-6989586621679125515"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">graph -&gt; Int
 forall graph. HasVertices' graph =&gt; graph -&gt; Int
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html#numVertices"><span class="hs-identifier hs-var">numVertices</span></a></span><span> </span><span class="annot"><span class="annottext">graph
-</span><a href="#local-6989586621679125707"><span class="hs-identifier hs-var">pg</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679125515"><span class="hs-identifier hs-var">pg</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span>
 </span><span id="line-191"></span><span>
-</span><span id="line-192"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679124546"><span id="local-6989586621679125713"><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/random-1.2.1.2-f4cff084f5bb381e8d0ea5f0ff70ce7cde0fcd9c12ea6754a93ba014da9eb283/share/doc/html/src/System.Random.Internal.html#Uniform"><span class="hs-identifier hs-type">Uniform</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679124546"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679124546"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679124546"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Arbitrary.html#Arbitrary"><span class="hs-identifier hs-type">Arbitrary</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Monotone.html#MonotonePolygon"><span class="hs-identifier hs-type">MonotonePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679124546"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-193"></span><span>  </span><span id="local-6989586621679125741"><span class="annot"><span class="annottext">arbitrary :: Gen (MonotonePolygon (Point 2 r))
+</span><span id="line-192"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679124354"><span id="local-6989586621679125521"><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/random-1.2.1.2-f4cff084f5bb381e8d0ea5f0ff70ce7cde0fcd9c12ea6754a93ba014da9eb283/share/doc/html/src/System.Random.Internal.html#Uniform"><span class="hs-identifier hs-type">Uniform</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679124354"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679124354"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679124354"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Arbitrary.html#Arbitrary"><span class="hs-identifier hs-type">Arbitrary</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Monotone.html#MonotonePolygon"><span class="hs-identifier hs-type">MonotonePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679124354"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-193"></span><span>  </span><span id="local-6989586621679125549"><span class="annot"><span class="annottext">arbitrary :: Gen (MonotonePolygon (Point 2 r))
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Arbitrary.html#arbitrary"><span class="hs-identifier hs-var hs-var hs-var hs-var">arbitrary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-194"></span><span>                </span><span id="local-6989586621679125742"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125742"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><span id="line-194"></span><span>                </span><span id="local-6989586621679125550"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679125550"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">max</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span>    </span><span class="annot"><span class="annottext">(Int -&gt; Int) -&gt; Gen Int -&gt; Gen Int
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen Int
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Gen.html#getSize"><span class="hs-identifier hs-var">getSize</span></a></span><span>
-</span><span id="line-195"></span><span>                </span><span id="local-6989586621679125745"><span class="annot"><span class="annottext">StdGen
-</span><a href="#local-6989586621679125745"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; StdGen
+</span><span id="line-195"></span><span>                </span><span id="local-6989586621679125553"><span class="annot"><span class="annottext">StdGen
+</span><a href="#local-6989586621679125553"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; StdGen
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/random-1.2.1.2-f4cff084f5bb381e8d0ea5f0ff70ce7cde0fcd9c12ea6754a93ba014da9eb283/share/doc/html/src/System.Random.Internal.html#mkStdGen"><span class="hs-identifier hs-var">mkStdGen</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; StdGen) -&gt; Gen Int -&gt; Gen StdGen
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Gen Int
 forall a. Arbitrary a =&gt; Gen a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/QuickCheck-2.15.0.1-f846b176b50b153840741948e582c1352c4a5435ad2d148fb2c043334c097c44/share/doc/html/src/Test.QuickCheck.Arbitrary.html#arbitrary"><span class="hs-identifier hs-var">arbitrary</span></a></span><span>
-</span><span id="line-196"></span><span>                </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679125747"><span class="annot"><span class="annottext">Vector 2 r
-</span><a href="#local-6989586621679125747"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679125748"><span class="annot"><span class="annottext">StdGen
-</span><a href="#local-6989586621679125748"><span class="hs-identifier hs-var">g'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">State StdGen (Vector 2 r) -&gt; StdGen -&gt; (Vector 2 r, StdGen)
+</span><span id="line-196"></span><span>                </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679125555"><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679125555"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679125556"><span class="annot"><span class="annottext">StdGen
+</span><a href="#local-6989586621679125556"><span class="hs-identifier hs-var">g'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">State StdGen (Vector 2 r) -&gt; StdGen -&gt; (Vector 2 r, StdGen)
 forall s a. State s a -&gt; s -&gt; (a, s)
 </span><span class="hs-identifier hs-var">runState</span></span><span> </span><span class="annot"><span class="annottext">State StdGen (Vector 2 r)
 forall g (m :: * -&gt; *) r.
 (MonadState g m, RandomGen g, Uniform r, Eq r, Num r) =&gt;
 m (Vector 2 r)
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Monotone.html#randomNonZeroVector"><span class="hs-identifier hs-var">randomNonZeroVector</span></a></span><span> </span><span class="annot"><span class="annottext">StdGen
-</span><a href="#local-6989586621679125745"><span class="hs-identifier hs-var">g</span></a></span><span>
+</span><a href="#local-6989586621679125553"><span class="hs-identifier hs-var">g</span></a></span><span>
 </span><span id="line-197"></span><span>                </span><span class="annot"><span class="annottext">MonotonePolygon (Point 2 r) -&gt; Gen (MonotonePolygon (Point 2 r))
 forall a. a -&gt; Gen a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
@@ -1302,7 +1302,7 @@ forall g (m :: * -&gt; *) r.
 (MonadState g m, RandomGen g, Uniform r, Ord r, Num r) =&gt;
 Int -&gt; Vector 2 r -&gt; m (MonotonePolygon (Point 2 r))
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.6.4/hgeometry-1.0.0.0/doc/html/hgeometry/src/HGeometry.Polygon.Monotone.html#randomMonotoneDirected"><span class="hs-identifier hs-var">randomMonotoneDirected</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679125742"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
-</span><a href="#local-6989586621679125747"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">StdGen
-</span><a href="#local-6989586621679125748"><span class="hs-identifier hs-var">g'</span></a></span><span>
+</span><a href="#local-6989586621679125550"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679125555"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">StdGen
+</span><a href="#local-6989586621679125556"><span class="hs-identifier hs-var">g'</span></a></span><span>
 </span><span id="line-198"></span></pre></body></html>
