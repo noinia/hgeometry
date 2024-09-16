@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
 --------------------------------------------------------------------------------
@@ -53,15 +52,16 @@ module Ipe.Types(
 
 
 import           Control.Lens hiding (views)
-import           Ipe.Attributes hiding (Matrix)
-import           Ipe.Content
-import           Ipe.Layer
-import           Ipe.Literal
 import qualified Data.List.NonEmpty as NE
 import           Data.Maybe (mapMaybe)
 import           Data.Semigroup (Endo)
 import qualified Data.Set as Set
 import           Data.Text (Text)
+import           GHC.Generics (Generic)
+import           Ipe.Attributes hiding (Matrix)
+import           Ipe.Content
+import           Ipe.Layer
+import           Ipe.Literal
 import           Text.XML.Expat.Tree (Node)
 
 
@@ -73,8 +73,17 @@ import           Text.XML.Expat.Tree (Node)
 data View = View { _layerNames      :: [LayerName]
                  , _activeLayer     :: LayerName
                  }
-          deriving (Eq, Ord, Show)
-makeLenses ''View
+          deriving (Eq, Ord, Show, Generic)
+
+-- | Lens to access the layers in this view
+layerNames :: Lens' View [LayerName]
+layerNames f (View ns a) = fmap (\ns' -> View ns' a) (f ns)
+{-# INLINE layerNames #-}
+
+-- | Lens to access the active layer
+activeLayer               :: Lens' View LayerName
+activeLayer f (View ns a) = fmap (\a' -> View ns a') (f a)
+{-# INLINE activeLayer #-}
 
 -- instance Default
 
@@ -83,8 +92,17 @@ makeLenses ''View
 data IpeStyle = IpeStyle { _styleName :: Maybe Text
                          , _styleData :: Node Text Text
                          }
-              deriving (Eq,Show)
-makeLenses ''IpeStyle
+              deriving (Eq,Show,Generic)
+
+-- | Lens to access the style name
+styleName :: Lens' IpeStyle (Maybe Text)
+styleName f (IpeStyle n sd) = fmap (\n' -> IpeStyle n' sd) (f n)
+{-# INLINE styleName #-}
+
+-- | Lens to access the style data
+styleData :: Lens' IpeStyle (Node Text Text)
+styleData f (IpeStyle n sd) = fmap (\sd' -> IpeStyle n sd') (f sd)
+{-# INLINE styleData #-}
 
 -- | The "basic" ipe stylesheet
 basicIpeStyle :: IpeStyle
@@ -99,12 +117,20 @@ opacitiesStyle = IpeStyle (Just "opacities") (xmlLiteral [litFile|data/ipe/opaci
 data IpePreamble  = IpePreamble { _encoding     :: Maybe Text
                                 , _preambleData :: Text
                                 }
-                  deriving (Eq,Read,Show,Ord)
-makeLenses ''IpePreamble
+                  deriving (Eq,Read,Show,Ord,Generic)
 
+-- | Lens to access the encoding
+encoding :: Lens' IpePreamble (Maybe Text)
+encoding f (IpePreamble e pd) = fmap (\e' -> IpePreamble e' pd) (f e)
+{-# INLINE encoding #-}
+
+-- | Lens to access the preambleData
+preambleData :: Lens' IpePreamble Text
+preambleData f (IpePreamble e pd) = fmap (\pd' -> IpePreamble e pd') (f pd)
+{-# INLINE preambleData #-}
+
+-- | Ipe Bitmap data
 type IpeBitmap = Text
-
-
 
 --------------------------------------------------------------------------------
 -- Ipe Pages
@@ -115,8 +141,22 @@ data IpePage r = IpePage { _layers  :: [LayerName]
                          , _views   :: [View]
                          , _content :: [IpeObject r]
                          }
-              deriving (Eq,Show)
-makeLenses ''IpePage
+              deriving (Eq,Show,Generic)
+
+-- | Lens to access the layers of an ipe page
+layers :: Lens' (IpePage r) [LayerName]
+layers f (IpePage lrs vs cnts) = fmap (\lrs' -> IpePage lrs' vs cnts) (f lrs)
+{-# INLINE layers #-}
+
+-- | Lens to access the views of an ipe page
+views :: Lens' (IpePage r) [View]
+views f (IpePage lrs vs cnts) = fmap (\vs' -> IpePage lrs vs' cnts) (f vs)
+{-# INLINE views #-}
+
+-- | Lens to access the content of an ipe page
+content :: Lens (IpePage r) (IpePage r') [IpeObject r] [IpeObject r']
+content f (IpePage lrs vs cnts) = fmap (\cnts' -> IpePage lrs vs cnts') (f cnts)
+{-# INLINE content #-}
 
 -- | Creates an empty page with one layer and view.
 emptyPage :: IpePage r
@@ -177,9 +217,22 @@ data IpeFile r = IpeFile { _preamble :: Maybe IpePreamble
                          , _styles   :: [IpeStyle]
                          , _pages    :: NE.NonEmpty (IpePage r)
                          }
-               deriving (Eq,Show)
-makeLenses ''IpeFile
+               deriving (Eq,Show,Generic)
 
+-- | Lens to access the preamble of an ipe file
+preamble :: Lens' (IpeFile r) (Maybe IpePreamble)
+preamble f (IpeFile p ss pgs) = fmap (\p' -> IpeFile p' ss pgs) (f p)
+{-# INLINE preamble #-}
+
+-- | Lens to access the styles of an ipe file
+styles :: Lens' (IpeFile r) [IpeStyle]
+styles f (IpeFile p ss pgs) = fmap (\ss' -> IpeFile p ss' pgs) (f ss)
+{-# INLINE styles #-}
+
+-- | Lens to access the pages of an ipe file
+pages :: Lens (IpeFile r) (IpeFile r') (NE.NonEmpty (IpePage r)) (NE.NonEmpty (IpePage r'))
+pages f (IpeFile p ss pgs) = fmap (\pgs' -> IpeFile p ss pgs') (f pgs)
+{-# INLINE pages #-}
 
 -- | Convenience constructor for creating an ipe file without preamble
 -- and with the default stylesheet.

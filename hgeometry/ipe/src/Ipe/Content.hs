@@ -33,6 +33,7 @@ import           Data.Text (Text)
 import           Data.Traversable
 import           Data.Vinyl hiding (Label)
 import           Data.Vinyl.TypeLevel (AllConstrained)
+import           GHC.Generics (Generic)
 import           HGeometry.Box (Rectangle)
 import           HGeometry.Ext
 import           HGeometry.Matrix
@@ -45,13 +46,24 @@ import           Ipe.Color
 import           Ipe.Layer
 import           Ipe.Path
 
+
 --------------------------------------------------------------------------------
 -- | Image Objects
 
+-- | bitmap image objects in Ipe
 data Image r = Image { _imageData :: ()
                      , _rect      :: Rectangle (Point 2 r)
-                     } deriving (Show,Eq,Ord)
-makeLenses ''Image
+                     } deriving (Show,Eq,Ord,Generic)
+
+-- | Lens to access the image data
+imageData :: Lens' (Image r) ()
+imageData f (Image i r) = fmap (\i' -> Image i' r) (f i)
+{-# INLINE imageData #-}
+
+-- | Lens to access the rectangle of the image
+rect :: Lens (Image r) (Image r') (Rectangle (Point 2 r)) (Rectangle (Point 2 r'))
+rect f (Image i r) = fmap (\r' -> Image i r') (f r)
+{-# INLINE rect #-}
 
 type instance NumType   (Image r) = r
 type instance Dimension (Image r) = 2
@@ -71,7 +83,7 @@ instance Traversable Image where
 
 -- | A text label
 data TextLabel r = Label Text (Point 2 r)
-                 deriving (Show,Eq,Ord)
+                 deriving (Show,Eq,Ord,Generic)
 
 type instance NumType   (TextLabel r) = r
 type instance Dimension (TextLabel r) = 2
@@ -88,7 +100,7 @@ instance Fractional r => IsTransformable (TextLabel r) where
 
 -- | A Minipage
 data MiniPage r = MiniPage Text (Point 2 r) r
-                 deriving (Show,Eq,Ord)
+                 deriving (Show,Eq,Ord,Generic)
 
 type instance NumType   (MiniPage r) = r
 type instance Dimension (MiniPage r) = 2
@@ -112,8 +124,18 @@ width (MiniPage _ _ w) = w
 data IpeSymbol r = Symbol { _symbolPoint :: Point 2 r
                           , _symbolName  :: Text
                           }
-                 deriving (Show,Eq,Ord)
-makeLenses ''IpeSymbol
+                 deriving (Show,Eq,Ord,Generic)
+
+-- | Lens to access the position of the symbol
+symbolPoint :: Lens (IpeSymbol r) (IpeSymbol r') (Point 2 r) (Point 2 r')
+symbolPoint f (Symbol p n) = fmap (\p' -> Symbol p' n) (f p)
+{-# INLINE symbolPoint #-}
+
+-- | Lens to access the name of the symbol
+symbolName :: Lens' (IpeSymbol r) Text
+symbolName f (Symbol p n) = fmap (\n' -> Symbol p n') (f n)
+{-# INLINE symbolName #-}
+
 
 type instance NumType   (IpeSymbol r) = r
 type instance Dimension (IpeSymbol r) = 2
@@ -241,7 +263,8 @@ instance TraverseIpeAttr Clip     where traverseIpeAttr f = traverseAttr (traver
 
 
 -- | A group is essentially a list of IpeObjects.
-newtype Group r = Group [IpeObject r] deriving (Show,Eq,Functor,Foldable,Traversable)
+newtype Group r = Group [IpeObject r]
+  deriving (Show,Eq,Functor,Foldable,Traversable,Generic)
 
 type instance NumType   (Group r) = r
 type instance Dimension (Group r) = 2
@@ -304,7 +327,7 @@ data IpeObject r =
   | IpeMiniPage  (IpeObject' MiniPage  r)
   | IpeUse       (IpeObject' IpeSymbol r)
   | IpePath      (IpeObject' Path      r)
-
+  deriving (Generic)
 
 traverseIpeObject'              :: forall g r f s. ( Applicative f
                                                    , Traversable g
