@@ -37,6 +37,7 @@ module Ipe.Path(
 import           Control.Lens hiding (rmap, elements)
 import qualified Data.Sequence as Seq
 import           Data.Traversable
+import           GHC.Generics (Generic)
 import           HGeometry.BezierSpline
 import           HGeometry.Ellipse (Ellipse)
 import           HGeometry.Matrix
@@ -100,17 +101,18 @@ instance Fractional r => IsTransformable (PathSegment r) where
 
 -- | A path is a non-empty sequence of PathSegments.
 newtype Path r = Path { _pathSegments :: Seq.Seq (PathSegment r) }
-                 deriving (Show,Eq,Functor,Foldable,Traversable)
+                 deriving (Show,Eq,Functor,Foldable,Traversable,Generic)
                  deriving newtype (Semigroup)
 
-makeLenses ''Path
+-- | Lens/Iso to access the sequcne of segments of the path
+pathSegments :: Iso (Path r) (Path r') (Seq.Seq (PathSegment r)) (Seq.Seq (PathSegment r'))
+pathSegments = coerced
 
 type instance NumType   (Path r) = r
 type instance Dimension (Path r) = 2
 
 instance Fractional r => IsTransformable (Path r) where
   transformBy t (Path s) = Path $ fmap (transformBy t) s
-
 
 --------------------------------------------------------------------------------
 
