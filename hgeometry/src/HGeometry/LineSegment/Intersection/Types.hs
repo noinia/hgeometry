@@ -1,5 +1,4 @@
 {-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.LineSegment.Intersection.Types
@@ -58,9 +57,13 @@ import           HGeometry.Point
 
 
 -- | Assumes that two segments have the same start point
-newtype AroundStart a = AroundStart a deriving (Show,Read,NFData,Functor)
+newtype AroundStart a = AroundStart a
+  deriving (Show,Read,NFData,Functor,Generic)
 
-makeWrapped ''AroundStart
+instance Wrapped (AroundStart a) where
+  type Unwrapped (AroundStart a) = a
+
+instance (AroundStart a ~ t) => Rewrapped (AroundStart a) t
 
 instance ( Point_ point 2 r, Eq r
          , HasEnd lineSegment point) => Eq (AroundStart lineSegment) where
@@ -77,9 +80,12 @@ instance ( LineSegment_ lineSegment point
 ----------------------------------------
 
 -- | Assumes that two segments have the same end point
-newtype AroundEnd a = AroundEnd a deriving (Show,Read,NFData,Functor)
+newtype AroundEnd a = AroundEnd a deriving (Show,Read,NFData,Functor,Generic)
 
-makeWrapped ''AroundEnd
+instance Wrapped (AroundEnd a) where
+  type Unwrapped (AroundEnd a) = a
+
+instance (AroundEnd a ~ t) => Rewrapped (AroundEnd a) t
 
 instance (Point_ point 2 r, Eq r, HasStart lineSegment point) => Eq (AroundEnd lineSegment) where
   -- | equality on endpoint
@@ -96,9 +102,13 @@ instance ( LineSegment_ lineSegment point
 --------------------------------------------------------------------------------
 
 -- | Assumes that two segments intersect in a single point.
-newtype AroundIntersection a = AroundIntersection a deriving (Eq,Show,Read,NFData,Functor)
+newtype AroundIntersection a = AroundIntersection a
+  deriving (Eq,Show,Read,NFData,Functor,Generic)
 
-makeWrapped ''AroundIntersection
+instance Wrapped (AroundIntersection a) where
+    type Unwrapped (AroundIntersection a) = a
+
+instance (AroundIntersection a ~ t) => Rewrapped (AroundIntersection a) t
 
 instance ( LineSegment_ lineSegment point
          , Point_ point 2 r
@@ -168,7 +178,20 @@ type OrdArounds lineSegment = ( Ord (AroundStart lineSegment)
                               , Ord (AroundEnd lineSegment)
                               )
 
-makeLenses ''Associated
+-- | Lens to access the segments for which this is a startPoint
+startPointOf :: Lens' (Associated lineSegment) (Set.Set (AroundStart lineSegment))
+startPointOf f (Associated ss es is) = fmap (\ss' -> Associated ss' es is) (f ss)
+{-# INLINE startPointOf #-}
+
+-- | Lens to access the segments for which this is an endPoint
+endPointOf :: Lens' (Associated lineSegment) (Set.Set (AroundEnd lineSegment))
+endPointOf f (Associated ss es is) = fmap (\es' -> Associated ss es' is) (f es)
+{-# INLINE endPointOf #-}
+
+-- | Lens to access the segments for which this point lies in the interior of the segment
+interiorTo :: Lens' (Associated lineSegment) (Set.Set (AroundIntersection lineSegment))
+interiorTo f (Associated ss es is) = fmap (\is' -> Associated ss es is') (f is)
+{-# INLINE interiorTo #-}
 
 
 -- | Fold over the segments associated with the intersection.
@@ -247,7 +270,21 @@ data IntersectionPoint point lineSegment =
   IntersectionPoint { _intersectionPoint :: !point
                     , _associatedSegs    :: !(Associated lineSegment)
                     } deriving stock (Show,Generic)
-makeLenses ''IntersectionPoint
+
+-- | Lens to access the intersectionp oint
+intersectionPoint :: Lens (IntersectionPoint point lineSegment)
+                          (IntersectionPoint point' lineSegment)
+                          point point'
+intersectionPoint f (IntersectionPoint p ss) = fmap (\p' -> IntersectionPoint p' ss) (f p)
+{-# INLINE intersectionPoint #-}
+
+-- | Lens to access the associated segments
+associatedSegs :: Lens (IntersectionPoint point lineSegment)
+                       (IntersectionPoint point lineSegment')
+                       (Associated lineSegment) (Associated lineSegment')
+associatedSegs f (IntersectionPoint p ss) = fmap (\ss' -> IntersectionPoint p ss') (f ss)
+{-# INLINE associatedSegs #-}
+
 
 deriving stock instance ( Eq (AroundStart lineSegment)
                         , Eq (AroundIntersection lineSegment)

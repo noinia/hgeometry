@@ -1,4 +1,3 @@
-{-# Language TemplateHaskell #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.VerticalRayShooting.PersistentSweep
@@ -21,6 +20,7 @@ module HGeometry.VerticalRayShooting.PersistentSweep
 
 import           Control.Lens hiding (contains, below)
 import           Data.Foldable (toList)
+import           Data.Functor.Contravariant (phantom)
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
@@ -50,10 +50,24 @@ data VerticalRayShootingStructure' r lineSegment =
                                    -- status structure is 's', i.e up to 'r'
                                  } deriving (Show,Eq)
 
+-- TODO this is very similar to the 'Alternating' sequence structure; so see if we can reuse code
+
+
 -- | The status structure
 type StatusStructure lineSegment = SS.Set lineSegment
 
-makeLensesWith (lensRules&generateUpdateableOptics .~ False) ''VerticalRayShootingStructure'
+-- | Getter to access the leftmost coordinate.
+leftMost :: Getter (VerticalRayShootingStructure' r lineSegment) r
+leftMost f (VerticalRayShootingStructure x _) = phantom (f x)
+{-# INLINE leftMost #-}
+
+-- | Getter to access the sweep structure
+sweepStruct :: Getter (VerticalRayShootingStructure' r lineSegment)
+                      (V.Vector (r :+ StatusStructure lineSegment))
+sweepStruct f (VerticalRayShootingStructure _ ss) = phantom (f ss)
+{-# INLINE sweepStruct #-}
+
+-- more or less copied the above two implementations from the TH generated ones
 
 --------------------------------------------------------------------------------
 -- * Building the DS
