@@ -38,7 +38,7 @@ instance Arbitrary r => Arbitrary (PlaneGraph QuickCheckWorld (Point 2 r) () ())
 -- 4) randomly include additional (bounded) edges
 -- 5) construct the plane graph from the connected set of line segments/edgse
 
-arbitraryPlaneGraph       :: proxy s -> Arbitrary (PlaneGraph s (Point 2 r) () ())
+arbitraryPlaneGraph       :: proxy s -> Gen (PlaneGraph s (Point 2 r) () ())
 arbitraryPlaneGraph proxy = do
     pts <- arbitrary
     case voronoiDiagram pts of
