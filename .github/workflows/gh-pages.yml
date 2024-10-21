@@ -13,12 +13,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - compiler: ghc-9.6.4
+          - compiler: ghc-9.10.1
             compilerKind: ghc
-            compilerVersion: 9.6.4
+            compilerVersion: 9.10.1
             setup-method: ghcup
             allow-failure: false
-            cabalVersion: 3.10.2.1
+            cabalVersion: 3.12.1.0
       fail-fast: false
     steps:
       - name: Set environment variables
