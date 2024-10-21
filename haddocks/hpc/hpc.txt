@@ -6,10 +6,11 @@
 --   
 --   This package provides the code coverage library for Haskell.
 --   
---   See <a>http://www.haskell.org/haskellwiki/Haskell_program_coverage</a>
+--   See
+--   <a>https://www.haskell.org/haskellwiki/Haskell_program_coverage</a>
 --   for more information.
 @package hpc
-@version 0.6.2.0
+@version 0.7.0.1
 
 
 -- | Minor utilities for the HPC tools.
@@ -43,23 +44,23 @@ readFileUtf8 :: FilePath -> IO String
 -- | Write file in UTF-8 encoding. Parent directory will be created if
 --   missing.
 writeFileUtf8 :: FilePath -> String -> IO ()
-instance GHC.Classes.Ord Trace.Hpc.Util.HpcPos
-instance GHC.Classes.Eq Trace.Hpc.Util.HpcPos
 instance GHC.Classes.Eq Trace.Hpc.Util.Hash
-instance GHC.Generics.Generic Trace.Hpc.Util.Hash
+instance GHC.Classes.Eq Trace.Hpc.Util.HpcPos
+instance GHC.Internal.Generics.Generic Trace.Hpc.Util.Hash
+instance Trace.Hpc.Util.HpcHash GHC.Types.Bool
+instance Trace.Hpc.Util.HpcHash GHC.Types.Char
+instance Trace.Hpc.Util.HpcHash Trace.Hpc.Util.HpcPos
 instance Trace.Hpc.Util.HpcHash GHC.Types.Int
 instance Trace.Hpc.Util.HpcHash GHC.Num.Integer.Integer
-instance Trace.Hpc.Util.HpcHash GHC.Types.Char
-instance Trace.Hpc.Util.HpcHash GHC.Types.Bool
 instance Trace.Hpc.Util.HpcHash a => Trace.Hpc.Util.HpcHash [a]
 instance (Trace.Hpc.Util.HpcHash a, Trace.Hpc.Util.HpcHash b) => Trace.Hpc.Util.HpcHash (a, b)
-instance Trace.Hpc.Util.HpcHash Trace.Hpc.Util.HpcPos
 instance Control.DeepSeq.NFData Trace.Hpc.Util.Hash
-instance GHC.Read.Read Trace.Hpc.Util.Hash
-instance GHC.Show.Show Trace.Hpc.Util.Hash
-instance GHC.Num.Num Trace.Hpc.Util.Hash
-instance GHC.Show.Show Trace.Hpc.Util.HpcPos
-instance GHC.Read.Read Trace.Hpc.Util.HpcPos
+instance GHC.Internal.Num.Num Trace.Hpc.Util.Hash
+instance GHC.Classes.Ord Trace.Hpc.Util.HpcPos
+instance GHC.Internal.Read.Read Trace.Hpc.Util.Hash
+instance GHC.Internal.Read.Read Trace.Hpc.Util.HpcPos
+instance GHC.Internal.Show.Show Trace.Hpc.Util.Hash
+instance GHC.Internal.Show.Show Trace.Hpc.Util.HpcPos
 
 
 -- | Datatypes and file-access routines for the tick data file
@@ -77,24 +78,30 @@ tixModuleHash :: TixModule -> Hash
 tixModuleTixs :: TixModule -> [Integer]
 
 -- | Read a <tt>.tix</tt> File.
-readTix :: String -> IO (Maybe Tix)
+readTix :: FilePath -> IO (Maybe Tix)
 
 -- | Write a <tt>.tix</tt> File.
-writeTix :: String -> Tix -> IO ()
+writeTix :: FilePath -> Tix -> IO ()
 
 -- | <tt>getTixFullName</tt> takes a binary or <tt>.tix</tt>-file name, and
 --   normalizes it into a <tt>.tix</tt>-file name.
-getTixFileName :: String -> String
-instance GHC.Classes.Eq Trace.Hpc.Tix.TixModule
-instance GHC.Show.Show Trace.Hpc.Tix.TixModule
-instance GHC.Read.Read Trace.Hpc.Tix.TixModule
+--   
+--   <pre>
+--   getTixFileName "example.hs" == "example.tix"
+--   getTixFileName "example.tar.gz" == "example.tar.tix"
+--   getTixFileName "example.tix" == "example.tix"
+--   </pre>
+getTixFileName :: FilePath -> FilePath
 instance GHC.Classes.Eq Trace.Hpc.Tix.Tix
-instance GHC.Show.Show Trace.Hpc.Tix.Tix
-instance GHC.Read.Read Trace.Hpc.Tix.Tix
-instance GHC.Generics.Generic Trace.Hpc.Tix.Tix
-instance GHC.Generics.Generic Trace.Hpc.Tix.TixModule
+instance GHC.Classes.Eq Trace.Hpc.Tix.TixModule
+instance GHC.Internal.Generics.Generic Trace.Hpc.Tix.Tix
+instance GHC.Internal.Generics.Generic Trace.Hpc.Tix.TixModule
 instance Control.DeepSeq.NFData Trace.Hpc.Tix.Tix
 instance Control.DeepSeq.NFData Trace.Hpc.Tix.TixModule
+instance GHC.Internal.Read.Read Trace.Hpc.Tix.Tix
+instance GHC.Internal.Read.Read Trace.Hpc.Tix.TixModule
+instance GHC.Internal.Show.Show Trace.Hpc.Tix.Tix
+instance GHC.Internal.Show.Show Trace.Hpc.Tix.TixModule
 
 module Trace.Hpc.Reflect
 clearTix :: IO ()
@@ -130,23 +137,30 @@ GuardBinBox :: CondBox
 CondBinBox :: CondBox
 QualBinBox :: CondBox
 
--- | Create is mix file.
-mixCreate :: String -> String -> Mix -> IO ()
+-- | Write a mix file to disk.
+--   
+--   The following command creates the mix file under the location
+--   "/home/user/main/Main.mix"
+--   
+--   <pre>
+--   mixCreate "/home/user/main" "Main" mix
+--   </pre>
+mixCreate :: FilePath -> String -> Mix -> IO ()
 
 -- | Read a mix file.
-readMix :: [String] -> Either String TixModule -> IO Mix
+readMix :: [FilePath] -> Either String TixModule -> IO Mix
 createMixEntryDom :: Show a => [(HpcPos, a)] -> [MixEntryDom [a]]
 type MixEntryDom a = Tree (HpcPos, a)
-instance GHC.Classes.Ord Trace.Hpc.Mix.CondBox
-instance GHC.Classes.Eq Trace.Hpc.Mix.CondBox
-instance GHC.Show.Show Trace.Hpc.Mix.CondBox
-instance GHC.Read.Read Trace.Hpc.Mix.CondBox
-instance GHC.Classes.Ord Trace.Hpc.Mix.BoxLabel
 instance GHC.Classes.Eq Trace.Hpc.Mix.BoxLabel
-instance GHC.Show.Show Trace.Hpc.Mix.BoxLabel
-instance GHC.Read.Read Trace.Hpc.Mix.BoxLabel
+instance GHC.Classes.Eq Trace.Hpc.Mix.CondBox
 instance GHC.Classes.Eq Trace.Hpc.Mix.Mix
-instance GHC.Read.Read Trace.Hpc.Mix.Mix
-instance GHC.Show.Show Trace.Hpc.Mix.Mix
 instance Trace.Hpc.Util.HpcHash Trace.Hpc.Mix.BoxLabel
 instance Trace.Hpc.Util.HpcHash Trace.Hpc.Mix.CondBox
+instance GHC.Classes.Ord Trace.Hpc.Mix.BoxLabel
+instance GHC.Classes.Ord Trace.Hpc.Mix.CondBox
+instance GHC.Internal.Read.Read Trace.Hpc.Mix.BoxLabel
+instance GHC.Internal.Read.Read Trace.Hpc.Mix.CondBox
+instance GHC.Internal.Read.Read Trace.Hpc.Mix.Mix
+instance GHC.Internal.Show.Show Trace.Hpc.Mix.BoxLabel
+instance GHC.Internal.Show.Show Trace.Hpc.Mix.CondBox
+instance GHC.Internal.Show.Show Trace.Hpc.Mix.Mix

@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE Safe #-}</span><span>
 </span><span id="line-2"></span><span>
-</span><span id="line-3"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
-</span><span id="line-4"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">--</span><span>
 </span><span id="line-5"></span><span class="hs-comment">-- Module      :  System.Mem.StableName</span><span>
 </span><span id="line-6"></span><span class="hs-comment">-- Copyright   :  (c) The University of Glasgow 2001</span><span>
 </span><span id="line-7"></span><span class="hs-comment">-- License     :  BSD-style (see the file libraries/base/LICENSE)</span><span>
@@ -22,15 +22,20 @@
 </span><span id="line-22"></span><span class="hs-comment">-- collector, meaning a re-hash would be necessary after every garbage</span><span>
 </span><span id="line-23"></span><span class="hs-comment">-- collection.</span><span>
 </span><span id="line-24"></span><span class="hs-comment">--</span><span>
-</span><span id="line-25"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
-</span><span id="line-26"></span><span>
-</span><span id="line-27"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">System.Mem.StableName</span><span> </span><span class="hs-special">(</span><span>
-</span><span id="line-28"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Stable Names</span></span><span>
-</span><span id="line-29"></span><span>  </span><span class="annot"><a href="GHC.StableName.html#StableName"><span class="hs-identifier">StableName</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-30"></span><span>  </span><span class="annot"><a href="GHC.StableName.html#makeStableName"><span class="hs-identifier">makeStableName</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-31"></span><span>  </span><span class="annot"><a href="GHC.StableName.html#hashStableName"><span class="hs-identifier">hashStableName</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-32"></span><span>  </span><span class="annot"><a href="GHC.StableName.html#eqStableName"><span class="hs-identifier">eqStableName</span></a></span><span>
-</span><span id="line-33"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-34"></span><span>
-</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.StableName.html"><span class="hs-identifier">GHC.StableName</span></a></span><span>
-</span><span id="line-36"></span></pre></body></html>
+</span><span id="line-25"></span><span class="hs-comment">-- See [Stretching the storage manager: weak pointers and stable names in</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- Haskell](https://www.microsoft.com/en-us/research/publication/stretching-the-storage-manager-weak-pointers-and-stable-names-in-haskell/)</span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- by Simon Peyton Jones, Simon Marlow and Conal Elliott for detailed discussion</span><span>
+</span><span id="line-28"></span><span class="hs-comment">-- of stable names. An implementation of a memo table with stable names</span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- can be found in [@stable-memo@](https://hackage.haskell.org/package/stable-memo)</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- package.</span><span>
+</span><span id="line-31"></span><span class="hs-comment">--</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="System.Mem.StableName.html"><span class="hs-identifier">System.Mem.StableName</span></a></span><span>
+</span><span id="line-34"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="hs-comment">-- *  Stable Names</span></span><span>
+</span><span id="line-35"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.StableName.html/GHC.Internal.StableName.html#StableName"><span class="hs-identifier">StableName</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-36"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.StableName.html/GHC.Internal.StableName.html#makeStableName"><span class="hs-identifier">makeStableName</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-37"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.StableName.html/GHC.Internal.StableName.html#hashStableName"><span class="hs-identifier">hashStableName</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-38"></span><span>     </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.StableName.html/GHC.Internal.StableName.html#eqStableName"><span class="hs-identifier">eqStableName</span></a></span><span>
+</span><span id="line-39"></span><span>     </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.System.Mem.StableName.html/GHC.Internal.System.Mem.StableName.html"><span class="hs-identifier">GHC.Internal.System.Mem.StableName</span></a></span></pre></body></html>

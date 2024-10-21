@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP, Trustworthy #-}</span><span>
 </span><span id="line-2"></span><span>
 </span><span id="line-3"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
 </span><span id="line-4"></span><span class="hs-comment">-- |</span><span>
@@ -16,12 +16,12 @@
 </span><span id="line-16"></span><span class="hs-comment">--</span><span>
 </span><span id="line-17"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
 </span><span id="line-18"></span><span>
-</span><span id="line-19"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.Array.MArray</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Data.Array.MArray.html"><span class="hs-identifier">Data.Array.MArray</span></a></span><span> </span><span class="hs-special">(</span><span>
 </span><span id="line-20"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Class of mutable array types</span></span><span>
 </span><span id="line-21"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#MArray"><span class="hs-identifier">MArray</span></a></span><span class="hs-special">,</span><span>       </span><span class="hs-comment">-- :: (* -&gt; * -&gt; *) -&gt; * -&gt; (* -&gt; *) -&gt; class</span><span>
 </span><span id="line-22"></span><span>
 </span><span id="line-23"></span><span>    </span><span class="annot"><span class="hs-comment">-- * The @Ix@ class and operations</span></span><span>
-</span><span id="line-24"></span><span>    </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/Data.Ix.html#/Data.Ix.html"><span class="hs-identifier">Data.Ix</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-24"></span><span>    </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Ix.html/Data.Ix.html"><span class="hs-identifier">Data.Ix</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-25"></span><span>
 </span><span id="line-26"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Constructing mutable arrays</span></span><span>
 </span><span id="line-27"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#newArray"><span class="hs-identifier">newArray</span></a></span><span class="hs-special">,</span><span>     </span><span class="hs-comment">-- :: (MArray a e m, Ix i) =&gt; (i,i) -&gt; e -&gt; m (a i e)</span><span>
@@ -49,7 +49,7 @@
 </span><span id="line-49"></span><span>    </span><span class="annot"><a href="Data.Array.Base.html#thaw"><span class="hs-identifier">thaw</span></a></span><span class="hs-special">,</span><span>         </span><span class="hs-comment">-- :: (Ix i, IArray a e, MArray b e m) =&gt; a i e -&gt; m (b i e)</span><span>
 </span><span id="line-50"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-51"></span><span>
-</span><span id="line-52"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/Data.Ix.html#/Data.Ix.html"><span class="hs-identifier">Data.Ix</span></a></span><span>
+</span><span id="line-52"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.Ix.html/Data.Ix.html"><span class="hs-identifier">Data.Ix</span></a></span><span>
 </span><span id="line-53"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Array.Base.html"><span class="hs-identifier">Data.Array.Base</span></a></span><span class="hs-cpp">
 #ifdef __HADDOCK__
 </span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data.Array.IArray</span><span class="hs-cpp">

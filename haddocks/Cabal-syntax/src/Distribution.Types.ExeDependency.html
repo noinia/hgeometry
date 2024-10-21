@@ -1,30 +1,31 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679424753"><span id="local-6989586621679424754"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
-</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric      #-}</span><span>
-</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Distribution.Types.ExeDependency</span><span>
-</span><span id="line-4"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier">ExeDependency</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-5"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Types.ExeDependency.html#qualifiedExeName"><span class="hs-identifier">qualifiedExeName</span></a></span><span>
-</span><span id="line-6"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-7"></span><span>
-</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/Prelude.html#/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-10"></span><span>
-</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Parsec.html"><span class="hs-identifier">Distribution.Parsec</span></a></span><span>
-</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Pretty.html"><span class="hs-identifier">Distribution.Pretty</span></a></span><span>
-</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.ComponentName.html"><span class="hs-identifier">Distribution.Types.ComponentName</span></a></span><span>
-</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html"><span class="hs-identifier">Distribution.Types.PackageName</span></a></span><span>
-</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html"><span class="hs-identifier">Distribution.Types.UnqualComponentName</span></a></span><span>
-</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Version.html"><span class="hs-identifier">Distribution.Version</span></a></span><span>                   </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.VersionRange.Internal.html#VersionRange"><span class="hs-identifier">VersionRange</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Types.VersionRange.Internal.html#anyVersion"><span class="hs-identifier">anyVersion</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Types.VersionRange.html#isAnyVersion"><span class="hs-identifier">isAnyVersion</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-17"></span><span>
-</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Distribution.Compat.CharParsing.html"><span class="hs-identifier">Distribution.Compat.CharParsing</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">P</span></span><span>
-</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6/src/Text.PrettyPrint.html#/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">PP</span></span><span>
-</span><span id="line-20"></span><span>
-</span><span id="line-21"></span><span class="hs-comment">-- | Describes a dependency on an executable from a package</span><span>
-</span><span id="line-22"></span><span class="hs-comment">--</span><span>
-</span><span id="line-23"></span><span class="hs-keyword">data</span><span> </span><span id="ExeDependency"><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-var">ExeDependency</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ExeDependency"><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-var">ExeDependency</span></a></span></span><span>
-</span><span id="line-24"></span><span>                     </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span>
-</span><span id="line-25"></span><span>                     </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span><span> </span><span class="hs-comment">-- name of executable component of package</span><span>
-</span><span id="line-26"></span><span>                     </span><span class="annot"><a href="Distribution.Types.VersionRange.Internal.html#VersionRange"><span class="hs-identifier hs-type">VersionRange</span></a></span><span>
-</span><span id="line-27"></span><span>                     </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679424760"><span id="local-6989586621679424762"><span class="annot"><span class="annottext">(forall x. ExeDependency -&gt; Rep ExeDependency x)
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679499515"><span id="local-6989586621679499516"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Types.ExeDependency.html"><span class="hs-identifier">Distribution.Types.ExeDependency</span></a></span><span>
+</span><span id="line-5"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier">ExeDependency</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Types.ExeDependency.html#qualifiedExeName"><span class="hs-identifier">qualifiedExeName</span></a></span><span>
+</span><span id="line-7"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Parsec.html"><span class="hs-identifier">Distribution.Parsec</span></a></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Pretty.html"><span class="hs-identifier">Distribution.Pretty</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.ComponentName.html"><span class="hs-identifier">Distribution.Types.ComponentName</span></a></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html"><span class="hs-identifier">Distribution.Types.PackageName</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html"><span class="hs-identifier">Distribution.Types.UnqualComponentName</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Version.html"><span class="hs-identifier">Distribution.Version</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.VersionRange.Internal.html#VersionRange"><span class="hs-identifier">VersionRange</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Types.VersionRange.Internal.html#anyVersion"><span class="hs-identifier">anyVersion</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Types.VersionRange.html#isAnyVersion"><span class="hs-identifier">isAnyVersion</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Distribution.Compat.CharParsing.html"><span class="hs-identifier">Distribution.Compat.CharParsing</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">P</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.html/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">PP</span></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="annot"><span class="hs-comment">-- | Describes a dependency on an executable from a package</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">data</span><span> </span><span id="ExeDependency"><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-var">ExeDependency</span></a></span></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="ExeDependency"><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-var">ExeDependency</span></a></span></span><span>
+</span><span id="line-25"></span><span>      </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span>
+</span><span id="line-26"></span><span>      </span><span class="annot"><a href="Distribution.Types.UnqualComponentName.html#UnqualComponentName"><span class="hs-identifier hs-type">UnqualComponentName</span></a></span><span> </span><span class="hs-comment">-- name of executable component of package</span><span>
+</span><span id="line-27"></span><span>      </span><span class="annot"><a href="Distribution.Types.VersionRange.Internal.html#VersionRange"><span class="hs-identifier hs-type">VersionRange</span></a></span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679499522"><span id="local-6989586621679499524"><span class="annot"><span class="annottext">(forall x. ExeDependency -&gt; Rep ExeDependency x)
 -&gt; (forall x. Rep ExeDependency x -&gt; ExeDependency)
 -&gt; Generic ExeDependency
 forall x. Rep ExeDependency x -&gt; ExeDependency
@@ -35,7 +36,7 @@ $cfrom :: forall x. ExeDependency -&gt; Rep ExeDependency x
 from :: forall x. ExeDependency -&gt; Rep ExeDependency x
 $cto :: forall x. Rep ExeDependency x -&gt; ExeDependency
 to :: forall x. Rep ExeDependency x -&gt; ExeDependency
-</span><a href="../../base-4.18.2.0/src/GHC.Generics.html#Generic/GHC.Generics.html#Generic"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></a></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679424766"><span id="local-6989586621679424770"><span id="local-6989586621679424773"><span id="local-6989586621679424787"><span class="annot"><span class="annottext">ReadPrec [ExeDependency]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679499530"><span id="local-6989586621679499534"><span id="local-6989586621679499537"><span id="local-6989586621679499551"><span class="annot"><span class="annottext">ReadPrec [ExeDependency]
 ReadPrec ExeDependency
 Int -&gt; ReadS ExeDependency
 ReadS [ExeDependency]
@@ -55,7 +56,7 @@ $creadPrec :: ReadPrec ExeDependency
 readPrec :: ReadPrec ExeDependency
 $creadListPrec :: ReadPrec [ExeDependency]
 readListPrec :: ReadPrec [ExeDependency]
-</span><a href="../../base-4.18.2.0/src/GHC.Read.html#Read/GHC.Read.html#Read"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></a></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679424791"><span id="local-6989586621679424801"><span id="local-6989586621679424805"><span class="annot"><span class="annottext">Int -&gt; ExeDependency -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679499558"><span id="local-6989586621679499568"><span id="local-6989586621679499572"><span class="annot"><span class="annottext">Int -&gt; ExeDependency -&gt; ShowS
 [ExeDependency] -&gt; ShowS
 ExeDependency -&gt; String
 (Int -&gt; ExeDependency -&gt; ShowS)
@@ -70,7 +71,7 @@ $cshow :: ExeDependency -&gt; String
 show :: ExeDependency -&gt; String
 $cshowList :: [ExeDependency] -&gt; ShowS
 showList :: [ExeDependency] -&gt; ShowS
-</span><a href="../../base-4.18.2.0/src/GHC.Show.html#Show/GHC.Show.html#Show"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></a></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679424809"><span id="local-6989586621679424817"><span class="annot"><span class="annottext">ExeDependency -&gt; ExeDependency -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679499577"><span id="local-6989586621679499585"><span class="annot"><span class="annottext">ExeDependency -&gt; ExeDependency -&gt; Bool
 (ExeDependency -&gt; ExeDependency -&gt; Bool)
 -&gt; (ExeDependency -&gt; ExeDependency -&gt; Bool) -&gt; Eq ExeDependency
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -78,7 +79,7 @@ $c== :: ExeDependency -&gt; ExeDependency -&gt; Bool
 == :: ExeDependency -&gt; ExeDependency -&gt; Bool
 $c/= :: ExeDependency -&gt; ExeDependency -&gt; Bool
 /= :: ExeDependency -&gt; ExeDependency -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679424824"><span id="local-6989586621679424832"><span id="local-6989586621679424837"><span id="local-6989586621679424841"><span id="local-6989586621679424844"><span id="local-6989586621679424847"><span id="local-6989586621679424850"><span class="annot"><span class="annottext">Eq ExeDependency
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679499592"><span id="local-6989586621679499600"><span id="local-6989586621679499605"><span id="local-6989586621679499609"><span id="local-6989586621679499612"><span id="local-6989586621679499615"><span id="local-6989586621679499618"><span class="annot"><span class="annottext">Eq ExeDependency
 Eq ExeDependency =&gt;
 (ExeDependency -&gt; ExeDependency -&gt; Ordering)
 -&gt; (ExeDependency -&gt; ExeDependency -&gt; Bool)
@@ -115,7 +116,7 @@ $cmax :: ExeDependency -&gt; ExeDependency -&gt; ExeDependency
 max :: ExeDependency -&gt; ExeDependency -&gt; ExeDependency
 $cmin :: ExeDependency -&gt; ExeDependency -&gt; ExeDependency
 min :: ExeDependency -&gt; ExeDependency -&gt; ExeDependency
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/Data.Typeable.Internal.html#Typeable/Data.Typeable.Internal.html#Typeable"><span class="hs-identifier hs-type">Typeable</span></a></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679424856"><span id="local-6989586621679424864"><span id="local-6989586621679424869"><span id="local-6989586621679424871"><span id="local-6989586621679424873"><span id="local-6989586621679424879"><span id="local-6989586621679424884"><span id="local-6989586621679424887"><span id="local-6989586621679424890"><span id="local-6989586621679424893"><span id="local-6989586621679424896"><span id="local-6989586621679424899"><span id="local-6989586621679424904"><span id="local-6989586621679424909"><span class="annot"><span class="annottext">Typeable ExeDependency
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679499628"><span id="local-6989586621679499636"><span id="local-6989586621679499641"><span id="local-6989586621679499643"><span id="local-6989586621679499645"><span id="local-6989586621679499651"><span id="local-6989586621679499656"><span id="local-6989586621679499659"><span id="local-6989586621679499662"><span id="local-6989586621679499665"><span id="local-6989586621679499668"><span id="local-6989586621679499671"><span id="local-6989586621679499676"><span id="local-6989586621679499681"><span class="annot"><span class="annottext">Typeable ExeDependency
 Typeable ExeDependency =&gt;
 (forall (c :: * -&gt; *).
  (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
@@ -281,111 +282,85 @@ MonadPlus m =&gt;
 gmapMo :: forall (m :: * -&gt; *).
 MonadPlus m =&gt;
 (forall d. Data d =&gt; d -&gt; m d) -&gt; ExeDependency -&gt; m ExeDependency
-</span><a href="../../base-4.18.2.0/src/Data.Data.html#Data/Data.Data.html#Data"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></a></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-28"></span><span>
-</span><span id="line-29"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679424915"><span id="local-6989586621679424922"><span id="local-6989586621679424928"><span class="annot"><a href="../../binary-0.8.9.1/src/Data.Binary.Class.html#Binary/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-type">ExeDependency</span></a></span></span></span></span><span>
-</span><span id="line-30"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679424967"><span id="local-6989586621679424974"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-type">ExeDependency</span></a></span></span></span><span>
-</span><span id="line-31"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.4.8.1/src/Control.DeepSeq.html#NFData/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-type">ExeDependency</span></a></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679425037"><span class="annot"><span class="annottext">rnf :: ExeDependency -&gt; ()
-</span><a href="#local-6989586621679425037"><span class="hs-identifier hs-var hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ExeDependency -&gt; ()
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679499691"><span id="local-6989586621679499698"><span id="local-6989586621679499704"><span class="annot"><a href="../../binary-0.8.9.2-2c55/src//Data.Binary.Class.html/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-type">ExeDependency</span></a></span></span></span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679499743"><span id="local-6989586621679499750"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-type">ExeDependency</span></a></span></span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-type">ExeDependency</span></a></span><span> </span><span class="hs-keyword">where</span><span> </span><span id="local-6989586621679499813"><span class="annot"><span class="annottext">rnf :: ExeDependency -&gt; ()
+</span><a href="#local-6989586621679499813"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ExeDependency -&gt; ()
 forall a. (Generic a, GNFData (Rep a)) =&gt; a -&gt; ()
 </span><a href="Distribution.Compat.Prelude.html#genericRnf"><span class="hs-identifier hs-var">genericRnf</span></a></span><span>
-</span><span id="line-32"></span><span>
-</span><span id="line-33"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679425042"><span class="annot"><a href="Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-type">ExeDependency</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-34"></span><span>  </span><span id="local-6989586621679425050"><span class="annot"><span class="annottext">pretty :: ExeDependency -&gt; Doc
-</span><a href="#local-6989586621679425050"><span class="hs-identifier hs-var hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-type">ExeDependency</span></a></span><span> </span><span id="local-6989586621679425052"><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679425052"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679425053"><span class="annot"><span class="annottext">UnqualComponentName
-</span><a href="#local-6989586621679425053"><span class="hs-identifier hs-var">exe</span></a></span></span><span> </span><span id="local-6989586621679425054"><span class="annot"><span class="annottext">VersionRange
-</span><a href="#local-6989586621679425054"><span class="hs-identifier hs-var">ver</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-35"></span><span>      </span><span class="annot"><span class="annottext">PackageName -&gt; Doc
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679499818"><span class="annot"><a href="Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-type">ExeDependency</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-35"></span><span>  </span><span id="local-6989586621679499826"><span class="annot"><span class="annottext">pretty :: ExeDependency -&gt; Doc
+</span><a href="#local-6989586621679499826"><span class="hs-identifier hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-type">ExeDependency</span></a></span><span> </span><span id="local-6989586621679499828"><span class="annot"><span class="annottext">PackageName
+</span><a href="#local-6989586621679499828"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679499829"><span class="annot"><span class="annottext">UnqualComponentName
+</span><a href="#local-6989586621679499829"><span class="hs-identifier hs-var">exe</span></a></span></span><span> </span><span id="local-6989586621679499830"><span class="annot"><span class="annottext">VersionRange
+</span><a href="#local-6989586621679499830"><span class="hs-identifier hs-var">ver</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-36"></span><span>    </span><span class="annot"><span class="annottext">PackageName -&gt; Doc
 forall a. Pretty a =&gt; a -&gt; Doc
 </span><a href="Distribution.Pretty.html#pretty"><span class="hs-identifier hs-var">pretty</span></a></span><span> </span><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679425052"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
+</span><a href="#local-6989586621679499828"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
 </span><a href="Distribution.Compat.Prelude.html#%3C%3C%3E%3E"><span class="hs-operator hs-var">&lt;&lt;&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
-</span><a href="../../pretty-1.1.3.6/src/Text.PrettyPrint.HughesPJ.html#colon/Text.PrettyPrint.HughesPJ.html#colon"><span class="hs-identifier hs-var">PP.colon</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#colon"><span class="hs-identifier hs-var">PP.colon</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
 </span><a href="Distribution.Compat.Prelude.html#%3C%3C%3E%3E"><span class="hs-operator hs-var">&lt;&lt;&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">UnqualComponentName -&gt; Doc
 forall a. Pretty a =&gt; a -&gt; Doc
 </span><a href="Distribution.Pretty.html#pretty"><span class="hs-identifier hs-var">pretty</span></a></span><span> </span><span class="annot"><span class="annottext">UnqualComponentName
-</span><a href="#local-6989586621679425053"><span class="hs-identifier hs-var">exe</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
-</span><a href="../../pretty-1.1.3.6/src/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E"><span class="hs-operator hs-var">PP.&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
-</span><a href="#local-6989586621679425058"><span class="hs-identifier hs-var">pver</span></a></span><span>
-</span><span id="line-36"></span><span>    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-37"></span><span>      </span><span id="local-6989586621679425058"><span class="annot"><span class="annottext">pver :: Doc
-</span><a href="#local-6989586621679425058"><span class="hs-identifier hs-var hs-var">pver</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">VersionRange -&gt; Bool
+</span><a href="#local-6989586621679499829"><span class="hs-identifier hs-var">exe</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
+</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#%3C%2B%3E"><span class="hs-operator hs-var">PP.&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Doc
+</span><a href="#local-6989586621679499834"><span class="hs-identifier hs-var">pver</span></a></span><span>
+</span><span id="line-37"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-38"></span><span>      </span><span id="local-6989586621679499834"><span class="annot"><span class="annottext">pver :: Doc
+</span><a href="#local-6989586621679499834"><span class="hs-identifier hs-var hs-var">pver</span></a></span></span><span>
+</span><span id="line-39"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">VersionRange -&gt; Bool
 </span><a href="Distribution.Types.VersionRange.html#isAnyVersion"><span class="hs-identifier hs-var">isAnyVersion</span></a></span><span> </span><span class="annot"><span class="annottext">VersionRange
-</span><a href="#local-6989586621679425054"><span class="hs-identifier hs-var">ver</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Doc
-</span><a href="../../pretty-1.1.3.6/src/Text.PrettyPrint.HughesPJ.html#empty/Text.PrettyPrint.HughesPJ.html#empty"><span class="hs-identifier hs-var">PP.empty</span></a></span><span>
-</span><span id="line-38"></span><span>           </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#otherwise/GHC.Base.html#otherwise"><span class="hs-identifier hs-var">otherwise</span></a></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">VersionRange -&gt; Doc
+</span><a href="#local-6989586621679499830"><span class="hs-identifier hs-var">ver</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Doc
+</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#empty"><span class="hs-identifier hs-var">PP.empty</span></a></span><span>
+</span><span id="line-40"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">VersionRange -&gt; Doc
 forall a. Pretty a =&gt; a -&gt; Doc
 </span><a href="Distribution.Pretty.html#pretty"><span class="hs-identifier hs-var">pretty</span></a></span><span> </span><span class="annot"><span class="annottext">VersionRange
-</span><a href="#local-6989586621679425054"><span class="hs-identifier hs-var">ver</span></a></span><span>
-</span><span id="line-39"></span><span>
-</span><span id="line-40"></span><span class="hs-comment">-- |</span><span>
-</span><span id="line-41"></span><span class="hs-comment">--</span><span>
-</span><span id="line-42"></span><span class="hs-comment">-- Examples</span><span>
+</span><a href="#local-6989586621679499830"><span class="hs-identifier hs-var">ver</span></a></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-comment">-- |</span><span>
 </span><span id="line-43"></span><span class="hs-comment">--</span><span>
-</span><span id="line-44"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;happy:happy&quot; :: Maybe ExeDependency</span><span>
-</span><span id="line-45"></span><span class="hs-comment">-- Just (ExeDependency (PackageName &quot;happy&quot;) (UnqualComponentName &quot;happy&quot;) (OrLaterVersion (mkVersion [0])))</span><span>
-</span><span id="line-46"></span><span class="hs-comment">--</span><span>
-</span><span id="line-47"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;happy:happy &gt;= 1.19.12&quot; :: Maybe ExeDependency</span><span>
-</span><span id="line-48"></span><span class="hs-comment">-- Just (ExeDependency (PackageName &quot;happy&quot;) (UnqualComponentName &quot;happy&quot;) (OrLaterVersion (mkVersion [1,19,12])))</span><span>
-</span><span id="line-49"></span><span class="hs-comment">--</span><span>
-</span><span id="line-50"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;happy:happy&gt;=1.19.12&quot; :: Maybe ExeDependency</span><span>
-</span><span id="line-51"></span><span class="hs-comment">-- Just (ExeDependency (PackageName &quot;happy&quot;) (UnqualComponentName &quot;happy&quot;) (OrLaterVersion (mkVersion [1,19,12])))</span><span>
-</span><span id="line-52"></span><span class="hs-comment">--</span><span>
-</span><span id="line-53"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;happy : happy &gt;= 1.19.12&quot; :: Maybe ExeDependency</span><span>
-</span><span id="line-54"></span><span class="hs-comment">-- Nothing</span><span>
-</span><span id="line-55"></span><span class="hs-comment">--</span><span>
-</span><span id="line-56"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;happy: happy &gt;= 1.19.12&quot; :: Maybe ExeDependency</span><span>
-</span><span id="line-57"></span><span class="hs-comment">-- Nothing</span><span>
-</span><span id="line-58"></span><span class="hs-comment">--</span><span>
-</span><span id="line-59"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;happy :happy &gt;= 1.19.12&quot; :: Maybe ExeDependency</span><span>
-</span><span id="line-60"></span><span class="hs-comment">-- Nothing</span><span>
-</span><span id="line-61"></span><span class="hs-comment">--</span><span>
-</span><span id="line-62"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#Parsec"><span class="hs-identifier hs-type">Parsec</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-type">ExeDependency</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-63"></span><span>    </span><span id="local-6989586621679425093"><span class="annot"><span class="annottext">parsec :: forall (m :: * -&gt; *). CabalParsing m =&gt; m ExeDependency
-</span><a href="#local-6989586621679425093"><span class="hs-identifier hs-var hs-var hs-var hs-var">parsec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-64"></span><span>        </span><span id="local-6989586621679425095"><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679425095"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m PackageName
+</span><span id="line-44"></span><span class="hs-comment">-- Examples</span><span>
+</span><span id="line-45"></span><span class="hs-comment">--</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;happy:happy&quot; :: Maybe ExeDependency</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- Just (ExeDependency (PackageName &quot;happy&quot;) (UnqualComponentName &quot;happy&quot;) (OrLaterVersion (mkVersion [0])))</span><span>
+</span><span id="line-48"></span><span class="hs-comment">--</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;happy:happy &gt;= 1.19.12&quot; :: Maybe ExeDependency</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- Just (ExeDependency (PackageName &quot;happy&quot;) (UnqualComponentName &quot;happy&quot;) (OrLaterVersion (mkVersion [1,19,12])))</span><span>
+</span><span id="line-51"></span><span class="hs-comment">--</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;happy:happy&gt;=1.19.12&quot; :: Maybe ExeDependency</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- Just (ExeDependency (PackageName &quot;happy&quot;) (UnqualComponentName &quot;happy&quot;) (OrLaterVersion (mkVersion [1,19,12])))</span><span>
+</span><span id="line-54"></span><span class="hs-comment">--</span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;happy : happy &gt;= 1.19.12&quot; :: Maybe ExeDependency</span><span>
+</span><span id="line-56"></span><span class="hs-comment">-- Nothing</span><span>
+</span><span id="line-57"></span><span class="hs-comment">--</span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;happy: happy &gt;= 1.19.12&quot; :: Maybe ExeDependency</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- Nothing</span><span>
+</span><span id="line-60"></span><span class="hs-comment">--</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;happy :happy &gt;= 1.19.12&quot; :: Maybe ExeDependency</span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- Nothing</span><span>
+</span><span id="line-63"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#Parsec"><span class="hs-identifier hs-type">Parsec</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-type">ExeDependency</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-64"></span><span>  </span><span id="local-6989586621679499869"><span class="annot"><span class="annottext">parsec :: forall (m :: * -&gt; *). CabalParsing m =&gt; m ExeDependency
+</span><a href="#local-6989586621679499869"><span class="hs-identifier hs-var hs-var hs-var">parsec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-65"></span><span>    </span><span id="local-6989586621679499871"><span class="annot"><a href="#local-6989586621679499871"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m PackageName
 forall a (m :: * -&gt; *). (Parsec a, CabalParsing m) =&gt; m a
 forall (m :: * -&gt; *). CabalParsing m =&gt; m PackageName
 </span><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-var">parsec</span></a></span><span>
-</span><span id="line-65"></span><span>        </span><span class="annot"><span class="annottext">Char
-</span><span class="hs-identifier">_</span></span><span>    </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Char -&gt; m Char
-forall (m :: * -&gt; *). CharParsing m =&gt; Char -&gt; m Char
-</span><a href="Distribution.Compat.CharParsing.html#char"><span class="hs-identifier hs-var">P.char</span></a></span><span> </span><span class="annot"><span class="annottext">Char
-</span><span class="hs-char">':'</span></span><span>
-</span><span id="line-66"></span><span>        </span><span id="local-6989586621679425097"><span class="annot"><span class="annottext">UnqualComponentName
-</span><a href="#local-6989586621679425097"><span class="hs-identifier hs-var">exe</span></a></span></span><span>  </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m UnqualComponentName
-forall (m :: * -&gt; *) a. (CabalParsing m, Parsec a) =&gt; m a
-</span><a href="Distribution.Parsec.html#lexemeParsec"><span class="hs-identifier hs-var">lexemeParsec</span></a></span><span>
-</span><span id="line-67"></span><span>        </span><span id="local-6989586621679425099"><span class="annot"><span class="annottext">VersionRange
-</span><a href="#local-6989586621679425099"><span class="hs-identifier hs-var">ver</span></a></span></span><span>  </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m VersionRange
-forall a (m :: * -&gt; *). (Parsec a, CabalParsing m) =&gt; m a
-forall (m :: * -&gt; *). CabalParsing m =&gt; m VersionRange
-</span><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-var">parsec</span></a></span><span> </span><span class="annot"><span class="annottext">m VersionRange -&gt; m VersionRange -&gt; m VersionRange
-forall a. m a -&gt; m a -&gt; m a
-forall (f :: * -&gt; *) a. Alternative f =&gt; f a -&gt; f a -&gt; f a
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#%3C%7C%3E/GHC.Base.html#%3C%7C%3E"><span class="hs-operator hs-var">&lt;|&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">VersionRange -&gt; m VersionRange
-forall a. a -&gt; m a
-forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#pure/GHC.Base.html#pure"><span class="hs-identifier hs-var">pure</span></a></span><span> </span><span class="annot"><span class="annottext">VersionRange
-</span><a href="Distribution.Types.VersionRange.Internal.html#anyVersion"><span class="hs-identifier hs-var">anyVersion</span></a></span><span>
-</span><span id="line-68"></span><span>        </span><span class="annot"><span class="annottext">ExeDependency -&gt; m ExeDependency
-forall a. a -&gt; m a
-forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#return/GHC.Base.html#return"><span class="hs-identifier hs-var">return</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PackageName -&gt; UnqualComponentName -&gt; VersionRange -&gt; ExeDependency
-</span><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-var">ExeDependency</span></a></span><span> </span><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679425095"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">UnqualComponentName
-</span><a href="#local-6989586621679425097"><span class="hs-identifier hs-var">exe</span></a></span><span> </span><span class="annot"><span class="annottext">VersionRange
-</span><a href="#local-6989586621679425099"><span class="hs-identifier hs-var">ver</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-69"></span><span>
-</span><span id="line-70"></span><span class="annot"><a href="Distribution.Types.ExeDependency.html#qualifiedExeName"><span class="hs-identifier hs-type">qualifiedExeName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-type">ExeDependency</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.ComponentName.html#ComponentName"><span class="hs-identifier hs-type">ComponentName</span></a></span><span>
-</span><span id="line-71"></span><span id="qualifiedExeName"><span class="annot"><span class="annottext">qualifiedExeName :: ExeDependency -&gt; ComponentName
+</span><span id="line-66"></span><span>    </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Compat.CharParsing.html#char"><span class="hs-identifier hs-type">P.char</span></a></span><span> </span><span class="annot"><span class="hs-char">':'</span></span><span>
+</span><span id="line-67"></span><span>    </span><span id="local-6989586621679499873"><span class="annot"><a href="#local-6989586621679499873"><span class="hs-identifier hs-var">exe</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#lexemeParsec"><span class="hs-identifier hs-type">lexemeParsec</span></a></span><span>
+</span><span id="line-68"></span><span>    </span><span id="local-6989586621679499875"><span class="annot"><a href="#local-6989586621679499875"><span class="hs-identifier hs-var">ver</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#parsec"><span class="hs-identifier hs-type">parsec</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;|&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="Distribution.Types.VersionRange.Internal.html#anyVersion"><span class="hs-identifier hs-type">anyVersion</span></a></span><span>
+</span><span id="line-69"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-type">ExeDependency</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679499871"><span class="hs-identifier hs-type">name</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679499873"><span class="hs-identifier hs-type">exe</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679499875"><span class="hs-identifier hs-type">ver</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="annot"><a href="Distribution.Types.ExeDependency.html#qualifiedExeName"><span class="hs-identifier hs-type">qualifiedExeName</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-type">ExeDependency</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.ComponentName.html#ComponentName"><span class="hs-identifier hs-type">ComponentName</span></a></span><span>
+</span><span id="line-72"></span><span id="qualifiedExeName"><span class="annot"><span class="annottext">qualifiedExeName :: ExeDependency -&gt; ComponentName
 </span><a href="Distribution.Types.ExeDependency.html#qualifiedExeName"><span class="hs-identifier hs-var hs-var">qualifiedExeName</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.ExeDependency.html#ExeDependency"><span class="hs-identifier hs-type">ExeDependency</span></a></span><span> </span><span class="annot"><span class="annottext">PackageName
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679425101"><span class="annot"><span class="annottext">UnqualComponentName
-</span><a href="#local-6989586621679425101"><span class="hs-identifier hs-var">ucn</span></a></span></span><span> </span><span class="annot"><span class="annottext">VersionRange
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679499877"><span class="annot"><span class="annottext">UnqualComponentName
+</span><a href="#local-6989586621679499877"><span class="hs-identifier hs-var">ucn</span></a></span></span><span> </span><span class="annot"><span class="annottext">VersionRange
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">UnqualComponentName -&gt; ComponentName
 </span><a href="Distribution.Types.ComponentName.html#CExeName"><span class="hs-identifier hs-var">CExeName</span></a></span><span> </span><span class="annot"><span class="annottext">UnqualComponentName
-</span><a href="#local-6989586621679425101"><span class="hs-identifier hs-var">ucn</span></a></span><span>
-</span><span id="line-72"></span></pre></body></html>
+</span><a href="#local-6989586621679499877"><span class="hs-identifier hs-var">ucn</span></a></span><span>
+</span><span id="line-73"></span></pre></body></html>

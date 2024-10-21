@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE GeneralizedNewtypeDeriving #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE NamedFieldPuns #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE PatternSynonyms #-}</span><span>
+</span><span id="line-4"></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html"><span class="hs-identifier">Distribution.Simple.Build.Inputs</span></a></span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Inputs of actions for building components</span></span><span>
+</span><span id="line-7"></span><span>    </span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#PreBuildComponentInputs"><span class="hs-identifier">PreBuildComponentInputs</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Queries over the component being built</span></span><span>
+</span><span id="line-10"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#buildVerbosity"><span class="hs-identifier">buildVerbosity</span></a></span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#buildComponent"><span class="hs-identifier">buildComponent</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#buildIsLib"><span class="hs-identifier">buildIsLib</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#buildCLBI"><span class="hs-identifier">buildCLBI</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#buildBI"><span class="hs-identifier">buildBI</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#buildCompiler"><span class="hs-identifier">buildCompiler</span></a></span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Re-exports</span></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.html#BuildingWhat"><span class="hs-identifier">BuildingWhat</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html#LocalBuildInfo"><span class="hs-identifier">LocalBuildInfo</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Types.TargetInfo.html#TargetInfo"><span class="hs-identifier">TargetInfo</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.html#buildingWhatVerbosity"><span class="hs-identifier">buildingWhatVerbosity</span></a></span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.html#buildingWhatDistPref"><span class="hs-identifier">buildingWhatDistPref</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Compiler.html"><span class="hs-identifier">Distribution.Simple.Compiler</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.html"><span class="hs-identifier">Distribution.Simple.Setup</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Setup.html#BuildingWhat"><span class="hs-identifier">BuildingWhat</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.html#buildingWhatDistPref"><span class="hs-identifier">buildingWhatDistPref</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.html#buildingWhatVerbosity"><span class="hs-identifier">buildingWhatVerbosity</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.BuildInfo.html/Distribution.Types.BuildInfo.html"><span class="hs-identifier">Distribution.Types.BuildInfo</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.Component.html/Distribution.Types.Component.html"><span class="hs-identifier">Distribution.Types.Component</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.ComponentLocalBuildInfo.html"><span class="hs-identifier">Distribution.Types.ComponentLocalBuildInfo</span></a></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html"><span class="hs-identifier">Distribution.Types.LocalBuildInfo</span></a></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.TargetInfo.html"><span class="hs-identifier">Distribution.Types.TargetInfo</span></a></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html"><span class="hs-identifier">Distribution.Verbosity</span></a></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- | The information required for a build computation which is available right</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- before building each component, i.e. the pre-build component inputs.</span><span>
+</span><span id="line-37"></span><span class="hs-keyword">data</span><span> </span><span id="PreBuildComponentInputs"><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#PreBuildComponentInputs"><span class="hs-identifier hs-var">PreBuildComponentInputs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PreBuildComponentInputs"><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#PreBuildComponentInputs"><span class="hs-identifier hs-var">PreBuildComponentInputs</span></a></span></span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="buildingWhat"><span class="annot"><span class="annottext">PreBuildComponentInputs -&gt; BuildingWhat
+</span><a href="Distribution.Simple.Build.Inputs.html#buildingWhat"><span class="hs-identifier hs-var hs-var">buildingWhat</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.html#BuildingWhat"><span class="hs-identifier hs-type">BuildingWhat</span></a></span><span>
+</span><span id="line-39"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ What kind of build are we doing?</span></span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="localBuildInfo"><span class="annot"><span class="annottext">PreBuildComponentInputs -&gt; LocalBuildInfo
+</span><a href="Distribution.Simple.Build.Inputs.html#localBuildInfo"><span class="hs-identifier hs-var hs-var">localBuildInfo</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html#LocalBuildInfo"><span class="hs-identifier hs-type">LocalBuildInfo</span></a></span><span>
+</span><span id="line-41"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ Information about the package</span></span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="targetInfo"><span class="annot"><span class="annottext">PreBuildComponentInputs -&gt; TargetInfo
+</span><a href="Distribution.Simple.Build.Inputs.html#targetInfo"><span class="hs-identifier hs-var hs-var">targetInfo</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.TargetInfo.html#TargetInfo"><span class="hs-identifier hs-type">TargetInfo</span></a></span><span>
+</span><span id="line-43"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ Information about an individual component</span></span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="annot"><span class="hs-comment">-- | Get the @'Verbosity'@ from the context the component being built is in.</span></span><span>
+</span><span id="line-47"></span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#buildVerbosity"><span class="hs-identifier hs-type">buildVerbosity</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#PreBuildComponentInputs"><span class="hs-identifier hs-type">PreBuildComponentInputs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html#Verbosity"><span class="hs-identifier hs-type">Verbosity</span></a></span><span>
+</span><span id="line-48"></span><span id="buildVerbosity"><span class="annot"><span class="annottext">buildVerbosity :: PreBuildComponentInputs -&gt; Verbosity
+</span><a href="Distribution.Simple.Build.Inputs.html#buildVerbosity"><span class="hs-identifier hs-var hs-var">buildVerbosity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BuildingWhat -&gt; Verbosity
+</span><a href="Distribution.Simple.Setup.html#buildingWhatVerbosity"><span class="hs-identifier hs-var">buildingWhatVerbosity</span></a></span><span> </span><span class="annot"><span class="annottext">(BuildingWhat -&gt; Verbosity)
+-&gt; (PreBuildComponentInputs -&gt; BuildingWhat)
+-&gt; PreBuildComponentInputs
+-&gt; Verbosity
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PreBuildComponentInputs -&gt; BuildingWhat
+</span><a href="Distribution.Simple.Build.Inputs.html#buildingWhat"><span class="hs-identifier hs-var">buildingWhat</span></a></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="annot"><span class="hs-comment">-- | Get the @'Component'@ being built.</span></span><span>
+</span><span id="line-51"></span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#buildComponent"><span class="hs-identifier hs-type">buildComponent</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#PreBuildComponentInputs"><span class="hs-identifier hs-type">PreBuildComponentInputs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.Component.html/Distribution.Types.Component.html#Component"><span class="hs-identifier hs-type">Component</span></a></span><span>
+</span><span id="line-52"></span><span id="buildComponent"><span class="annot"><span class="annottext">buildComponent :: PreBuildComponentInputs -&gt; Component
+</span><a href="Distribution.Simple.Build.Inputs.html#buildComponent"><span class="hs-identifier hs-var hs-var">buildComponent</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TargetInfo -&gt; Component
+</span><a href="Distribution.Types.TargetInfo.html#targetComponent"><span class="hs-identifier hs-var">targetComponent</span></a></span><span> </span><span class="annot"><span class="annottext">(TargetInfo -&gt; Component)
+-&gt; (PreBuildComponentInputs -&gt; TargetInfo)
+-&gt; PreBuildComponentInputs
+-&gt; Component
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PreBuildComponentInputs -&gt; TargetInfo
+</span><a href="Distribution.Simple.Build.Inputs.html#targetInfo"><span class="hs-identifier hs-var">targetInfo</span></a></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="annot"><span class="hs-comment">-- | Is the @'Component'@ being built a @'Library'@?</span></span><span>
+</span><span id="line-55"></span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#buildIsLib"><span class="hs-identifier hs-type">buildIsLib</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#PreBuildComponentInputs"><span class="hs-identifier hs-type">PreBuildComponentInputs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-56"></span><span id="buildIsLib"><span class="annot"><span class="annottext">buildIsLib :: PreBuildComponentInputs -&gt; Bool
+</span><a href="Distribution.Simple.Build.Inputs.html#buildIsLib"><span class="hs-identifier hs-var hs-var">buildIsLib</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-57"></span><span>  </span><span id="local-6989586621679479439"><span class="annot"><a href="#local-6989586621679479439"><span class="hs-identifier hs-var">component</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">PreBuildComponentInputs -&gt; Component
+</span><a href="Distribution.Simple.Build.Inputs.html#buildComponent"><span class="hs-identifier hs-var">buildComponent</span></a></span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679479440"><span class="annot"><a href="#local-6989586621679479440"><span class="hs-identifier hs-var hs-var">isLib</span></a></span></span><span>
+</span><span id="line-59"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.Component.html/Distribution.Types.Component.html#CLib"><span class="hs-identifier hs-type">CLib</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Component
+</span><a href="#local-6989586621679479439"><span class="hs-identifier hs-var">component</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-60"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-61"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="annot"><a href="#local-6989586621679479440"><span class="hs-identifier hs-type">isLib</span></a></span><span>
+</span><span id="line-62"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#buildIsLib"><span class="hs-pragma hs-type">buildIsLib</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="annot"><span class="hs-comment">-- | Get the @'ComponentLocalBuildInfo'@ for the component being built.</span></span><span>
+</span><span id="line-65"></span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#buildCLBI"><span class="hs-identifier hs-type">buildCLBI</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#PreBuildComponentInputs"><span class="hs-identifier hs-type">PreBuildComponentInputs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Types.ComponentLocalBuildInfo.html#ComponentLocalBuildInfo"><span class="hs-identifier hs-type">ComponentLocalBuildInfo</span></a></span><span>
+</span><span id="line-66"></span><span id="buildCLBI"><span class="annot"><span class="annottext">buildCLBI :: PreBuildComponentInputs -&gt; ComponentLocalBuildInfo
+</span><a href="Distribution.Simple.Build.Inputs.html#buildCLBI"><span class="hs-identifier hs-var hs-var">buildCLBI</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TargetInfo -&gt; ComponentLocalBuildInfo
+</span><a href="Distribution.Types.TargetInfo.html#targetCLBI"><span class="hs-identifier hs-var">targetCLBI</span></a></span><span> </span><span class="annot"><span class="annottext">(TargetInfo -&gt; ComponentLocalBuildInfo)
+-&gt; (PreBuildComponentInputs -&gt; TargetInfo)
+-&gt; PreBuildComponentInputs
+-&gt; ComponentLocalBuildInfo
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PreBuildComponentInputs -&gt; TargetInfo
+</span><a href="Distribution.Simple.Build.Inputs.html#targetInfo"><span class="hs-identifier hs-var">targetInfo</span></a></span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span class="annot"><span class="hs-comment">-- | Get the @'BuildInfo'@ of the component being built.</span></span><span>
+</span><span id="line-69"></span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#buildBI"><span class="hs-identifier hs-type">buildBI</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#PreBuildComponentInputs"><span class="hs-identifier hs-type">PreBuildComponentInputs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.BuildInfo.html/Distribution.Types.BuildInfo.html#BuildInfo"><span class="hs-identifier hs-type">BuildInfo</span></a></span><span>
+</span><span id="line-70"></span><span id="buildBI"><span class="annot"><span class="annottext">buildBI :: PreBuildComponentInputs -&gt; BuildInfo
+</span><a href="Distribution.Simple.Build.Inputs.html#buildBI"><span class="hs-identifier hs-var hs-var">buildBI</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Component -&gt; BuildInfo
+</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.Component.html/Distribution.Types.Component.html#componentBuildInfo"><span class="hs-identifier hs-var">componentBuildInfo</span></a></span><span> </span><span class="annot"><span class="annottext">(Component -&gt; BuildInfo)
+-&gt; (PreBuildComponentInputs -&gt; Component)
+-&gt; PreBuildComponentInputs
+-&gt; BuildInfo
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PreBuildComponentInputs -&gt; Component
+</span><a href="Distribution.Simple.Build.Inputs.html#buildComponent"><span class="hs-identifier hs-var">buildComponent</span></a></span><span>
+</span><span id="line-71"></span><span>
+</span><span id="line-72"></span><span class="annot"><span class="hs-comment">-- | Get the @'Compiler'@ being used to build the component.</span></span><span>
+</span><span id="line-73"></span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#buildCompiler"><span class="hs-identifier hs-type">buildCompiler</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#PreBuildComponentInputs"><span class="hs-identifier hs-type">PreBuildComponentInputs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Compiler.html#Compiler"><span class="hs-identifier hs-type">Compiler</span></a></span><span>
+</span><span id="line-74"></span><span id="buildCompiler"><span class="annot"><span class="annottext">buildCompiler :: PreBuildComponentInputs -&gt; Compiler
+</span><a href="Distribution.Simple.Build.Inputs.html#buildCompiler"><span class="hs-identifier hs-var hs-var">buildCompiler</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; Compiler
+</span><a href="Distribution.Types.LocalBuildInfo.html#compiler"><span class="hs-identifier hs-var">compiler</span></a></span><span> </span><span class="annot"><span class="annottext">(LocalBuildInfo -&gt; Compiler)
+-&gt; (PreBuildComponentInputs -&gt; LocalBuildInfo)
+-&gt; PreBuildComponentInputs
+-&gt; Compiler
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PreBuildComponentInputs -&gt; LocalBuildInfo
+</span><a href="Distribution.Simple.Build.Inputs.html#localBuildInfo"><span class="hs-identifier hs-var">localBuildInfo</span></a></span><span>
+</span><span id="line-75"></span></pre></body></html>

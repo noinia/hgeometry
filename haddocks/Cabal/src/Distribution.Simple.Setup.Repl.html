@@ -1,0 +1,693 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Module      :  Distribution.Simple.Setup.Repl</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Copyright   :  Isaac Jones 2003-2004</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--                Duncan Coutts 2007</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- License     :  BSD3</span><span>
+</span><span id="line-14"></span><span class="hs-comment">--</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- Maintainer  :  cabal-devel@haskell.org</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- Portability :  portable</span><span>
+</span><span id="line-17"></span><span class="hs-comment">--</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- Definition of the repl command-line options.</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- See: @Distribution.Simple.Setup@</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html"><span class="hs-identifier">Distribution.Simple.Setup.Repl</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplFlags"><span class="hs-identifier">ReplFlags</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#defaultReplFlags"><span class="hs-identifier">defaultReplFlags</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#replCommand"><span class="hs-identifier">replCommand</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplOptions"><span class="hs-identifier">ReplOptions</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#replOptions"><span class="hs-identifier">replOptions</span></a></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">get</span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.ReadE.html"><span class="hs-identifier">Distribution.ReadE</span></a></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html"><span class="hs-identifier">Distribution.Simple.Command</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt"><span class="hs-identifier">boolOpt</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt%27"><span class="hs-identifier">boolOpt'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html"><span class="hs-identifier">Distribution.Simple.Flag</span></a></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Program.html"><span class="hs-identifier">Distribution.Simple.Program</span></a></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Utils.html"><span class="hs-identifier">Distribution.Simple.Utils</span></a></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html"><span class="hs-identifier">Distribution.Verbosity</span></a></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html"><span class="hs-identifier">Distribution.Simple.Setup.Common</span></a></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="annot"><span class="hs-comment">-- * REPL Flags</span></span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">data</span><span> </span><span id="ReplOptions"><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplOptions"><span class="hs-identifier hs-var">ReplOptions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ReplOptions"><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplOptions"><span class="hs-identifier hs-var">ReplOptions</span></a></span></span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="replOptionsFlags"><span class="annot"><span class="annottext">ReplOptions -&gt; [String]
+</span><a href="Distribution.Simple.Setup.Repl.html#replOptionsFlags"><span class="hs-identifier hs-var hs-var">replOptionsFlags</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="replOptionsNoLoad"><span class="annot"><span class="annottext">ReplOptions -&gt; Flag Bool
+</span><a href="Distribution.Simple.Setup.Repl.html#replOptionsNoLoad"><span class="hs-identifier hs-var hs-var">replOptionsNoLoad</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="replOptionsFlagOutput"><span class="annot"><span class="annottext">ReplOptions -&gt; Flag String
+</span><a href="Distribution.Simple.Setup.Repl.html#replOptionsFlagOutput"><span class="hs-identifier hs-var hs-var">replOptionsFlagOutput</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-51"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679467027"><span id="local-6989586621679467038"><span id="local-6989586621679467042"><span class="annot"><span class="annottext">Int -&gt; ReplOptions -&gt; ShowS
+[ReplOptions] -&gt; ShowS
+ReplOptions -&gt; String
+(Int -&gt; ReplOptions -&gt; ShowS)
+-&gt; (ReplOptions -&gt; String)
+-&gt; ([ReplOptions] -&gt; ShowS)
+-&gt; Show ReplOptions
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ReplOptions -&gt; ShowS
+showsPrec :: Int -&gt; ReplOptions -&gt; ShowS
+$cshow :: ReplOptions -&gt; String
+show :: ReplOptions -&gt; String
+$cshowList :: [ReplOptions] -&gt; ShowS
+showList :: [ReplOptions] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679467050"><span id="local-6989586621679467052"><span class="annot"><span class="annottext">(forall x. ReplOptions -&gt; Rep ReplOptions x)
+-&gt; (forall x. Rep ReplOptions x -&gt; ReplOptions)
+-&gt; Generic ReplOptions
+forall x. Rep ReplOptions x -&gt; ReplOptions
+forall x. ReplOptions -&gt; Rep ReplOptions x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cfrom :: forall x. ReplOptions -&gt; Rep ReplOptions x
+from :: forall x. ReplOptions -&gt; Rep ReplOptions x
+$cto :: forall x. Rep ReplOptions x -&gt; ReplOptions
+to :: forall x. Rep ReplOptions x -&gt; ReplOptions
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679467058"><span id="local-6989586621679467065"><span id="local-6989586621679467071"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplOptions"><span class="hs-identifier hs-type">ReplOptions</span></a></span></span></span></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679467117"><span id="local-6989586621679467124"><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Structured.html/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplOptions"><span class="hs-identifier hs-type">ReplOptions</span></a></span></span></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679467175"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplOptions"><span class="hs-identifier hs-type">ReplOptions</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-57"></span><span>  </span><span id="local-6989586621679467179"><span class="annot"><span class="annottext">mempty :: ReplOptions
+</span><span class="hs-identifier hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[String] -&gt; Flag Bool -&gt; Flag String -&gt; ReplOptions
+</span><a href="Distribution.Simple.Setup.Repl.html#ReplOptions"><span class="hs-identifier hs-var">ReplOptions</span></a></span><span> </span><span class="annot"><span class="annottext">[String]
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; Flag Bool
+forall a. a -&gt; Flag a
+</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Flag String
+forall a. Flag a
+</span><a href="Distribution.Simple.Flag.html#NoFlag"><span class="hs-identifier hs-var">NoFlag</span></a></span><span>
+</span><span id="line-58"></span><span>  </span><span id="local-6989586621679467183"><span class="annot"><span class="annottext">mappend :: ReplOptions -&gt; ReplOptions -&gt; ReplOptions
+</span><span class="hs-identifier hs-var hs-var hs-var">mappend</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplOptions -&gt; ReplOptions -&gt; ReplOptions
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679467186"><span id="local-6989586621679467189"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplOptions"><span class="hs-identifier hs-type">ReplOptions</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-61"></span><span>  </span><span id="local-6989586621679467214"><span class="annot"><span class="annottext">&lt;&gt; :: ReplOptions -&gt; ReplOptions -&gt; ReplOptions
+</span><span class="hs-operator hs-var hs-var hs-var">(&lt;&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplOptions -&gt; ReplOptions -&gt; ReplOptions
+forall a. (Generic a, GSemigroup (Rep a)) =&gt; a -&gt; a -&gt; a
+</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Semigroup.html/Distribution.Compat.Semigroup.html#gmappend"><span class="hs-identifier hs-var">gmappend</span></a></span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span class="hs-keyword">data</span><span> </span><span id="ReplFlags"><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplFlags"><span class="hs-identifier hs-var">ReplFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ReplFlags"><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplFlags"><span class="hs-identifier hs-var">ReplFlags</span></a></span></span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="replProgramPaths"><span class="annot"><span class="annottext">ReplFlags -&gt; [(String, String)]
+</span><a href="Distribution.Simple.Setup.Repl.html#replProgramPaths"><span class="hs-identifier hs-var hs-var">replProgramPaths</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="replProgramArgs"><span class="annot"><span class="annottext">ReplFlags -&gt; [(String, [String])]
+</span><a href="Distribution.Simple.Setup.Repl.html#replProgramArgs"><span class="hs-identifier hs-var hs-var">replProgramArgs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="replDistPref"><span class="annot"><span class="annottext">ReplFlags -&gt; Flag String
+</span><a href="Distribution.Simple.Setup.Repl.html#replDistPref"><span class="hs-identifier hs-var hs-var">replDistPref</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="replVerbosity"><span class="annot"><span class="annottext">ReplFlags -&gt; Flag Verbosity
+</span><a href="Distribution.Simple.Setup.Repl.html#replVerbosity"><span class="hs-identifier hs-var hs-var">replVerbosity</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><a href="Distribution.Verbosity.html#Verbosity"><span class="hs-identifier hs-type">Verbosity</span></a></span><span>
+</span><span id="line-68"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="replReload"><span class="annot"><span class="annottext">ReplFlags -&gt; Flag Bool
+</span><a href="Distribution.Simple.Setup.Repl.html#replReload"><span class="hs-identifier hs-var hs-var">replReload</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="replReplOptions"><span class="annot"><span class="annottext">ReplFlags -&gt; ReplOptions
+</span><a href="Distribution.Simple.Setup.Repl.html#replReplOptions"><span class="hs-identifier hs-var hs-var">replReplOptions</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplOptions"><span class="hs-identifier hs-type">ReplOptions</span></a></span><span>
+</span><span id="line-70"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679467224"><span id="local-6989586621679467238"><span id="local-6989586621679467242"><span class="annot"><span class="annottext">Int -&gt; ReplFlags -&gt; ShowS
+[ReplFlags] -&gt; ShowS
+ReplFlags -&gt; String
+(Int -&gt; ReplFlags -&gt; ShowS)
+-&gt; (ReplFlags -&gt; String)
+-&gt; ([ReplFlags] -&gt; ShowS)
+-&gt; Show ReplFlags
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; ReplFlags -&gt; ShowS
+showsPrec :: Int -&gt; ReplFlags -&gt; ShowS
+$cshow :: ReplFlags -&gt; String
+show :: ReplFlags -&gt; String
+$cshowList :: [ReplFlags] -&gt; ShowS
+showList :: [ReplFlags] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679467250"><span id="local-6989586621679467252"><span class="annot"><span class="annottext">(forall x. ReplFlags -&gt; Rep ReplFlags x)
+-&gt; (forall x. Rep ReplFlags x -&gt; ReplFlags) -&gt; Generic ReplFlags
+forall x. Rep ReplFlags x -&gt; ReplFlags
+forall x. ReplFlags -&gt; Rep ReplFlags x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cfrom :: forall x. ReplFlags -&gt; Rep ReplFlags x
+from :: forall x. ReplFlags -&gt; Rep ReplFlags x
+$cto :: forall x. Rep ReplFlags x -&gt; ReplFlags
+to :: forall x. Rep ReplFlags x -&gt; ReplFlags
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679467255"><span id="local-6989586621679467262"><span id="local-6989586621679467268"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplFlags"><span class="hs-identifier hs-type">ReplFlags</span></a></span></span></span></span><span>
+</span><span id="line-74"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679467339"><span id="local-6989586621679467346"><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Structured.html/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplFlags"><span class="hs-identifier hs-type">ReplFlags</span></a></span></span></span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#defaultReplFlags"><span class="hs-identifier hs-type">defaultReplFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplFlags"><span class="hs-identifier hs-type">ReplFlags</span></a></span><span>
+</span><span id="line-77"></span><span id="defaultReplFlags"><span class="annot"><span class="annottext">defaultReplFlags :: ReplFlags
+</span><a href="Distribution.Simple.Setup.Repl.html#defaultReplFlags"><span class="hs-identifier hs-var hs-var">defaultReplFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-78"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplFlags"><span class="hs-identifier hs-type">ReplFlags</span></a></span><span>
+</span><span id="line-79"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">replProgramPaths :: [(String, String)]
+</span><a href="Distribution.Simple.Setup.Repl.html#replProgramPaths"><span class="hs-identifier hs-var">replProgramPaths</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(String, String)]
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-80"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">replProgramArgs :: [(String, [String])]
+</span><a href="Distribution.Simple.Setup.Repl.html#replProgramArgs"><span class="hs-identifier hs-var">replProgramArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-81"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">replDistPref :: Flag String
+</span><a href="Distribution.Simple.Setup.Repl.html#replDistPref"><span class="hs-identifier hs-var">replDistPref</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag String
+forall a. Flag a
+</span><a href="Distribution.Simple.Flag.html#NoFlag"><span class="hs-identifier hs-var">NoFlag</span></a></span><span>
+</span><span id="line-82"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">replVerbosity :: Flag Verbosity
+</span><a href="Distribution.Simple.Setup.Repl.html#replVerbosity"><span class="hs-identifier hs-var">replVerbosity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Verbosity -&gt; Flag Verbosity
+forall a. a -&gt; Flag a
+</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Verbosity
+</span><a href="Distribution.Verbosity.html#normal"><span class="hs-identifier hs-var">normal</span></a></span><span>
+</span><span id="line-83"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">replReload :: Flag Bool
+</span><a href="Distribution.Simple.Setup.Repl.html#replReload"><span class="hs-identifier hs-var">replReload</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Flag Bool
+forall a. a -&gt; Flag a
+</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-84"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">replReplOptions :: ReplOptions
+</span><a href="Distribution.Simple.Setup.Repl.html#replReplOptions"><span class="hs-identifier hs-var">replReplOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplOptions
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-85"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679467405"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplFlags"><span class="hs-identifier hs-type">ReplFlags</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-88"></span><span>  </span><span id="local-6989586621679467441"><span class="annot"><span class="annottext">mempty :: ReplFlags
+</span><span class="hs-identifier hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplFlags
+forall a. (Generic a, GMonoid (Rep a)) =&gt; a
+</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Semigroup.html/Distribution.Compat.Semigroup.html#gmempty"><span class="hs-identifier hs-var">gmempty</span></a></span><span>
+</span><span id="line-89"></span><span>  </span><span id="local-6989586621679467444"><span class="annot"><span class="annottext">mappend :: ReplFlags -&gt; ReplFlags -&gt; ReplFlags
+</span><span class="hs-identifier hs-var hs-var hs-var">mappend</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplFlags -&gt; ReplFlags -&gt; ReplFlags
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679467447"><span id="local-6989586621679467450"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplFlags"><span class="hs-identifier hs-type">ReplFlags</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-92"></span><span>  </span><span id="local-6989586621679467481"><span class="annot"><span class="annottext">&lt;&gt; :: ReplFlags -&gt; ReplFlags -&gt; ReplFlags
+</span><span class="hs-operator hs-var hs-var hs-var">(&lt;&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplFlags -&gt; ReplFlags -&gt; ReplFlags
+forall a. (Generic a, GSemigroup (Rep a)) =&gt; a -&gt; a -&gt; a
+</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Semigroup.html/Distribution.Compat.Semigroup.html#gmappend"><span class="hs-identifier hs-var">gmappend</span></a></span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#replCommand"><span class="hs-identifier hs-type">replCommand</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Db.html#ProgramDb"><span class="hs-identifier hs-type">ProgramDb</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplFlags"><span class="hs-identifier hs-type">ReplFlags</span></a></span><span>
+</span><span id="line-95"></span><span id="replCommand"><span class="annot"><span class="annottext">replCommand :: ProgramDb -&gt; CommandUI ReplFlags
+</span><a href="Distribution.Simple.Setup.Repl.html#replCommand"><span class="hs-identifier hs-var hs-var">replCommand</span></a></span></span><span> </span><span id="local-6989586621679467482"><span class="annot"><span class="annottext">ProgramDb
+</span><a href="#local-6989586621679467482"><span class="hs-identifier hs-var">progDb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-96"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span>
+</span><span id="line-97"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">commandName :: String
+</span><a href="Distribution.Simple.Command.html#commandName"><span class="hs-identifier hs-var">commandName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;repl&quot;</span></span><span>
+</span><span id="line-98"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandSynopsis :: String
+</span><a href="Distribution.Simple.Command.html#commandSynopsis"><span class="hs-identifier hs-var">commandSynopsis</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-99"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Open an interpreter session for the given component.&quot;</span></span><span>
+</span><span id="line-100"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDescription :: Maybe ShowS
+</span><a href="Distribution.Simple.Command.html#commandDescription"><span class="hs-identifier hs-var">commandDescription</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; Maybe ShowS
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; Maybe ShowS) -&gt; ShowS -&gt; Maybe ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679467487"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679467487"><span class="hs-identifier hs-var">pname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-101"></span><span>        </span><span class="annot"><span class="annottext">ShowS
+</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Generic.html/Distribution.Utils.Generic.html#wrapText"><span class="hs-identifier hs-var">wrapText</span></a></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-102"></span><span>          </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;If the current directory contains no package, ignores COMPONENT &quot;</span></span><span>
+</span><span id="line-103"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;parameters and opens an interactive interpreter session; if a &quot;</span></span><span>
+</span><span id="line-104"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;sandbox is present, its package database will be used.\n&quot;</span></span><span>
+</span><span id="line-105"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;\n&quot;</span></span><span>
+</span><span id="line-106"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Otherwise, (re)configures with the given or default flags, and &quot;</span></span><span>
+</span><span id="line-107"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;loads the interpreter with the relevant modules. For executables, &quot;</span></span><span>
+</span><span id="line-108"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;tests and benchmarks, loads the main module (and its &quot;</span></span><span>
+</span><span id="line-109"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;dependencies); for libraries all exposed/other modules.\n&quot;</span></span><span>
+</span><span id="line-110"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;\n&quot;</span></span><span>
+</span><span id="line-111"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;The default component is the library itself, or the executable &quot;</span></span><span>
+</span><span id="line-112"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;if that is the only component.\n&quot;</span></span><span>
+</span><span id="line-113"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;\n&quot;</span></span><span>
+</span><span id="line-114"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Support for loading specific modules is planned but not &quot;</span></span><span>
+</span><span id="line-115"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;implemented yet. For certain scenarios, `&quot;</span></span><span>
+</span><span id="line-116"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679467487"><span class="hs-identifier hs-var">pname</span></a></span><span>
+</span><span id="line-117"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot; exec -- ghci :l Foo` may be used instead. Note that `exec` will &quot;</span></span><span>
+</span><span id="line-118"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;not (re)configure and you will have to specify the location of &quot;</span></span><span>
+</span><span id="line-119"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;other modules, if required.\n&quot;</span></span><span>
+</span><span id="line-120"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandNotes :: Maybe ShowS
+</span><a href="Distribution.Simple.Command.html#commandNotes"><span class="hs-identifier hs-var">commandNotes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; Maybe ShowS
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; Maybe ShowS) -&gt; ShowS -&gt; Maybe ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679467490"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679467490"><span class="hs-identifier hs-var">pname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-121"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Examples:\n&quot;</span></span><span>
+</span><span id="line-122"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;  &quot;</span></span><span>
+</span><span id="line-123"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679467490"><span class="hs-identifier hs-var">pname</span></a></span><span>
+</span><span id="line-124"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot; repl           &quot;</span></span><span>
+</span><span id="line-125"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;    The first component in the package\n&quot;</span></span><span>
+</span><span id="line-126"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;  &quot;</span></span><span>
+</span><span id="line-127"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679467490"><span class="hs-identifier hs-var">pname</span></a></span><span>
+</span><span id="line-128"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot; repl foo       &quot;</span></span><span>
+</span><span id="line-129"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;    A named component (i.e. lib, exe, test suite)\n&quot;</span></span><span>
+</span><span id="line-130"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;  &quot;</span></span><span>
+</span><span id="line-131"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679467490"><span class="hs-identifier hs-var">pname</span></a></span><span>
+</span><span id="line-132"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot; repl --repl-options=\&quot;-lstdc++\&quot;&quot;</span></span><span>
+</span><span id="line-133"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;  Specifying flags for interpreter\n&quot;</span></span><span>
+</span><span id="line-134"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="hs-comment">-- TODO: re-enable once we have support for module/file targets</span><span>
+</span><span id="line-135"></span><span>      </span><span class="hs-comment">--        ++ &quot;  &quot; ++ pname ++ &quot; repl Foo.Bar   &quot;</span><span>
+</span><span id="line-136"></span><span>      </span><span class="hs-comment">--        ++ &quot;    A module\n&quot;</span><span>
+</span><span id="line-137"></span><span>      </span><span class="hs-comment">--        ++ &quot;  &quot; ++ pname ++ &quot; repl Foo/Bar.hs&quot;</span><span>
+</span><span id="line-138"></span><span>      </span><span class="hs-comment">--        ++ &quot;    A file\n\n&quot;</span><span>
+</span><span id="line-139"></span><span>      </span><span class="hs-comment">--        ++ &quot;If a target is ambiguous it can be qualified with the component &quot;</span><span>
+</span><span id="line-140"></span><span>      </span><span class="hs-comment">--        ++ &quot;name, e.g.\n&quot;</span><span>
+</span><span id="line-141"></span><span>      </span><span class="hs-comment">--        ++ &quot;  &quot; ++ pname ++ &quot; repl foo:Foo.Bar\n&quot;</span><span>
+</span><span id="line-142"></span><span>      </span><span class="hs-comment">--        ++ &quot;  &quot; ++ pname ++ &quot; repl testsuite1:Foo/Bar.hs\n&quot;</span><span>
+</span><span id="line-143"></span><span>      </span><span class="annot"><span class="annottext">commandUsage :: ShowS
+</span><a href="Distribution.Simple.Command.html#commandUsage"><span class="hs-identifier hs-var">commandUsage</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679467492"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679467492"><span class="hs-identifier hs-var">pname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Usage: &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679467492"><span class="hs-identifier hs-var">pname</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot; repl [COMPONENT] [FLAGS]\n&quot;</span></span><span>
+</span><span id="line-144"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDefaultFlags :: ReplFlags
+</span><a href="Distribution.Simple.Command.html#commandDefaultFlags"><span class="hs-identifier hs-var">commandDefaultFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReplFlags
+</span><a href="Distribution.Simple.Setup.Repl.html#defaultReplFlags"><span class="hs-identifier hs-var">defaultReplFlags</span></a></span><span>
+</span><span id="line-145"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandOptions :: ShowOrParseArgs -&gt; [OptionField ReplFlags]
+</span><a href="Distribution.Simple.Command.html#commandOptions"><span class="hs-identifier hs-var">commandOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679467495"><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679467495"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-146"></span><span>        </span><span class="annot"><span class="annottext">(ReplFlags -&gt; Flag Verbosity)
+-&gt; (Flag Verbosity -&gt; ReplFlags -&gt; ReplFlags)
+-&gt; OptionField ReplFlags
+forall flags.
+(flags -&gt; Flag Verbosity)
+-&gt; (Flag Verbosity -&gt; flags -&gt; flags) -&gt; OptionField flags
+</span><a href="Distribution.Simple.Setup.Common.html#optionVerbosity"><span class="hs-identifier hs-var">optionVerbosity</span></a></span><span> </span><span class="annot"><span class="annottext">ReplFlags -&gt; Flag Verbosity
+</span><a href="Distribution.Simple.Setup.Repl.html#replVerbosity"><span class="hs-identifier hs-var">replVerbosity</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467497"><span class="annot"><span class="annottext">Flag Verbosity
+</span><a href="#local-6989586621679467497"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467498"><span class="annot"><span class="annottext">ReplFlags
+</span><a href="#local-6989586621679467498"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ReplFlags
+</span><a href="#local-6989586621679467498"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#replVerbosity"><span class="hs-identifier hs-var">replVerbosity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467497"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-147"></span><span>          </span><span class="annot"><span class="annottext">OptionField ReplFlags
+-&gt; [OptionField ReplFlags] -&gt; [OptionField ReplFlags]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">(ReplFlags -&gt; Flag String)
+-&gt; (Flag String -&gt; ReplFlags -&gt; ReplFlags)
+-&gt; ShowOrParseArgs
+-&gt; OptionField ReplFlags
+forall flags.
+(flags -&gt; Flag String)
+-&gt; (Flag String -&gt; flags -&gt; flags)
+-&gt; ShowOrParseArgs
+-&gt; OptionField flags
+</span><a href="Distribution.Simple.Setup.Common.html#optionDistPref"><span class="hs-identifier hs-var">optionDistPref</span></a></span><span>
+</span><span id="line-148"></span><span>            </span><span class="annot"><span class="annottext">ReplFlags -&gt; Flag String
+</span><a href="Distribution.Simple.Setup.Repl.html#replDistPref"><span class="hs-identifier hs-var">replDistPref</span></a></span><span>
+</span><span id="line-149"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467500"><span class="annot"><span class="annottext">Flag String
+</span><a href="#local-6989586621679467500"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679467501"><span class="annot"><span class="annottext">ReplFlags
+</span><a href="#local-6989586621679467501"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ReplFlags
+</span><a href="#local-6989586621679467501"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#replDistPref"><span class="hs-identifier hs-var">replDistPref</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467500"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-150"></span><span>            </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679467495"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
+</span><span id="line-151"></span><span>          </span><span class="annot"><span class="annottext">OptionField ReplFlags
+-&gt; [OptionField ReplFlags] -&gt; [OptionField ReplFlags]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">ProgramDb
+-&gt; ShowOrParseArgs
+-&gt; (ReplFlags -&gt; [(String, String)])
+-&gt; ([(String, String)] -&gt; ReplFlags -&gt; ReplFlags)
+-&gt; [OptionField ReplFlags]
+forall flags.
+ProgramDb
+-&gt; ShowOrParseArgs
+-&gt; (flags -&gt; [(String, String)])
+-&gt; ([(String, String)] -&gt; flags -&gt; flags)
+-&gt; [OptionField flags]
+</span><a href="Distribution.Simple.Setup.Common.html#programDbPaths"><span class="hs-identifier hs-var">programDbPaths</span></a></span><span>
+</span><span id="line-152"></span><span>            </span><span class="annot"><span class="annottext">ProgramDb
+</span><a href="#local-6989586621679467482"><span class="hs-identifier hs-var">progDb</span></a></span><span>
+</span><span id="line-153"></span><span>            </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679467495"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
+</span><span id="line-154"></span><span>            </span><span class="annot"><span class="annottext">ReplFlags -&gt; [(String, String)]
+</span><a href="Distribution.Simple.Setup.Repl.html#replProgramPaths"><span class="hs-identifier hs-var">replProgramPaths</span></a></span><span>
+</span><span id="line-155"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467503"><span class="annot"><span class="annottext">[(String, String)]
+</span><a href="#local-6989586621679467503"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467504"><span class="annot"><span class="annottext">ReplFlags
+</span><a href="#local-6989586621679467504"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ReplFlags
+</span><a href="#local-6989586621679467504"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#replProgramPaths"><span class="hs-identifier hs-var">replProgramPaths</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467503"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-156"></span><span>          </span><span class="annot"><span class="annottext">[OptionField ReplFlags]
+-&gt; [OptionField ReplFlags] -&gt; [OptionField ReplFlags]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">ProgramDb
+-&gt; ShowOrParseArgs
+-&gt; (ReplFlags -&gt; [(String, [String])])
+-&gt; ([(String, [String])] -&gt; ReplFlags -&gt; ReplFlags)
+-&gt; [OptionField ReplFlags]
+forall flags.
+ProgramDb
+-&gt; ShowOrParseArgs
+-&gt; (flags -&gt; [(String, [String])])
+-&gt; ([(String, [String])] -&gt; flags -&gt; flags)
+-&gt; [OptionField flags]
+</span><a href="Distribution.Simple.Setup.Common.html#programDbOption"><span class="hs-identifier hs-var">programDbOption</span></a></span><span>
+</span><span id="line-157"></span><span>            </span><span class="annot"><span class="annottext">ProgramDb
+</span><a href="#local-6989586621679467482"><span class="hs-identifier hs-var">progDb</span></a></span><span>
+</span><span id="line-158"></span><span>            </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679467495"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
+</span><span id="line-159"></span><span>            </span><span class="annot"><span class="annottext">ReplFlags -&gt; [(String, [String])]
+</span><a href="Distribution.Simple.Setup.Repl.html#replProgramArgs"><span class="hs-identifier hs-var">replProgramArgs</span></a></span><span>
+</span><span id="line-160"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467506"><span class="annot"><span class="annottext">[(String, [String])]
+</span><a href="#local-6989586621679467506"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467507"><span class="annot"><span class="annottext">ReplFlags
+</span><a href="#local-6989586621679467507"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ReplFlags
+</span><a href="#local-6989586621679467507"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#replProgramArgs"><span class="hs-identifier hs-var">replProgramArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467506"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-161"></span><span>          </span><span class="annot"><span class="annottext">[OptionField ReplFlags]
+-&gt; [OptionField ReplFlags] -&gt; [OptionField ReplFlags]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">ProgramDb
+-&gt; ShowOrParseArgs
+-&gt; (ReplFlags -&gt; [(String, [String])])
+-&gt; ([(String, [String])] -&gt; ReplFlags -&gt; ReplFlags)
+-&gt; [OptionField ReplFlags]
+forall flags.
+ProgramDb
+-&gt; ShowOrParseArgs
+-&gt; (flags -&gt; [(String, [String])])
+-&gt; ([(String, [String])] -&gt; flags -&gt; flags)
+-&gt; [OptionField flags]
+</span><a href="Distribution.Simple.Setup.Common.html#programDbOptions"><span class="hs-identifier hs-var">programDbOptions</span></a></span><span>
+</span><span id="line-162"></span><span>            </span><span class="annot"><span class="annottext">ProgramDb
+</span><a href="#local-6989586621679467482"><span class="hs-identifier hs-var">progDb</span></a></span><span>
+</span><span id="line-163"></span><span>            </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679467495"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
+</span><span id="line-164"></span><span>            </span><span class="annot"><span class="annottext">ReplFlags -&gt; [(String, [String])]
+</span><a href="Distribution.Simple.Setup.Repl.html#replProgramArgs"><span class="hs-identifier hs-var">replProgramArgs</span></a></span><span>
+</span><span id="line-165"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467509"><span class="annot"><span class="annottext">[(String, [String])]
+</span><a href="#local-6989586621679467509"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467510"><span class="annot"><span class="annottext">ReplFlags
+</span><a href="#local-6989586621679467510"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ReplFlags
+</span><a href="#local-6989586621679467510"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#replProgramArgs"><span class="hs-identifier hs-var">replProgramArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467509"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-166"></span><span>          </span><span class="annot"><span class="annottext">[OptionField ReplFlags]
+-&gt; [OptionField ReplFlags] -&gt; [OptionField ReplFlags]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679467495"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-167"></span><span>            </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="Distribution.Simple.Command.html#ParseArgs"><span class="hs-identifier hs-var">ParseArgs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-168"></span><span>              </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [String]
+-&gt; String
+-&gt; (ReplFlags -&gt; Flag Bool)
+-&gt; (Flag Bool -&gt; ReplFlags -&gt; ReplFlags)
+-&gt; MkOptDescr
+     (ReplFlags -&gt; Flag Bool)
+     (Flag Bool -&gt; ReplFlags -&gt; ReplFlags)
+     ReplFlags
+-&gt; OptionField ReplFlags
+forall get set a.
+String
+-&gt; [String]
+-&gt; String
+-&gt; get
+-&gt; set
+-&gt; MkOptDescr get set a
+-&gt; OptionField a
+</span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
+</span><span id="line-169"></span><span>                  </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;&quot;</span></span><span>
+</span><span id="line-170"></span><span>                  </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;reload&quot;</span></span><span class="hs-special">]</span><span>
+</span><span id="line-171"></span><span>                  </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Used from within an interpreter to update files.&quot;</span></span><span>
+</span><span id="line-172"></span><span>                  </span><span class="annot"><span class="annottext">ReplFlags -&gt; Flag Bool
+</span><a href="Distribution.Simple.Setup.Repl.html#replReload"><span class="hs-identifier hs-var">replReload</span></a></span><span>
+</span><span id="line-173"></span><span>                  </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467513"><span class="annot"><span class="annottext">Flag Bool
+</span><a href="#local-6989586621679467513"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467514"><span class="annot"><span class="annottext">ReplFlags
+</span><a href="#local-6989586621679467514"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ReplFlags
+</span><a href="#local-6989586621679467514"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#replReload"><span class="hs-identifier hs-var">replReload</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467513"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-174"></span><span>                  </span><span class="annot"><span class="annottext">MkOptDescr
+  (ReplFlags -&gt; Flag Bool)
+  (Flag Bool -&gt; ReplFlags -&gt; ReplFlags)
+  ReplFlags
+forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
+</span><a href="Distribution.Simple.Setup.Common.html#trueArg"><span class="hs-identifier hs-var">trueArg</span></a></span><span>
+</span><span id="line-175"></span><span>              </span><span class="hs-special">]</span><span>
+</span><span id="line-176"></span><span>            </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-177"></span><span>          </span><span class="annot"><span class="annottext">[OptionField ReplFlags]
+-&gt; [OptionField ReplFlags] -&gt; [OptionField ReplFlags]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">(OptionField ReplOptions -&gt; OptionField ReplFlags)
+-&gt; [OptionField ReplOptions] -&gt; [OptionField ReplFlags]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">OptionField ReplOptions -&gt; OptionField ReplFlags
+</span><a href="#local-6989586621679467516"><span class="hs-identifier hs-var">liftReplOption</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ShowOrParseArgs -&gt; [OptionField ReplOptions]
+</span><a href="Distribution.Simple.Setup.Repl.html#replOptions"><span class="hs-identifier hs-var">replOptions</span></a></span><span> </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679467495"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-178"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-179"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-180"></span><span>    </span><span id="local-6989586621679467516"><span class="annot"><span class="annottext">liftReplOption :: OptionField ReplOptions -&gt; OptionField ReplFlags
+</span><a href="#local-6989586621679467516"><span class="hs-identifier hs-var hs-var">liftReplOption</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(ReplFlags -&gt; ReplOptions)
+-&gt; (ReplOptions -&gt; ReplFlags -&gt; ReplFlags)
+-&gt; OptionField ReplOptions
+-&gt; OptionField ReplFlags
+forall b a.
+(b -&gt; a) -&gt; (a -&gt; b -&gt; b) -&gt; OptionField a -&gt; OptionField b
+</span><a href="Distribution.Simple.Command.html#liftOption"><span class="hs-identifier hs-var">liftOption</span></a></span><span> </span><span class="annot"><span class="annottext">ReplFlags -&gt; ReplOptions
+</span><a href="Distribution.Simple.Setup.Repl.html#replReplOptions"><span class="hs-identifier hs-var">replReplOptions</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467518"><span class="annot"><span class="annottext">ReplOptions
+</span><a href="#local-6989586621679467518"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467519"><span class="annot"><span class="annottext">ReplFlags
+</span><a href="#local-6989586621679467519"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ReplFlags
+</span><a href="#local-6989586621679467519"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#replReplOptions"><span class="hs-identifier hs-var">replReplOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467518"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-181"></span><span>
+</span><span id="line-182"></span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#replOptions"><span class="hs-identifier hs-type">replOptions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#ShowOrParseArgs"><span class="hs-identifier hs-type">ShowOrParseArgs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Distribution.Simple.Command.html#OptionField"><span class="hs-identifier hs-type">OptionField</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#ReplOptions"><span class="hs-identifier hs-type">ReplOptions</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-183"></span><span id="replOptions"><span class="annot"><span class="annottext">replOptions :: ShowOrParseArgs -&gt; [OptionField ReplOptions]
+</span><a href="Distribution.Simple.Setup.Repl.html#replOptions"><span class="hs-identifier hs-var hs-var">replOptions</span></a></span></span><span> </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-184"></span><span>  </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [String]
+-&gt; String
+-&gt; (ReplOptions -&gt; Flag Bool)
+-&gt; (Flag Bool -&gt; ReplOptions -&gt; ReplOptions)
+-&gt; MkOptDescr
+     (ReplOptions -&gt; Flag Bool)
+     (Flag Bool -&gt; ReplOptions -&gt; ReplOptions)
+     ReplOptions
+-&gt; OptionField ReplOptions
+forall get set a.
+String
+-&gt; [String]
+-&gt; String
+-&gt; get
+-&gt; set
+-&gt; MkOptDescr get set a
+-&gt; OptionField a
+</span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
+</span><span id="line-185"></span><span>      </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-186"></span><span>      </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;repl-no-load&quot;</span></span><span class="hs-special">]</span><span>
+</span><span id="line-187"></span><span>      </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Disable loading of project modules at REPL startup.&quot;</span></span><span>
+</span><span id="line-188"></span><span>      </span><span class="annot"><span class="annottext">ReplOptions -&gt; Flag Bool
+</span><a href="Distribution.Simple.Setup.Repl.html#replOptionsNoLoad"><span class="hs-identifier hs-var">replOptionsNoLoad</span></a></span><span>
+</span><span id="line-189"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467520"><span class="annot"><span class="annottext">Flag Bool
+</span><a href="#local-6989586621679467520"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679467521"><span class="annot"><span class="annottext">ReplOptions
+</span><a href="#local-6989586621679467521"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ReplOptions
+</span><a href="#local-6989586621679467521"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#replOptionsNoLoad"><span class="hs-identifier hs-var">replOptionsNoLoad</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467520"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-190"></span><span>      </span><span class="annot"><span class="annottext">MkOptDescr
+  (ReplOptions -&gt; Flag Bool)
+  (Flag Bool -&gt; ReplOptions -&gt; ReplOptions)
+  ReplOptions
+forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
+</span><a href="Distribution.Simple.Setup.Common.html#trueArg"><span class="hs-identifier hs-var">trueArg</span></a></span><span>
+</span><span id="line-191"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [String]
+-&gt; String
+-&gt; (ReplOptions -&gt; [String])
+-&gt; ([String] -&gt; ReplOptions -&gt; ReplOptions)
+-&gt; MkOptDescr
+     (ReplOptions -&gt; [String])
+     ([String] -&gt; ReplOptions -&gt; ReplOptions)
+     ReplOptions
+-&gt; OptionField ReplOptions
+forall get set a.
+String
+-&gt; [String]
+-&gt; String
+-&gt; get
+-&gt; set
+-&gt; MkOptDescr get set a
+-&gt; OptionField a
+</span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
+</span><span id="line-192"></span><span>      </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-193"></span><span>      </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;repl-options&quot;</span></span><span class="hs-special">]</span><span>
+</span><span id="line-194"></span><span>      </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Use the option(s) for the repl&quot;</span></span><span>
+</span><span id="line-195"></span><span>      </span><span class="annot"><span class="annottext">ReplOptions -&gt; [String]
+</span><a href="Distribution.Simple.Setup.Repl.html#replOptionsFlags"><span class="hs-identifier hs-var">replOptionsFlags</span></a></span><span>
+</span><span id="line-196"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467522"><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679467522"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679467523"><span class="annot"><span class="annottext">ReplOptions
+</span><a href="#local-6989586621679467523"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ReplOptions
+</span><a href="#local-6989586621679467523"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#replOptionsFlags"><span class="hs-identifier hs-var">replOptionsFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467522"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-197"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+-&gt; ReadE [String]
+-&gt; ([String] -&gt; [String])
+-&gt; MkOptDescr
+     (ReplOptions -&gt; [String])
+     ([String] -&gt; ReplOptions -&gt; ReplOptions)
+     ReplOptions
+forall b a.
+Monoid b =&gt;
+String
+-&gt; ReadE b
+-&gt; (b -&gt; [String])
+-&gt; MkOptDescr (a -&gt; b) (b -&gt; a -&gt; a) a
+</span><a href="Distribution.Simple.Command.html#reqArg"><span class="hs-identifier hs-var">reqArg</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;FLAG&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(String -&gt; [String]) -&gt; ReadE [String]
+forall a. (String -&gt; a) -&gt; ReadE a
+</span><a href="Distribution.ReadE.html#succeedReadE"><span class="hs-identifier hs-var">succeedReadE</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String]
+</span><span class="hs-identifier hs-var">words</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[String] -&gt; [String]
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span class="hs-special">)</span><span>
+</span><span id="line-198"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [String]
+-&gt; String
+-&gt; (ReplOptions -&gt; Flag String)
+-&gt; (Flag String -&gt; ReplOptions -&gt; ReplOptions)
+-&gt; MkOptDescr
+     (ReplOptions -&gt; Flag String)
+     (Flag String -&gt; ReplOptions -&gt; ReplOptions)
+     ReplOptions
+-&gt; OptionField ReplOptions
+forall get set a.
+String
+-&gt; [String]
+-&gt; String
+-&gt; get
+-&gt; set
+-&gt; MkOptDescr get set a
+-&gt; OptionField a
+</span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
+</span><span id="line-199"></span><span>      </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-200"></span><span>      </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;repl-multi-file&quot;</span></span><span class="hs-special">]</span><span>
+</span><span id="line-201"></span><span>      </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Write repl options to this directory rather than starting repl mode&quot;</span></span><span>
+</span><span id="line-202"></span><span>      </span><span class="annot"><span class="annottext">ReplOptions -&gt; Flag String
+</span><a href="Distribution.Simple.Setup.Repl.html#replOptionsFlagOutput"><span class="hs-identifier hs-var">replOptionsFlagOutput</span></a></span><span>
+</span><span id="line-203"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467528"><span class="annot"><span class="annottext">Flag String
+</span><a href="#local-6989586621679467528"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679467529"><span class="annot"><span class="annottext">ReplOptions
+</span><a href="#local-6989586621679467529"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ReplOptions
+</span><a href="#local-6989586621679467529"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Repl.html#replOptionsFlagOutput"><span class="hs-identifier hs-var">replOptionsFlagOutput</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467528"><span class="hs-identifier hs-type">p</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-204"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+-&gt; ReadE (Flag String)
+-&gt; (Flag String -&gt; [String])
+-&gt; MkOptDescr
+     (ReplOptions -&gt; Flag String)
+     (Flag String -&gt; ReplOptions -&gt; ReplOptions)
+     ReplOptions
+forall b a.
+Monoid b =&gt;
+String
+-&gt; ReadE b
+-&gt; (b -&gt; [String])
+-&gt; MkOptDescr (a -&gt; b) (b -&gt; a -&gt; a) a
+</span><a href="Distribution.Simple.Command.html#reqArg"><span class="hs-identifier hs-var">reqArg</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;DIR&quot;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(String -&gt; Flag String) -&gt; ReadE (Flag String)
+forall a. (String -&gt; a) -&gt; ReadE a
+</span><a href="Distribution.ReadE.html#succeedReadE"><span class="hs-identifier hs-var">succeedReadE</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; Flag String
+forall a. a -&gt; Flag a
+</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Flag String -&gt; [String]
+forall a. Flag a -&gt; [a]
+</span><a href="Distribution.Simple.Flag.html#flagToList"><span class="hs-identifier hs-var">flagToList</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-205"></span><span>  </span><span class="hs-special">]</span><span>
+</span><span id="line-206"></span></pre></body></html>

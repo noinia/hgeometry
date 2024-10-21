@@ -8,7 +8,7 @@
 --   <tt>ghci</tt> interactive shell and <tt>iserv</tt>, GHC's
 --   out-of-process interpreter backend.
 @package ghci
-@version 9.6.4
+@version 9.10.1
 
 
 -- | Efficient serialisation for GHCi Instruction arrays
@@ -26,7 +26,7 @@ getArray :: (Binary i, Ix i, MArray IOUArray a IO) => Get (UArray i a)
 -- | Break Arrays
 --   
 --   An array of words, indexed by a breakpoint number (breakpointId in
---   Tickish) containing the ignore count for every breakpopint. There is
+--   Tickish) containing the ignore count for every breakpoint. There is
 --   one of these arrays per module.
 --   
 --   For each word with value n: n &gt; 1 : the corresponding breakpoint is
@@ -64,12 +64,12 @@ FFIStdCall :: FFIConv
 data C_ffi_cif
 prepForeignCall :: FFIConv -> [FFIType] -> FFIType -> IO (Ptr C_ffi_cif)
 freeForeignCallInfo :: Ptr C_ffi_cif -> IO ()
-instance Data.Binary.Class.Binary GHCi.FFI.FFIType
-instance GHC.Generics.Generic GHCi.FFI.FFIType
-instance GHC.Show.Show GHCi.FFI.FFIType
 instance Data.Binary.Class.Binary GHCi.FFI.FFIConv
-instance GHC.Generics.Generic GHCi.FFI.FFIConv
-instance GHC.Show.Show GHCi.FFI.FFIConv
+instance Data.Binary.Class.Binary GHCi.FFI.FFIType
+instance GHC.Internal.Generics.Generic GHCi.FFI.FFIConv
+instance GHC.Internal.Generics.Generic GHCi.FFI.FFIType
+instance GHC.Internal.Show.Show GHCi.FFI.FFIConv
+instance GHC.Internal.Show.Show GHCi.FFI.FFIType
 
 
 -- | Run-time info table support. This module provides support for creating
@@ -91,49 +91,51 @@ RemotePtr :: Word64 -> RemotePtr a
 toRemotePtr :: Ptr a -> RemotePtr a
 fromRemotePtr :: RemotePtr a -> Ptr a
 castRemotePtr :: RemotePtr a -> RemotePtr b
-newtype HValue
-HValue :: Any -> HValue
 
--- | A reference to a remote value. These are allocated and freed
---   explicitly.
-data RemoteRef a
+-- | A reference to a heap object. Potentially in a remote heap! These are
+--   allocated and freed explicitly.
+newtype RemoteRef a
+RemoteRef :: RemotePtr () -> RemoteRef a
 
 -- | Make a reference to a local value that we can send remotely. This
 --   reference will keep the value that it refers to alive until
 --   <a>freeRemoteRef</a> is called.
 mkRemoteRef :: a -> IO (RemoteRef a)
 
--- | Convert an HValueRef to an HValue. Should only be used if the HValue
---   originated in this process.
+-- | Convert a RemoteRef to its carried type. Should only be used if the
+--   RemoteRef originated in this process.
 localRef :: RemoteRef a -> IO a
 
--- | Release an HValueRef that originated in this process
+-- | Release a RemoteRef that originated in this process
 freeRemoteRef :: RemoteRef a -> IO ()
-type HValueRef = RemoteRef HValue
-toHValueRef :: RemoteRef a -> RemoteRef HValue
+castRemoteRef :: RemoteRef a -> RemoteRef b
 
--- | An HValueRef with a finalizer
+-- | An RemoteRef with a finalizer
 data ForeignRef a
 
 -- | Create a <a>ForeignRef</a> from a <a>RemoteRef</a>. The finalizer
---   should arrange to call <tt>freeHValueRef</tt> on the <a>HValueRef</a>.
+--   should arrange to call <a>freeRemoteRef</a> on the <a>RemoteRef</a>.
 --   (since this function needs to be called in the process that created
---   the <a>HValueRef</a>, it cannot be called directly from the
+--   the <a>RemoteRef</a>, it cannot be called directly from the
 --   finalizer).
 mkForeignRef :: RemoteRef a -> IO () -> IO (ForeignRef a)
 
--- | Use a <a>ForeignHValue</a>
+-- | Use a <a>ForeignRef</a>
 withForeignRef :: ForeignRef a -> (RemoteRef a -> IO b) -> IO b
-type ForeignHValue = ForeignRef HValue
-unsafeForeignRefToRemoteRef :: ForeignRef a -> RemoteRef a
 finalizeForeignRef :: ForeignRef a -> IO ()
-instance Data.Binary.Class.Binary (GHCi.RemoteTypes.RemoteRef a)
-instance GHC.Show.Show (GHCi.RemoteTypes.RemoteRef a)
-instance GHC.Show.Show (GHCi.RemoteTypes.RemotePtr a)
+castForeignRef :: ForeignRef a -> ForeignRef b
+unsafeForeignRefToRemoteRef :: ForeignRef a -> RemoteRef a
+newtype HValue
+HValue :: (Any :: Type) -> HValue
+type HValueRef = RemoteRef HValue
+type ForeignHValue = ForeignRef HValue
 instance Data.Binary.Class.Binary (GHCi.RemoteTypes.RemotePtr a)
-instance Control.DeepSeq.NFData (GHCi.RemoteTypes.RemotePtr a)
+instance Data.Binary.Class.Binary (GHCi.RemoteTypes.RemoteRef a)
 instance Control.DeepSeq.NFData (GHCi.RemoteTypes.ForeignRef a)
-instance GHC.Show.Show GHCi.RemoteTypes.HValue
+instance Control.DeepSeq.NFData (GHCi.RemoteTypes.RemotePtr a)
+instance GHC.Internal.Show.Show GHCi.RemoteTypes.HValue
+instance GHC.Internal.Show.Show (GHCi.RemoteTypes.RemotePtr a)
+instance GHC.Internal.Show.Show (GHCi.RemoteTypes.RemoteRef a)
 
 
 -- | Primarily, this module consists of an interface to the C-land dynamic
@@ -211,12 +213,12 @@ ResolvedBCOPtrBCO :: ResolvedBCO -> ResolvedBCOPtr
 -- | Resolves to the MutableArray# inside the BreakArray
 ResolvedBCOPtrBreakArray :: {-# UNPACK #-} !RemoteRef BreakArray -> ResolvedBCOPtr
 isLittleEndian :: Bool
-instance GHC.Show.Show GHCi.ResolvedBCO.ResolvedBCO
-instance GHC.Generics.Generic GHCi.ResolvedBCO.ResolvedBCO
-instance GHC.Show.Show GHCi.ResolvedBCO.ResolvedBCOPtr
-instance GHC.Generics.Generic GHCi.ResolvedBCO.ResolvedBCOPtr
 instance Data.Binary.Class.Binary GHCi.ResolvedBCO.ResolvedBCO
 instance Data.Binary.Class.Binary GHCi.ResolvedBCO.ResolvedBCOPtr
+instance GHC.Internal.Generics.Generic GHCi.ResolvedBCO.ResolvedBCO
+instance GHC.Internal.Generics.Generic GHCi.ResolvedBCO.ResolvedBCOPtr
+instance GHC.Internal.Show.Show GHCi.ResolvedBCO.ResolvedBCO
+instance GHC.Internal.Show.Show GHCi.ResolvedBCO.ResolvedBCOPtr
 
 
 -- | Create real byte-code objects from <a>ResolvedBCO</a>s.
@@ -237,61 +239,63 @@ module GHCi.StaticPtrTable
 sptAddEntry :: Fingerprint -> HValue -> IO ()
 
 module GHCi.TH.Binary
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Loc
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Name
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.ModName
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.NameFlavour
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.PkgName
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.NameSpace
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Module
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Info
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Type
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.TyLit
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Specificity
-instance Data.Binary.Class.Binary flag => Data.Binary.Class.Binary (Language.Haskell.TH.Syntax.TyVarBndr flag)
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Role
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Lit
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Range
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Stmt
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Pat
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Exp
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.AnnLookup
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.AnnTarget
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Bang
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.BndrVis
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Body
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Bytes
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Callconv
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Clause
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Con
 instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Dec
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Overlap
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.DecidedStrictness
 instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.DerivClause
 instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.DerivStrategy
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Guard
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Body
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Match
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Fixity
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.TySynEqn
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.FunDep
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.AnnTarget
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.RuleBndr
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Phases
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.RuleMatch
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Inline
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Pragma
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Safety
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Callconv
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Foreign
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Bang
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.SourceUnpackedness
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.SourceStrictness
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.DecidedStrictness
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.FixityDirection
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.OccName
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Con
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.AnnLookup
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.ModuleInfo
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Clause
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.InjectivityAnn
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.FamilyResultSig
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.TypeFamilyHead
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.PatSynDir
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.PatSynArgs
 instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.DocLoc
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Exp
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.FamilyResultSig
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Fixity
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.FixityDirection
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Foreign
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.FunDep
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Guard
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Info
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.InjectivityAnn
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Inline
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Lit
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Loc
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Match
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.ModName
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Module
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.ModuleInfo
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Name
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.NameFlavour
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.NameSpace
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.NamespaceSpecifier
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.OccName
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Overlap
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Pat
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.PatSynArgs
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.PatSynDir
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Phases
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.PkgName
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Pragma
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Range
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Role
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.RuleBndr
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.RuleMatch
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Safety
 instance Data.Binary.Class.Binary GHC.Serialized.Serialized
-instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Bytes
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.SourceStrictness
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.SourceUnpackedness
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Specificity
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Stmt
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.TyLit
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.TySynEqn
+instance Data.Binary.Class.Binary flag => Data.Binary.Class.Binary (Language.Haskell.TH.Syntax.TyVarBndr flag)
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.Type
+instance Data.Binary.Class.Binary Language.Haskell.TH.Syntax.TypeFamilyHead
 
 
 -- | Remote GHCi message types and serialization.
@@ -319,11 +323,11 @@ data Message a
 [ResolveObjs] :: Message Bool
 [FindSystemLibrary] :: String -> Message (Maybe String)
 
--- | Create a set of BCO objects, and return HValueRefs to them Note: Each
---   ByteString contains a Binary-encoded [ResolvedBCO], not a ResolvedBCO.
---   The list is to allow us to serialise the ResolvedBCOs in parallel. See
---   <tt>createBCOs</tt> in compiler<i>GHC</i>Runtime/Interpreter.hs.
-[CreateBCOs] :: [ByteString] -> Message [HValueRef]
+-- | Create a set of BCO objects, and return HValueRefs to them See
+--   <tt>createBCOs</tt> in compiler<i>GHC</i>Runtime/Interpreter.hs. NB:
+--   this has a custom Binary behavior, see Note [Parallelize CreateBCOs
+--   serialization]
+[CreateBCOs] :: [ResolvedBCO] -> Message [HValueRef]
 
 -- | Release <a>HValueRef</a>s
 [FreeHValueRefs] :: [HValueRef] -> Message ()
@@ -345,10 +349,10 @@ data Message a
 [MkConInfoTable] :: Bool -> Int -> Int -> Int -> Int -> ByteString -> Message (RemotePtr StgInfoTable)
 
 -- | Evaluate a statement
-[EvalStmt] :: EvalOpts -> EvalExpr HValueRef -> Message (EvalStatus [HValueRef])
+[EvalStmt] :: EvalOpts -> EvalExpr HValueRef -> Message (EvalStatus_ [HValueRef] [HValueRef])
 
 -- | Resume evaluation of a statement after a breakpoint
-[ResumeStmt] :: EvalOpts -> RemoteRef (ResumeContext [HValueRef]) -> Message (EvalStatus [HValueRef])
+[ResumeStmt] :: EvalOpts -> RemoteRef (ResumeContext [HValueRef]) -> Message (EvalStatus_ [HValueRef] [HValueRef])
 
 -- | Abandon evaluation of a statement after a breakpoint
 [AbandonStmt] :: RemoteRef (ResumeContext [HValueRef]) -> Message ()
@@ -402,10 +406,14 @@ data Message a
 [GetClosure] :: HValueRef -> Message (GenClosure HValueRef)
 
 -- | Evaluate something. This is used to support :force in GHCi.
-[Seq] :: HValueRef -> Message (EvalStatus ())
+[Seq] :: HValueRef -> Message (EvalStatus_ () ())
 
 -- | Resume forcing a free variable in a breakpoint (#2950)
-[ResumeSeq] :: RemoteRef (ResumeContext ()) -> Message (EvalStatus ())
+[ResumeSeq] :: RemoteRef (ResumeContext ()) -> Message (EvalStatus_ () ())
+
+-- | Allocate a string for a breakpoint module name. This uses an empty
+--   dummy type because <tt>ModuleName</tt> isn't available here.
+[NewBreakModule] :: String -> Message (RemotePtr BreakModule)
 data Msg
 Msg :: Message a -> Msg
 
@@ -458,7 +466,7 @@ QException :: String -> QResult a
 QFail :: String -> QResult a
 data EvalStatus_ a b
 EvalComplete :: Word64 -> EvalResult a -> EvalStatus_ a b
-EvalBreak :: Bool -> HValueRef -> Int -> Int -> RemoteRef (ResumeContext b) -> RemotePtr CostCentreStack -> EvalStatus_ a b
+EvalBreak :: HValueRef -> Maybe EvalBreakpoint -> RemoteRef (ResumeContext b) -> RemotePtr CostCentreStack -> EvalStatus_ a b
 type EvalStatus a = EvalStatus_ a a
 data EvalResult a
 EvalException :: SerializableException -> EvalResult a
@@ -478,6 +486,8 @@ EvalOpts :: Bool -> Bool -> Bool -> Bool -> EvalOpts
 data EvalExpr a
 EvalThis :: a -> EvalExpr a
 EvalApp :: EvalExpr a -> EvalExpr a -> EvalExpr a
+data EvalBreakpoint
+EvalBreakpoint :: Int -> String -> EvalBreakpoint
 data SerializableException
 EUserInterrupt :: SerializableException
 EExitCode :: ExitCode -> SerializableException
@@ -525,48 +535,55 @@ remoteCall :: Binary a => Pipe -> Message a -> IO a
 remoteTHCall :: Binary a => Pipe -> THMessage a -> IO a
 readPipe :: Pipe -> Get a -> IO a
 writePipe :: Pipe -> Put -> IO ()
-instance GHC.Show.Show a => GHC.Show.Show (GHCi.Message.QResult a)
-instance GHC.Generics.Generic (GHCi.Message.QResult a)
-instance GHC.Show.Show GHCi.Message.EvalOpts
-instance GHC.Generics.Generic GHCi.Message.EvalOpts
-instance GHC.Show.Show a => GHC.Show.Show (GHCi.Message.EvalExpr a)
-instance GHC.Generics.Generic (GHCi.Message.EvalExpr a)
-instance GHC.Show.Show GHCi.Message.SerializableException
-instance GHC.Generics.Generic GHCi.Message.SerializableException
-instance GHC.Show.Show a => GHC.Show.Show (GHCi.Message.EvalResult a)
-instance GHC.Generics.Generic (GHCi.Message.EvalResult a)
-instance GHC.Show.Show a => GHC.Show.Show (GHCi.Message.EvalStatus_ a b)
-instance GHC.Generics.Generic (GHCi.Message.EvalStatus_ a b)
-instance GHC.Show.Show a => GHC.Show.Show (GHCi.Message.THResult a)
-instance GHC.Generics.Generic (GHCi.Message.THResult a)
-instance GHC.Generics.Generic GHCi.Message.THResultType
-instance GHC.Show.Show GHCi.Message.THResultType
-instance GHC.Enum.Enum GHCi.Message.THResultType
-instance GHC.Show.Show (GHCi.Message.Message a)
-instance GHC.Show.Show (GHCi.Message.THMessage a)
-instance GHC.Show.Show GHCi.Message.QState
-instance Data.Binary.Class.Binary GHCi.Message.THResultType
-instance Data.Binary.Class.Binary a => Data.Binary.Class.Binary (GHCi.Message.THResult a)
-instance Data.Binary.Class.Binary a => Data.Binary.Class.Binary (GHCi.Message.EvalStatus_ a b)
-instance Data.Binary.Class.Binary a => Data.Binary.Class.Binary (GHCi.Message.EvalResult a)
-instance Data.Binary.Class.Binary GHCi.Message.SerializableException
+
+-- | A dummy type that tags the pointer to a breakpoint's
+--   <tt>ModuleName</tt>, because that type isn't available here.
+data BreakModule
+instance Data.Binary.Class.Binary GHC.Internal.ClosureTypes.ClosureType
+instance Data.Binary.Class.Binary GHC.Exts.Heap.ProfInfo.Types.CostCentre
+instance Data.Binary.Class.Binary GHC.Exts.Heap.ProfInfo.Types.CostCentreStack
+instance Data.Binary.Class.Binary GHCi.Message.EvalBreakpoint
 instance Data.Binary.Class.Binary a => Data.Binary.Class.Binary (GHCi.Message.EvalExpr a)
 instance Data.Binary.Class.Binary GHCi.Message.EvalOpts
-instance Data.Binary.Class.Binary a => Data.Binary.Class.Binary (GHCi.Message.QResult a)
-instance Data.Binary.Class.Binary GHC.IO.Exception.ExitCode
-instance Data.Binary.Class.Binary (GHC.Ptr.Ptr a)
-instance Data.Binary.Class.Binary (GHC.Ptr.FunPtr a)
-instance Data.Binary.Class.Binary GHC.Exts.Heap.ProfInfo.Types.StgTSOProfInfo
-instance Data.Binary.Class.Binary GHC.Exts.Heap.ProfInfo.Types.CostCentreStack
-instance Data.Binary.Class.Binary GHC.Exts.Heap.ProfInfo.Types.CostCentre
+instance Data.Binary.Class.Binary a => Data.Binary.Class.Binary (GHCi.Message.EvalResult a)
+instance Data.Binary.Class.Binary a => Data.Binary.Class.Binary (GHCi.Message.EvalStatus_ a b)
+instance Data.Binary.Class.Binary GHC.Internal.IO.Exception.ExitCode
+instance Data.Binary.Class.Binary (GHC.Internal.Ptr.FunPtr a)
+instance Data.Binary.Class.Binary a => Data.Binary.Class.Binary (GHC.Exts.Heap.Closures.GenClosure a)
 instance Data.Binary.Class.Binary GHC.Exts.Heap.ProfInfo.Types.IndexTable
+instance Data.Binary.Class.Binary GHC.Exts.Heap.Closures.PrimType
+instance Data.Binary.Class.Binary (GHC.Internal.Ptr.Ptr a)
+instance Data.Binary.Class.Binary a => Data.Binary.Class.Binary (GHCi.Message.QResult a)
+instance Data.Binary.Class.Binary GHCi.Message.SerializableException
+instance Data.Binary.Class.Binary GHC.Exts.Heap.InfoTable.Types.StgInfoTable
+instance Data.Binary.Class.Binary GHC.Exts.Heap.ProfInfo.Types.StgTSOProfInfo
+instance Data.Binary.Class.Binary a => Data.Binary.Class.Binary (GHCi.Message.THResult a)
+instance Data.Binary.Class.Binary GHCi.Message.THResultType
+instance Data.Binary.Class.Binary GHC.Exts.Heap.Closures.TsoFlags
 instance Data.Binary.Class.Binary GHC.Exts.Heap.Closures.WhatNext
 instance Data.Binary.Class.Binary GHC.Exts.Heap.Closures.WhyBlocked
-instance Data.Binary.Class.Binary GHC.Exts.Heap.Closures.TsoFlags
-instance Data.Binary.Class.Binary GHC.Exts.Heap.InfoTable.Types.StgInfoTable
-instance Data.Binary.Class.Binary GHC.Exts.Heap.ClosureTypes.ClosureType
-instance Data.Binary.Class.Binary GHC.Exts.Heap.Closures.PrimType
-instance Data.Binary.Class.Binary a => Data.Binary.Class.Binary (GHC.Exts.Heap.Closures.GenClosure a)
+instance GHC.Internal.Enum.Enum GHCi.Message.THResultType
+instance GHC.Internal.Generics.Generic GHCi.Message.EvalBreakpoint
+instance GHC.Internal.Generics.Generic (GHCi.Message.EvalExpr a)
+instance GHC.Internal.Generics.Generic GHCi.Message.EvalOpts
+instance GHC.Internal.Generics.Generic (GHCi.Message.EvalResult a)
+instance GHC.Internal.Generics.Generic (GHCi.Message.EvalStatus_ a b)
+instance GHC.Internal.Generics.Generic (GHCi.Message.QResult a)
+instance GHC.Internal.Generics.Generic GHCi.Message.SerializableException
+instance GHC.Internal.Generics.Generic (GHCi.Message.THResult a)
+instance GHC.Internal.Generics.Generic GHCi.Message.THResultType
+instance GHC.Internal.Show.Show GHCi.Message.EvalBreakpoint
+instance GHC.Internal.Show.Show a => GHC.Internal.Show.Show (GHCi.Message.EvalExpr a)
+instance GHC.Internal.Show.Show GHCi.Message.EvalOpts
+instance GHC.Internal.Show.Show a => GHC.Internal.Show.Show (GHCi.Message.EvalResult a)
+instance GHC.Internal.Show.Show a => GHC.Internal.Show.Show (GHCi.Message.EvalStatus_ a b)
+instance GHC.Internal.Show.Show (GHCi.Message.Message a)
+instance GHC.Internal.Show.Show a => GHC.Internal.Show.Show (GHCi.Message.QResult a)
+instance GHC.Internal.Show.Show GHCi.Message.QState
+instance GHC.Internal.Show.Show GHCi.Message.SerializableException
+instance GHC.Internal.Show.Show (GHCi.Message.THMessage a)
+instance GHC.Internal.Show.Show a => GHC.Internal.Show.Show (GHCi.Message.THResult a)
+instance GHC.Internal.Show.Show GHCi.Message.THResultType
 
 
 -- | Running TH splices
@@ -587,14 +604,14 @@ runTH :: Pipe -> RemoteRef (IORef QState) -> HValueRef -> THResultType -> Maybe 
 -- | The exception thrown by "fail" in the GHCiQ monad
 data GHCiQException
 GHCiQException :: QState -> String -> GHCiQException
-instance GHC.Show.Show GHCi.TH.GHCiQException
-instance GHC.Exception.Type.Exception GHCi.TH.GHCiQException
-instance Control.Monad.Fail.MonadFail GHCi.TH.GHCiQ
-instance Language.Haskell.TH.Syntax.Quasi GHCi.TH.GHCiQ
-instance GHC.Base.Functor GHCi.TH.GHCiQ
-instance GHC.Base.Applicative GHCi.TH.GHCiQ
-instance GHC.Base.Monad GHCi.TH.GHCiQ
+instance GHC.Internal.Base.Applicative GHCi.TH.GHCiQ
+instance GHC.Internal.Exception.Type.Exception GHCi.TH.GHCiQException
+instance GHC.Internal.Base.Functor GHCi.TH.GHCiQ
+instance GHC.Internal.Control.Monad.Fail.MonadFail GHCi.TH.GHCiQ
+instance GHC.Internal.Base.Monad GHCi.TH.GHCiQ
 instance Control.Monad.IO.Class.MonadIO GHCi.TH.GHCiQ
+instance Language.Haskell.TH.Syntax.Quasi GHCi.TH.GHCiQ
+instance GHC.Internal.Show.Show GHCi.TH.GHCiQException
 
 
 -- | Execute GHCi messages.
@@ -604,3 +621,19 @@ instance Control.Monad.IO.Class.MonadIO GHCi.TH.GHCiQ
 module GHCi.Run
 run :: Message a -> IO a
 redirectInterrupts :: ThreadId -> IO a -> IO a
+
+module GHCi.Utils
+
+-- | Gets a GHC Handle File description from the given OS Handle or POSIX
+--   fd.
+getGhcHandle :: CInt -> IO Handle
+
+-- | Read a handle passed on the command-line and prepare it to be used
+--   with the IO manager
+readGhcHandle :: String -> IO Handle
+
+module GHCi.Server
+serv :: Bool -> MessageHook -> Pipe -> (forall a. () => IO a -> IO a) -> IO ()
+
+-- | Default server
+defaultServer :: IO ()

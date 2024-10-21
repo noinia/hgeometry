@@ -40,7 +40,7 @@
 --   However, this isn't generally the case. Consider instead the error and
 --   state effects, as exemplified by <a>MaybeT</a> and <a>StateT</a>
 --   respectively. If we have <tt><a>MaybeT</a> (<a>State</a> s) a</tt>,
---   this is effectively <tt><tt>State</tt> s (<a>Maybe</a> a) ~ s -&gt;
+--   this is effectively <tt><a>State</a> s (<a>Maybe</a> a) ~ s -&gt;
 --   (<a>Maybe</a> a, s)</tt>: put simply, the error can occur only in the
 --   <i>result</i>, but not the state, which always 'survives'. On the
 --   other hand, if we have <tt><a>StateT</a> s <a>Maybe</a> a</tt>, this
@@ -122,7 +122,7 @@ module Control.Monad.Accum
 --   <li><tt><a>accum</a> f</tt> <tt>=</tt> <tt><a>look</a> &gt;&gt;= acc
 --   -&gt; let (res, v) = f acc in <a>add</a> v <a>$&gt;</a> res</tt></li>
 --   </ol>
-class (Monoid w, Monad m) => MonadAccum w m | m -> w
+class (Monoid w, Monad m) => MonadAccum w (m :: Type -> Type) | m -> w
 
 -- | Retrieve the accumulated result so far.
 look :: MonadAccum w m => m w
@@ -143,30 +143,30 @@ accum :: MonadAccum w m => (w -> (a, w)) -> m a
 --   deriving via (LiftingAccum (ExceptT e) m) instance (MonadAccum w m) =&gt;
 --    MonadAccum w (ExceptT e m)
 --   </pre>
-newtype LiftingAccum (t :: (Type -> Type) -> Type -> Type) (m :: Type -> Type) (a :: Type)
-LiftingAccum :: t m a -> LiftingAccum (t :: (Type -> Type) -> Type -> Type) (m :: Type -> Type) (a :: Type)
+newtype LiftingAccum (t :: Type -> Type -> Type -> Type) (m :: Type -> Type) a
+LiftingAccum :: t m a -> LiftingAccum (t :: (Type -> Type) -> Type -> Type) (m :: Type -> Type) a
 
 -- | Retrieve a function of the accumulated value.
-looks :: forall (a :: Type) (m :: Type -> Type) (w :: Type). MonadAccum w m => (w -> a) -> m a
-instance GHC.Base.Monad (t m) => GHC.Base.Monad (Control.Monad.Accum.LiftingAccum t m)
-instance GHC.Base.Applicative (t m) => GHC.Base.Applicative (Control.Monad.Accum.LiftingAccum t m)
-instance GHC.Base.Functor (t m) => GHC.Base.Functor (Control.Monad.Accum.LiftingAccum t m)
-instance Control.Monad.Accum.MonadAccum w m => Control.Monad.Accum.MonadAccum w (Control.Monad.Trans.Maybe.MaybeT m)
+looks :: forall a m w. MonadAccum w m => (w -> a) -> m a
+instance GHC.Internal.Base.Applicative (t m) => GHC.Internal.Base.Applicative (Control.Monad.Accum.LiftingAccum t m)
+instance GHC.Internal.Base.Functor (t m) => GHC.Internal.Base.Functor (Control.Monad.Accum.LiftingAccum t m)
+instance (Control.Monad.Accum.MonadAccum w' m, GHC.Internal.Base.Monoid w) => Control.Monad.Accum.MonadAccum w' (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance (Control.Monad.Accum.MonadAccum w' m, GHC.Internal.Base.Monoid w) => Control.Monad.Accum.MonadAccum w' (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
+instance Control.Monad.Accum.MonadAccum w' m => Control.Monad.Accum.MonadAccum w' (Control.Monad.Trans.RWS.CPS.RWST r w s m)
+instance (Control.Monad.Accum.MonadAccum w' m, GHC.Internal.Base.Monoid w) => Control.Monad.Accum.MonadAccum w' (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (Control.Monad.Accum.MonadAccum w' m, GHC.Internal.Base.Monoid w) => Control.Monad.Accum.MonadAccum w' (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance Control.Monad.Accum.MonadAccum w' m => Control.Monad.Accum.MonadAccum w' (Control.Monad.Trans.Writer.CPS.WriterT w m)
+instance GHC.Internal.Base.Monoid w => Control.Monad.Accum.MonadAccum w (Control.Monad.Trans.Accum.AccumT w GHC.Internal.Data.Functor.Identity.Identity)
 instance Control.Monad.Accum.MonadAccum w m => Control.Monad.Accum.MonadAccum w (Control.Monad.Trans.Cont.ContT r m)
 instance Control.Monad.Accum.MonadAccum w m => Control.Monad.Accum.MonadAccum w (Control.Monad.Trans.Except.ExceptT e m)
 instance Control.Monad.Accum.MonadAccum w m => Control.Monad.Accum.MonadAccum w (Control.Monad.Trans.Identity.IdentityT m)
-instance Control.Monad.Accum.MonadAccum w' m => Control.Monad.Accum.MonadAccum w' (Control.Monad.Trans.RWS.CPS.RWST r w s m)
-instance (Control.Monad.Accum.MonadAccum w' m, GHC.Base.Monoid w) => Control.Monad.Accum.MonadAccum w' (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
-instance (Control.Monad.Accum.MonadAccum w' m, GHC.Base.Monoid w) => Control.Monad.Accum.MonadAccum w' (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance (Control.Monad.Trans.Class.MonadTrans t, GHC.Internal.Base.Monad (t m), Control.Monad.Accum.MonadAccum w m) => Control.Monad.Accum.MonadAccum w (Control.Monad.Accum.LiftingAccum t m)
+instance Control.Monad.Accum.MonadAccum w m => Control.Monad.Accum.MonadAccum w (Control.Monad.Trans.Maybe.MaybeT m)
 instance Control.Monad.Accum.MonadAccum w m => Control.Monad.Accum.MonadAccum w (Control.Monad.Trans.Reader.ReaderT r m)
 instance Control.Monad.Accum.MonadAccum w m => Control.Monad.Accum.MonadAccum w (Control.Monad.Trans.Select.SelectT r m)
-instance Control.Monad.Accum.MonadAccum w m => Control.Monad.Accum.MonadAccum w (Control.Monad.Trans.State.Lazy.StateT s m)
 instance Control.Monad.Accum.MonadAccum w m => Control.Monad.Accum.MonadAccum w (Control.Monad.Trans.State.Strict.StateT s m)
-instance Control.Monad.Accum.MonadAccum w' m => Control.Monad.Accum.MonadAccum w' (Control.Monad.Trans.Writer.CPS.WriterT w m)
-instance (Control.Monad.Accum.MonadAccum w' m, GHC.Base.Monoid w) => Control.Monad.Accum.MonadAccum w' (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (Control.Monad.Accum.MonadAccum w' m, GHC.Base.Monoid w) => Control.Monad.Accum.MonadAccum w' (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance (Control.Monad.Trans.Class.MonadTrans t, GHC.Base.Monad (t m), Control.Monad.Accum.MonadAccum w m) => Control.Monad.Accum.MonadAccum w (Control.Monad.Accum.LiftingAccum t m)
-instance GHC.Base.Monoid w => Control.Monad.Accum.MonadAccum w (Control.Monad.Trans.Accum.AccumT w Data.Functor.Identity.Identity)
+instance Control.Monad.Accum.MonadAccum w m => Control.Monad.Accum.MonadAccum w (Control.Monad.Trans.State.Lazy.StateT s m)
+instance GHC.Internal.Base.Monad (t m) => GHC.Internal.Base.Monad (Control.Monad.Accum.LiftingAccum t m)
 
 
 -- | <ul>
@@ -250,21 +250,21 @@ label_ :: MonadCont m => m (m a)
 --   <li><a>Proof of quasi-algebraic properties</a></li>
 --   <li><a>Original issue</a></li>
 --   </ul>
-liftCallCC :: forall (t :: (Type -> Type) -> Type -> Type) (m :: Type -> Type) (a :: Type) (b :: Type). (MonadTrans t, Monad m, forall (m' :: Type -> Type). Monad m' => Monad (t m')) => CallCC m (t m a) b -> CallCC (t m) a b
+liftCallCC :: (MonadTrans t, Monad m, forall (m' :: Type -> Type). Monad m' => Monad (t m')) => CallCC m (t m a) b -> CallCC (t m) a b
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Cont.Class.MonadCont m) => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.Accum.AccumT w m)
 instance forall k (r :: k) (m :: k -> *). Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.Cont.ContT r m)
 instance Control.Monad.Cont.Class.MonadCont m => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.Except.ExceptT e m)
 instance Control.Monad.Cont.Class.MonadCont m => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.Identity.IdentityT m)
 instance Control.Monad.Cont.Class.MonadCont m => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.Maybe.MaybeT m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Cont.Class.MonadCont m) => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.RWS.CPS.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Cont.Class.MonadCont m) => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Cont.Class.MonadCont m) => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
 instance Control.Monad.Cont.Class.MonadCont m => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.Reader.ReaderT r m)
-instance (GHC.Base.Monoid w, Control.Monad.Cont.Class.MonadCont m) => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
-instance (GHC.Base.Monoid w, Control.Monad.Cont.Class.MonadCont m) => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.RWS.Strict.RWST r w s m)
-instance Control.Monad.Cont.Class.MonadCont m => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.State.Lazy.StateT s m)
 instance Control.Monad.Cont.Class.MonadCont m => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.State.Strict.StateT s m)
-instance (GHC.Base.Monoid w, Control.Monad.Cont.Class.MonadCont m) => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (GHC.Base.Monoid w, Control.Monad.Cont.Class.MonadCont m) => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance (GHC.Base.Monoid w, Control.Monad.Cont.Class.MonadCont m) => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.RWS.CPS.RWST r w s m)
-instance (GHC.Base.Monoid w, Control.Monad.Cont.Class.MonadCont m) => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.Writer.CPS.WriterT w m)
-instance (GHC.Base.Monoid w, Control.Monad.Cont.Class.MonadCont m) => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.Accum.AccumT w m)
+instance Control.Monad.Cont.Class.MonadCont m => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.State.Lazy.StateT s m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Cont.Class.MonadCont m) => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.Writer.CPS.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Cont.Class.MonadCont m) => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Cont.Class.MonadCont m) => Control.Monad.Cont.Class.MonadCont (Control.Monad.Trans.Writer.Lazy.WriterT w m)
 
 
 -- | <ul>
@@ -379,7 +379,7 @@ withCont :: ((b -> r) -> a -> r) -> Cont r a -> Cont r b
 --   
 --   <a>ContT</a> is not a functor on the category of monads, and many
 --   operations cannot be lifted through it.
-newtype () => ContT (r :: k) (m :: k -> Type) a
+newtype ContT (r :: k) (m :: k -> Type) a
 ContT :: ((a -> m r) -> m r) -> ContT (r :: k) (m :: k -> Type) a
 runContT :: ContT r m a -> (a -> m r) -> m r
 
@@ -446,7 +446,7 @@ module Control.Monad.Error.Class
 --   <a>MonadError</a> class. (If you are using the deprecated
 --   <a>Control.Monad.Error</a> or <a>Control.Monad.Trans.Error</a>, you
 --   may also have to define an <tt>Error</tt> instance.)
-class (Monad m) => MonadError e m | m -> e
+class Monad m => MonadError e (m :: Type -> Type) | m -> e
 
 -- | Is used within a monadic computation to begin exception processing.
 throwError :: MonadError e m => e -> m a
@@ -536,22 +536,22 @@ mapError :: (MonadError e m, MonadError e' n) => (m (Either e a) -> n (Either e'
 --   <tt>MkDatabaseError</tt> and re-thrown in the inner monad, otherwise
 --   the result value is returned.
 modifyError :: MonadError e' m => (e -> e') -> ExceptT e m a -> m a
-instance Control.Monad.Error.Class.MonadError GHC.IO.Exception.IOException GHC.Types.IO
-instance Control.Monad.Error.Class.MonadError () GHC.Maybe.Maybe
-instance Control.Monad.Error.Class.MonadError e (Data.Either.Either e)
-instance GHC.Base.Monad m => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.Except.ExceptT e m)
+instance Control.Monad.Error.Class.MonadError GHC.Internal.IO.Exception.IOException GHC.Types.IO
+instance Control.Monad.Error.Class.MonadError () GHC.Internal.Maybe.Maybe
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Error.Class.MonadError e m) => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.Accum.AccumT w m)
+instance Control.Monad.Error.Class.MonadError e (GHC.Internal.Data.Either.Either e)
+instance GHC.Internal.Base.Monad m => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.Except.ExceptT e m)
 instance Control.Monad.Error.Class.MonadError e m => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.Identity.IdentityT m)
 instance Control.Monad.Error.Class.MonadError e m => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.Maybe.MaybeT m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Error.Class.MonadError e m) => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.RWS.CPS.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Error.Class.MonadError e m) => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Error.Class.MonadError e m) => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
 instance Control.Monad.Error.Class.MonadError e m => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.Reader.ReaderT r m)
-instance (GHC.Base.Monoid w, Control.Monad.Error.Class.MonadError e m) => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
-instance (GHC.Base.Monoid w, Control.Monad.Error.Class.MonadError e m) => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.RWS.Strict.RWST r w s m)
-instance Control.Monad.Error.Class.MonadError e m => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.State.Lazy.StateT s m)
 instance Control.Monad.Error.Class.MonadError e m => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.State.Strict.StateT s m)
-instance (GHC.Base.Monoid w, Control.Monad.Error.Class.MonadError e m) => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (GHC.Base.Monoid w, Control.Monad.Error.Class.MonadError e m) => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance (GHC.Base.Monoid w, Control.Monad.Error.Class.MonadError e m) => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.RWS.CPS.RWST r w s m)
-instance (GHC.Base.Monoid w, Control.Monad.Error.Class.MonadError e m) => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.Writer.CPS.WriterT w m)
-instance (GHC.Base.Monoid w, Control.Monad.Error.Class.MonadError e m) => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.Accum.AccumT w m)
+instance Control.Monad.Error.Class.MonadError e m => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.State.Lazy.StateT s m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Error.Class.MonadError e m) => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.Writer.CPS.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Error.Class.MonadError e m) => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Error.Class.MonadError e m) => Control.Monad.Error.Class.MonadError e (Control.Monad.Trans.Writer.Lazy.WriterT w m)
 
 
 -- | <ul>
@@ -585,7 +585,7 @@ module Control.Monad.Except
 --   <a>MonadError</a> class. (If you are using the deprecated
 --   <a>Control.Monad.Error</a> or <a>Control.Monad.Trans.Error</a>, you
 --   may also have to define an <tt>Error</tt> instance.)
-class (Monad m) => MonadError e m | m -> e
+class Monad m => MonadError e (m :: Type -> Type) | m -> e
 
 -- | Is used within a monadic computation to begin exception processing.
 throwError :: MonadError e m => e -> m a
@@ -688,7 +688,7 @@ modifyError :: MonadError e' m => (e -> e') -> ExceptT e m a -> m a
 --   The <a>return</a> function yields a computation that produces the
 --   given value, while <tt>&gt;&gt;=</tt> sequences two subcomputations,
 --   exiting on the first exception.
-newtype () => ExceptT e (m :: Type -> Type) a
+newtype ExceptT e (m :: Type -> Type) a
 ExceptT :: m (Either e a) -> ExceptT e (m :: Type -> Type) a
 
 -- | The parameterizable exception monad.
@@ -783,7 +783,7 @@ module Control.Monad.Reader.Class
 -- | See examples in <a>Control.Monad.Reader</a>. Note, the partially
 --   applied function type <tt>(-&gt;) r</tt> is a simple reader monad. See
 --   the <tt>instance</tt> declaration below.
-class Monad m => MonadReader r m | m -> r
+class Monad m => MonadReader r (m :: Type -> Type) | m -> r
 
 -- | Retrieves the monad environment.
 ask :: MonadReader r m => m r
@@ -796,22 +796,22 @@ reader :: MonadReader r m => (r -> a) -> m a
 
 -- | Retrieves a function of the current environment.
 asks :: MonadReader r m => (r -> a) -> m a
-instance Control.Monad.Reader.Class.MonadReader r ((->) r)
-instance GHC.Base.Monad m => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.Reader.ReaderT r m)
-instance (GHC.Base.Monad m, GHC.Base.Monoid w) => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.RWS.CPS.RWST r w s m)
-instance (GHC.Base.Monad m, GHC.Base.Monoid w) => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
-instance (GHC.Base.Monad m, GHC.Base.Monoid w) => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.RWS.Strict.RWST r w s m)
 instance Control.Monad.Reader.Class.MonadReader r' m => Control.Monad.Reader.Class.MonadReader r' (Control.Monad.Trans.Cont.ContT r m)
+instance Control.Monad.Reader.Class.MonadReader r' m => Control.Monad.Reader.Class.MonadReader r' (Control.Monad.Trans.Select.SelectT r m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Reader.Class.MonadReader r m) => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.Accum.AccumT w m)
 instance Control.Monad.Reader.Class.MonadReader r m => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.Except.ExceptT e m)
+instance Control.Monad.Reader.Class.MonadReader r ((->) r)
 instance Control.Monad.Reader.Class.MonadReader r m => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.Identity.IdentityT m)
 instance Control.Monad.Reader.Class.MonadReader r m => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.Maybe.MaybeT m)
-instance Control.Monad.Reader.Class.MonadReader r m => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.State.Lazy.StateT s m)
+instance (GHC.Internal.Base.Monad m, GHC.Internal.Base.Monoid w) => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance (GHC.Internal.Base.Monad m, GHC.Internal.Base.Monoid w) => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
+instance (GHC.Internal.Base.Monad m, GHC.Internal.Base.Monoid w) => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.RWS.CPS.RWST r w s m)
+instance GHC.Internal.Base.Monad m => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.Reader.ReaderT r m)
 instance Control.Monad.Reader.Class.MonadReader r m => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.State.Strict.StateT s m)
-instance (GHC.Base.Monoid w, Control.Monad.Reader.Class.MonadReader r m) => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.Writer.CPS.WriterT w m)
-instance (GHC.Base.Monoid w, Control.Monad.Reader.Class.MonadReader r m) => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (GHC.Base.Monoid w, Control.Monad.Reader.Class.MonadReader r m) => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance (GHC.Base.Monoid w, Control.Monad.Reader.Class.MonadReader r m) => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.Accum.AccumT w m)
-instance Control.Monad.Reader.Class.MonadReader r' m => Control.Monad.Reader.Class.MonadReader r' (Control.Monad.Trans.Select.SelectT r m)
+instance Control.Monad.Reader.Class.MonadReader r m => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.State.Lazy.StateT s m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Reader.Class.MonadReader r m) => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Reader.Class.MonadReader r m) => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Reader.Class.MonadReader r m) => Control.Monad.Reader.Class.MonadReader r (Control.Monad.Trans.Writer.CPS.WriterT w m)
 
 
 -- | <ul>
@@ -843,7 +843,7 @@ instance Control.Monad.Reader.Class.MonadReader r' m => Control.Monad.Reader.Cla
 --   However, this isn't generally the case. Consider instead the error and
 --   state effects, as exemplified by <a>MaybeT</a> and <a>StateT</a>
 --   respectively. If we have <tt><a>MaybeT</a> (<a>State</a> s) a</tt>,
---   this is effectively <tt><tt>State</tt> s (<a>Maybe</a> a) ~ s -&gt;
+--   this is effectively <tt><a>State</a> s (<a>Maybe</a> a) ~ s -&gt;
 --   (<a>Maybe</a> a, s)</tt>: put simply, the error can occur only in the
 --   <i>result</i>, but not the state, which always 'survives'. On the
 --   other hand, if we have <tt><a>StateT</a> s <a>Maybe</a> a</tt>, this
@@ -890,7 +890,7 @@ module Control.Monad.Select
 --   <li><tt><a>select</a> f <a>*&gt;</a> <a>select</a> g</tt> <tt>=</tt>
 --   <tt><a>select</a> g</tt></li>
 --   </ul>
-class (Monad m) => MonadSelect r m | m -> r
+class Monad m => MonadSelect r (m :: Type -> Type) | m -> r
 select :: MonadSelect r m => ((a -> r) -> a) -> m a
 
 -- | A helper type to decrease boilerplate when defining new transformer
@@ -903,27 +903,27 @@ select :: MonadSelect r m => ((a -> r) -> a) -> m a
 --   deriving via (LiftingSelect (ExceptT e) m) instance (MonadSelect r m) =&gt;
 --    MonadSelect r (ExceptT e m)
 --   </pre>
-newtype LiftingSelect (t :: (Type -> Type) -> Type -> Type) (m :: Type -> Type) (a :: Type)
-LiftingSelect :: t m a -> LiftingSelect (t :: (Type -> Type) -> Type -> Type) (m :: Type -> Type) (a :: Type)
-instance GHC.Base.Monad (t m) => GHC.Base.Monad (Control.Monad.Select.LiftingSelect t m)
-instance GHC.Base.Applicative (t m) => GHC.Base.Applicative (Control.Monad.Select.LiftingSelect t m)
-instance GHC.Base.Functor (t m) => GHC.Base.Functor (Control.Monad.Select.LiftingSelect t m)
-instance Control.Monad.Select.MonadSelect r m => Control.Monad.Select.MonadSelect r (Control.Monad.Trans.Maybe.MaybeT m)
+newtype LiftingSelect (t :: Type -> Type -> Type -> Type) (m :: Type -> Type) a
+LiftingSelect :: t m a -> LiftingSelect (t :: (Type -> Type) -> Type -> Type) (m :: Type -> Type) a
+instance GHC.Internal.Base.Applicative (t m) => GHC.Internal.Base.Applicative (Control.Monad.Select.LiftingSelect t m)
+instance GHC.Internal.Base.Functor (t m) => GHC.Internal.Base.Functor (Control.Monad.Select.LiftingSelect t m)
+instance GHC.Internal.Base.Monad (t m) => GHC.Internal.Base.Monad (Control.Monad.Select.LiftingSelect t m)
 instance Control.Monad.Select.MonadSelect r' m => Control.Monad.Select.MonadSelect r' (Control.Monad.Trans.Cont.ContT r m)
+instance Control.Monad.Select.MonadSelect r' m => Control.Monad.Select.MonadSelect r' (Control.Monad.Trans.Reader.ReaderT r m)
+instance (Control.Monad.Select.MonadSelect r m, GHC.Internal.Base.Monoid w) => Control.Monad.Select.MonadSelect r (Control.Monad.Trans.Accum.AccumT w m)
 instance Control.Monad.Select.MonadSelect r m => Control.Monad.Select.MonadSelect r (Control.Monad.Trans.Except.ExceptT e m)
 instance Control.Monad.Select.MonadSelect r m => Control.Monad.Select.MonadSelect r (Control.Monad.Trans.Identity.IdentityT m)
-instance Control.Monad.Select.MonadSelect r' m => Control.Monad.Select.MonadSelect r' (Control.Monad.Trans.Reader.ReaderT r m)
-instance Control.Monad.Select.MonadSelect w m => Control.Monad.Select.MonadSelect w (Control.Monad.Trans.State.Lazy.StateT s m)
-instance Control.Monad.Select.MonadSelect w m => Control.Monad.Select.MonadSelect w (Control.Monad.Trans.State.Strict.StateT s m)
-instance Control.Monad.Select.MonadSelect w' m => Control.Monad.Select.MonadSelect w' (Control.Monad.Trans.Writer.CPS.WriterT w m)
-instance (Control.Monad.Select.MonadSelect w' m, GHC.Base.Monoid w) => Control.Monad.Select.MonadSelect w' (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (Control.Monad.Select.MonadSelect w' m, GHC.Base.Monoid w) => Control.Monad.Select.MonadSelect w' (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (Control.Monad.Trans.Class.MonadTrans t, Control.Monad.Select.MonadSelect r m, GHC.Internal.Base.Monad (t m)) => Control.Monad.Select.MonadSelect r (Control.Monad.Select.LiftingSelect t m)
+instance Control.Monad.Select.MonadSelect r m => Control.Monad.Select.MonadSelect r (Control.Monad.Trans.Maybe.MaybeT m)
+instance Control.Monad.Select.MonadSelect r (Control.Monad.Trans.Select.SelectT r GHC.Internal.Data.Functor.Identity.Identity)
+instance (Control.Monad.Select.MonadSelect w' m, GHC.Internal.Base.Monoid w) => Control.Monad.Select.MonadSelect w' (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance (Control.Monad.Select.MonadSelect w' m, GHC.Internal.Base.Monoid w) => Control.Monad.Select.MonadSelect w' (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
 instance Control.Monad.Select.MonadSelect w' m => Control.Monad.Select.MonadSelect w' (Control.Monad.Trans.RWS.CPS.RWST r w s m)
-instance (Control.Monad.Select.MonadSelect w' m, GHC.Base.Monoid w) => Control.Monad.Select.MonadSelect w' (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
-instance (Control.Monad.Select.MonadSelect w' m, GHC.Base.Monoid w) => Control.Monad.Select.MonadSelect w' (Control.Monad.Trans.RWS.Strict.RWST r w s m)
-instance (Control.Monad.Select.MonadSelect r m, GHC.Base.Monoid w) => Control.Monad.Select.MonadSelect r (Control.Monad.Trans.Accum.AccumT w m)
-instance (Control.Monad.Trans.Class.MonadTrans t, Control.Monad.Select.MonadSelect r m, GHC.Base.Monad (t m)) => Control.Monad.Select.MonadSelect r (Control.Monad.Select.LiftingSelect t m)
-instance Control.Monad.Select.MonadSelect r (Control.Monad.Trans.Select.SelectT r Data.Functor.Identity.Identity)
+instance (Control.Monad.Select.MonadSelect w' m, GHC.Internal.Base.Monoid w) => Control.Monad.Select.MonadSelect w' (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (Control.Monad.Select.MonadSelect w' m, GHC.Internal.Base.Monoid w) => Control.Monad.Select.MonadSelect w' (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance Control.Monad.Select.MonadSelect w' m => Control.Monad.Select.MonadSelect w' (Control.Monad.Trans.Writer.CPS.WriterT w m)
+instance Control.Monad.Select.MonadSelect w m => Control.Monad.Select.MonadSelect w (Control.Monad.Trans.State.Strict.StateT s m)
+instance Control.Monad.Select.MonadSelect w m => Control.Monad.Select.MonadSelect w (Control.Monad.Trans.State.Lazy.StateT s m)
 
 
 -- | MonadState class.
@@ -936,7 +936,7 @@ module Control.Monad.State.Class
 
 -- | Minimal definition is either both of <tt>get</tt> and <tt>put</tt> or
 --   just <tt>state</tt>
-class Monad m => MonadState s m | m -> s
+class Monad m => MonadState s (m :: Type -> Type) | m -> s
 
 -- | Return the state from the internals of the monad.
 get :: MonadState s m => m s
@@ -968,21 +968,21 @@ modify' :: MonadState s m => (s -> s) -> m ()
 -- | Gets specific component of the state, using a projection function
 --   supplied.
 gets :: MonadState s m => (s -> a) -> m a
-instance GHC.Base.Monad m => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.State.Lazy.StateT s m)
-instance GHC.Base.Monad m => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.State.Strict.StateT s m)
-instance (GHC.Base.Monad m, GHC.Base.Monoid w) => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.RWS.CPS.RWST r w s m)
-instance (GHC.Base.Monad m, GHC.Base.Monoid w) => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
-instance (GHC.Base.Monad m, GHC.Base.Monoid w) => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.State.Class.MonadState s m) => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.Accum.AccumT w m)
 instance Control.Monad.State.Class.MonadState s m => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.Cont.ContT r m)
 instance Control.Monad.State.Class.MonadState s m => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.Except.ExceptT e m)
 instance Control.Monad.State.Class.MonadState s m => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.Identity.IdentityT m)
 instance Control.Monad.State.Class.MonadState s m => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.Maybe.MaybeT m)
+instance (GHC.Internal.Base.Monad m, GHC.Internal.Base.Monoid w) => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance (GHC.Internal.Base.Monad m, GHC.Internal.Base.Monoid w) => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
+instance (GHC.Internal.Base.Monad m, GHC.Internal.Base.Monoid w) => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.RWS.CPS.RWST r w s m)
 instance Control.Monad.State.Class.MonadState s m => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.Reader.ReaderT r m)
-instance (GHC.Base.Monoid w, Control.Monad.State.Class.MonadState s m) => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.Writer.CPS.WriterT w m)
-instance (GHC.Base.Monoid w, Control.Monad.State.Class.MonadState s m) => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (GHC.Base.Monoid w, Control.Monad.State.Class.MonadState s m) => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance (GHC.Base.Monoid w, Control.Monad.State.Class.MonadState s m) => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.Accum.AccumT w m)
 instance Control.Monad.State.Class.MonadState s m => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.Select.SelectT r m)
+instance GHC.Internal.Base.Monad m => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.State.Strict.StateT s m)
+instance GHC.Internal.Base.Monad m => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.State.Lazy.StateT s m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.State.Class.MonadState s m) => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.State.Class.MonadState s m) => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.State.Class.MonadState s m) => Control.Monad.State.Class.MonadState s (Control.Monad.Trans.Writer.CPS.WriterT w m)
 
 
 -- | Classes for monad transformers.
@@ -1013,7 +1013,7 @@ module Control.Monad.State.Strict
 
 -- | Minimal definition is either both of <tt>get</tt> and <tt>put</tt> or
 --   just <tt>state</tt>
-class Monad m => MonadState s m | m -> s
+class Monad m => MonadState s (m :: Type -> Type) | m -> s
 
 -- | Return the state from the internals of the monad.
 get :: MonadState s m => m s
@@ -1103,7 +1103,7 @@ withState :: (s -> s) -> State s a -> State s a
 --   The <a>return</a> function leaves the state unchanged, while
 --   <tt>&gt;&gt;=</tt> uses the final state of the first computation as
 --   the initial state of the second.
-newtype () => StateT s (m :: Type -> Type) a
+newtype StateT s (m :: Type -> Type) a
 StateT :: (s -> m (a, s)) -> StateT s (m :: Type -> Type) a
 runStateT :: StateT s m a -> s -> m (a, s)
 
@@ -1153,7 +1153,7 @@ module Control.Monad.State.Lazy
 
 -- | Minimal definition is either both of <tt>get</tt> and <tt>put</tt> or
 --   just <tt>state</tt>
-class Monad m => MonadState s m | m -> s
+class Monad m => MonadState s (m :: Type -> Type) | m -> s
 
 -- | Return the state from the internals of the monad.
 get :: MonadState s m => m s
@@ -1243,7 +1243,7 @@ withState :: (s -> s) -> State s a -> State s a
 --   The <a>return</a> function leaves the state unchanged, while
 --   <tt>&gt;&gt;=</tt> uses the final state of the first computation as
 --   the initial state of the second.
-newtype () => StateT s (m :: Type -> Type) a
+newtype StateT s (m :: Type -> Type) a
 StateT :: (s -> m (a, s)) -> StateT s (m :: Type -> Type) a
 runStateT :: StateT s m a -> s -> m (a, s)
 
@@ -1321,7 +1321,7 @@ module Control.Monad.Reader
 -- | See examples in <a>Control.Monad.Reader</a>. Note, the partially
 --   applied function type <tt>(-&gt;) r</tt> is a simple reader monad. See
 --   the <tt>instance</tt> declaration below.
-class Monad m => MonadReader r m | m -> r
+class Monad m => MonadReader r (m :: Type -> Type) | m -> r
 
 -- | Retrieves the monad environment.
 ask :: MonadReader r m => m r
@@ -1339,9 +1339,10 @@ asks :: MonadReader r m => (r -> a) -> m a
 --   
 --   Computations are functions of a shared environment.
 --   
---   The <a>return</a> function ignores the environment, while
---   <tt>&gt;&gt;=</tt> passes the inherited environment to both
---   subcomputations.
+--   The <a>return</a> function ignores the environment, while <tt>m
+--   <a>&gt;&gt;=</a> k</tt> passes the inherited environment to both
+--   subcomputations:
+--   
 type Reader r = ReaderT r Identity
 
 -- | Runs a <tt>Reader</tt> and extracts the final value from it. (The
@@ -1368,10 +1369,11 @@ withReader :: (r' -> r) -> Reader r a -> Reader r' a
 -- | The reader monad transformer, which adds a read-only environment to
 --   the given monad.
 --   
---   The <a>return</a> function ignores the environment, while
---   <tt>&gt;&gt;=</tt> passes the inherited environment to both
---   subcomputations.
-newtype () => ReaderT r (m :: Type -> Type) a
+--   The <a>return</a> function ignores the environment, while <tt>m
+--   <a>&gt;&gt;=</a> k</tt> passes the inherited environment to both
+--   subcomputations:
+--   
+newtype ReaderT r (m :: Type -> Type) a
 ReaderT :: (r -> m a) -> ReaderT r (m :: Type -> Type) a
 runReaderT :: ReaderT r m a -> r -> m a
 
@@ -1400,7 +1402,7 @@ withReaderT :: forall r' r (m :: Type -> Type) a. (r' -> r) -> ReaderT r m a -> 
 --   (<a>http://web.cecs.pdx.edu/~mpj/pubs/springschool.html</a>) Advanced
 --   School of Functional Programming, 1995.
 module Control.Monad.Writer.Class
-class (Monoid w, Monad m) => MonadWriter w m | m -> w
+class (Monoid w, Monad m) => MonadWriter w (m :: Type -> Type) | m -> w
 
 -- | <tt><a>writer</a> (a,w)</tt> embeds a simple writer action.
 writer :: MonadWriter w m => (a, w) -> m a
@@ -1437,20 +1439,20 @@ listens :: MonadWriter w m => (w -> b) -> m a -> m (a, b)
 --   (x,f)) m)</pre></li>
 --   </ul>
 censor :: MonadWriter w m => (w -> w) -> m a -> m a
-instance GHC.Base.Monoid w => Control.Monad.Writer.Class.MonadWriter w ((,) w)
-instance (GHC.Base.Monoid w, GHC.Base.Monad m) => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.Writer.CPS.WriterT w m)
-instance (GHC.Base.Monoid w, GHC.Base.Monad m) => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (GHC.Base.Monoid w, GHC.Base.Monad m) => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance (GHC.Base.Monoid w, GHC.Base.Monad m) => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.RWS.CPS.RWST r w s m)
-instance (GHC.Base.Monoid w, GHC.Base.Monad m) => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
-instance (GHC.Base.Monoid w, GHC.Base.Monad m) => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w', Control.Monad.Writer.Class.MonadWriter w m) => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.Accum.AccumT w' m)
 instance Control.Monad.Writer.Class.MonadWriter w m => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.Except.ExceptT e m)
 instance Control.Monad.Writer.Class.MonadWriter w m => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.Identity.IdentityT m)
 instance Control.Monad.Writer.Class.MonadWriter w m => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.Maybe.MaybeT m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Monad m) => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Monad m) => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Monad m) => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.RWS.CPS.RWST r w s m)
 instance Control.Monad.Writer.Class.MonadWriter w m => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.Reader.ReaderT r m)
-instance Control.Monad.Writer.Class.MonadWriter w m => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.State.Lazy.StateT s m)
 instance Control.Monad.Writer.Class.MonadWriter w m => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.State.Strict.StateT s m)
-instance (GHC.Base.Monoid w', Control.Monad.Writer.Class.MonadWriter w m) => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.Accum.AccumT w' m)
+instance Control.Monad.Writer.Class.MonadWriter w m => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.State.Lazy.StateT s m)
+instance GHC.Internal.Base.Monoid w => Control.Monad.Writer.Class.MonadWriter w ((,) w)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Monad m) => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Monad m) => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Monad m) => Control.Monad.Writer.Class.MonadWriter w (Control.Monad.Trans.Writer.CPS.WriterT w m)
 
 
 -- | Strict writer monads that use continuation-passing-style to achieve
@@ -1463,7 +1465,7 @@ instance (GHC.Base.Monoid w', Control.Monad.Writer.Class.MonadWriter w m) => Con
 --   
 --   <i>Since: mtl-2.3, transformers-0.5.6</i>
 module Control.Monad.Writer.CPS
-class (Monoid w, Monad m) => MonadWriter w m | m -> w
+class (Monoid w, Monad m) => MonadWriter w (m :: Type -> Type) | m -> w
 
 -- | <tt><a>writer</a> (a,w)</tt> embeds a simple writer action.
 writer :: MonadWriter w m => (a, w) -> m a
@@ -1505,8 +1507,10 @@ censor :: MonadWriter w m => (w -> w) -> m a -> m a
 --   accumulate.
 --   
 --   The <a>return</a> function produces the output <a>mempty</a>, while
---   <a>&gt;&gt;=</a> combines the outputs of the subcomputations using
---   <a>mappend</a>.
+--   <tt>m <a>&gt;&gt;=</a> k</tt> combines the outputs of the
+--   subcomputations using <a>mappend</a> (also known as
+--   <tt>&lt;&gt;</tt>):
+--   
 type Writer w = WriterT w Identity
 
 -- | Unwrap a writer computation as a (result, output) pair. (The inverse
@@ -1538,9 +1542,11 @@ mapWriter :: (Monoid w, Monoid w') => ((a, w) -> (b, w')) -> Writer w a -> Write
 --   </ul>
 --   
 --   The <a>return</a> function produces the output <a>mempty</a>, while
---   <a>&gt;&gt;=</a> combines the outputs of the subcomputations using
---   <a>mappend</a>.
-data () => WriterT w (m :: Type -> Type) a
+--   <tt>m <a>&gt;&gt;=</a> k</tt> combines the outputs of the
+--   subcomputations using <a>mappend</a> (also known as
+--   <tt>&lt;&gt;</tt>):
+--   
+data WriterT w (m :: Type -> Type) a
 
 -- | Extract the output from a writer computation.
 --   
@@ -1567,13 +1573,13 @@ mapWriterT :: (Monad n, Monoid w, Monoid w') => (m (a, w) -> n (b, w')) -> Write
 --   (<a>http://web.cecs.pdx.edu/~mpj/</a>) Advanced School of Functional
 --   Programming, 1995.
 module Control.Monad.RWS.Class
-class (Monoid w, MonadReader r m, MonadWriter w m, MonadState s m) => MonadRWS r w s m | m -> r, m -> w, m -> s
-instance (GHC.Base.Monoid w, GHC.Base.Monad m) => Control.Monad.RWS.Class.MonadRWS r w s (Control.Monad.Trans.RWS.CPS.RWST r w s m)
-instance (GHC.Base.Monoid w, GHC.Base.Monad m) => Control.Monad.RWS.Class.MonadRWS r w s (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
-instance (GHC.Base.Monoid w, GHC.Base.Monad m) => Control.Monad.RWS.Class.MonadRWS r w s (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+class (Monoid w, MonadReader r m, MonadWriter w m, MonadState s m) => MonadRWS r w s (m :: Type -> Type) | m -> r, m -> w, m -> s
 instance Control.Monad.RWS.Class.MonadRWS r w s m => Control.Monad.RWS.Class.MonadRWS r w s (Control.Monad.Trans.Except.ExceptT e m)
 instance Control.Monad.RWS.Class.MonadRWS r w s m => Control.Monad.RWS.Class.MonadRWS r w s (Control.Monad.Trans.Identity.IdentityT m)
 instance Control.Monad.RWS.Class.MonadRWS r w s m => Control.Monad.RWS.Class.MonadRWS r w s (Control.Monad.Trans.Maybe.MaybeT m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Monad m) => Control.Monad.RWS.Class.MonadRWS r w s (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Monad m) => Control.Monad.RWS.Class.MonadRWS r w s (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Monad m) => Control.Monad.RWS.Class.MonadRWS r w s (Control.Monad.Trans.RWS.CPS.RWST r w s m)
 
 
 -- | Strict RWS monad.
@@ -1624,7 +1630,7 @@ withRWS :: (r' -> s -> (r, s)) -> RWS r w s a -> RWS r' w s a
 -- | A monad transformer adding reading an environment of type <tt>r</tt>,
 --   collecting an output of type <tt>w</tt> and updating a state of type
 --   <tt>s</tt> to an inner monad <tt>m</tt>.
-newtype () => RWST r w s (m :: Type -> Type) a
+newtype RWST r w s (m :: Type -> Type) a
 RWST :: (r -> s -> m (a, s, w)) -> RWST r w s (m :: Type -> Type) a
 runRWST :: RWST r w s m a -> r -> s -> m (a, s, w)
 
@@ -1702,7 +1708,7 @@ withRWS :: (r' -> s -> (r, s)) -> RWS r w s a -> RWS r' w s a
 -- | A monad transformer adding reading an environment of type <tt>r</tt>,
 --   collecting an output of type <tt>w</tt> and updating a state of type
 --   <tt>s</tt> to an inner monad <tt>m</tt>.
-newtype () => RWST r w s (m :: Type -> Type) a
+newtype RWST r w s (m :: Type -> Type) a
 RWST :: (r -> s -> m (a, s, w)) -> RWST r w s (m :: Type -> Type) a
 runRWST :: RWST r w s m a -> r -> s -> m (a, s, w)
 
@@ -1792,7 +1798,7 @@ withRWS :: (r' -> s -> (r, s)) -> RWS r w s a -> RWS r' w s a
 -- | A monad transformer adding reading an environment of type <tt>r</tt>,
 --   collecting an output of type <tt>w</tt> and updating a state of type
 --   <tt>s</tt> to an inner monad <tt>m</tt>.
-data () => RWST r w s (m :: Type -> Type) a
+data RWST r w s (m :: Type -> Type) a
 
 -- | Unwrap an RWST computation as a function. (The inverse of
 --   <a>rwsT</a>.)
@@ -1832,7 +1838,7 @@ withRWST :: forall r' s r w (m :: Type -> Type) a. (r' -> s -> (r, s)) -> RWST r
 --   (<a>http://web.cecs.pdx.edu/~mpj/pubs/springschool.html</a>) Advanced
 --   School of Functional Programming, 1995.
 module Control.Monad.Writer.Lazy
-class (Monoid w, Monad m) => MonadWriter w m | m -> w
+class (Monoid w, Monad m) => MonadWriter w (m :: Type -> Type) | m -> w
 
 -- | <tt><a>writer</a> (a,w)</tt> embeds a simple writer action.
 writer :: MonadWriter w m => (a, w) -> m a
@@ -1874,8 +1880,10 @@ censor :: MonadWriter w m => (w -> w) -> m a -> m a
 --   accumulate.
 --   
 --   The <a>return</a> function produces the output <a>mempty</a>, while
---   <tt>&gt;&gt;=</tt> combines the outputs of the subcomputations using
---   <a>mappend</a>.
+--   <tt>m <a>&gt;&gt;=</a> k</tt> combines the outputs of the
+--   subcomputations using <a>mappend</a> (also known as
+--   <tt>&lt;&gt;</tt>):
+--   
 type Writer w = WriterT w Identity
 
 -- | Unwrap a writer computation as a (result, output) pair. (The inverse
@@ -1907,9 +1915,11 @@ mapWriter :: ((a, w) -> (b, w')) -> Writer w a -> Writer w' b
 --   </ul>
 --   
 --   The <a>return</a> function produces the output <a>mempty</a>, while
---   <tt>&gt;&gt;=</tt> combines the outputs of the subcomputations using
---   <a>mappend</a>.
-newtype () => WriterT w (m :: Type -> Type) a
+--   <tt>m <a>&gt;&gt;=</a> k</tt> combines the outputs of the
+--   subcomputations using <a>mappend</a> (also known as
+--   <tt>&lt;&gt;</tt>):
+--   
+newtype WriterT w (m :: Type -> Type) a
 WriterT :: m (a, w) -> WriterT w (m :: Type -> Type) a
 runWriterT :: WriterT w m a -> m (a, w)
 
@@ -1947,7 +1957,7 @@ module Control.Monad.Writer
 --   (<a>http://web.cecs.pdx.edu/~mpj/pubs/springschool.html</a>) Advanced
 --   School of Functional Programming, 1995.
 module Control.Monad.Writer.Strict
-class (Monoid w, Monad m) => MonadWriter w m | m -> w
+class (Monoid w, Monad m) => MonadWriter w (m :: Type -> Type) | m -> w
 
 -- | <tt><a>writer</a> (a,w)</tt> embeds a simple writer action.
 writer :: MonadWriter w m => (a, w) -> m a
@@ -1989,8 +1999,10 @@ censor :: MonadWriter w m => (w -> w) -> m a -> m a
 --   accumulate.
 --   
 --   The <a>return</a> function produces the output <a>mempty</a>, while
---   <tt>&gt;&gt;=</tt> combines the outputs of the subcomputations using
---   <a>mappend</a>.
+--   <tt>m <a>&gt;&gt;=</a> k</tt> combines the outputs of the
+--   subcomputations using <a>mappend</a> (also known as
+--   <tt>&lt;&gt;</tt>):
+--   
 type Writer w = WriterT w Identity
 
 -- | Unwrap a writer computation as a (result, output) pair. (The inverse
@@ -2022,9 +2034,11 @@ mapWriter :: ((a, w) -> (b, w')) -> Writer w a -> Writer w' b
 --   </ul>
 --   
 --   The <a>return</a> function produces the output <a>mempty</a>, while
---   <tt>&gt;&gt;=</tt> combines the outputs of the subcomputations using
---   <a>mappend</a>.
-newtype () => WriterT w (m :: Type -> Type) a
+--   <tt>m <a>&gt;&gt;=</a> k</tt> combines the outputs of the
+--   subcomputations using <a>mappend</a> (also known as
+--   <tt>&lt;&gt;</tt>):
+--   
+newtype WriterT w (m :: Type -> Type) a
 WriterT :: m (a, w) -> WriterT w (m :: Type -> Type) a
 [runWriterT] :: WriterT w (m :: Type -> Type) a -> m (a, w)
 

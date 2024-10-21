@@ -5,7 +5,7 @@
 </span><span id="line-5"></span><span class="hs-comment">-- | Types for the Constructed Product Result lattice.</span><span>
 </span><span id="line-6"></span><span class="hs-comment">-- &quot;GHC.Core.Opt.CprAnal&quot; and &quot;GHC.Core.Opt.WorkWrap.Utils&quot;</span><span>
 </span><span id="line-7"></span><span class="hs-comment">-- are its primary customers via 'GHC.Types.Id.idCprSig'.</span><span>
-</span><span id="line-8"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">GHC.Types.Cpr</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html"><span class="hs-identifier">GHC.Types.Cpr</span></a></span><span> </span><span class="hs-special">(</span><span>
 </span><span id="line-9"></span><span>    </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier">Cpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier">ConCpr</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#topCpr"><span class="hs-identifier">topCpr</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#botCpr"><span class="hs-identifier">botCpr</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#flatConCpr"><span class="hs-identifier">flatConCpr</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#asConCpr"><span class="hs-identifier">asConCpr</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-10"></span><span>    </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier">CprType</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#topCprType"><span class="hs-identifier">topCprType</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#botCprType"><span class="hs-identifier">botCprType</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#flatConCprType"><span class="hs-identifier">flatConCprType</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-11"></span><span>    </span><span class="annot"><a href="GHC.Types.Cpr.html#lubCprType"><span class="hs-identifier">lubCprType</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#applyCprTy"><span class="hs-identifier">applyCprTy</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#abstractCprTy"><span class="hs-identifier">abstractCprTy</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#trimCprTy"><span class="hs-identifier">trimCprTy</span></a></span><span class="hs-special">,</span><span>
@@ -37,7 +37,7 @@
 </span><span id="line-37"></span><span>  </span><span class="hs-comment">-- ^ @FlatConCpr tag@ is an efficient encoding for @'ConCpr_' tag [TopCpr..]@.</span><span>
 </span><span id="line-38"></span><span>  </span><span class="hs-comment">-- Purely for compiler perf. Can be constructed with 'ConCpr'.</span><span>
 </span><span id="line-39"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="TopCpr"><span class="annot"><a href="GHC.Types.Cpr.html#TopCpr"><span class="hs-identifier hs-var">TopCpr</span></a></span></span><span>
-</span><span id="line-40"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621681601268"><span id="local-6989586621681601274"><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Bool
+</span><span id="line-40"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span id="local-6989586621682429390"><span id="local-6989586621682429399"><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Bool
 (Cpr -&gt; Cpr -&gt; Bool) -&gt; (Cpr -&gt; Cpr -&gt; Bool) -&gt; Eq Cpr
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
 $c== :: Cpr -&gt; Cpr -&gt; Bool
@@ -49,92 +49,92 @@ $c/= :: Cpr -&gt; Cpr -&gt; Bool
 </span><span id="line-42"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-type">ConCpr</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#ConTag"><span class="hs-identifier hs-type">ConTag</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span>
 </span><span id="line-43"></span><span class="hs-keyword">pattern</span><span> </span><span id="ConCpr"><span id="%24mConCpr"><span id="%24bConCpr"><span class="annot"><span class="annottext">$mConCpr :: forall {r}. Cpr -&gt; (Arity -&gt; [Cpr] -&gt; r) -&gt; ((# #) -&gt; r) -&gt; r
 $bConCpr :: Arity -&gt; [Cpr] -&gt; Cpr
-</span><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-var hs-var hs-var hs-var">ConCpr</span></a></span></span></span></span><span> </span><span class="annot"><a href="#local-6989586621681601279"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681601280"><span class="hs-identifier hs-type">cs</span></a></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr_"><span class="hs-identifier hs-type">ConCpr_</span></a></span><span> </span><span id="local-6989586621681601279"><span class="annot"><a href="#local-6989586621681601279"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621681601280"><span class="annot"><a href="#local-6989586621681601280"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-44"></span><span>  </span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-var">ConCpr</span></a></span><span> </span><span id="local-6989586621681601281"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601281"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621681601282"><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601282"><span class="hs-identifier hs-var">cs</span></a></span></span><span>
+</span><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-var hs-var hs-var">ConCpr</span></a></span></span></span></span><span> </span><span class="annot"><a href="#local-6989586621682429404"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682429405"><span class="hs-identifier hs-type">cs</span></a></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr_"><span class="hs-identifier hs-type">ConCpr_</span></a></span><span> </span><span id="local-6989586621682429404"><span class="annot"><a href="#local-6989586621682429404"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621682429405"><span class="annot"><a href="#local-6989586621682429405"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-44"></span><span>  </span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-var">ConCpr</span></a></span><span> </span><span id="local-6989586621682429406"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429406"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621682429407"><span class="annot"><span class="annottext">[Cpr]
+</span><a href="#local-6989586621682429407"><span class="hs-identifier hs-var">cs</span></a></span></span><span>
 </span><span id="line-45"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">(Cpr -&gt; Bool) -&gt; [Cpr] -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Bool
-</span><a href="../../base-4.18.2.0/src/Data.Foldable.html#all/Data.Foldable.html#all"><span class="hs-identifier hs-var">all</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Bool
+</span><span class="hs-identifier hs-var">all</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#TopCpr"><span class="hs-identifier hs-var">TopCpr</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601282"><span class="hs-identifier hs-var">cs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr
+</span><a href="#local-6989586621682429407"><span class="hs-identifier hs-var">cs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr
 </span><a href="GHC.Types.Cpr.html#FlatConCpr"><span class="hs-identifier hs-var">FlatConCpr</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601281"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><a href="#local-6989586621682429406"><span class="hs-identifier hs-var">t</span></a></span><span>
 </span><span id="line-46"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#otherwise/GHC.Base.html#otherwise"><span class="hs-identifier hs-var">otherwise</span></a></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; [Cpr] -&gt; Cpr
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>          </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; [Cpr] -&gt; Cpr
 </span><a href="GHC.Types.Cpr.html#ConCpr_"><span class="hs-identifier hs-var">ConCpr_</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601281"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601282"><span class="hs-identifier hs-var">cs</span></a></span><span>
+</span><a href="#local-6989586621682429406"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">[Cpr]
+</span><a href="#local-6989586621682429407"><span class="hs-identifier hs-var">cs</span></a></span><span>
 </span><span id="line-47"></span><span class="hs-pragma">{-# COMPLETE</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#BotCpr"><span class="hs-pragma hs-type">BotCpr</span></a></span><span class="hs-pragma">,</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#TopCpr"><span class="hs-pragma hs-type">TopCpr</span></a></span><span class="hs-pragma">,</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#FlatConCpr"><span class="hs-pragma hs-type">FlatConCpr</span></a></span><span class="hs-pragma">,</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-pragma hs-type">ConCpr</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
 </span><span id="line-48"></span><span>
-</span><span id="line-49"></span><span class="annot"><a href="GHC.Types.Cpr.html#viewConTag"><span class="hs-identifier hs-type">viewConTag</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Maybe/GHC.Maybe.html#Maybe"><span class="hs-identifier hs-type">Maybe</span></a></span><span> </span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#ConTag"><span class="hs-identifier hs-type">ConTag</span></a></span><span>
+</span><span id="line-49"></span><span class="annot"><a href="GHC.Types.Cpr.html#viewConTag"><span class="hs-identifier hs-type">viewConTag</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#ConTag"><span class="hs-identifier hs-type">ConTag</span></a></span><span>
 </span><span id="line-50"></span><span id="viewConTag"><span class="annot"><span class="annottext">viewConTag :: Cpr -&gt; Maybe Arity
-</span><a href="GHC.Types.Cpr.html#viewConTag"><span class="hs-identifier hs-var hs-var">viewConTag</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#FlatConCpr"><span class="hs-identifier hs-type">FlatConCpr</span></a></span><span> </span><span id="local-6989586621681601285"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601285"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Maybe Arity
+</span><a href="GHC.Types.Cpr.html#viewConTag"><span class="hs-identifier hs-var hs-var">viewConTag</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#FlatConCpr"><span class="hs-identifier hs-type">FlatConCpr</span></a></span><span> </span><span id="local-6989586621682429410"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429410"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Maybe Arity
 forall a. a -&gt; Maybe a
-</span><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Just/GHC.Maybe.html#Just"><span class="hs-identifier hs-var">Just</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601285"><span class="hs-identifier hs-var">t</span></a></span><span>
-</span><span id="line-51"></span><span class="annot"><a href="GHC.Types.Cpr.html#viewConTag"><span class="hs-identifier hs-var">viewConTag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-type">ConCpr</span></a></span><span> </span><span id="local-6989586621681601286"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601286"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="annot"><span class="annottext">[Cpr]
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429410"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-51"></span><span class="annot"><a href="GHC.Types.Cpr.html#viewConTag"><span class="hs-identifier hs-var">viewConTag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-type">ConCpr</span></a></span><span> </span><span id="local-6989586621682429411"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429411"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="annot"><span class="annottext">[Cpr]
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Maybe Arity
 forall a. a -&gt; Maybe a
-</span><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Just/GHC.Maybe.html#Just"><span class="hs-identifier hs-var">Just</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601286"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429411"><span class="hs-identifier hs-var">t</span></a></span><span>
 </span><span id="line-52"></span><span class="annot"><a href="GHC.Types.Cpr.html#viewConTag"><span class="hs-identifier hs-var">viewConTag</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><span class="hs-identifier">_</span></span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe Arity
 forall a. Maybe a
-</span><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Nothing/GHC.Maybe.html#Nothing"><span class="hs-identifier hs-var">Nothing</span></a></span><span>
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
 </span><span id="line-53"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#viewConTag"><span class="hs-pragma hs-type">viewConTag</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
 </span><span id="line-54"></span><span>
 </span><span id="line-55"></span><span class="annot"><a href="GHC.Types.Cpr.html#lubCpr"><span class="hs-identifier hs-type">lubCpr</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span>
 </span><span id="line-56"></span><span id="lubCpr"><span class="annot"><span class="annottext">lubCpr :: Cpr -&gt; Cpr -&gt; Cpr
 </span><a href="GHC.Types.Cpr.html#lubCpr"><span class="hs-identifier hs-var hs-var">lubCpr</span></a></span></span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="GHC.Types.Cpr.html#BotCpr"><span class="hs-identifier hs-var">BotCpr</span></a></span><span>      </span><span id="local-6989586621681601288"><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601288"><span class="hs-identifier hs-var">cpr</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601288"><span class="hs-identifier hs-var">cpr</span></a></span><span>
-</span><span id="line-57"></span><span class="annot"><a href="GHC.Types.Cpr.html#lubCpr"><span class="hs-identifier hs-var">lubCpr</span></a></span><span> </span><span id="local-6989586621681601289"><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601289"><span class="hs-identifier hs-var">cpr</span></a></span></span><span>         </span><span class="annot"><span class="annottext">Cpr
+</span><a href="GHC.Types.Cpr.html#BotCpr"><span class="hs-identifier hs-var">BotCpr</span></a></span><span>      </span><span id="local-6989586621682429413"><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682429413"><span class="hs-identifier hs-var">cpr</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682429413"><span class="hs-identifier hs-var">cpr</span></a></span><span>
+</span><span id="line-57"></span><span class="annot"><a href="GHC.Types.Cpr.html#lubCpr"><span class="hs-identifier hs-var">lubCpr</span></a></span><span> </span><span id="local-6989586621682429414"><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682429414"><span class="hs-identifier hs-var">cpr</span></a></span></span><span>         </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#BotCpr"><span class="hs-identifier hs-var">BotCpr</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601289"><span class="hs-identifier hs-var">cpr</span></a></span><span>
-</span><span id="line-58"></span><span class="annot"><a href="GHC.Types.Cpr.html#lubCpr"><span class="hs-identifier hs-var">lubCpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#FlatConCpr"><span class="hs-identifier hs-type">FlatConCpr</span></a></span><span> </span><span id="local-6989586621681601290"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601290"><span class="hs-identifier hs-var">t1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Cpr -&gt; Maybe Arity
-</span><a href="GHC.Types.Cpr.html#viewConTag"><span class="hs-identifier hs-var">viewConTag</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Just/GHC.Maybe.html#Just"><span class="hs-identifier hs-type">Just</span></a></span><span> </span><span id="local-6989586621681601291"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601291"><span class="hs-identifier hs-var">t2</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682429414"><span class="hs-identifier hs-var">cpr</span></a></span><span>
+</span><span id="line-58"></span><span class="annot"><a href="GHC.Types.Cpr.html#lubCpr"><span class="hs-identifier hs-var">lubCpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#FlatConCpr"><span class="hs-identifier hs-type">FlatConCpr</span></a></span><span> </span><span id="local-6989586621682429415"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429415"><span class="hs-identifier hs-var">t1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Cpr -&gt; Maybe Arity
+</span><a href="GHC.Types.Cpr.html#viewConTag"><span class="hs-identifier hs-var">viewConTag</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682429416"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429416"><span class="hs-identifier hs-var">t2</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-59"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601290"><span class="hs-identifier hs-var">t1</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
+</span><a href="#local-6989586621682429415"><span class="hs-identifier hs-var">t1</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601291"><span class="hs-identifier hs-var">t2</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr
+</span><a href="#local-6989586621682429416"><span class="hs-identifier hs-var">t2</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr
 </span><a href="GHC.Types.Cpr.html#FlatConCpr"><span class="hs-identifier hs-var">FlatConCpr</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601290"><span class="hs-identifier hs-var">t1</span></a></span><span>
+</span><a href="#local-6989586621682429415"><span class="hs-identifier hs-var">t1</span></a></span><span>
 </span><span id="line-60"></span><span class="annot"><a href="GHC.Types.Cpr.html#lubCpr"><span class="hs-identifier hs-var">lubCpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Cpr -&gt; Maybe Arity
-</span><a href="GHC.Types.Cpr.html#viewConTag"><span class="hs-identifier hs-var">viewConTag</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Just/GHC.Maybe.html#Just"><span class="hs-identifier hs-type">Just</span></a></span><span> </span><span id="local-6989586621681601292"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601292"><span class="hs-identifier hs-var">t1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#FlatConCpr"><span class="hs-identifier hs-type">FlatConCpr</span></a></span><span> </span><span id="local-6989586621681601293"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601293"><span class="hs-identifier hs-var">t2</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="GHC.Types.Cpr.html#viewConTag"><span class="hs-identifier hs-var">viewConTag</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682429417"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429417"><span class="hs-identifier hs-var">t1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#FlatConCpr"><span class="hs-identifier hs-type">FlatConCpr</span></a></span><span> </span><span id="local-6989586621682429418"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429418"><span class="hs-identifier hs-var">t2</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-61"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601292"><span class="hs-identifier hs-var">t1</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
+</span><a href="#local-6989586621682429417"><span class="hs-identifier hs-var">t1</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601293"><span class="hs-identifier hs-var">t2</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr
+</span><a href="#local-6989586621682429418"><span class="hs-identifier hs-var">t2</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr
 </span><a href="GHC.Types.Cpr.html#FlatConCpr"><span class="hs-identifier hs-var">FlatConCpr</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601293"><span class="hs-identifier hs-var">t2</span></a></span><span>
-</span><span id="line-62"></span><span class="annot"><a href="GHC.Types.Cpr.html#lubCpr"><span class="hs-identifier hs-var">lubCpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-type">ConCpr</span></a></span><span> </span><span id="local-6989586621681601294"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601294"><span class="hs-identifier hs-var">t1</span></a></span></span><span> </span><span id="local-6989586621681601295"><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601295"><span class="hs-identifier hs-var">cs1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-type">ConCpr</span></a></span><span> </span><span id="local-6989586621681601296"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601296"><span class="hs-identifier hs-var">t2</span></a></span></span><span> </span><span id="local-6989586621681601297"><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601297"><span class="hs-identifier hs-var">cs2</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682429418"><span class="hs-identifier hs-var">t2</span></a></span><span>
+</span><span id="line-62"></span><span class="annot"><a href="GHC.Types.Cpr.html#lubCpr"><span class="hs-identifier hs-var">lubCpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-type">ConCpr</span></a></span><span> </span><span id="local-6989586621682429419"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429419"><span class="hs-identifier hs-var">t1</span></a></span></span><span> </span><span id="local-6989586621682429420"><span class="annot"><span class="annottext">[Cpr]
+</span><a href="#local-6989586621682429420"><span class="hs-identifier hs-var">cs1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-type">ConCpr</span></a></span><span> </span><span id="local-6989586621682429421"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429421"><span class="hs-identifier hs-var">t2</span></a></span></span><span> </span><span id="local-6989586621682429422"><span class="annot"><span class="annottext">[Cpr]
+</span><a href="#local-6989586621682429422"><span class="hs-identifier hs-var">cs2</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-63"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601294"><span class="hs-identifier hs-var">t1</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
+</span><a href="#local-6989586621682429419"><span class="hs-identifier hs-var">t1</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601296"><span class="hs-identifier hs-var">t2</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; [Cpr] -&gt; Cpr
+</span><a href="#local-6989586621682429421"><span class="hs-identifier hs-var">t2</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; [Cpr] -&gt; Cpr
 </span><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-var">ConCpr</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601294"><span class="hs-identifier hs-var">t1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Cpr] -&gt; [Cpr] -&gt; [Cpr]
+</span><a href="#local-6989586621682429419"><span class="hs-identifier hs-var">t1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Cpr] -&gt; [Cpr] -&gt; [Cpr]
 </span><a href="GHC.Types.Cpr.html#lubFieldCprs"><span class="hs-identifier hs-var">lubFieldCprs</span></a></span><span> </span><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601295"><span class="hs-identifier hs-var">cs1</span></a></span><span> </span><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601297"><span class="hs-identifier hs-var">cs2</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682429420"><span class="hs-identifier hs-var">cs1</span></a></span><span> </span><span class="annot"><span class="annottext">[Cpr]
+</span><a href="#local-6989586621682429422"><span class="hs-identifier hs-var">cs2</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-64"></span><span class="annot"><a href="GHC.Types.Cpr.html#lubCpr"><span class="hs-identifier hs-var">lubCpr</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><span class="hs-identifier">_</span></span><span>           </span><span class="annot"><span class="annottext">Cpr
 </span><span class="hs-identifier">_</span></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cpr
@@ -142,21 +142,21 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span id="line-65"></span><span>
 </span><span id="line-66"></span><span class="annot"><a href="GHC.Types.Cpr.html#lubFieldCprs"><span class="hs-identifier hs-type">lubFieldCprs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-67"></span><span id="lubFieldCprs"><span class="annot"><span class="annottext">lubFieldCprs :: [Cpr] -&gt; [Cpr] -&gt; [Cpr]
-</span><a href="GHC.Types.Cpr.html#lubFieldCprs"><span class="hs-identifier hs-var hs-var">lubFieldCprs</span></a></span></span><span> </span><span id="local-6989586621681601299"><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601299"><span class="hs-keyword hs-var">as</span></a></span></span><span> </span><span id="local-6989586621681601300"><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601300"><span class="hs-identifier hs-var">bs</span></a></span></span><span>
+</span><a href="GHC.Types.Cpr.html#lubFieldCprs"><span class="hs-identifier hs-var hs-var">lubFieldCprs</span></a></span></span><span> </span><span id="local-6989586621682429424"><span class="annot"><span class="annottext">[Cpr]
+</span><a href="#local-6989586621682429424"><span class="hs-keyword hs-var">as</span></a></span></span><span> </span><span id="local-6989586621682429425"><span class="annot"><span class="annottext">[Cpr]
+</span><a href="#local-6989586621682429425"><span class="hs-identifier hs-var">bs</span></a></span></span><span>
 </span><span id="line-68"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601299"><span class="hs-keyword hs-var">as</span></a></span><span> </span><span class="annot"><span class="annottext">[Cpr] -&gt; [Cpr] -&gt; Bool
+</span><a href="#local-6989586621682429424"><span class="hs-keyword hs-var">as</span></a></span><span> </span><span class="annot"><span class="annottext">[Cpr] -&gt; [Cpr] -&gt; Bool
 forall a b. [a] -&gt; [b] -&gt; Bool
 </span><a href="GHC.Utils.Misc.html#equalLength"><span class="hs-operator hs-var">`equalLength`</span></a></span><span> </span><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601300"><span class="hs-identifier hs-var">bs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Cpr -&gt; Cpr -&gt; Cpr) -&gt; [Cpr] -&gt; [Cpr] -&gt; [Cpr]
+</span><a href="#local-6989586621682429425"><span class="hs-identifier hs-var">bs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Cpr -&gt; Cpr -&gt; Cpr) -&gt; [Cpr] -&gt; [Cpr] -&gt; [Cpr]
 forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
-</span><a href="../../base-4.18.2.0/src/GHC.List.html#zipWith/GHC.List.html#zipWith"><span class="hs-identifier hs-var">zipWith</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Cpr
+</span><span class="hs-identifier hs-var">zipWith</span></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Cpr
 </span><a href="GHC.Types.Cpr.html#lubCpr"><span class="hs-identifier hs-var">lubCpr</span></a></span><span> </span><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601299"><span class="hs-keyword hs-var">as</span></a></span><span> </span><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601300"><span class="hs-identifier hs-var">bs</span></a></span><span>
+</span><a href="#local-6989586621682429424"><span class="hs-keyword hs-var">as</span></a></span><span> </span><span class="annot"><span class="annottext">[Cpr]
+</span><a href="#local-6989586621682429425"><span class="hs-identifier hs-var">bs</span></a></span><span>
 </span><span id="line-69"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#otherwise/GHC.Base.html#otherwise"><span class="hs-identifier hs-var">otherwise</span></a></span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
 </span><span id="line-70"></span><span>
 </span><span id="line-71"></span><span class="annot"><a href="GHC.Types.Cpr.html#topCpr"><span class="hs-identifier hs-type">topCpr</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span>
 </span><span id="line-72"></span><span id="topCpr"><span class="annot"><span class="annottext">topCpr :: Cpr
@@ -170,10 +170,10 @@ forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
 </span><span id="line-76"></span><span>
 </span><span id="line-77"></span><span class="annot"><a href="GHC.Types.Cpr.html#flatConCpr"><span class="hs-identifier hs-type">flatConCpr</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#ConTag"><span class="hs-identifier hs-type">ConTag</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span>
 </span><span id="line-78"></span><span id="flatConCpr"><span class="annot"><span class="annottext">flatConCpr :: Arity -&gt; Cpr
-</span><a href="GHC.Types.Cpr.html#flatConCpr"><span class="hs-identifier hs-var hs-var">flatConCpr</span></a></span></span><span> </span><span id="local-6989586621681601303"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601303"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr
+</span><a href="GHC.Types.Cpr.html#flatConCpr"><span class="hs-identifier hs-var hs-var">flatConCpr</span></a></span></span><span> </span><span id="local-6989586621682429428"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429428"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr
 </span><a href="GHC.Types.Cpr.html#FlatConCpr"><span class="hs-identifier hs-var">FlatConCpr</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601303"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><a href="#local-6989586621682429428"><span class="hs-identifier hs-var">t</span></a></span><span>
 </span><span id="line-79"></span><span>
 </span><span id="line-80"></span><span class="annot"><a href="GHC.Types.Cpr.html#trimCpr"><span class="hs-identifier hs-type">trimCpr</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span>
 </span><span id="line-81"></span><span id="trimCpr"><span class="annot"><span class="annottext">trimCpr :: Cpr -&gt; Cpr
@@ -184,45 +184,45 @@ forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
 </span><span class="hs-identifier">_</span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#topCpr"><span class="hs-identifier hs-var">topCpr</span></a></span><span>
 </span><span id="line-83"></span><span>
-</span><span id="line-84"></span><span class="annot"><a href="GHC.Types.Cpr.html#asConCpr"><span class="hs-identifier hs-type">asConCpr</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Maybe/GHC.Maybe.html#Maybe"><span class="hs-identifier hs-type">Maybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#ConTag"><span class="hs-identifier hs-type">ConTag</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-84"></span><span class="annot"><a href="GHC.Types.Cpr.html#asConCpr"><span class="hs-identifier hs-type">asConCpr</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#ConTag"><span class="hs-identifier hs-type">ConTag</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
 </span><span id="line-85"></span><span id="asConCpr"><span class="annot"><span class="annottext">asConCpr :: Cpr -&gt; Maybe (Arity, [Cpr])
-</span><a href="GHC.Types.Cpr.html#asConCpr"><span class="hs-identifier hs-var hs-var">asConCpr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-type">ConCpr</span></a></span><span> </span><span id="local-6989586621681601305"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601305"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621681601306"><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601306"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Arity, [Cpr]) -&gt; Maybe (Arity, [Cpr])
+</span><a href="GHC.Types.Cpr.html#asConCpr"><span class="hs-identifier hs-var hs-var">asConCpr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-type">ConCpr</span></a></span><span> </span><span id="local-6989586621682429430"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429430"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621682429431"><span class="annot"><span class="annottext">[Cpr]
+</span><a href="#local-6989586621682429431"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Arity, [Cpr]) -&gt; Maybe (Arity, [Cpr])
 forall a. a -&gt; Maybe a
-</span><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Just/GHC.Maybe.html#Just"><span class="hs-identifier hs-var">Just</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601305"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601306"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-86"></span><span class="annot"><a href="GHC.Types.Cpr.html#asConCpr"><span class="hs-identifier hs-var">asConCpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#FlatConCpr"><span class="hs-identifier hs-type">FlatConCpr</span></a></span><span> </span><span id="local-6989586621681601307"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601307"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Arity, [Cpr]) -&gt; Maybe (Arity, [Cpr])
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429430"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Cpr]
+</span><a href="#local-6989586621682429431"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-86"></span><span class="annot"><a href="GHC.Types.Cpr.html#asConCpr"><span class="hs-identifier hs-var">asConCpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#FlatConCpr"><span class="hs-identifier hs-type">FlatConCpr</span></a></span><span> </span><span id="local-6989586621682429432"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429432"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Arity, [Cpr]) -&gt; Maybe (Arity, [Cpr])
 forall a. a -&gt; Maybe a
-</span><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Just/GHC.Maybe.html#Just"><span class="hs-identifier hs-var">Just</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601307"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429432"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
 </span><span id="line-87"></span><span class="annot"><a href="GHC.Types.Cpr.html#asConCpr"><span class="hs-identifier hs-var">asConCpr</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#TopCpr"><span class="hs-identifier hs-var">TopCpr</span></a></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (Arity, [Cpr])
 forall a. Maybe a
-</span><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Nothing/GHC.Maybe.html#Nothing"><span class="hs-identifier hs-var">Nothing</span></a></span><span>
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
 </span><span id="line-88"></span><span class="annot"><a href="GHC.Types.Cpr.html#asConCpr"><span class="hs-identifier hs-var">asConCpr</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#BotCpr"><span class="hs-identifier hs-var">BotCpr</span></a></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (Arity, [Cpr])
 forall a. Maybe a
-</span><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Nothing/GHC.Maybe.html#Nothing"><span class="hs-identifier hs-var">Nothing</span></a></span><span>
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
 </span><span id="line-89"></span><span>
 </span><span id="line-90"></span><span class="annot"><a href="GHC.Types.Cpr.html#seqCpr"><span class="hs-identifier hs-type">seqCpr</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-91"></span><span id="seqCpr"><span class="annot"><span class="annottext">seqCpr :: Cpr -&gt; ()
 </span><a href="GHC.Types.Cpr.html#seqCpr"><span class="hs-identifier hs-var hs-var">seqCpr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-type">ConCpr</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621681601309"><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601309"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Cpr -&gt; () -&gt; ()) -&gt; () -&gt; [Cpr] -&gt; ()
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682429434"><span class="annot"><span class="annottext">[Cpr]
+</span><a href="#local-6989586621682429434"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Cpr -&gt; () -&gt; ()) -&gt; () -&gt; [Cpr] -&gt; ()
 forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; [a] -&gt; b
 forall (t :: * -&gt; *) a b.
 Foldable t =&gt;
 (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
-</span><a href="../../base-4.18.2.0/src/Data.Foldable.html#foldr/Data.Foldable.html#foldr"><span class="hs-identifier hs-var">foldr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">() -&gt; () -&gt; ()
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">() -&gt; () -&gt; ()
 forall a b. a -&gt; b -&gt; b
 </span><span class="hs-identifier hs-var">seq</span></span><span> </span><span class="annot"><span class="annottext">(() -&gt; () -&gt; ()) -&gt; (Cpr -&gt; ()) -&gt; Cpr -&gt; () -&gt; ()
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#./GHC.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; ()
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; ()
 </span><a href="GHC.Types.Cpr.html#seqCpr"><span class="hs-identifier hs-var">seqCpr</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601309"><span class="hs-identifier hs-var">cs</span></a></span><span>
+</span><a href="#local-6989586621682429434"><span class="hs-identifier hs-var">cs</span></a></span><span>
 </span><span id="line-92"></span><span class="annot"><a href="GHC.Types.Cpr.html#seqCpr"><span class="hs-identifier hs-var">seqCpr</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><span class="hs-identifier">_</span></span><span>             </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-93"></span><span>
@@ -241,28 +241,28 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span id="line-104"></span><span>                      </span><span class="hs-comment">--   'ct_arty' arguments</span><span>
 </span><span id="line-105"></span><span>  </span><span class="hs-special">}</span><span>
 </span><span id="line-106"></span><span>
-</span><span id="line-107"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621681601317"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-108"></span><span>  </span><span id="local-6989586621681601323"><span class="annot"><span class="annottext">CprType
-</span><a href="#local-6989586621681601323"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621681601324"><span class="annot"><span class="annottext">== :: CprType -&gt; CprType -&gt; Bool
-</span><span class="hs-operator hs-var hs-var hs-var hs-var">==</span></span></span><span> </span><span id="local-6989586621681601325"><span class="annot"><span class="annottext">CprType
-</span><a href="#local-6989586621681601325"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">CprType -&gt; Cpr
+</span><span id="line-107"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682429442"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-108"></span><span>  </span><span id="local-6989586621682429448"><span class="annot"><span class="annottext">CprType
+</span><a href="#local-6989586621682429448"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621682429449"><span class="annot"><span class="annottext">== :: CprType -&gt; CprType -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var">==</span></span></span><span> </span><span id="local-6989586621682429450"><span class="annot"><span class="annottext">CprType
+</span><a href="#local-6989586621682429450"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">CprType -&gt; Cpr
 </span><a href="GHC.Types.Cpr.html#ct_cpr"><span class="hs-identifier hs-var">ct_cpr</span></a></span><span> </span><span class="annot"><span class="annottext">CprType
-</span><a href="#local-6989586621681601323"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Bool
+</span><a href="#local-6989586621682429448"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">CprType -&gt; Cpr
 </span><a href="GHC.Types.Cpr.html#ct_cpr"><span class="hs-identifier hs-var">ct_cpr</span></a></span><span> </span><span class="annot"><span class="annottext">CprType
-</span><a href="#local-6989586621681601325"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><a href="#local-6989586621682429450"><span class="hs-identifier hs-var">b</span></a></span><span>
 </span><span id="line-109"></span><span>         </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CprType -&gt; Arity
 </span><a href="GHC.Types.Cpr.html#ct_arty"><span class="hs-identifier hs-var">ct_arty</span></a></span><span> </span><span class="annot"><span class="annottext">CprType
-</span><a href="#local-6989586621681601323"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
+</span><a href="#local-6989586621682429448"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">CprType -&gt; Arity
 </span><a href="GHC.Types.Cpr.html#ct_arty"><span class="hs-identifier hs-var">ct_arty</span></a></span><span> </span><span class="annot"><span class="annottext">CprType
-</span><a href="#local-6989586621681601325"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621682429450"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">CprType -&gt; Cpr
 </span><a href="GHC.Types.Cpr.html#ct_cpr"><span class="hs-identifier hs-var">ct_cpr</span></a></span><span> </span><span class="annot"><span class="annottext">CprType
-</span><a href="#local-6989586621681601323"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Bool
+</span><a href="#local-6989586621682429448"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#topCpr"><span class="hs-identifier hs-var">topCpr</span></a></span><span class="hs-special">)</span><span>
@@ -283,118 +283,118 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span id="line-116"></span><span>
 </span><span id="line-117"></span><span class="annot"><a href="GHC.Types.Cpr.html#flatConCprType"><span class="hs-identifier hs-type">flatConCprType</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Language.Haskell.Syntax.Basic.html#ConTag"><span class="hs-identifier hs-type">ConTag</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span>
 </span><span id="line-118"></span><span id="flatConCprType"><span class="annot"><span class="annottext">flatConCprType :: Arity -&gt; CprType
-</span><a href="GHC.Types.Cpr.html#flatConCprType"><span class="hs-identifier hs-var hs-var">flatConCprType</span></a></span></span><span> </span><span id="local-6989586621681601328"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601328"><span class="hs-identifier hs-var">con_tag</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">ct_arty :: Arity
+</span><a href="GHC.Types.Cpr.html#flatConCprType"><span class="hs-identifier hs-var hs-var">flatConCprType</span></a></span></span><span> </span><span id="local-6989586621682429453"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429453"><span class="hs-identifier hs-var">con_tag</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">ct_arty :: Arity
 </span><a href="GHC.Types.Cpr.html#ct_arty"><span class="hs-identifier hs-var">ct_arty</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ct_cpr :: Cpr
 </span><a href="GHC.Types.Cpr.html#ct_cpr"><span class="hs-identifier hs-var">ct_cpr</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr
 </span><a href="GHC.Types.Cpr.html#flatConCpr"><span class="hs-identifier hs-var">flatConCpr</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601328"><span class="hs-identifier hs-var">con_tag</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><a href="#local-6989586621682429453"><span class="hs-identifier hs-var">con_tag</span></a></span><span> </span><span class="hs-special">}</span><span>
 </span><span id="line-119"></span><span>
 </span><span id="line-120"></span><span class="annot"><a href="GHC.Types.Cpr.html#lubCprType"><span class="hs-identifier hs-type">lubCprType</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span>
 </span><span id="line-121"></span><span id="lubCprType"><span class="annot"><span class="annottext">lubCprType :: CprType -&gt; CprType -&gt; CprType
-</span><a href="GHC.Types.Cpr.html#lubCprType"><span class="hs-identifier hs-var hs-var">lubCprType</span></a></span></span><span> </span><span id="local-6989586621681601329"><span class="annot"><span class="annottext">ty1 :: CprType
-</span><a href="#local-6989586621681601329"><span class="hs-identifier hs-var">ty1</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span id="local-6989586621681601330"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601330"><span class="hs-identifier hs-var">n1</span></a></span></span><span> </span><span id="local-6989586621681601331"><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601331"><span class="hs-identifier hs-var">cpr1</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621681601332"><span class="annot"><span class="annottext">ty2 :: CprType
-</span><a href="#local-6989586621681601332"><span class="hs-identifier hs-var">ty2</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span id="local-6989586621681601333"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601333"><span class="hs-identifier hs-var">n2</span></a></span></span><span> </span><span id="local-6989586621681601334"><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601334"><span class="hs-identifier hs-var">cpr2</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="GHC.Types.Cpr.html#lubCprType"><span class="hs-identifier hs-var hs-var">lubCprType</span></a></span></span><span> </span><span id="local-6989586621682429454"><span class="annot"><span class="annottext">ty1 :: CprType
+</span><a href="#local-6989586621682429454"><span class="hs-identifier hs-var">ty1</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span id="local-6989586621682429455"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429455"><span class="hs-identifier hs-var">n1</span></a></span></span><span> </span><span id="local-6989586621682429456"><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682429456"><span class="hs-identifier hs-var">cpr1</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621682429457"><span class="annot"><span class="annottext">ty2 :: CprType
+</span><a href="#local-6989586621682429457"><span class="hs-identifier hs-var">ty2</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span id="local-6989586621682429458"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429458"><span class="hs-identifier hs-var">n2</span></a></span></span><span> </span><span id="local-6989586621682429459"><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682429459"><span class="hs-identifier hs-var">cpr2</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-122"></span><span>  </span><span class="hs-comment">-- The arity of bottom CPR types can be extended arbitrarily.</span><span>
 </span><span id="line-123"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601331"><span class="hs-identifier hs-var">cpr1</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Bool
+</span><a href="#local-6989586621682429456"><span class="hs-identifier hs-var">cpr1</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#botCpr"><span class="hs-identifier hs-var">botCpr</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601330"><span class="hs-identifier hs-var">n1</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
+</span><a href="#local-6989586621682429455"><span class="hs-identifier hs-var">n1</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601333"><span class="hs-identifier hs-var">n2</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprType
-</span><a href="#local-6989586621681601332"><span class="hs-identifier hs-var">ty2</span></a></span><span>
+</span><a href="#local-6989586621682429458"><span class="hs-identifier hs-var">n2</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprType
+</span><a href="#local-6989586621682429457"><span class="hs-identifier hs-var">ty2</span></a></span><span>
 </span><span id="line-124"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601334"><span class="hs-identifier hs-var">cpr2</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Bool
+</span><a href="#local-6989586621682429459"><span class="hs-identifier hs-var">cpr2</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#botCpr"><span class="hs-identifier hs-var">botCpr</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601333"><span class="hs-identifier hs-var">n2</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
+</span><a href="#local-6989586621682429458"><span class="hs-identifier hs-var">n2</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601330"><span class="hs-identifier hs-var">n1</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprType
-</span><a href="#local-6989586621681601329"><span class="hs-identifier hs-var">ty1</span></a></span><span>
+</span><a href="#local-6989586621682429455"><span class="hs-identifier hs-var">n1</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprType
+</span><a href="#local-6989586621682429454"><span class="hs-identifier hs-var">ty1</span></a></span><span>
 </span><span id="line-125"></span><span>  </span><span class="hs-comment">-- There might be non-bottom CPR types with mismatching arities.</span><span>
 </span><span id="line-126"></span><span>  </span><span class="hs-comment">-- Consider test DmdAnalGADTs. We want to return top in these cases.</span><span>
 </span><span id="line-127"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601330"><span class="hs-identifier hs-var">n1</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
+</span><a href="#local-6989586621682429455"><span class="hs-identifier hs-var">n1</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601333"><span class="hs-identifier hs-var">n2</span></a></span><span>                   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr -&gt; CprType
+</span><a href="#local-6989586621682429458"><span class="hs-identifier hs-var">n2</span></a></span><span>                   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr -&gt; CprType
 </span><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-var">CprType</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601330"><span class="hs-identifier hs-var">n1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Cpr
+</span><a href="#local-6989586621682429455"><span class="hs-identifier hs-var">n1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Cpr
 </span><a href="GHC.Types.Cpr.html#lubCpr"><span class="hs-identifier hs-var">lubCpr</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601331"><span class="hs-identifier hs-var">cpr1</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601334"><span class="hs-identifier hs-var">cpr2</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682429456"><span class="hs-identifier hs-var">cpr1</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682429459"><span class="hs-identifier hs-var">cpr2</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-128"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#otherwise/GHC.Base.html#otherwise"><span class="hs-identifier hs-var">otherwise</span></a></span><span>                  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprType
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>                  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprType
 </span><a href="GHC.Types.Cpr.html#topCprType"><span class="hs-identifier hs-var">topCprType</span></a></span><span>
 </span><span id="line-129"></span><span>
 </span><span id="line-130"></span><span class="annot"><a href="GHC.Types.Cpr.html#applyCprTy"><span class="hs-identifier hs-type">applyCprTy</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span>
 </span><span id="line-131"></span><span id="applyCprTy"><span class="annot"><span class="annottext">applyCprTy :: CprType -&gt; Arity -&gt; CprType
-</span><a href="GHC.Types.Cpr.html#applyCprTy"><span class="hs-identifier hs-var hs-var">applyCprTy</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span id="local-6989586621681601336"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601336"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621681601337"><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601337"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621681601338"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601338"><span class="hs-identifier hs-var">k</span></a></span></span><span>
+</span><a href="GHC.Types.Cpr.html#applyCprTy"><span class="hs-identifier hs-var hs-var">applyCprTy</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span id="local-6989586621682429461"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429461"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621682429462"><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682429462"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621682429463"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429463"><span class="hs-identifier hs-var">k</span></a></span></span><span>
 </span><span id="line-132"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601336"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
+</span><a href="#local-6989586621682429461"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601338"><span class="hs-identifier hs-var">k</span></a></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr -&gt; CprType
+</span><a href="#local-6989586621682429463"><span class="hs-identifier hs-var">k</span></a></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr -&gt; CprType
 </span><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-var">CprType</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601336"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Arity
+</span><a href="#local-6989586621682429461"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Arity
 forall a. Num a =&gt; a -&gt; a -&gt; a
-</span><a href="../../base-4.18.2.0/src/GHC.Num.html#-/GHC.Num.html#-"><span class="hs-glyph hs-var">-</span></a></span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601338"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601337"><span class="hs-identifier hs-var">res</span></a></span><span>
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429463"><span class="hs-identifier hs-var">k</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682429462"><span class="hs-identifier hs-var">res</span></a></span><span>
 </span><span id="line-133"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601337"><span class="hs-identifier hs-var">res</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Bool
+</span><a href="#local-6989586621682429462"><span class="hs-identifier hs-var">res</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#botCpr"><span class="hs-identifier hs-var">botCpr</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprType
 </span><a href="GHC.Types.Cpr.html#botCprType"><span class="hs-identifier hs-var">botCprType</span></a></span><span>
 </span><span id="line-134"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#otherwise/GHC.Base.html#otherwise"><span class="hs-identifier hs-var">otherwise</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprType
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprType
 </span><a href="GHC.Types.Cpr.html#topCprType"><span class="hs-identifier hs-var">topCprType</span></a></span><span>
 </span><span id="line-135"></span><span>
 </span><span id="line-136"></span><span class="annot"><a href="GHC.Types.Cpr.html#abstractCprTy"><span class="hs-identifier hs-type">abstractCprTy</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span>
 </span><span id="line-137"></span><span id="abstractCprTy"><span class="annot"><span class="annottext">abstractCprTy :: CprType -&gt; CprType
-</span><a href="GHC.Types.Cpr.html#abstractCprTy"><span class="hs-identifier hs-var hs-var">abstractCprTy</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span id="local-6989586621681601339"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601339"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621681601340"><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601340"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="GHC.Types.Cpr.html#abstractCprTy"><span class="hs-identifier hs-var hs-var">abstractCprTy</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span id="local-6989586621682429464"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429464"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621682429465"><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682429465"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-138"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601340"><span class="hs-identifier hs-var">res</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Bool
+</span><a href="#local-6989586621682429465"><span class="hs-identifier hs-var">res</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#topCpr"><span class="hs-identifier hs-var">topCpr</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprType
 </span><a href="GHC.Types.Cpr.html#topCprType"><span class="hs-identifier hs-var">topCprType</span></a></span><span>
 </span><span id="line-139"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#otherwise/GHC.Base.html#otherwise"><span class="hs-identifier hs-var">otherwise</span></a></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr -&gt; CprType
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr -&gt; CprType
 </span><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-var">CprType</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601339"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Arity
+</span><a href="#local-6989586621682429464"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Arity
 forall a. Num a =&gt; a -&gt; a -&gt; a
-</span><a href="../../base-4.18.2.0/src/GHC.Num.html#%2B/GHC.Num.html#%2B"><span class="hs-operator hs-var">+</span></a></span><span class="annot"><span class="annottext">Arity
+</span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Arity
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601340"><span class="hs-identifier hs-var">res</span></a></span><span>
+</span><a href="#local-6989586621682429465"><span class="hs-identifier hs-var">res</span></a></span><span>
 </span><span id="line-140"></span><span>
 </span><span id="line-141"></span><span class="annot"><a href="GHC.Types.Cpr.html#trimCprTy"><span class="hs-identifier hs-type">trimCprTy</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span>
 </span><span id="line-142"></span><span id="trimCprTy"><span class="annot"><span class="annottext">trimCprTy :: CprType -&gt; CprType
-</span><a href="GHC.Types.Cpr.html#trimCprTy"><span class="hs-identifier hs-var hs-var">trimCprTy</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span id="local-6989586621681601342"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601342"><span class="hs-identifier hs-var">arty</span></a></span></span><span> </span><span id="local-6989586621681601343"><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601343"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr -&gt; CprType
+</span><a href="GHC.Types.Cpr.html#trimCprTy"><span class="hs-identifier hs-var hs-var">trimCprTy</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span id="local-6989586621682429467"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429467"><span class="hs-identifier hs-var">arty</span></a></span></span><span> </span><span id="local-6989586621682429468"><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682429468"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr -&gt; CprType
 </span><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-var">CprType</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601342"><span class="hs-identifier hs-var">arty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Cpr -&gt; Cpr
+</span><a href="#local-6989586621682429467"><span class="hs-identifier hs-var">arty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Cpr -&gt; Cpr
 </span><a href="GHC.Types.Cpr.html#trimCpr"><span class="hs-identifier hs-var">trimCpr</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601343"><span class="hs-identifier hs-var">res</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682429468"><span class="hs-identifier hs-var">res</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-143"></span><span>
 </span><span id="line-144"></span><span class="annot"><span class="hs-comment">-- | The result of 'unpackConFieldsCpr'.</span></span><span>
 </span><span id="line-145"></span><span class="hs-keyword">data</span><span> </span><span id="UnpackConFieldsResult"><span class="annot"><a href="GHC.Types.Cpr.html#UnpackConFieldsResult"><span class="hs-identifier hs-var">UnpackConFieldsResult</span></a></span></span><span>
@@ -409,24 +409,24 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span id="line-154"></span><span class="hs-comment">-- non-'ConCpr' case.</span><span>
 </span><span id="line-155"></span><span class="annot"><a href="GHC.Types.Cpr.html#unpackConFieldsCpr"><span class="hs-identifier hs-type">unpackConFieldsCpr</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.DataCon.html#DataCon"><span class="hs-identifier hs-type">DataCon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#UnpackConFieldsResult"><span class="hs-identifier hs-type">UnpackConFieldsResult</span></a></span><span>
 </span><span id="line-156"></span><span id="unpackConFieldsCpr"><span class="annot"><span class="annottext">unpackConFieldsCpr :: DataCon -&gt; Cpr -&gt; UnpackConFieldsResult
-</span><a href="GHC.Types.Cpr.html#unpackConFieldsCpr"><span class="hs-identifier hs-var hs-var">unpackConFieldsCpr</span></a></span></span><span> </span><span id="local-6989586621681601346"><span class="annot"><span class="annottext">DataCon
-</span><a href="#local-6989586621681601346"><span class="hs-identifier hs-var">dc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-type">ConCpr</span></a></span><span> </span><span id="local-6989586621681601347"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601347"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621681601348"><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601348"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="GHC.Types.Cpr.html#unpackConFieldsCpr"><span class="hs-identifier hs-var hs-var">unpackConFieldsCpr</span></a></span></span><span> </span><span id="local-6989586621682429471"><span class="annot"><span class="annottext">DataCon
+</span><a href="#local-6989586621682429471"><span class="hs-identifier hs-var">dc</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-type">ConCpr</span></a></span><span> </span><span id="local-6989586621682429472"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429472"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span id="local-6989586621682429473"><span class="annot"><span class="annottext">[Cpr]
+</span><a href="#local-6989586621682429473"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-157"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601347"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
+</span><a href="#local-6989586621682429472"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">DataCon -&gt; Arity
 </span><a href="GHC.Core.DataCon.html#dataConTag"><span class="hs-identifier hs-var">dataConTag</span></a></span><span> </span><span class="annot"><span class="annottext">DataCon
-</span><a href="#local-6989586621681601346"><span class="hs-identifier hs-var">dc</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601348"><span class="hs-identifier hs-var">cs</span></a></span><span> </span><span class="annot"><span class="annottext">[Cpr] -&gt; Arity -&gt; Bool
+</span><a href="#local-6989586621682429471"><span class="hs-identifier hs-var">dc</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Cpr]
+</span><a href="#local-6989586621682429473"><span class="hs-identifier hs-var">cs</span></a></span><span> </span><span class="annot"><span class="annottext">[Cpr] -&gt; Arity -&gt; Bool
 forall a. [a] -&gt; Arity -&gt; Bool
 </span><a href="GHC.Utils.Misc.html#lengthIs"><span class="hs-operator hs-var">`lengthIs`</span></a></span><span> </span><span class="annot"><span class="annottext">DataCon -&gt; Arity
 </span><a href="GHC.Core.DataCon.html#dataConRepArity"><span class="hs-identifier hs-var">dataConRepArity</span></a></span><span> </span><span class="annot"><span class="annottext">DataCon
-</span><a href="#local-6989586621681601346"><span class="hs-identifier hs-var">dc</span></a></span><span>
+</span><a href="#local-6989586621682429471"><span class="hs-identifier hs-var">dc</span></a></span><span>
 </span><span id="line-158"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Cpr] -&gt; UnpackConFieldsResult
 </span><a href="GHC.Types.Cpr.html#ForeachField"><span class="hs-identifier hs-var">ForeachField</span></a></span><span> </span><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601348"><span class="hs-identifier hs-var">cs</span></a></span><span>
+</span><a href="#local-6989586621682429473"><span class="hs-identifier hs-var">cs</span></a></span><span>
 </span><span id="line-159"></span><span class="annot"><a href="GHC.Types.Cpr.html#unpackConFieldsCpr"><span class="hs-identifier hs-var">unpackConFieldsCpr</span></a></span><span> </span><span class="annot"><span class="annottext">DataCon
 </span><span class="hs-identifier">_</span></span><span>  </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#BotCpr"><span class="hs-identifier hs-var">BotCpr</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; UnpackConFieldsResult
@@ -442,16 +442,16 @@ forall a. [a] -&gt; Arity -&gt; Bool
 </span><span id="line-163"></span><span class="annot"><a href="GHC.Types.Cpr.html#seqCprTy"><span class="hs-identifier hs-type">seqCprTy</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-164"></span><span id="seqCprTy"><span class="annot"><span class="annottext">seqCprTy :: CprType -&gt; ()
 </span><a href="GHC.Types.Cpr.html#seqCprTy"><span class="hs-identifier hs-var hs-var">seqCprTy</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621681601352"><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601352"><span class="hs-identifier hs-var">cpr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; ()
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682429477"><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682429477"><span class="hs-identifier hs-var">cpr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; ()
 </span><a href="GHC.Types.Cpr.html#seqCpr"><span class="hs-identifier hs-var">seqCpr</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601352"><span class="hs-identifier hs-var">cpr</span></a></span><span>
+</span><a href="#local-6989586621682429477"><span class="hs-identifier hs-var">cpr</span></a></span><span>
 </span><span id="line-165"></span><span>
 </span><span id="line-166"></span><span class="hs-comment">-- | The arity of the wrapped 'CprType' is the arity at which it is safe</span><span>
 </span><span id="line-167"></span><span class="hs-comment">-- to unleash. See Note [Understanding DmdType and DmdSig] in &quot;GHC.Types.Demand&quot;</span><span>
 </span><span id="line-168"></span><span class="hs-keyword">newtype</span><span> </span><span id="CprSig"><span class="annot"><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-var">CprSig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="CprSig"><span class="annot"><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-var">CprSig</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="getCprSig"><span class="annot"><span class="annottext">CprSig -&gt; CprType
 </span><a href="GHC.Types.Cpr.html#getCprSig"><span class="hs-identifier hs-var hs-var">getCprSig</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span class="hs-special">}</span><span>
-</span><span id="line-169"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621681601356"><span id="local-6989586621681601360"><span class="annot"><span class="annottext">CprSig -&gt; CprSig -&gt; Bool
+</span><span id="line-169"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682429481"><span id="local-6989586621682429485"><span class="annot"><span class="annottext">CprSig -&gt; CprSig -&gt; Bool
 (CprSig -&gt; CprSig -&gt; Bool)
 -&gt; (CprSig -&gt; CprSig -&gt; Bool) -&gt; Eq CprSig
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -459,7 +459,7 @@ $c== :: CprSig -&gt; CprSig -&gt; Bool
 == :: CprSig -&gt; CprSig -&gt; Bool
 $c/= :: CprSig -&gt; CprSig -&gt; Bool
 /= :: CprSig -&gt; CprSig -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681601365"><span id="local-6989586621681601370"><span id="local-6989586621681601374"><span class="annot"><span class="annottext">BinHandle -&gt; IO CprSig
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682429491"><span id="local-6989586621682429496"><span id="local-6989586621682429500"><span class="annot"><span class="annottext">BinHandle -&gt; IO CprSig
 BinHandle -&gt; CprSig -&gt; IO ()
 BinHandle -&gt; CprSig -&gt; IO (Bin CprSig)
 (BinHandle -&gt; CprSig -&gt; IO ())
@@ -484,21 +484,21 @@ get :: BinHandle -&gt; IO CprSig
 </span><span id="line-173"></span><span class="hs-comment">-- &quot;GHC.Types.Demand&quot;</span><span>
 </span><span id="line-174"></span><span class="annot"><a href="GHC.Types.Cpr.html#mkCprSigForArity"><span class="hs-identifier hs-type">mkCprSigForArity</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-type">CprSig</span></a></span><span>
 </span><span id="line-175"></span><span id="mkCprSigForArity"><span class="annot"><span class="annottext">mkCprSigForArity :: Arity -&gt; CprType -&gt; CprSig
-</span><a href="GHC.Types.Cpr.html#mkCprSigForArity"><span class="hs-identifier hs-var hs-var">mkCprSigForArity</span></a></span></span><span> </span><span id="local-6989586621681601379"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601379"><span class="hs-identifier hs-var">arty</span></a></span></span><span> </span><span id="local-6989586621681601380"><span class="annot"><span class="annottext">ty :: CprType
-</span><a href="#local-6989586621681601380"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span id="local-6989586621681601381"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601381"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="annot"><span class="annottext">Cpr
+</span><a href="GHC.Types.Cpr.html#mkCprSigForArity"><span class="hs-identifier hs-var hs-var">mkCprSigForArity</span></a></span></span><span> </span><span id="local-6989586621682429508"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429508"><span class="hs-identifier hs-var">arty</span></a></span></span><span> </span><span id="local-6989586621682429509"><span class="annot"><span class="annottext">ty :: CprType
+</span><a href="#local-6989586621682429509"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span id="local-6989586621682429510"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429510"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>
 </span><span id="line-176"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601379"><span class="hs-identifier hs-var">arty</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
+</span><a href="#local-6989586621682429508"><span class="hs-identifier hs-var">arty</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601381"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprSig
+</span><a href="#local-6989586621682429510"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprSig
 </span><a href="GHC.Types.Cpr.html#topCprSig"><span class="hs-identifier hs-var">topCprSig</span></a></span><span> </span><span class="hs-comment">-- Trim on arity mismatch</span><span>
 </span><span id="line-177"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#otherwise/GHC.Base.html#otherwise"><span class="hs-identifier hs-var">otherwise</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprType -&gt; CprSig
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprType -&gt; CprSig
 </span><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-var">CprSig</span></a></span><span> </span><span class="annot"><span class="annottext">CprType
-</span><a href="#local-6989586621681601380"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><a href="#local-6989586621682429509"><span class="hs-identifier hs-var">ty</span></a></span><span>
 </span><span id="line-178"></span><span>
 </span><span id="line-179"></span><span class="annot"><a href="GHC.Types.Cpr.html#topCprSig"><span class="hs-identifier hs-type">topCprSig</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-type">CprSig</span></a></span><span>
 </span><span id="line-180"></span><span id="topCprSig"><span class="annot"><span class="annottext">topCprSig :: CprSig
@@ -508,66 +508,66 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span id="line-181"></span><span>
 </span><span id="line-182"></span><span class="annot"><a href="GHC.Types.Cpr.html#isTopCprSig"><span class="hs-identifier hs-type">isTopCprSig</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-type">CprSig</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
 </span><span id="line-183"></span><span id="isTopCprSig"><span class="annot"><span class="annottext">isTopCprSig :: CprSig -&gt; Bool
-</span><a href="GHC.Types.Cpr.html#isTopCprSig"><span class="hs-identifier hs-var hs-var">isTopCprSig</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-type">CprSig</span></a></span><span> </span><span id="local-6989586621681601383"><span class="annot"><span class="annottext">CprType
-</span><a href="#local-6989586621681601383"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprType -&gt; Cpr
+</span><a href="GHC.Types.Cpr.html#isTopCprSig"><span class="hs-identifier hs-var hs-var">isTopCprSig</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-type">CprSig</span></a></span><span> </span><span id="local-6989586621682429511"><span class="annot"><span class="annottext">CprType
+</span><a href="#local-6989586621682429511"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprType -&gt; Cpr
 </span><a href="GHC.Types.Cpr.html#ct_cpr"><span class="hs-identifier hs-var">ct_cpr</span></a></span><span> </span><span class="annot"><span class="annottext">CprType
-</span><a href="#local-6989586621681601383"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Bool
+</span><a href="#local-6989586621682429511"><span class="hs-identifier hs-var">ty</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; Cpr -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#topCpr"><span class="hs-identifier hs-var">topCpr</span></a></span><span>
 </span><span id="line-184"></span><span>
 </span><span id="line-185"></span><span class="annot"><a href="GHC.Types.Cpr.html#mkCprSig"><span class="hs-identifier hs-type">mkCprSig</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-type">CprSig</span></a></span><span>
 </span><span id="line-186"></span><span id="mkCprSig"><span class="annot"><span class="annottext">mkCprSig :: Arity -&gt; Cpr -&gt; CprSig
-</span><a href="GHC.Types.Cpr.html#mkCprSig"><span class="hs-identifier hs-var hs-var">mkCprSig</span></a></span></span><span> </span><span id="local-6989586621681601384"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601384"><span class="hs-identifier hs-var">arty</span></a></span></span><span> </span><span id="local-6989586621681601385"><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601385"><span class="hs-identifier hs-var">cpr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprType -&gt; CprSig
+</span><a href="GHC.Types.Cpr.html#mkCprSig"><span class="hs-identifier hs-var hs-var">mkCprSig</span></a></span></span><span> </span><span id="local-6989586621682429512"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429512"><span class="hs-identifier hs-var">arty</span></a></span></span><span> </span><span id="local-6989586621682429513"><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682429513"><span class="hs-identifier hs-var">cpr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprType -&gt; CprSig
 </span><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-var">CprSig</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Arity -&gt; Cpr -&gt; CprType
 </span><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-var">CprType</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601384"><span class="hs-identifier hs-var">arty</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601385"><span class="hs-identifier hs-var">cpr</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682429512"><span class="hs-identifier hs-var">arty</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682429513"><span class="hs-identifier hs-var">cpr</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-187"></span><span>
 </span><span id="line-188"></span><span class="annot"><a href="GHC.Types.Cpr.html#seqCprSig"><span class="hs-identifier hs-type">seqCprSig</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-type">CprSig</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
 </span><span id="line-189"></span><span id="seqCprSig"><span class="annot"><span class="annottext">seqCprSig :: CprSig -&gt; ()
-</span><a href="GHC.Types.Cpr.html#seqCprSig"><span class="hs-identifier hs-var hs-var">seqCprSig</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-type">CprSig</span></a></span><span> </span><span id="local-6989586621681601386"><span class="annot"><span class="annottext">CprType
-</span><a href="#local-6989586621681601386"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprType -&gt; ()
+</span><a href="GHC.Types.Cpr.html#seqCprSig"><span class="hs-identifier hs-var hs-var">seqCprSig</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-type">CprSig</span></a></span><span> </span><span id="local-6989586621682429514"><span class="annot"><span class="annottext">CprType
+</span><a href="#local-6989586621682429514"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprType -&gt; ()
 </span><a href="GHC.Types.Cpr.html#seqCprTy"><span class="hs-identifier hs-var">seqCprTy</span></a></span><span> </span><span class="annot"><span class="annottext">CprType
-</span><a href="#local-6989586621681601386"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><a href="#local-6989586621682429514"><span class="hs-identifier hs-var">ty</span></a></span><span>
 </span><span id="line-190"></span><span>
 </span><span id="line-191"></span><span class="annot"><a href="GHC.Types.Cpr.html#prependArgsCprSig"><span class="hs-identifier hs-type">prependArgsCprSig</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Basic.html#Arity"><span class="hs-identifier hs-type">Arity</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-type">CprSig</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-type">CprSig</span></a></span><span>
 </span><span id="line-192"></span><span class="annot"><span class="hs-comment">-- ^ Add extra value args to CprSig</span></span><span>
 </span><span id="line-193"></span><span id="prependArgsCprSig"><span class="annot"><span class="annottext">prependArgsCprSig :: Arity -&gt; CprSig -&gt; CprSig
-</span><a href="GHC.Types.Cpr.html#prependArgsCprSig"><span class="hs-identifier hs-var hs-var">prependArgsCprSig</span></a></span></span><span> </span><span id="local-6989586621681601387"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601387"><span class="hs-identifier hs-var">n_extra</span></a></span></span><span> </span><span id="local-6989586621681601388"><span class="annot"><span class="annottext">cpr_sig :: CprSig
-</span><a href="#local-6989586621681601388"><span class="hs-identifier hs-var">cpr_sig</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-type">CprSig</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span id="local-6989586621681601389"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601389"><span class="hs-identifier hs-var">arity</span></a></span></span><span> </span><span id="local-6989586621681601390"><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601390"><span class="hs-identifier hs-var">cpr</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="GHC.Types.Cpr.html#prependArgsCprSig"><span class="hs-identifier hs-var hs-var">prependArgsCprSig</span></a></span></span><span> </span><span id="local-6989586621682429515"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429515"><span class="hs-identifier hs-var">n_extra</span></a></span></span><span> </span><span id="local-6989586621682429516"><span class="annot"><span class="annottext">cpr_sig :: CprSig
+</span><a href="#local-6989586621682429516"><span class="hs-identifier hs-var">cpr_sig</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-type">CprSig</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span id="local-6989586621682429517"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429517"><span class="hs-identifier hs-var">arity</span></a></span></span><span> </span><span id="local-6989586621682429518"><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682429518"><span class="hs-identifier hs-var">cpr</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-194"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601387"><span class="hs-identifier hs-var">n_extra</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
+</span><a href="#local-6989586621682429515"><span class="hs-identifier hs-var">n_extra</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Arity
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CprSig
-</span><a href="#local-6989586621681601388"><span class="hs-identifier hs-var">cpr_sig</span></a></span><span>
+</span><a href="#local-6989586621682429516"><span class="hs-identifier hs-var">cpr_sig</span></a></span><span>
 </span><span id="line-195"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#otherwise/GHC.Base.html#otherwise"><span class="hs-identifier hs-var">otherwise</span></a></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; SDoc -&gt; CprSig -&gt; CprSig
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; SDoc -&gt; CprSig -&gt; CprSig
 forall a. HasCallStack =&gt; Bool -&gt; SDoc -&gt; a -&gt; a
 </span><a href="GHC.Utils.Panic.html#assertPpr"><span class="hs-identifier hs-var">assertPpr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601387"><span class="hs-identifier hs-var">n_extra</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
+</span><a href="#local-6989586621682429515"><span class="hs-identifier hs-var">n_extra</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Arity
 </span><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Arity -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601387"><span class="hs-identifier hs-var">n_extra</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CprSig -&gt; CprSig) -&gt; CprSig -&gt; CprSig
+</span><a href="#local-6989586621682429515"><span class="hs-identifier hs-var">n_extra</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CprSig -&gt; CprSig) -&gt; CprSig -&gt; CprSig
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#%24/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span>
+</span><span class="hs-operator hs-var">$</span></span><span>
 </span><span id="line-196"></span><span>                   </span><span class="annot"><span class="annottext">CprType -&gt; CprSig
 </span><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-var">CprSig</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Arity -&gt; Cpr -&gt; CprType
 </span><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-var">CprType</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601389"><span class="hs-identifier hs-var">arity</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Arity
+</span><a href="#local-6989586621682429517"><span class="hs-identifier hs-var">arity</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Arity -&gt; Arity
 forall a. Num a =&gt; a -&gt; a -&gt; a
-</span><a href="../../base-4.18.2.0/src/GHC.Num.html#%2B/GHC.Num.html#%2B"><span class="hs-operator hs-var">+</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601387"><span class="hs-identifier hs-var">n_extra</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601390"><span class="hs-identifier hs-var">cpr</span></a></span><span class="hs-special">)</span><span>
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429515"><span class="hs-identifier hs-var">n_extra</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682429518"><span class="hs-identifier hs-var">cpr</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-197"></span><span>
 </span><span id="line-198"></span><span class="hs-comment">-- | BNF:</span><span>
 </span><span id="line-199"></span><span class="hs-comment">--</span><span>
@@ -580,22 +580,22 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span id="line-206"></span><span class="hs-comment">--   * `f x = f x` has result CPR `b`</span><span>
 </span><span id="line-207"></span><span class="hs-comment">--   * `1(1,)` is a valid (nested) 'Cpr' denotation for `(I# 42#, f 42)`.</span><span>
 </span><span id="line-208"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-209"></span><span>  </span><span id="local-6989586621681601406"><span class="annot"><span class="annottext">ppr :: Cpr -&gt; SDoc
-</span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="annot"><span class="annottext">Cpr
+</span><span id="line-209"></span><span>  </span><span id="local-6989586621682429534"><span class="annot"><span class="annottext">ppr :: Cpr -&gt; SDoc
+</span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#TopCpr"><span class="hs-identifier hs-var">TopCpr</span></a></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SDoc
 forall doc. IsOutput doc =&gt; doc
 </span><a href="GHC.Utils.Outputable.html#empty"><span class="hs-identifier hs-var">empty</span></a></span><span>
-</span><span id="line-210"></span><span>  </span><span class="annot"><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#FlatConCpr"><span class="hs-identifier hs-type">FlatConCpr</span></a></span><span> </span><span id="local-6989586621681601408"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601408"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; SDoc
+</span><span id="line-210"></span><span>  </span><span class="annot"><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#FlatConCpr"><span class="hs-identifier hs-type">FlatConCpr</span></a></span><span> </span><span id="local-6989586621682429536"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429536"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; SDoc
 forall doc. IsLine doc =&gt; Arity -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#int"><span class="hs-identifier hs-var">int</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601408"><span class="hs-identifier hs-var">n</span></a></span><span>
-</span><span id="line-211"></span><span>  </span><span class="annot"><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-type">ConCpr</span></a></span><span> </span><span id="local-6989586621681601410"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601410"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621681601411"><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601411"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; SDoc
+</span><a href="#local-6989586621682429536"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-211"></span><span>  </span><span class="annot"><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-type">ConCpr</span></a></span><span> </span><span id="local-6989586621682429538"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429538"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621682429539"><span class="annot"><span class="annottext">[Cpr]
+</span><a href="#local-6989586621682429539"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; SDoc
 forall doc. IsLine doc =&gt; Arity -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#int"><span class="hs-identifier hs-var">int</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601410"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682429538"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc
@@ -604,7 +604,7 @@ forall a. (a -&gt; SDoc) -&gt; [a] -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#pprWithCommas"><span class="hs-identifier hs-var">pprWithCommas</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601411"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682429539"><span class="hs-identifier hs-var">cs</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-212"></span><span>  </span><span class="annot"><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#BotCpr"><span class="hs-identifier hs-var">BotCpr</span></a></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; SDoc
 forall doc. IsLine doc =&gt; Char -&gt; doc
@@ -620,18 +620,18 @@ forall doc. IsLine doc =&gt; Char -&gt; doc
 </span><span id="line-220"></span><span class="hs-comment">--   * `f x y z = f x y z` has denotation `\3.b`</span><span>
 </span><span id="line-221"></span><span class="hs-comment">--   * `g !x = (x+1, x+2)` has denotation `\1.1(1,1)`.</span><span>
 </span><span id="line-222"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-223"></span><span>  </span><span id="local-6989586621681601428"><span class="annot"><span class="annottext">ppr :: CprType -&gt; SDoc
-</span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span id="local-6989586621681601429"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601429"><span class="hs-identifier hs-var">arty</span></a></span></span><span> </span><span id="local-6989586621681601430"><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601430"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-223"></span><span>  </span><span id="local-6989586621682429556"><span class="annot"><span class="annottext">ppr :: CprType -&gt; SDoc
+</span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span id="local-6989586621682429557"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429557"><span class="hs-identifier hs-var">arty</span></a></span></span><span> </span><span id="local-6989586621682429558"><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682429558"><span class="hs-identifier hs-var">res</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-224"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Arity
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601429"><span class="hs-identifier hs-var">arty</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; SDoc
+</span><a href="#local-6989586621682429557"><span class="hs-identifier hs-var">arty</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601430"><span class="hs-identifier hs-var">res</span></a></span><span>
+</span><a href="#local-6989586621682429558"><span class="hs-identifier hs-var">res</span></a></span><span>
 </span><span id="line-225"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#otherwise/GHC.Base.html#otherwise"><span class="hs-identifier hs-var">otherwise</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; SDoc
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; SDoc
 forall doc. IsLine doc =&gt; Char -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#char"><span class="hs-identifier hs-var">char</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'\\'</span></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
@@ -639,7 +639,7 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Arity -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601429"><span class="hs-identifier hs-var">arty</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682429557"><span class="hs-identifier hs-var">arty</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; SDoc
 forall doc. IsLine doc =&gt; Char -&gt; doc
@@ -649,109 +649,107 @@ forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601430"><span class="hs-identifier hs-var">res</span></a></span><span>
+</span><a href="#local-6989586621682429558"><span class="hs-identifier hs-var">res</span></a></span><span>
 </span><span id="line-226"></span><span>
 </span><span id="line-227"></span><span class="annot"><span class="hs-comment">-- | Only print the CPR result</span></span><span>
 </span><span id="line-228"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-type">CprSig</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-229"></span><span>  </span><span id="local-6989586621681601434"><span class="annot"><span class="annottext">ppr :: CprSig -&gt; SDoc
-</span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-type">CprSig</span></a></span><span> </span><span id="local-6989586621681601435"><span class="annot"><span class="annottext">CprType
-</span><a href="#local-6989586621681601435"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; SDoc
+</span><span id="line-229"></span><span>  </span><span id="local-6989586621682429562"><span class="annot"><span class="annottext">ppr :: CprSig -&gt; SDoc
+</span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprSig"><span class="hs-identifier hs-type">CprSig</span></a></span><span> </span><span id="local-6989586621682429563"><span class="annot"><span class="annottext">CprType
+</span><a href="#local-6989586621682429563"><span class="hs-identifier hs-var">ty</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CprType -&gt; Cpr
 </span><a href="GHC.Types.Cpr.html#ct_cpr"><span class="hs-identifier hs-var">ct_cpr</span></a></span><span> </span><span class="annot"><span class="annottext">CprType
-</span><a href="#local-6989586621681601435"><span class="hs-identifier hs-var">ty</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682429563"><span class="hs-identifier hs-var">ty</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-230"></span><span>
-</span><span id="line-231"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621681601438"><span class="annot"><a href="GHC.Utils.Binary.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-232"></span><span>  </span><span id="local-6989586621681601457"><span class="annot"><span class="annottext">put_ :: BinHandle -&gt; Cpr -&gt; IO ()
-</span><a href="#local-6989586621681601457"><span class="hs-identifier hs-var hs-var hs-var hs-var">put_</span></a></span></span><span> </span><span id="local-6989586621681601459"><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601459"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="annot"><span class="annottext">Cpr
+</span><span id="line-231"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682429566"><span class="annot"><a href="GHC.Utils.Binary.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#Cpr"><span class="hs-identifier hs-type">Cpr</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-232"></span><span>  </span><span id="local-6989586621682429585"><span class="annot"><span class="annottext">put_ :: BinHandle -&gt; Cpr -&gt; IO ()
+</span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var hs-var hs-var">put_</span></a></span></span><span> </span><span id="local-6989586621682429586"><span class="annot"><span class="annottext">BinHandle
+</span><a href="#local-6989586621682429586"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#TopCpr"><span class="hs-identifier hs-var">TopCpr</span></a></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Word8 -&gt; IO ()
 </span><a href="GHC.Utils.Binary.html#putByte"><span class="hs-identifier hs-var">putByte</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601459"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Word8
+</span><a href="#local-6989586621682429586"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Word8
 </span><span class="hs-number">0</span></span><span>
-</span><span id="line-233"></span><span>  </span><span class="annot"><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span id="local-6989586621681601461"><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601461"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="annot"><span class="annottext">Cpr
+</span><span id="line-233"></span><span>  </span><span class="annot"><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span id="local-6989586621682429588"><span class="annot"><span class="annottext">BinHandle
+</span><a href="#local-6989586621682429588"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#BotCpr"><span class="hs-identifier hs-var">BotCpr</span></a></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Word8 -&gt; IO ()
 </span><a href="GHC.Utils.Binary.html#putByte"><span class="hs-identifier hs-var">putByte</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601461"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Word8
+</span><a href="#local-6989586621682429588"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Word8
 </span><span class="hs-number">1</span></span><span>
-</span><span id="line-234"></span><span>  </span><span class="annot"><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span id="local-6989586621681601462"><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601462"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#FlatConCpr"><span class="hs-identifier hs-type">FlatConCpr</span></a></span><span> </span><span id="local-6989586621681601463"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601463"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Word8 -&gt; IO ()
+</span><span id="line-234"></span><span>  </span><span class="annot"><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span id="local-6989586621682429589"><span class="annot"><span class="annottext">BinHandle
+</span><a href="#local-6989586621682429589"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#FlatConCpr"><span class="hs-identifier hs-type">FlatConCpr</span></a></span><span> </span><span id="local-6989586621682429590"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429590"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Word8 -&gt; IO ()
 </span><a href="GHC.Utils.Binary.html#putByte"><span class="hs-identifier hs-var">putByte</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601462"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Word8
+</span><a href="#local-6989586621682429589"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Word8
 </span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">IO () -&gt; IO () -&gt; IO ()
 forall a b. IO a -&gt; IO b -&gt; IO b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#%2A%3E/GHC.Base.html#%2A%3E"><span class="hs-operator hs-var">*&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Arity -&gt; IO ()
+</span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Arity -&gt; IO ()
 forall a. Binary a =&gt; BinHandle -&gt; a -&gt; IO ()
 </span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601462"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601463"><span class="hs-identifier hs-var">n</span></a></span><span>
-</span><span id="line-235"></span><span>  </span><span class="annot"><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span id="local-6989586621681601464"><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601464"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-type">ConCpr</span></a></span><span> </span><span id="local-6989586621681601465"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601465"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621681601466"><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601466"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Word8 -&gt; IO ()
+</span><a href="#local-6989586621682429589"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429590"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-235"></span><span>  </span><span class="annot"><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span id="local-6989586621682429591"><span class="annot"><span class="annottext">BinHandle
+</span><a href="#local-6989586621682429591"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-type">ConCpr</span></a></span><span> </span><span id="local-6989586621682429592"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429592"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621682429593"><span class="annot"><span class="annottext">[Cpr]
+</span><a href="#local-6989586621682429593"><span class="hs-identifier hs-var">cs</span></a></span></span><span class="hs-special">)</span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Word8 -&gt; IO ()
 </span><a href="GHC.Utils.Binary.html#putByte"><span class="hs-identifier hs-var">putByte</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601464"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Word8
+</span><a href="#local-6989586621682429591"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Word8
 </span><span class="hs-number">3</span></span><span> </span><span class="annot"><span class="annottext">IO () -&gt; IO () -&gt; IO ()
 forall a b. IO a -&gt; IO b -&gt; IO b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#%2A%3E/GHC.Base.html#%2A%3E"><span class="hs-operator hs-var">*&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Arity -&gt; IO ()
+</span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Arity -&gt; IO ()
 forall a. Binary a =&gt; BinHandle -&gt; a -&gt; IO ()
 </span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601464"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601465"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">IO () -&gt; IO () -&gt; IO ()
+</span><a href="#local-6989586621682429591"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429592"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">IO () -&gt; IO () -&gt; IO ()
 forall a b. IO a -&gt; IO b -&gt; IO b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#%2A%3E/GHC.Base.html#%2A%3E"><span class="hs-operator hs-var">*&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; [Cpr] -&gt; IO ()
+</span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; [Cpr] -&gt; IO ()
 forall a. Binary a =&gt; BinHandle -&gt; a -&gt; IO ()
 </span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601464"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">[Cpr]
-</span><a href="#local-6989586621681601466"><span class="hs-identifier hs-var">cs</span></a></span><span>
-</span><span id="line-236"></span><span>  </span><span id="local-6989586621681601494"><span class="annot"><span class="annottext">get :: BinHandle -&gt; IO Cpr
-</span><a href="#local-6989586621681601494"><span class="hs-identifier hs-var hs-var hs-var hs-var">get</span></a></span></span><span>  </span><span id="local-6989586621681601496"><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601496"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-237"></span><span>    </span><span id="local-6989586621681601497"><span class="annot"><span class="annottext">Word8
-</span><a href="#local-6989586621681601497"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; IO Word8
+</span><a href="#local-6989586621682429591"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">[Cpr]
+</span><a href="#local-6989586621682429593"><span class="hs-identifier hs-var">cs</span></a></span><span>
+</span><span id="line-236"></span><span>  </span><span id="local-6989586621682429621"><span class="annot"><span class="annottext">get :: BinHandle -&gt; IO Cpr
+</span><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-var hs-var hs-var">get</span></a></span></span><span>  </span><span id="local-6989586621682429622"><span class="annot"><span class="annottext">BinHandle
+</span><a href="#local-6989586621682429622"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-237"></span><span>    </span><span id="local-6989586621682429623"><span class="annot"><a href="#local-6989586621682429623"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; IO Word8
 </span><a href="GHC.Utils.Binary.html#getByte"><span class="hs-identifier hs-var">getByte</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601496"><span class="hs-identifier hs-var">bh</span></a></span><span>
-</span><span id="line-238"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Word8
-</span><a href="#local-6989586621681601497"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682429622"><span class="hs-identifier hs-var">bh</span></a></span><span>
+</span><span id="line-238"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621682429623"><span class="hs-identifier hs-type">h</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-239"></span><span>      </span><span class="annot"><span class="annottext">Word8
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; IO Cpr
 forall a. a -&gt; IO a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#return/GHC.Base.html#return"><span class="hs-identifier hs-var">return</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#TopCpr"><span class="hs-identifier hs-var">TopCpr</span></a></span><span>
 </span><span id="line-240"></span><span>      </span><span class="annot"><span class="annottext">Word8
 </span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Cpr -&gt; IO Cpr
 forall a. a -&gt; IO a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#return/GHC.Base.html#return"><span class="hs-identifier hs-var">return</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Cpr
 </span><a href="GHC.Types.Cpr.html#BotCpr"><span class="hs-identifier hs-var">BotCpr</span></a></span><span>
 </span><span id="line-241"></span><span>      </span><span class="annot"><span class="annottext">Word8
 </span><span class="hs-number">2</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr
 </span><a href="GHC.Types.Cpr.html#FlatConCpr"><span class="hs-identifier hs-var">FlatConCpr</span></a></span><span> </span><span class="annot"><span class="annottext">(Arity -&gt; Cpr) -&gt; IO Arity -&gt; IO Cpr
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><a href="../../base-4.18.2.0/src/Data.Functor.html#%3C%24%3E/Data.Functor.html#%3C%24%3E"><span class="hs-operator hs-var">&lt;$&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; IO Arity
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; IO Arity
 forall a. Binary a =&gt; BinHandle -&gt; IO a
 </span><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-var">get</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601496"><span class="hs-identifier hs-var">bh</span></a></span><span>
+</span><a href="#local-6989586621682429622"><span class="hs-identifier hs-var">bh</span></a></span><span>
 </span><span id="line-242"></span><span>      </span><span class="annot"><span class="annottext">Word8
 </span><span class="hs-number">3</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; [Cpr] -&gt; Cpr
 </span><a href="GHC.Types.Cpr.html#ConCpr"><span class="hs-identifier hs-var">ConCpr</span></a></span><span> </span><span class="annot"><span class="annottext">(Arity -&gt; [Cpr] -&gt; Cpr) -&gt; IO Arity -&gt; IO ([Cpr] -&gt; Cpr)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><a href="../../base-4.18.2.0/src/Data.Functor.html#%3C%24%3E/Data.Functor.html#%3C%24%3E"><span class="hs-operator hs-var">&lt;$&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; IO Arity
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; IO Arity
 forall a. Binary a =&gt; BinHandle -&gt; IO a
 </span><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-var">get</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601496"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">IO ([Cpr] -&gt; Cpr) -&gt; IO [Cpr] -&gt; IO Cpr
+</span><a href="#local-6989586621682429622"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">IO ([Cpr] -&gt; Cpr) -&gt; IO [Cpr] -&gt; IO Cpr
 forall a b. IO (a -&gt; b) -&gt; IO a -&gt; IO b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#%3C%2A%3E/GHC.Base.html#%3C%2A%3E"><span class="hs-operator hs-var">&lt;*&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; IO [Cpr]
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; IO [Cpr]
 forall a. Binary a =&gt; BinHandle -&gt; IO a
 </span><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-var">get</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601496"><span class="hs-identifier hs-var">bh</span></a></span><span>
+</span><a href="#local-6989586621682429622"><span class="hs-identifier hs-var">bh</span></a></span><span>
 </span><span id="line-243"></span><span>      </span><span class="annot"><span class="annottext">Word8
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc -&gt; IO Cpr
 forall a. HasCallStack =&gt; String -&gt; SDoc -&gt; a
@@ -760,39 +758,39 @@ forall a. HasCallStack =&gt; String -&gt; SDoc -&gt; a
 forall doc. IsLine doc =&gt; Arity -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#int"><span class="hs-identifier hs-var">int</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Word8 -&gt; Arity
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
-</span><a href="../../base-4.18.2.0/src/GHC.Real.html#fromIntegral/GHC.Real.html#fromIntegral"><span class="hs-identifier hs-var">fromIntegral</span></a></span><span> </span><span class="annot"><span class="annottext">Word8
-</span><a href="#local-6989586621681601497"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Word8
+</span><a href="#local-6989586621682429623"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-244"></span><span>
-</span><span id="line-245"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621681601503"><span class="annot"><a href="GHC.Utils.Binary.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-246"></span><span>  </span><span id="local-6989586621681601509"><span class="annot"><span class="annottext">put_ :: BinHandle -&gt; CprType -&gt; IO ()
-</span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var hs-var hs-var hs-var">put_</span></a></span></span><span> </span><span id="local-6989586621681601510"><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601510"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span id="local-6989586621681601511"><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601511"><span class="hs-identifier hs-var">arty</span></a></span></span><span> </span><span id="local-6989586621681601512"><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601512"><span class="hs-identifier hs-var">cpr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Arity -&gt; IO ()
+</span><span id="line-245"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621682429629"><span class="annot"><a href="GHC.Utils.Binary.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-246"></span><span>  </span><span id="local-6989586621682429635"><span class="annot"><span class="annottext">put_ :: BinHandle -&gt; CprType -&gt; IO ()
+</span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var hs-var hs-var">put_</span></a></span></span><span> </span><span id="local-6989586621682429636"><span class="annot"><span class="annottext">BinHandle
+</span><a href="#local-6989586621682429636"><span class="hs-identifier hs-var">bh</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-type">CprType</span></a></span><span> </span><span id="local-6989586621682429637"><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429637"><span class="hs-identifier hs-var">arty</span></a></span></span><span> </span><span id="local-6989586621682429638"><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682429638"><span class="hs-identifier hs-var">cpr</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Arity -&gt; IO ()
 forall a. Binary a =&gt; BinHandle -&gt; a -&gt; IO ()
 </span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601510"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
-</span><a href="#local-6989586621681601511"><span class="hs-identifier hs-var">arty</span></a></span><span> </span><span class="annot"><span class="annottext">IO () -&gt; IO () -&gt; IO ()
+</span><a href="#local-6989586621682429636"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Arity
+</span><a href="#local-6989586621682429637"><span class="hs-identifier hs-var">arty</span></a></span><span> </span><span class="annot"><span class="annottext">IO () -&gt; IO () -&gt; IO ()
 forall a b. IO a -&gt; IO b -&gt; IO b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f a -&gt; f b -&gt; f b
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#%2A%3E/GHC.Base.html#%2A%3E"><span class="hs-operator hs-var">*&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Cpr -&gt; IO ()
+</span><span class="hs-operator hs-var">*&gt;</span></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; Cpr -&gt; IO ()
 forall a. Binary a =&gt; BinHandle -&gt; a -&gt; IO ()
 </span><a href="GHC.Utils.Binary.html#put_"><span class="hs-identifier hs-var">put_</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601510"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
-</span><a href="#local-6989586621681601512"><span class="hs-identifier hs-var">cpr</span></a></span><span>
-</span><span id="line-247"></span><span>  </span><span id="local-6989586621681601517"><span class="annot"><span class="annottext">get :: BinHandle -&gt; IO CprType
-</span><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-var hs-var hs-var hs-var">get</span></a></span></span><span>  </span><span id="local-6989586621681601518"><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601518"><span class="hs-identifier hs-var">bh</span></a></span></span><span>                    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr -&gt; CprType
+</span><a href="#local-6989586621682429636"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">Cpr
+</span><a href="#local-6989586621682429638"><span class="hs-identifier hs-var">cpr</span></a></span><span>
+</span><span id="line-247"></span><span>  </span><span id="local-6989586621682429643"><span class="annot"><span class="annottext">get :: BinHandle -&gt; IO CprType
+</span><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-var hs-var hs-var">get</span></a></span></span><span>  </span><span id="local-6989586621682429644"><span class="annot"><span class="annottext">BinHandle
+</span><a href="#local-6989586621682429644"><span class="hs-identifier hs-var">bh</span></a></span></span><span>                    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Arity -&gt; Cpr -&gt; CprType
 </span><a href="GHC.Types.Cpr.html#CprType"><span class="hs-identifier hs-var">CprType</span></a></span><span> </span><span class="annot"><span class="annottext">(Arity -&gt; Cpr -&gt; CprType) -&gt; IO Arity -&gt; IO (Cpr -&gt; CprType)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><a href="../../base-4.18.2.0/src/Data.Functor.html#%3C%24%3E/Data.Functor.html#%3C%24%3E"><span class="hs-operator hs-var">&lt;$&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; IO Arity
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; IO Arity
 forall a. Binary a =&gt; BinHandle -&gt; IO a
 </span><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-var">get</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601518"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">IO (Cpr -&gt; CprType) -&gt; IO Cpr -&gt; IO CprType
+</span><a href="#local-6989586621682429644"><span class="hs-identifier hs-var">bh</span></a></span><span> </span><span class="annot"><span class="annottext">IO (Cpr -&gt; CprType) -&gt; IO Cpr -&gt; IO CprType
 forall a b. IO (a -&gt; b) -&gt; IO a -&gt; IO b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#%3C%2A%3E/GHC.Base.html#%3C%2A%3E"><span class="hs-operator hs-var">&lt;*&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; IO Cpr
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">BinHandle -&gt; IO Cpr
 forall a. Binary a =&gt; BinHandle -&gt; IO a
 </span><a href="GHC.Utils.Binary.html#get"><span class="hs-identifier hs-var">get</span></a></span><span> </span><span class="annot"><span class="annottext">BinHandle
-</span><a href="#local-6989586621681601518"><span class="hs-identifier hs-var">bh</span></a></span><span>
+</span><a href="#local-6989586621682429644"><span class="hs-identifier hs-var">bh</span></a></span><span>
 </span><span id="line-248"></span></pre></body></html>

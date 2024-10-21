@@ -7,9 +7,12 @@
 --   This package provides functions for walking the GHC heap data
 --   structures and retrieving information about those data structures.
 @package ghc-heap
-@version 9.6.4
+@version 9.10.1
 
 module GHC.Exts.Heap.ClosureTypes
+
+-- | Enum representing closure types This is a mirror of:
+--   <tt>rts<i>include</i>rts<i>storage</i>ClosureTypes.h</tt>
 data ClosureType
 INVALID_OBJECT :: ClosureType
 CONSTR :: ClosureType
@@ -80,11 +83,6 @@ N_CLOSURE_TYPES :: ClosureType
 
 -- | Return the size of the closures header in words
 closureTypeHeaderSize :: ClosureType -> Int
-instance GHC.Generics.Generic GHC.Exts.Heap.ClosureTypes.ClosureType
-instance GHC.Show.Show GHC.Exts.Heap.ClosureTypes.ClosureType
-instance GHC.Classes.Ord GHC.Exts.Heap.ClosureTypes.ClosureType
-instance GHC.Classes.Eq GHC.Exts.Heap.ClosureTypes.ClosureType
-instance GHC.Enum.Enum GHC.Exts.Heap.ClosureTypes.ClosureType
 
 module GHC.Exts.Heap.Constants
 wORD_SIZE :: Int
@@ -104,11 +102,12 @@ StgInfoTable :: Maybe EntryFunPtr -> HalfWord -> HalfWord -> ClosureType -> Half
 [tipe] :: StgInfoTable -> ClosureType
 [srtlen] :: StgInfoTable -> HalfWord
 [code] :: StgInfoTable -> Maybe ItblCodes
-type EntryFunPtr = FunPtr (Ptr () -> IO (Ptr ()))
+type EntryFunPtr = FunPtr Ptr () -> IO Ptr ()
 type HalfWord = Word32
 type ItblCodes = Either [Word8] [Word32]
-instance GHC.Generics.Generic GHC.Exts.Heap.InfoTable.Types.StgInfoTable
-instance GHC.Show.Show GHC.Exts.Heap.InfoTable.Types.StgInfoTable
+instance GHC.Classes.Eq GHC.Exts.Heap.InfoTable.Types.StgInfoTable
+instance GHC.Internal.Generics.Generic GHC.Exts.Heap.InfoTable.Types.StgInfoTable
+instance GHC.Internal.Show.Show GHC.Exts.Heap.InfoTable.Types.StgInfoTable
 
 module GHC.Exts.Heap.InfoTable
 
@@ -182,22 +181,22 @@ IndexTable :: CostCentre -> Maybe CostCentreStack -> Maybe IndexTable -> Bool ->
 [it_ccs] :: IndexTable -> Maybe CostCentreStack
 [it_next] :: IndexTable -> Maybe IndexTable
 [it_back_edge] :: IndexTable -> Bool
-instance GHC.Classes.Ord GHC.Exts.Heap.ProfInfo.Types.CostCentre
 instance GHC.Classes.Eq GHC.Exts.Heap.ProfInfo.Types.CostCentre
-instance GHC.Generics.Generic GHC.Exts.Heap.ProfInfo.Types.CostCentre
-instance GHC.Show.Show GHC.Exts.Heap.ProfInfo.Types.CostCentre
-instance GHC.Classes.Ord GHC.Exts.Heap.ProfInfo.Types.CostCentreStack
 instance GHC.Classes.Eq GHC.Exts.Heap.ProfInfo.Types.CostCentreStack
-instance GHC.Generics.Generic GHC.Exts.Heap.ProfInfo.Types.CostCentreStack
-instance GHC.Show.Show GHC.Exts.Heap.ProfInfo.Types.CostCentreStack
-instance GHC.Classes.Ord GHC.Exts.Heap.ProfInfo.Types.IndexTable
 instance GHC.Classes.Eq GHC.Exts.Heap.ProfInfo.Types.IndexTable
-instance GHC.Generics.Generic GHC.Exts.Heap.ProfInfo.Types.IndexTable
-instance GHC.Show.Show GHC.Exts.Heap.ProfInfo.Types.IndexTable
-instance GHC.Classes.Ord GHC.Exts.Heap.ProfInfo.Types.StgTSOProfInfo
 instance GHC.Classes.Eq GHC.Exts.Heap.ProfInfo.Types.StgTSOProfInfo
-instance GHC.Generics.Generic GHC.Exts.Heap.ProfInfo.Types.StgTSOProfInfo
-instance GHC.Show.Show GHC.Exts.Heap.ProfInfo.Types.StgTSOProfInfo
+instance GHC.Internal.Generics.Generic GHC.Exts.Heap.ProfInfo.Types.CostCentre
+instance GHC.Internal.Generics.Generic GHC.Exts.Heap.ProfInfo.Types.CostCentreStack
+instance GHC.Internal.Generics.Generic GHC.Exts.Heap.ProfInfo.Types.IndexTable
+instance GHC.Internal.Generics.Generic GHC.Exts.Heap.ProfInfo.Types.StgTSOProfInfo
+instance GHC.Classes.Ord GHC.Exts.Heap.ProfInfo.Types.CostCentre
+instance GHC.Classes.Ord GHC.Exts.Heap.ProfInfo.Types.CostCentreStack
+instance GHC.Classes.Ord GHC.Exts.Heap.ProfInfo.Types.IndexTable
+instance GHC.Classes.Ord GHC.Exts.Heap.ProfInfo.Types.StgTSOProfInfo
+instance GHC.Internal.Show.Show GHC.Exts.Heap.ProfInfo.Types.CostCentre
+instance GHC.Internal.Show.Show GHC.Exts.Heap.ProfInfo.Types.CostCentreStack
+instance GHC.Internal.Show.Show GHC.Exts.Heap.ProfInfo.Types.IndexTable
+instance GHC.Internal.Show.Show GHC.Exts.Heap.ProfInfo.Types.StgTSOProfInfo
 
 module GHC.Exts.Heap.ProfInfo.PeekProfInfo_ProfilingEnabled
 peekStgTSOProfInfo :: (Ptr b -> IO (Maybe CostCentreStack)) -> Ptr a -> IO (Maybe StgTSOProfInfo)
@@ -513,9 +512,9 @@ Word64Closure :: PrimType -> !Word64 -> GenClosure b
 [word64Val] :: GenClosure b -> !Word64
 
 -- | Primitive Addr
-AddrClosure :: PrimType -> !Int -> GenClosure b
+AddrClosure :: PrimType -> !Ptr () -> GenClosure b
 [ptipe] :: GenClosure b -> PrimType
-[addrVal] :: GenClosure b -> !Int
+[addrVal] :: GenClosure b -> !Ptr ()
 
 -- | Primitive Float
 FloatClosure :: PrimType -> !Float -> GenClosure b
@@ -534,6 +533,13 @@ OtherClosure :: !StgInfoTable -> ![b] -> ![Word] -> GenClosure b
 [rawWords] :: GenClosure b -> ![Word]
 UnsupportedClosure :: !StgInfoTable -> GenClosure b
 [info] :: GenClosure b -> !StgInfoTable
+
+-- | A primitive word from a bitmap encoded stack frame payload
+--   
+--   The type itself cannot be restored (i.e. it might represent a Word8#
+--   or an Int#).
+UnknownTypeWordSizedPrimitive :: !Word -> GenClosure b
+[wordVal] :: GenClosure b -> !Word
 data PrimType
 PInt :: PrimType
 PWord :: PrimType
@@ -585,13 +591,90 @@ allClosures :: GenClosure b -> [b]
 -- | Get the size of the top-level closure in words. Includes header and
 --   payload. Does not follow pointers.
 closureSize :: Box -> Int
+type StgStackClosure = GenStgStackClosure Box
+
+-- | A decoded <tt>StgStack</tt> with <a>StackFrame</a>s
+--   
+--   Stack related data structures (<a>GenStgStackClosure</a>,
+--   <a>GenStackField</a>, <a>GenStackFrame</a>) are defined separately
+--   from <a>GenClosure</a> as their related functions are very different.
+--   Though, both are closures in the sense of RTS structures, their
+--   decoding logic differs: While it's safe to keep a reference to a heap
+--   closure, the garbage collector does not update references to stack
+--   located closures.
+--   
+--   Additionally, stack frames don't appear outside of the stack. Thus,
+--   keeping <a>GenStackFrame</a> and <a>GenClosure</a> separated, makes
+--   these types more precise (in the sense what values to expect.)
+data GenStgStackClosure b
+GenStgStackClosure :: !StgInfoTable -> !Word32 -> ![GenStackFrame b] -> GenStgStackClosure b
+[ssc_info] :: GenStgStackClosure b -> !StgInfoTable
+
+-- | stack size in *words*
+[ssc_stack_size] :: GenStgStackClosure b -> !Word32
+[ssc_stack] :: GenStgStackClosure b -> ![GenStackFrame b]
+type StackFrame = GenStackFrame Box
+
+-- | A single stack frame
+data GenStackFrame b
+UpdateFrame :: !StgInfoTable -> !b -> GenStackFrame b
+[info_tbl] :: GenStackFrame b -> !StgInfoTable
+[updatee] :: GenStackFrame b -> !b
+CatchFrame :: !StgInfoTable -> !b -> GenStackFrame b
+[info_tbl] :: GenStackFrame b -> !StgInfoTable
+[handler] :: GenStackFrame b -> !b
+CatchStmFrame :: !StgInfoTable -> !b -> !b -> GenStackFrame b
+[info_tbl] :: GenStackFrame b -> !StgInfoTable
+[catchFrameCode] :: GenStackFrame b -> !b
+[handler] :: GenStackFrame b -> !b
+CatchRetryFrame :: !StgInfoTable -> !Word -> !b -> !b -> GenStackFrame b
+[info_tbl] :: GenStackFrame b -> !StgInfoTable
+[running_alt_code] :: GenStackFrame b -> !Word
+[first_code] :: GenStackFrame b -> !b
+[alt_code] :: GenStackFrame b -> !b
+AtomicallyFrame :: !StgInfoTable -> !b -> !b -> GenStackFrame b
+[info_tbl] :: GenStackFrame b -> !StgInfoTable
+[atomicallyFrameCode] :: GenStackFrame b -> !b
+[result] :: GenStackFrame b -> !b
+UnderflowFrame :: !StgInfoTable -> !GenStgStackClosure b -> GenStackFrame b
+[info_tbl] :: GenStackFrame b -> !StgInfoTable
+[nextChunk] :: GenStackFrame b -> !GenStgStackClosure b
+StopFrame :: !StgInfoTable -> GenStackFrame b
+[info_tbl] :: GenStackFrame b -> !StgInfoTable
+RetSmall :: !StgInfoTable -> ![GenStackField b] -> GenStackFrame b
+[info_tbl] :: GenStackFrame b -> !StgInfoTable
+[stack_payload] :: GenStackFrame b -> ![GenStackField b]
+RetBig :: !StgInfoTable -> ![GenStackField b] -> GenStackFrame b
+[info_tbl] :: GenStackFrame b -> !StgInfoTable
+[stack_payload] :: GenStackFrame b -> ![GenStackField b]
+RetFun :: !StgInfoTable -> !Word -> !b -> ![GenStackField b] -> GenStackFrame b
+[info_tbl] :: GenStackFrame b -> !StgInfoTable
+[retFunSize] :: GenStackFrame b -> !Word
+[retFunFun] :: GenStackFrame b -> !b
+[retFunPayload] :: GenStackFrame b -> ![GenStackField b]
+RetBCO :: !StgInfoTable -> !b -> ![GenStackField b] -> GenStackFrame b
+[info_tbl] :: GenStackFrame b -> !StgInfoTable
+
+-- | always a BCOClosure
+[bco] :: GenStackFrame b -> !b
+[bcoArgs] :: GenStackFrame b -> ![GenStackField b]
+type StackField = GenStackField Box
+
+-- | Bitmap-encoded payload on the stack
+data GenStackField b
+
+-- | A non-pointer field
+StackWord :: !Word -> GenStackField b
+
+-- | A pointer field
+StackBox :: !b -> GenStackField b
 
 -- | An arbitrary Haskell value in a safe Box. The point is that even
 --   unevaluated thunks can safely be moved around inside the Box, and when
 --   required, e.g. in <tt>getBoxedClosureData</tt>, the function knows how
 --   far it has to evaluate the argument.
 data Box
-Box :: Any -> Box
+Box :: (Any :: Type) -> Box
 
 -- | Boxes can be compared, but this is not pure, as different heap objects
 --   can, after garbage collection, become the same object.
@@ -611,28 +694,43 @@ areBoxesEqual :: Box -> Box -> IO Bool
 --   case list of x:_ -&gt; asBox x
 --   </pre>
 asBox :: a -> Box
-instance GHC.Classes.Ord GHC.Exts.Heap.Closures.PrimType
-instance GHC.Generics.Generic GHC.Exts.Heap.Closures.PrimType
-instance GHC.Show.Show GHC.Exts.Heap.Closures.PrimType
 instance GHC.Classes.Eq GHC.Exts.Heap.Closures.PrimType
-instance GHC.Classes.Ord GHC.Exts.Heap.Closures.WhatNext
-instance GHC.Generics.Generic GHC.Exts.Heap.Closures.WhatNext
-instance GHC.Show.Show GHC.Exts.Heap.Closures.WhatNext
-instance GHC.Classes.Eq GHC.Exts.Heap.Closures.WhatNext
-instance GHC.Classes.Ord GHC.Exts.Heap.Closures.WhyBlocked
-instance GHC.Generics.Generic GHC.Exts.Heap.Closures.WhyBlocked
-instance GHC.Show.Show GHC.Exts.Heap.Closures.WhyBlocked
-instance GHC.Classes.Eq GHC.Exts.Heap.Closures.WhyBlocked
-instance GHC.Classes.Ord GHC.Exts.Heap.Closures.TsoFlags
-instance GHC.Generics.Generic GHC.Exts.Heap.Closures.TsoFlags
-instance GHC.Show.Show GHC.Exts.Heap.Closures.TsoFlags
 instance GHC.Classes.Eq GHC.Exts.Heap.Closures.TsoFlags
-instance Data.Traversable.Traversable GHC.Exts.Heap.Closures.GenClosure
-instance Data.Foldable.Foldable GHC.Exts.Heap.Closures.GenClosure
-instance GHC.Base.Functor GHC.Exts.Heap.Closures.GenClosure
-instance GHC.Generics.Generic (GHC.Exts.Heap.Closures.GenClosure b)
-instance GHC.Show.Show b => GHC.Show.Show (GHC.Exts.Heap.Closures.GenClosure b)
-instance GHC.Show.Show GHC.Exts.Heap.Closures.Box
+instance GHC.Classes.Eq GHC.Exts.Heap.Closures.WhatNext
+instance GHC.Classes.Eq GHC.Exts.Heap.Closures.WhyBlocked
+instance GHC.Internal.Data.Foldable.Foldable GHC.Exts.Heap.Closures.GenClosure
+instance GHC.Internal.Data.Foldable.Foldable GHC.Exts.Heap.Closures.GenStackField
+instance GHC.Internal.Data.Foldable.Foldable GHC.Exts.Heap.Closures.GenStackFrame
+instance GHC.Internal.Data.Foldable.Foldable GHC.Exts.Heap.Closures.GenStgStackClosure
+instance GHC.Internal.Base.Functor GHC.Exts.Heap.Closures.GenClosure
+instance GHC.Internal.Base.Functor GHC.Exts.Heap.Closures.GenStackField
+instance GHC.Internal.Base.Functor GHC.Exts.Heap.Closures.GenStackFrame
+instance GHC.Internal.Base.Functor GHC.Exts.Heap.Closures.GenStgStackClosure
+instance GHC.Internal.Generics.Generic (GHC.Exts.Heap.Closures.GenClosure b)
+instance GHC.Internal.Generics.Generic (GHC.Exts.Heap.Closures.GenStackField b)
+instance GHC.Internal.Generics.Generic (GHC.Exts.Heap.Closures.GenStackFrame b)
+instance GHC.Internal.Generics.Generic (GHC.Exts.Heap.Closures.GenStgStackClosure b)
+instance GHC.Internal.Generics.Generic GHC.Exts.Heap.Closures.PrimType
+instance GHC.Internal.Generics.Generic GHC.Exts.Heap.Closures.TsoFlags
+instance GHC.Internal.Generics.Generic GHC.Exts.Heap.Closures.WhatNext
+instance GHC.Internal.Generics.Generic GHC.Exts.Heap.Closures.WhyBlocked
+instance GHC.Classes.Ord GHC.Exts.Heap.Closures.PrimType
+instance GHC.Classes.Ord GHC.Exts.Heap.Closures.TsoFlags
+instance GHC.Classes.Ord GHC.Exts.Heap.Closures.WhatNext
+instance GHC.Classes.Ord GHC.Exts.Heap.Closures.WhyBlocked
+instance GHC.Internal.Show.Show GHC.Exts.Heap.Closures.Box
+instance GHC.Internal.Show.Show b => GHC.Internal.Show.Show (GHC.Exts.Heap.Closures.GenClosure b)
+instance GHC.Internal.Show.Show b => GHC.Internal.Show.Show (GHC.Exts.Heap.Closures.GenStackField b)
+instance GHC.Internal.Show.Show b => GHC.Internal.Show.Show (GHC.Exts.Heap.Closures.GenStackFrame b)
+instance GHC.Internal.Show.Show b => GHC.Internal.Show.Show (GHC.Exts.Heap.Closures.GenStgStackClosure b)
+instance GHC.Internal.Show.Show GHC.Exts.Heap.Closures.PrimType
+instance GHC.Internal.Show.Show GHC.Exts.Heap.Closures.TsoFlags
+instance GHC.Internal.Show.Show GHC.Exts.Heap.Closures.WhatNext
+instance GHC.Internal.Show.Show GHC.Exts.Heap.Closures.WhyBlocked
+instance GHC.Internal.Data.Traversable.Traversable GHC.Exts.Heap.Closures.GenClosure
+instance GHC.Internal.Data.Traversable.Traversable GHC.Exts.Heap.Closures.GenStackField
+instance GHC.Internal.Data.Traversable.Traversable GHC.Exts.Heap.Closures.GenStackFrame
+instance GHC.Internal.Data.Traversable.Traversable GHC.Exts.Heap.Closures.GenStgStackClosure
 
 module GHC.Exts.Heap.FFIClosures_ProfilingEnabled
 data TSOFields
@@ -1003,9 +1101,9 @@ Word64Closure :: PrimType -> !Word64 -> GenClosure b
 [word64Val] :: GenClosure b -> !Word64
 
 -- | Primitive Addr
-AddrClosure :: PrimType -> !Int -> GenClosure b
+AddrClosure :: PrimType -> !Ptr () -> GenClosure b
 [ptipe] :: GenClosure b -> PrimType
-[addrVal] :: GenClosure b -> !Int
+[addrVal] :: GenClosure b -> !Ptr ()
 
 -- | Primitive Float
 FloatClosure :: PrimType -> !Float -> GenClosure b
@@ -1024,6 +1122,16 @@ OtherClosure :: !StgInfoTable -> ![b] -> ![Word] -> GenClosure b
 [rawWords] :: GenClosure b -> ![Word]
 UnsupportedClosure :: !StgInfoTable -> GenClosure b
 [info] :: GenClosure b -> !StgInfoTable
+
+-- | A primitive word from a bitmap encoded stack frame payload
+--   
+--   The type itself cannot be restored (i.e. it might represent a Word8#
+--   or an Int#).
+UnknownTypeWordSizedPrimitive :: !Word -> GenClosure b
+[wordVal] :: GenClosure b -> !Word
+
+-- | Enum representing closure types This is a mirror of:
+--   <tt>rts<i>include</i>rts<i>storage</i>ClosureTypes.h</tt>
 data ClosureType
 INVALID_OBJECT :: ClosureType
 CONSTR :: ClosureType
@@ -1157,7 +1265,7 @@ StgInfoTable :: Maybe EntryFunPtr -> HalfWord -> HalfWord -> ClosureType -> Half
 [tipe] :: StgInfoTable -> ClosureType
 [srtlen] :: StgInfoTable -> HalfWord
 [code] :: StgInfoTable -> Maybe ItblCodes
-type EntryFunPtr = FunPtr (Ptr () -> IO (Ptr ()))
+type EntryFunPtr = FunPtr Ptr () -> IO Ptr ()
 type HalfWord = Word32
 type ItblCodes = Either [Word8] [Word32]
 
@@ -1232,7 +1340,7 @@ allClosures :: GenClosure b -> [b]
 --   required, e.g. in <tt>getBoxedClosureData</tt>, the function knows how
 --   far it has to evaluate the argument.
 data Box
-Box :: Any -> Box
+Box :: (Any :: Type) -> Box
 
 -- | This takes an arbitrary value and puts it into a box. Note that calls
 --   like
@@ -1252,12 +1360,88 @@ asBox :: a -> Box
 -- | Boxes can be compared, but this is not pure, as different heap objects
 --   can, after garbage collection, become the same object.
 areBoxesEqual :: Box -> Box -> IO Bool
-instance GHC.Exts.Heap.HasHeapRep a
-instance GHC.Exts.Heap.HasHeapRep a
-instance (GHC.Prim.Int# GHC.Types.~ a) => GHC.Exts.Heap.HasHeapRep a
-instance (GHC.Prim.Word# GHC.Types.~ a) => GHC.Exts.Heap.HasHeapRep a
-instance (GHC.Prim.Int64# GHC.Types.~ a) => GHC.Exts.Heap.HasHeapRep a
-instance (GHC.Prim.Word64# GHC.Types.~ a) => GHC.Exts.Heap.HasHeapRep a
 instance (GHC.Prim.Addr# GHC.Types.~ a) => GHC.Exts.Heap.HasHeapRep a
-instance (GHC.Prim.Float# GHC.Types.~ a) => GHC.Exts.Heap.HasHeapRep a
+instance GHC.Exts.Heap.HasHeapRep a
+instance GHC.Exts.Heap.HasHeapRep a
 instance (GHC.Prim.Double# GHC.Types.~ a) => GHC.Exts.Heap.HasHeapRep a
+instance (GHC.Prim.Float# GHC.Types.~ a) => GHC.Exts.Heap.HasHeapRep a
+instance (GHC.Prim.Int64# GHC.Types.~ a) => GHC.Exts.Heap.HasHeapRep a
+instance (GHC.Prim.Int# GHC.Types.~ a) => GHC.Exts.Heap.HasHeapRep a
+instance (GHC.Prim.Word64# GHC.Types.~ a) => GHC.Exts.Heap.HasHeapRep a
+instance (GHC.Prim.Word# GHC.Types.~ a) => GHC.Exts.Heap.HasHeapRep a
+
+module GHC.Exts.Stack.Constants
+newtype ByteOffset
+ByteOffset :: Int -> ByteOffset
+[offsetInBytes] :: ByteOffset -> Int
+newtype WordOffset
+WordOffset :: Int -> WordOffset
+[offsetInWords] :: WordOffset -> Int
+offsetStgCatchFrameHandler :: WordOffset
+sizeStgCatchFrame :: Int
+offsetStgCatchSTMFrameCode :: WordOffset
+offsetStgCatchSTMFrameHandler :: WordOffset
+sizeStgCatchSTMFrame :: Int
+offsetStgUpdateFrameUpdatee :: WordOffset
+sizeStgUpdateFrame :: Int
+offsetStgAtomicallyFrameCode :: WordOffset
+offsetStgAtomicallyFrameResult :: WordOffset
+sizeStgAtomicallyFrame :: Int
+offsetStgCatchRetryFrameRunningAltCode :: WordOffset
+offsetStgCatchRetryFrameRunningFirstCode :: WordOffset
+offsetStgCatchRetryFrameAltCode :: WordOffset
+sizeStgCatchRetryFrame :: Int
+offsetStgRetFunFrameSize :: WordOffset
+offsetStgRetFunFrameFun :: WordOffset
+offsetStgRetFunFramePayload :: WordOffset
+sizeStgRetFunFrame :: Int
+offsetStgBCOFrameInstrs :: ByteOffset
+offsetStgBCOFrameLiterals :: ByteOffset
+offsetStgBCOFramePtrs :: ByteOffset
+offsetStgBCOFrameArity :: ByteOffset
+offsetStgBCOFrameSize :: ByteOffset
+offsetStgClosurePayload :: WordOffset
+sizeStgClosure :: Int
+byteOffsetToWordOffset :: ByteOffset -> WordOffset
+bytesToWords :: Int -> Int
+bytesInWord :: Int
+instance GHC.Internal.Enum.Enum GHC.Exts.Stack.Constants.ByteOffset
+instance GHC.Internal.Enum.Enum GHC.Exts.Stack.Constants.WordOffset
+instance GHC.Classes.Eq GHC.Exts.Stack.Constants.ByteOffset
+instance GHC.Classes.Eq GHC.Exts.Stack.Constants.WordOffset
+instance GHC.Internal.Real.Integral GHC.Exts.Stack.Constants.ByteOffset
+instance GHC.Internal.Real.Integral GHC.Exts.Stack.Constants.WordOffset
+instance GHC.Internal.Num.Num GHC.Exts.Stack.Constants.ByteOffset
+instance GHC.Internal.Num.Num GHC.Exts.Stack.Constants.WordOffset
+instance GHC.Classes.Ord GHC.Exts.Stack.Constants.ByteOffset
+instance GHC.Classes.Ord GHC.Exts.Stack.Constants.WordOffset
+instance GHC.Internal.Real.Real GHC.Exts.Stack.Constants.ByteOffset
+instance GHC.Internal.Real.Real GHC.Exts.Stack.Constants.WordOffset
+instance GHC.Internal.Show.Show GHC.Exts.Stack.Constants.ByteOffset
+instance GHC.Internal.Show.Show GHC.Exts.Stack.Constants.WordOffset
+
+module GHC.Exts.Stack.Decode
+
+-- | Decode <a>StackSnapshot</a> to a <a>StgStackClosure</a>
+--   
+--   The return value is the representation of the <tt>StgStack</tt>
+--   itself.
+--   
+--   See <i>Note [Decoding the stack]</i>.
+decodeStack :: StackSnapshot -> IO StgStackClosure
+instance GHC.Internal.Show.Show GHC.Exts.Stack.Decode.Pointerness
+
+module GHC.Exts.Stack
+
+-- | Decode <a>StackSnapshot</a> to a <a>StgStackClosure</a>
+--   
+--   The return value is the representation of the <tt>StgStack</tt>
+--   itself.
+--   
+--   See <i>Note [Decoding the stack]</i>.
+decodeStack :: StackSnapshot -> IO StgStackClosure
+
+-- | Get the size of the <a>StackFrame</a> in words.
+--   
+--   Includes header and payload. Does not follow pointers.
+stackFrameSize :: StackFrame -> Int

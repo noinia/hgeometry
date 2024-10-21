@@ -9,21 +9,21 @@
 </span><span id="line-9"></span><span class="hs-comment">-- implementation of David Himmelstrup.</span><span>
 </span><span id="line-10"></span><span class="hs-comment">--</span><span>
 </span><span id="line-11"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.Polygon.Convex.Random</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Random.html"><span class="hs-identifier">HGeometry.Polygon.Convex.Random</span></a></span><span>
 </span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Random.html#randomConvex"><span class="hs-identifier">randomConvex</span></a></span><span>
 </span><span id="line-14"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-15"></span><span>
-</span><span id="line-16"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-ad4ffa0d8fed99eb0a82e7ae6f92f74beeaf04ae23235424b0e62e87c817fcef/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
 </span><span id="line-17"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad.State</span></span><span>
 </span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.IntSet</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">IS</span></span><span>
 </span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
-</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Unboxed.html"><span class="hs-identifier">Data.Vector.Unboxed</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">VU</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Unboxed.html/Data.Vector.Unboxed.html"><span class="hs-identifier">Data.Vector.Unboxed</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">VU</span></span><span>
 </span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
 </span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Polygon.Class.html"><span class="hs-identifier">HGeometry.Polygon.Class</span></a></span><span>
 </span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Polygon.Convex.Implementation.html"><span class="hs-identifier">HGeometry.Polygon.Convex.Implementation</span></a></span><span>
 </span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html"><span class="hs-identifier">HGeometry.Polygon.Simple.Class</span></a></span><span>
-</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/random-1.2.1.2-f4cff084f5bb381e8d0ea5f0ff70ce7cde0fcd9c12ea6754a93ba014da9eb283/share/doc/html/src/System.Random.Stateful.html"><span class="hs-identifier">System.Random.Stateful</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/random-1.2.1.2-130b58c50f8f26affc7e2b6740ee67b53517e9914a2a65e99d7800d0aab4f0f7/share/doc/html/src/System.Random.Stateful.html/System.Random.Stateful.html"><span class="hs-identifier">System.Random.Stateful</span></a></span><span>
 </span><span id="line-27"></span><span>
 </span><span id="line-28"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-29"></span><span class="hs-comment">-- Random convex polygons</span><span>
@@ -60,18 +60,18 @@
 </span><span id="line-60"></span><span class="hs-comment">-- And the sum of [-3, 4, -1] = -3+4-1 = 0.</span><span>
 </span><span id="line-61"></span><span>
 </span><span id="line-62"></span><span class="hs-comment">-- O(n log n)</span><span>
-</span><span id="line-63"></span><span id="local-6989586621679487044"><span id="local-6989586621679487045"><span class="annot"><a href="HGeometry.Polygon.Convex.Random.html#randomBetween"><span class="hs-identifier hs-type">randomBetween</span></a></span><span>                     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadState</span></span><span> </span><span class="annot"><a href="#local-6989586621679487044"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679487045"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/random-1.2.1.2-f4cff084f5bb381e8d0ea5f0ff70ce7cde0fcd9c12ea6754a93ba014da9eb283/share/doc/html/src/System.Random.Internal.html#RandomGen"><span class="hs-identifier hs-type">RandomGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679487044"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-64"></span><span>                                  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679487045"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Unboxed.Base.html#Vector"><span class="hs-identifier hs-type">VU.Vector</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-63"></span><span id="local-6989586621679478968"><span id="local-6989586621679478969"><span class="annot"><a href="HGeometry.Polygon.Convex.Random.html#randomBetween"><span class="hs-identifier hs-type">randomBetween</span></a></span><span>                     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadState</span></span><span> </span><span class="annot"><a href="#local-6989586621679478968"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679478969"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/random-1.2.1.2-130b58c50f8f26affc7e2b6740ee67b53517e9914a2a65e99d7800d0aab4f0f7/share/doc/html/src/System.Random.Internal.html/System.Random.Internal.html#RandomGen"><span class="hs-identifier hs-type">RandomGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679478968"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>                                  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679478969"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Unboxed.Base.html/Data.Vector.Unboxed.Base.html#Vector"><span class="hs-identifier hs-type">VU.Vector</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-65"></span><span id="randomBetween"><span class="annot"><span class="annottext">randomBetween :: forall g (m :: * -&gt; *).
 (MonadState g m, RandomGen g) =&gt;
 Int -&gt; Int -&gt; m (Vector Int)
-</span><a href="HGeometry.Polygon.Convex.Random.html#randomBetween"><span class="hs-identifier hs-var hs-var">randomBetween</span></a></span></span><span> </span><span id="local-6989586621679487287"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487287"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679487288"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487288"><span class="hs-identifier hs-var">vMax</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487288"><span class="hs-identifier hs-var">vMax</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="HGeometry.Polygon.Convex.Random.html#randomBetween"><span class="hs-identifier hs-var hs-var">randomBetween</span></a></span></span><span> </span><span id="local-6989586621679479214"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479214"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679479215"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479215"><span class="hs-identifier hs-var">vMax</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479215"><span class="hs-identifier hs-var">vMax</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487287"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679479214"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector Int -&gt; m (Vector Int)
@@ -81,100 +81,85 @@ forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Vector Int
 forall a. Unbox a =&gt; Int -&gt; a -&gt; Vector a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Unboxed.html#replicate"><span class="hs-identifier hs-var">VU.replicate</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487288"><span class="hs-identifier hs-var">vMax</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Unboxed.html/Data.Vector.Unboxed.html#replicate"><span class="hs-identifier hs-var">VU.replicate</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479215"><span class="hs-identifier hs-var">vMax</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span>
-</span><span id="line-66"></span><span class="annot"><a href="HGeometry.Polygon.Convex.Random.html#randomBetween"><span class="hs-identifier hs-var">randomBetween</span></a></span><span> </span><span id="local-6989586621679487292"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487292"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679487293"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487293"><span class="hs-identifier hs-var">vMax</span></a></span></span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; IntSet -&gt; m (Vector Int)
-</span><a href="#local-6989586621679487294"><span class="hs-identifier hs-var">worker</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487292"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><span id="line-66"></span><span class="annot"><a href="HGeometry.Polygon.Convex.Random.html#randomBetween"><span class="hs-identifier hs-var">randomBetween</span></a></span><span> </span><span id="local-6989586621679479219"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479219"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679479220"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479220"><span class="hs-identifier hs-var">vMax</span></a></span></span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; IntSet -&gt; m (Vector Int)
+</span><a href="#local-6989586621679479221"><span class="hs-identifier hs-var">worker</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479219"><span class="hs-identifier hs-var">n</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">IntSet
 </span><span class="hs-identifier hs-var">IS.empty</span></span><span>
 </span><span id="line-67"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-68"></span><span>    </span><span id="local-6989586621679487296"><span class="annot"><span class="annottext">gen :: Int -&gt; [Int] -&gt; [Int]
-</span><a href="#local-6989586621679487296"><span class="hs-identifier hs-var hs-var">gen</span></a></span></span><span> </span><span id="local-6989586621679487297"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487297"><span class="hs-identifier hs-var">from'</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487293"><span class="hs-identifier hs-var">vMax</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><span id="line-68"></span><span>    </span><span id="local-6989586621679479223"><span class="annot"><span class="annottext">gen :: Int -&gt; [Int] -&gt; [Int]
+</span><a href="#local-6989586621679479223"><span class="hs-identifier hs-var hs-var">gen</span></a></span></span><span> </span><span id="local-6989586621679479224"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479224"><span class="hs-identifier hs-var">from'</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479220"><span class="hs-identifier hs-var">vMax</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487297"><span class="hs-identifier hs-var">from'</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-69"></span><span>    </span><span class="annot"><a href="#local-6989586621679487296"><span class="hs-identifier hs-var">gen</span></a></span><span> </span><span id="local-6989586621679487298"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487298"><span class="hs-identifier hs-var">from'</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679487299"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487299"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679487300"><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679487300"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487299"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679479224"><span class="hs-identifier hs-var">from'</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-69"></span><span>    </span><span class="annot"><a href="#local-6989586621679479223"><span class="hs-identifier hs-var">gen</span></a></span><span> </span><span id="local-6989586621679479225"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479225"><span class="hs-identifier hs-var">from'</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679479226"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479226"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679479227"><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621679479227"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479226"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487298"><span class="hs-identifier hs-var">from'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; [Int]
+</span><a href="#local-6989586621679479225"><span class="hs-identifier hs-var">from'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; [Int]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; [Int]
-</span><a href="#local-6989586621679487296"><span class="hs-identifier hs-var">gen</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487299"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">[Int]
-</span><a href="#local-6989586621679487300"><span class="hs-identifier hs-var">xs</span></a></span><span>
-</span><span id="line-70"></span><span>    </span><span id="local-6989586621679487294"><span class="annot"><span class="annottext">worker :: Int -&gt; IntSet -&gt; m (Vector Int)
-</span><a href="#local-6989586621679487294"><span class="hs-identifier hs-var hs-var">worker</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><span class="hs-number">0</span></span><span> </span><span id="local-6989586621679487301"><span class="annot"><span class="annottext">IntSet
-</span><a href="#local-6989586621679487301"><span class="hs-identifier hs-var">seen</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector Int -&gt; m (Vector Int)
+</span><a href="#local-6989586621679479223"><span class="hs-identifier hs-var">gen</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479226"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">[Int]
+</span><a href="#local-6989586621679479227"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-70"></span><span>    </span><span id="local-6989586621679479221"><span class="annot"><span class="annottext">worker :: Int -&gt; IntSet -&gt; m (Vector Int)
+</span><a href="#local-6989586621679479221"><span class="hs-identifier hs-var hs-var">worker</span></a></span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span id="local-6989586621679479228"><span class="annot"><span class="annottext">IntSet
+</span><a href="#local-6989586621679479228"><span class="hs-identifier hs-var">seen</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector Int -&gt; m (Vector Int)
 forall a. a -&gt; m a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Int] -&gt; Vector Int
 forall a. Unbox a =&gt; [a] -&gt; Vector a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Unboxed.html#fromList"><span class="hs-identifier hs-var">VU.fromList</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; [Int]
-</span><a href="#local-6989586621679487296"><span class="hs-identifier hs-var">gen</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Unboxed.html/Data.Vector.Unboxed.html#fromList"><span class="hs-identifier hs-var">VU.fromList</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; [Int] -&gt; [Int]
+</span><a href="#local-6989586621679479223"><span class="hs-identifier hs-var">gen</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">([Int] -&gt; [Int]) -&gt; [Int] -&gt; [Int]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">IntSet -&gt; [Int]
 </span><span class="hs-identifier hs-var">IS.elems</span></span><span> </span><span class="annot"><span class="annottext">IntSet
-</span><a href="#local-6989586621679487301"><span class="hs-identifier hs-var">seen</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-71"></span><span>    </span><span class="annot"><a href="#local-6989586621679487294"><span class="hs-identifier hs-var">worker</span></a></span><span> </span><span id="local-6989586621679487304"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487304"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679487305"><span class="annot"><span class="annottext">IntSet
-</span><a href="#local-6989586621679487305"><span class="hs-identifier hs-var">seen</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-72"></span><span>      </span><span id="local-6989586621679487306"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487306"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; StateGenM g -&gt; m Int
+</span><a href="#local-6989586621679479228"><span class="hs-identifier hs-var">seen</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-71"></span><span>    </span><span class="annot"><a href="#local-6989586621679479221"><span class="hs-identifier hs-var">worker</span></a></span><span> </span><span id="local-6989586621679479231"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479231"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679479232"><span class="annot"><span class="annottext">IntSet
+</span><a href="#local-6989586621679479232"><span class="hs-identifier hs-var">seen</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-72"></span><span>      </span><span id="local-6989586621679479233"><span class="annot"><a href="#local-6989586621679479233"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; StateGenM g -&gt; m Int
 forall a g (m :: * -&gt; *).
 (UniformRange a, StatefulGen g m) =&gt;
 (a, a) -&gt; g -&gt; m a
 forall g (m :: * -&gt; *). StatefulGen g m =&gt; (Int, Int) -&gt; g -&gt; m Int
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/random-1.2.1.2-f4cff084f5bb381e8d0ea5f0ff70ce7cde0fcd9c12ea6754a93ba014da9eb283/share/doc/html/src/System.Random.Internal.html#uniformRM"><span class="hs-identifier hs-var">uniformRM</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/random-1.2.1.2-130b58c50f8f26affc7e2b6740ee67b53517e9914a2a65e99d7800d0aab4f0f7/share/doc/html/src/System.Random.Internal.html/System.Random.Internal.html#uniformRM"><span class="hs-identifier hs-var">uniformRM</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487293"><span class="hs-identifier hs-var">vMax</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679479220"><span class="hs-identifier hs-var">vMax</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">StateGenM g
 forall g. StateGenM g
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/random-1.2.1.2-f4cff084f5bb381e8d0ea5f0ff70ce7cde0fcd9c12ea6754a93ba014da9eb283/share/doc/html/src/System.Random.Internal.html#StateGenM"><span class="hs-identifier hs-var">StateGenM</span></a></span><span>
-</span><span id="line-73"></span><span>      </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Int -&gt; IntSet -&gt; Bool
-</span><span class="hs-identifier hs-var">IS.member</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487306"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">IntSet
-</span><a href="#local-6989586621679487305"><span class="hs-identifier hs-var">seen</span></a></span><span>
-</span><span id="line-74"></span><span>        </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">Int -&gt; IntSet -&gt; m (Vector Int)
-</span><a href="#local-6989586621679487294"><span class="hs-identifier hs-var">worker</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487304"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">IntSet
-</span><a href="#local-6989586621679487305"><span class="hs-identifier hs-var">seen</span></a></span><span>
-</span><span id="line-75"></span><span>        </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Int -&gt; IntSet -&gt; m (Vector Int)
-</span><a href="#local-6989586621679487294"><span class="hs-identifier hs-var">worker</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487304"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
-forall a. Num a =&gt; a -&gt; a -&gt; a
-</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
-</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; IntSet -&gt; IntSet
-</span><span class="hs-identifier hs-var">IS.insert</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487306"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">IntSet
-</span><a href="#local-6989586621679487305"><span class="hs-identifier hs-var">seen</span></a></span><span class="hs-special">)</span><span>
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/random-1.2.1.2-130b58c50f8f26affc7e2b6740ee67b53517e9914a2a65e99d7800d0aab4f0f7/share/doc/html/src/System.Random.Internal.html/System.Random.Internal.html#StateGenM"><span class="hs-identifier hs-var">StateGenM</span></a></span><span>
+</span><span id="line-73"></span><span>      </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IS.member</span></span><span> </span><span class="annot"><a href="#local-6989586621679479233"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679479232"><span class="hs-identifier hs-type">seen</span></a></span><span>
+</span><span id="line-74"></span><span>        </span><span class="hs-keyword">then</span><span> </span><span class="annot"><a href="#local-6989586621679479221"><span class="hs-identifier hs-type">worker</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679479231"><span class="hs-identifier hs-type">i</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679479232"><span class="hs-identifier hs-type">seen</span></a></span><span>
+</span><span id="line-75"></span><span>        </span><span class="hs-keyword">else</span><span> </span><span class="annot"><a href="#local-6989586621679479221"><span class="hs-identifier hs-type">worker</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679479231"><span class="hs-identifier hs-type">i</span></a></span><span class="annot"><span class="hs-glyph hs-type">-</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IS.insert</span></span><span> </span><span class="annot"><a href="#local-6989586621679479233"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679479232"><span class="hs-identifier hs-type">seen</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-76"></span><span>
-</span><span id="line-77"></span><span id="local-6989586621679487311"><span id="local-6989586621679487312"><span class="annot"><a href="HGeometry.Polygon.Convex.Random.html#randomBetweenZero"><span class="hs-identifier hs-type">randomBetweenZero</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadState</span></span><span> </span><span class="annot"><a href="#local-6989586621679487311"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679487312"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/random-1.2.1.2-f4cff084f5bb381e8d0ea5f0ff70ce7cde0fcd9c12ea6754a93ba014da9eb283/share/doc/html/src/System.Random.Internal.html#RandomGen"><span class="hs-identifier hs-type">RandomGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679487311"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679487312"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Unboxed.Base.html#Vector"><span class="hs-identifier hs-type">VU.Vector</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-77"></span><span id="local-6989586621679479238"><span id="local-6989586621679479239"><span class="annot"><a href="HGeometry.Polygon.Convex.Random.html#randomBetweenZero"><span class="hs-identifier hs-type">randomBetweenZero</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadState</span></span><span> </span><span class="annot"><a href="#local-6989586621679479238"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679479239"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/random-1.2.1.2-130b58c50f8f26affc7e2b6740ee67b53517e9914a2a65e99d7800d0aab4f0f7/share/doc/html/src/System.Random.Internal.html/System.Random.Internal.html#RandomGen"><span class="hs-identifier hs-type">RandomGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679479238"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679479239"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Unboxed.Base.html/Data.Vector.Unboxed.Base.html#Vector"><span class="hs-identifier hs-type">VU.Vector</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-78"></span><span id="randomBetweenZero"><span class="annot"><span class="annottext">randomBetweenZero :: forall g (m :: * -&gt; *).
 (MonadState g m, RandomGen g) =&gt;
 Int -&gt; Int -&gt; m (Vector Int)
-</span><a href="HGeometry.Polygon.Convex.Random.html#randomBetweenZero"><span class="hs-identifier hs-var hs-var">randomBetweenZero</span></a></span></span><span> </span><span id="local-6989586621679487330"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487330"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679487331"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487331"><span class="hs-identifier hs-var">vMax</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Int -&gt; Int) -&gt; Vector Int -&gt; Vector Int -&gt; Vector Int
+</span><a href="HGeometry.Polygon.Convex.Random.html#randomBetweenZero"><span class="hs-identifier hs-var hs-var">randomBetweenZero</span></a></span></span><span> </span><span id="local-6989586621679479257"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479257"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679479258"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479258"><span class="hs-identifier hs-var">vMax</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Int -&gt; Int) -&gt; Vector Int -&gt; Vector Int -&gt; Vector Int
 forall a b c.
 (Unbox a, Unbox b, Unbox c) =&gt;
 (a -&gt; b -&gt; c) -&gt; Vector a -&gt; Vector b -&gt; Vector c
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Unboxed.html#zipWith"><span class="hs-identifier hs-var">VU.zipWith</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Vector Int -&gt; Vector Int -&gt; Vector Int)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Unboxed.html/Data.Vector.Unboxed.html#zipWith"><span class="hs-identifier hs-var">VU.zipWith</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Vector Int -&gt; Vector Int -&gt; Vector Int)
 -&gt; m (Vector Int) -&gt; m (Vector Int -&gt; Vector Int)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; m (Vector Int)
@@ -182,8 +167,8 @@ forall g (m :: * -&gt; *).
 (MonadState g m, RandomGen g) =&gt;
 Int -&gt; Int -&gt; m (Vector Int)
 </span><a href="HGeometry.Polygon.Convex.Random.html#randomBetween"><span class="hs-identifier hs-var">randomBetween</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487330"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487331"><span class="hs-identifier hs-var">vMax</span></a></span><span> </span><span class="annot"><span class="annottext">m (Vector Int -&gt; Vector Int) -&gt; m (Vector Int) -&gt; m (Vector Int)
+</span><a href="#local-6989586621679479257"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479258"><span class="hs-identifier hs-var">vMax</span></a></span><span> </span><span class="annot"><span class="annottext">m (Vector Int -&gt; Vector Int) -&gt; m (Vector Int) -&gt; m (Vector Int)
 forall a b. m (a -&gt; b) -&gt; m a -&gt; m b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; m (Vector Int)
@@ -191,16 +176,16 @@ forall g (m :: * -&gt; *).
 (MonadState g m, RandomGen g) =&gt;
 Int -&gt; Int -&gt; m (Vector Int)
 </span><a href="HGeometry.Polygon.Convex.Random.html#randomBetween"><span class="hs-identifier hs-var">randomBetween</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487330"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487331"><span class="hs-identifier hs-var">vMax</span></a></span><span>
+</span><a href="#local-6989586621679479257"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479258"><span class="hs-identifier hs-var">vMax</span></a></span><span>
 </span><span id="line-79"></span><span>
-</span><span id="line-80"></span><span id="local-6989586621679487085"><span id="local-6989586621679487086"><span class="annot"><a href="HGeometry.Polygon.Convex.Random.html#randomEdges"><span class="hs-identifier hs-type">randomEdges</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadState</span></span><span> </span><span class="annot"><a href="#local-6989586621679487085"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679487086"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/random-1.2.1.2-f4cff084f5bb381e8d0ea5f0ff70ce7cde0fcd9c12ea6754a93ba014da9eb283/share/doc/html/src/System.Random.Internal.html#RandomGen"><span class="hs-identifier hs-type">RandomGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679487085"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679487086"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">]</span></span></span><span>
+</span><span id="line-80"></span><span id="local-6989586621679479011"><span id="local-6989586621679479012"><span class="annot"><a href="HGeometry.Polygon.Convex.Random.html#randomEdges"><span class="hs-identifier hs-type">randomEdges</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadState</span></span><span> </span><span class="annot"><a href="#local-6989586621679479011"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679479012"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/random-1.2.1.2-130b58c50f8f26affc7e2b6740ee67b53517e9914a2a65e99d7800d0aab4f0f7/share/doc/html/src/System.Random.Internal.html/System.Random.Internal.html#RandomGen"><span class="hs-identifier hs-type">RandomGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679479011"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679479012"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">]</span></span></span><span>
 </span><span id="line-81"></span><span id="randomEdges"><span class="annot"><span class="annottext">randomEdges :: forall g (m :: * -&gt; *).
 (MonadState g m, RandomGen g) =&gt;
 Int -&gt; Int -&gt; m [Point 2 Int]
-</span><a href="HGeometry.Polygon.Convex.Random.html#randomEdges"><span class="hs-identifier hs-var hs-var">randomEdges</span></a></span></span><span> </span><span id="local-6989586621679487350"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487350"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679487351"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487351"><span class="hs-identifier hs-var">vMax</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><a href="HGeometry.Polygon.Convex.Random.html#randomEdges"><span class="hs-identifier hs-var hs-var">randomEdges</span></a></span></span><span> </span><span id="local-6989586621679479277"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479277"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679479278"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479278"><span class="hs-identifier hs-var">vMax</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-82"></span><span>  </span><span class="annot"><span class="annottext">(Int -&gt; Int -&gt; Point 2 Int) -&gt; [Int] -&gt; [Int] -&gt; [Point 2 Int]
 forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
 </span><span class="hs-identifier hs-var">zipWith</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Point 2 Int
@@ -214,13 +199,13 @@ forall a b. (a -&gt; b) -&gt; m a -&gt; m b
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">Vector Int -&gt; [Int]
 forall a. Unbox a =&gt; Vector a -&gt; [a]
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Unboxed.html#toList"><span class="hs-identifier hs-var">VU.toList</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; m (Vector Int)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Unboxed.html/Data.Vector.Unboxed.html#toList"><span class="hs-identifier hs-var">VU.toList</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; m (Vector Int)
 forall g (m :: * -&gt; *).
 (MonadState g m, RandomGen g) =&gt;
 Int -&gt; Int -&gt; m (Vector Int)
 </span><a href="HGeometry.Polygon.Convex.Random.html#randomBetweenZero"><span class="hs-identifier hs-var">randomBetweenZero</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487350"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487351"><span class="hs-identifier hs-var">vMax</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679479277"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479278"><span class="hs-identifier hs-var">vMax</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-84"></span><span>    </span><span class="annot"><span class="annottext">m ([Int] -&gt; [Point 2 Int]) -&gt; m [Int] -&gt; m [Point 2 Int]
 forall a b. m (a -&gt; b) -&gt; m a -&gt; m b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
@@ -229,26 +214,26 @@ forall a b. (a -&gt; b) -&gt; m a -&gt; m b
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">Vector Int -&gt; [Int]
 forall a. Unbox a =&gt; Vector a -&gt; [a]
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Unboxed.html#toList"><span class="hs-identifier hs-var">VU.toList</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; m (Vector Int)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Unboxed.html/Data.Vector.Unboxed.html#toList"><span class="hs-identifier hs-var">VU.toList</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; m (Vector Int)
 forall g (m :: * -&gt; *).
 (MonadState g m, RandomGen g) =&gt;
 Int -&gt; Int -&gt; m (Vector Int)
 </span><a href="HGeometry.Polygon.Convex.Random.html#randomBetweenZero"><span class="hs-identifier hs-var">randomBetweenZero</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487350"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487351"><span class="hs-identifier hs-var">vMax</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679479277"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479278"><span class="hs-identifier hs-var">vMax</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-85"></span><span>
 </span><span id="line-86"></span><span class="hs-comment">-- | Generate a random ConvexPolygon with @N@ vertices and a granularity of @vMax@.</span><span>
 </span><span id="line-87"></span><span class="hs-comment">--</span><span>
 </span><span id="line-88"></span><span class="hs-comment">-- \( O(n \log n) \)</span><span>
-</span><span id="line-89"></span><span id="local-6989586621679487098"><span id="local-6989586621679487099"><span class="annot"><a href="HGeometry.Polygon.Convex.Random.html#randomConvex"><span class="hs-identifier hs-type">randomConvex</span></a></span><span>                 </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadState</span></span><span> </span><span class="annot"><a href="#local-6989586621679487098"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679487099"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/random-1.2.1.2-f4cff084f5bb381e8d0ea5f0ff70ce7cde0fcd9c12ea6754a93ba014da9eb283/share/doc/html/src/System.Random.Internal.html#RandomGen"><span class="hs-identifier hs-type">RandomGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679487098"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-90"></span><span>                             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679487099"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Convex.Implementation.html#ConvexPolygon"><span class="hs-identifier hs-type">ConvexPolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-89"></span><span id="local-6989586621679479024"><span id="local-6989586621679479025"><span class="annot"><a href="HGeometry.Polygon.Convex.Random.html#randomConvex"><span class="hs-identifier hs-type">randomConvex</span></a></span><span>                 </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">MonadState</span></span><span> </span><span class="annot"><a href="#local-6989586621679479024"><span class="hs-identifier hs-type">g</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679479025"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/random-1.2.1.2-130b58c50f8f26affc7e2b6740ee67b53517e9914a2a65e99d7800d0aab4f0f7/share/doc/html/src/System.Random.Internal.html/System.Random.Internal.html#RandomGen"><span class="hs-identifier hs-type">RandomGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679479024"><span class="hs-identifier hs-type">g</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-90"></span><span>                             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679479025"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Convex.Implementation.html#ConvexPolygon"><span class="hs-identifier hs-type">ConvexPolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-91"></span><span id="randomConvex"><span class="annot"><span class="annottext">randomConvex :: forall g (m :: * -&gt; *).
 (MonadState g m, RandomGen g) =&gt;
 Int -&gt; Int -&gt; m (ConvexPolygon (Point 2 Rational))
-</span><a href="HGeometry.Polygon.Convex.Random.html#randomConvex"><span class="hs-identifier hs-var hs-var">randomConvex</span></a></span></span><span> </span><span id="local-6989586621679487821"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487821"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679487822"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487822"><span class="hs-identifier hs-var">_vMax</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487821"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="HGeometry.Polygon.Convex.Random.html#randomConvex"><span class="hs-identifier hs-var hs-var">randomConvex</span></a></span></span><span> </span><span id="local-6989586621679479748"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479748"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679479749"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479749"><span class="hs-identifier hs-var">_vMax</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479748"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">3</span></span><span> </span><span class="hs-glyph">=</span><span>
@@ -256,12 +241,10 @@ forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 forall a. HasCallStack =&gt; [Char] -&gt; a
 </span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
 </span><span class="hs-string">&quot;HGeometry.Polygon.Convex.randomConvex: At least 3 edges are required.&quot;</span></span><span>
-</span><span id="line-93"></span><span class="annot"><a href="HGeometry.Polygon.Convex.Random.html#randomConvex"><span class="hs-identifier hs-var">randomConvex</span></a></span><span> </span><span id="local-6989586621679487824"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487824"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679487825"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487825"><span class="hs-identifier hs-var">vMax</span></a></span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-94"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679487826"><span class="annot"><span class="annottext">Point 2 Int
-</span><a href="#local-6989586621679487826"><span class="hs-identifier hs-var">v</span></a></span></span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span id="local-6989586621679487828"><span class="annot"><span class="annottext">[Point 2 Int]
-</span><a href="#local-6989586621679487828"><span class="hs-identifier hs-var">vs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Point 2 Int] -&gt; NonEmpty (Point 2 Int)
+</span><span id="line-93"></span><span class="annot"><a href="HGeometry.Polygon.Convex.Random.html#randomConvex"><span class="hs-identifier hs-var">randomConvex</span></a></span><span> </span><span id="local-6989586621679479751"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479751"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679479752"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479752"><span class="hs-identifier hs-var">vMax</span></a></span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-94"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679479753"><span class="annot"><a href="#local-6989586621679479753"><span class="hs-identifier hs-var">v</span></a></span></span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span id="local-6989586621679479755"><span class="annot"><a href="#local-6989586621679479755"><span class="hs-identifier hs-var">vs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[Point 2 Int] -&gt; NonEmpty (Point 2 Int)
 forall a. HasCallStack =&gt; [a] -&gt; NonEmpty a
 </span><span class="hs-identifier hs-var">NonEmpty.fromList</span></span><span> </span><span class="annot"><span class="annottext">([Point 2 Int] -&gt; NonEmpty (Point 2 Int))
 -&gt; ([Point 2 Int] -&gt; [Point 2 Int])
@@ -284,16 +267,15 @@ forall g (m :: * -&gt; *).
 (MonadState g m, RandomGen g) =&gt;
 Int -&gt; Int -&gt; m [Point 2 Int]
 </span><a href="HGeometry.Polygon.Convex.Random.html#randomEdges"><span class="hs-identifier hs-var">randomEdges</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487824"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487825"><span class="hs-identifier hs-var">vMax</span></a></span><span>
-</span><span id="line-95"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679487833"><span class="annot"><span class="annottext">theVertices :: NonEmpty (Point 2 Rational)
-</span><a href="#local-6989586621679487833"><span class="hs-identifier hs-var hs-var">theVertices</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ASetter
+</span><a href="#local-6989586621679479751"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679479752"><span class="hs-identifier hs-var">vMax</span></a></span><span>
+</span><span id="line-95"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679479760"><span class="annot"><a href="#local-6989586621679479760"><span class="hs-identifier hs-var hs-var">theVertices</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ASetter
   (Point 2 Int) (Point 2 Rational) Int (NumType (Point 2 Rational))
 -&gt; (Int -&gt; NumType (Point 2 Rational))
 -&gt; Point 2 Int
 -&gt; Point 2 Rational
 forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Setter.html#over"><span class="hs-identifier hs-var">over</span></a></span><span> </span><span class="annot"><span class="annottext">ASetter
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-ad4ffa0d8fed99eb0a82e7ae6f92f74beeaf04ae23235424b0e62e87c817fcef/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#over"><span class="hs-identifier hs-var">over</span></a></span><span> </span><span class="annot"><span class="annottext">ASetter
   (Point 2 Int) (Point 2 Rational) Int (NumType (Point 2 Rational))
 (NumType (Point 2 Int) -&gt; Identity (NumType (Point 2 Rational)))
 -&gt; Point 2 Int -&gt; Identity (Point 2 Rational)
@@ -312,7 +294,7 @@ forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; NumType (Point 2 Rational)
 forall a b. (Real a, Fractional b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">realToFrac</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679487825"><span class="hs-identifier hs-var">vMax</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(NumType (Point 2 Rational) -&gt; NumType (Point 2 Rational))
+</span><a href="#local-6989586621679479752"><span class="hs-identifier hs-var">vMax</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(NumType (Point 2 Rational) -&gt; NumType (Point 2 Rational))
 -&gt; (Int -&gt; NumType (Point 2 Rational))
 -&gt; Int
 -&gt; NumType (Point 2 Rational)
@@ -328,19 +310,19 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 forall (f :: * -&gt; *) b a.
 Foldable f =&gt;
 (b -&gt; a -&gt; b) -&gt; b -&gt; f a -&gt; NonEmpty b
-</span><span class="hs-identifier hs-var">NonEmpty.scanl</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679487838"><span class="annot"><span class="annottext">Point 2 Int
-</span><a href="#local-6989586621679487838"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679487839"><span class="annot"><span class="annottext">Point 2 Int
-</span><a href="#local-6989586621679487839"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 Int
-</span><a href="#local-6989586621679487838"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Int -&gt; Vector 2 Int -&gt; Point 2 Int
+</span><span class="hs-identifier hs-var">NonEmpty.scanl</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679479765"><span class="annot"><span class="annottext">Point 2 Int
+</span><a href="#local-6989586621679479765"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679479766"><span class="annot"><span class="annottext">Point 2 Int
+</span><a href="#local-6989586621679479766"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 Int
+</span><a href="#local-6989586621679479765"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Int -&gt; Vector 2 Int -&gt; Point 2 Int
 forall point (d :: Nat) r.
 (Affine_ point d r, Num r) =&gt;
 point -&gt; Vector d r -&gt; point
 </span><span class="hs-operator hs-var">.+^</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 Int
-</span><a href="#local-6989586621679487839"><span class="hs-identifier hs-var">u</span></a></span><span class="annot"><span class="annottext">Point 2 Int
+</span><a href="#local-6989586621679479766"><span class="hs-identifier hs-var">u</span></a></span><span class="annot"><span class="annottext">Point 2 Int
 -&gt; Getting (Vector 2 Int) (Point 2 Int) (Vector 2 Int)
 -&gt; Vector 2 Int
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector 2 Int) (Point 2 Int) (Vector 2 Int)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-ad4ffa0d8fed99eb0a82e7ae6f92f74beeaf04ae23235424b0e62e87c817fcef/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector 2 Int) (Point 2 Int) (Vector 2 Int)
 forall (d :: Nat) r s.
 (Dimension (Point 2 Int) ~ d, NumType (Point 2 Int) ~ r,
  Dimension (Point 2 Int) ~ d, NumType (Point 2 Int) ~ s) =&gt;
@@ -351,10 +333,9 @@ forall point point' (d :: Nat) r s.
 Lens point point' (Vector d r) (Vector d s)
 Lens (Point 2 Int) (Point 2 Int) (Vector 2 Int) (Vector 2 Int)
 </span><span class="hs-identifier hs-var">vector</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 Int
-</span><a href="#local-6989586621679487826"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 Int]
-</span><a href="#local-6989586621679487828"><span class="hs-identifier hs-var">vs</span></a></span><span>
-</span><span id="line-97"></span><span>      </span><span id="local-6989586621679487843"><span class="annot"><span class="annottext">pRational :: ConvexPolygon (Point 2 Rational)
-</span><a href="#local-6989586621679487843"><span class="hs-identifier hs-var hs-var">pRational</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 Rational) -&gt; ConvexPolygon (Point 2 Rational)
+</span><a href="#local-6989586621679479753"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 Int]
+</span><a href="#local-6989586621679479755"><span class="hs-identifier hs-var">vs</span></a></span><span>
+</span><span id="line-97"></span><span>      </span><span id="local-6989586621679479770"><span class="annot"><a href="#local-6989586621679479770"><span class="hs-identifier hs-var hs-var">pRational</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 Rational) -&gt; ConvexPolygon (Point 2 Rational)
 forall simplePolygon point r (f :: * -&gt; *).
 (SimplePolygon_ simplePolygon point r, Foldable f) =&gt;
 f point -&gt; simplePolygon
@@ -362,58 +343,7 @@ forall (f :: * -&gt; *).
 Foldable f =&gt;
 f (Point 2 Rational) -&gt; ConvexPolygon (Point 2 Rational)
 </span><a href="HGeometry.Polygon.Simple.Class.html#uncheckedFromCCWPoints"><span class="hs-identifier hs-var">uncheckedFromCCWPoints</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 Rational)
-</span><a href="#local-6989586621679487833"><span class="hs-identifier hs-var">theVertices</span></a></span><span>
-</span><span id="line-98"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span id="local-6989586621679487846"><span class="annot"><span class="annottext">Vector 2 Rational
-</span><a href="#local-6989586621679487846"><span class="hs-identifier hs-var">c</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ConvexPolygon (Point 2 Rational) -&gt; Point 2 Rational
-forall point'.
-(Fractional Rational, ConstructablePoint_ point' 2 Rational) =&gt;
-ConvexPolygon (Point 2 Rational) -&gt; point'
-forall simplePolygon point r point'.
-(SimplePolygon_ simplePolygon point r, Fractional r,
- ConstructablePoint_ point' 2 r) =&gt;
-simplePolygon -&gt; point'
-</span><a href="HGeometry.Polygon.Simple.Class.html#centroid"><span class="hs-identifier hs-var">centroid</span></a></span><span> </span><span class="annot"><span class="annottext">ConvexPolygon (Point 2 Rational)
-</span><a href="#local-6989586621679487843"><span class="hs-identifier hs-var">pRational</span></a></span><span>
-</span><span id="line-99"></span><span>  </span><span class="annot"><span class="annottext">ConvexPolygon (Point 2 Rational)
--&gt; m (ConvexPolygon (Point 2 Rational))
-forall a. a -&gt; m a
-forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
-</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">(ConvexPolygon (Point 2 Rational)
- -&gt; m (ConvexPolygon (Point 2 Rational)))
--&gt; ConvexPolygon (Point 2 Rational)
--&gt; m (ConvexPolygon (Point 2 Rational))
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ConvexPolygon (Point 2 Rational)
-</span><a href="#local-6989586621679487843"><span class="hs-identifier hs-var">pRational</span></a></span><span class="annot"><span class="annottext">ConvexPolygon (Point 2 Rational)
--&gt; (ConvexPolygon (Point 2 Rational)
-    -&gt; ConvexPolygon (Point 2 Rational))
--&gt; ConvexPolygon (Point 2 Rational)
-forall a b. a -&gt; (a -&gt; b) -&gt; b
-</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Vertex (ConvexPolygon (Point 2 Rational))
- -&gt; Identity (Vertex (ConvexPolygon (Point 2 Rational))))
--&gt; ConvexPolygon (Point 2 Rational)
--&gt; Identity (ConvexPolygon (Point 2 Rational))
-(Point 2 Rational -&gt; Identity (Point 2 Rational))
--&gt; ConvexPolygon (Point 2 Rational)
--&gt; Identity (ConvexPolygon (Point 2 Rational))
-forall polygon.
-HasOuterBoundary polygon =&gt;
-IndexedTraversal1' (VertexIx polygon) polygon (Vertex polygon)
-IndexedTraversal1'
-  (VertexIx (ConvexPolygon (Point 2 Rational)))
-  (ConvexPolygon (Point 2 Rational))
-  (Vertex (ConvexPolygon (Point 2 Rational)))
-</span><a href="HGeometry.Polygon.Class.html#outerBoundary"><span class="hs-identifier hs-var">outerBoundary</span></a></span><span> </span><span class="annot"><span class="annottext">((Point 2 Rational -&gt; Identity (Point 2 Rational))
- -&gt; ConvexPolygon (Point 2 Rational)
- -&gt; Identity (ConvexPolygon (Point 2 Rational)))
--&gt; (Point 2 Rational -&gt; Point 2 Rational)
--&gt; ConvexPolygon (Point 2 Rational)
--&gt; ConvexPolygon (Point 2 Rational)
-forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 Rational -&gt; Vector 2 Rational -&gt; Point 2 Rational
-forall point (d :: Nat) r.
-(Affine_ point d r, Num r) =&gt;
-point -&gt; Vector d r -&gt; point
-</span><span class="hs-operator hs-var">.-^</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 Rational
-</span><a href="#local-6989586621679487846"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679479760"><span class="hs-identifier hs-var">theVertices</span></a></span><span>
+</span><span id="line-98"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span id="local-6989586621679479773"><span class="annot"><a href="#local-6989586621679479773"><span class="hs-identifier hs-var">c</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#centroid"><span class="hs-identifier hs-type">centroid</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679479770"><span class="hs-identifier hs-type">pRational</span></a></span><span>
+</span><span id="line-99"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="#local-6989586621679479770"><span class="hs-identifier hs-type">pRational</span></a></span><span class="annot"><span class="hs-operator hs-type">&amp;</span></span><span class="annot"><a href="HGeometry.Polygon.Class.html#outerBoundary"><span class="hs-identifier hs-type">outerBoundary</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-ad4ffa0d8fed99eb0a82e7ae6f92f74beeaf04ae23235424b0e62e87c817fcef/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-type">%~</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-operator">.-^</span></span><span> </span><span class="annot"><span class="hs-identifier">c</span></span><span class="hs-special">)</span><span>
 </span><span id="line-100"></span></pre></body></html>

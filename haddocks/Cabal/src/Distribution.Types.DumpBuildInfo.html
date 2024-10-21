@@ -1,15 +1,16 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679344606"><span id="local-6989586621679344607"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679447100"><span id="local-6989586621679447101"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
 </span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
-</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Distribution.Types.DumpBuildInfo</span><span>
-</span><span id="line-4"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Types.DumpBuildInfo.html#DumpBuildInfo"><span class="hs-identifier">DumpBuildInfo</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-5"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-6"></span><span>
-</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.10.1.0/src/Distribution.Compat.Prelude.html#/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-8"></span><span>
-</span><span id="line-9"></span><span class="hs-keyword">data</span><span> </span><span id="DumpBuildInfo"><span class="annot"><a href="Distribution.Types.DumpBuildInfo.html#DumpBuildInfo"><span class="hs-identifier hs-var">DumpBuildInfo</span></a></span></span><span>
-</span><span id="line-10"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="NoDumpBuildInfo"><span class="annot"><a href="Distribution.Types.DumpBuildInfo.html#NoDumpBuildInfo"><span class="hs-identifier hs-var">NoDumpBuildInfo</span></a></span></span><span>
-</span><span id="line-11"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="DumpBuildInfo"><span class="annot"><a href="Distribution.Types.DumpBuildInfo.html#DumpBuildInfo"><span class="hs-identifier hs-var">DumpBuildInfo</span></a></span></span><span>
-</span><span id="line-12"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679344611"><span id="local-6989586621679344615"><span id="local-6989586621679344618"><span id="local-6989586621679344623"><span class="annot"><span class="annottext">ReadPrec [DumpBuildInfo]
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Types.DumpBuildInfo.html"><span class="hs-identifier">Distribution.Types.DumpBuildInfo</span></a></span><span>
+</span><span id="line-5"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Types.DumpBuildInfo.html#DumpBuildInfo"><span class="hs-identifier">DumpBuildInfo</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">data</span><span> </span><span id="DumpBuildInfo"><span class="annot"><a href="Distribution.Types.DumpBuildInfo.html#DumpBuildInfo"><span class="hs-identifier hs-var">DumpBuildInfo</span></a></span></span><span>
+</span><span id="line-11"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="NoDumpBuildInfo"><span class="annot"><a href="Distribution.Types.DumpBuildInfo.html#NoDumpBuildInfo"><span class="hs-identifier hs-var">NoDumpBuildInfo</span></a></span></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="DumpBuildInfo"><span class="annot"><a href="Distribution.Types.DumpBuildInfo.html#DumpBuildInfo"><span class="hs-identifier hs-var">DumpBuildInfo</span></a></span></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679447105"><span id="local-6989586621679447109"><span id="local-6989586621679447112"><span id="local-6989586621679447117"><span class="annot"><span class="annottext">ReadPrec [DumpBuildInfo]
 ReadPrec DumpBuildInfo
 Int -&gt; ReadS DumpBuildInfo
 ReadS [DumpBuildInfo]
@@ -29,7 +30,7 @@ $creadPrec :: ReadPrec DumpBuildInfo
 readPrec :: ReadPrec DumpBuildInfo
 $creadListPrec :: ReadPrec [DumpBuildInfo]
 readListPrec :: ReadPrec [DumpBuildInfo]
-</span><a href="../../base-4.18.2.0/src/GHC.Read.html#Read/GHC.Read.html#Read"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></a></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679344627"><span id="local-6989586621679344629"><span id="local-6989586621679344633"><span class="annot"><span class="annottext">Int -&gt; DumpBuildInfo -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679447124"><span id="local-6989586621679447126"><span id="local-6989586621679447130"><span class="annot"><span class="annottext">Int -&gt; DumpBuildInfo -&gt; ShowS
 [DumpBuildInfo] -&gt; ShowS
 DumpBuildInfo -&gt; String
 (Int -&gt; DumpBuildInfo -&gt; ShowS)
@@ -44,7 +45,7 @@ $cshow :: DumpBuildInfo -&gt; String
 show :: DumpBuildInfo -&gt; String
 $cshowList :: [DumpBuildInfo] -&gt; ShowS
 showList :: [DumpBuildInfo] -&gt; ShowS
-</span><a href="../../base-4.18.2.0/src/GHC.Show.html#Show/GHC.Show.html#Show"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></a></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679344637"><span id="local-6989586621679344639"><span class="annot"><span class="annottext">DumpBuildInfo -&gt; DumpBuildInfo -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679447135"><span id="local-6989586621679447140"><span class="annot"><span class="annottext">DumpBuildInfo -&gt; DumpBuildInfo -&gt; Bool
 (DumpBuildInfo -&gt; DumpBuildInfo -&gt; Bool)
 -&gt; (DumpBuildInfo -&gt; DumpBuildInfo -&gt; Bool) -&gt; Eq DumpBuildInfo
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -52,7 +53,7 @@ $c== :: DumpBuildInfo -&gt; DumpBuildInfo -&gt; Bool
 == :: DumpBuildInfo -&gt; DumpBuildInfo -&gt; Bool
 $c/= :: DumpBuildInfo -&gt; DumpBuildInfo -&gt; Bool
 /= :: DumpBuildInfo -&gt; DumpBuildInfo -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679344646"><span id="local-6989586621679344648"><span id="local-6989586621679344650"><span id="local-6989586621679344654"><span id="local-6989586621679344657"><span id="local-6989586621679344660"><span id="local-6989586621679344663"><span class="annot"><span class="annottext">Eq DumpBuildInfo
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679447147"><span id="local-6989586621679447149"><span id="local-6989586621679447151"><span id="local-6989586621679447155"><span id="local-6989586621679447158"><span id="local-6989586621679447161"><span id="local-6989586621679447164"><span class="annot"><span class="annottext">Eq DumpBuildInfo
 Eq DumpBuildInfo =&gt;
 (DumpBuildInfo -&gt; DumpBuildInfo -&gt; Ordering)
 -&gt; (DumpBuildInfo -&gt; DumpBuildInfo -&gt; Bool)
@@ -89,7 +90,7 @@ $cmax :: DumpBuildInfo -&gt; DumpBuildInfo -&gt; DumpBuildInfo
 max :: DumpBuildInfo -&gt; DumpBuildInfo -&gt; DumpBuildInfo
 $cmin :: DumpBuildInfo -&gt; DumpBuildInfo -&gt; DumpBuildInfo
 min :: DumpBuildInfo -&gt; DumpBuildInfo -&gt; DumpBuildInfo
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679344667"><span id="local-6989586621679344675"><span id="local-6989586621679344681"><span id="local-6989586621679344691"><span id="local-6989586621679344693"><span id="local-6989586621679344697"><span id="local-6989586621679344701"><span id="local-6989586621679344705"><span class="annot"><span class="annottext">Int -&gt; DumpBuildInfo
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679447172"><span id="local-6989586621679447181"><span id="local-6989586621679447188"><span id="local-6989586621679447198"><span id="local-6989586621679447201"><span id="local-6989586621679447206"><span id="local-6989586621679447212"><span id="local-6989586621679447216"><span class="annot"><span class="annottext">Int -&gt; DumpBuildInfo
 DumpBuildInfo -&gt; Int
 DumpBuildInfo -&gt; [DumpBuildInfo]
 DumpBuildInfo -&gt; DumpBuildInfo
@@ -131,14 +132,14 @@ $cenumFromTo :: DumpBuildInfo -&gt; DumpBuildInfo -&gt; [DumpBuildInfo]
 enumFromTo :: DumpBuildInfo -&gt; DumpBuildInfo -&gt; [DumpBuildInfo]
 $cenumFromThenTo :: DumpBuildInfo -&gt; DumpBuildInfo -&gt; DumpBuildInfo -&gt; [DumpBuildInfo]
 enumFromThenTo :: DumpBuildInfo -&gt; DumpBuildInfo -&gt; DumpBuildInfo -&gt; [DumpBuildInfo]
-</span><a href="../../base-4.18.2.0/src/GHC.Enum.html#Enum/GHC.Enum.html#Enum"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></a></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679344709"><span id="local-6989586621679344711"><span class="annot"><span class="annottext">DumpBuildInfo
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679447224"><span id="local-6989586621679447226"><span class="annot"><span class="annottext">DumpBuildInfo
 DumpBuildInfo -&gt; DumpBuildInfo -&gt; Bounded DumpBuildInfo
 forall a. a -&gt; a -&gt; Bounded a
 $cminBound :: DumpBuildInfo
 minBound :: DumpBuildInfo
 $cmaxBound :: DumpBuildInfo
 maxBound :: DumpBuildInfo
-</span><a href="../../base-4.18.2.0/src/GHC.Enum.html#Bounded/GHC.Enum.html#Bounded"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Bounded</span></a></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679344715"><span id="local-6989586621679344717"><span class="annot"><span class="annottext">(forall x. DumpBuildInfo -&gt; Rep DumpBuildInfo x)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Bounded</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679447232"><span id="local-6989586621679447234"><span class="annot"><span class="annottext">(forall x. DumpBuildInfo -&gt; Rep DumpBuildInfo x)
 -&gt; (forall x. Rep DumpBuildInfo x -&gt; DumpBuildInfo)
 -&gt; Generic DumpBuildInfo
 forall x. Rep DumpBuildInfo x -&gt; DumpBuildInfo
@@ -149,8 +150,8 @@ $cfrom :: forall x. DumpBuildInfo -&gt; Rep DumpBuildInfo x
 from :: forall x. DumpBuildInfo -&gt; Rep DumpBuildInfo x
 $cto :: forall x. Rep DumpBuildInfo x -&gt; DumpBuildInfo
 to :: forall x. Rep DumpBuildInfo x -&gt; DumpBuildInfo
-</span><a href="../../base-4.18.2.0/src/GHC.Generics.html#Generic/GHC.Generics.html#Generic"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></a></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/Data.Typeable.Internal.html#Typeable/Data.Typeable.Internal.html#Typeable"><span class="hs-identifier hs-type">Typeable</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-13"></span><span>
-</span><span id="line-14"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679344721"><span id="local-6989586621679344728"><span id="local-6989586621679344734"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Types.DumpBuildInfo.html#DumpBuildInfo"><span class="hs-identifier hs-type">DumpBuildInfo</span></a></span></span></span></span><span>
-</span><span id="line-15"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679344761"><span id="local-6989586621679344768"><span class="annot"><a href="../../Cabal-syntax-3.10.1.0/src/Distribution.Utils.Structured.html#Structured/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.DumpBuildInfo.html#DumpBuildInfo"><span class="hs-identifier hs-type">DumpBuildInfo</span></a></span></span></span><span>
-</span><span id="line-16"></span></pre></body></html>
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679447240"><span id="local-6989586621679447247"><span id="local-6989586621679447253"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Types.DumpBuildInfo.html#DumpBuildInfo"><span class="hs-identifier hs-type">DumpBuildInfo</span></a></span></span></span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679447280"><span id="local-6989586621679447287"><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Structured.html/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.DumpBuildInfo.html#DumpBuildInfo"><span class="hs-identifier hs-type">DumpBuildInfo</span></a></span></span></span><span>
+</span><span id="line-17"></span></pre></body></html>

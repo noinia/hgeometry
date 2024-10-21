@@ -28,7 +28,7 @@
 </span><span id="line-28"></span><span class="hs-comment">-- applies a sequence of monad transformers.</span><span>
 </span><span id="line-29"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
 </span><span id="line-30"></span><span>
-</span><span id="line-31"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Control.Monad.Trans.Class</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Control.Monad.Trans.Class.html"><span class="hs-identifier">Control.Monad.Trans.Class</span></a></span><span> </span><span class="hs-special">(</span><span>
 </span><span id="line-32"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Transformer class</span></span><span>
 </span><span id="line-33"></span><span>    </span><span class="annot"><a href="Control.Monad.Trans.Class.html#MonadTrans"><span class="hs-identifier">MonadTrans</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
 </span><span id="line-34"></span><span>
@@ -75,7 +75,7 @@
 </span><span id="line-75"></span><span class="hs-comment">-- to be reported as ambiguous.  For transformers 0.6 and later, this can</span><span>
 </span><span id="line-76"></span><span class="hs-comment">-- be fixed by removing the second constraint, which is implied by the first.</span><span class="hs-cpp">
 #if __GLASGOW_HASKELL__ &gt;= 806
-</span><span class="hs-keyword">class</span><span> </span><span class="hs-special">(</span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679079949"><span class="annot"><a href="#local-6989586621679079949"><span class="hs-identifier hs-type">m</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Base.html#Monad/GHC.Base.html#Monad"><span class="hs-identifier hs-type">Monad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079949"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Base.html#Monad/GHC.Base.html#Monad"><span class="hs-identifier hs-type">Monad</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679079947"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079949"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span id="MonadTrans"><span class="annot"><a href="Control.Monad.Trans.Class.html#MonadTrans"><span class="hs-identifier hs-var">MonadTrans</span></a></span></span><span> </span><span id="local-6989586621679079947"><span class="annot"><a href="#local-6989586621679079947"><span class="hs-identifier hs-type">t</span></a></span></span><span> </span><span class="hs-keyword">where</span><span class="hs-cpp">
+</span><span class="hs-keyword">class</span><span> </span><span class="hs-special">(</span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679088144"><span class="annot"><a href="#local-6989586621679088144"><span class="hs-identifier hs-type">m</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679088144"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679088142"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679088144"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span id="MonadTrans"><span class="annot"><a href="Control.Monad.Trans.Class.html#MonadTrans"><span class="hs-identifier hs-var">MonadTrans</span></a></span></span><span> </span><span id="local-6989586621679088142"><span class="annot"><a href="#local-6989586621679088142"><span class="hs-identifier hs-type">t</span></a></span></span><span> </span><span class="hs-keyword">where</span><span class="hs-cpp">
 #else
 </span><span class="hs-comment">-- Prior to GHC 8.8 (base-4.13), the Monad class included fail.</span><span>
 </span><span id="line-81"></span><span class="hs-comment">-- GHC 8.6 (base-4.12) has MonadFailDesugaring on by default, so there</span><span>
@@ -84,18 +84,21 @@
 </span><span id="line-84"></span><span class="hs-keyword">class</span><span> </span><span class="hs-identifier">MonadTrans</span><span> </span><span class="hs-identifier">t</span><span> </span><span class="hs-keyword">where</span><span class="hs-cpp">
 #endif
 </span><span>    </span><span class="hs-comment">-- | Lift a computation from the argument monad to the constructed monad.</span><span>
-</span><span id="line-87"></span><span>    </span><span id="lift"><span class="annot"><a href="Control.Monad.Trans.Class.html#lift"><span class="hs-identifier hs-type">lift</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679079952"><span id="local-6989586621679079953"><span class="hs-special">(</span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Base.html#Monad/GHC.Base.html#Monad"><span class="hs-identifier hs-type">Monad</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079952"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679079952"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079953"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679079947"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079952"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679079953"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-87"></span><span>    </span><span id="lift"><span class="annot"><a href="Control.Monad.Trans.Class.html#lift"><span class="hs-identifier hs-type">lift</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679088147"><span id="local-6989586621679088148"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Monad</span></span><span> </span><span class="annot"><a href="#local-6989586621679088147"><span class="hs-identifier hs-type">m</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679088147"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679088148"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679088142"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679088147"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679088148"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
 </span><span id="line-88"></span><span>
 </span><span id="line-89"></span><span class="annot"><span class="hs-comment">{- $conventions
-Most monad transformer modules include the special case of applying
-the transformer to 'Data.Functor.Identity.Identity'.  For example,
+All monad transformer modules except 'Control.Monad.Trans.Maybe'
+include the special case of applying the transformer
+to 'Data.Functor.Identity.Identity'.  For example,
 @'Control.Monad.Trans.State.Lazy.State' s@ is an abbreviation for
 @'Control.Monad.Trans.State.Lazy.StateT' s 'Data.Functor.Identity.Identity'@.
+As a consequence, operations defined on the monad transformer can also
+be used on this special case.
 
 Each monad transformer also comes with an operation @run@/XXX/@T@ to
 unwrap the transformer, exposing a computation of the inner monad.
-(Currently these functions are defined as field labels, but in the next
-major release they will be separate functions.)
+(Currently these functions are defined as field labels, but in a future
+major release they may be separate functions.)
 
 All of the monad transformers except 'Control.Monad.Trans.Cont.ContT'
 and 'Control.Monad.Trans.Cont.SelectT' are functors on the category
@@ -120,8 +123,8 @@ combinator, but a few with more complex type signatures require
 specialized lifting combinators, called @lift@/Op/
 (see &quot;Control.Monad.Signatures&quot;).
 -}</span></span><span>
-</span><span id="line-123"></span><span>
-</span><span id="line-124"></span><span class="annot"><span class="hs-comment">{- $strict
+</span><span id="line-126"></span><span>
+</span><span id="line-127"></span><span class="annot"><span class="hs-comment">{- $strict
 
 A monad is said to be /strict/ if its '&gt;&gt;=' operation (and therefore also
 '&gt;&gt;') is strict in its first argument.  The base monads 'Maybe', @[]@
@@ -134,7 +137,7 @@ and 'IO' are strict:
 &gt;&gt;&gt; undefined &gt;&gt; print 2
 *** Exception: Prelude.undefined
 
-However the monads 'Data.Functor.Identity.Identity' and @(-&gt;) a@ are not:
+However, the monads 'Data.Functor.Identity.Identity' and @(-&gt;) a@ are not:
 
 &gt;&gt;&gt; undefined &gt;&gt; Identity 2
 Identity 2
@@ -143,11 +146,11 @@ Identity 2
 
 In a strict monad you know when each action is executed, but the monad
 is not necessarily strict in the return value, or in other components
-of the monad, such as a state.  However you can use 'seq' to create
+of the monad, such as a state.  However, you can use 'seq' to create
 an action that is strict in the component you want evaluated.
 -}</span></span><span>
-</span><span id="line-149"></span><span>
-</span><span id="line-150"></span><span class="annot"><span class="hs-comment">{- $example1
+</span><span id="line-152"></span><span>
+</span><span id="line-153"></span><span class="annot"><span class="hs-comment">{- $example1
 
 The first example is a parser monad in the style of
 
@@ -184,8 +187,8 @@ applications of 'Control.Monad.Trans.State.Lazy.StateT'.  Alternatively one
 could use monad classes from the @mtl@ package or similar, which contain
 methods @get@ and @put@ with types generalized over all suitable monads.
 -}</span></span><span>
-</span><span id="line-187"></span><span>
-</span><span id="line-188"></span><span class="annot"><span class="hs-comment">{- $example2
+</span><span id="line-190"></span><span>
+</span><span id="line-191"></span><span class="annot"><span class="hs-comment">{- $example2
 
 We can define a parser that also counts by adding a
 'Control.Monad.Trans.Writer.Lazy.WriterT' transformer:
@@ -227,8 +230,8 @@ We can also define a primitive using the Writer:
 
 Then the parser will keep track of how many @tick@s it executes.
 -}</span></span><span>
-</span><span id="line-230"></span><span>
-</span><span id="line-231"></span><span class="annot"><span class="hs-comment">{- $example3
+</span><span id="line-233"></span><span>
+</span><span id="line-234"></span><span class="annot"><span class="hs-comment">{- $example3
 
 This example is a cut-down version of the one in
 
@@ -296,4 +299,4 @@ so we can use 'Control.Monad.IO.Class.liftIO' instead:
 &gt; putStr s = liftIO (Prelude.putStr s)
 
 -}</span></span><span>
-</span><span id="line-299"></span></pre></body></html>
+</span><span id="line-302"></span></pre></body></html>

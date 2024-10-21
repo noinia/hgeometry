@@ -1,0 +1,475 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Module      :  Distribution.Simple.Setup.Install</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Copyright   :  Isaac Jones 2003-2004</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--                Duncan Coutts 2007</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- License     :  BSD3</span><span>
+</span><span id="line-14"></span><span class="hs-comment">--</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- Maintainer  :  cabal-devel@haskell.org</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- Portability :  portable</span><span>
+</span><span id="line-17"></span><span class="hs-comment">--</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- Definition of the install command-line options.</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- See: @Distribution.Simple.Setup@</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Install.html"><span class="hs-identifier">Distribution.Simple.Setup.Install</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#InstallFlags"><span class="hs-identifier">InstallFlags</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#emptyInstallFlags"><span class="hs-identifier">emptyInstallFlags</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#defaultInstallFlags"><span class="hs-identifier">defaultInstallFlags</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#installCommand"><span class="hs-identifier">installCommand</span></a></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">get</span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.ReadE.html"><span class="hs-identifier">Distribution.ReadE</span></a></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html"><span class="hs-identifier">Distribution.Simple.Command</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt"><span class="hs-identifier">boolOpt</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt%27"><span class="hs-identifier">boolOpt'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Compiler.html"><span class="hs-identifier">Distribution.Simple.Compiler</span></a></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html"><span class="hs-identifier">Distribution.Simple.Flag</span></a></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.html"><span class="hs-identifier">Distribution.Simple.InstallDirs</span></a></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Utils.html"><span class="hs-identifier">Distribution.Simple.Utils</span></a></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html"><span class="hs-identifier">Distribution.Verbosity</span></a></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html"><span class="hs-identifier">Distribution.Simple.Setup.Common</span></a></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="annot"><span class="hs-comment">-- * Install flags</span></span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="annot"><span class="hs-comment">-- | Flags to @install@: (package db, verbosity)</span></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">data</span><span> </span><span id="InstallFlags"><span class="annot"><a href="Distribution.Simple.Setup.Install.html#InstallFlags"><span class="hs-identifier hs-var">InstallFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="InstallFlags"><span class="annot"><a href="Distribution.Simple.Setup.Install.html#InstallFlags"><span class="hs-identifier hs-var">InstallFlags</span></a></span></span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="installPackageDB"><span class="annot"><span class="annottext">InstallFlags -&gt; Flag PackageDB
+</span><a href="Distribution.Simple.Setup.Install.html#installPackageDB"><span class="hs-identifier hs-var hs-var">installPackageDB</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Compiler.html#PackageDB"><span class="hs-identifier hs-type">PackageDB</span></a></span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="installDest"><span class="annot"><span class="annottext">InstallFlags -&gt; Flag CopyDest
+</span><a href="Distribution.Simple.Setup.Install.html#installDest"><span class="hs-identifier hs-var hs-var">installDest</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.InstallDirs.html#CopyDest"><span class="hs-identifier hs-type">CopyDest</span></a></span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="installDistPref"><span class="annot"><span class="annottext">InstallFlags -&gt; Flag FilePath
+</span><a href="Distribution.Simple.Setup.Install.html#installDistPref"><span class="hs-identifier hs-var hs-var">installDistPref</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
+</span><span id="line-51"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="installUseWrapper"><span class="annot"><span class="annottext">InstallFlags -&gt; Flag Bool
+</span><a href="Distribution.Simple.Setup.Install.html#installUseWrapper"><span class="hs-identifier hs-var hs-var">installUseWrapper</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="installInPlace"><span class="annot"><span class="annottext">InstallFlags -&gt; Flag Bool
+</span><a href="Distribution.Simple.Setup.Install.html#installInPlace"><span class="hs-identifier hs-var hs-var">installInPlace</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-53"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="installVerbosity"><span class="annot"><span class="annottext">InstallFlags -&gt; Flag Verbosity
+</span><a href="Distribution.Simple.Setup.Install.html#installVerbosity"><span class="hs-identifier hs-var hs-var">installVerbosity</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><a href="Distribution.Verbosity.html#Verbosity"><span class="hs-identifier hs-type">Verbosity</span></a></span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-comment">-- this is only here, because we can not</span><span>
+</span><span id="line-55"></span><span>    </span><span class="hs-comment">-- change the hooks API.</span><span>
+</span><span id="line-56"></span><span>    </span><span id="installCabalFilePath"><span class="annot"><span class="annottext">InstallFlags -&gt; Flag FilePath
+</span><a href="Distribution.Simple.Setup.Install.html#installCabalFilePath"><span class="hs-identifier hs-var hs-var">installCabalFilePath</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679467913"><span id="local-6989586621679467930"><span id="local-6989586621679467934"><span class="annot"><span class="annottext">Int -&gt; InstallFlags -&gt; ShowS
+[InstallFlags] -&gt; ShowS
+InstallFlags -&gt; FilePath
+(Int -&gt; InstallFlags -&gt; ShowS)
+-&gt; (InstallFlags -&gt; FilePath)
+-&gt; ([InstallFlags] -&gt; ShowS)
+-&gt; Show InstallFlags
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; FilePath) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; InstallFlags -&gt; ShowS
+showsPrec :: Int -&gt; InstallFlags -&gt; ShowS
+$cshow :: InstallFlags -&gt; FilePath
+show :: InstallFlags -&gt; FilePath
+$cshowList :: [InstallFlags] -&gt; ShowS
+showList :: [InstallFlags] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679467946"><span id="local-6989586621679467948"><span class="annot"><span class="annottext">(forall x. InstallFlags -&gt; Rep InstallFlags x)
+-&gt; (forall x. Rep InstallFlags x -&gt; InstallFlags)
+-&gt; Generic InstallFlags
+forall x. Rep InstallFlags x -&gt; InstallFlags
+forall x. InstallFlags -&gt; Rep InstallFlags x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cfrom :: forall x. InstallFlags -&gt; Rep InstallFlags x
+from :: forall x. InstallFlags -&gt; Rep InstallFlags x
+$cto :: forall x. Rep InstallFlags x -&gt; InstallFlags
+to :: forall x. Rep InstallFlags x -&gt; InstallFlags
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#defaultInstallFlags"><span class="hs-identifier hs-type">defaultInstallFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#InstallFlags"><span class="hs-identifier hs-type">InstallFlags</span></a></span><span>
+</span><span id="line-61"></span><span id="defaultInstallFlags"><span class="annot"><span class="annottext">defaultInstallFlags :: InstallFlags
+</span><a href="Distribution.Simple.Setup.Install.html#defaultInstallFlags"><span class="hs-identifier hs-var hs-var">defaultInstallFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-62"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#InstallFlags"><span class="hs-identifier hs-type">InstallFlags</span></a></span><span>
+</span><span id="line-63"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">installPackageDB :: Flag PackageDB
+</span><a href="Distribution.Simple.Setup.Install.html#installPackageDB"><span class="hs-identifier hs-var">installPackageDB</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag PackageDB
+forall a. Flag a
+</span><a href="Distribution.Simple.Flag.html#NoFlag"><span class="hs-identifier hs-var">NoFlag</span></a></span><span>
+</span><span id="line-64"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">installDest :: Flag CopyDest
+</span><a href="Distribution.Simple.Setup.Install.html#installDest"><span class="hs-identifier hs-var">installDest</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CopyDest -&gt; Flag CopyDest
+forall a. a -&gt; Flag a
+</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">CopyDest
+</span><a href="Distribution.Simple.InstallDirs.html#NoCopyDest"><span class="hs-identifier hs-var">NoCopyDest</span></a></span><span>
+</span><span id="line-65"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">installDistPref :: Flag FilePath
+</span><a href="Distribution.Simple.Setup.Install.html#installDistPref"><span class="hs-identifier hs-var">installDistPref</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag FilePath
+forall a. Flag a
+</span><a href="Distribution.Simple.Flag.html#NoFlag"><span class="hs-identifier hs-var">NoFlag</span></a></span><span>
+</span><span id="line-66"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">installUseWrapper :: Flag Bool
+</span><a href="Distribution.Simple.Setup.Install.html#installUseWrapper"><span class="hs-identifier hs-var">installUseWrapper</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Flag Bool
+forall a. a -&gt; Flag a
+</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-67"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">installInPlace :: Flag Bool
+</span><a href="Distribution.Simple.Setup.Install.html#installInPlace"><span class="hs-identifier hs-var">installInPlace</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Flag Bool
+forall a. a -&gt; Flag a
+</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-68"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">installVerbosity :: Flag Verbosity
+</span><a href="Distribution.Simple.Setup.Install.html#installVerbosity"><span class="hs-identifier hs-var">installVerbosity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Verbosity -&gt; Flag Verbosity
+forall a. a -&gt; Flag a
+</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Verbosity
+</span><a href="Distribution.Verbosity.html#normal"><span class="hs-identifier hs-var">normal</span></a></span><span>
+</span><span id="line-69"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">installCabalFilePath :: Flag FilePath
+</span><a href="Distribution.Simple.Setup.Install.html#installCabalFilePath"><span class="hs-identifier hs-var">installCabalFilePath</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag FilePath
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-70"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-71"></span><span>
+</span><span id="line-72"></span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#installCommand"><span class="hs-identifier hs-type">installCommand</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#InstallFlags"><span class="hs-identifier hs-type">InstallFlags</span></a></span><span>
+</span><span id="line-73"></span><span id="installCommand"><span class="annot"><span class="annottext">installCommand :: CommandUI InstallFlags
+</span><a href="Distribution.Simple.Setup.Install.html#installCommand"><span class="hs-identifier hs-var hs-var">installCommand</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-74"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span>
+</span><span id="line-75"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">commandName :: FilePath
+</span><a href="Distribution.Simple.Command.html#commandName"><span class="hs-identifier hs-var">commandName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;install&quot;</span></span><span>
+</span><span id="line-76"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandSynopsis :: FilePath
+</span><a href="Distribution.Simple.Command.html#commandSynopsis"><span class="hs-identifier hs-var">commandSynopsis</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-77"></span><span>        </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;Copy the files into the install locations. Run register.&quot;</span></span><span>
+</span><span id="line-78"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDescription :: Maybe ShowS
+</span><a href="Distribution.Simple.Command.html#commandDescription"><span class="hs-identifier hs-var">commandDescription</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; Maybe ShowS
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; Maybe ShowS) -&gt; ShowS -&gt; Maybe ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-79"></span><span>        </span><span class="annot"><span class="annottext">ShowS
+</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Generic.html/Distribution.Utils.Generic.html#wrapText"><span class="hs-identifier hs-var">wrapText</span></a></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-80"></span><span>          </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;Unlike the copy command, install calls the register command. &quot;</span></span><span>
+</span><span id="line-81"></span><span>            </span><span class="annot"><span class="annottext">FilePath -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;If you want to install into a location that is not what was &quot;</span></span><span>
+</span><span id="line-82"></span><span>            </span><span class="annot"><span class="annottext">FilePath -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;specified in the configure step, use the copy command.\n&quot;</span></span><span>
+</span><span id="line-83"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandNotes :: Maybe ShowS
+</span><a href="Distribution.Simple.Command.html#commandNotes"><span class="hs-identifier hs-var">commandNotes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ShowS
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-84"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandUsage :: ShowS
+</span><a href="Distribution.Simple.Command.html#commandUsage"><span class="hs-identifier hs-var">commandUsage</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679467964"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679467964"><span class="hs-identifier hs-var">pname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-85"></span><span>        </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;Usage: &quot;</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679467964"><span class="hs-identifier hs-var">pname</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot; install [FLAGS]\n&quot;</span></span><span>
+</span><span id="line-86"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDefaultFlags :: InstallFlags
+</span><a href="Distribution.Simple.Command.html#commandDefaultFlags"><span class="hs-identifier hs-var">commandDefaultFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">InstallFlags
+</span><a href="Distribution.Simple.Setup.Install.html#defaultInstallFlags"><span class="hs-identifier hs-var">defaultInstallFlags</span></a></span><span>
+</span><span id="line-87"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandOptions :: ShowOrParseArgs -&gt; [OptionField InstallFlags]
+</span><a href="Distribution.Simple.Command.html#commandOptions"><span class="hs-identifier hs-var">commandOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679467967"><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679467967"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679467967"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-88"></span><span>        </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="Distribution.Simple.Command.html#ShowArgs"><span class="hs-identifier hs-var">ShowArgs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-89"></span><span>          </span><span class="annot"><span class="annottext">(OptionField InstallFlags -&gt; Bool)
+-&gt; [OptionField InstallFlags] -&gt; [OptionField InstallFlags]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">filter</span></span><span>
+</span><span id="line-90"></span><span>            </span><span class="hs-special">(</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FilePath -&gt; [FilePath] -&gt; Bool
+forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
+</span><span class="hs-operator hs-var">`notElem`</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;target-package-db&quot;</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-91"></span><span>                </span><span class="annot"><span class="annottext">(FilePath -&gt; Bool)
+-&gt; (OptionField InstallFlags -&gt; FilePath)
+-&gt; OptionField InstallFlags
+-&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">OptionField InstallFlags -&gt; FilePath
+forall a. OptionField a -&gt; FilePath
+</span><a href="Distribution.Simple.Command.html#optionName"><span class="hs-identifier hs-var">optionName</span></a></span><span>
+</span><span id="line-92"></span><span>            </span><span class="hs-special">)</span><span>
+</span><span id="line-93"></span><span>            </span><span class="annot"><span class="annottext">([OptionField InstallFlags] -&gt; [OptionField InstallFlags])
+-&gt; [OptionField InstallFlags] -&gt; [OptionField InstallFlags]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ShowOrParseArgs -&gt; [OptionField InstallFlags]
+</span><a href="Distribution.Simple.Setup.Install.html#installOptions"><span class="hs-identifier hs-var">installOptions</span></a></span><span> </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="Distribution.Simple.Command.html#ShowArgs"><span class="hs-identifier hs-var">ShowArgs</span></a></span><span>
+</span><span id="line-94"></span><span>        </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="Distribution.Simple.Command.html#ParseArgs"><span class="hs-identifier hs-var">ParseArgs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ShowOrParseArgs -&gt; [OptionField InstallFlags]
+</span><a href="Distribution.Simple.Setup.Install.html#installOptions"><span class="hs-identifier hs-var">installOptions</span></a></span><span> </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="Distribution.Simple.Command.html#ParseArgs"><span class="hs-identifier hs-var">ParseArgs</span></a></span><span>
+</span><span id="line-95"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#installOptions"><span class="hs-identifier hs-type">installOptions</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#ShowOrParseArgs"><span class="hs-identifier hs-type">ShowOrParseArgs</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Distribution.Simple.Command.html#OptionField"><span class="hs-identifier hs-type">OptionField</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#InstallFlags"><span class="hs-identifier hs-type">InstallFlags</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-98"></span><span id="installOptions"><span class="annot"><span class="annottext">installOptions :: ShowOrParseArgs -&gt; [OptionField InstallFlags]
+</span><a href="Distribution.Simple.Setup.Install.html#installOptions"><span class="hs-identifier hs-var hs-var">installOptions</span></a></span></span><span> </span><span id="local-6989586621679467974"><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679467974"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-99"></span><span>  </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">(InstallFlags -&gt; Flag Verbosity)
+-&gt; (Flag Verbosity -&gt; InstallFlags -&gt; InstallFlags)
+-&gt; OptionField InstallFlags
+forall flags.
+(flags -&gt; Flag Verbosity)
+-&gt; (Flag Verbosity -&gt; flags -&gt; flags) -&gt; OptionField flags
+</span><a href="Distribution.Simple.Setup.Common.html#optionVerbosity"><span class="hs-identifier hs-var">optionVerbosity</span></a></span><span> </span><span class="annot"><span class="annottext">InstallFlags -&gt; Flag Verbosity
+</span><a href="Distribution.Simple.Setup.Install.html#installVerbosity"><span class="hs-identifier hs-var">installVerbosity</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467976"><span class="annot"><span class="annottext">Flag Verbosity
+</span><a href="#local-6989586621679467976"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467977"><span class="annot"><span class="annottext">InstallFlags
+</span><a href="#local-6989586621679467977"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InstallFlags
+</span><a href="#local-6989586621679467977"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#installVerbosity"><span class="hs-identifier hs-var">installVerbosity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467976"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-100"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(InstallFlags -&gt; Flag FilePath)
+-&gt; (Flag FilePath -&gt; InstallFlags -&gt; InstallFlags)
+-&gt; ShowOrParseArgs
+-&gt; OptionField InstallFlags
+forall flags.
+(flags -&gt; Flag FilePath)
+-&gt; (Flag FilePath -&gt; flags -&gt; flags)
+-&gt; ShowOrParseArgs
+-&gt; OptionField flags
+</span><a href="Distribution.Simple.Setup.Common.html#optionDistPref"><span class="hs-identifier hs-var">optionDistPref</span></a></span><span>
+</span><span id="line-101"></span><span>      </span><span class="annot"><span class="annottext">InstallFlags -&gt; Flag FilePath
+</span><a href="Distribution.Simple.Setup.Install.html#installDistPref"><span class="hs-identifier hs-var">installDistPref</span></a></span><span>
+</span><span id="line-102"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467979"><span class="annot"><span class="annottext">Flag FilePath
+</span><a href="#local-6989586621679467979"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679467980"><span class="annot"><span class="annottext">InstallFlags
+</span><a href="#local-6989586621679467980"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InstallFlags
+</span><a href="#local-6989586621679467980"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#installDistPref"><span class="hs-identifier hs-var">installDistPref</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467979"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-103"></span><span>      </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679467974"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
+</span><span id="line-104"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+-&gt; [FilePath]
+-&gt; FilePath
+-&gt; (InstallFlags -&gt; Flag Bool)
+-&gt; (Flag Bool -&gt; InstallFlags -&gt; InstallFlags)
+-&gt; MkOptDescr
+     (InstallFlags -&gt; Flag Bool)
+     (Flag Bool -&gt; InstallFlags -&gt; InstallFlags)
+     InstallFlags
+-&gt; OptionField InstallFlags
+forall get set a.
+FilePath
+-&gt; [FilePath]
+-&gt; FilePath
+-&gt; get
+-&gt; set
+-&gt; MkOptDescr get set a
+-&gt; OptionField a
+</span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
+</span><span id="line-105"></span><span>      </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;&quot;</span></span><span>
+</span><span id="line-106"></span><span>      </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;inplace&quot;</span></span><span class="hs-special">]</span><span>
+</span><span id="line-107"></span><span>      </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;install the package in the install subdirectory of the dist prefix, so it can be used without being installed&quot;</span></span><span>
+</span><span id="line-108"></span><span>      </span><span class="annot"><span class="annottext">InstallFlags -&gt; Flag Bool
+</span><a href="Distribution.Simple.Setup.Install.html#installInPlace"><span class="hs-identifier hs-var">installInPlace</span></a></span><span>
+</span><span id="line-109"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467982"><span class="annot"><span class="annottext">Flag Bool
+</span><a href="#local-6989586621679467982"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467983"><span class="annot"><span class="annottext">InstallFlags
+</span><a href="#local-6989586621679467983"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InstallFlags
+</span><a href="#local-6989586621679467983"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#installInPlace"><span class="hs-identifier hs-var">installInPlace</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467982"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-110"></span><span>      </span><span class="annot"><span class="annottext">MkOptDescr
+  (InstallFlags -&gt; Flag Bool)
+  (Flag Bool -&gt; InstallFlags -&gt; InstallFlags)
+  InstallFlags
+forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
+</span><a href="Distribution.Simple.Setup.Common.html#trueArg"><span class="hs-identifier hs-var">trueArg</span></a></span><span>
+</span><span id="line-111"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+-&gt; [FilePath]
+-&gt; FilePath
+-&gt; (InstallFlags -&gt; Flag Bool)
+-&gt; (Flag Bool -&gt; InstallFlags -&gt; InstallFlags)
+-&gt; MkOptDescr
+     (InstallFlags -&gt; Flag Bool)
+     (Flag Bool -&gt; InstallFlags -&gt; InstallFlags)
+     InstallFlags
+-&gt; OptionField InstallFlags
+forall get set a.
+FilePath
+-&gt; [FilePath]
+-&gt; FilePath
+-&gt; get
+-&gt; set
+-&gt; MkOptDescr get set a
+-&gt; OptionField a
+</span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
+</span><span id="line-112"></span><span>      </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;&quot;</span></span><span>
+</span><span id="line-113"></span><span>      </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;shell-wrappers&quot;</span></span><span class="hs-special">]</span><span>
+</span><span id="line-114"></span><span>      </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;using shell script wrappers around executables&quot;</span></span><span>
+</span><span id="line-115"></span><span>      </span><span class="annot"><span class="annottext">InstallFlags -&gt; Flag Bool
+</span><a href="Distribution.Simple.Setup.Install.html#installUseWrapper"><span class="hs-identifier hs-var">installUseWrapper</span></a></span><span>
+</span><span id="line-116"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467985"><span class="annot"><span class="annottext">Flag Bool
+</span><a href="#local-6989586621679467985"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467986"><span class="annot"><span class="annottext">InstallFlags
+</span><a href="#local-6989586621679467986"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InstallFlags
+</span><a href="#local-6989586621679467986"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#installUseWrapper"><span class="hs-identifier hs-var">installUseWrapper</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467985"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-117"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FilePath
+-&gt; FilePath
+-&gt; MkOptDescr
+     (InstallFlags -&gt; Flag Bool)
+     (Flag Bool -&gt; InstallFlags -&gt; InstallFlags)
+     InstallFlags
+forall a.
+FilePath
+-&gt; FilePath -&gt; MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
+</span><a href="Distribution.Simple.Setup.Common.html#boolOpt"><span class="hs-identifier hs-var">boolOpt</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-118"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+-&gt; [FilePath]
+-&gt; FilePath
+-&gt; (InstallFlags -&gt; Flag PackageDB)
+-&gt; (Flag PackageDB -&gt; InstallFlags -&gt; InstallFlags)
+-&gt; MkOptDescr
+     (InstallFlags -&gt; Flag PackageDB)
+     (Flag PackageDB -&gt; InstallFlags -&gt; InstallFlags)
+     InstallFlags
+-&gt; OptionField InstallFlags
+forall get set a.
+FilePath
+-&gt; [FilePath]
+-&gt; FilePath
+-&gt; get
+-&gt; set
+-&gt; MkOptDescr get set a
+-&gt; OptionField a
+</span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
+</span><span id="line-119"></span><span>      </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;&quot;</span></span><span>
+</span><span id="line-120"></span><span>      </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;package-db&quot;</span></span><span class="hs-special">]</span><span>
+</span><span id="line-121"></span><span>      </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;&quot;</span></span><span>
+</span><span id="line-122"></span><span>      </span><span class="annot"><span class="annottext">InstallFlags -&gt; Flag PackageDB
+</span><a href="Distribution.Simple.Setup.Install.html#installPackageDB"><span class="hs-identifier hs-var">installPackageDB</span></a></span><span>
+</span><span id="line-123"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467988"><span class="annot"><span class="annottext">Flag PackageDB
+</span><a href="#local-6989586621679467988"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467989"><span class="annot"><span class="annottext">InstallFlags
+</span><a href="#local-6989586621679467989"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InstallFlags
+</span><a href="#local-6989586621679467989"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#installPackageDB"><span class="hs-identifier hs-var">installPackageDB</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467988"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-124"></span><span>      </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">[(Flag PackageDB, OptFlags, FilePath)]
+-&gt; MkOptDescr
+     (InstallFlags -&gt; Flag PackageDB)
+     (Flag PackageDB -&gt; InstallFlags -&gt; InstallFlags)
+     InstallFlags
+forall b a.
+Eq b =&gt;
+[(b, OptFlags, FilePath)] -&gt; MkOptDescr (a -&gt; b) (b -&gt; a -&gt; a) a
+</span><a href="Distribution.Simple.Command.html#choiceOpt"><span class="hs-identifier hs-var">choiceOpt</span></a></span><span>
+</span><span id="line-125"></span><span>          </span><span class="hs-special">[</span><span>
+</span><span id="line-126"></span><span>            </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">PackageDB -&gt; Flag PackageDB
+forall a. a -&gt; Flag a
+</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDB
+</span><a href="Distribution.Simple.Compiler.html#UserPackageDB"><span class="hs-identifier hs-var">UserPackageDB</span></a></span><span>
+</span><span id="line-127"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;user&quot;</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-128"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;upon configuration register this package in the user's local package database&quot;</span></span><span>
+</span><span id="line-129"></span><span>            </span><span class="hs-special">)</span><span>
+</span><span id="line-130"></span><span>          </span><span class="hs-special">,</span><span>
+</span><span id="line-131"></span><span>            </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">PackageDB -&gt; Flag PackageDB
+forall a. a -&gt; Flag a
+</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">PackageDB
+</span><a href="Distribution.Simple.Compiler.html#GlobalPackageDB"><span class="hs-identifier hs-var">GlobalPackageDB</span></a></span><span>
+</span><span id="line-132"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;global&quot;</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-133"></span><span>            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;(default) upon configuration register this package in the system-wide package database&quot;</span></span><span>
+</span><span id="line-134"></span><span>            </span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span>          </span><span class="hs-special">]</span><span>
+</span><span id="line-136"></span><span>      </span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+-&gt; [FilePath]
+-&gt; FilePath
+-&gt; (InstallFlags -&gt; Flag CopyDest)
+-&gt; (Flag CopyDest -&gt; InstallFlags -&gt; InstallFlags)
+-&gt; MkOptDescr
+     (InstallFlags -&gt; Flag CopyDest)
+     (Flag CopyDest -&gt; InstallFlags -&gt; InstallFlags)
+     InstallFlags
+-&gt; OptionField InstallFlags
+forall get set a.
+FilePath
+-&gt; [FilePath]
+-&gt; FilePath
+-&gt; get
+-&gt; set
+-&gt; MkOptDescr get set a
+-&gt; OptionField a
+</span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
+</span><span id="line-138"></span><span>      </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;&quot;</span></span><span>
+</span><span id="line-139"></span><span>      </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;target-package-db&quot;</span></span><span class="hs-special">]</span><span>
+</span><span id="line-140"></span><span>      </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;package database to install into. Required when using ${pkgroot} prefix.&quot;</span></span><span>
+</span><span id="line-141"></span><span>      </span><span class="annot"><span class="annottext">InstallFlags -&gt; Flag CopyDest
+</span><a href="Distribution.Simple.Setup.Install.html#installDest"><span class="hs-identifier hs-var">installDest</span></a></span><span>
+</span><span id="line-142"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467993"><span class="annot"><span class="annottext">Flag CopyDest
+</span><a href="#local-6989586621679467993"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679467994"><span class="annot"><span class="annottext">InstallFlags
+</span><a href="#local-6989586621679467994"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">InstallFlags
+</span><a href="#local-6989586621679467994"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#installDest"><span class="hs-identifier hs-var">installDest</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679467993"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>      </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">FilePath
+-&gt; ReadE (Flag CopyDest)
+-&gt; (Flag CopyDest -&gt; [FilePath])
+-&gt; MkOptDescr
+     (InstallFlags -&gt; Flag CopyDest)
+     (Flag CopyDest -&gt; InstallFlags -&gt; InstallFlags)
+     InstallFlags
+forall b a.
+Monoid b =&gt;
+FilePath
+-&gt; ReadE b
+-&gt; (b -&gt; [FilePath])
+-&gt; MkOptDescr (a -&gt; b) (b -&gt; a -&gt; a) a
+</span><a href="Distribution.Simple.Command.html#reqArg"><span class="hs-identifier hs-var">reqArg</span></a></span><span>
+</span><span id="line-144"></span><span>          </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;DATABASE&quot;</span></span><span>
+</span><span id="line-145"></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(FilePath -&gt; Flag CopyDest) -&gt; ReadE (Flag CopyDest)
+forall a. (FilePath -&gt; a) -&gt; ReadE a
+</span><a href="Distribution.ReadE.html#succeedReadE"><span class="hs-identifier hs-var">succeedReadE</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CopyDest -&gt; Flag CopyDest
+forall a. a -&gt; Flag a
+</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">(CopyDest -&gt; Flag CopyDest)
+-&gt; (FilePath -&gt; CopyDest) -&gt; FilePath -&gt; Flag CopyDest
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; CopyDest
+</span><a href="Distribution.Simple.InstallDirs.html#CopyToDb"><span class="hs-identifier hs-var">CopyToDb</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-146"></span><span>          </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679467998"><span class="annot"><span class="annottext">Flag CopyDest
+</span><a href="#local-6989586621679467998"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Flag CopyDest
+</span><a href="#local-6989586621679467998"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-keyword">of</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.InstallDirs.html#CopyToDb"><span class="hs-identifier hs-type">CopyToDb</span></a></span><span> </span><span id="local-6989586621679467999"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679467999"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679467999"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">]</span><span class="hs-special">;</span><span> </span><span class="annot"><span class="annottext">Flag CopyDest
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><span id="line-147"></span><span>      </span><span class="hs-special">)</span><span>
+</span><span id="line-148"></span><span>  </span><span class="hs-special">]</span><span>
+</span><span id="line-149"></span><span>
+</span><span id="line-150"></span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#emptyInstallFlags"><span class="hs-identifier hs-type">emptyInstallFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#InstallFlags"><span class="hs-identifier hs-type">InstallFlags</span></a></span><span>
+</span><span id="line-151"></span><span id="emptyInstallFlags"><span class="annot"><span class="annottext">emptyInstallFlags :: InstallFlags
+</span><a href="Distribution.Simple.Setup.Install.html#emptyInstallFlags"><span class="hs-identifier hs-var hs-var">emptyInstallFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">InstallFlags
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-152"></span><span>
+</span><span id="line-153"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679468006"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#InstallFlags"><span class="hs-identifier hs-type">InstallFlags</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-154"></span><span>  </span><span id="local-6989586621679468043"><span class="annot"><span class="annottext">mempty :: InstallFlags
+</span><span class="hs-identifier hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">InstallFlags
+forall a. (Generic a, GMonoid (Rep a)) =&gt; a
+</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Semigroup.html/Distribution.Compat.Semigroup.html#gmempty"><span class="hs-identifier hs-var">gmempty</span></a></span><span>
+</span><span id="line-155"></span><span>  </span><span id="local-6989586621679468046"><span class="annot"><span class="annottext">mappend :: InstallFlags -&gt; InstallFlags -&gt; InstallFlags
+</span><span class="hs-identifier hs-var hs-var hs-var">mappend</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">InstallFlags -&gt; InstallFlags -&gt; InstallFlags
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span>
+</span><span id="line-156"></span><span>
+</span><span id="line-157"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679468049"><span id="local-6989586621679468052"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Install.html#InstallFlags"><span class="hs-identifier hs-type">InstallFlags</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-158"></span><span>  </span><span id="local-6989586621679468087"><span class="annot"><span class="annottext">&lt;&gt; :: InstallFlags -&gt; InstallFlags -&gt; InstallFlags
+</span><span class="hs-operator hs-var hs-var hs-var">(&lt;&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">InstallFlags -&gt; InstallFlags -&gt; InstallFlags
+forall a. (Generic a, GSemigroup (Rep a)) =&gt; a -&gt; a -&gt; a
+</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Semigroup.html/Distribution.Compat.Semigroup.html#gmappend"><span class="hs-identifier hs-var">gmappend</span></a></span><span>
+</span><span id="line-159"></span></pre></body></html>

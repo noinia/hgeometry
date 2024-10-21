@@ -32,7 +32,7 @@
 --   lift operations introduced by monad transformers through other
 --   transformers.
 @package transformers
-@version 0.6.1.0
+@version 0.6.1.1
 
 
 -- | Making functors with an <a>Applicative</a> instance that performs
@@ -41,26 +41,26 @@ module Control.Applicative.Backwards
 
 -- | The same functor, but with an <a>Applicative</a> instance that
 --   performs actions in the reverse order.
-newtype Backwards f a
-Backwards :: f a -> Backwards f a
-[forwards] :: Backwards f a -> f a
-instance forall k (f :: k -> *). GHC.Generics.Generic1 (Control.Applicative.Backwards.Backwards f)
-instance forall k (f :: k -> *) (a :: k). GHC.Generics.Generic (Control.Applicative.Backwards.Backwards f a)
-instance Data.Functor.Classes.Eq1 f => Data.Functor.Classes.Eq1 (Control.Applicative.Backwards.Backwards f)
-instance Data.Functor.Classes.Ord1 f => Data.Functor.Classes.Ord1 (Control.Applicative.Backwards.Backwards f)
-instance Data.Functor.Classes.Read1 f => Data.Functor.Classes.Read1 (Control.Applicative.Backwards.Backwards f)
-instance Data.Functor.Classes.Show1 f => Data.Functor.Classes.Show1 (Control.Applicative.Backwards.Backwards f)
-instance (Data.Functor.Classes.Eq1 f, GHC.Classes.Eq a) => GHC.Classes.Eq (Control.Applicative.Backwards.Backwards f a)
-instance (Data.Functor.Classes.Ord1 f, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Applicative.Backwards.Backwards f a)
-instance (Data.Functor.Classes.Read1 f, GHC.Read.Read a) => GHC.Read.Read (Control.Applicative.Backwards.Backwards f a)
-instance (Data.Functor.Classes.Show1 f, GHC.Show.Show a) => GHC.Show.Show (Control.Applicative.Backwards.Backwards f a)
-instance GHC.Base.Functor f => GHC.Base.Functor (Control.Applicative.Backwards.Backwards f)
-instance GHC.Base.Applicative f => GHC.Base.Applicative (Control.Applicative.Backwards.Backwards f)
-instance GHC.Base.Alternative f => GHC.Base.Alternative (Control.Applicative.Backwards.Backwards f)
-instance Data.Foldable.Foldable f => Data.Foldable.Foldable (Control.Applicative.Backwards.Backwards f)
-instance Data.Foldable1.Foldable1 f => Data.Foldable1.Foldable1 (Control.Applicative.Backwards.Backwards f)
-instance Data.Traversable.Traversable f => Data.Traversable.Traversable (Control.Applicative.Backwards.Backwards f)
+newtype Backwards (f :: k -> Type) (a :: k)
+Backwards :: f a -> Backwards (f :: k -> Type) (a :: k)
+[forwards] :: Backwards (f :: k -> Type) (a :: k) -> f a
+instance GHC.Internal.Base.Alternative f => GHC.Internal.Base.Alternative (Control.Applicative.Backwards.Backwards f)
+instance GHC.Internal.Base.Applicative f => GHC.Internal.Base.Applicative (Control.Applicative.Backwards.Backwards f)
 instance Data.Functor.Contravariant.Contravariant f => Data.Functor.Contravariant.Contravariant (Control.Applicative.Backwards.Backwards f)
+instance Data.Functor.Classes.Eq1 f => Data.Functor.Classes.Eq1 (Control.Applicative.Backwards.Backwards f)
+instance (Data.Functor.Classes.Eq1 f, GHC.Classes.Eq a) => GHC.Classes.Eq (Control.Applicative.Backwards.Backwards f a)
+instance Data.Foldable1.Foldable1 f => Data.Foldable1.Foldable1 (Control.Applicative.Backwards.Backwards f)
+instance GHC.Internal.Data.Foldable.Foldable f => GHC.Internal.Data.Foldable.Foldable (Control.Applicative.Backwards.Backwards f)
+instance GHC.Internal.Base.Functor f => GHC.Internal.Base.Functor (Control.Applicative.Backwards.Backwards f)
+instance forall k (f :: k -> *). GHC.Internal.Generics.Generic1 (Control.Applicative.Backwards.Backwards f)
+instance forall k (f :: k -> *) (a :: k). GHC.Internal.Generics.Generic (Control.Applicative.Backwards.Backwards f a)
+instance Data.Functor.Classes.Ord1 f => Data.Functor.Classes.Ord1 (Control.Applicative.Backwards.Backwards f)
+instance (Data.Functor.Classes.Ord1 f, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Applicative.Backwards.Backwards f a)
+instance Data.Functor.Classes.Read1 f => Data.Functor.Classes.Read1 (Control.Applicative.Backwards.Backwards f)
+instance (Data.Functor.Classes.Read1 f, GHC.Internal.Read.Read a) => GHC.Internal.Read.Read (Control.Applicative.Backwards.Backwards f a)
+instance Data.Functor.Classes.Show1 f => Data.Functor.Classes.Show1 (Control.Applicative.Backwards.Backwards f)
+instance (Data.Functor.Classes.Show1 f, GHC.Internal.Show.Show a) => GHC.Internal.Show.Show (Control.Applicative.Backwards.Backwards f a)
+instance GHC.Internal.Data.Traversable.Traversable f => GHC.Internal.Data.Traversable.Traversable (Control.Applicative.Backwards.Backwards f)
 
 
 -- | Signatures for monad operations that require specialized lifting. Each
@@ -75,7 +75,7 @@ module Control.Monad.Signatures
 --   <li><pre><a>lift</a> (f k) = f' (<a>lift</a> . k) =&gt; <a>lift</a>
 --   (cf f) = liftCallCC cf f'</pre></li>
 --   </ul>
-type CallCC m a b = ((a -> m b) -> m a) -> m a
+type CallCC (m :: Type -> Type) a b = a -> m b -> m a -> m a
 
 -- | Signature of the <tt>catchE</tt> operation, introduced in
 --   <a>Control.Monad.Trans.Except</a>. Any lifting function
@@ -85,7 +85,7 @@ type CallCC m a b = ((a -> m b) -> m a) -> m a
 --   <li><pre><a>lift</a> (cf m f) = liftCatch (<a>lift</a> . cf)
 --   (<a>lift</a> f)</pre></li>
 --   </ul>
-type Catch e m a = m a -> (e -> m a) -> m a
+type Catch e (m :: k -> Type) (a :: k) = m a -> e -> m a -> m a
 
 -- | Signature of the <tt>listen</tt> operation, introduced in
 --   <a>Control.Monad.Trans.Writer</a>. Any lifting function
@@ -95,7 +95,7 @@ type Catch e m a = m a -> (e -> m a) -> m a
 --   <li><pre><a>lift</a> . liftListen = liftListen .
 --   <a>lift</a></pre></li>
 --   </ul>
-type Listen w m a = m a -> m (a, w)
+type Listen w (m :: Type -> Type) a = m a -> m (a, w)
 
 -- | Signature of the <tt>pass</tt> operation, introduced in
 --   <a>Control.Monad.Trans.Writer</a>. Any lifting function
@@ -104,7 +104,7 @@ type Listen w m a = m a -> m (a, w)
 --   <ul>
 --   <li><pre><a>lift</a> . liftPass = liftPass . <a>lift</a></pre></li>
 --   </ul>
-type Pass w m a = m (a, w -> w) -> m a
+type Pass w (m :: Type -> Type) a = m (a, w -> w) -> m a
 
 
 -- | The class of monad transformers.
@@ -145,7 +145,7 @@ module Control.Monad.Trans.Class
 --   to be reported as ambiguous. For transformers 0.6 and later, this can
 --   be fixed by removing the second constraint, which is implied by the
 --   first.
-class (forall m. Monad m => Monad (t m)) => MonadTrans t
+class forall (m :: Type -> Type). Monad m => Monad t m => MonadTrans (t :: Type -> Type -> Type -> Type)
 
 -- | Lift a computation from the argument monad to the constructed monad.
 lift :: (MonadTrans t, Monad m) => m a -> t m a
@@ -228,9 +228,9 @@ shift :: ((a -> r) -> Cont r r) -> Cont r a
 --   
 --   <a>ContT</a> is not a functor on the category of monads, and many
 --   operations cannot be lifted through it.
-newtype ContT r m a
-ContT :: ((a -> m r) -> m r) -> ContT r m a
-[runContT] :: ContT r m a -> (a -> m r) -> m r
+newtype ContT (r :: k) (m :: k -> Type) a
+ContT :: ((a -> m r) -> m r) -> ContT (r :: k) (m :: k -> Type) a
+[runContT] :: ContT (r :: k) (m :: k -> Type) a -> (a -> m r) -> m r
 
 -- | The result of running a CPS computation with <a>return</a> as the
 --   final continuation.
@@ -249,7 +249,7 @@ evalContT :: Monad m => ContT r m r -> m r
 --   <li><pre><a>runContT</a> (<a>mapContT</a> f m) = f . <a>runContT</a>
 --   m</pre></li>
 --   </ul>
-mapContT :: (m r -> m r) -> ContT r m a -> ContT r m a
+mapContT :: forall {k} m (r :: k) a. (m r -> m r) -> ContT r m a -> ContT r m a
 
 -- | Apply a function to transform the continuation passed to a CPS
 --   computation.
@@ -258,7 +258,7 @@ mapContT :: (m r -> m r) -> ContT r m a -> ContT r m a
 --   <li><pre><a>runContT</a> (<a>withContT</a> f m) = <a>runContT</a> m .
 --   f</pre></li>
 --   </ul>
-withContT :: ((b -> m r) -> a -> m r) -> ContT r m a -> ContT r m b
+withContT :: forall {k} b m (r :: k) a. ((b -> m r) -> a -> m r) -> ContT r m a -> ContT r m b
 
 -- | <tt>callCC</tt> (call-with-current-continuation) calls its argument
 --   function, passing it the current continuation. It provides an escape
@@ -274,7 +274,7 @@ withContT :: ((b -> m r) -> a -> m r) -> ContT r m a -> ContT r m b
 --   continuation anywhere within its scope will escape from the
 --   computation, even if it is many layers deep within nested
 --   computations.
-callCC :: ((a -> ContT r m b) -> ContT r m a) -> ContT r m a
+callCC :: forall {k} a (r :: k) (m :: k -> Type) b. ((a -> ContT r m b) -> ContT r m a) -> ContT r m a
 
 -- | <tt><a>resetT</a> m</tt> delimits the continuation of any
 --   <a>shiftT</a> inside <tt>m</tt>.
@@ -282,7 +282,7 @@ callCC :: ((a -> ContT r m b) -> ContT r m a) -> ContT r m a
 --   <ul>
 --   <li><pre><a>resetT</a> (<a>lift</a> m) = <a>lift</a> m</pre></li>
 --   </ul>
-resetT :: Monad m => ContT r m r -> ContT r' m r
+resetT :: forall (m :: Type -> Type) r r'. Monad m => ContT r m r -> ContT r' m r
 
 -- | <tt><a>shiftT</a> f</tt> captures the continuation up to the nearest
 --   enclosing <a>resetT</a> and passes it to <tt>f</tt>:
@@ -296,13 +296,13 @@ shiftT :: Monad m => ((a -> m r) -> ContT r m r) -> ContT r m a
 -- | <tt><a>liftLocal</a> ask local</tt> yields a <tt>local</tt> function
 --   for <tt><a>ContT</a> r m</tt>.
 liftLocal :: Monad m => m r' -> ((r' -> r') -> m r -> m r) -> (r' -> r') -> ContT r m a -> ContT r m a
-instance forall k (r :: k) (m :: k -> *) a. GHC.Generics.Generic (Control.Monad.Trans.Cont.ContT r m a)
-instance forall k (r :: k) (m :: k -> *). GHC.Base.Functor (Control.Monad.Trans.Cont.ContT r m)
-instance forall k (r :: k) (m :: k -> *). GHC.Base.Applicative (Control.Monad.Trans.Cont.ContT r m)
-instance forall k (r :: k) (m :: k -> *). GHC.Base.Monad (Control.Monad.Trans.Cont.ContT r m)
-instance Control.Monad.Fail.MonadFail m => Control.Monad.Fail.MonadFail (Control.Monad.Trans.Cont.ContT r m)
-instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Cont.ContT r)
+instance forall k (r :: k) (m :: k -> *). GHC.Internal.Base.Applicative (Control.Monad.Trans.Cont.ContT r m)
+instance forall k (r :: k) (m :: k -> *). GHC.Internal.Base.Functor (Control.Monad.Trans.Cont.ContT r m)
+instance forall k (r :: k) (m :: k -> *) a. GHC.Internal.Generics.Generic (Control.Monad.Trans.Cont.ContT r m a)
+instance forall k (r :: k) (m :: k -> *). GHC.Internal.Base.Monad (Control.Monad.Trans.Cont.ContT r m)
+instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Cont.ContT r m)
 instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Cont.ContT r m)
+instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Cont.ContT r)
 
 
 -- | This monad transformer extends a monad with the ability to throw
@@ -329,7 +329,7 @@ type Except e = ExceptT e Identity
 
 -- | Constructor for computations in the exception monad. (The inverse of
 --   <a>runExcept</a>).
-except :: Monad m => Either e a -> ExceptT e m a
+except :: forall (m :: Type -> Type) e a. Monad m => Either e a -> ExceptT e m a
 
 -- | Extractor for computations in the exception monad. (The inverse of
 --   <a>except</a>).
@@ -359,8 +359,8 @@ withExcept :: (e -> e') -> Except e a -> Except e' a
 --   The <a>return</a> function yields a computation that produces the
 --   given value, while <tt>&gt;&gt;=</tt> sequences two subcomputations,
 --   exiting on the first exception.
-newtype ExceptT e m a
-ExceptT :: m (Either e a) -> ExceptT e m a
+newtype ExceptT e (m :: Type -> Type) a
+ExceptT :: m (Either e a) -> ExceptT e (m :: Type -> Type) a
 
 -- | The inverse of <a>ExceptT</a>.
 runExceptT :: ExceptT e m a -> m (Either e a)
@@ -375,7 +375,7 @@ mapExceptT :: (m (Either e a) -> n (Either e' b)) -> ExceptT e m a -> ExceptT e'
 
 -- | Transform any exceptions thrown by the computation using the given
 --   function.
-withExceptT :: Functor m => (e -> e') -> ExceptT e m a -> ExceptT e' m a
+withExceptT :: forall (m :: Type -> Type) e e' a. Functor m => (e -> e') -> ExceptT e m a -> ExceptT e' m a
 
 -- | Signal an exception value <tt>e</tt>.
 --   
@@ -384,7 +384,7 @@ withExceptT :: Functor m => (e -> e') -> ExceptT e m a -> ExceptT e' m a
 --   (<a>Left</a> e)</pre></li>
 --   <li><pre><a>throwE</a> e &gt;&gt;= m = <a>throwE</a> e</pre></li>
 --   </ul>
-throwE :: Monad m => e -> ExceptT e m a
+throwE :: forall (m :: Type -> Type) e a. Monad m => e -> ExceptT e m a
 
 -- | Handle an exception.
 --   
@@ -392,22 +392,22 @@ throwE :: Monad m => e -> ExceptT e m a
 --   <li><pre><a>catchE</a> (<a>lift</a> m) h = <a>lift</a> m</pre></li>
 --   <li><pre><a>catchE</a> (<a>throwE</a> e) h = h e</pre></li>
 --   </ul>
-catchE :: Monad m => ExceptT e m a -> (e -> ExceptT e' m a) -> ExceptT e' m a
+catchE :: forall (m :: Type -> Type) e a e'. Monad m => ExceptT e m a -> (e -> ExceptT e' m a) -> ExceptT e' m a
 
 -- | The same as <tt><a>flip</a> <a>catchE</a></tt>, which is useful in
 --   situations where the code for the handler is shorter.
-handleE :: Monad m => (e -> ExceptT e' m a) -> ExceptT e m a -> ExceptT e' m a
+handleE :: forall (m :: Type -> Type) e e' a. Monad m => (e -> ExceptT e' m a) -> ExceptT e m a -> ExceptT e' m a
 
 -- | Similar to <a>catchE</a>, but returns an <a>Either</a> result which is
 --   <tt>(<a>Right</a> a)</tt> if no exception was thown, or
 --   <tt>(<a>Left</a> ex)</tt> if an exception <tt>ex</tt> was thrown.
-tryE :: Monad m => ExceptT e m a -> ExceptT e m (Either e a)
+tryE :: forall (m :: Type -> Type) e a. Monad m => ExceptT e m a -> ExceptT e m (Either e a)
 
 -- | <tt><a>finallyE</a> a b</tt> executes computation <tt>a</tt> followed
 --   by computation <tt>b</tt>, even if <tt>a</tt> exits early by throwing
 --   an exception. In the latter case, the exception is re-thrown after
 --   <tt>b</tt> has been executed.
-finallyE :: Monad m => ExceptT e m a -> ExceptT e m () -> ExceptT e m a
+finallyE :: forall (m :: Type -> Type) e a. Monad m => ExceptT e m a -> ExceptT e m () -> ExceptT e m a
 
 -- | Lift a <tt>callCC</tt> operation to the new monad.
 liftCallCC :: CallCC m (Either e a) (Either e b) -> CallCC (ExceptT e m) a b
@@ -417,29 +417,29 @@ liftListen :: Monad m => Listen w m (Either e a) -> Listen w (ExceptT e m) a
 
 -- | Lift a <tt>pass</tt> operation to the new monad.
 liftPass :: Monad m => Pass w m (Either e a) -> Pass w (ExceptT e m) a
-instance GHC.Base.Functor m => GHC.Generics.Generic1 (Control.Monad.Trans.Except.ExceptT e m)
-instance GHC.Generics.Generic (Control.Monad.Trans.Except.ExceptT e m a)
-instance (GHC.Classes.Eq e, Data.Functor.Classes.Eq1 m) => Data.Functor.Classes.Eq1 (Control.Monad.Trans.Except.ExceptT e m)
-instance (GHC.Classes.Ord e, Data.Functor.Classes.Ord1 m) => Data.Functor.Classes.Ord1 (Control.Monad.Trans.Except.ExceptT e m)
-instance (GHC.Read.Read e, Data.Functor.Classes.Read1 m) => Data.Functor.Classes.Read1 (Control.Monad.Trans.Except.ExceptT e m)
-instance (GHC.Show.Show e, Data.Functor.Classes.Show1 m) => Data.Functor.Classes.Show1 (Control.Monad.Trans.Except.ExceptT e m)
-instance (GHC.Classes.Eq e, Data.Functor.Classes.Eq1 m, GHC.Classes.Eq a) => GHC.Classes.Eq (Control.Monad.Trans.Except.ExceptT e m a)
-instance (GHC.Classes.Ord e, Data.Functor.Classes.Ord1 m, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Monad.Trans.Except.ExceptT e m a)
-instance (GHC.Read.Read e, Data.Functor.Classes.Read1 m, GHC.Read.Read a) => GHC.Read.Read (Control.Monad.Trans.Except.ExceptT e m a)
-instance (GHC.Show.Show e, Data.Functor.Classes.Show1 m, GHC.Show.Show a) => GHC.Show.Show (Control.Monad.Trans.Except.ExceptT e m a)
-instance GHC.Base.Functor m => GHC.Base.Functor (Control.Monad.Trans.Except.ExceptT e m)
-instance Data.Foldable.Foldable f => Data.Foldable.Foldable (Control.Monad.Trans.Except.ExceptT e f)
-instance Data.Traversable.Traversable f => Data.Traversable.Traversable (Control.Monad.Trans.Except.ExceptT e f)
-instance (GHC.Base.Functor m, GHC.Base.Monad m) => GHC.Base.Applicative (Control.Monad.Trans.Except.ExceptT e m)
-instance (GHC.Base.Functor m, GHC.Base.Monad m, GHC.Base.Monoid e) => GHC.Base.Alternative (Control.Monad.Trans.Except.ExceptT e m)
-instance GHC.Base.Monad m => GHC.Base.Monad (Control.Monad.Trans.Except.ExceptT e m)
-instance Control.Monad.Fail.MonadFail m => Control.Monad.Fail.MonadFail (Control.Monad.Trans.Except.ExceptT e m)
-instance (GHC.Base.Monad m, GHC.Base.Monoid e) => GHC.Base.MonadPlus (Control.Monad.Trans.Except.ExceptT e m)
-instance Control.Monad.Fix.MonadFix m => Control.Monad.Fix.MonadFix (Control.Monad.Trans.Except.ExceptT e m)
-instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Except.ExceptT e)
-instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Except.ExceptT e m)
-instance Control.Monad.Zip.MonadZip m => Control.Monad.Zip.MonadZip (Control.Monad.Trans.Except.ExceptT e m)
+instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m, GHC.Internal.Base.Monoid e) => GHC.Internal.Base.Alternative (Control.Monad.Trans.Except.ExceptT e m)
+instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Applicative (Control.Monad.Trans.Except.ExceptT e m)
 instance Data.Functor.Contravariant.Contravariant m => Data.Functor.Contravariant.Contravariant (Control.Monad.Trans.Except.ExceptT e m)
+instance (GHC.Classes.Eq e, Data.Functor.Classes.Eq1 m) => Data.Functor.Classes.Eq1 (Control.Monad.Trans.Except.ExceptT e m)
+instance (GHC.Classes.Eq e, Data.Functor.Classes.Eq1 m, GHC.Classes.Eq a) => GHC.Classes.Eq (Control.Monad.Trans.Except.ExceptT e m a)
+instance GHC.Internal.Data.Foldable.Foldable f => GHC.Internal.Data.Foldable.Foldable (Control.Monad.Trans.Except.ExceptT e f)
+instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad.Trans.Except.ExceptT e m)
+instance GHC.Internal.Base.Functor m => GHC.Internal.Generics.Generic1 (Control.Monad.Trans.Except.ExceptT e m)
+instance GHC.Internal.Generics.Generic (Control.Monad.Trans.Except.ExceptT e m a)
+instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Trans.Except.ExceptT e m)
+instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Except.ExceptT e m)
+instance GHC.Internal.Control.Monad.Fix.MonadFix m => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.Except.ExceptT e m)
+instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Except.ExceptT e m)
+instance (GHC.Internal.Base.Monad m, GHC.Internal.Base.Monoid e) => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.Except.ExceptT e m)
+instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Except.ExceptT e)
+instance Control.Monad.Zip.MonadZip m => Control.Monad.Zip.MonadZip (Control.Monad.Trans.Except.ExceptT e m)
+instance (GHC.Classes.Ord e, Data.Functor.Classes.Ord1 m) => Data.Functor.Classes.Ord1 (Control.Monad.Trans.Except.ExceptT e m)
+instance (GHC.Classes.Ord e, Data.Functor.Classes.Ord1 m, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Monad.Trans.Except.ExceptT e m a)
+instance (GHC.Internal.Read.Read e, Data.Functor.Classes.Read1 m) => Data.Functor.Classes.Read1 (Control.Monad.Trans.Except.ExceptT e m)
+instance (GHC.Internal.Read.Read e, Data.Functor.Classes.Read1 m, GHC.Internal.Read.Read a) => GHC.Internal.Read.Read (Control.Monad.Trans.Except.ExceptT e m a)
+instance (GHC.Internal.Show.Show e, Data.Functor.Classes.Show1 m) => Data.Functor.Classes.Show1 (Control.Monad.Trans.Except.ExceptT e m)
+instance (GHC.Internal.Show.Show e, Data.Functor.Classes.Show1 m, GHC.Internal.Show.Show a) => GHC.Internal.Show.Show (Control.Monad.Trans.Except.ExceptT e m a)
+instance GHC.Internal.Data.Traversable.Traversable f => GHC.Internal.Data.Traversable.Traversable (Control.Monad.Trans.Except.ExceptT e f)
 
 
 -- | The identity monad transformer.
@@ -449,42 +449,42 @@ module Control.Monad.Trans.Identity
 
 -- | The trivial monad transformer, which maps a monad to an equivalent
 --   monad.
-newtype IdentityT f a
-IdentityT :: f a -> IdentityT f a
-[runIdentityT] :: IdentityT f a -> f a
+newtype IdentityT (f :: k -> Type) (a :: k)
+IdentityT :: f a -> IdentityT (f :: k -> Type) (a :: k)
+[runIdentityT] :: IdentityT (f :: k -> Type) (a :: k) -> f a
 
 -- | Lift a unary operation to the new monad.
-mapIdentityT :: (m a -> n b) -> IdentityT m a -> IdentityT n b
+mapIdentityT :: forall {k1} {k2} m (a :: k1) n (b :: k2). (m a -> n b) -> IdentityT m a -> IdentityT n b
 
 -- | Lift a <tt>catchE</tt> operation to the new monad.
-liftCatch :: Catch e m a -> Catch e (IdentityT m) a
+liftCatch :: forall {k} e m (a :: k). Catch e m a -> Catch e (IdentityT m) a
 
 -- | Lift a <tt>callCC</tt> operation to the new monad.
 liftCallCC :: CallCC m a b -> CallCC (IdentityT m) a b
-instance forall k (f :: k -> *). GHC.Generics.Generic1 (Control.Monad.Trans.Identity.IdentityT f)
-instance forall k (f :: k -> *) (a :: k). GHC.Generics.Generic (Control.Monad.Trans.Identity.IdentityT f a)
-instance Data.Functor.Classes.Eq1 f => Data.Functor.Classes.Eq1 (Control.Monad.Trans.Identity.IdentityT f)
-instance Data.Functor.Classes.Ord1 f => Data.Functor.Classes.Ord1 (Control.Monad.Trans.Identity.IdentityT f)
-instance Data.Functor.Classes.Read1 f => Data.Functor.Classes.Read1 (Control.Monad.Trans.Identity.IdentityT f)
-instance Data.Functor.Classes.Show1 f => Data.Functor.Classes.Show1 (Control.Monad.Trans.Identity.IdentityT f)
-instance (Data.Functor.Classes.Eq1 f, GHC.Classes.Eq a) => GHC.Classes.Eq (Control.Monad.Trans.Identity.IdentityT f a)
-instance (Data.Functor.Classes.Ord1 f, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Monad.Trans.Identity.IdentityT f a)
-instance (Data.Functor.Classes.Read1 f, GHC.Read.Read a) => GHC.Read.Read (Control.Monad.Trans.Identity.IdentityT f a)
-instance (Data.Functor.Classes.Show1 f, GHC.Show.Show a) => GHC.Show.Show (Control.Monad.Trans.Identity.IdentityT f a)
-instance GHC.Base.Functor m => GHC.Base.Functor (Control.Monad.Trans.Identity.IdentityT m)
-instance Data.Foldable.Foldable f => Data.Foldable.Foldable (Control.Monad.Trans.Identity.IdentityT f)
-instance Data.Foldable1.Foldable1 m => Data.Foldable1.Foldable1 (Control.Monad.Trans.Identity.IdentityT m)
-instance Data.Traversable.Traversable f => Data.Traversable.Traversable (Control.Monad.Trans.Identity.IdentityT f)
-instance GHC.Base.Applicative m => GHC.Base.Applicative (Control.Monad.Trans.Identity.IdentityT m)
-instance GHC.Base.Alternative m => GHC.Base.Alternative (Control.Monad.Trans.Identity.IdentityT m)
-instance GHC.Base.Monad m => GHC.Base.Monad (Control.Monad.Trans.Identity.IdentityT m)
-instance Control.Monad.Fail.MonadFail m => Control.Monad.Fail.MonadFail (Control.Monad.Trans.Identity.IdentityT m)
-instance GHC.Base.MonadPlus m => GHC.Base.MonadPlus (Control.Monad.Trans.Identity.IdentityT m)
-instance Control.Monad.Fix.MonadFix m => Control.Monad.Fix.MonadFix (Control.Monad.Trans.Identity.IdentityT m)
-instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Identity.IdentityT m)
-instance Control.Monad.Zip.MonadZip m => Control.Monad.Zip.MonadZip (Control.Monad.Trans.Identity.IdentityT m)
-instance Control.Monad.Trans.Class.MonadTrans Control.Monad.Trans.Identity.IdentityT
+instance GHC.Internal.Base.Alternative m => GHC.Internal.Base.Alternative (Control.Monad.Trans.Identity.IdentityT m)
+instance GHC.Internal.Base.Applicative m => GHC.Internal.Base.Applicative (Control.Monad.Trans.Identity.IdentityT m)
 instance Data.Functor.Contravariant.Contravariant f => Data.Functor.Contravariant.Contravariant (Control.Monad.Trans.Identity.IdentityT f)
+instance Data.Functor.Classes.Eq1 f => Data.Functor.Classes.Eq1 (Control.Monad.Trans.Identity.IdentityT f)
+instance (Data.Functor.Classes.Eq1 f, GHC.Classes.Eq a) => GHC.Classes.Eq (Control.Monad.Trans.Identity.IdentityT f a)
+instance Data.Foldable1.Foldable1 m => Data.Foldable1.Foldable1 (Control.Monad.Trans.Identity.IdentityT m)
+instance GHC.Internal.Data.Foldable.Foldable f => GHC.Internal.Data.Foldable.Foldable (Control.Monad.Trans.Identity.IdentityT f)
+instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad.Trans.Identity.IdentityT m)
+instance forall k (f :: k -> *). GHC.Internal.Generics.Generic1 (Control.Monad.Trans.Identity.IdentityT f)
+instance forall k (f :: k -> *) (a :: k). GHC.Internal.Generics.Generic (Control.Monad.Trans.Identity.IdentityT f a)
+instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Identity.IdentityT m)
+instance GHC.Internal.Control.Monad.Fix.MonadFix m => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.Identity.IdentityT m)
+instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Identity.IdentityT m)
+instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Trans.Identity.IdentityT m)
+instance GHC.Internal.Base.MonadPlus m => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.Identity.IdentityT m)
+instance Control.Monad.Trans.Class.MonadTrans Control.Monad.Trans.Identity.IdentityT
+instance Control.Monad.Zip.MonadZip m => Control.Monad.Zip.MonadZip (Control.Monad.Trans.Identity.IdentityT m)
+instance Data.Functor.Classes.Ord1 f => Data.Functor.Classes.Ord1 (Control.Monad.Trans.Identity.IdentityT f)
+instance (Data.Functor.Classes.Ord1 f, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Monad.Trans.Identity.IdentityT f a)
+instance Data.Functor.Classes.Read1 f => Data.Functor.Classes.Read1 (Control.Monad.Trans.Identity.IdentityT f)
+instance (Data.Functor.Classes.Read1 f, GHC.Internal.Read.Read a) => GHC.Internal.Read.Read (Control.Monad.Trans.Identity.IdentityT f a)
+instance Data.Functor.Classes.Show1 f => Data.Functor.Classes.Show1 (Control.Monad.Trans.Identity.IdentityT f)
+instance (Data.Functor.Classes.Show1 f, GHC.Internal.Show.Show a) => GHC.Internal.Show.Show (Control.Monad.Trans.Identity.IdentityT f a)
+instance GHC.Internal.Data.Traversable.Traversable f => GHC.Internal.Data.Traversable.Traversable (Control.Monad.Trans.Identity.IdentityT f)
 
 
 -- | The <a>MaybeT</a> monad transformer extends a monad with the ability
@@ -506,9 +506,9 @@ module Control.Monad.Trans.Maybe
 --   The <a>return</a> function yields a computation that produces that
 --   value, while <tt>&gt;&gt;=</tt> sequences two subcomputations, exiting
 --   if either computation does.
-newtype MaybeT m a
-MaybeT :: m (Maybe a) -> MaybeT m a
-[runMaybeT] :: MaybeT m a -> m (Maybe a)
+newtype MaybeT (m :: Type -> Type) a
+MaybeT :: m (Maybe a) -> MaybeT (m :: Type -> Type) a
+[runMaybeT] :: MaybeT (m :: Type -> Type) a -> m (Maybe a)
 
 -- | Transform the computation inside a <tt>MaybeT</tt>.
 --   
@@ -519,15 +519,15 @@ MaybeT :: m (Maybe a) -> MaybeT m a
 mapMaybeT :: (m (Maybe a) -> n (Maybe b)) -> MaybeT m a -> MaybeT n b
 
 -- | Convert a <a>Maybe</a> computation to <a>MaybeT</a>.
-hoistMaybe :: Applicative m => Maybe b -> MaybeT m b
+hoistMaybe :: forall (m :: Type -> Type) b. Applicative m => Maybe b -> MaybeT m b
 
 -- | Convert a <a>MaybeT</a> computation to <a>ExceptT</a>, with a default
 --   exception value.
-maybeToExceptT :: Functor m => e -> MaybeT m a -> ExceptT e m a
+maybeToExceptT :: forall (m :: Type -> Type) e a. Functor m => e -> MaybeT m a -> ExceptT e m a
 
 -- | Convert a <a>ExceptT</a> computation to <a>MaybeT</a>, discarding the
 --   value of any exception.
-exceptToMaybeT :: Functor m => ExceptT e m a -> MaybeT m a
+exceptToMaybeT :: forall (m :: Type -> Type) e a. Functor m => ExceptT e m a -> MaybeT m a
 
 -- | Lift a <tt>callCC</tt> operation to the new monad.
 liftCallCC :: CallCC m (Maybe a) (Maybe b) -> CallCC (MaybeT m) a b
@@ -540,29 +540,29 @@ liftListen :: Monad m => Listen w m (Maybe a) -> Listen w (MaybeT m) a
 
 -- | Lift a <tt>pass</tt> operation to the new monad.
 liftPass :: Monad m => Pass w m (Maybe a) -> Pass w (MaybeT m) a
-instance GHC.Base.Functor m => GHC.Generics.Generic1 (Control.Monad.Trans.Maybe.MaybeT m)
-instance GHC.Generics.Generic (Control.Monad.Trans.Maybe.MaybeT m a)
-instance Data.Functor.Classes.Eq1 m => Data.Functor.Classes.Eq1 (Control.Monad.Trans.Maybe.MaybeT m)
-instance Data.Functor.Classes.Ord1 m => Data.Functor.Classes.Ord1 (Control.Monad.Trans.Maybe.MaybeT m)
-instance Data.Functor.Classes.Read1 m => Data.Functor.Classes.Read1 (Control.Monad.Trans.Maybe.MaybeT m)
-instance Data.Functor.Classes.Show1 m => Data.Functor.Classes.Show1 (Control.Monad.Trans.Maybe.MaybeT m)
-instance (Data.Functor.Classes.Eq1 m, GHC.Classes.Eq a) => GHC.Classes.Eq (Control.Monad.Trans.Maybe.MaybeT m a)
-instance (Data.Functor.Classes.Ord1 m, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Monad.Trans.Maybe.MaybeT m a)
-instance (Data.Functor.Classes.Read1 m, GHC.Read.Read a) => GHC.Read.Read (Control.Monad.Trans.Maybe.MaybeT m a)
-instance (Data.Functor.Classes.Show1 m, GHC.Show.Show a) => GHC.Show.Show (Control.Monad.Trans.Maybe.MaybeT m a)
-instance GHC.Base.Functor m => GHC.Base.Functor (Control.Monad.Trans.Maybe.MaybeT m)
-instance Data.Foldable.Foldable f => Data.Foldable.Foldable (Control.Monad.Trans.Maybe.MaybeT f)
-instance Data.Traversable.Traversable f => Data.Traversable.Traversable (Control.Monad.Trans.Maybe.MaybeT f)
-instance (GHC.Base.Functor m, GHC.Base.Monad m) => GHC.Base.Applicative (Control.Monad.Trans.Maybe.MaybeT m)
-instance (GHC.Base.Functor m, GHC.Base.Monad m) => GHC.Base.Alternative (Control.Monad.Trans.Maybe.MaybeT m)
-instance GHC.Base.Monad m => GHC.Base.Monad (Control.Monad.Trans.Maybe.MaybeT m)
-instance GHC.Base.Monad m => Control.Monad.Fail.MonadFail (Control.Monad.Trans.Maybe.MaybeT m)
-instance GHC.Base.Monad m => GHC.Base.MonadPlus (Control.Monad.Trans.Maybe.MaybeT m)
-instance Control.Monad.Fix.MonadFix m => Control.Monad.Fix.MonadFix (Control.Monad.Trans.Maybe.MaybeT m)
-instance Control.Monad.Trans.Class.MonadTrans Control.Monad.Trans.Maybe.MaybeT
-instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Maybe.MaybeT m)
-instance Control.Monad.Zip.MonadZip m => Control.Monad.Zip.MonadZip (Control.Monad.Trans.Maybe.MaybeT m)
+instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Alternative (Control.Monad.Trans.Maybe.MaybeT m)
+instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Applicative (Control.Monad.Trans.Maybe.MaybeT m)
 instance Data.Functor.Contravariant.Contravariant m => Data.Functor.Contravariant.Contravariant (Control.Monad.Trans.Maybe.MaybeT m)
+instance Data.Functor.Classes.Eq1 m => Data.Functor.Classes.Eq1 (Control.Monad.Trans.Maybe.MaybeT m)
+instance (Data.Functor.Classes.Eq1 m, GHC.Classes.Eq a) => GHC.Classes.Eq (Control.Monad.Trans.Maybe.MaybeT m a)
+instance GHC.Internal.Data.Foldable.Foldable f => GHC.Internal.Data.Foldable.Foldable (Control.Monad.Trans.Maybe.MaybeT f)
+instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad.Trans.Maybe.MaybeT m)
+instance GHC.Internal.Base.Functor m => GHC.Internal.Generics.Generic1 (Control.Monad.Trans.Maybe.MaybeT m)
+instance GHC.Internal.Generics.Generic (Control.Monad.Trans.Maybe.MaybeT m a)
+instance GHC.Internal.Base.Monad m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Maybe.MaybeT m)
+instance GHC.Internal.Control.Monad.Fix.MonadFix m => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.Maybe.MaybeT m)
+instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Maybe.MaybeT m)
+instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Trans.Maybe.MaybeT m)
+instance GHC.Internal.Base.Monad m => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.Maybe.MaybeT m)
+instance Control.Monad.Trans.Class.MonadTrans Control.Monad.Trans.Maybe.MaybeT
+instance Control.Monad.Zip.MonadZip m => Control.Monad.Zip.MonadZip (Control.Monad.Trans.Maybe.MaybeT m)
+instance Data.Functor.Classes.Ord1 m => Data.Functor.Classes.Ord1 (Control.Monad.Trans.Maybe.MaybeT m)
+instance (Data.Functor.Classes.Ord1 m, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Monad.Trans.Maybe.MaybeT m a)
+instance Data.Functor.Classes.Read1 m => Data.Functor.Classes.Read1 (Control.Monad.Trans.Maybe.MaybeT m)
+instance (Data.Functor.Classes.Read1 m, GHC.Internal.Read.Read a) => GHC.Internal.Read.Read (Control.Monad.Trans.Maybe.MaybeT m a)
+instance Data.Functor.Classes.Show1 m => Data.Functor.Classes.Show1 (Control.Monad.Trans.Maybe.MaybeT m)
+instance (Data.Functor.Classes.Show1 m, GHC.Internal.Show.Show a) => GHC.Internal.Show.Show (Control.Monad.Trans.Maybe.MaybeT m a)
+instance GHC.Internal.Data.Traversable.Traversable f => GHC.Internal.Data.Traversable.Traversable (Control.Monad.Trans.Maybe.MaybeT f)
 
 
 -- | A monad transformer that combines <a>ReaderT</a>, <a>WriterT</a> and
@@ -611,7 +611,7 @@ withRWS :: (r' -> s -> (r, s)) -> RWS r w s a -> RWS r' w s a
 -- | A monad transformer adding reading an environment of type <tt>r</tt>,
 --   collecting an output of type <tt>w</tt> and updating a state of type
 --   <tt>s</tt> to an inner monad <tt>m</tt>.
-data RWST r w s m a
+data RWST r w s (m :: Type -> Type) a
 
 -- | Construct an RWST computation from a function. (The inverse of
 --   <a>runRWST</a>.)
@@ -645,14 +645,14 @@ mapRWST :: (Monad n, Monoid w, Monoid w') => (m (a, s, w) -> n (b, s, w')) -> RW
 --   <li><pre><a>runRWST</a> (<a>withRWST</a> f m) r s = <a>uncurry</a>
 --   (<a>runRWST</a> m) (f r s)</pre></li>
 --   </ul>
-withRWST :: (r' -> s -> (r, s)) -> RWST r w s m a -> RWST r' w s m a
+withRWST :: forall r' s r w (m :: Type -> Type) a. (r' -> s -> (r, s)) -> RWST r w s m a -> RWST r' w s m a
 
 -- | Constructor for computations in the reader monad (equivalent to
 --   <a>asks</a>).
-reader :: Monad m => (r -> a) -> RWST r w s m a
+reader :: forall (m :: Type -> Type) r a w s. Monad m => (r -> a) -> RWST r w s m a
 
 -- | Fetch the value of the environment.
-ask :: Monad m => RWST r w s m r
+ask :: forall (m :: Type -> Type) r w s. Monad m => RWST r w s m r
 
 -- | Execute a computation in a modified environment
 --   
@@ -660,21 +660,21 @@ ask :: Monad m => RWST r w s m r
 --   <li><pre><a>runRWST</a> (<a>local</a> f m) r s = <a>runRWST</a> m (f
 --   r) s</pre></li>
 --   </ul>
-local :: (r -> r) -> RWST r w s m a -> RWST r w s m a
+local :: forall r w s (m :: Type -> Type) a. (r -> r) -> RWST r w s m a -> RWST r w s m a
 
 -- | Retrieve a function of the current environment.
 --   
 --   <ul>
 --   <li><pre><a>asks</a> f = <a>liftM</a> f <a>ask</a></pre></li>
 --   </ul>
-asks :: Monad m => (r -> a) -> RWST r w s m a
+asks :: forall (m :: Type -> Type) r a w s. Monad m => (r -> a) -> RWST r w s m a
 
 -- | Construct a writer computation from a (result, output) pair.
-writer :: (Monoid w, Monad m) => (a, w) -> RWST r w s m a
+writer :: forall w (m :: Type -> Type) a r s. (Monoid w, Monad m) => (a, w) -> RWST r w s m a
 
 -- | <tt><a>tell</a> w</tt> is an action that produces the output
 --   <tt>w</tt>.
-tell :: (Monoid w, Monad m) => w -> RWST r w s m ()
+tell :: forall w (m :: Type -> Type) r s. (Monoid w, Monad m) => w -> RWST r w s m ()
 
 -- | <tt><a>listen</a> m</tt> is an action that executes the action
 --   <tt>m</tt> and adds its output to the value of the computation.
@@ -683,7 +683,7 @@ tell :: (Monoid w, Monad m) => w -> RWST r w s m ()
 --   <li><pre><a>runRWST</a> (<a>listen</a> m) r s = <a>liftM</a> (\ (a, w)
 --   -&gt; ((a, w), w)) (<a>runRWST</a> m r s)</pre></li>
 --   </ul>
-listen :: (Monoid w, Monad m) => RWST r w s m a -> RWST r w s m (a, w)
+listen :: forall w (m :: Type -> Type) r s a. (Monoid w, Monad m) => RWST r w s m a -> RWST r w s m (a, w)
 
 -- | <tt><a>listens</a> f m</tt> is an action that executes the action
 --   <tt>m</tt> and adds the result of applying <tt>f</tt> to the output to
@@ -695,7 +695,7 @@ listen :: (Monoid w, Monad m) => RWST r w s m a -> RWST r w s m (a, w)
 --   <li><pre><a>runRWST</a> (<a>listens</a> f m) r s = <a>liftM</a> (\ (a,
 --   w) -&gt; ((a, f w), w)) (<a>runRWST</a> m r s)</pre></li>
 --   </ul>
-listens :: (Monoid w, Monad m) => (w -> b) -> RWST r w s m a -> RWST r w s m (a, b)
+listens :: forall w (m :: Type -> Type) b r s a. (Monoid w, Monad m) => (w -> b) -> RWST r w s m a -> RWST r w s m (a, b)
 
 -- | <tt><a>pass</a> m</tt> is an action that executes the action
 --   <tt>m</tt>, which returns a value and a function, and returns the
@@ -705,7 +705,7 @@ listens :: (Monoid w, Monad m) => (w -> b) -> RWST r w s m a -> RWST r w s m (a,
 --   <li><pre><a>runRWST</a> (<a>pass</a> m) r s = <a>liftM</a> (\ ((a, f),
 --   w) -&gt; (a, f w)) (<a>runRWST</a> m r s)</pre></li>
 --   </ul>
-pass :: (Monoid w, Monoid w', Monad m) => RWST r w s m (a, w -> w') -> RWST r w' s m a
+pass :: forall w w' (m :: Type -> Type) r s a. (Monoid w, Monoid w', Monad m) => RWST r w s m (a, w -> w') -> RWST r w' s m a
 
 -- | <tt><a>censor</a> f m</tt> is an action that executes the action
 --   <tt>m</tt> and applies the function <tt>f</tt> to its output, leaving
@@ -717,16 +717,16 @@ pass :: (Monoid w, Monoid w', Monad m) => RWST r w s m (a, w -> w') -> RWST r w'
 --   <li><pre><a>runRWST</a> (<a>censor</a> f m) r s = <a>liftM</a> (\ (a,
 --   w) -&gt; (a, f w)) (<a>runRWST</a> m r s)</pre></li>
 --   </ul>
-censor :: (Monoid w, Monad m) => (w -> w) -> RWST r w s m a -> RWST r w s m a
+censor :: forall w (m :: Type -> Type) r s a. (Monoid w, Monad m) => (w -> w) -> RWST r w s m a -> RWST r w s m a
 
 -- | Construct a state monad computation from a state transformer function.
-state :: Monad m => (s -> (a, s)) -> RWST r w s m a
+state :: forall (m :: Type -> Type) s a r w. Monad m => (s -> (a, s)) -> RWST r w s m a
 
 -- | Fetch the current value of the state within the monad.
-get :: Monad m => RWST r w s m s
+get :: forall (m :: Type -> Type) r w s. Monad m => RWST r w s m s
 
 -- | <tt><a>put</a> s</tt> sets the state within the monad to <tt>s</tt>.
-put :: Monad m => s -> RWST r w s m ()
+put :: forall (m :: Type -> Type) s r w. Monad m => s -> RWST r w s m ()
 
 -- | <tt><a>modify</a> f</tt> is an action that updates the state to the
 --   result of applying <tt>f</tt> to the current state.
@@ -735,7 +735,7 @@ put :: Monad m => s -> RWST r w s m ()
 --   <li><pre><a>modify</a> f = <a>get</a> &gt;&gt;= (<a>put</a> .
 --   f)</pre></li>
 --   </ul>
-modify :: Monad m => (s -> s) -> RWST r w s m ()
+modify :: forall (m :: Type -> Type) s r w. Monad m => (s -> s) -> RWST r w s m ()
 
 -- | Get a specific component of the state, using a projection function
 --   supplied.
@@ -743,7 +743,7 @@ modify :: Monad m => (s -> s) -> RWST r w s m ()
 --   <ul>
 --   <li><pre><a>gets</a> f = <a>liftM</a> f <a>get</a></pre></li>
 --   </ul>
-gets :: Monad m => (s -> a) -> RWST r w s m a
+gets :: forall (m :: Type -> Type) s a r w. Monad m => (s -> a) -> RWST r w s m a
 
 -- | Uniform lifting of a <tt>callCC</tt> operation to the new monad. This
 --   version rolls back to the original state on entering the continuation.
@@ -755,16 +755,16 @@ liftCallCC' :: CallCC m (a, s, w) (b, s, w) -> CallCC (RWST r w s m) a b
 
 -- | Lift a <tt>catchE</tt> operation to the new monad.
 liftCatch :: Catch e m (a, s, w) -> Catch e (RWST r w s m) a
-instance GHC.Generics.Generic (Control.Monad.Trans.RWS.CPS.RWST r w s m a)
-instance GHC.Base.Functor m => GHC.Base.Functor (Control.Monad.Trans.RWS.CPS.RWST r w s m)
-instance (GHC.Base.Functor m, GHC.Base.Monad m) => GHC.Base.Applicative (Control.Monad.Trans.RWS.CPS.RWST r w s m)
-instance (GHC.Base.Functor m, GHC.Base.MonadPlus m) => GHC.Base.Alternative (Control.Monad.Trans.RWS.CPS.RWST r w s m)
-instance GHC.Base.Monad m => GHC.Base.Monad (Control.Monad.Trans.RWS.CPS.RWST r w s m)
-instance Control.Monad.Fail.MonadFail m => Control.Monad.Fail.MonadFail (Control.Monad.Trans.RWS.CPS.RWST r w s m)
-instance (GHC.Base.Functor m, GHC.Base.MonadPlus m) => GHC.Base.MonadPlus (Control.Monad.Trans.RWS.CPS.RWST r w s m)
-instance Control.Monad.Fix.MonadFix m => Control.Monad.Fix.MonadFix (Control.Monad.Trans.RWS.CPS.RWST r w s m)
-instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.RWS.CPS.RWST r w s)
+instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.Alternative (Control.Monad.Trans.RWS.CPS.RWST r w s m)
+instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Applicative (Control.Monad.Trans.RWS.CPS.RWST r w s m)
+instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad.Trans.RWS.CPS.RWST r w s m)
+instance GHC.Internal.Generics.Generic (Control.Monad.Trans.RWS.CPS.RWST r w s m a)
+instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.RWS.CPS.RWST r w s m)
+instance GHC.Internal.Control.Monad.Fix.MonadFix m => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.RWS.CPS.RWST r w s m)
 instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.RWS.CPS.RWST r w s m)
+instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.RWS.CPS.RWST r w s m)
+instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Trans.RWS.CPS.RWST r w s m)
+instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.RWS.CPS.RWST r w s)
 
 
 -- | A monad transformer that combines <a>ReaderT</a>, <a>WriterT</a> and
@@ -812,9 +812,9 @@ withRWS :: (r' -> s -> (r, s)) -> RWS r w s a -> RWS r' w s a
 -- | A monad transformer adding reading an environment of type <tt>r</tt>,
 --   collecting an output of type <tt>w</tt> and updating a state of type
 --   <tt>s</tt> to an inner monad <tt>m</tt>.
-newtype RWST r w s m a
-RWST :: (r -> s -> m (a, s, w)) -> RWST r w s m a
-[runRWST] :: RWST r w s m a -> r -> s -> m (a, s, w)
+newtype RWST r w s (m :: Type -> Type) a
+RWST :: (r -> s -> m (a, s, w)) -> RWST r w s (m :: Type -> Type) a
+[runRWST] :: RWST r w s (m :: Type -> Type) a -> r -> s -> m (a, s, w)
 
 -- | Evaluate a computation with the given initial state and environment,
 --   returning the final value and output, discarding the final state.
@@ -839,14 +839,14 @@ mapRWST :: (m (a, s, w) -> n (b, s, w')) -> RWST r w s m a -> RWST r w' s n b
 --   <li><pre><a>runRWST</a> (<a>withRWST</a> f m) r s = <a>uncurry</a>
 --   (<a>runRWST</a> m) (f r s)</pre></li>
 --   </ul>
-withRWST :: (r' -> s -> (r, s)) -> RWST r w s m a -> RWST r' w s m a
+withRWST :: forall r' s r w (m :: Type -> Type) a. (r' -> s -> (r, s)) -> RWST r w s m a -> RWST r' w s m a
 
 -- | Constructor for computations in the reader monad (equivalent to
 --   <a>asks</a>).
-reader :: (Monoid w, Monad m) => (r -> a) -> RWST r w s m a
+reader :: forall w (m :: Type -> Type) r a s. (Monoid w, Monad m) => (r -> a) -> RWST r w s m a
 
 -- | Fetch the value of the environment.
-ask :: (Monoid w, Monad m) => RWST r w s m r
+ask :: forall w (m :: Type -> Type) r s. (Monoid w, Monad m) => RWST r w s m r
 
 -- | Execute a computation in a modified environment
 --   
@@ -854,21 +854,21 @@ ask :: (Monoid w, Monad m) => RWST r w s m r
 --   <li><pre><a>runRWST</a> (<a>local</a> f m) r s = <a>runRWST</a> m (f
 --   r) s</pre></li>
 --   </ul>
-local :: (r -> r) -> RWST r w s m a -> RWST r w s m a
+local :: forall r w s (m :: Type -> Type) a. (r -> r) -> RWST r w s m a -> RWST r w s m a
 
 -- | Retrieve a function of the current environment.
 --   
 --   <ul>
 --   <li><pre><a>asks</a> f = <a>liftM</a> f <a>ask</a></pre></li>
 --   </ul>
-asks :: (Monoid w, Monad m) => (r -> a) -> RWST r w s m a
+asks :: forall w (m :: Type -> Type) r a s. (Monoid w, Monad m) => (r -> a) -> RWST r w s m a
 
 -- | Construct a writer computation from a (result, output) pair.
-writer :: Monad m => (a, w) -> RWST r w s m a
+writer :: forall (m :: Type -> Type) a w r s. Monad m => (a, w) -> RWST r w s m a
 
 -- | <tt><a>tell</a> w</tt> is an action that produces the output
 --   <tt>w</tt>.
-tell :: Monad m => w -> RWST r w s m ()
+tell :: forall (m :: Type -> Type) w r s. Monad m => w -> RWST r w s m ()
 
 -- | <tt><a>listen</a> m</tt> is an action that executes the action
 --   <tt>m</tt> and adds its output to the value of the computation.
@@ -877,7 +877,7 @@ tell :: Monad m => w -> RWST r w s m ()
 --   <li><pre><a>runRWST</a> (<a>listen</a> m) r s = <a>liftM</a> (\ (a, w)
 --   -&gt; ((a, w), w)) (<a>runRWST</a> m r s)</pre></li>
 --   </ul>
-listen :: Monad m => RWST r w s m a -> RWST r w s m (a, w)
+listen :: forall (m :: Type -> Type) r w s a. Monad m => RWST r w s m a -> RWST r w s m (a, w)
 
 -- | <tt><a>listens</a> f m</tt> is an action that executes the action
 --   <tt>m</tt> and adds the result of applying <tt>f</tt> to the output to
@@ -889,7 +889,7 @@ listen :: Monad m => RWST r w s m a -> RWST r w s m (a, w)
 --   <li><pre><a>runRWST</a> (<a>listens</a> f m) r s = <a>liftM</a> (\ (a,
 --   w) -&gt; ((a, f w), w)) (<a>runRWST</a> m r s)</pre></li>
 --   </ul>
-listens :: Monad m => (w -> b) -> RWST r w s m a -> RWST r w s m (a, b)
+listens :: forall (m :: Type -> Type) w b r s a. Monad m => (w -> b) -> RWST r w s m a -> RWST r w s m (a, b)
 
 -- | <tt><a>pass</a> m</tt> is an action that executes the action
 --   <tt>m</tt>, which returns a value and a function, and returns the
@@ -899,7 +899,7 @@ listens :: Monad m => (w -> b) -> RWST r w s m a -> RWST r w s m (a, b)
 --   <li><pre><a>runRWST</a> (<a>pass</a> m) r s = <a>liftM</a> (\ ((a, f),
 --   w) -&gt; (a, f w)) (<a>runRWST</a> m r s)</pre></li>
 --   </ul>
-pass :: Monad m => RWST r w s m (a, w -> w) -> RWST r w s m a
+pass :: forall (m :: Type -> Type) r w s a. Monad m => RWST r w s m (a, w -> w) -> RWST r w s m a
 
 -- | <tt><a>censor</a> f m</tt> is an action that executes the action
 --   <tt>m</tt> and applies the function <tt>f</tt> to its output, leaving
@@ -911,16 +911,16 @@ pass :: Monad m => RWST r w s m (a, w -> w) -> RWST r w s m a
 --   <li><pre><a>runRWST</a> (<a>censor</a> f m) r s = <a>liftM</a> (\ (a,
 --   w) -&gt; (a, f w)) (<a>runRWST</a> m r s)</pre></li>
 --   </ul>
-censor :: Monad m => (w -> w) -> RWST r w s m a -> RWST r w s m a
+censor :: forall (m :: Type -> Type) w r s a. Monad m => (w -> w) -> RWST r w s m a -> RWST r w s m a
 
 -- | Construct a state monad computation from a state transformer function.
-state :: (Monoid w, Monad m) => (s -> (a, s)) -> RWST r w s m a
+state :: forall w (m :: Type -> Type) s a r. (Monoid w, Monad m) => (s -> (a, s)) -> RWST r w s m a
 
 -- | Fetch the current value of the state within the monad.
-get :: (Monoid w, Monad m) => RWST r w s m s
+get :: forall w (m :: Type -> Type) r s. (Monoid w, Monad m) => RWST r w s m s
 
 -- | <tt><a>put</a> s</tt> sets the state within the monad to <tt>s</tt>.
-put :: (Monoid w, Monad m) => s -> RWST r w s m ()
+put :: forall w (m :: Type -> Type) s r. (Monoid w, Monad m) => s -> RWST r w s m ()
 
 -- | <tt><a>modify</a> f</tt> is an action that updates the state to the
 --   result of applying <tt>f</tt> to the current state.
@@ -929,7 +929,7 @@ put :: (Monoid w, Monad m) => s -> RWST r w s m ()
 --   <li><pre><a>modify</a> f = <a>get</a> &gt;&gt;= (<a>put</a> .
 --   f)</pre></li>
 --   </ul>
-modify :: (Monoid w, Monad m) => (s -> s) -> RWST r w s m ()
+modify :: forall w (m :: Type -> Type) s r. (Monoid w, Monad m) => (s -> s) -> RWST r w s m ()
 
 -- | Get a specific component of the state, using a projection function
 --   supplied.
@@ -937,7 +937,7 @@ modify :: (Monoid w, Monad m) => (s -> s) -> RWST r w s m ()
 --   <ul>
 --   <li><pre><a>gets</a> f = <a>liftM</a> f <a>get</a></pre></li>
 --   </ul>
-gets :: (Monoid w, Monad m) => (s -> a) -> RWST r w s m a
+gets :: forall w (m :: Type -> Type) s a r. (Monoid w, Monad m) => (s -> a) -> RWST r w s m a
 
 -- | Uniform lifting of a <tt>callCC</tt> operation to the new monad. This
 --   version rolls back to the original state on entering the continuation.
@@ -949,17 +949,17 @@ liftCallCC' :: Monoid w => CallCC m (a, s, w) (b, s, w) -> CallCC (RWST r w s m)
 
 -- | Lift a <tt>catchE</tt> operation to the new monad.
 liftCatch :: Catch e m (a, s, w) -> Catch e (RWST r w s m) a
-instance GHC.Generics.Generic (Control.Monad.Trans.RWS.Lazy.RWST r w s m a)
-instance GHC.Base.Functor m => GHC.Base.Functor (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
-instance (GHC.Base.Monoid w, GHC.Base.Functor m, GHC.Base.Monad m) => GHC.Base.Applicative (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
-instance (GHC.Base.Monoid w, GHC.Base.Functor m, GHC.Base.MonadPlus m) => GHC.Base.Alternative (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
-instance (GHC.Base.Monoid w, GHC.Base.Monad m) => GHC.Base.Monad (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
-instance (GHC.Base.Monoid w, Control.Monad.Fail.MonadFail m) => Control.Monad.Fail.MonadFail (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
-instance (GHC.Base.Monoid w, GHC.Base.MonadPlus m) => GHC.Base.MonadPlus (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
-instance (GHC.Base.Monoid w, Control.Monad.Fix.MonadFix m) => Control.Monad.Fix.MonadFix (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
-instance GHC.Base.Monoid w => Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.RWS.Lazy.RWST r w s)
-instance (GHC.Base.Monoid w, Control.Monad.IO.Class.MonadIO m) => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.Alternative (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Applicative (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
 instance Data.Functor.Contravariant.Contravariant m => Data.Functor.Contravariant.Contravariant (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
+instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
+instance GHC.Internal.Generics.Generic (Control.Monad.Trans.RWS.Lazy.RWST r w s m a)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Fail.MonadFail m) => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Fix.MonadFix m) => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.IO.Class.MonadIO m) => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Monad (Control.Monad.Trans.RWS.Lazy.RWST r w s m)
+instance GHC.Internal.Base.Monoid w => Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.RWS.Lazy.RWST r w s)
 
 
 -- | A monad transformer that combines <a>ReaderT</a>, <a>WriterT</a> and
@@ -1016,9 +1016,9 @@ withRWS :: (r' -> s -> (r, s)) -> RWS r w s a -> RWS r' w s a
 -- | A monad transformer adding reading an environment of type <tt>r</tt>,
 --   collecting an output of type <tt>w</tt> and updating a state of type
 --   <tt>s</tt> to an inner monad <tt>m</tt>.
-newtype RWST r w s m a
-RWST :: (r -> s -> m (a, s, w)) -> RWST r w s m a
-[runRWST] :: RWST r w s m a -> r -> s -> m (a, s, w)
+newtype RWST r w s (m :: Type -> Type) a
+RWST :: (r -> s -> m (a, s, w)) -> RWST r w s (m :: Type -> Type) a
+[runRWST] :: RWST r w s (m :: Type -> Type) a -> r -> s -> m (a, s, w)
 
 -- | Evaluate a computation with the given initial state and environment,
 --   returning the final value and output, discarding the final state.
@@ -1043,14 +1043,14 @@ mapRWST :: (m (a, s, w) -> n (b, s, w')) -> RWST r w s m a -> RWST r w' s n b
 --   <li><pre><a>runRWST</a> (<a>withRWST</a> f m) r s = <a>uncurry</a>
 --   (<a>runRWST</a> m) (f r s)</pre></li>
 --   </ul>
-withRWST :: (r' -> s -> (r, s)) -> RWST r w s m a -> RWST r' w s m a
+withRWST :: forall r' s r w (m :: Type -> Type) a. (r' -> s -> (r, s)) -> RWST r w s m a -> RWST r' w s m a
 
 -- | Constructor for computations in the reader monad (equivalent to
 --   <a>asks</a>).
-reader :: (Monoid w, Monad m) => (r -> a) -> RWST r w s m a
+reader :: forall w (m :: Type -> Type) r a s. (Monoid w, Monad m) => (r -> a) -> RWST r w s m a
 
 -- | Fetch the value of the environment.
-ask :: (Monoid w, Monad m) => RWST r w s m r
+ask :: forall w (m :: Type -> Type) r s. (Monoid w, Monad m) => RWST r w s m r
 
 -- | Execute a computation in a modified environment
 --   
@@ -1058,21 +1058,21 @@ ask :: (Monoid w, Monad m) => RWST r w s m r
 --   <li><pre><a>runRWST</a> (<a>local</a> f m) r s = <a>runRWST</a> m (f
 --   r) s</pre></li>
 --   </ul>
-local :: (r -> r) -> RWST r w s m a -> RWST r w s m a
+local :: forall r w s (m :: Type -> Type) a. (r -> r) -> RWST r w s m a -> RWST r w s m a
 
 -- | Retrieve a function of the current environment.
 --   
 --   <ul>
 --   <li><pre><a>asks</a> f = <a>liftM</a> f <a>ask</a></pre></li>
 --   </ul>
-asks :: (Monoid w, Monad m) => (r -> a) -> RWST r w s m a
+asks :: forall w (m :: Type -> Type) r a s. (Monoid w, Monad m) => (r -> a) -> RWST r w s m a
 
 -- | Construct a writer computation from a (result, output) pair.
-writer :: Monad m => (a, w) -> RWST r w s m a
+writer :: forall (m :: Type -> Type) a w r s. Monad m => (a, w) -> RWST r w s m a
 
 -- | <tt><a>tell</a> w</tt> is an action that produces the output
 --   <tt>w</tt>.
-tell :: Monad m => w -> RWST r w s m ()
+tell :: forall (m :: Type -> Type) w r s. Monad m => w -> RWST r w s m ()
 
 -- | <tt><a>listen</a> m</tt> is an action that executes the action
 --   <tt>m</tt> and adds its output to the value of the computation.
@@ -1081,7 +1081,7 @@ tell :: Monad m => w -> RWST r w s m ()
 --   <li><pre><a>runRWST</a> (<a>listen</a> m) r s = <a>liftM</a> (\ (a, w)
 --   -&gt; ((a, w), w)) (<a>runRWST</a> m r s)</pre></li>
 --   </ul>
-listen :: Monad m => RWST r w s m a -> RWST r w s m (a, w)
+listen :: forall (m :: Type -> Type) r w s a. Monad m => RWST r w s m a -> RWST r w s m (a, w)
 
 -- | <tt><a>listens</a> f m</tt> is an action that executes the action
 --   <tt>m</tt> and adds the result of applying <tt>f</tt> to the output to
@@ -1093,7 +1093,7 @@ listen :: Monad m => RWST r w s m a -> RWST r w s m (a, w)
 --   <li><pre><a>runRWST</a> (<a>listens</a> f m) r s = <a>liftM</a> (\ (a,
 --   w) -&gt; ((a, f w), w)) (<a>runRWST</a> m r s)</pre></li>
 --   </ul>
-listens :: Monad m => (w -> b) -> RWST r w s m a -> RWST r w s m (a, b)
+listens :: forall (m :: Type -> Type) w b r s a. Monad m => (w -> b) -> RWST r w s m a -> RWST r w s m (a, b)
 
 -- | <tt><a>pass</a> m</tt> is an action that executes the action
 --   <tt>m</tt>, which returns a value and a function, and returns the
@@ -1103,7 +1103,7 @@ listens :: Monad m => (w -> b) -> RWST r w s m a -> RWST r w s m (a, b)
 --   <li><pre><a>runRWST</a> (<a>pass</a> m) r s = <a>liftM</a> (\ ((a, f),
 --   w) -&gt; (a, f w)) (<a>runRWST</a> m r s)</pre></li>
 --   </ul>
-pass :: Monad m => RWST r w s m (a, w -> w) -> RWST r w s m a
+pass :: forall (m :: Type -> Type) r w s a. Monad m => RWST r w s m (a, w -> w) -> RWST r w s m a
 
 -- | <tt><a>censor</a> f m</tt> is an action that executes the action
 --   <tt>m</tt> and applies the function <tt>f</tt> to its output, leaving
@@ -1115,16 +1115,16 @@ pass :: Monad m => RWST r w s m (a, w -> w) -> RWST r w s m a
 --   <li><pre><a>runRWST</a> (<a>censor</a> f m) r s = <a>liftM</a> (\ (a,
 --   w) -&gt; (a, f w)) (<a>runRWST</a> m r s)</pre></li>
 --   </ul>
-censor :: Monad m => (w -> w) -> RWST r w s m a -> RWST r w s m a
+censor :: forall (m :: Type -> Type) w r s a. Monad m => (w -> w) -> RWST r w s m a -> RWST r w s m a
 
 -- | Construct a state monad computation from a state transformer function.
-state :: (Monoid w, Monad m) => (s -> (a, s)) -> RWST r w s m a
+state :: forall w (m :: Type -> Type) s a r. (Monoid w, Monad m) => (s -> (a, s)) -> RWST r w s m a
 
 -- | Fetch the current value of the state within the monad.
-get :: (Monoid w, Monad m) => RWST r w s m s
+get :: forall w (m :: Type -> Type) r s. (Monoid w, Monad m) => RWST r w s m s
 
 -- | <tt><a>put</a> s</tt> sets the state within the monad to <tt>s</tt>.
-put :: (Monoid w, Monad m) => s -> RWST r w s m ()
+put :: forall w (m :: Type -> Type) s r. (Monoid w, Monad m) => s -> RWST r w s m ()
 
 -- | <tt><a>modify</a> f</tt> is an action that updates the state to the
 --   result of applying <tt>f</tt> to the current state.
@@ -1133,7 +1133,7 @@ put :: (Monoid w, Monad m) => s -> RWST r w s m ()
 --   <li><pre><a>modify</a> f = <a>get</a> &gt;&gt;= (<a>put</a> .
 --   f)</pre></li>
 --   </ul>
-modify :: (Monoid w, Monad m) => (s -> s) -> RWST r w s m ()
+modify :: forall w (m :: Type -> Type) s r. (Monoid w, Monad m) => (s -> s) -> RWST r w s m ()
 
 -- | Get a specific component of the state, using a projection function
 --   supplied.
@@ -1141,7 +1141,7 @@ modify :: (Monoid w, Monad m) => (s -> s) -> RWST r w s m ()
 --   <ul>
 --   <li><pre><a>gets</a> f = <a>liftM</a> f <a>get</a></pre></li>
 --   </ul>
-gets :: (Monoid w, Monad m) => (s -> a) -> RWST r w s m a
+gets :: forall w (m :: Type -> Type) s a r. (Monoid w, Monad m) => (s -> a) -> RWST r w s m a
 
 -- | Uniform lifting of a <tt>callCC</tt> operation to the new monad. This
 --   version rolls back to the original state on entering the continuation.
@@ -1153,17 +1153,17 @@ liftCallCC' :: Monoid w => CallCC m (a, s, w) (b, s, w) -> CallCC (RWST r w s m)
 
 -- | Lift a <tt>catchE</tt> operation to the new monad.
 liftCatch :: Catch e m (a, s, w) -> Catch e (RWST r w s m) a
-instance GHC.Generics.Generic (Control.Monad.Trans.RWS.Strict.RWST r w s m a)
-instance GHC.Base.Functor m => GHC.Base.Functor (Control.Monad.Trans.RWS.Strict.RWST r w s m)
-instance (GHC.Base.Monoid w, GHC.Base.Functor m, GHC.Base.Monad m) => GHC.Base.Applicative (Control.Monad.Trans.RWS.Strict.RWST r w s m)
-instance (GHC.Base.Monoid w, GHC.Base.Functor m, GHC.Base.MonadPlus m) => GHC.Base.Alternative (Control.Monad.Trans.RWS.Strict.RWST r w s m)
-instance (GHC.Base.Monoid w, GHC.Base.Monad m) => GHC.Base.Monad (Control.Monad.Trans.RWS.Strict.RWST r w s m)
-instance (GHC.Base.Monoid w, Control.Monad.Fail.MonadFail m) => Control.Monad.Fail.MonadFail (Control.Monad.Trans.RWS.Strict.RWST r w s m)
-instance (GHC.Base.Monoid w, GHC.Base.MonadPlus m) => GHC.Base.MonadPlus (Control.Monad.Trans.RWS.Strict.RWST r w s m)
-instance (GHC.Base.Monoid w, Control.Monad.Fix.MonadFix m) => Control.Monad.Fix.MonadFix (Control.Monad.Trans.RWS.Strict.RWST r w s m)
-instance GHC.Base.Monoid w => Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.RWS.Strict.RWST r w s)
-instance (GHC.Base.Monoid w, Control.Monad.IO.Class.MonadIO m) => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.Alternative (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Applicative (Control.Monad.Trans.RWS.Strict.RWST r w s m)
 instance Data.Functor.Contravariant.Contravariant m => Data.Functor.Contravariant.Contravariant (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance GHC.Internal.Generics.Generic (Control.Monad.Trans.RWS.Strict.RWST r w s m a)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Fail.MonadFail m) => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Fix.MonadFix m) => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.IO.Class.MonadIO m) => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Monad (Control.Monad.Trans.RWS.Strict.RWST r w s m)
+instance GHC.Internal.Base.Monoid w => Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.RWS.Strict.RWST r w s)
 
 
 -- | Declaration of the <a>ReaderT</a> monad transformer, which adds a
@@ -1177,14 +1177,15 @@ module Control.Monad.Trans.Reader
 --   
 --   Computations are functions of a shared environment.
 --   
---   The <a>return</a> function ignores the environment, while
---   <tt>&gt;&gt;=</tt> passes the inherited environment to both
---   subcomputations.
+--   The <a>return</a> function ignores the environment, while <tt>m
+--   <a>&gt;&gt;=</a> k</tt> passes the inherited environment to both
+--   subcomputations:
+--   
 type Reader r = ReaderT r Identity
 
 -- | Constructor for computations in the reader monad (equivalent to
 --   <a>asks</a>).
-reader :: Monad m => (r -> a) -> ReaderT r m a
+reader :: forall (m :: Type -> Type) r a. Monad m => (r -> a) -> ReaderT r m a
 
 -- | Runs a <tt>Reader</tt> and extracts the final value from it. (The
 --   inverse of <a>reader</a>.)
@@ -1210,12 +1211,13 @@ withReader :: (r' -> r) -> Reader r a -> Reader r' a
 -- | The reader monad transformer, which adds a read-only environment to
 --   the given monad.
 --   
---   The <a>return</a> function ignores the environment, while
---   <tt>&gt;&gt;=</tt> passes the inherited environment to both
---   subcomputations.
-newtype ReaderT r m a
-ReaderT :: (r -> m a) -> ReaderT r m a
-[runReaderT] :: ReaderT r m a -> r -> m a
+--   The <a>return</a> function ignores the environment, while <tt>m
+--   <a>&gt;&gt;=</a> k</tt> passes the inherited environment to both
+--   subcomputations:
+--   
+newtype ReaderT r (m :: Type -> Type) a
+ReaderT :: (r -> m a) -> ReaderT r (m :: Type -> Type) a
+[runReaderT] :: ReaderT r (m :: Type -> Type) a -> r -> m a
 
 -- | Transform the computation inside a <tt>ReaderT</tt>.
 --   
@@ -1232,10 +1234,10 @@ mapReaderT :: (m a -> n b) -> ReaderT r m a -> ReaderT r n b
 --   <li><pre><a>runReaderT</a> (<a>withReaderT</a> f m) =
 --   <a>runReaderT</a> m . f</pre></li>
 --   </ul>
-withReaderT :: (r' -> r) -> ReaderT r m a -> ReaderT r' m a
+withReaderT :: forall r' r (m :: Type -> Type) a. (r' -> r) -> ReaderT r m a -> ReaderT r' m a
 
 -- | Fetch the value of the environment.
-ask :: Monad m => ReaderT r m r
+ask :: forall (m :: Type -> Type) r. Monad m => ReaderT r m r
 
 -- | Execute a computation in a modified environment (a specialization of
 --   <a>withReaderT</a>).
@@ -1244,33 +1246,33 @@ ask :: Monad m => ReaderT r m r
 --   <li><pre><a>runReaderT</a> (<a>local</a> f m) = <a>runReaderT</a> m .
 --   f</pre></li>
 --   </ul>
-local :: (r -> r) -> ReaderT r m a -> ReaderT r m a
+local :: forall r (m :: Type -> Type) a. (r -> r) -> ReaderT r m a -> ReaderT r m a
 
 -- | Retrieve a function of the current environment.
 --   
 --   <ul>
 --   <li><pre><a>asks</a> f = <a>liftM</a> f <a>ask</a></pre></li>
 --   </ul>
-asks :: Monad m => (r -> a) -> ReaderT r m a
+asks :: forall (m :: Type -> Type) r a. Monad m => (r -> a) -> ReaderT r m a
 
 -- | Lift a <tt>callCC</tt> operation to the new monad.
 liftCallCC :: CallCC m a b -> CallCC (ReaderT r m) a b
 
 -- | Lift a <tt>catchE</tt> operation to the new monad.
 liftCatch :: Catch e m a -> Catch e (ReaderT r m) a
-instance GHC.Generics.Generic1 (Control.Monad.Trans.Reader.ReaderT r m)
-instance GHC.Generics.Generic (Control.Monad.Trans.Reader.ReaderT r m a)
-instance GHC.Base.Functor m => GHC.Base.Functor (Control.Monad.Trans.Reader.ReaderT r m)
-instance GHC.Base.Applicative m => GHC.Base.Applicative (Control.Monad.Trans.Reader.ReaderT r m)
-instance GHC.Base.Alternative m => GHC.Base.Alternative (Control.Monad.Trans.Reader.ReaderT r m)
-instance GHC.Base.Monad m => GHC.Base.Monad (Control.Monad.Trans.Reader.ReaderT r m)
-instance Control.Monad.Fail.MonadFail m => Control.Monad.Fail.MonadFail (Control.Monad.Trans.Reader.ReaderT r m)
-instance GHC.Base.MonadPlus m => GHC.Base.MonadPlus (Control.Monad.Trans.Reader.ReaderT r m)
-instance Control.Monad.Fix.MonadFix m => Control.Monad.Fix.MonadFix (Control.Monad.Trans.Reader.ReaderT r m)
-instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Reader.ReaderT r)
-instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Reader.ReaderT r m)
-instance Control.Monad.Zip.MonadZip m => Control.Monad.Zip.MonadZip (Control.Monad.Trans.Reader.ReaderT r m)
+instance GHC.Internal.Base.Alternative m => GHC.Internal.Base.Alternative (Control.Monad.Trans.Reader.ReaderT r m)
+instance GHC.Internal.Base.Applicative m => GHC.Internal.Base.Applicative (Control.Monad.Trans.Reader.ReaderT r m)
 instance Data.Functor.Contravariant.Contravariant m => Data.Functor.Contravariant.Contravariant (Control.Monad.Trans.Reader.ReaderT r m)
+instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad.Trans.Reader.ReaderT r m)
+instance GHC.Internal.Generics.Generic1 (Control.Monad.Trans.Reader.ReaderT r m)
+instance GHC.Internal.Generics.Generic (Control.Monad.Trans.Reader.ReaderT r m a)
+instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Reader.ReaderT r m)
+instance GHC.Internal.Control.Monad.Fix.MonadFix m => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.Reader.ReaderT r m)
+instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Reader.ReaderT r m)
+instance GHC.Internal.Base.MonadPlus m => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.Reader.ReaderT r m)
+instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Trans.Reader.ReaderT r m)
+instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Reader.ReaderT r)
+instance Control.Monad.Zip.MonadZip m => Control.Monad.Zip.MonadZip (Control.Monad.Trans.Reader.ReaderT r m)
 
 
 -- | Selection monad transformer, modelling search algorithms.
@@ -1308,8 +1310,8 @@ mapSelect :: (a -> a) -> Select r a -> Select r a
 --   
 --   <a>SelectT</a> is not a functor on the category of monads, and many
 --   operations cannot be lifted through it.
-newtype SelectT r m a
-SelectT :: ((a -> m r) -> m a) -> SelectT r m a
+newtype SelectT r (m :: Type -> Type) a
+SelectT :: ((a -> m r) -> m a) -> SelectT r (m :: Type -> Type) a
 
 -- | Runs a <tt>SelectT</tt> computation with a function for evaluating
 --   answers to select a particular answer. (The inverse of <a>select</a>.)
@@ -1327,16 +1329,16 @@ runSelectT :: SelectT r m a -> (a -> m r) -> m a
 mapSelectT :: (m a -> m a) -> SelectT r m a -> SelectT r m a
 
 -- | Convert a selection computation to a continuation-passing computation.
-selectToContT :: Monad m => SelectT r m a -> ContT r m a
-instance GHC.Generics.Generic (Control.Monad.Trans.Select.SelectT r m a)
-instance GHC.Base.Functor m => GHC.Base.Functor (Control.Monad.Trans.Select.SelectT r m)
-instance (GHC.Base.Functor m, GHC.Base.Monad m) => GHC.Base.Applicative (Control.Monad.Trans.Select.SelectT r m)
-instance (GHC.Base.Functor m, GHC.Base.MonadPlus m) => GHC.Base.Alternative (Control.Monad.Trans.Select.SelectT r m)
-instance GHC.Base.Monad m => GHC.Base.Monad (Control.Monad.Trans.Select.SelectT r m)
-instance Control.Monad.Fail.MonadFail m => Control.Monad.Fail.MonadFail (Control.Monad.Trans.Select.SelectT r m)
-instance GHC.Base.MonadPlus m => GHC.Base.MonadPlus (Control.Monad.Trans.Select.SelectT r m)
-instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Select.SelectT r)
+selectToContT :: forall (m :: Type -> Type) r a. Monad m => SelectT r m a -> ContT r m a
+instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.Alternative (Control.Monad.Trans.Select.SelectT r m)
+instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Applicative (Control.Monad.Trans.Select.SelectT r m)
+instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad.Trans.Select.SelectT r m)
+instance GHC.Internal.Generics.Generic (Control.Monad.Trans.Select.SelectT r m a)
+instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Select.SelectT r m)
 instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Select.SelectT r m)
+instance GHC.Internal.Base.MonadPlus m => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.Select.SelectT r m)
+instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Trans.Select.SelectT r m)
+instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Select.SelectT r)
 
 
 -- | Lazy state monads, passing an updatable state through a computation.
@@ -1372,7 +1374,7 @@ type State s = StateT s Identity
 
 -- | Construct a state monad computation from a function. (The inverse of
 --   <a>runState</a>.)
-state :: Monad m => (s -> (a, s)) -> StateT s m a
+state :: forall (m :: Type -> Type) s a. Monad m => (s -> (a, s)) -> StateT s m a
 
 -- | Unwrap a state monad computation as a function. (The inverse of
 --   <a>state</a>.)
@@ -1423,9 +1425,9 @@ withState :: (s -> s) -> State s a -> State s a
 --   The <a>return</a> function leaves the state unchanged, while
 --   <tt>&gt;&gt;=</tt> uses the final state of the first computation as
 --   the initial state of the second.
-newtype StateT s m a
-StateT :: (s -> m (a, s)) -> StateT s m a
-[runStateT] :: StateT s m a -> s -> m (a, s)
+newtype StateT s (m :: Type -> Type) a
+StateT :: (s -> m (a, s)) -> StateT s (m :: Type -> Type) a
+[runStateT] :: StateT s (m :: Type -> Type) a -> s -> m (a, s)
 
 -- | Evaluate a state computation with the given initial state and return
 --   the final value, discarding the final state.
@@ -1460,13 +1462,13 @@ mapStateT :: (m (a, s) -> n (b, s)) -> StateT s m a -> StateT s n b
 --   <ul>
 --   <li><pre><a>withStateT</a> f m = <a>modify</a> f &gt;&gt; m</pre></li>
 --   </ul>
-withStateT :: (s -> s) -> StateT s m a -> StateT s m a
+withStateT :: forall s (m :: Type -> Type) a. (s -> s) -> StateT s m a -> StateT s m a
 
 -- | Fetch the current value of the state within the monad.
-get :: Monad m => StateT s m s
+get :: forall (m :: Type -> Type) s. Monad m => StateT s m s
 
 -- | <tt><a>put</a> s</tt> sets the state within the monad to <tt>s</tt>.
-put :: Monad m => s -> StateT s m ()
+put :: forall (m :: Type -> Type) s. Monad m => s -> StateT s m ()
 
 -- | <tt><a>modify</a> f</tt> is an action that updates the state to the
 --   result of applying <tt>f</tt> to the current state.
@@ -1475,7 +1477,7 @@ put :: Monad m => s -> StateT s m ()
 --   <li><pre><a>modify</a> f = <a>get</a> &gt;&gt;= (<a>put</a> .
 --   f)</pre></li>
 --   </ul>
-modify :: Monad m => (s -> s) -> StateT s m ()
+modify :: forall (m :: Type -> Type) s. Monad m => (s -> s) -> StateT s m ()
 
 -- | A variant of <a>modify</a> in which the computation is strict in the
 --   new state.
@@ -1484,7 +1486,7 @@ modify :: Monad m => (s -> s) -> StateT s m ()
 --   <li><pre><a>modify'</a> f = <a>get</a> &gt;&gt;= ((<a>$!</a>)
 --   <a>put</a> . f)</pre></li>
 --   </ul>
-modify' :: Monad m => (s -> s) -> StateT s m ()
+modify' :: forall (m :: Type -> Type) s. Monad m => (s -> s) -> StateT s m ()
 
 -- | A variant of <a>modify</a> in which the new state is generated by a
 --   monadic action.
@@ -1496,7 +1498,7 @@ modifyM :: Monad m => (s -> m s) -> StateT s m ()
 --   <ul>
 --   <li><pre><a>gets</a> f = <a>liftM</a> f <a>get</a></pre></li>
 --   </ul>
-gets :: Monad m => (s -> a) -> StateT s m a
+gets :: forall (m :: Type -> Type) s a. Monad m => (s -> a) -> StateT s m a
 
 -- | Uniform lifting of a <tt>callCC</tt> operation to the new monad. This
 --   version rolls back to the original state on entering the continuation.
@@ -1516,17 +1518,17 @@ liftListen :: Monad m => Listen w m (a, s) -> Listen w (StateT s m) a
 
 -- | Lift a <tt>pass</tt> operation to the new monad.
 liftPass :: Monad m => Pass w m (a, s) -> Pass w (StateT s m) a
-instance GHC.Generics.Generic (Control.Monad.Trans.State.Lazy.StateT s m a)
-instance GHC.Base.Functor m => GHC.Base.Functor (Control.Monad.Trans.State.Lazy.StateT s m)
-instance (GHC.Base.Functor m, GHC.Base.Monad m) => GHC.Base.Applicative (Control.Monad.Trans.State.Lazy.StateT s m)
-instance (GHC.Base.Functor m, GHC.Base.MonadPlus m) => GHC.Base.Alternative (Control.Monad.Trans.State.Lazy.StateT s m)
-instance GHC.Base.Monad m => GHC.Base.Monad (Control.Monad.Trans.State.Lazy.StateT s m)
-instance Control.Monad.Fail.MonadFail m => Control.Monad.Fail.MonadFail (Control.Monad.Trans.State.Lazy.StateT s m)
-instance GHC.Base.MonadPlus m => GHC.Base.MonadPlus (Control.Monad.Trans.State.Lazy.StateT s m)
-instance Control.Monad.Fix.MonadFix m => Control.Monad.Fix.MonadFix (Control.Monad.Trans.State.Lazy.StateT s m)
-instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.State.Lazy.StateT s)
-instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.State.Lazy.StateT s m)
+instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.Alternative (Control.Monad.Trans.State.Lazy.StateT s m)
+instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Applicative (Control.Monad.Trans.State.Lazy.StateT s m)
 instance Data.Functor.Contravariant.Contravariant m => Data.Functor.Contravariant.Contravariant (Control.Monad.Trans.State.Lazy.StateT s m)
+instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad.Trans.State.Lazy.StateT s m)
+instance GHC.Internal.Generics.Generic (Control.Monad.Trans.State.Lazy.StateT s m a)
+instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.State.Lazy.StateT s m)
+instance GHC.Internal.Control.Monad.Fix.MonadFix m => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.State.Lazy.StateT s m)
+instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.State.Lazy.StateT s m)
+instance GHC.Internal.Base.MonadPlus m => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.State.Lazy.StateT s m)
+instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Trans.State.Lazy.StateT s m)
+instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.State.Lazy.StateT s)
 
 
 -- | State monads, passing an updatable state through a computation.
@@ -1573,7 +1575,7 @@ type State s = StateT s Identity
 
 -- | Construct a state monad computation from a function. (The inverse of
 --   <a>runState</a>.)
-state :: Monad m => (s -> (a, s)) -> StateT s m a
+state :: forall (m :: Type -> Type) s a. Monad m => (s -> (a, s)) -> StateT s m a
 
 -- | Unwrap a state monad computation as a function. (The inverse of
 --   <a>state</a>.)
@@ -1624,9 +1626,9 @@ withState :: (s -> s) -> State s a -> State s a
 --   The <a>return</a> function leaves the state unchanged, while
 --   <tt>&gt;&gt;=</tt> uses the final state of the first computation as
 --   the initial state of the second.
-newtype StateT s m a
-StateT :: (s -> m (a, s)) -> StateT s m a
-[runStateT] :: StateT s m a -> s -> m (a, s)
+newtype StateT s (m :: Type -> Type) a
+StateT :: (s -> m (a, s)) -> StateT s (m :: Type -> Type) a
+[runStateT] :: StateT s (m :: Type -> Type) a -> s -> m (a, s)
 
 -- | Evaluate a state computation with the given initial state and return
 --   the final value, discarding the final state.
@@ -1661,13 +1663,13 @@ mapStateT :: (m (a, s) -> n (b, s)) -> StateT s m a -> StateT s n b
 --   <ul>
 --   <li><pre><a>withStateT</a> f m = <a>modify</a> f &gt;&gt; m</pre></li>
 --   </ul>
-withStateT :: (s -> s) -> StateT s m a -> StateT s m a
+withStateT :: forall s (m :: Type -> Type) a. (s -> s) -> StateT s m a -> StateT s m a
 
 -- | Fetch the current value of the state within the monad.
-get :: Monad m => StateT s m s
+get :: forall (m :: Type -> Type) s. Monad m => StateT s m s
 
 -- | <tt><a>put</a> s</tt> sets the state within the monad to <tt>s</tt>.
-put :: Monad m => s -> StateT s m ()
+put :: forall (m :: Type -> Type) s. Monad m => s -> StateT s m ()
 
 -- | <tt><a>modify</a> f</tt> is an action that updates the state to the
 --   result of applying <tt>f</tt> to the current state.
@@ -1676,7 +1678,7 @@ put :: Monad m => s -> StateT s m ()
 --   <li><pre><a>modify</a> f = <a>get</a> &gt;&gt;= (<a>put</a> .
 --   f)</pre></li>
 --   </ul>
-modify :: Monad m => (s -> s) -> StateT s m ()
+modify :: forall (m :: Type -> Type) s. Monad m => (s -> s) -> StateT s m ()
 
 -- | A variant of <a>modify</a> in which the computation is strict in the
 --   new state.
@@ -1689,7 +1691,7 @@ modify :: Monad m => (s -> s) -> StateT s m ()
 --   Note that this is only strict in the top level of the state. Lazy
 --   components of the state will not be evaluated unless <tt>f</tt>
 --   evaluates them.
-modify' :: Monad m => (s -> s) -> StateT s m ()
+modify' :: forall (m :: Type -> Type) s. Monad m => (s -> s) -> StateT s m ()
 
 -- | A variant of <a>modify</a> in which the new state is generated by a
 --   monadic action.
@@ -1701,7 +1703,7 @@ modifyM :: Monad m => (s -> m s) -> StateT s m ()
 --   <ul>
 --   <li><pre><a>gets</a> f = <a>liftM</a> f <a>get</a></pre></li>
 --   </ul>
-gets :: Monad m => (s -> a) -> StateT s m a
+gets :: forall (m :: Type -> Type) s a. Monad m => (s -> a) -> StateT s m a
 
 -- | Uniform lifting of a <tt>callCC</tt> operation to the new monad. This
 --   version rolls back to the original state on entering the continuation.
@@ -1721,17 +1723,17 @@ liftListen :: Monad m => Listen w m (a, s) -> Listen w (StateT s m) a
 
 -- | Lift a <tt>pass</tt> operation to the new monad.
 liftPass :: Monad m => Pass w m (a, s) -> Pass w (StateT s m) a
-instance GHC.Generics.Generic (Control.Monad.Trans.State.Strict.StateT s m a)
-instance GHC.Base.Functor m => GHC.Base.Functor (Control.Monad.Trans.State.Strict.StateT s m)
-instance (GHC.Base.Functor m, GHC.Base.Monad m) => GHC.Base.Applicative (Control.Monad.Trans.State.Strict.StateT s m)
-instance (GHC.Base.Functor m, GHC.Base.MonadPlus m) => GHC.Base.Alternative (Control.Monad.Trans.State.Strict.StateT s m)
-instance GHC.Base.Monad m => GHC.Base.Monad (Control.Monad.Trans.State.Strict.StateT s m)
-instance Control.Monad.Fail.MonadFail m => Control.Monad.Fail.MonadFail (Control.Monad.Trans.State.Strict.StateT s m)
-instance GHC.Base.MonadPlus m => GHC.Base.MonadPlus (Control.Monad.Trans.State.Strict.StateT s m)
-instance Control.Monad.Fix.MonadFix m => Control.Monad.Fix.MonadFix (Control.Monad.Trans.State.Strict.StateT s m)
-instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.State.Strict.StateT s)
-instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.State.Strict.StateT s m)
+instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.Alternative (Control.Monad.Trans.State.Strict.StateT s m)
+instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Applicative (Control.Monad.Trans.State.Strict.StateT s m)
 instance Data.Functor.Contravariant.Contravariant m => Data.Functor.Contravariant.Contravariant (Control.Monad.Trans.State.Strict.StateT s m)
+instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad.Trans.State.Strict.StateT s m)
+instance GHC.Internal.Generics.Generic (Control.Monad.Trans.State.Strict.StateT s m a)
+instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.State.Strict.StateT s m)
+instance GHC.Internal.Control.Monad.Fix.MonadFix m => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.State.Strict.StateT s m)
+instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.State.Strict.StateT s m)
+instance GHC.Internal.Base.MonadPlus m => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.State.Strict.StateT s m)
+instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Trans.State.Strict.StateT s m)
+instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.State.Strict.StateT s)
 
 
 -- | The strict <a>WriterT</a> monad transformer, which adds collection of
@@ -1751,13 +1753,15 @@ module Control.Monad.Trans.Writer.CPS
 --   accumulate.
 --   
 --   The <a>return</a> function produces the output <a>mempty</a>, while
---   <a>&gt;&gt;=</a> combines the outputs of the subcomputations using
---   <a>mappend</a>.
+--   <tt>m <a>&gt;&gt;=</a> k</tt> combines the outputs of the
+--   subcomputations using <a>mappend</a> (also known as
+--   <tt>&lt;&gt;</tt>):
+--   
 type Writer w = WriterT w Identity
 
 -- | Construct a writer computation from a (result, output) pair. (The
 --   inverse of <a>runWriter</a>.)
-writer :: (Monoid w, Monad m) => (a, w) -> WriterT w m a
+writer :: forall w (m :: Type -> Type) a. (Monoid w, Monad m) => (a, w) -> WriterT w m a
 
 -- | Unwrap a writer computation as a (result, output) pair. (The inverse
 --   of <a>writer</a>.)
@@ -1788,9 +1792,11 @@ mapWriter :: (Monoid w, Monoid w') => ((a, w) -> (b, w')) -> Writer w a -> Write
 --   </ul>
 --   
 --   The <a>return</a> function produces the output <a>mempty</a>, while
---   <a>&gt;&gt;=</a> combines the outputs of the subcomputations using
---   <a>mappend</a>.
-data WriterT w m a
+--   <tt>m <a>&gt;&gt;=</a> k</tt> combines the outputs of the
+--   subcomputations using <a>mappend</a> (also known as
+--   <tt>&lt;&gt;</tt>):
+--   
+data WriterT w (m :: Type -> Type) a
 
 -- | Construct a writer computation from a (result, output) computation.
 --   (The inverse of <a>runWriterT</a>.)
@@ -1818,7 +1824,7 @@ mapWriterT :: (Monad n, Monoid w, Monoid w') => (m (a, w) -> n (b, w')) -> Write
 
 -- | <tt><a>tell</a> w</tt> is an action that produces the output
 --   <tt>w</tt>.
-tell :: (Monoid w, Monad m) => w -> WriterT w m ()
+tell :: forall w (m :: Type -> Type). (Monoid w, Monad m) => w -> WriterT w m ()
 
 -- | <tt><a>listen</a> m</tt> is an action that executes the action
 --   <tt>m</tt> and adds its output to the value of the computation.
@@ -1827,7 +1833,7 @@ tell :: (Monoid w, Monad m) => w -> WriterT w m ()
 --   <li><pre><a>runWriterT</a> (<a>listen</a> m) = <a>liftM</a> (\ (a, w)
 --   -&gt; ((a, w), w)) (<a>runWriterT</a> m)</pre></li>
 --   </ul>
-listen :: (Monoid w, Monad m) => WriterT w m a -> WriterT w m (a, w)
+listen :: forall w (m :: Type -> Type) a. (Monoid w, Monad m) => WriterT w m a -> WriterT w m (a, w)
 
 -- | <tt><a>listens</a> f m</tt> is an action that executes the action
 --   <tt>m</tt> and adds the result of applying <tt>f</tt> to the output to
@@ -1839,7 +1845,7 @@ listen :: (Monoid w, Monad m) => WriterT w m a -> WriterT w m (a, w)
 --   <li><pre><a>runWriterT</a> (<a>listens</a> f m) = <a>liftM</a> (\ (a,
 --   w) -&gt; ((a, f w), w)) (<a>runWriterT</a> m)</pre></li>
 --   </ul>
-listens :: (Monoid w, Monad m) => (w -> b) -> WriterT w m a -> WriterT w m (a, b)
+listens :: forall w (m :: Type -> Type) b a. (Monoid w, Monad m) => (w -> b) -> WriterT w m a -> WriterT w m (a, b)
 
 -- | <tt><a>pass</a> m</tt> is an action that executes the action
 --   <tt>m</tt>, which returns a value and a function, and returns the
@@ -1849,7 +1855,7 @@ listens :: (Monoid w, Monad m) => (w -> b) -> WriterT w m a -> WriterT w m (a, b
 --   <li><pre><a>runWriterT</a> (<a>pass</a> m) = <a>liftM</a> (\ ((a, f),
 --   w) -&gt; (a, f w)) (<a>runWriterT</a> m)</pre></li>
 --   </ul>
-pass :: (Monoid w, Monoid w', Monad m) => WriterT w m (a, w -> w') -> WriterT w' m a
+pass :: forall w w' (m :: Type -> Type) a. (Monoid w, Monoid w', Monad m) => WriterT w m (a, w -> w') -> WriterT w' m a
 
 -- | <tt><a>censor</a> f m</tt> is an action that executes the action
 --   <tt>m</tt> and applies the function <tt>f</tt> to its output, leaving
@@ -1861,7 +1867,7 @@ pass :: (Monoid w, Monoid w', Monad m) => WriterT w m (a, w -> w') -> WriterT w'
 --   <li><pre><a>runWriterT</a> (<a>censor</a> f m) = <a>liftM</a> (\ (a,
 --   w) -&gt; (a, f w)) (<a>runWriterT</a> m)</pre></li>
 --   </ul>
-censor :: (Monoid w, Monad m) => (w -> w) -> WriterT w m a -> WriterT w m a
+censor :: forall w (m :: Type -> Type) a. (Monoid w, Monad m) => (w -> w) -> WriterT w m a -> WriterT w m a
 
 -- | Uniform lifting of a <tt>callCC</tt> operation to the new monad. This
 --   version rolls back to the original state on entering the continuation.
@@ -1869,16 +1875,16 @@ liftCallCC :: CallCC m (a, w) (b, w) -> CallCC (WriterT w m) a b
 
 -- | Lift a <tt>catchE</tt> operation to the new monad.
 liftCatch :: Catch e m (a, w) -> Catch e (WriterT w m) a
-instance GHC.Generics.Generic (Control.Monad.Trans.Writer.CPS.WriterT w m a)
-instance GHC.Base.Functor m => GHC.Base.Functor (Control.Monad.Trans.Writer.CPS.WriterT w m)
-instance (GHC.Base.Functor m, GHC.Base.Monad m) => GHC.Base.Applicative (Control.Monad.Trans.Writer.CPS.WriterT w m)
-instance (GHC.Base.Functor m, GHC.Base.MonadPlus m) => GHC.Base.Alternative (Control.Monad.Trans.Writer.CPS.WriterT w m)
-instance GHC.Base.Monad m => GHC.Base.Monad (Control.Monad.Trans.Writer.CPS.WriterT w m)
-instance Control.Monad.Fail.MonadFail m => Control.Monad.Fail.MonadFail (Control.Monad.Trans.Writer.CPS.WriterT w m)
-instance (GHC.Base.Functor m, GHC.Base.MonadPlus m) => GHC.Base.MonadPlus (Control.Monad.Trans.Writer.CPS.WriterT w m)
-instance Control.Monad.Fix.MonadFix m => Control.Monad.Fix.MonadFix (Control.Monad.Trans.Writer.CPS.WriterT w m)
-instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Writer.CPS.WriterT w)
+instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.Alternative (Control.Monad.Trans.Writer.CPS.WriterT w m)
+instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Applicative (Control.Monad.Trans.Writer.CPS.WriterT w m)
+instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad.Trans.Writer.CPS.WriterT w m)
+instance GHC.Internal.Generics.Generic (Control.Monad.Trans.Writer.CPS.WriterT w m a)
+instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Writer.CPS.WriterT w m)
+instance GHC.Internal.Control.Monad.Fix.MonadFix m => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.Writer.CPS.WriterT w m)
 instance Control.Monad.IO.Class.MonadIO m => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Writer.CPS.WriterT w m)
+instance (GHC.Internal.Base.Functor m, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.Writer.CPS.WriterT w m)
+instance Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Writer.CPS.WriterT w)
+instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Control.Monad.Trans.Writer.CPS.WriterT w m)
 
 
 -- | The lazy <a>WriterT</a> monad transformer, which adds collection of
@@ -1897,13 +1903,15 @@ module Control.Monad.Trans.Writer.Lazy
 --   accumulate.
 --   
 --   The <a>return</a> function produces the output <a>mempty</a>, while
---   <tt>&gt;&gt;=</tt> combines the outputs of the subcomputations using
---   <a>mappend</a>.
+--   <tt>m <a>&gt;&gt;=</a> k</tt> combines the outputs of the
+--   subcomputations using <a>mappend</a> (also known as
+--   <tt>&lt;&gt;</tt>):
+--   
 type Writer w = WriterT w Identity
 
 -- | Construct a writer computation from a (result, output) pair. (The
 --   inverse of <a>runWriter</a>.)
-writer :: Monad m => (a, w) -> WriterT w m a
+writer :: forall (m :: Type -> Type) a w. Monad m => (a, w) -> WriterT w m a
 
 -- | Unwrap a writer computation as a (result, output) pair. (The inverse
 --   of <a>writer</a>.)
@@ -1934,11 +1942,13 @@ mapWriter :: ((a, w) -> (b, w')) -> Writer w a -> Writer w' b
 --   </ul>
 --   
 --   The <a>return</a> function produces the output <a>mempty</a>, while
---   <tt>&gt;&gt;=</tt> combines the outputs of the subcomputations using
---   <a>mappend</a>.
-newtype WriterT w m a
-WriterT :: m (a, w) -> WriterT w m a
-[runWriterT] :: WriterT w m a -> m (a, w)
+--   <tt>m <a>&gt;&gt;=</a> k</tt> combines the outputs of the
+--   subcomputations using <a>mappend</a> (also known as
+--   <tt>&lt;&gt;</tt>):
+--   
+newtype WriterT w (m :: Type -> Type) a
+WriterT :: m (a, w) -> WriterT w (m :: Type -> Type) a
+[runWriterT] :: WriterT w (m :: Type -> Type) a -> m (a, w)
 
 -- | Extract the output from a writer computation.
 --   
@@ -1959,7 +1969,7 @@ mapWriterT :: (m (a, w) -> n (b, w')) -> WriterT w m a -> WriterT w' n b
 
 -- | <tt><a>tell</a> w</tt> is an action that produces the output
 --   <tt>w</tt>.
-tell :: Monad m => w -> WriterT w m ()
+tell :: forall (m :: Type -> Type) w. Monad m => w -> WriterT w m ()
 
 -- | <tt><a>listen</a> m</tt> is an action that executes the action
 --   <tt>m</tt> and adds its output to the value of the computation.
@@ -1968,7 +1978,7 @@ tell :: Monad m => w -> WriterT w m ()
 --   <li><pre><a>runWriterT</a> (<a>listen</a> m) = <a>liftM</a> (\ (a, w)
 --   -&gt; ((a, w), w)) (<a>runWriterT</a> m)</pre></li>
 --   </ul>
-listen :: Monad m => WriterT w m a -> WriterT w m (a, w)
+listen :: forall (m :: Type -> Type) w a. Monad m => WriterT w m a -> WriterT w m (a, w)
 
 -- | <tt><a>listens</a> f m</tt> is an action that executes the action
 --   <tt>m</tt> and adds the result of applying <tt>f</tt> to the output to
@@ -1980,7 +1990,7 @@ listen :: Monad m => WriterT w m a -> WriterT w m (a, w)
 --   <li><pre><a>runWriterT</a> (<a>listens</a> f m) = <a>liftM</a> (\ (a,
 --   w) -&gt; ((a, f w), w)) (<a>runWriterT</a> m)</pre></li>
 --   </ul>
-listens :: Monad m => (w -> b) -> WriterT w m a -> WriterT w m (a, b)
+listens :: forall (m :: Type -> Type) w b a. Monad m => (w -> b) -> WriterT w m a -> WriterT w m (a, b)
 
 -- | <tt><a>pass</a> m</tt> is an action that executes the action
 --   <tt>m</tt>, which returns a value and a function, and returns the
@@ -1990,7 +2000,7 @@ listens :: Monad m => (w -> b) -> WriterT w m a -> WriterT w m (a, b)
 --   <li><pre><a>runWriterT</a> (<a>pass</a> m) = <a>liftM</a> (\ ((a, f),
 --   w) -&gt; (a, f w)) (<a>runWriterT</a> m)</pre></li>
 --   </ul>
-pass :: Monad m => WriterT w m (a, w -> w) -> WriterT w m a
+pass :: forall (m :: Type -> Type) w a. Monad m => WriterT w m (a, w -> w) -> WriterT w m a
 
 -- | <tt><a>censor</a> f m</tt> is an action that executes the action
 --   <tt>m</tt> and applies the function <tt>f</tt> to its output, leaving
@@ -2002,35 +2012,35 @@ pass :: Monad m => WriterT w m (a, w -> w) -> WriterT w m a
 --   <li><pre><a>runWriterT</a> (<a>censor</a> f m) = <a>liftM</a> (\ (a,
 --   w) -&gt; (a, f w)) (<a>runWriterT</a> m)</pre></li>
 --   </ul>
-censor :: Monad m => (w -> w) -> WriterT w m a -> WriterT w m a
+censor :: forall (m :: Type -> Type) w a. Monad m => (w -> w) -> WriterT w m a -> WriterT w m a
 
 -- | Lift a <tt>callCC</tt> operation to the new monad.
 liftCallCC :: Monoid w => CallCC m (a, w) (b, w) -> CallCC (WriterT w m) a b
 
 -- | Lift a <tt>catchE</tt> operation to the new monad.
 liftCatch :: Catch e m (a, w) -> Catch e (WriterT w m) a
-instance GHC.Generics.Generic (Control.Monad.Trans.Writer.Lazy.WriterT w m a)
-instance (GHC.Classes.Eq w, Data.Functor.Classes.Eq1 m) => Data.Functor.Classes.Eq1 (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (GHC.Classes.Ord w, Data.Functor.Classes.Ord1 m) => Data.Functor.Classes.Ord1 (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (GHC.Read.Read w, Data.Functor.Classes.Read1 m) => Data.Functor.Classes.Read1 (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (GHC.Show.Show w, Data.Functor.Classes.Show1 m) => Data.Functor.Classes.Show1 (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (GHC.Classes.Eq w, Data.Functor.Classes.Eq1 m, GHC.Classes.Eq a) => GHC.Classes.Eq (Control.Monad.Trans.Writer.Lazy.WriterT w m a)
-instance (GHC.Classes.Ord w, Data.Functor.Classes.Ord1 m, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Monad.Trans.Writer.Lazy.WriterT w m a)
-instance (GHC.Read.Read w, Data.Functor.Classes.Read1 m, GHC.Read.Read a) => GHC.Read.Read (Control.Monad.Trans.Writer.Lazy.WriterT w m a)
-instance (GHC.Show.Show w, Data.Functor.Classes.Show1 m, GHC.Show.Show a) => GHC.Show.Show (Control.Monad.Trans.Writer.Lazy.WriterT w m a)
-instance GHC.Base.Functor m => GHC.Base.Functor (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance Data.Foldable.Foldable f => Data.Foldable.Foldable (Control.Monad.Trans.Writer.Lazy.WriterT w f)
-instance Data.Traversable.Traversable f => Data.Traversable.Traversable (Control.Monad.Trans.Writer.Lazy.WriterT w f)
-instance (GHC.Base.Monoid w, GHC.Base.Applicative m) => GHC.Base.Applicative (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (GHC.Base.Monoid w, GHC.Base.Alternative m) => GHC.Base.Alternative (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (GHC.Base.Monoid w, GHC.Base.Monad m) => GHC.Base.Monad (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (GHC.Base.Monoid w, Control.Monad.Fail.MonadFail m) => Control.Monad.Fail.MonadFail (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (GHC.Base.Monoid w, GHC.Base.MonadPlus m) => GHC.Base.MonadPlus (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (GHC.Base.Monoid w, Control.Monad.Fix.MonadFix m) => Control.Monad.Fix.MonadFix (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance GHC.Base.Monoid w => Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Writer.Lazy.WriterT w)
-instance (GHC.Base.Monoid w, Control.Monad.IO.Class.MonadIO m) => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Writer.Lazy.WriterT w m)
-instance (GHC.Base.Monoid w, Control.Monad.Zip.MonadZip m) => Control.Monad.Zip.MonadZip (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Alternative m) => GHC.Internal.Base.Alternative (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Applicative m) => GHC.Internal.Base.Applicative (Control.Monad.Trans.Writer.Lazy.WriterT w m)
 instance Data.Functor.Contravariant.Contravariant m => Data.Functor.Contravariant.Contravariant (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance (GHC.Classes.Eq w, Data.Functor.Classes.Eq1 m) => Data.Functor.Classes.Eq1 (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance (GHC.Classes.Eq w, Data.Functor.Classes.Eq1 m, GHC.Classes.Eq a) => GHC.Classes.Eq (Control.Monad.Trans.Writer.Lazy.WriterT w m a)
+instance GHC.Internal.Data.Foldable.Foldable f => GHC.Internal.Data.Foldable.Foldable (Control.Monad.Trans.Writer.Lazy.WriterT w f)
+instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance GHC.Internal.Generics.Generic (Control.Monad.Trans.Writer.Lazy.WriterT w m a)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Fail.MonadFail m) => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Fix.MonadFix m) => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.IO.Class.MonadIO m) => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance GHC.Internal.Base.Monoid w => Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Writer.Lazy.WriterT w)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Monad (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Zip.MonadZip m) => Control.Monad.Zip.MonadZip (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance (GHC.Classes.Ord w, Data.Functor.Classes.Ord1 m) => Data.Functor.Classes.Ord1 (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance (GHC.Classes.Ord w, Data.Functor.Classes.Ord1 m, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Monad.Trans.Writer.Lazy.WriterT w m a)
+instance (GHC.Internal.Read.Read w, Data.Functor.Classes.Read1 m) => Data.Functor.Classes.Read1 (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance (GHC.Internal.Read.Read w, Data.Functor.Classes.Read1 m, GHC.Internal.Read.Read a) => GHC.Internal.Read.Read (Control.Monad.Trans.Writer.Lazy.WriterT w m a)
+instance (GHC.Internal.Show.Show w, Data.Functor.Classes.Show1 m) => Data.Functor.Classes.Show1 (Control.Monad.Trans.Writer.Lazy.WriterT w m)
+instance (GHC.Internal.Show.Show w, Data.Functor.Classes.Show1 m, GHC.Internal.Show.Show a) => GHC.Internal.Show.Show (Control.Monad.Trans.Writer.Lazy.WriterT w m a)
+instance GHC.Internal.Data.Traversable.Traversable f => GHC.Internal.Data.Traversable.Traversable (Control.Monad.Trans.Writer.Lazy.WriterT w f)
 
 
 -- | The WriterT monad transformer. This version builds its output lazily;
@@ -2041,24 +2051,32 @@ module Control.Monad.Trans.Writer
 
 -- | The lazy <a>AccumT</a> monad transformer, which adds accumulation
 --   capabilities (such as declarations or document patches) to a given
---   monad.
+--   monad. Each computation has access to the combination of the input
+--   environment and outputs added so far, and returns the outputs added.
 --   
---   This monad transformer provides append-only accumulation during the
---   computation. For more general access, use
---   <a>Control.Monad.Trans.State</a> instead.
+--   In applications requiring only the ability to accumulate an output and
+--   to inspect the output so far, it would be considerably more efficient
+--   to use <a>Control.Monad.Trans.State</a> instead.
 module Control.Monad.Trans.Accum
 
 -- | An accumulation monad parameterized by the type <tt>w</tt> of output
 --   to accumulate.
 --   
---   The <a>return</a> function produces the output <a>mempty</a>, while
---   <tt>&gt;&gt;=</tt> combines the outputs of the subcomputations using
---   <a>mappend</a>.
+--   This monad is a more complex extension of both the reader and writer
+--   monads. The <a>return</a> function produces the output <a>mempty</a>,
+--   while <tt>m <a>&gt;&gt;=</a> k</tt> uses the output of <tt>m</tt> both
+--   to extend the initial environment of <tt>k</tt> and to combine with
+--   the output of <tt>k</tt>:
+--   
+--   
+--   In applications requiring only the ability to accumulate an output and
+--   to inspect the output so far, it would be considerably more efficient
+--   to use a state monad.
 type Accum w = AccumT w Identity
 
 -- | Construct an accumulation computation from a (result, output) pair.
 --   (The inverse of <a>runAccum</a>.)
-accum :: Monad m => (w -> (a, w)) -> AccumT w m a
+accum :: forall (m :: Type -> Type) w a. Monad m => (w -> (a, w)) -> AccumT w m a
 
 -- | Unwrap an accumulation computation as a (result, output) pair. (The
 --   inverse of <a>accum</a>.)
@@ -2097,23 +2115,28 @@ mapAccum :: ((a, w) -> (b, w)) -> Accum w a -> Accum w b
 --   <li><tt>m</tt> - The inner monad.</li>
 --   </ul>
 --   
---   The <a>return</a> function produces the output <a>mempty</a>, while
---   <tt>&gt;&gt;=</tt> combines the outputs of the subcomputations using
---   <a>mappend</a>.
+--   This monad transformer is a more complex extension of both the reader
+--   and writer monad transformers. The <a>return</a> function produces the
+--   output <a>mempty</a>, while <tt>m <a>&gt;&gt;=</a> k</tt> uses the
+--   output of <tt>m</tt> both to extend the initial environment of
+--   <tt>k</tt> and to combine with the output of <tt>k</tt>:
 --   
---   This monad transformer is similar to both state and writer monad
---   transformers. Thus it can be seen as
 --   
---   <ul>
---   <li>a restricted append-only version of a state monad transformer
---   or</li>
---   <li>a writer monad transformer with the extra ability to read all
---   previous output.</li>
---   </ul>
-newtype AccumT w m a
-AccumT :: (w -> m (a, w)) -> AccumT w m a
+--   In applications requiring only the ability to accumulate an output and
+--   to inspect the output so far, it would be considerably more efficient
+--   to use a state monad transformer.
+newtype AccumT w (m :: Type -> Type) a
+AccumT :: (w -> m (a, w)) -> AccumT w (m :: Type -> Type) a
 
--- | Unwrap an accumulation computation.
+-- | Unwrap an accumulation computation. For example, in the call
+--   
+--   <pre>
+--   (value, locals) &lt;- runAccumT action globals
+--   </pre>
+--   
+--   the action is fed an initial environment <tt>globals</tt>, and
+--   <tt>locals</tt> is the sum of all arguments to calls of <a>add</a>
+--   executed by the action.
 runAccumT :: AccumT w m a -> w -> m (a, w)
 
 -- | Extract the output from an accumulation computation.
@@ -2144,15 +2167,15 @@ mapAccumT :: (m (a, w) -> n (b, w)) -> AccumT w m a -> AccumT w n b
 
 -- | <tt><a>look</a></tt> is an action that fetches all the previously
 --   accumulated output.
-look :: (Monoid w, Monad m) => AccumT w m w
+look :: forall w (m :: Type -> Type). (Monoid w, Monad m) => AccumT w m w
 
 -- | <tt><a>look</a></tt> is an action that retrieves a function of the
 --   previously accumulated output.
-looks :: (Monoid w, Monad m) => (w -> a) -> AccumT w m a
+looks :: forall w (m :: Type -> Type) a. (Monoid w, Monad m) => (w -> a) -> AccumT w m a
 
 -- | <tt><a>add</a> w</tt> is an action that produces the output
 --   <tt>w</tt>.
-add :: Monad m => w -> AccumT w m ()
+add :: forall (m :: Type -> Type) w. Monad m => w -> AccumT w m ()
 
 -- | Uniform lifting of a <tt>callCC</tt> operation to the new monad. This
 --   version rolls back to the original output history on entering the
@@ -2175,24 +2198,24 @@ liftListen :: Monad m => Listen w m (a, s) -> Listen w (AccumT s m) a
 liftPass :: Monad m => Pass w m (a, s) -> Pass w (AccumT s m) a
 
 -- | Convert a read-only computation into an accumulation computation.
-readerToAccumT :: (Functor m, Monoid w) => ReaderT w m a -> AccumT w m a
+readerToAccumT :: forall (m :: Type -> Type) w a. (Functor m, Monoid w) => ReaderT w m a -> AccumT w m a
 
 -- | Convert a writer computation into an accumulation computation.
-writerToAccumT :: WriterT w m a -> AccumT w m a
+writerToAccumT :: forall w (m :: Type -> Type) a. WriterT w m a -> AccumT w m a
 
 -- | Convert an accumulation (append-only) computation into a fully
 --   stateful computation.
-accumToStateT :: (Functor m, Monoid s) => AccumT s m a -> StateT s m a
-instance GHC.Generics.Generic (Control.Monad.Trans.Accum.AccumT w m a)
-instance GHC.Base.Functor m => GHC.Base.Functor (Control.Monad.Trans.Accum.AccumT w m)
-instance (GHC.Base.Monoid w, GHC.Base.Functor m, GHC.Base.Monad m) => GHC.Base.Applicative (Control.Monad.Trans.Accum.AccumT w m)
-instance (GHC.Base.Monoid w, GHC.Base.Functor m, GHC.Base.MonadPlus m) => GHC.Base.Alternative (Control.Monad.Trans.Accum.AccumT w m)
-instance (GHC.Base.Monoid w, GHC.Base.Functor m, GHC.Base.Monad m) => GHC.Base.Monad (Control.Monad.Trans.Accum.AccumT w m)
-instance (GHC.Base.Monoid w, Control.Monad.Fail.MonadFail m) => Control.Monad.Fail.MonadFail (Control.Monad.Trans.Accum.AccumT w m)
-instance (GHC.Base.Monoid w, GHC.Base.Functor m, GHC.Base.MonadPlus m) => GHC.Base.MonadPlus (Control.Monad.Trans.Accum.AccumT w m)
-instance (GHC.Base.Monoid w, GHC.Base.Functor m, Control.Monad.Fix.MonadFix m) => Control.Monad.Fix.MonadFix (Control.Monad.Trans.Accum.AccumT w m)
-instance GHC.Base.Monoid w => Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Accum.AccumT w)
-instance (GHC.Base.Monoid w, GHC.Base.Functor m, Control.Monad.IO.Class.MonadIO m) => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Accum.AccumT w m)
+accumToStateT :: forall (m :: Type -> Type) s a. (Functor m, Monoid s) => AccumT s m a -> StateT s m a
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.Alternative (Control.Monad.Trans.Accum.AccumT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Applicative (Control.Monad.Trans.Accum.AccumT w m)
+instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad.Trans.Accum.AccumT w m)
+instance GHC.Internal.Generics.Generic (Control.Monad.Trans.Accum.AccumT w m a)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Monad (Control.Monad.Trans.Accum.AccumT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Fail.MonadFail m) => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Accum.AccumT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, GHC.Internal.Control.Monad.Fix.MonadFix m) => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.Accum.AccumT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, Control.Monad.IO.Class.MonadIO m) => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Accum.AccumT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Functor m, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.Accum.AccumT w m)
+instance GHC.Internal.Base.Monoid w => Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Accum.AccumT w)
 
 
 -- | The strict <a>WriterT</a> monad transformer, which adds collection of
@@ -2213,13 +2236,15 @@ module Control.Monad.Trans.Writer.Strict
 --   accumulate.
 --   
 --   The <a>return</a> function produces the output <a>mempty</a>, while
---   <tt>&gt;&gt;=</tt> combines the outputs of the subcomputations using
---   <a>mappend</a>.
+--   <tt>m <a>&gt;&gt;=</a> k</tt> combines the outputs of the
+--   subcomputations using <a>mappend</a> (also known as
+--   <tt>&lt;&gt;</tt>):
+--   
 type Writer w = WriterT w Identity
 
 -- | Construct a writer computation from a (result, output) pair. (The
 --   inverse of <a>runWriter</a>.)
-writer :: Monad m => (a, w) -> WriterT w m a
+writer :: forall (m :: Type -> Type) a w. Monad m => (a, w) -> WriterT w m a
 
 -- | Unwrap a writer computation as a (result, output) pair. (The inverse
 --   of <a>writer</a>.)
@@ -2250,11 +2275,13 @@ mapWriter :: ((a, w) -> (b, w')) -> Writer w a -> Writer w' b
 --   </ul>
 --   
 --   The <a>return</a> function produces the output <a>mempty</a>, while
---   <tt>&gt;&gt;=</tt> combines the outputs of the subcomputations using
---   <a>mappend</a>.
-newtype WriterT w m a
-WriterT :: m (a, w) -> WriterT w m a
-[runWriterT] :: WriterT w m a -> m (a, w)
+--   <tt>m <a>&gt;&gt;=</a> k</tt> combines the outputs of the
+--   subcomputations using <a>mappend</a> (also known as
+--   <tt>&lt;&gt;</tt>):
+--   
+newtype WriterT w (m :: Type -> Type) a
+WriterT :: m (a, w) -> WriterT w (m :: Type -> Type) a
+[runWriterT] :: WriterT w (m :: Type -> Type) a -> m (a, w)
 
 -- | Extract the output from a writer computation.
 --   
@@ -2275,7 +2302,7 @@ mapWriterT :: (m (a, w) -> n (b, w')) -> WriterT w m a -> WriterT w' n b
 
 -- | <tt><a>tell</a> w</tt> is an action that produces the output
 --   <tt>w</tt>.
-tell :: Monad m => w -> WriterT w m ()
+tell :: forall (m :: Type -> Type) w. Monad m => w -> WriterT w m ()
 
 -- | <tt><a>listen</a> m</tt> is an action that executes the action
 --   <tt>m</tt> and adds its output to the value of the computation.
@@ -2284,7 +2311,7 @@ tell :: Monad m => w -> WriterT w m ()
 --   <li><pre><a>runWriterT</a> (<a>listen</a> m) = <a>liftM</a> (\ (a, w)
 --   -&gt; ((a, w), w)) (<a>runWriterT</a> m)</pre></li>
 --   </ul>
-listen :: Monad m => WriterT w m a -> WriterT w m (a, w)
+listen :: forall (m :: Type -> Type) w a. Monad m => WriterT w m a -> WriterT w m (a, w)
 
 -- | <tt><a>listens</a> f m</tt> is an action that executes the action
 --   <tt>m</tt> and adds the result of applying <tt>f</tt> to the output to
@@ -2296,7 +2323,7 @@ listen :: Monad m => WriterT w m a -> WriterT w m (a, w)
 --   <li><pre><a>runWriterT</a> (<a>listens</a> f m) = <a>liftM</a> (\ (a,
 --   w) -&gt; ((a, f w), w)) (<a>runWriterT</a> m)</pre></li>
 --   </ul>
-listens :: Monad m => (w -> b) -> WriterT w m a -> WriterT w m (a, b)
+listens :: forall (m :: Type -> Type) w b a. Monad m => (w -> b) -> WriterT w m a -> WriterT w m (a, b)
 
 -- | <tt><a>pass</a> m</tt> is an action that executes the action
 --   <tt>m</tt>, which returns a value and a function, and returns the
@@ -2306,7 +2333,7 @@ listens :: Monad m => (w -> b) -> WriterT w m a -> WriterT w m (a, b)
 --   <li><pre><a>runWriterT</a> (<a>pass</a> m) = <a>liftM</a> (\ ((a, f),
 --   w) -&gt; (a, f w)) (<a>runWriterT</a> m)</pre></li>
 --   </ul>
-pass :: Monad m => WriterT w m (a, w -> w) -> WriterT w m a
+pass :: forall (m :: Type -> Type) w a. Monad m => WriterT w m (a, w -> w) -> WriterT w m a
 
 -- | <tt><a>censor</a> f m</tt> is an action that executes the action
 --   <tt>m</tt> and applies the function <tt>f</tt> to its output, leaving
@@ -2318,69 +2345,69 @@ pass :: Monad m => WriterT w m (a, w -> w) -> WriterT w m a
 --   <li><pre><a>runWriterT</a> (<a>censor</a> f m) = <a>liftM</a> (\ (a,
 --   w) -&gt; (a, f w)) (<a>runWriterT</a> m)</pre></li>
 --   </ul>
-censor :: Monad m => (w -> w) -> WriterT w m a -> WriterT w m a
+censor :: forall (m :: Type -> Type) w a. Monad m => (w -> w) -> WriterT w m a -> WriterT w m a
 
 -- | Lift a <tt>callCC</tt> operation to the new monad.
 liftCallCC :: Monoid w => CallCC m (a, w) (b, w) -> CallCC (WriterT w m) a b
 
 -- | Lift a <tt>catchE</tt> operation to the new monad.
 liftCatch :: Catch e m (a, w) -> Catch e (WriterT w m) a
-instance GHC.Generics.Generic (Control.Monad.Trans.Writer.Strict.WriterT w m a)
-instance (GHC.Classes.Eq w, Data.Functor.Classes.Eq1 m) => Data.Functor.Classes.Eq1 (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance (GHC.Classes.Ord w, Data.Functor.Classes.Ord1 m) => Data.Functor.Classes.Ord1 (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance (GHC.Read.Read w, Data.Functor.Classes.Read1 m) => Data.Functor.Classes.Read1 (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance (GHC.Show.Show w, Data.Functor.Classes.Show1 m) => Data.Functor.Classes.Show1 (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance (GHC.Classes.Eq w, Data.Functor.Classes.Eq1 m, GHC.Classes.Eq a) => GHC.Classes.Eq (Control.Monad.Trans.Writer.Strict.WriterT w m a)
-instance (GHC.Classes.Ord w, Data.Functor.Classes.Ord1 m, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Monad.Trans.Writer.Strict.WriterT w m a)
-instance (GHC.Read.Read w, Data.Functor.Classes.Read1 m, GHC.Read.Read a) => GHC.Read.Read (Control.Monad.Trans.Writer.Strict.WriterT w m a)
-instance (GHC.Show.Show w, Data.Functor.Classes.Show1 m, GHC.Show.Show a) => GHC.Show.Show (Control.Monad.Trans.Writer.Strict.WriterT w m a)
-instance GHC.Base.Functor m => GHC.Base.Functor (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance Data.Foldable.Foldable f => Data.Foldable.Foldable (Control.Monad.Trans.Writer.Strict.WriterT w f)
-instance Data.Traversable.Traversable f => Data.Traversable.Traversable (Control.Monad.Trans.Writer.Strict.WriterT w f)
-instance (GHC.Base.Monoid w, GHC.Base.Applicative m) => GHC.Base.Applicative (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance (GHC.Base.Monoid w, GHC.Base.Alternative m) => GHC.Base.Alternative (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance (GHC.Base.Monoid w, GHC.Base.Monad m) => GHC.Base.Monad (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance (GHC.Base.Monoid w, Control.Monad.Fail.MonadFail m) => Control.Monad.Fail.MonadFail (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance (GHC.Base.Monoid w, GHC.Base.MonadPlus m) => GHC.Base.MonadPlus (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance (GHC.Base.Monoid w, Control.Monad.Fix.MonadFix m) => Control.Monad.Fix.MonadFix (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance GHC.Base.Monoid w => Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Writer.Strict.WriterT w)
-instance (GHC.Base.Monoid w, Control.Monad.IO.Class.MonadIO m) => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Writer.Strict.WriterT w m)
-instance (GHC.Base.Monoid w, Control.Monad.Zip.MonadZip m) => Control.Monad.Zip.MonadZip (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Alternative m) => GHC.Internal.Base.Alternative (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Applicative m) => GHC.Internal.Base.Applicative (Control.Monad.Trans.Writer.Strict.WriterT w m)
 instance Data.Functor.Contravariant.Contravariant m => Data.Functor.Contravariant.Contravariant (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Classes.Eq w, Data.Functor.Classes.Eq1 m) => Data.Functor.Classes.Eq1 (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Classes.Eq w, Data.Functor.Classes.Eq1 m, GHC.Classes.Eq a) => GHC.Classes.Eq (Control.Monad.Trans.Writer.Strict.WriterT w m a)
+instance GHC.Internal.Data.Foldable.Foldable f => GHC.Internal.Data.Foldable.Foldable (Control.Monad.Trans.Writer.Strict.WriterT w f)
+instance GHC.Internal.Base.Functor m => GHC.Internal.Base.Functor (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance GHC.Internal.Generics.Generic (Control.Monad.Trans.Writer.Strict.WriterT w m a)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Fail.MonadFail m) => GHC.Internal.Control.Monad.Fail.MonadFail (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Control.Monad.Fix.MonadFix m) => GHC.Internal.Control.Monad.Fix.MonadFix (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.IO.Class.MonadIO m) => Control.Monad.IO.Class.MonadIO (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.MonadPlus m) => GHC.Internal.Base.MonadPlus (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance GHC.Internal.Base.Monoid w => Control.Monad.Trans.Class.MonadTrans (Control.Monad.Trans.Writer.Strict.WriterT w)
+instance (GHC.Internal.Base.Monoid w, GHC.Internal.Base.Monad m) => GHC.Internal.Base.Monad (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Internal.Base.Monoid w, Control.Monad.Zip.MonadZip m) => Control.Monad.Zip.MonadZip (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Classes.Ord w, Data.Functor.Classes.Ord1 m) => Data.Functor.Classes.Ord1 (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Classes.Ord w, Data.Functor.Classes.Ord1 m, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Monad.Trans.Writer.Strict.WriterT w m a)
+instance (GHC.Internal.Read.Read w, Data.Functor.Classes.Read1 m) => Data.Functor.Classes.Read1 (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Internal.Read.Read w, Data.Functor.Classes.Read1 m, GHC.Internal.Read.Read a) => GHC.Internal.Read.Read (Control.Monad.Trans.Writer.Strict.WriterT w m a)
+instance (GHC.Internal.Show.Show w, Data.Functor.Classes.Show1 m) => Data.Functor.Classes.Show1 (Control.Monad.Trans.Writer.Strict.WriterT w m)
+instance (GHC.Internal.Show.Show w, Data.Functor.Classes.Show1 m, GHC.Internal.Show.Show a) => GHC.Internal.Show.Show (Control.Monad.Trans.Writer.Strict.WriterT w m a)
+instance GHC.Internal.Data.Traversable.Traversable f => GHC.Internal.Data.Traversable.Traversable (Control.Monad.Trans.Writer.Strict.WriterT w f)
 
 
 -- | The constant functor.
 module Data.Functor.Constant
 
 -- | Constant functor.
-newtype Constant a b
-Constant :: a -> Constant a b
-[getConstant] :: Constant a b -> a
-instance GHC.Generics.Generic1 (Data.Functor.Constant.Constant a)
-instance forall a k (b :: k). GHC.Generics.Generic (Data.Functor.Constant.Constant a b)
-instance forall a k (b :: k). (Data.Typeable.Internal.Typeable b, Data.Typeable.Internal.Typeable k, Data.Data.Data a) => Data.Data.Data (Data.Functor.Constant.Constant a b)
-instance forall a k (b :: k). GHC.Classes.Ord a => GHC.Classes.Ord (Data.Functor.Constant.Constant a b)
-instance forall a k (b :: k). GHC.Classes.Eq a => GHC.Classes.Eq (Data.Functor.Constant.Constant a b)
-instance forall k a (b :: k). GHC.Read.Read a => GHC.Read.Read (Data.Functor.Constant.Constant a b)
-instance forall k a (b :: k). GHC.Show.Show a => GHC.Show.Show (Data.Functor.Constant.Constant a b)
-instance Data.Functor.Classes.Eq2 Data.Functor.Constant.Constant
-instance Data.Functor.Classes.Ord2 Data.Functor.Constant.Constant
-instance Data.Functor.Classes.Read2 Data.Functor.Constant.Constant
-instance Data.Functor.Classes.Show2 Data.Functor.Constant.Constant
-instance GHC.Classes.Eq a => Data.Functor.Classes.Eq1 (Data.Functor.Constant.Constant a)
-instance GHC.Classes.Ord a => Data.Functor.Classes.Ord1 (Data.Functor.Constant.Constant a)
-instance GHC.Read.Read a => Data.Functor.Classes.Read1 (Data.Functor.Constant.Constant a)
-instance GHC.Show.Show a => Data.Functor.Classes.Show1 (Data.Functor.Constant.Constant a)
-instance GHC.Base.Functor (Data.Functor.Constant.Constant a)
-instance Data.Foldable.Foldable (Data.Functor.Constant.Constant a)
-instance Data.Traversable.Traversable (Data.Functor.Constant.Constant a)
-instance forall k a (b :: k). GHC.Base.Semigroup a => GHC.Base.Semigroup (Data.Functor.Constant.Constant a b)
-instance GHC.Base.Monoid a => GHC.Base.Applicative (Data.Functor.Constant.Constant a)
-instance forall k a (b :: k). GHC.Base.Monoid a => GHC.Base.Monoid (Data.Functor.Constant.Constant a b)
-instance Data.Bifunctor.Bifunctor Data.Functor.Constant.Constant
+newtype Constant a (b :: k)
+Constant :: a -> Constant a (b :: k)
+[getConstant] :: Constant a (b :: k) -> a
+instance GHC.Internal.Base.Monoid a => GHC.Internal.Base.Applicative (Data.Functor.Constant.Constant a)
 instance Data.Bifoldable.Bifoldable Data.Functor.Constant.Constant
+instance Data.Bifunctor.Bifunctor Data.Functor.Constant.Constant
 instance Data.Bitraversable.Bitraversable Data.Functor.Constant.Constant
 instance Data.Functor.Contravariant.Contravariant (Data.Functor.Constant.Constant a)
+instance forall a k (b :: k). (GHC.Internal.Data.Typeable.Internal.Typeable b, GHC.Internal.Data.Typeable.Internal.Typeable k, GHC.Internal.Data.Data.Data a) => GHC.Internal.Data.Data.Data (Data.Functor.Constant.Constant a b)
+instance GHC.Classes.Eq a => Data.Functor.Classes.Eq1 (Data.Functor.Constant.Constant a)
+instance Data.Functor.Classes.Eq2 Data.Functor.Constant.Constant
+instance forall a k (b :: k). GHC.Classes.Eq a => GHC.Classes.Eq (Data.Functor.Constant.Constant a b)
+instance GHC.Internal.Data.Foldable.Foldable (Data.Functor.Constant.Constant a)
+instance GHC.Internal.Base.Functor (Data.Functor.Constant.Constant a)
+instance GHC.Internal.Generics.Generic1 (Data.Functor.Constant.Constant a)
+instance forall a k (b :: k). GHC.Internal.Generics.Generic (Data.Functor.Constant.Constant a b)
+instance forall k a (b :: k). GHC.Internal.Base.Monoid a => GHC.Internal.Base.Monoid (Data.Functor.Constant.Constant a b)
+instance GHC.Classes.Ord a => Data.Functor.Classes.Ord1 (Data.Functor.Constant.Constant a)
+instance Data.Functor.Classes.Ord2 Data.Functor.Constant.Constant
+instance forall a k (b :: k). GHC.Classes.Ord a => GHC.Classes.Ord (Data.Functor.Constant.Constant a b)
+instance GHC.Internal.Read.Read a => Data.Functor.Classes.Read1 (Data.Functor.Constant.Constant a)
+instance Data.Functor.Classes.Read2 Data.Functor.Constant.Constant
+instance forall k a (b :: k). GHC.Internal.Read.Read a => GHC.Internal.Read.Read (Data.Functor.Constant.Constant a b)
+instance forall k a (b :: k). GHC.Internal.Base.Semigroup a => GHC.Internal.Base.Semigroup (Data.Functor.Constant.Constant a b)
+instance GHC.Internal.Show.Show a => Data.Functor.Classes.Show1 (Data.Functor.Constant.Constant a)
+instance Data.Functor.Classes.Show2 Data.Functor.Constant.Constant
+instance forall k a (b :: k). GHC.Internal.Show.Show a => GHC.Internal.Show.Show (Data.Functor.Constant.Constant a b)
+instance GHC.Internal.Data.Traversable.Traversable (Data.Functor.Constant.Constant a)
 
 
 -- | Adding a new kind of pure computation to an applicative functor.
@@ -2388,9 +2415,9 @@ module Control.Applicative.Lift
 
 -- | Applicative functor formed by adding pure computations to a given
 --   applicative functor.
-data Lift f a
-Pure :: a -> Lift f a
-Other :: f a -> Lift f a
+data Lift (f :: Type -> Type) a
+Pure :: a -> Lift (f :: Type -> Type) a
+Other :: f a -> Lift (f :: Type -> Type) a
 
 -- | Projection to the other functor.
 unLift :: Applicative f => Lift f a -> f a
@@ -2422,7 +2449,7 @@ elimLift :: (a -> r) -> (f a -> r) -> Lift f a -> r
 --   <li><pre><a>failure</a> e1 <a>&lt;*&gt;</a> <a>failure</a> e2 =
 --   <a>failure</a> (e1 <a>&lt;&gt;</a> e2)</pre></li>
 --   </ul>
-type Errors e = Lift (Constant e)
+type Errors e = Lift Constant e :: Type -> Type
 
 -- | Extractor for computations with accumulating errors.
 --   
@@ -2439,22 +2466,22 @@ failure :: e -> Errors e a
 -- | Convert from <a>Either</a> to <a>Errors</a> (inverse of
 --   <a>runErrors</a>).
 eitherToErrors :: Either e a -> Errors e a
-instance GHC.Generics.Generic1 (Control.Applicative.Lift.Lift f)
-instance GHC.Generics.Generic (Control.Applicative.Lift.Lift f a)
+instance GHC.Internal.Base.Alternative f => GHC.Internal.Base.Alternative (Control.Applicative.Lift.Lift f)
+instance GHC.Internal.Base.Applicative f => GHC.Internal.Base.Applicative (Control.Applicative.Lift.Lift f)
 instance Data.Functor.Classes.Eq1 f => Data.Functor.Classes.Eq1 (Control.Applicative.Lift.Lift f)
-instance Data.Functor.Classes.Ord1 f => Data.Functor.Classes.Ord1 (Control.Applicative.Lift.Lift f)
-instance Data.Functor.Classes.Read1 f => Data.Functor.Classes.Read1 (Control.Applicative.Lift.Lift f)
-instance Data.Functor.Classes.Show1 f => Data.Functor.Classes.Show1 (Control.Applicative.Lift.Lift f)
 instance (Data.Functor.Classes.Eq1 f, GHC.Classes.Eq a) => GHC.Classes.Eq (Control.Applicative.Lift.Lift f a)
-instance (Data.Functor.Classes.Ord1 f, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Applicative.Lift.Lift f a)
-instance (Data.Functor.Classes.Read1 f, GHC.Read.Read a) => GHC.Read.Read (Control.Applicative.Lift.Lift f a)
-instance (Data.Functor.Classes.Show1 f, GHC.Show.Show a) => GHC.Show.Show (Control.Applicative.Lift.Lift f a)
-instance GHC.Base.Functor f => GHC.Base.Functor (Control.Applicative.Lift.Lift f)
-instance Data.Foldable.Foldable f => Data.Foldable.Foldable (Control.Applicative.Lift.Lift f)
-instance Data.Traversable.Traversable f => Data.Traversable.Traversable (Control.Applicative.Lift.Lift f)
-instance GHC.Base.Applicative f => GHC.Base.Applicative (Control.Applicative.Lift.Lift f)
-instance GHC.Base.Alternative f => GHC.Base.Alternative (Control.Applicative.Lift.Lift f)
 instance Data.Foldable1.Foldable1 f => Data.Foldable1.Foldable1 (Control.Applicative.Lift.Lift f)
+instance GHC.Internal.Data.Foldable.Foldable f => GHC.Internal.Data.Foldable.Foldable (Control.Applicative.Lift.Lift f)
+instance GHC.Internal.Base.Functor f => GHC.Internal.Base.Functor (Control.Applicative.Lift.Lift f)
+instance GHC.Internal.Generics.Generic1 (Control.Applicative.Lift.Lift f)
+instance GHC.Internal.Generics.Generic (Control.Applicative.Lift.Lift f a)
+instance Data.Functor.Classes.Ord1 f => Data.Functor.Classes.Ord1 (Control.Applicative.Lift.Lift f)
+instance (Data.Functor.Classes.Ord1 f, GHC.Classes.Ord a) => GHC.Classes.Ord (Control.Applicative.Lift.Lift f a)
+instance Data.Functor.Classes.Read1 f => Data.Functor.Classes.Read1 (Control.Applicative.Lift.Lift f)
+instance (Data.Functor.Classes.Read1 f, GHC.Internal.Read.Read a) => GHC.Internal.Read.Read (Control.Applicative.Lift.Lift f a)
+instance Data.Functor.Classes.Show1 f => Data.Functor.Classes.Show1 (Control.Applicative.Lift.Lift f)
+instance (Data.Functor.Classes.Show1 f, GHC.Internal.Show.Show a) => GHC.Internal.Show.Show (Control.Applicative.Lift.Lift f a)
+instance GHC.Internal.Data.Traversable.Traversable f => GHC.Internal.Data.Traversable.Traversable (Control.Applicative.Lift.Lift f)
 
 
 -- | Making functors whose elements are notionally in the reverse order
@@ -2463,26 +2490,26 @@ module Data.Functor.Reverse
 
 -- | The same functor, but with <a>Foldable</a> and <a>Traversable</a>
 --   instances that process the elements in the reverse order.
-newtype Reverse f a
-Reverse :: f a -> Reverse f a
-[getReverse] :: Reverse f a -> f a
-instance forall k (f :: k -> *). GHC.Generics.Generic1 (Data.Functor.Reverse.Reverse f)
-instance forall k (f :: k -> *) (a :: k). GHC.Generics.Generic (Data.Functor.Reverse.Reverse f a)
-instance Data.Functor.Classes.Eq1 f => Data.Functor.Classes.Eq1 (Data.Functor.Reverse.Reverse f)
-instance Data.Functor.Classes.Ord1 f => Data.Functor.Classes.Ord1 (Data.Functor.Reverse.Reverse f)
-instance Data.Functor.Classes.Read1 f => Data.Functor.Classes.Read1 (Data.Functor.Reverse.Reverse f)
-instance Data.Functor.Classes.Show1 f => Data.Functor.Classes.Show1 (Data.Functor.Reverse.Reverse f)
-instance (Data.Functor.Classes.Eq1 f, GHC.Classes.Eq a) => GHC.Classes.Eq (Data.Functor.Reverse.Reverse f a)
-instance (Data.Functor.Classes.Ord1 f, GHC.Classes.Ord a) => GHC.Classes.Ord (Data.Functor.Reverse.Reverse f a)
-instance (Data.Functor.Classes.Read1 f, GHC.Read.Read a) => GHC.Read.Read (Data.Functor.Reverse.Reverse f a)
-instance (Data.Functor.Classes.Show1 f, GHC.Show.Show a) => GHC.Show.Show (Data.Functor.Reverse.Reverse f a)
-instance GHC.Base.Functor f => GHC.Base.Functor (Data.Functor.Reverse.Reverse f)
-instance GHC.Base.Applicative f => GHC.Base.Applicative (Data.Functor.Reverse.Reverse f)
-instance GHC.Base.Alternative f => GHC.Base.Alternative (Data.Functor.Reverse.Reverse f)
-instance GHC.Base.Monad m => GHC.Base.Monad (Data.Functor.Reverse.Reverse m)
-instance Control.Monad.Fail.MonadFail m => Control.Monad.Fail.MonadFail (Data.Functor.Reverse.Reverse m)
-instance GHC.Base.MonadPlus m => GHC.Base.MonadPlus (Data.Functor.Reverse.Reverse m)
-instance Data.Foldable.Foldable f => Data.Foldable.Foldable (Data.Functor.Reverse.Reverse f)
-instance Data.Foldable1.Foldable1 f => Data.Foldable1.Foldable1 (Data.Functor.Reverse.Reverse f)
-instance Data.Traversable.Traversable f => Data.Traversable.Traversable (Data.Functor.Reverse.Reverse f)
+newtype Reverse (f :: k -> Type) (a :: k)
+Reverse :: f a -> Reverse (f :: k -> Type) (a :: k)
+[getReverse] :: Reverse (f :: k -> Type) (a :: k) -> f a
+instance GHC.Internal.Base.Alternative f => GHC.Internal.Base.Alternative (Data.Functor.Reverse.Reverse f)
+instance GHC.Internal.Base.Applicative f => GHC.Internal.Base.Applicative (Data.Functor.Reverse.Reverse f)
 instance Data.Functor.Contravariant.Contravariant f => Data.Functor.Contravariant.Contravariant (Data.Functor.Reverse.Reverse f)
+instance Data.Functor.Classes.Eq1 f => Data.Functor.Classes.Eq1 (Data.Functor.Reverse.Reverse f)
+instance (Data.Functor.Classes.Eq1 f, GHC.Classes.Eq a) => GHC.Classes.Eq (Data.Functor.Reverse.Reverse f a)
+instance Data.Foldable1.Foldable1 f => Data.Foldable1.Foldable1 (Data.Functor.Reverse.Reverse f)
+instance GHC.Internal.Data.Foldable.Foldable f => GHC.Internal.Data.Foldable.Foldable (Data.Functor.Reverse.Reverse f)
+instance GHC.Internal.Base.Functor f => GHC.Internal.Base.Functor (Data.Functor.Reverse.Reverse f)
+instance forall k (f :: k -> *). GHC.Internal.Generics.Generic1 (Data.Functor.Reverse.Reverse f)
+instance forall k (f :: k -> *) (a :: k). GHC.Internal.Generics.Generic (Data.Functor.Reverse.Reverse f a)
+instance GHC.Internal.Control.Monad.Fail.MonadFail m => GHC.Internal.Control.Monad.Fail.MonadFail (Data.Functor.Reverse.Reverse m)
+instance GHC.Internal.Base.MonadPlus m => GHC.Internal.Base.MonadPlus (Data.Functor.Reverse.Reverse m)
+instance GHC.Internal.Base.Monad m => GHC.Internal.Base.Monad (Data.Functor.Reverse.Reverse m)
+instance Data.Functor.Classes.Ord1 f => Data.Functor.Classes.Ord1 (Data.Functor.Reverse.Reverse f)
+instance (Data.Functor.Classes.Ord1 f, GHC.Classes.Ord a) => GHC.Classes.Ord (Data.Functor.Reverse.Reverse f a)
+instance Data.Functor.Classes.Read1 f => Data.Functor.Classes.Read1 (Data.Functor.Reverse.Reverse f)
+instance (Data.Functor.Classes.Read1 f, GHC.Internal.Read.Read a) => GHC.Internal.Read.Read (Data.Functor.Reverse.Reverse f a)
+instance Data.Functor.Classes.Show1 f => Data.Functor.Classes.Show1 (Data.Functor.Reverse.Reverse f)
+instance (Data.Functor.Classes.Show1 f, GHC.Internal.Show.Show a) => GHC.Internal.Show.Show (Data.Functor.Reverse.Reverse f a)
+instance GHC.Internal.Data.Traversable.Traversable f => GHC.Internal.Data.Traversable.Traversable (Data.Functor.Reverse.Reverse f)

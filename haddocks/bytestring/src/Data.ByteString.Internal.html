@@ -17,7 +17,7 @@
 </span><span id="line-17"></span><span class="hs-comment">-- public interface modules, such as &quot;Data.ByteString.Unsafe&quot;. Packages that</span><span>
 </span><span id="line-18"></span><span class="hs-comment">-- extend the ByteString system at a low level will need to use this module.</span><span>
 </span><span id="line-19"></span><span class="hs-comment">--</span><span>
-</span><span id="line-20"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data.ByteString.Internal</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Data.ByteString.Internal.html"><span class="hs-identifier">Data.ByteString.Internal</span></a></span><span> </span><span class="hs-special">(</span><span>
 </span><span id="line-21"></span><span>
 </span><span id="line-22"></span><span>        </span><span class="annot"><span class="hs-comment">-- * The @ByteString@ type and representation</span></span><span>
 </span><span id="line-23"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#ByteString"><span class="hs-identifier">ByteString</span></a></span><span>
@@ -60,35 +60,38 @@
 </span><span id="line-60"></span><span>        </span><span class="annot"><span class="hs-comment">-- * Utilities</span></span><span>
 </span><span id="line-61"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#nullForeignPtr"><span class="hs-identifier">nullForeignPtr</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-62"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#deferForeignPtrAvailability"><span class="hs-identifier">deferForeignPtrAvailability</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-63"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#checkedAdd"><span class="hs-identifier">checkedAdd</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-64"></span><span>
-</span><span id="line-65"></span><span>        </span><span class="annot"><span class="hs-comment">-- * Standard C Functions</span></span><span>
-</span><span id="line-66"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c_strlen"><span class="hs-identifier">c_strlen</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-67"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c_free_finalizer"><span class="hs-identifier">c_free_finalizer</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-68"></span><span>
-</span><span id="line-69"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#memchr"><span class="hs-identifier">memchr</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-70"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#memcmp"><span class="hs-identifier">memcmp</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-71"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#memcpy"><span class="hs-identifier">memcpy</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-72"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#memset"><span class="hs-identifier">memset</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-73"></span><span>
-</span><span id="line-74"></span><span>        </span><span class="annot"><span class="hs-comment">-- * cbits functions</span></span><span>
-</span><span id="line-75"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c_reverse"><span class="hs-identifier">c_reverse</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-76"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c_intersperse"><span class="hs-identifier">c_intersperse</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-77"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c_maximum"><span class="hs-identifier">c_maximum</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-78"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c_minimum"><span class="hs-identifier">c_minimum</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-79"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c_count"><span class="hs-identifier">c_count</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-80"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c_sort"><span class="hs-identifier">c_sort</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-81"></span><span>
-</span><span id="line-82"></span><span>        </span><span class="annot"><span class="hs-comment">-- * Chars</span></span><span>
-</span><span id="line-83"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#w2c"><span class="hs-identifier">w2c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c2w"><span class="hs-identifier">c2w</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#isSpaceWord8"><span class="hs-identifier">isSpaceWord8</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#isSpaceChar8"><span class="hs-identifier">isSpaceChar8</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-63"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#SizeOverflowException"><span class="hs-identifier">SizeOverflowException</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-64"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#overflowError"><span class="hs-identifier">overflowError</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-65"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#checkedAdd"><span class="hs-identifier">checkedAdd</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-66"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#checkedMultiply"><span class="hs-identifier">checkedMultiply</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span>        </span><span class="annot"><span class="hs-comment">-- * Standard C Functions</span></span><span>
+</span><span id="line-69"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c_strlen"><span class="hs-identifier">c_strlen</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-70"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c_free_finalizer"><span class="hs-identifier">c_free_finalizer</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-71"></span><span>
+</span><span id="line-72"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#memchr"><span class="hs-identifier">memchr</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-73"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#memcmp"><span class="hs-identifier">memcmp</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-74"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#memcpy"><span class="hs-identifier">memcpy</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-75"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#memset"><span class="hs-identifier">memset</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span>        </span><span class="annot"><span class="hs-comment">-- * cbits functions</span></span><span>
+</span><span id="line-78"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c_reverse"><span class="hs-identifier">c_reverse</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-79"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c_intersperse"><span class="hs-identifier">c_intersperse</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-80"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c_maximum"><span class="hs-identifier">c_maximum</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-81"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c_minimum"><span class="hs-identifier">c_minimum</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-82"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c_count"><span class="hs-identifier">c_count</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-83"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c_sort"><span class="hs-identifier">c_sort</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-84"></span><span>
-</span><span id="line-85"></span><span>        </span><span class="annot"><span class="hs-comment">-- * Deprecated and unmentionable</span></span><span>
-</span><span id="line-86"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#accursedUnutterablePerformIO"><span class="hs-identifier">accursedUnutterablePerformIO</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-85"></span><span>        </span><span class="annot"><span class="hs-comment">-- * Chars</span></span><span>
+</span><span id="line-86"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#w2c"><span class="hs-identifier">w2c</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#c2w"><span class="hs-identifier">c2w</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#isSpaceWord8"><span class="hs-identifier">isSpaceWord8</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#isSpaceChar8"><span class="hs-identifier">isSpaceChar8</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-87"></span><span>
-</span><span id="line-88"></span><span>        </span><span class="annot"><span class="hs-comment">-- * Exported compatibility shim</span></span><span>
-</span><span id="line-89"></span><span>        </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.ForeignPtr.html#plusForeignPtr/GHC.ForeignPtr.html#plusForeignPtr"><span class="hs-identifier">plusForeignPtr</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-90"></span><span>        </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.ForeignPtr.html#unsafeWithForeignPtr/GHC.ForeignPtr.html#unsafeWithForeignPtr"><span class="hs-identifier">unsafeWithForeignPtr</span></a></span><span>
-</span><span id="line-91"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-92"></span><span>
-</span><span id="line-93"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.ByteString.Internal.Type.html"><span class="hs-identifier">Data.ByteString.Internal.Type</span></a></span><span>
-</span><span id="line-94"></span></pre></body></html>
+</span><span id="line-88"></span><span>        </span><span class="annot"><span class="hs-comment">-- * Deprecated and unmentionable</span></span><span>
+</span><span id="line-89"></span><span>        </span><span class="annot"><a href="Data.ByteString.Internal.Type.html#accursedUnutterablePerformIO"><span class="hs-identifier">accursedUnutterablePerformIO</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span>        </span><span class="annot"><span class="hs-comment">-- * Exported compatibility shim</span></span><span>
+</span><span id="line-92"></span><span>        </span><span class="annot"><span class="hs-identifier">plusForeignPtr</span></span><span class="hs-special">,</span><span>
+</span><span id="line-93"></span><span>        </span><span class="annot"><span class="hs-identifier">unsafeWithForeignPtr</span></span><span>
+</span><span id="line-94"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.ByteString.Internal.Type.html"><span class="hs-identifier">Data.ByteString.Internal.Type</span></a></span><span>
+</span><span id="line-97"></span></pre></body></html>

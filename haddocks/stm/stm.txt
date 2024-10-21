@@ -13,17 +13,16 @@
 --   other forms of concurrent communication, such as locks or
 --   <a>MVar</a>s.
 @package stm
-@version 2.5.1.0
+@version 2.5.3.1
 
 
 -- | <a>TBQueue</a> is a bounded version of <tt>TQueue</tt>. The queue has
 --   a maximum capacity set when it is created. If the queue already
 --   contains the maximum number of elements, then <a>writeTBQueue</a>
---   blocks until an element is removed from the queue.
+--   retries until an element is removed from the queue.
 --   
---   The implementation is based on the traditional purely-functional queue
---   representation that uses two lists to obtain amortised <i>O(1)</i>
---   enqueue and dequeue operations.
+--   The implementation is based on an array to obtain <i>O(1)</i> enqueue
+--   and dequeue operations.
 module Control.Concurrent.STM.TBQueue
 
 -- | <a>TBQueue</a> is an abstract type representing a bounded FIFO
@@ -72,6 +71,9 @@ isEmptyTBQueue :: TBQueue a -> STM Bool
 
 -- | Returns <a>True</a> if the supplied <a>TBQueue</a> is full.
 isFullTBQueue :: TBQueue a -> STM Bool
+
+-- | The maximum number of elements the queue can hold.
+capacityTBQueue :: TBQueue a -> Natural
 instance GHC.Classes.Eq (Control.Concurrent.STM.TBQueue.TBQueue a)
 
 
@@ -284,33 +286,11 @@ instance GHC.Classes.Eq (Control.Concurrent.STM.TQueue.TQueue a)
 
 
 module Control.Concurrent.STM.TVar
-
--- | Shared memory locations that support atomic memory transactions.
-data () => TVar a
-
--- | Create a new <a>TVar</a> holding a value supplied
+data TVar a
 newTVar :: a -> STM (TVar a)
-
--- | <tt>IO</tt> version of <a>newTVar</a>. This is useful for creating
---   top-level <a>TVar</a>s using <a>unsafePerformIO</a>, because using
---   <a>atomically</a> inside <a>unsafePerformIO</a> isn't possible.
 newTVarIO :: a -> IO (TVar a)
-
--- | Return the current value stored in a <a>TVar</a>.
 readTVar :: TVar a -> STM a
-
--- | Return the current value stored in a <a>TVar</a>. This is equivalent
---   to
---   
---   <pre>
---   readTVarIO = atomically . readTVar
---   </pre>
---   
---   but works much faster, because it doesn't perform a complete
---   transaction, it just reads the current value of the <a>TVar</a>.
 readTVarIO :: TVar a -> IO a
-
--- | Write the supplied value into a <a>TVar</a>.
 writeTVar :: TVar a -> a -> STM ()
 
 -- | Mutate the contents of a <a>TVar</a>. <i>N.B.</i>, this version is
@@ -327,31 +307,11 @@ stateTVar :: TVar s -> (s -> (a, s)) -> STM a
 
 -- | Swap the contents of a <a>TVar</a> for a new value.
 swapTVar :: TVar a -> a -> STM a
-
--- | Switch the value of returned <a>TVar</a> from initial value
---   <a>False</a> to <a>True</a> after a given number of microseconds. The
---   caveats associated with <a>threadDelay</a> also apply.
---   
---   Be careful not to exceed <tt>maxBound :: Int</tt>, which on 32-bit
---   machines is only 2147483647 μs, less than 36 minutes.
 registerDelay :: Int -> IO (TVar Bool)
 
 -- | Make a <a>Weak</a> pointer to a <a>TVar</a>, using the second argument
 --   as a finalizer to run when <a>TVar</a> is garbage-collected
 mkWeakTVar :: TVar a -> IO () -> IO (Weak (TVar a))
-
-
-module Control.Concurrent.STM.TArray
-
--- | TArray is a transactional array, supporting the usual <a>MArray</a>
---   interface for mutable arrays.
---   
---   It is currently implemented as <tt>Array ix (TVar e)</tt>, but it may
---   be replaced by a more efficient implementation in the future (the
---   interface will remain the same, however).
-data TArray i e
-instance GHC.Ix.Ix i => GHC.Classes.Eq (Control.Concurrent.STM.TArray.TArray i e)
-instance Data.Array.Base.MArray Control.Concurrent.STM.TArray.TArray e GHC.Conc.Sync.STM
 
 
 -- | Software Transactional Memory: a modular composable concurrency
@@ -375,89 +335,30 @@ instance Data.Array.Base.MArray Control.Concurrent.STM.TArray.TArray e GHC.Conc.
 --   which can perform the invariant checking without help from the runtime
 --   system.
 module Control.Monad.STM
-
--- | A monad supporting atomic memory transactions.
-data () => STM a
-
--- | Perform a series of STM actions atomically.
---   
---   Using <a>atomically</a> inside an <a>unsafePerformIO</a> or
---   <a>unsafeInterleaveIO</a> subverts some of guarantees that STM
---   provides. It makes it possible to run a transaction inside of another
---   transaction, depending on when the thunk is evaluated. If a nested
---   transaction is attempted, an exception is thrown by the runtime. It is
---   possible to safely use <a>atomically</a> inside <a>unsafePerformIO</a>
---   or <a>unsafeInterleaveIO</a>, but the typechecker does not rule out
---   programs that may attempt nested transactions, meaning that the
---   programmer must take special care to prevent these.
---   
---   However, there are functions for creating transactional variables that
---   can always be safely called in <a>unsafePerformIO</a>. See:
---   <a>newTVarIO</a>, <a>newTChanIO</a>, <a>newBroadcastTChanIO</a>,
---   <a>newTQueueIO</a>, <a>newTBQueueIO</a>, and <a>newTMVarIO</a>.
---   
---   Using <a>unsafePerformIO</a> inside of <a>atomically</a> is also
---   dangerous but for different reasons. See <a>unsafeIOToSTM</a> for more
---   on this.
+data STM a
 atomically :: STM a -> IO a
-
--- | Retry execution of the current memory transaction because it has seen
---   values in <a>TVar</a>s which mean that it should not continue (e.g.
---   the <a>TVar</a>s represent a shared buffer that is now empty). The
---   implementation may block the thread until one of the <a>TVar</a>s that
---   it has read from has been updated. (GHC only)
 retry :: STM a
-
--- | Compose two alternative STM actions (GHC only).
---   
---   If the first action completes without retrying then it forms the
---   result of the <a>orElse</a>. Otherwise, if the first action retries,
---   then the second action is tried in its place. If both actions retry
---   then the <a>orElse</a> as a whole retries.
 orElse :: STM a -> STM a -> STM a
 
 -- | Check that the boolean condition is true and, if not, <a>retry</a>.
 --   
 --   In other words, <tt>check b = unless b retry</tt>.
 check :: Bool -> STM ()
-
--- | A variant of <a>throw</a> that can only be used within the <a>STM</a>
---   monad.
---   
---   Throwing an exception in <tt>STM</tt> aborts the transaction and
---   propagates the exception. If the exception is caught via
---   <a>catchSTM</a>, only the changes enclosed by the catch are rolled
---   back; changes made outside of <a>catchSTM</a> persist.
---   
---   If the exception is not caught inside of the <a>STM</a>, it is
---   re-thrown by <a>atomically</a>, and the entire <a>STM</a> is rolled
---   back.
---   
---   Although <a>throwSTM</a> has a type that is an instance of the type of
---   <a>throw</a>, the two functions are subtly different:
---   
---   <pre>
---   throw e    `seq` x  ===&gt; throw e
---   throwSTM e `seq` x  ===&gt; x
---   </pre>
---   
---   The first example will cause the exception <tt>e</tt> to be raised,
---   whereas the second one won't. In fact, <a>throwSTM</a> will only cause
---   an exception to be raised when it is used within the <a>STM</a> monad.
---   The <a>throwSTM</a> variant should be used in preference to
---   <a>throw</a> to raise an exception within the <a>STM</a> monad because
---   it guarantees ordering with respect to other <a>STM</a> operations,
---   whereas <a>throw</a> does not.
 throwSTM :: Exception e => e -> STM a
-
--- | Exception handling within STM actions.
---   
---   <tt><a>catchSTM</a> m f</tt> catches any exception thrown by
---   <tt>m</tt> using <a>throwSTM</a>, using the function <tt>f</tt> to
---   handle the exception. If an exception is thrown, any changes made by
---   <tt>m</tt> are rolled back, but changes prior to <tt>m</tt> persist.
 catchSTM :: Exception e => STM a -> (e -> STM a) -> STM a
-instance Control.Monad.Fix.MonadFix GHC.Conc.Sync.STM
+instance GHC.Internal.Control.Monad.Fix.MonadFix GHC.Internal.Conc.Sync.STM
+
+
+module Control.Concurrent.STM.TArray
+
+-- | <a>TArray</a> is a transactional array, supporting the usual
+--   <a>MArray</a> interface for mutable arrays.
+--   
+--   It is conceptually implemented as <tt>Array i (TVar e)</tt>.
+data TArray i e
+instance (GHC.Classes.Eq i, GHC.Classes.Eq e) => GHC.Classes.Eq (Control.Concurrent.STM.TArray.TArray i e)
+instance Data.Array.Base.MArray Control.Concurrent.STM.TArray.TArray e GHC.Types.IO
+instance Data.Array.Base.MArray Control.Concurrent.STM.TArray.TArray e GHC.Internal.Conc.Sync.STM
 
 
 -- | Software Transactional Memory: a modular composable concurrency

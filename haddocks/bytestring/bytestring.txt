@@ -35,7 +35,8 @@
 --   
 --   There is also a <a>ShortByteString</a> type which has a lower memory
 --   overhead and can be converted to or from a <a>ByteString</a>. It is
---   suitable for keeping many short strings in memory.
+--   suitable for keeping many short strings in memory, especially
+--   long-term, without incurring any possible heap fragmentation costs.
 --   
 --   <a>ByteString</a>s are not designed for Unicode. For Unicode strings
 --   you should use the <a>Text</a> type from the <tt>text</tt> package.
@@ -47,7 +48,7 @@
 --   import qualified Data.ByteString as BS
 --   </pre>
 @package bytestring
-@version 0.11.5.3
+@version 0.12.1.0
 
 
 -- | <ul>
@@ -100,7 +101,15 @@ contramapF :: (b -> a) -> FixedPrim a -> FixedPrim b
 -- | Encode a pair by encoding its first component and then its second
 --   component.
 pairF :: FixedPrim a -> FixedPrim b -> FixedPrim (a, b)
-storableToF :: forall a. Storable a => FixedPrim a
+
+-- | <i>Deprecated: Deprecated since <tt>bytestring-0.12.1.0</tt>. This
+--   function is dangerous in the presence of internal padding and makes
+--   naive assumptions about alignment. * For a primitive Haskell type like
+--   <a>Int64</a>, use the corresponding primitive like <a>int64Host</a>. *
+--   For other types, it is recommended to manually write a small function
+--   that performs the necessary unaligned write and zeroes or removes any
+--   internal padding bits.</i>
+storableToF :: Storable a => FixedPrim a
 
 -- | A builder primitive that always results in sequence of bytes that is
 --   no longer than a pre-determined bound.
@@ -214,8 +223,8 @@ caseWordSize_32_64 :: a -> a -> a
 -- | <i>Deprecated: Use <a>boundedPrim</a> instead</i>
 boudedPrim :: Int -> (a -> Ptr Word8 -> IO (Ptr Word8)) -> BoundedPrim a
 instance Data.ByteString.Builder.Prim.Internal.Contravariant Data.ByteString.Builder.Prim.Internal.BoundedPrim
-instance Data.ByteString.Builder.Prim.Internal.Monoidal Data.ByteString.Builder.Prim.Internal.BoundedPrim
 instance Data.ByteString.Builder.Prim.Internal.Contravariant Data.ByteString.Builder.Prim.Internal.FixedPrim
+instance Data.ByteString.Builder.Prim.Internal.Monoidal Data.ByteString.Builder.Prim.Internal.BoundedPrim
 instance Data.ByteString.Builder.Prim.Internal.Monoidal Data.ByteString.Builder.Prim.Internal.FixedPrim
 
 
@@ -406,8 +415,20 @@ nullForeignPtr :: ForeignPtr Word8
 --   <a>deferForeignPtrAvailability</a> incurs no direct overhead.
 deferForeignPtrAvailability :: ForeignPtr a -> IO (ForeignPtr a)
 
--- | Add two non-negative numbers. Errors out on overflow. ...
+-- | The type of exception raised by <a>overflowError</a> and on failure by
+--   overflow-checked arithmetic operations.
+data SizeOverflowException
+
+-- | Raises a <a>SizeOverflowException</a>, with a message using the given
+--   function name.
+overflowError :: String -> a
+
+-- | Add two non-negative numbers. Calls <a>overflowError</a> on overflow.
 checkedAdd :: String -> Int -> Int -> Int
+
+-- | Multiplies two non-negative numbers. Calls <a>overflowError</a> on
+--   overflow.
+checkedMultiply :: String -> Int -> Int -> Int
 c_strlen :: CString -> IO CSize
 c_free_finalizer :: FunPtr (Ptr Word8 -> IO ())
 memchr :: Ptr Word8 -> Word8 -> CSize -> IO (Ptr Word8)
@@ -473,29 +494,7 @@ isSpaceChar8 :: Char -> Bool
 --   Yield not to its blasphemous call! Flee traveller! Flee or you will be
 --   corrupted and devoured!
 accursedUnutterablePerformIO :: IO a -> a
-
--- | Advances the given address by the given offset in bytes.
---   
---   The new <a>ForeignPtr</a> shares the finalizer of the original,
---   equivalent from a finalization standpoint to just creating another
---   reference to the original. That is, the finalizer will not be called
---   before the new <a>ForeignPtr</a> is unreachable, nor will it be called
---   an additional time due to this call, and the finalizer will be called
---   with the same address that it would have had this call not happened,
---   *not* the new address.
 plusForeignPtr :: ForeignPtr a -> Int -> ForeignPtr b
-
--- | This is similar to <a>withForeignPtr</a> but comes with an important
---   caveat: the user must guarantee that the continuation does not diverge
---   (e.g. loop or throw an exception). In exchange for this loss of
---   generality, this function offers the ability of GHC to optimise more
---   aggressively.
---   
---   Specifically, applications of the form: <tt> unsafeWithForeignPtr fptr
---   (<a>forever</a> something) </tt>
---   
---   See GHC issue #17760 for more information about the unsoundness
---   behavior that this function can result in.
 unsafeWithForeignPtr :: ForeignPtr a -> (Ptr a -> IO b) -> IO b
 
 
@@ -509,26 +508,26 @@ module Data.ByteString.Lazy.Internal
 -- | A space-efficient representation of a <a>Word8</a> vector, supporting
 --   many efficient operations.
 --   
---   A lazy <a>ByteString</a> contains 8-bit bytes, or by using the
+--   A <a>LazyByteString</a> contains 8-bit bytes, or by using the
 --   operations from <a>Data.ByteString.Lazy.Char8</a> it can be
 --   interpreted as containing 8-bit characters.
 data ByteString
 Empty :: ByteString
-Chunk :: {-# UNPACK #-} !ByteString -> ByteString -> ByteString
+Chunk :: {-# UNPACK #-} !StrictByteString -> ByteString -> ByteString
 
 -- | Type synonym for the lazy flavour of <a>ByteString</a>.
 type LazyByteString = ByteString
 
 -- | Smart constructor for <a>Chunk</a>. Guarantees the data type
 --   invariant.
-chunk :: ByteString -> ByteString -> ByteString
+chunk :: StrictByteString -> ByteString -> ByteString
 
 -- | Consume the chunks of a lazy ByteString with a natural right fold.
-foldrChunks :: (ByteString -> a -> a) -> a -> ByteString -> a
+foldrChunks :: (StrictByteString -> a -> a) -> a -> ByteString -> a
 
 -- | Consume the chunks of a lazy ByteString with a strict, tail-recursive,
 --   accumulating left fold.
-foldlChunks :: (a -> ByteString -> a) -> a -> ByteString -> a
+foldlChunks :: (a -> StrictByteString -> a) -> a -> ByteString -> a
 
 -- | The data type invariant: Every ByteString is either <a>Empty</a> or
 --   consists of non-null <a>StrictByteString</a>s. All functions must
@@ -555,29 +554,29 @@ packChars :: [Char] -> ByteString
 unpackBytes :: ByteString -> [Word8]
 unpackChars :: ByteString -> [Char]
 
--- | <i>O(1)</i> Convert a strict <a>ByteString</a> into a lazy
---   <a>ByteString</a>.
-fromStrict :: ByteString -> ByteString
+-- | <i>O(1)</i> Convert a <a>StrictByteString</a> into a
+--   <a>LazyByteString</a>.
+fromStrict :: StrictByteString -> LazyByteString
 
--- | <i>O(n)</i> Convert a lazy <a>ByteString</a> into a strict
---   <a>ByteString</a>.
+-- | <i>O(n)</i> Convert a <a>LazyByteString</a> into a
+--   <a>StrictByteString</a>.
 --   
 --   Note that this is an <i>expensive</i> operation that forces the whole
---   lazy ByteString into memory and then copies all the data. If possible,
---   try to avoid converting back and forth between strict and lazy
---   bytestrings.
-toStrict :: ByteString -> ByteString
-instance Language.Haskell.TH.Syntax.Lift Data.ByteString.Lazy.Internal.ByteString
+--   <a>LazyByteString</a> into memory and then copies all the data. If
+--   possible, try to avoid converting back and forth between strict and
+--   lazy bytestrings.
+toStrict :: LazyByteString -> StrictByteString
+instance GHC.Internal.Data.Data.Data Data.ByteString.Lazy.Internal.ByteString
 instance GHC.Classes.Eq Data.ByteString.Lazy.Internal.ByteString
-instance GHC.Classes.Ord Data.ByteString.Lazy.Internal.ByteString
-instance GHC.Base.Semigroup Data.ByteString.Lazy.Internal.ByteString
-instance GHC.Base.Monoid Data.ByteString.Lazy.Internal.ByteString
+instance GHC.Internal.IsList.IsList Data.ByteString.Lazy.Internal.ByteString
+instance GHC.Internal.Data.String.IsString Data.ByteString.Lazy.Internal.ByteString
+instance Language.Haskell.TH.Syntax.Lift Data.ByteString.Lazy.Internal.ByteString
+instance GHC.Internal.Base.Monoid Data.ByteString.Lazy.Internal.ByteString
 instance Control.DeepSeq.NFData Data.ByteString.Lazy.Internal.ByteString
-instance GHC.Show.Show Data.ByteString.Lazy.Internal.ByteString
-instance GHC.Read.Read Data.ByteString.Lazy.Internal.ByteString
-instance GHC.IsList.IsList Data.ByteString.Lazy.Internal.ByteString
-instance Data.String.IsString Data.ByteString.Lazy.Internal.ByteString
-instance Data.Data.Data Data.ByteString.Lazy.Internal.ByteString
+instance GHC.Classes.Ord Data.ByteString.Lazy.Internal.ByteString
+instance GHC.Internal.Read.Read Data.ByteString.Lazy.Internal.ByteString
+instance GHC.Internal.Base.Semigroup Data.ByteString.Lazy.Internal.ByteString
+instance GHC.Internal.Show.Show Data.ByteString.Lazy.Internal.ByteString
 
 
 -- | Internal representation of ShortByteString
@@ -589,8 +588,16 @@ module Data.ByteString.Short.Internal
 --   contribute to heap fragmentation. It can be converted to or from a
 --   <a>ByteString</a> (at the cost of copying the string data). It
 --   supports very few other operations.
-data ShortByteString
-SBS :: ByteArray# -> ShortByteString
+newtype ShortByteString
+
+ShortByteString :: ByteArray -> ShortByteString
+
+[unShortByteString] :: ShortByteString -> ByteArray
+
+-- | Prior to <tt>bytestring-0.12</tt> <a>SBS</a> was a genuine constructor
+--   of <a>ShortByteString</a>, but now it is a bundled pattern synonym,
+--   provided as a compatibility shim.
+pattern SBS :: ByteArray# -> ShortByteString
 
 -- | <i>O(1)</i>. The empty <a>ShortByteString</a>.
 empty :: ShortByteString
@@ -779,7 +786,7 @@ unfoldr :: (a -> Maybe (Word8, a)) -> a -> ShortByteString
 --   <pre>
 --   fst (unfoldrN n f s) == take n (unfoldr f s)
 --   </pre>
-unfoldrN :: forall a. Int -> (a -> Maybe (Word8, a)) -> a -> (ShortByteString, Maybe a)
+unfoldrN :: Int -> (a -> Maybe (Word8, a)) -> a -> (ShortByteString, Maybe a)
 
 -- | <i>O(n)</i> <a>take</a> <tt>n</tt>, applied to a ShortByteString
 --   <tt>xs</tt>, returns the prefix of <tt>xs</tt> of length <tt>n</tt>,
@@ -949,7 +956,7 @@ stripPrefix :: ShortByteString -> ShortByteString -> Maybe ShortByteString
 isInfixOf :: ShortByteString -> ShortByteString -> Bool
 
 -- | <i>O(n)</i> The <a>isPrefixOf</a> function takes two ShortByteStrings
---   and returns <a>True</a>
+--   and returns <a>True</a> iff the first is a prefix of the second.
 isPrefixOf :: ShortByteString -> ShortByteString -> Bool
 
 -- | <i>O(n)</i> The <a>isSuffixOf</a> function takes two ShortByteStrings
@@ -1097,21 +1104,27 @@ packCStringLen :: CStringLen -> IO ShortByteString
 useAsCString :: ShortByteString -> (CString -> IO a) -> IO a
 
 -- | <i>O(n) construction.</i> Use a <tt>ShortByteString</tt> with a
---   function requiring a <tt>CStringLen</tt>. As for <tt>useAsCString</tt>
+--   function requiring a <a>CStringLen</a>. As for <a>useAsCString</a>
 --   this function makes a copy of the original <tt>ShortByteString</tt>.
 --   It must not be stored or used after the subcomputation finishes.
+--   
+--   Beware that this function does not add a terminating <tt>NUL</tt> byte
+--   at the end of <a>CStringLen</a>. If you need to construct a pointer to
+--   a null-terminated sequence, use <a>useAsCString</a> (and measure
+--   length independently if desired).
 useAsCStringLen :: ShortByteString -> (CStringLen -> IO a) -> IO a
-instance Language.Haskell.TH.Syntax.Lift Data.ByteString.Short.Internal.ShortByteString
+instance GHC.Internal.Data.Data.Data Data.ByteString.Short.Internal.ShortByteString
 instance GHC.Classes.Eq Data.ByteString.Short.Internal.ShortByteString
-instance GHC.Classes.Ord Data.ByteString.Short.Internal.ShortByteString
-instance GHC.Base.Semigroup Data.ByteString.Short.Internal.ShortByteString
-instance GHC.Base.Monoid Data.ByteString.Short.Internal.ShortByteString
+instance GHC.Internal.Generics.Generic Data.ByteString.Short.Internal.ShortByteString
+instance GHC.Internal.IsList.IsList Data.ByteString.Short.Internal.ShortByteString
+instance GHC.Internal.Data.String.IsString Data.ByteString.Short.Internal.ShortByteString
+instance Language.Haskell.TH.Syntax.Lift Data.ByteString.Short.Internal.ShortByteString
+instance GHC.Internal.Base.Monoid Data.ByteString.Short.Internal.ShortByteString
 instance Control.DeepSeq.NFData Data.ByteString.Short.Internal.ShortByteString
-instance GHC.Show.Show Data.ByteString.Short.Internal.ShortByteString
-instance GHC.Read.Read Data.ByteString.Short.Internal.ShortByteString
-instance GHC.IsList.IsList Data.ByteString.Short.Internal.ShortByteString
-instance Data.String.IsString Data.ByteString.Short.Internal.ShortByteString
-instance Data.Data.Data Data.ByteString.Short.Internal.ShortByteString
+instance GHC.Classes.Ord Data.ByteString.Short.Internal.ShortByteString
+instance GHC.Internal.Read.Read Data.ByteString.Short.Internal.ShortByteString
+instance GHC.Internal.Base.Semigroup Data.ByteString.Short.Internal.ShortByteString
+instance GHC.Internal.Show.Show Data.ByteString.Short.Internal.ShortByteString
 
 
 -- | A compact representation suitable for storing short byte strings in
@@ -1141,8 +1154,16 @@ module Data.ByteString.Short
 --   contribute to heap fragmentation. It can be converted to or from a
 --   <a>ByteString</a> (at the cost of copying the string data). It
 --   supports very few other operations.
-data ShortByteString
-SBS :: ByteArray# -> ShortByteString
+newtype ShortByteString
+
+ShortByteString :: ByteArray -> ShortByteString
+
+[unShortByteString] :: ShortByteString -> ByteArray
+
+-- | Prior to <tt>bytestring-0.12</tt> <a>SBS</a> was a genuine constructor
+--   of <a>ShortByteString</a>, but now it is a bundled pattern synonym,
+--   provided as a compatibility shim.
+pattern SBS :: ByteArray# -> ShortByteString
 
 -- | <i>O(1)</i>. The empty <a>ShortByteString</a>.
 empty :: ShortByteString
@@ -1335,7 +1356,7 @@ unfoldr :: (a -> Maybe (Word8, a)) -> a -> ShortByteString
 --   <pre>
 --   fst (unfoldrN n f s) == take n (unfoldr f s)
 --   </pre>
-unfoldrN :: forall a. Int -> (a -> Maybe (Word8, a)) -> a -> (ShortByteString, Maybe a)
+unfoldrN :: Int -> (a -> Maybe (Word8, a)) -> a -> (ShortByteString, Maybe a)
 
 -- | <i>O(n)</i> <a>take</a> <tt>n</tt>, applied to a ShortByteString
 --   <tt>xs</tt>, returns the prefix of <tt>xs</tt> of length <tt>n</tt>,
@@ -1505,7 +1526,7 @@ stripPrefix :: ShortByteString -> ShortByteString -> Maybe ShortByteString
 isInfixOf :: ShortByteString -> ShortByteString -> Bool
 
 -- | <i>O(n)</i> The <a>isPrefixOf</a> function takes two ShortByteStrings
---   and returns <a>True</a>
+--   and returns <a>True</a> iff the first is a prefix of the second.
 isPrefixOf :: ShortByteString -> ShortByteString -> Bool
 
 -- | <i>O(n)</i> The <a>isSuffixOf</a> function takes two ShortByteStrings
@@ -1644,9 +1665,14 @@ packCStringLen :: CStringLen -> IO ShortByteString
 useAsCString :: ShortByteString -> (CString -> IO a) -> IO a
 
 -- | <i>O(n) construction.</i> Use a <tt>ShortByteString</tt> with a
---   function requiring a <tt>CStringLen</tt>. As for <tt>useAsCString</tt>
+--   function requiring a <a>CStringLen</a>. As for <a>useAsCString</a>
 --   this function makes a copy of the original <tt>ShortByteString</tt>.
 --   It must not be stored or used after the subcomputation finishes.
+--   
+--   Beware that this function does not add a terminating <tt>NUL</tt> byte
+--   at the end of <a>CStringLen</a>. If you need to construct a pointer to
+--   a null-terminated sequence, use <a>useAsCString</a> (and measure
+--   length independently if desired).
 useAsCStringLen :: ShortByteString -> (CStringLen -> IO a) -> IO a
 
 
@@ -1911,18 +1937,18 @@ pack :: [Word8] -> ByteString
 -- | <i>O(n)</i> Converts a <a>ByteString</a> to a <tt>[<a>Word8</a>]</tt>.
 unpack :: ByteString -> [Word8]
 
--- | <i>O(1)</i> Convert a strict <a>ByteString</a> into a lazy
---   <a>ByteString</a>.
-fromStrict :: ByteString -> ByteString
+-- | <i>O(1)</i> Convert a <a>StrictByteString</a> into a
+--   <a>LazyByteString</a>.
+fromStrict :: StrictByteString -> LazyByteString
 
--- | <i>O(n)</i> Convert a lazy <a>ByteString</a> into a strict
---   <a>ByteString</a>.
+-- | <i>O(n)</i> Convert a <a>LazyByteString</a> into a
+--   <a>StrictByteString</a>.
 --   
 --   Note that this is an <i>expensive</i> operation that forces the whole
---   lazy ByteString into memory and then copies all the data. If possible,
---   try to avoid converting back and forth between strict and lazy
---   bytestrings.
-toStrict :: ByteString -> ByteString
+--   <a>LazyByteString</a> into memory and then copies all the data. If
+--   possible, try to avoid converting back and forth between strict and
+--   lazy bytestrings.
+toStrict :: LazyByteString -> StrictByteString
 
 -- | Convert a <a>FilePath</a> to a <a>ByteString</a>.
 --   
@@ -2585,12 +2611,21 @@ packCStringLen :: CStringLen -> IO ByteString
 useAsCString :: ByteString -> (CString -> IO a) -> IO a
 
 -- | <i>O(n) construction</i> Use a <tt>ByteString</tt> with a function
---   requiring a <tt>CStringLen</tt>. As for <tt>useAsCString</tt> this
+--   requiring a <a>CStringLen</a>. As for <a>useAsCString</a> this
 --   function makes a copy of the original <tt>ByteString</tt>. It must not
 --   be stored or used after the subcomputation finishes.
+--   
+--   Beware that this function is not required to add a terminating
+--   <tt>NUL</tt> byte at the end of the <a>CStringLen</a> it provides. If
+--   you need to construct a pointer to a null-terminated sequence, use
+--   <a>useAsCString</a> (and measure length independently if desired).
 useAsCStringLen :: ByteString -> (CStringLen -> IO a) -> IO a
 
 -- | Read a line from stdin.
+
+-- | <i>Deprecated: Deprecated since <tt>bytestring-0.12</tt>. Use
+--   <a>getLine</a> instead. (Functions that rely on ASCII encodings belong
+--   in <a>Data.ByteString.Char8</a>)</i>
 getLine :: IO ByteString
 
 -- | getContents. Read stdin strictly. Equivalent to hGetContents stdin The
@@ -2616,6 +2651,10 @@ writeFile :: FilePath -> ByteString -> IO ()
 appendFile :: FilePath -> ByteString -> IO ()
 
 -- | Read a line from a handle
+
+-- | <i>Deprecated: Deprecated since <tt>bytestring-0.12</tt>. Use
+--   <a>hGetLine</a> instead. (Functions that rely on ASCII encodings
+--   belong in <a>Data.ByteString.Char8</a>)</i>
 hGetLine :: Handle -> IO ByteString
 
 -- | Read a handle's entire contents strictly into a <a>ByteString</a>.
@@ -2715,7 +2754,7 @@ module Data.ByteString.Lazy
 -- | A space-efficient representation of a <a>Word8</a> vector, supporting
 --   many efficient operations.
 --   
---   A lazy <a>ByteString</a> contains 8-bit bytes, or by using the
+--   A <a>LazyByteString</a> contains 8-bit bytes, or by using the
 --   operations from <a>Data.ByteString.Lazy.Char8</a> it can be
 --   interpreted as containing 8-bit characters.
 data ByteString
@@ -2735,33 +2774,33 @@ pack :: [Word8] -> ByteString
 -- | <i>O(n)</i> Converts a <a>ByteString</a> to a '[Word8]'.
 unpack :: ByteString -> [Word8]
 
--- | <i>O(1)</i> Convert a strict <a>ByteString</a> into a lazy
---   <a>ByteString</a>.
-fromStrict :: ByteString -> ByteString
+-- | <i>O(1)</i> Convert a <a>StrictByteString</a> into a
+--   <a>LazyByteString</a>.
+fromStrict :: StrictByteString -> LazyByteString
 
--- | <i>O(n)</i> Convert a lazy <a>ByteString</a> into a strict
---   <a>ByteString</a>.
+-- | <i>O(n)</i> Convert a <a>LazyByteString</a> into a
+--   <a>StrictByteString</a>.
 --   
 --   Note that this is an <i>expensive</i> operation that forces the whole
---   lazy ByteString into memory and then copies all the data. If possible,
---   try to avoid converting back and forth between strict and lazy
---   bytestrings.
-toStrict :: ByteString -> ByteString
+--   <a>LazyByteString</a> into memory and then copies all the data. If
+--   possible, try to avoid converting back and forth between strict and
+--   lazy bytestrings.
+toStrict :: LazyByteString -> StrictByteString
 
--- | <i>O(c)</i> Convert a list of strict <a>ByteString</a> into a lazy
---   <a>ByteString</a>
-fromChunks :: [ByteString] -> ByteString
+-- | <i>O(c)</i> Convert a list of <a>StrictByteString</a> into a
+--   <a>LazyByteString</a>
+fromChunks :: [StrictByteString] -> LazyByteString
 
--- | <i>O(c)</i> Convert a lazy <a>ByteString</a> into a list of strict
---   <a>ByteString</a>
-toChunks :: ByteString -> [ByteString]
+-- | <i>O(c)</i> Convert a <a>LazyByteString</a> into a list of
+--   <a>StrictByteString</a>
+toChunks :: LazyByteString -> [StrictByteString]
 
 -- | Consume the chunks of a lazy ByteString with a natural right fold.
-foldrChunks :: (ByteString -> a -> a) -> a -> ByteString -> a
+foldrChunks :: (StrictByteString -> a -> a) -> a -> ByteString -> a
 
 -- | Consume the chunks of a lazy ByteString with a strict, tail-recursive,
 --   accumulating left fold.
-foldlChunks :: (a -> ByteString -> a) -> a -> ByteString -> a
+foldlChunks :: (a -> StrictByteString -> a) -> a -> ByteString -> a
 
 -- | <i>O(1)</i> <a>cons</a> is analogous to <a>(:)</a> for lists.
 cons :: Word8 -> ByteString -> ByteString
@@ -3439,7 +3478,7 @@ module Data.ByteString.Lazy.Char8
 -- | A space-efficient representation of a <a>Word8</a> vector, supporting
 --   many efficient operations.
 --   
---   A lazy <a>ByteString</a> contains 8-bit bytes, or by using the
+--   A <a>LazyByteString</a> contains 8-bit bytes, or by using the
 --   operations from <a>Data.ByteString.Lazy.Char8</a> it can be
 --   interpreted as containing 8-bit characters.
 data ByteString
@@ -3456,26 +3495,26 @@ pack :: [Char] -> ByteString
 -- | <i>O(n)</i> Converts a <a>ByteString</a> to a <a>String</a>.
 unpack :: ByteString -> [Char]
 
--- | <i>O(c)</i> Convert a list of strict <a>ByteString</a> into a lazy
---   <a>ByteString</a>
-fromChunks :: [ByteString] -> ByteString
+-- | <i>O(c)</i> Convert a list of <a>StrictByteString</a> into a
+--   <a>LazyByteString</a>
+fromChunks :: [StrictByteString] -> LazyByteString
 
--- | <i>O(c)</i> Convert a lazy <a>ByteString</a> into a list of strict
---   <a>ByteString</a>
-toChunks :: ByteString -> [ByteString]
+-- | <i>O(c)</i> Convert a <a>LazyByteString</a> into a list of
+--   <a>StrictByteString</a>
+toChunks :: LazyByteString -> [StrictByteString]
 
--- | <i>O(1)</i> Convert a strict <a>ByteString</a> into a lazy
---   <a>ByteString</a>.
-fromStrict :: ByteString -> ByteString
+-- | <i>O(1)</i> Convert a <a>StrictByteString</a> into a
+--   <a>LazyByteString</a>.
+fromStrict :: StrictByteString -> LazyByteString
 
--- | <i>O(n)</i> Convert a lazy <a>ByteString</a> into a strict
---   <a>ByteString</a>.
+-- | <i>O(n)</i> Convert a <a>LazyByteString</a> into a
+--   <a>StrictByteString</a>.
 --   
 --   Note that this is an <i>expensive</i> operation that forces the whole
---   lazy ByteString into memory and then copies all the data. If possible,
---   try to avoid converting back and forth between strict and lazy
---   bytestrings.
-toStrict :: ByteString -> ByteString
+--   <a>LazyByteString</a> into memory and then copies all the data. If
+--   possible, try to avoid converting back and forth between strict and
+--   lazy bytestrings.
+toStrict :: LazyByteString -> StrictByteString
 
 -- | <i>O(1)</i> <a>cons</a> is analogous to <a>(:)</a> for lists.
 cons :: Char -> ByteString -> ByteString
@@ -4037,18 +4076,131 @@ unzip :: [(Char, Char)] -> (ByteString, ByteString)
 --   rest of the program.
 copy :: ByteString -> ByteString
 
--- | readInt reads an Int from the beginning of the ByteString. If there is
---   no integer at the beginning of the string, it returns Nothing,
---   otherwise it just returns the int read, and the rest of the string.
+-- | Try to read a signed <a>Int</a> value from the <a>ByteString</a>,
+--   returning <tt>Just (val, str)</tt> on success, where <tt>val</tt> is
+--   the value read and <tt>str</tt> is the rest of the input string. If
+--   the sequence of digits decodes to a value larger than can be
+--   represented by an <a>Int</a>, the returned value will be
+--   <a>Nothing</a>.
 --   
---   Note: This function will overflow the Int for large integers.
+--   <a>readInt</a> does not ignore leading whitespace, the value must
+--   start immediately at the beginning of the input string.
+--   
+--   <h4><b>Examples</b></h4>
+--   
+--   <pre>
+--   &gt;&gt;&gt; readInt "-1729 sum of cubes"
+--   Just (-1729," sum of cubes")
+--   
+--   &gt;&gt;&gt; readInt "+1: readInt also accepts a leading '+'"
+--   Just (1, ": readInt also accepts a leading '+'")
+--   
+--   &gt;&gt;&gt; readInt "not a decimal number"
+--   Nothing
+--   
+--   &gt;&gt;&gt; readInt "12345678901234567890 overflows maxBound"
+--   Nothing
+--   
+--   &gt;&gt;&gt; readInt "-12345678901234567890 underflows minBound"
+--   Nothing
+--   </pre>
 readInt :: ByteString -> Maybe (Int, ByteString)
 
--- | readInteger reads an Integer from the beginning of the ByteString. If
---   there is no integer at the beginning of the string, it returns
---   Nothing, otherwise it just returns the int read, and the rest of the
---   string.
+-- | A variant of <a>readInt</a> specialised to <a>Int64</a>.
+readInt64 :: ByteString -> Maybe (Int64, ByteString)
+
+-- | A variant of <a>readInt</a> specialised to <a>Int32</a>.
+readInt32 :: ByteString -> Maybe (Int32, ByteString)
+
+-- | A variant of <a>readInt</a> specialised to <a>Int16</a>.
+readInt16 :: ByteString -> Maybe (Int16, ByteString)
+
+-- | A variant of <a>readInt</a> specialised to <a>Int8</a>.
+readInt8 :: ByteString -> Maybe (Int8, ByteString)
+
+-- | Try to read a <a>Word</a> value from the <a>ByteString</a>, returning
+--   <tt>Just (val, str)</tt> on success, where <tt>val</tt> is the value
+--   read and <tt>str</tt> is the rest of the input string. If the sequence
+--   of digits decodes to a value larger than can be represented by a
+--   <a>Word</a>, the returned value will be <a>Nothing</a>.
+--   
+--   <a>readWord</a> does not ignore leading whitespace, the value must
+--   start with a decimal digit immediately at the beginning of the input
+--   string. Leading <tt>+</tt> signs are not accepted.
+--   
+--   <h4><b>Examples</b></h4>
+--   
+--   <pre>
+--   &gt;&gt;&gt; readWord "1729 sum of cubes"
+--   Just (1729," sum of cubes")
+--   
+--   &gt;&gt;&gt; readWord "+1729 has an explicit sign"
+--   Nothing
+--   
+--   &gt;&gt;&gt; readWord "not a decimal number"
+--   Nothing
+--   
+--   &gt;&gt;&gt; readWord "98765432109876543210 overflows maxBound"
+--   Nothing
+--   </pre>
+readWord :: ByteString -> Maybe (Word, ByteString)
+
+-- | A variant of <a>readWord</a> specialised to <a>Word64</a>.
+readWord64 :: ByteString -> Maybe (Word64, ByteString)
+
+-- | A variant of <a>readWord</a> specialised to <a>Word32</a>.
+readWord32 :: ByteString -> Maybe (Word32, ByteString)
+
+-- | A variant of <a>readWord</a> specialised to <a>Word16</a>.
+readWord16 :: ByteString -> Maybe (Word16, ByteString)
+
+-- | A variant of <a>readWord</a> specialised to <a>Word8</a>.
+readWord8 :: ByteString -> Maybe (Word8, ByteString)
+
+-- | <a>readInteger</a> reads an <a>Integer</a> from the beginning of the
+--   <a>ByteString</a>. If there is no <a>Integer</a> at the beginning of
+--   the string, it returns <a>Nothing</a>, otherwise it just returns the
+--   <a>Integer</a> read, and the rest of the string.
+--   
+--   <a>readInteger</a> does not ignore leading whitespace, the value must
+--   start immediately at the beginning of the input string.
+--   
+--   <h4><b>Examples</b></h4>
+--   
+--   <pre>
+--   &gt;&gt;&gt; readInteger "-000111222333444555666777888999 all done"
+--   Just (-111222333444555666777888999," all done")
+--   
+--   &gt;&gt;&gt; readInteger "+1: readInteger also accepts a leading '+'"
+--   Just (1, ": readInteger also accepts a leading '+'")
+--   
+--   &gt;&gt;&gt; readInteger "not a decimal number"
+--   Nothing
+--   </pre>
 readInteger :: ByteString -> Maybe (Integer, ByteString)
+
+-- | <a>readNatural</a> reads a <a>Natural</a> number from the beginning of
+--   the <a>ByteString</a>. If there is no <a>Natural</a> number at the
+--   beginning of the string, it returns <a>Nothing</a>, otherwise it just
+--   returns the number read, and the rest of the string.
+--   
+--   <a>readNatural</a> does not ignore leading whitespace, the value must
+--   start with a decimal digit immediately at the beginning of the input
+--   string. Leading <tt>+</tt> signs are not accepted.
+--   
+--   <h4><b>Examples</b></h4>
+--   
+--   <pre>
+--   &gt;&gt;&gt; readNatural "000111222333444555666777888999 all done"
+--   Just (111222333444555666777888999," all done")
+--   
+--   &gt;&gt;&gt; readNatural "+000111222333444555666777888999 explicit sign"
+--   Nothing
+--   
+--   &gt;&gt;&gt; readNatural "not a decimal number"
+--   Nothing
+--   </pre>
+readNatural :: ByteString -> Maybe (Natural, ByteString)
 
 -- | getContents. Equivalent to hGetContents stdin. Will read <i>lazily</i>
 getContents :: IO ByteString
@@ -4190,18 +4342,18 @@ pack :: String -> ByteString
 -- | <i>O(n)</i> Converts a <a>ByteString</a> to a <a>String</a>.
 unpack :: ByteString -> [Char]
 
--- | <i>O(1)</i> Convert a strict <a>ByteString</a> into a lazy
---   <a>ByteString</a>.
-fromStrict :: ByteString -> ByteString
+-- | <i>O(1)</i> Convert a <a>StrictByteString</a> into a
+--   <a>LazyByteString</a>.
+fromStrict :: StrictByteString -> LazyByteString
 
--- | <i>O(n)</i> Convert a lazy <a>ByteString</a> into a strict
---   <a>ByteString</a>.
+-- | <i>O(n)</i> Convert a <a>LazyByteString</a> into a
+--   <a>StrictByteString</a>.
 --   
 --   Note that this is an <i>expensive</i> operation that forces the whole
---   lazy ByteString into memory and then copies all the data. If possible,
---   try to avoid converting back and forth between strict and lazy
---   bytestrings.
-toStrict :: ByteString -> ByteString
+--   <a>LazyByteString</a> into memory and then copies all the data. If
+--   possible, try to avoid converting back and forth between strict and
+--   lazy bytestrings.
+toStrict :: LazyByteString -> StrictByteString
 
 -- | <i>O(n)</i> <a>cons</a> is analogous to (:) for lists, but of
 --   different complexity, as it requires a memcpy.
@@ -4785,18 +4937,131 @@ unzip :: [(Char, Char)] -> (ByteString, ByteString)
 -- | <i>O(n)</i> Sort a ByteString efficiently, using counting sort.
 sort :: ByteString -> ByteString
 
--- | readInt reads an Int from the beginning of the ByteString. If there is
---   no integer at the beginning of the string, it returns Nothing,
---   otherwise it just returns the int read, and the rest of the string.
+-- | Try to read a signed <a>Int</a> value from the <a>ByteString</a>,
+--   returning <tt>Just (val, str)</tt> on success, where <tt>val</tt> is
+--   the value read and <tt>str</tt> is the rest of the input string. If
+--   the sequence of digits decodes to a value larger than can be
+--   represented by an <a>Int</a>, the returned value will be
+--   <a>Nothing</a>.
 --   
---   Note: This function will overflow the Int for large integers.
+--   <a>readInt</a> does not ignore leading whitespace, the value must
+--   start immediately at the beginning of the input string.
+--   
+--   <h4><b>Examples</b></h4>
+--   
+--   <pre>
+--   &gt;&gt;&gt; readInt "-1729 sum of cubes"
+--   Just (-1729," sum of cubes")
+--   
+--   &gt;&gt;&gt; readInt "+1: readInt also accepts a leading '+'"
+--   Just (1, ": readInt also accepts a leading '+'")
+--   
+--   &gt;&gt;&gt; readInt "not a decimal number"
+--   Nothing
+--   
+--   &gt;&gt;&gt; readInt "12345678901234567890 overflows maxBound"
+--   Nothing
+--   
+--   &gt;&gt;&gt; readInt "-12345678901234567890 underflows minBound"
+--   Nothing
+--   </pre>
 readInt :: ByteString -> Maybe (Int, ByteString)
 
--- | readInteger reads an Integer from the beginning of the ByteString. If
---   there is no integer at the beginning of the string, it returns
---   Nothing, otherwise it just returns the int read, and the rest of the
---   string.
+-- | A variant of <a>readInt</a> specialised to <a>Int64</a>.
+readInt64 :: ByteString -> Maybe (Int64, ByteString)
+
+-- | A variant of <a>readInt</a> specialised to <a>Int32</a>.
+readInt32 :: ByteString -> Maybe (Int32, ByteString)
+
+-- | A variant of <a>readInt</a> specialised to <a>Int16</a>.
+readInt16 :: ByteString -> Maybe (Int16, ByteString)
+
+-- | A variant of <a>readInt</a> specialised to <a>Int8</a>.
+readInt8 :: ByteString -> Maybe (Int8, ByteString)
+
+-- | Try to read a <a>Word</a> value from the <a>ByteString</a>, returning
+--   <tt>Just (val, str)</tt> on success, where <tt>val</tt> is the value
+--   read and <tt>str</tt> is the rest of the input string. If the sequence
+--   of digits decodes to a value larger than can be represented by a
+--   <a>Word</a>, the returned value will be <a>Nothing</a>.
+--   
+--   <a>readWord</a> does not ignore leading whitespace, the value must
+--   start with a decimal digit immediately at the beginning of the input
+--   string. Leading <tt>+</tt> signs are not accepted.
+--   
+--   <h4><b>Examples</b></h4>
+--   
+--   <pre>
+--   &gt;&gt;&gt; readWord "1729 sum of cubes"
+--   Just (1729," sum of cubes")
+--   
+--   &gt;&gt;&gt; readWord "+1729 has an explicit sign"
+--   Nothing
+--   
+--   &gt;&gt;&gt; readWord "not a decimal number"
+--   Nothing
+--   
+--   &gt;&gt;&gt; readWord "98765432109876543210 overflows maxBound"
+--   Nothing
+--   </pre>
+readWord :: ByteString -> Maybe (Word, ByteString)
+
+-- | A variant of <a>readWord</a> specialised to <a>Word64</a>.
+readWord64 :: ByteString -> Maybe (Word64, ByteString)
+
+-- | A variant of <a>readWord</a> specialised to <a>Word32</a>.
+readWord32 :: ByteString -> Maybe (Word32, ByteString)
+
+-- | A variant of <a>readWord</a> specialised to <a>Word16</a>.
+readWord16 :: ByteString -> Maybe (Word16, ByteString)
+
+-- | A variant of <a>readWord</a> specialised to <a>Word8</a>.
+readWord8 :: ByteString -> Maybe (Word8, ByteString)
+
+-- | <a>readInteger</a> reads an <a>Integer</a> from the beginning of the
+--   <a>ByteString</a>. If there is no <a>Integer</a> at the beginning of
+--   the string, it returns <a>Nothing</a>, otherwise it just returns the
+--   <a>Integer</a> read, and the rest of the string.
+--   
+--   <a>readInteger</a> does not ignore leading whitespace, the value must
+--   start immediately at the beginning of the input string.
+--   
+--   <h4><b>Examples</b></h4>
+--   
+--   <pre>
+--   &gt;&gt;&gt; readInteger "-000111222333444555666777888999 all done"
+--   Just (-111222333444555666777888999," all done")
+--   
+--   &gt;&gt;&gt; readInteger "+1: readInteger also accepts a leading '+'"
+--   Just (1, ": readInteger also accepts a leading '+'")
+--   
+--   &gt;&gt;&gt; readInteger "not a decimal number"
+--   Nothing
+--   </pre>
 readInteger :: ByteString -> Maybe (Integer, ByteString)
+
+-- | <a>readNatural</a> reads a <a>Natural</a> number from the beginning of
+--   the <a>ByteString</a>. If there is no <a>Natural</a> number at the
+--   beginning of the string, it returns <a>Nothing</a>, otherwise it just
+--   returns the number read, and the rest of the string.
+--   
+--   <a>readNatural</a> does not ignore leading whitespace, the value must
+--   start with a decimal digit immediately at the beginning of the input
+--   string. Leading <tt>+</tt> signs are not accepted.
+--   
+--   <h4><b>Examples</b></h4>
+--   
+--   <pre>
+--   &gt;&gt;&gt; readNatural "000111222333444555666777888999 all done"
+--   Just (111222333444555666777888999," all done")
+--   
+--   &gt;&gt;&gt; readNatural "+000111222333444555666777888999 explicit sign"
+--   Nothing
+--   
+--   &gt;&gt;&gt; readNatural "not a decimal number"
+--   Nothing
+--   </pre>
+readNatural :: ByteString -> Maybe (Natural, ByteString)
 
 -- | <i>O(n)</i> Make a copy of the <a>ByteString</a> with its own storage.
 --   This is mainly useful to allow the rest of the data pointed to by the
@@ -4824,9 +5089,14 @@ packCStringLen :: CStringLen -> IO ByteString
 useAsCString :: ByteString -> (CString -> IO a) -> IO a
 
 -- | <i>O(n) construction</i> Use a <tt>ByteString</tt> with a function
---   requiring a <tt>CStringLen</tt>. As for <tt>useAsCString</tt> this
+--   requiring a <a>CStringLen</a>. As for <a>useAsCString</a> this
 --   function makes a copy of the original <tt>ByteString</tt>. It must not
 --   be stored or used after the subcomputation finishes.
+--   
+--   Beware that this function is not required to add a terminating
+--   <tt>NUL</tt> byte at the end of the <a>CStringLen</a> it provides. If
+--   you need to construct a pointer to a null-terminated sequence, use
+--   <a>useAsCString</a> (and measure length independently if desired).
 useAsCStringLen :: ByteString -> (CStringLen -> IO a) -> IO a
 
 -- | Read a line from stdin.
@@ -4992,9 +5262,9 @@ newBuffer :: Int -> IO Buffer
 -- | Combined size of the filled and free space in the buffer.
 bufferSize :: Buffer -> Int
 
--- | Convert the filled part of a <a>Buffer</a> to a strict
---   <a>ByteString</a>.
-byteStringFromBuffer :: Buffer -> ByteString
+-- | Convert the filled part of a <a>Buffer</a> to a
+--   <a>StrictByteString</a>.
+byteStringFromBuffer :: Buffer -> StrictByteString
 
 -- | A stream of chunks that are constructed in the <a>IO</a> monad.
 --   
@@ -5007,21 +5277,21 @@ data ChunkIOStream a
 -- | The partially filled last buffer together with the result.
 Finished :: Buffer -> a -> ChunkIOStream a
 
--- | Yield a <i>non-empty</i> strict <a>ByteString</a>.
-Yield1 :: ByteString -> IO (ChunkIOStream a) -> ChunkIOStream a
+-- | Yield a <i>non-empty</i> <a>StrictByteString</a>.
+Yield1 :: StrictByteString -> IO (ChunkIOStream a) -> ChunkIOStream a
 
 -- | Convert a <a>BuildStep</a> to a <a>ChunkIOStream</a> stream by
 --   executing it on <a>Buffer</a>s allocated according to the given
 --   <a>AllocationStrategy</a>.
-buildStepToCIOS :: forall a. AllocationStrategy -> BuildStep a -> IO (ChunkIOStream a)
+buildStepToCIOS :: AllocationStrategy -> BuildStep a -> IO (ChunkIOStream a)
 
--- | Convert a <tt><a>ChunkIOStream</a> ()</tt> to a lazy <a>ByteString</a>
+-- | Convert a <tt><a>ChunkIOStream</a> ()</tt> to a <a>LazyByteString</a>
 --   using <a>unsafeDupablePerformIO</a>.
-ciosUnitToLazyByteString :: AllocationStrategy -> ByteString -> ChunkIOStream () -> ByteString
+ciosUnitToLazyByteString :: AllocationStrategy -> LazyByteString -> ChunkIOStream () -> LazyByteString
 
 -- | Convert a <a>ChunkIOStream</a> to a lazy tuple of the result and the
---   written <a>ByteString</a> using <a>unsafeDupablePerformIO</a>.
-ciosToLazyByteString :: AllocationStrategy -> (a -> (b, ByteString)) -> ChunkIOStream a -> (b, ByteString)
+--   written <a>LazyByteString</a> using <a>unsafeDupablePerformIO</a>.
+ciosToLazyByteString :: AllocationStrategy -> (a -> (b, LazyByteString)) -> ChunkIOStream a -> (b, LazyByteString)
 
 -- | <a>BuildSignal</a>s abstract signals to the caller of a
 --   <a>BuildStep</a>. There are three signals: <a>done</a>,
@@ -5030,7 +5300,7 @@ data BuildSignal a
 
 -- | <a>BuildStep</a>s may be called *multiple times* and they must not
 --   rise an async. exception.
-type BuildStep a = BufferRange -> IO (BuildSignal a)
+type BuildStep a = BufferRange -> IO BuildSignal a
 
 -- | The final build step that returns the <a>done</a> signal.
 finalBuildStep :: BuildStep ()
@@ -5042,11 +5312,12 @@ done :: Ptr Word8 -> a -> BuildSignal a
 -- | Signal that the current buffer is full.
 bufferFull :: Int -> Ptr Word8 -> BuildStep a -> BuildSignal a
 
--- | Signal that a <a>ByteString</a> chunk should be inserted directly.
-insertChunk :: Ptr Word8 -> ByteString -> BuildStep a -> BuildSignal a
+-- | Signal that a <a>StrictByteString</a> chunk should be inserted
+--   directly.
+insertChunk :: Ptr Word8 -> StrictByteString -> BuildStep a -> BuildSignal a
 
 -- | Fill a <a>BufferRange</a> using a <a>BuildStep</a>.
-fillWithBuildStep :: BuildStep a -> (Ptr Word8 -> a -> IO b) -> (Ptr Word8 -> Int -> BuildStep a -> IO b) -> (Ptr Word8 -> ByteString -> BuildStep a -> IO b) -> BufferRange -> IO b
+fillWithBuildStep :: BuildStep a -> (Ptr Word8 -> a -> IO b) -> (Ptr Word8 -> Int -> BuildStep a -> IO b) -> (Ptr Word8 -> StrictByteString -> BuildStep a -> IO b) -> BufferRange -> IO b
 
 -- | <a>Builder</a>s denote sequences of bytes. They are <a>Monoid</a>s
 --   where <a>mempty</a> is the zero-length sequence and <a>mappend</a> is
@@ -5055,7 +5326,7 @@ data Builder
 
 -- | Construct a <a>Builder</a>. In contrast to <a>BuildStep</a>s,
 --   <a>Builder</a>s are referentially transparent.
-builder :: (forall r. BuildStep r -> BuildStep r) -> Builder
+builder :: (forall r. () => BuildStep r -> BuildStep r) -> Builder
 
 -- | Run a <a>Builder</a> with the <a>finalBuildStep</a>.
 runBuilder :: Builder -> BuildStep ()
@@ -5079,65 +5350,66 @@ flush :: Builder
 --   <tt>n</tt> free bytes for the following <a>Builder</a>.
 ensureFree :: Int -> Builder
 
--- | Construct a <a>Builder</a> that copies the strict <a>ByteString</a>.
+-- | Construct a <a>Builder</a> that copies the <a>StrictByteString</a>.
 --   
 --   Use this function to create <a>Builder</a>s from smallish (<tt>&lt;=
---   4kb</tt>) <a>ByteString</a>s or if you need to guarantee that the
---   <a>ByteString</a> is not shared with the chunks generated by the
---   <a>Builder</a>.
-byteStringCopy :: ByteString -> Builder
+--   4kb</tt>) <a>StrictByteString</a>s or if you need to guarantee that
+--   the <a>StrictByteString</a> is not shared with the chunks generated by
+--   the <a>Builder</a>.
+byteStringCopy :: StrictByteString -> Builder
 
--- | Construct a <a>Builder</a> that always inserts the strict
---   <a>ByteString</a> directly as a chunk.
+-- | Construct a <a>Builder</a> that always inserts the
+--   <a>StrictByteString</a> directly as a chunk.
 --   
 --   This implies flushing the output buffer, even if it contains just a
 --   single byte. You should therefore use <a>byteStringInsert</a> only for
---   large (<tt>&gt; 8kb</tt>) <a>ByteString</a>s. Otherwise, the generated
---   chunks are too fragmented to be processed efficiently afterwards.
-byteStringInsert :: ByteString -> Builder
+--   large (<tt>&gt; 8kb</tt>) <a>StrictByteString</a>s. Otherwise, the
+--   generated chunks are too fragmented to be processed efficiently
+--   afterwards.
+byteStringInsert :: StrictByteString -> Builder
 
--- | Construct a <a>Builder</a> that copies the strict <a>ByteString</a>s,
+-- | Construct a <a>Builder</a> that copies the <a>StrictByteString</a>s,
 --   if it is smaller than the treshold, and inserts it directly otherwise.
 --   
---   For example, <tt>byteStringThreshold 1024</tt> copies strict
---   <a>ByteString</a>s whose size is less or equal to 1kb, and inserts
---   them directly otherwise. This implies that the average chunk-size of
---   the generated lazy <a>ByteString</a> may be as low as 513 bytes, as
---   there could always be just a single byte between the directly inserted
---   1025 byte, strict <a>ByteString</a>s.
-byteStringThreshold :: Int -> ByteString -> Builder
+--   For example, <tt>byteStringThreshold 1024</tt> copies
+--   <a>StrictByteString</a>s whose size is less or equal to 1kb, and
+--   inserts them directly otherwise. This implies that the average
+--   chunk-size of the generated <a>LazyByteString</a> may be as low as 513
+--   bytes, as there could always be just a single byte between the
+--   directly inserted 1025 byte, <a>StrictByteString</a>s.
+byteStringThreshold :: Int -> StrictByteString -> Builder
 
--- | Construct a <a>Builder</a> that copies the lazy <a>ByteString</a>.
-lazyByteStringCopy :: ByteString -> Builder
+-- | Construct a <a>Builder</a> that copies the <a>LazyByteString</a>.
+lazyByteStringCopy :: LazyByteString -> Builder
 
--- | Construct a <a>Builder</a> that inserts all chunks of the lazy
---   <a>ByteString</a> directly.
-lazyByteStringInsert :: ByteString -> Builder
+-- | Construct a <a>Builder</a> that inserts all chunks of the
+--   <a>LazyByteString</a> directly.
+lazyByteStringInsert :: LazyByteString -> Builder
 
 -- | Construct a <a>Builder</a> that uses the thresholding strategy of
---   <a>byteStringThreshold</a> for each chunk of the lazy
---   <a>ByteString</a>.
-lazyByteStringThreshold :: Int -> ByteString -> Builder
+--   <a>byteStringThreshold</a> for each chunk of the
+--   <a>LazyByteString</a>.
+lazyByteStringThreshold :: Int -> LazyByteString -> Builder
 
 -- | Construct a <a>Builder</a> that copies the <a>ShortByteString</a>.
 shortByteString :: ShortByteString -> Builder
 
--- | The maximal size of a <a>ByteString</a> that is copied. <tt>2 *
+-- | The maximal size of a <a>StrictByteString</a> that is copied. <tt>2 *
 --   <a>smallChunkSize</a></tt> to guarantee that on average a chunk is of
 --   <a>smallChunkSize</a>.
 maximalCopySize :: Int
 
 -- | Create a <a>Builder</a> denoting the same sequence of bytes as a
---   strict <a>ByteString</a>. The <a>Builder</a> inserts large
---   <a>ByteString</a>s directly, but copies small ones to ensure that the
---   generated chunks are large on average.
-byteString :: ByteString -> Builder
+--   <a>StrictByteString</a>. The <a>Builder</a> inserts large
+--   <a>StrictByteString</a>s directly, but copies small ones to ensure
+--   that the generated chunks are large on average.
+byteString :: StrictByteString -> Builder
 
 -- | Create a <a>Builder</a> denoting the same sequence of bytes as a lazy
---   <a>ByteString</a>. The <a>Builder</a> inserts large chunks of the lazy
---   <a>ByteString</a> directly, but copies small ones to ensure that the
---   generated chunks are large on average.
-lazyByteString :: ByteString -> Builder
+--   <a>LazyByteString</a>. The <a>Builder</a> inserts large chunks of the
+--   <a>LazyByteString</a> directly, but copies small ones to ensure that
+--   the generated chunks are large on average.
+lazyByteString :: LazyByteString -> Builder
 
 -- | <i>Heavy inlining.</i> Execute a <a>Builder</a> with custom execution
 --   parameters.
@@ -5152,7 +5424,7 @@ lazyByteString :: ByteString -> Builder
 --     toLazyByteStringWith (<a>safeStrategy</a> <a>smallChunkSize</a> <a>defaultChunkSize</a>) L.empty
 --   </pre>
 --   
---   where <tt>L.empty</tt> is the zero-length lazy <a>ByteString</a>.
+--   where <tt>L.empty</tt> is the zero-length <a>LazyByteString</a>.
 --   
 --   In most cases, the parameters used by <a>toLazyByteString</a> give
 --   good performance. A sub-performing case of <a>toLazyByteString</a> is
@@ -5166,20 +5438,21 @@ lazyByteString :: ByteString -> Builder
 --   </pre>
 --   
 --   This reduces the allocation and trimming overhead, as all generated
---   <a>ByteString</a>s fit into the first buffer and there is no trimming
---   required, if more than 64 bytes and less than 128 bytes are written.
-toLazyByteStringWith :: AllocationStrategy -> ByteString -> Builder -> ByteString
+--   <a>LazyByteString</a>s fit into the first buffer and there is no
+--   trimming required, if more than 64 bytes and less than 128 bytes are
+--   written.
+toLazyByteStringWith :: AllocationStrategy -> LazyByteString -> Builder -> LazyByteString
 
 -- | A buffer allocation strategy for executing <a>Builder</a>s.
 data AllocationStrategy
 
--- | Use this strategy for generating lazy <a>ByteString</a>s whose chunks
+-- | Use this strategy for generating <a>LazyByteString</a>s whose chunks
 --   are likely to survive one garbage collection. This strategy trims
 --   buffers that are filled less than half in order to avoid spilling too
 --   much memory.
 safeStrategy :: Int -> Int -> AllocationStrategy
 
--- | Use this strategy for generating lazy <a>ByteString</a>s whose chunks
+-- | Use this strategy for generating <a>LazyByteString</a>s whose chunks
 --   are discarded right after they are generated. For example, if you just
 --   generate them to write them to a network socket.
 untrimmedStrategy :: Int -> Int -> AllocationStrategy
@@ -5223,13 +5496,13 @@ data Put a
 --   <a>Put</a>s are referentially transparent in the sense that sequencing
 --   the same <a>Put</a> multiple times yields every time the same value
 --   with the same side-effect.
-put :: (forall r. (a -> BuildStep r) -> BuildStep r) -> Put a
+put :: (forall r. () => (a -> BuildStep r) -> BuildStep r) -> Put a
 
 -- | Run a <a>Put</a>.
 runPut :: Put a -> BuildStep a
 
 -- | Execute a <a>Put</a> and return the computed result and the bytes
---   written during the computation as a lazy <a>ByteString</a>.
+--   written during the computation as a <a>LazyByteString</a>.
 --   
 --   This function is strict in the computed result and lazy in the writing
 --   of the bytes. For example, given
@@ -5262,24 +5535,24 @@ runPut :: Put a -> BuildStep a
 --   <pre>
 --   type DecodingState = ...
 --   
---   decodeBase64 :: <a>ByteString</a> -&gt; DecodingState -&gt; <a>Put</a> (Maybe DecodingState)
+--   decodeBase64 :: <a>StrictByteString</a> -&gt; DecodingState -&gt; <a>Put</a> (Maybe DecodingState)
 --   decodeBase64 = ...
 --    
 --   </pre>
 --   
---   The above function takes a strict <a>ByteString</a> supposed to
+--   The above function takes a <a>StrictByteString</a> supposed to
 --   represent Base64 encoded data and the current decoding state. It
 --   writes the decoded bytes as the side-effect of the <a>Put</a> and
 --   returns the new decoding state, if the decoding of all data in the
---   <a>ByteString</a> was successful. The checking if the strict
---   <a>ByteString</a> represents Base64 encoded data and the actual
+--   <a>StrictByteString</a> was successful. The checking if the
+--   <a>StrictByteString</a> represents Base64 encoded data and the actual
 --   decoding are fused. This makes the common case, where all data
 --   represents Base64 encoded data, more efficient. It also implies that
 --   all data must be decoded before the final decoding state can be
 --   returned. <a>Put</a>s are intended for implementing such fused
 --   checking and decoding/encoding, which is reflected in their strictness
 --   properties.
-putToLazyByteString :: Put a -> (a, ByteString)
+putToLazyByteString :: Put a -> (a, LazyByteString)
 
 -- | Execute a <a>Put</a> with a buffer-allocation strategy and a
 --   continuation. For example, <a>putToLazyByteString</a> is implemented
@@ -5290,7 +5563,7 @@ putToLazyByteString :: Put a -> (a, ByteString)
 --       (<a>safeStrategy</a> <a>smallChunkSize</a> <a>defaultChunkSize</a>) (x -&gt; (x, L.empty))
 --    
 --   </pre>
-putToLazyByteStringWith :: AllocationStrategy -> (a -> (b, ByteString)) -> Put a -> (b, ByteString)
+putToLazyByteStringWith :: AllocationStrategy -> (a -> (b, LazyByteString)) -> Put a -> (b, LazyByteString)
 
 -- | Run a <a>Put</a> action redirecting the produced output to a
 --   <a>Handle</a>.
@@ -5298,7 +5571,7 @@ putToLazyByteStringWith :: AllocationStrategy -> (a -> (b, ByteString)) -> Put a
 --   The output is buffered using the <a>Handle</a>s associated buffer. If
 --   this buffer is too small to execute one step of the <a>Put</a> action,
 --   then it is replaced with a large enough buffer.
-hPut :: forall a. Handle -> Put a -> IO a
+hPut :: Handle -> Put a -> IO a
 
 -- | Run a <a>Builder</a> as a side-effect of a <tt><a>Put</a> ()</tt>
 --   action.
@@ -5306,11 +5579,11 @@ putBuilder :: Builder -> Put ()
 
 -- | Convert a <tt><a>Put</a> ()</tt> action to a <a>Builder</a>.
 fromPut :: Put () -> Builder
-instance GHC.Base.Functor Data.ByteString.Builder.Internal.Put
-instance GHC.Base.Applicative Data.ByteString.Builder.Internal.Put
-instance GHC.Base.Monad Data.ByteString.Builder.Internal.Put
-instance GHC.Base.Semigroup Data.ByteString.Builder.Internal.Builder
-instance GHC.Base.Monoid Data.ByteString.Builder.Internal.Builder
+instance GHC.Internal.Base.Applicative Data.ByteString.Builder.Internal.Put
+instance GHC.Internal.Base.Functor Data.ByteString.Builder.Internal.Put
+instance GHC.Internal.Base.Monad Data.ByteString.Builder.Internal.Put
+instance GHC.Internal.Base.Monoid Data.ByteString.Builder.Internal.Builder
+instance GHC.Internal.Base.Semigroup Data.ByteString.Builder.Internal.Builder
 
 
 -- | This module provides <a>Builder</a> <i>primitives</i>, which are lower
@@ -5570,7 +5843,7 @@ condB :: (a -> Bool) -> BoundedPrim a -> BoundedPrim a -> BoundedPrim a
 --   free bytes. This optimization is not observationally equivalent in a
 --   strict sense, as it influences the boundaries of the generated chunks.
 --   However, for a user of this library it is observationally equivalent,
---   as chunk boundaries of a lazy <a>ByteString</a> can only be observed
+--   as chunk boundaries of a <a>LazyByteString</a> can only be observed
 --   through the internal interface. Moreover, we expect that all
 --   primitives write much fewer than 4kb (the default short buffer size).
 --   Hence, it is safe to ignore the additional memory spilled due to the
@@ -5598,9 +5871,9 @@ primMapListBounded :: BoundedPrim a -> [a] -> Builder
 --   value using a <a>BoundedPrim</a> for each sequence element.
 primUnfoldrBounded :: BoundedPrim b -> (a -> Maybe (b, a)) -> a -> Builder
 
--- | Create a <a>Builder</a> that encodes each <a>Word8</a> of a strict
---   <a>ByteString</a> using a <a>BoundedPrim</a>. For example, we can
---   write a <a>Builder</a> that filters a strict <a>ByteString</a> as
+-- | Create a <a>Builder</a> that encodes each <a>Word8</a> of a
+--   <a>StrictByteString</a> using a <a>BoundedPrim</a>. For example, we
+--   can write a <a>Builder</a> that filters a <a>StrictByteString</a> as
 --   follows.
 --   
 --   <pre>
@@ -5610,10 +5883,10 @@ primUnfoldrBounded :: BoundedPrim b -> (a -> Maybe (b, a)) -> a -> Builder
 --   <pre>
 --   filterBS p = P.condB p (P.liftFixedToBounded P.word8) P.emptyB
 --   </pre>
-primMapByteStringBounded :: BoundedPrim Word8 -> ByteString -> Builder
+primMapByteStringBounded :: BoundedPrim Word8 -> StrictByteString -> Builder
 
 -- | Chunk-wise application of <a>primMapByteStringBounded</a>.
-primMapLazyByteStringBounded :: BoundedPrim Word8 -> ByteString -> Builder
+primMapLazyByteStringBounded :: BoundedPrim Word8 -> LazyByteString -> Builder
 
 -- | A builder primitive that always results in a sequence of bytes of a
 --   pre-determined, fixed size.
@@ -5635,23 +5908,23 @@ primMapListFixed :: FixedPrim a -> [a] -> Builder
 --   <a>FixedPrim</a>.
 primUnfoldrFixed :: FixedPrim b -> (a -> Maybe (b, a)) -> a -> Builder
 
--- | <i>Heavy inlining.</i> Encode all bytes of a strict <a>ByteString</a>
+-- | <i>Heavy inlining.</i> Encode all bytes of a <a>StrictByteString</a>
 --   from left-to-right with a <a>FixedPrim</a>. This function is quite
 --   versatile. For example, we can use it to construct a <a>Builder</a>
 --   that maps every byte before copying it to the buffer to be filled.
 --   
 --   <pre>
---   mapToBuilder :: (Word8 -&gt; Word8) -&gt; S.ByteString -&gt; Builder
+--   mapToBuilder :: (Word8 -&gt; Word8) -&gt; S.StrictByteString -&gt; Builder
 --   mapToBuilder f = primMapByteStringFixed (contramapF f word8)
 --   </pre>
 --   
---   We can also use it to hex-encode a strict <a>ByteString</a> as shown
---   by the <a>byteStringHex</a> example above.
-primMapByteStringFixed :: FixedPrim Word8 -> ByteString -> Builder
+--   We can also use it to hex-encode a <a>StrictByteString</a> as shown by
+--   the <a>byteStringHex</a> example above.
+primMapByteStringFixed :: FixedPrim Word8 -> StrictByteString -> Builder
 
--- | <i>Heavy inlining.</i> Encode all bytes of a lazy <a>ByteString</a>
+-- | <i>Heavy inlining.</i> Encode all bytes of a <a>LazyByteString</a>
 --   from left-to-right with a <a>FixedPrim</a>.
-primMapLazyByteStringFixed :: FixedPrim Word8 -> ByteString -> Builder
+primMapLazyByteStringFixed :: FixedPrim Word8 -> LazyByteString -> Builder
 
 -- | Encoding single signed bytes as-is.
 int8 :: FixedPrim Int8
@@ -5996,7 +6269,7 @@ scientific :: FloatFormat
 -- | Standard or scientific notation depending on the exponent. Matches
 --   <a>show</a>
 generic :: FloatFormat
-instance GHC.Show.Show Data.ByteString.Builder.RealFloat.FormatMode
+instance GHC.Internal.Show.Show Data.ByteString.Builder.RealFloat.FormatMode
 
 
 -- | Extra functions for creating and executing <a>Builder</a>s. They are
@@ -6017,7 +6290,7 @@ module Data.ByteString.Builder.Extra
 --     toLazyByteStringWith (<a>safeStrategy</a> <a>smallChunkSize</a> <a>defaultChunkSize</a>) L.empty
 --   </pre>
 --   
---   where <tt>L.empty</tt> is the zero-length lazy <a>ByteString</a>.
+--   where <tt>L.empty</tt> is the zero-length <a>LazyByteString</a>.
 --   
 --   In most cases, the parameters used by <a>toLazyByteString</a> give
 --   good performance. A sub-performing case of <a>toLazyByteString</a> is
@@ -6031,20 +6304,21 @@ module Data.ByteString.Builder.Extra
 --   </pre>
 --   
 --   This reduces the allocation and trimming overhead, as all generated
---   <a>ByteString</a>s fit into the first buffer and there is no trimming
---   required, if more than 64 bytes and less than 128 bytes are written.
-toLazyByteStringWith :: AllocationStrategy -> ByteString -> Builder -> ByteString
+--   <a>LazyByteString</a>s fit into the first buffer and there is no
+--   trimming required, if more than 64 bytes and less than 128 bytes are
+--   written.
+toLazyByteStringWith :: AllocationStrategy -> LazyByteString -> Builder -> LazyByteString
 
 -- | A buffer allocation strategy for executing <a>Builder</a>s.
 data AllocationStrategy
 
--- | Use this strategy for generating lazy <a>ByteString</a>s whose chunks
+-- | Use this strategy for generating <a>LazyByteString</a>s whose chunks
 --   are likely to survive one garbage collection. This strategy trims
 --   buffers that are filled less than half in order to avoid spilling too
 --   much memory.
 safeStrategy :: Int -> Int -> AllocationStrategy
 
--- | Use this strategy for generating lazy <a>ByteString</a>s whose chunks
+-- | Use this strategy for generating <a>LazyByteString</a>s whose chunks
 --   are discarded right after they are generated. For example, if you just
 --   generate them to write them to a network socket.
 untrimmedStrategy :: Int -> Int -> AllocationStrategy
@@ -6057,45 +6331,46 @@ smallChunkSize :: Int
 --   management overhead
 defaultChunkSize :: Int
 
--- | Construct a <a>Builder</a> that copies the strict <a>ByteString</a>.
+-- | Construct a <a>Builder</a> that copies the <a>StrictByteString</a>.
 --   
 --   Use this function to create <a>Builder</a>s from smallish (<tt>&lt;=
---   4kb</tt>) <a>ByteString</a>s or if you need to guarantee that the
---   <a>ByteString</a> is not shared with the chunks generated by the
---   <a>Builder</a>.
-byteStringCopy :: ByteString -> Builder
+--   4kb</tt>) <a>StrictByteString</a>s or if you need to guarantee that
+--   the <a>StrictByteString</a> is not shared with the chunks generated by
+--   the <a>Builder</a>.
+byteStringCopy :: StrictByteString -> Builder
 
--- | Construct a <a>Builder</a> that always inserts the strict
---   <a>ByteString</a> directly as a chunk.
+-- | Construct a <a>Builder</a> that always inserts the
+--   <a>StrictByteString</a> directly as a chunk.
 --   
 --   This implies flushing the output buffer, even if it contains just a
 --   single byte. You should therefore use <a>byteStringInsert</a> only for
---   large (<tt>&gt; 8kb</tt>) <a>ByteString</a>s. Otherwise, the generated
---   chunks are too fragmented to be processed efficiently afterwards.
-byteStringInsert :: ByteString -> Builder
+--   large (<tt>&gt; 8kb</tt>) <a>StrictByteString</a>s. Otherwise, the
+--   generated chunks are too fragmented to be processed efficiently
+--   afterwards.
+byteStringInsert :: StrictByteString -> Builder
 
--- | Construct a <a>Builder</a> that copies the strict <a>ByteString</a>s,
+-- | Construct a <a>Builder</a> that copies the <a>StrictByteString</a>s,
 --   if it is smaller than the treshold, and inserts it directly otherwise.
 --   
---   For example, <tt>byteStringThreshold 1024</tt> copies strict
---   <a>ByteString</a>s whose size is less or equal to 1kb, and inserts
---   them directly otherwise. This implies that the average chunk-size of
---   the generated lazy <a>ByteString</a> may be as low as 513 bytes, as
---   there could always be just a single byte between the directly inserted
---   1025 byte, strict <a>ByteString</a>s.
-byteStringThreshold :: Int -> ByteString -> Builder
+--   For example, <tt>byteStringThreshold 1024</tt> copies
+--   <a>StrictByteString</a>s whose size is less or equal to 1kb, and
+--   inserts them directly otherwise. This implies that the average
+--   chunk-size of the generated <a>LazyByteString</a> may be as low as 513
+--   bytes, as there could always be just a single byte between the
+--   directly inserted 1025 byte, <a>StrictByteString</a>s.
+byteStringThreshold :: Int -> StrictByteString -> Builder
 
--- | Construct a <a>Builder</a> that copies the lazy <a>ByteString</a>.
-lazyByteStringCopy :: ByteString -> Builder
+-- | Construct a <a>Builder</a> that copies the <a>LazyByteString</a>.
+lazyByteStringCopy :: LazyByteString -> Builder
 
--- | Construct a <a>Builder</a> that inserts all chunks of the lazy
---   <a>ByteString</a> directly.
-lazyByteStringInsert :: ByteString -> Builder
+-- | Construct a <a>Builder</a> that inserts all chunks of the
+--   <a>LazyByteString</a> directly.
+lazyByteStringInsert :: LazyByteString -> Builder
 
 -- | Construct a <a>Builder</a> that uses the thresholding strategy of
---   <a>byteStringThreshold</a> for each chunk of the lazy
---   <a>ByteString</a>.
-lazyByteStringThreshold :: Int -> ByteString -> Builder
+--   <a>byteStringThreshold</a> for each chunk of the
+--   <a>LazyByteString</a>.
+lazyByteStringThreshold :: Int -> LazyByteString -> Builder
 
 -- | Flush the current buffer. This introduces a chunk boundary.
 flush :: Builder
@@ -6107,8 +6382,8 @@ flush :: Builder
 --   <ul>
 --   <li>an IO action for writing the Builder's data into a user-supplied
 --   memory buffer.</li>
---   <li>a pre-existing chunks of data represented by a strict
---   <a>ByteString</a></li>
+--   <li>a pre-existing chunks of data represented by a
+--   <a>StrictByteString</a></li>
 --   </ul>
 --   
 --   While this is rather low level, it provides you with full flexibility
@@ -6138,11 +6413,11 @@ More :: !Int -> BufferWriter -> Next
 
 -- | In addition to the data that has just been written into your buffer by
 --   the <a>BufferWriter</a> action, it gives you a pre-existing chunk of
---   data as a <a>ByteString</a>. It also gives you the following
+--   data as a <a>StrictByteString</a>. It also gives you the following
 --   <a>BufferWriter</a> action. It is safe to run this following action
 --   using a buffer with as much free space as was left by the previous run
 --   action.
-Chunk :: !ByteString -> BufferWriter -> Next
+Chunk :: !StrictByteString -> BufferWriter -> Next
 
 -- | Turn a <a>Builder</a> into its initial <a>BufferWriter</a> action.
 runBuilder :: Builder -> BufferWriter
@@ -6202,9 +6477,9 @@ doubleHost :: Double -> Builder
 --   <a>Builder</a>s support (a) by providing an <i>O(1)</i> concatentation
 --   operation and efficient implementations of basic encodings for
 --   <a>Char</a>s, <a>Int</a>s, and other standard Haskell values. They
---   support (b) by providing their result as a lazy <a>ByteString</a>,
+--   support (b) by providing their result as a <a>LazyByteString</a>,
 --   which is internally just a linked list of pointers to <i>chunks</i> of
---   consecutive raw memory. Lazy <a>ByteString</a>s can be efficiently
+--   consecutive raw memory. <a>LazyByteString</a>s can be efficiently
 --   consumed by functions that write them to a file or send them over a
 --   network socket. Note that each chunk boundary incurs expensive extra
 --   work (e.g., a system call) that must be amortized over the work spent
@@ -6227,19 +6502,12 @@ doubleHost :: Double -> Builder
 --   type Table = [Row]
 --   </pre>
 --   
---   We use the following imports and abbreviate <a>mappend</a> to simplify
---   reading.
+--   We use the following imports.
 --   
 --   <pre>
 --   import qualified <a>Data.ByteString.Lazy</a>               as L
 --   import           <a>Data.ByteString.Builder</a>
---   import           Data.Monoid
---   import           Data.Foldable                        (<a>foldMap</a>)
 --   import           Data.List                            (<a>intersperse</a>)
---   
---   infixr 4 &lt;&gt;
---   (&lt;&gt;) :: <a>Monoid</a> m =&gt; m -&gt; m -&gt; m
---   (&lt;&gt;) = <a>mappend</a>
 --   </pre>
 --   
 --   CSV is a character-based representation of tables. For maximal
@@ -6250,14 +6518,14 @@ doubleHost :: Double -> Builder
 --   afterwards. We get rid of this intermediate <a>String</a>
 --   representation by fixing the character encoding to UTF-8 and using
 --   <a>Builder</a>s to convert <tt>Table</tt>s directly to UTF-8 encoded
---   CSV tables represented as lazy <a>ByteString</a>s.
+--   CSV tables represented as <a>LazyByteString</a>s.
 --   
 --   <pre>
---   encodeUtf8CSV :: Table -&gt; L.ByteString
+--   encodeUtf8CSV :: Table -&gt; L.LazyByteString
 --   encodeUtf8CSV = <a>toLazyByteString</a> . renderTable
 --   
 --   renderTable :: Table -&gt; Builder
---   renderTable rs = <a>mconcat</a> [renderRow r &lt;&gt; <a>charUtf8</a> '\n' | r &lt;- rs]
+--   renderTable rs = <a>mconcat</a> [renderRow r <a>&lt;&gt;</a> <a>charUtf8</a> '\n' | r &lt;- rs]
 --   
 --   renderRow :: Row -&gt; Builder
 --   renderRow []     = <a>mempty</a>
@@ -6269,7 +6537,7 @@ doubleHost :: Double -> Builder
 --   renderCell (IntC i)     = <a>intDec</a> i
 --   
 --   renderString :: String -&gt; Builder
---   renderString cs = charUtf8 '"' &lt;&gt; foldMap escape cs &lt;&gt; charUtf8 '"'
+--   renderString cs = charUtf8 '"' &lt;&gt; <a>foldMap</a> escape cs &lt;&gt; charUtf8 '"'
 --     where
 --       escape '\\' = charUtf8 '\\' &lt;&gt; charUtf8 '\\'
 --       escape '\"' = charUtf8 '\\' &lt;&gt; charUtf8 '\"'
@@ -6298,7 +6566,7 @@ doubleHost :: Double -> Builder
 --   </pre>
 --   
 --   The expression <tt>encodeUtf8CSV table</tt> results in the following
---   lazy <a>ByteString</a>.
+--   lazy <a>LazyByteString</a>.
 --   
 --   <pre>
 --   Chunk "\"hello\",\"\\\"1\\\"\",\"\206\187-w\195\182rld\"\n-3,-2,-1,0,1,2,3\n" Empty
@@ -6326,11 +6594,11 @@ doubleHost :: Double -> Builder
 --   </pre>
 --   
 --   On a Core2 Duo 2.20GHz on a 32-bit Linux, the above code takes 1ms to
---   generate the 22'500 bytes long lazy <a>ByteString</a>. Looking again
---   at the definitions above, we see that we took care to avoid
---   intermediate data structures, as otherwise we would sacrifice
---   performance. For example, the following (arguably simpler) definition
---   of <tt>renderRow</tt> is about 20% slower.
+--   generate the 22'500 bytes long <a>LazyByteString</a>. Looking again at
+--   the definitions above, we see that we took care to avoid intermediate
+--   data structures, as otherwise we would sacrifice performance. For
+--   example, the following (arguably simpler) definition of
+--   <tt>renderRow</tt> is about 20% slower.
 --   
 --   <pre>
 --   renderRow :: Row -&gt; Builder
@@ -6338,8 +6606,8 @@ doubleHost :: Double -> Builder
 --   </pre>
 --   
 --   Similarly, using <i>O(n)</i> concatentations like <a>++</a> or the
---   equivalent <a>concat</a> operations on strict and lazy
---   <a>ByteString</a>s should be avoided. The following definition of
+--   equivalent <a>concat</a> operations on strict and
+--   <a>LazyByteString</a>s should be avoided. The following definition of
 --   <tt>renderString</tt> is also about 20% slower.
 --   
 --   <pre>
@@ -6362,10 +6630,10 @@ module Data.ByteString.Builder
 --   concatenation, which runs in <i>O(1)</i>.
 data Builder
 
--- | Execute a <a>Builder</a> and return the generated chunks as a lazy
---   <a>ByteString</a>. The work is performed lazy, i.e., only when a chunk
---   of the lazy <a>ByteString</a> is forced.
-toLazyByteString :: Builder -> ByteString
+-- | Execute a <a>Builder</a> and return the generated chunks as a
+--   <a>LazyByteString</a>. The work is performed lazy, i.e., only when a
+--   chunk of the <a>LazyByteString</a> is forced.
+toLazyByteString :: Builder -> LazyByteString
 
 -- | Output a <a>Builder</a> to a <a>Handle</a>. The <a>Builder</a> is
 --   executed directly on the buffer of the <a>Handle</a>. If the buffer is
@@ -6390,16 +6658,16 @@ hPutBuilder :: Handle -> Builder -> IO ()
 writeFile :: FilePath -> Builder -> IO ()
 
 -- | Create a <a>Builder</a> denoting the same sequence of bytes as a
---   strict <a>ByteString</a>. The <a>Builder</a> inserts large
---   <a>ByteString</a>s directly, but copies small ones to ensure that the
---   generated chunks are large on average.
-byteString :: ByteString -> Builder
+--   <a>StrictByteString</a>. The <a>Builder</a> inserts large
+--   <a>StrictByteString</a>s directly, but copies small ones to ensure
+--   that the generated chunks are large on average.
+byteString :: StrictByteString -> Builder
 
 -- | Create a <a>Builder</a> denoting the same sequence of bytes as a lazy
---   <a>ByteString</a>. The <a>Builder</a> inserts large chunks of the lazy
---   <a>ByteString</a> directly, but copies small ones to ensure that the
---   generated chunks are large on average.
-lazyByteString :: ByteString -> Builder
+--   <a>LazyByteString</a>. The <a>Builder</a> inserts large chunks of the
+--   <a>LazyByteString</a> directly, but copies small ones to ensure that
+--   the generated chunks are large on average.
+lazyByteString :: LazyByteString -> Builder
 
 -- | Construct a <a>Builder</a> that copies the <a>ShortByteString</a>.
 shortByteString :: ShortByteString -> Builder
@@ -6585,12 +6853,12 @@ floatHexFixed :: Float -> Builder
 -- | Encode an IEEE <a>Double</a> using 16 nibbles.
 doubleHexFixed :: Double -> Builder
 
--- | Encode each byte of a <a>ByteString</a> using its fixed-width hex
---   encoding.
-byteStringHex :: ByteString -> Builder
+-- | Encode each byte of a <a>StrictByteString</a> using its fixed-width
+--   hex encoding.
+byteStringHex :: StrictByteString -> Builder
 
--- | Encode each byte of a lazy <a>ByteString</a> using its fixed-width hex
+-- | Encode each byte of a <a>LazyByteString</a> using its fixed-width hex
 --   encoding.
-lazyByteStringHex :: ByteString -> Builder
-instance Data.String.IsString Data.ByteString.Builder.Internal.Builder
-instance GHC.Show.Show Data.ByteString.Builder.Internal.Builder
+lazyByteStringHex :: LazyByteString -> Builder
+instance GHC.Internal.Data.String.IsString Data.ByteString.Builder.Internal.Builder
+instance GHC.Internal.Show.Show Data.ByteString.Builder.Internal.Builder

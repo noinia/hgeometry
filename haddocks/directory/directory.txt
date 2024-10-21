@@ -7,7 +7,7 @@
 --   This library provides a basic set of operations for manipulating files
 --   and directories in a portable way.
 @package directory
-@version 1.3.8.1
+@version 1.3.8.3
 
 
 -- | Internal modules are always subject to change from version to version.
@@ -15,6 +15,36 @@
 --   shown in the Hackage documentation may differ from what is actually
 --   available on your system.
 module System.Directory.Internal
+data FileType
+File :: FileType
+
+-- | POSIX: either file or directory link; Windows: file link
+SymbolicLink :: FileType
+Directory :: FileType
+
+-- | Windows only: directory link
+DirectoryLink :: FileType
+
+-- | Fallibly converts String to OsString. Only intended to be used on
+--   literals.
+os :: String -> OsString
+
+-- | Newtype representing short operating system specific strings.
+--   
+--   Internally this is either <a>WindowsString</a> or <a>PosixString</a>,
+--   depending on the platform. Both use unpinned <tt>ShortByteString</tt>
+--   for efficiency.
+--   
+--   The constructor is only exported via
+--   <a>System.OsString.Internal.Types</a>, since dealing with the
+--   internals isn't generally recommended, but supported in case you need
+--   to write platform specific code.
+data OsString
+
+-- | Type representing filenames/pathnames.
+--   
+--   This type doesn't add any guarantees over <a>OsString</a>.
+type OsPath = OsString
 
 -- | Special directories for storing user-specific application data,
 --   configuration, and cache files, as specified by the <a>XDG Base
@@ -85,25 +115,12 @@ Permissions :: Bool -> Bool -> Bool -> Bool -> Permissions
 [searchable] :: Permissions -> Bool
 
 -- | A generator with side-effects.
-newtype ListT m a
-ListT :: m (Maybe (a, ListT m a)) -> ListT m a
-[unListT] :: ListT m a -> m (Maybe (a, ListT m a))
-data FileType
-File :: FileType
-
--- | POSIX: either file or directory link; Windows: file link
-SymbolicLink :: FileType
-Directory :: FileType
-
--- | Windows only: directory link
-DirectoryLink :: FileType
-
--- | Fallibly converts String to OsString. Only intended to be used on
---   literals.
-os :: String -> OsString
-emptyListT :: Applicative m => ListT m a
+newtype ListT (m :: Type -> Type) a
+ListT :: m (Maybe (a, ListT m a)) -> ListT (m :: Type -> Type) a
+[unListT] :: ListT (m :: Type -> Type) a -> m (Maybe (a, ListT m a))
+emptyListT :: forall (m :: Type -> Type) a. Applicative m => ListT m a
 maybeToListT :: Applicative m => m (Maybe a) -> ListT m a
-listToListT :: Applicative m => [a] -> ListT m a
+listToListT :: forall (m :: Type -> Type) a. Applicative m => [a] -> ListT m a
 liftJoinListT :: Monad m => m (ListT m a) -> ListT m a
 listTHead :: Functor m => ListT m a -> m (Maybe a)
 listTToList :: Monad m => ListT m a -> m [a]
@@ -166,23 +183,9 @@ withBinaryHandle :: IO Handle -> (Handle -> IO r) -> IO r
 
 -- | Copy data from one handle to another until end of file.
 copyHandleData :: Handle -> Handle -> IO ()
-
--- | Type representing filenames/pathnames.
---   
---   This type doesn't add any guarantees over <a>OsString</a>.
-type OsPath = OsString
-
--- | Newtype representing short operating system specific strings.
---   
---   Internally this is either <a>WindowsString</a> or <a>PosixString</a>,
---   depending on the platform. Both use unpinned <tt>ShortByteString</tt>
---   for efficiency.
---   
---   The constructor is only exported via
---   <a>System.OsString.Internal.Types</a>, since dealing with the
---   internals isn't generally recommended, but supported in case you need
---   to write platform specific code.
-data () => OsString
+setFileMode :: OsPath -> Mode -> IO ()
+createSymbolicLink :: Bool -> OsPath -> OsPath -> IO ()
+readSymbolicLink :: OsPath -> IO OsPath
 createDirectoryInternal :: OsPath -> IO ()
 removePathInternal :: Bool -> OsPath -> IO ()
 renamePathInternal :: OsPath -> OsPath -> IO ()
@@ -194,9 +197,12 @@ c_free :: Ptr a -> IO ()
 c_PATH_MAX :: Maybe Int
 c_realpath :: CString -> CString -> IO CString
 withRealpath :: CString -> (CString -> IO a) -> IO a
-canonicalizePathWith :: ((OsPath -> IO OsPath) -> OsPath -> IO OsPath) -> OsPath -> IO OsPath
+realPath :: OsPath -> IO OsPath
 canonicalizePathSimplify :: OsPath -> IO OsPath
 findExecutablesLazyInternal :: ([OsPath] -> OsString -> ListT IO OsPath) -> OsString -> ListT IO OsPath
+
+-- | Get the contents of the <tt>PATH</tt> environment variable.
+getPath :: IO [OsPath]
 exeExtensionInternal :: OsString
 getDirectoryContentsInternal :: OsPath -> IO [OsPath]
 getCurrentDirectoryInternal :: IO OsPath
@@ -215,8 +221,6 @@ prependCurrentDirectory :: OsPath -> IO OsPath
 setCurrentDirectoryInternal :: OsPath -> IO ()
 linkToDirectoryIsDirectory :: Bool
 createHardLink :: OsPath -> OsPath -> IO ()
-createSymbolicLink :: Bool -> OsPath -> OsPath -> IO ()
-readSymbolicLink :: OsPath -> IO OsPath
 type Metadata = FileStatus
 getSymbolicLinkMetadata :: OsPath -> IO Metadata
 getFileMetadata :: OsPath -> IO Metadata
@@ -229,7 +233,6 @@ modeFromMetadata :: Metadata -> Mode
 allWriteMode :: FileMode
 hasWriteMode :: Mode -> Bool
 setWriteMode :: Bool -> Mode -> Mode
-setFileMode :: OsPath -> Mode -> IO ()
 setFilePermissions :: OsPath -> Mode -> IO ()
 getAccessPermissions :: OsPath -> IO Permissions
 setAccessPermissions :: OsPath -> Permissions -> IO ()
@@ -249,9 +252,6 @@ copyFileWithMetadataInternal :: (Metadata -> OsPath -> IO ()) -> (Metadata -> Os
 setTimes :: OsPath -> (Maybe POSIXTime, Maybe POSIXTime) -> IO ()
 lookupEnvOs :: OsString -> IO (Maybe OsString)
 getEnvOs :: OsString -> IO OsString
-
--- | Get the contents of the <tt>PATH</tt> environment variable.
-getPath :: IO [OsPath]
 
 -- | $HOME is preferred, because the user has control over it. However,
 --   POSIX doesn't define it as a mandatory variable, so fall back to
@@ -723,10 +723,13 @@ removeFile :: OsPath -> IO ()
 -- | <tt><a>renameFile</a> old new</tt> changes the name of an existing
 --   file system object from <i>old</i> to <i>new</i>. If the <i>new</i>
 --   object already exists, it is replaced by the <i>old</i> object.
---   Neither path may refer to an existing directory. A conformant
---   implementation need not support renaming files in all situations (e.g.
---   renaming across different physical devices), but the constraints must
---   be documented.
+--   Neither path may refer to an existing directory.
+--   
+--   A conformant implementation need not support renaming files in all
+--   situations (e.g. renaming across different physical devices), but the
+--   constraints must be documented. On Windows, this does not support
+--   renaming across different physical devices; if you are looking to do
+--   so, consider using <a>copyFileWithMetadata</a> and <a>removeFile</a>.
 --   
 --   On Windows, this calls <tt>MoveFileEx</tt> with
 --   <tt>MOVEFILE_REPLACE_EXISTING</tt> set, which is not guaranteed to be
@@ -1242,6 +1245,8 @@ setAccessTime :: OsPath -> UTCTime -> IO ()
 --   modification time; or</li>
 --   <li><a>isDoesNotExistError</a> if the file or directory does not
 --   exist.</li>
+--   <li><a>InvalidArgument</a> on FAT32 file system if the time is before
+--   DOS Epoch (1 January 1980).</li>
 --   </ul>
 --   
 --   Some caveats for POSIX systems:
@@ -1719,10 +1724,13 @@ removeFile :: FilePath -> IO ()
 -- | <tt><a>renameFile</a> old new</tt> changes the name of an existing
 --   file system object from <i>old</i> to <i>new</i>. If the <i>new</i>
 --   object already exists, it is replaced by the <i>old</i> object.
---   Neither path may refer to an existing directory. A conformant
---   implementation need not support renaming files in all situations (e.g.
---   renaming across different physical devices), but the constraints must
---   be documented.
+--   Neither path may refer to an existing directory.
+--   
+--   A conformant implementation need not support renaming files in all
+--   situations (e.g. renaming across different physical devices), but the
+--   constraints must be documented. On Windows, this does not support
+--   renaming across different physical devices; if you are looking to do
+--   so, consider using <a>copyFileWithMetadata</a> and <a>removeFile</a>.
 --   
 --   On Windows, this calls <tt>MoveFileEx</tt> with
 --   <tt>MOVEFILE_REPLACE_EXISTING</tt> set, which is not guaranteed to be
@@ -2234,6 +2242,8 @@ setAccessTime :: FilePath -> UTCTime -> IO ()
 --   modification time; or</li>
 --   <li><a>isDoesNotExistError</a> if the file or directory does not
 --   exist.</li>
+--   <li><a>InvalidArgument</a> on FAT32 file system if the time is before
+--   DOS Epoch (1 January 1980).</li>
 --   </ul>
 --   
 --   Some caveats for POSIX systems:

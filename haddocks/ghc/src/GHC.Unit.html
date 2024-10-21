@@ -2,7 +2,7 @@
 </span><span id="line-2"></span><span>
 </span><span id="line-3"></span><span class="hs-comment">-- | Units are library components from Cabal packages compiled and installed in</span><span>
 </span><span id="line-4"></span><span class="hs-comment">-- a database</span><span>
-</span><span id="line-5"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">GHC.Unit</span><span>
+</span><span id="line-5"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="GHC.Unit.html"><span class="hs-identifier">GHC.Unit</span></a></span><span>
 </span><span id="line-6"></span><span>   </span><span class="hs-special">(</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="GHC.Unit.Types.html"><span class="hs-identifier">GHC.Unit.Types</span></a></span><span>
 </span><span id="line-7"></span><span>   </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="GHC.Unit.Info.html"><span class="hs-identifier">GHC.Unit.Info</span></a></span><span>
 </span><span id="line-8"></span><span>   </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="GHC.Unit.Parser.html"><span class="hs-identifier">GHC.Unit.Parser</span></a></span><span>
@@ -63,7 +63,7 @@ Wired-in units
 
 Certain libraries (ghc-prim, base, etc.) are known to the compiler and to the
 RTS as they provide some basic primitives.  Hence UnitIds of wired-in libraries
-are fixed. Instead of letting Cabal chose the UnitId for these libraries, their
+are fixed. Instead of letting Cabal choose the UnitId for these libraries, their
 .cabal file uses the following stanza to force it to a specific value:
 
    ghc-options: -this-unit-id ghc-prim    -- taken from ghc-prim.cabal

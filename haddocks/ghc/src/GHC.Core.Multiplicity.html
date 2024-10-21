@@ -9,7 +9,7 @@ Mult is a type synonym for Type, used only when its kind is Multiplicity.
 To simplify dealing with multiplicities, functions such as
 mkMultMul perform simplifications such as Many * x = Many on the fly.
 -}</span></span><span>
-</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">GHC.Core.Multiplicity</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="GHC.Core.Multiplicity.html"><span class="hs-identifier">GHC.Core.Multiplicity</span></a></span><span>
 </span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Mult"><span class="hs-identifier">Mult</span></a></span><span>
 </span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="GHC.Core.Type.html#OneTy"><span class="hs-identifier">OneTy</span></a></span><span>
 </span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="GHC.Core.Type.html#ManyTy"><span class="hs-identifier">ManyTy</span></a></span><span>
@@ -312,29 +312,29 @@ To add a new multiplicity, you need to:
   and Zero
 -}</span><span>
 </span><span id="line-314"></span><span>
-</span><span id="line-315"></span><span class="annot"><a href="GHC.Core.Multiplicity.html#isMultMul"><span class="hs-identifier hs-type">isMultMul</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Mult"><span class="hs-identifier hs-type">Mult</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Maybe/GHC.Maybe.html#Maybe"><span class="hs-identifier hs-type">Maybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Mult"><span class="hs-identifier hs-type">Mult</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Mult"><span class="hs-identifier hs-type">Mult</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-315"></span><span class="annot"><a href="GHC.Core.Multiplicity.html#isMultMul"><span class="hs-identifier hs-type">isMultMul</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Mult"><span class="hs-identifier hs-type">Mult</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Mult"><span class="hs-identifier hs-type">Mult</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Mult"><span class="hs-identifier hs-type">Mult</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-316"></span><span id="isMultMul"><span class="annot"><span class="annottext">isMultMul :: Mult -&gt; Maybe (Mult, Mult)
-</span><a href="GHC.Core.Multiplicity.html#isMultMul"><span class="hs-identifier hs-var hs-var">isMultMul</span></a></span></span><span> </span><span id="local-6989586621681573490"><span class="annot"><span class="annottext">Mult
-</span><a href="#local-6989586621681573490"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Just/GHC.Maybe.html#Just"><span class="hs-identifier hs-type">Just</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621681573491"><span class="annot"><span class="annottext">TyCon
-</span><a href="#local-6989586621681573491"><span class="hs-identifier hs-var">tc</span></a></span></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span id="local-6989586621681573492"><span class="annot"><span class="annottext">Mult
-</span><a href="#local-6989586621681573492"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681573493"><span class="annot"><span class="annottext">Mult
-</span><a href="#local-6989586621681573493"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(() :: Constraint) =&gt; Mult -&gt; Maybe (TyCon, [Mult])
+</span><a href="GHC.Core.Multiplicity.html#isMultMul"><span class="hs-identifier hs-var hs-var">isMultMul</span></a></span></span><span> </span><span id="local-6989586621682406903"><span class="annot"><span class="annottext">Mult
+</span><a href="#local-6989586621682406903"><span class="hs-identifier hs-var">ty</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621682406904"><span class="annot"><span class="annottext">TyCon
+</span><a href="#local-6989586621682406904"><span class="hs-identifier hs-var">tc</span></a></span></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span id="local-6989586621682406905"><span class="annot"><span class="annottext">Mult
+</span><a href="#local-6989586621682406905"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682406906"><span class="annot"><span class="annottext">Mult
+</span><a href="#local-6989586621682406906"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">HasDebugCallStack =&gt; Mult -&gt; Maybe (TyCon, [Mult])
 Mult -&gt; Maybe (TyCon, [Mult])
 </span><a href="GHC.Core.Type.html#splitTyConApp_maybe"><span class="hs-identifier hs-var">splitTyConApp_maybe</span></a></span><span> </span><span class="annot"><span class="annottext">Mult
-</span><a href="#local-6989586621681573490"><span class="hs-identifier hs-var">ty</span></a></span><span>
+</span><a href="#local-6989586621682406903"><span class="hs-identifier hs-var">ty</span></a></span><span>
 </span><span id="line-317"></span><span>             </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">TyCon
-</span><a href="#local-6989586621681573491"><span class="hs-identifier hs-var">tc</span></a></span><span> </span><span class="annot"><span class="annottext">TyCon -&gt; Unique -&gt; Bool
+</span><a href="#local-6989586621682406904"><span class="hs-identifier hs-var">tc</span></a></span><span> </span><span class="annot"><span class="annottext">TyCon -&gt; Unique -&gt; Bool
 forall a. Uniquable a =&gt; a -&gt; Unique -&gt; Bool
 </span><a href="GHC.Types.Unique.html#hasKey"><span class="hs-operator hs-var">`hasKey`</span></a></span><span> </span><span class="annot"><span class="annottext">Unique
 </span><a href="GHC.Builtin.Names.html#multMulTyConKey"><span class="hs-identifier hs-var">multMulTyConKey</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Mult, Mult) -&gt; Maybe (Mult, Mult)
 forall a. a -&gt; Maybe a
-</span><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Just/GHC.Maybe.html#Just"><span class="hs-identifier hs-var">Just</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Mult
-</span><a href="#local-6989586621681573492"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Mult
-</span><a href="#local-6989586621681573493"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Mult
+</span><a href="#local-6989586621682406905"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Mult
+</span><a href="#local-6989586621682406906"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-318"></span><span>             </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#otherwise/GHC.Base.html#otherwise"><span class="hs-identifier hs-var">otherwise</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (Mult, Mult)
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (Mult, Mult)
 forall a. Maybe a
-</span><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Nothing/GHC.Maybe.html#Nothing"><span class="hs-identifier hs-var">Nothing</span></a></span><span>
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
 </span><span id="line-319"></span><span>
 </span><span id="line-320"></span><span class="hs-comment">{-
 Note [Overapproximating multiplicities]
@@ -367,13 +367,13 @@ that the summands and factors are ordered somehow, to have more equalities.
 </span><span id="line-344"></span><span class="annot"><a href="GHC.Core.Multiplicity.html#mkMultMul"><span class="hs-identifier hs-type">mkMultMul</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Mult"><span class="hs-identifier hs-type">Mult</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Mult"><span class="hs-identifier hs-type">Mult</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Mult"><span class="hs-identifier hs-type">Mult</span></a></span><span>
 </span><span id="line-345"></span><span id="mkMultMul"><span class="annot"><span class="annottext">mkMultMul :: Mult -&gt; Mult -&gt; Mult
 </span><a href="GHC.Core.Multiplicity.html#mkMultMul"><span class="hs-identifier hs-var hs-var">mkMultMul</span></a></span></span><span> </span><span class="annot"><span class="annottext">Mult
-</span><a href="GHC.Core.Type.html#OneTy"><span class="hs-identifier hs-var">OneTy</span></a></span><span>  </span><span id="local-6989586621681573495"><span class="annot"><span class="annottext">Mult
-</span><a href="#local-6989586621681573495"><span class="hs-identifier hs-var">p</span></a></span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Mult
-</span><a href="#local-6989586621681573495"><span class="hs-identifier hs-var">p</span></a></span><span>
-</span><span id="line-346"></span><span class="annot"><a href="GHC.Core.Multiplicity.html#mkMultMul"><span class="hs-identifier hs-var">mkMultMul</span></a></span><span> </span><span id="local-6989586621681573496"><span class="annot"><span class="annottext">Mult
-</span><a href="#local-6989586621681573496"><span class="hs-identifier hs-var">p</span></a></span></span><span>      </span><span class="annot"><span class="annottext">Mult
+</span><a href="GHC.Core.Type.html#OneTy"><span class="hs-identifier hs-var">OneTy</span></a></span><span>  </span><span id="local-6989586621682406908"><span class="annot"><span class="annottext">Mult
+</span><a href="#local-6989586621682406908"><span class="hs-identifier hs-var">p</span></a></span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Mult
+</span><a href="#local-6989586621682406908"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-346"></span><span class="annot"><a href="GHC.Core.Multiplicity.html#mkMultMul"><span class="hs-identifier hs-var">mkMultMul</span></a></span><span> </span><span id="local-6989586621682406909"><span class="annot"><span class="annottext">Mult
+</span><a href="#local-6989586621682406909"><span class="hs-identifier hs-var">p</span></a></span></span><span>      </span><span class="annot"><span class="annottext">Mult
 </span><a href="GHC.Core.Type.html#OneTy"><span class="hs-identifier hs-var">OneTy</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Mult
-</span><a href="#local-6989586621681573496"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><a href="#local-6989586621682406909"><span class="hs-identifier hs-var">p</span></a></span><span>
 </span><span id="line-347"></span><span class="annot"><a href="GHC.Core.Multiplicity.html#mkMultMul"><span class="hs-identifier hs-var">mkMultMul</span></a></span><span> </span><span class="annot"><span class="annottext">Mult
 </span><a href="GHC.Core.Type.html#ManyTy"><span class="hs-identifier hs-var">ManyTy</span></a></span><span> </span><span class="annot"><span class="annottext">Mult
 </span><span class="hs-identifier">_</span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Mult
@@ -382,26 +382,26 @@ that the summands and factors are ordered somehow, to have more equalities.
 </span><span class="hs-identifier">_</span></span><span>      </span><span class="annot"><span class="annottext">Mult
 </span><a href="GHC.Core.Type.html#ManyTy"><span class="hs-identifier hs-var">ManyTy</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Mult
 </span><a href="GHC.Core.Type.html#ManyTy"><span class="hs-identifier hs-var">ManyTy</span></a></span><span>
-</span><span id="line-349"></span><span class="annot"><a href="GHC.Core.Multiplicity.html#mkMultMul"><span class="hs-identifier hs-var">mkMultMul</span></a></span><span> </span><span id="local-6989586621681573497"><span class="annot"><span class="annottext">Mult
-</span><a href="#local-6989586621681573497"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621681573498"><span class="annot"><span class="annottext">Mult
-</span><a href="#local-6989586621681573498"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TyCon -&gt; [Mult] -&gt; Mult
+</span><span id="line-349"></span><span class="annot"><a href="GHC.Core.Multiplicity.html#mkMultMul"><span class="hs-identifier hs-var">mkMultMul</span></a></span><span> </span><span id="local-6989586621682406910"><span class="annot"><span class="annottext">Mult
+</span><a href="#local-6989586621682406910"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621682406911"><span class="annot"><span class="annottext">Mult
+</span><a href="#local-6989586621682406911"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TyCon -&gt; [Mult] -&gt; Mult
 </span><a href="GHC.Core.Type.html#mkTyConApp"><span class="hs-identifier hs-var">mkTyConApp</span></a></span><span> </span><span class="annot"><span class="annottext">TyCon
 </span><a href="GHC.Builtin.Types.html#multMulTyCon"><span class="hs-identifier hs-var">multMulTyCon</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Mult
-</span><a href="#local-6989586621681573497"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Mult
-</span><a href="#local-6989586621681573498"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621682406910"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Mult
+</span><a href="#local-6989586621682406911"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-350"></span><span>
-</span><span id="line-351"></span><span id="local-6989586621681573445"><span class="annot"><a href="GHC.Core.Multiplicity.html#scaleScaled"><span class="hs-identifier hs-type">scaleScaled</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Mult"><span class="hs-identifier hs-type">Mult</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Scaled"><span class="hs-identifier hs-type">Scaled</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681573445"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Scaled"><span class="hs-identifier hs-type">Scaled</span></a></span><span> </span><span class="annot"><a href="#local-6989586621681573445"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-351"></span><span id="local-6989586621682406856"><span class="annot"><a href="GHC.Core.Multiplicity.html#scaleScaled"><span class="hs-identifier hs-type">scaleScaled</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Mult"><span class="hs-identifier hs-type">Mult</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Scaled"><span class="hs-identifier hs-type">Scaled</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682406856"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Scaled"><span class="hs-identifier hs-type">Scaled</span></a></span><span> </span><span class="annot"><a href="#local-6989586621682406856"><span class="hs-identifier hs-type">a</span></a></span></span><span>
 </span><span id="line-352"></span><span id="scaleScaled"><span class="annot"><span class="annottext">scaleScaled :: forall a. Mult -&gt; Scaled a -&gt; Scaled a
-</span><a href="GHC.Core.Multiplicity.html#scaleScaled"><span class="hs-identifier hs-var hs-var">scaleScaled</span></a></span></span><span> </span><span id="local-6989586621681573500"><span class="annot"><span class="annottext">Mult
-</span><a href="#local-6989586621681573500"><span class="hs-identifier hs-var">m'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Scaled"><span class="hs-identifier hs-type">Scaled</span></a></span><span> </span><span id="local-6989586621681573502"><span class="annot"><span class="annottext">Mult
-</span><a href="#local-6989586621681573502"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621681573503"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621681573503"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Mult -&gt; a -&gt; Scaled a
+</span><a href="GHC.Core.Multiplicity.html#scaleScaled"><span class="hs-identifier hs-var hs-var">scaleScaled</span></a></span></span><span> </span><span id="local-6989586621682406913"><span class="annot"><span class="annottext">Mult
+</span><a href="#local-6989586621682406913"><span class="hs-identifier hs-var">m'</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Core.TyCo.Rep.html#Scaled"><span class="hs-identifier hs-type">Scaled</span></a></span><span> </span><span id="local-6989586621682406915"><span class="annot"><span class="annottext">Mult
+</span><a href="#local-6989586621682406915"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span id="local-6989586621682406916"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621682406916"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Mult -&gt; a -&gt; Scaled a
 forall a. Mult -&gt; a -&gt; Scaled a
 </span><a href="GHC.Core.TyCo.Rep.html#Scaled"><span class="hs-identifier hs-var">Scaled</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Mult
-</span><a href="#local-6989586621681573500"><span class="hs-identifier hs-var">m'</span></a></span><span> </span><span class="annot"><span class="annottext">Mult -&gt; Mult -&gt; Mult
+</span><a href="#local-6989586621682406913"><span class="hs-identifier hs-var">m'</span></a></span><span> </span><span class="annot"><span class="annottext">Mult -&gt; Mult -&gt; Mult
 </span><a href="GHC.Core.Multiplicity.html#mkMultMul"><span class="hs-operator hs-var">`mkMultMul`</span></a></span><span> </span><span class="annot"><span class="annottext">Mult
-</span><a href="#local-6989586621681573502"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621681573503"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><a href="#local-6989586621682406915"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621682406916"><span class="hs-identifier hs-var">t</span></a></span><span>
 </span><span id="line-353"></span><span>
 </span><span id="line-354"></span><span class="hs-comment">-- See Note [Joining usages]</span><span>
 </span><span id="line-355"></span><span class="hs-comment">-- | @mkMultSup w1 w2@ returns a multiplicity such that @mkMultSup w1</span><span>
@@ -418,7 +418,7 @@ forall a. Mult -&gt; a -&gt; Scaled a
 </span><span id="line-364"></span><span>
 </span><span id="line-365"></span><span class="hs-keyword">data</span><span> </span><span id="IsSubmult"><span class="annot"><a href="GHC.Core.Multiplicity.html#IsSubmult"><span class="hs-identifier hs-var">IsSubmult</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Submult"><span class="annot"><a href="GHC.Core.Multiplicity.html#Submult"><span class="hs-identifier hs-var">Submult</span></a></span></span><span>     </span><span class="hs-comment">-- Definitely a submult</span><span>
 </span><span id="line-366"></span><span>               </span><span class="hs-glyph">|</span><span> </span><span id="Unknown"><span class="annot"><a href="GHC.Core.Multiplicity.html#Unknown"><span class="hs-identifier hs-var">Unknown</span></a></span></span><span>     </span><span class="hs-comment">-- Could be a submult, need to ask the typechecker</span><span>
-</span><span id="line-367"></span><span>               </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621681573507"><span id="local-6989586621681573509"><span id="local-6989586621681573513"><span class="annot"><span class="annottext">Int -&gt; IsSubmult -&gt; ShowS
+</span><span id="line-367"></span><span>               </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682406920"><span id="local-6989586621682406922"><span id="local-6989586621682406926"><span class="annot"><span class="annottext">Int -&gt; IsSubmult -&gt; ShowS
 [IsSubmult] -&gt; ShowS
 IsSubmult -&gt; String
 (Int -&gt; IsSubmult -&gt; ShowS)
@@ -433,7 +433,7 @@ $cshow :: IsSubmult -&gt; String
 show :: IsSubmult -&gt; String
 $cshowList :: [IsSubmult] -&gt; ShowS
 showList :: [IsSubmult] -&gt; ShowS
-</span><a href="../../base-4.18.2.0/src/GHC.Show.html#Show/GHC.Show.html#Show"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></a></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681573517"><span id="local-6989586621681573519"><span class="annot"><span class="annottext">IsSubmult -&gt; IsSubmult -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682406931"><span id="local-6989586621682406936"><span class="annot"><span class="annottext">IsSubmult -&gt; IsSubmult -&gt; Bool
 (IsSubmult -&gt; IsSubmult -&gt; Bool)
 -&gt; (IsSubmult -&gt; IsSubmult -&gt; Bool) -&gt; Eq IsSubmult
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -444,14 +444,14 @@ $c/= :: IsSubmult -&gt; IsSubmult -&gt; Bool
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-368"></span><span>
 </span><span id="line-369"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#Outputable"><span class="hs-identifier hs-type">Outputable</span></a></span><span> </span><span class="annot"><a href="GHC.Core.Multiplicity.html#IsSubmult"><span class="hs-identifier hs-type">IsSubmult</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-370"></span><span>  </span><span id="local-6989586621681573528"><span class="annot"><span class="annottext">ppr :: IsSubmult -&gt; SDoc
-</span><a href="#local-6989586621681573528"><span class="hs-identifier hs-var hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
+</span><span id="line-370"></span><span>  </span><span id="local-6989586621682406945"><span class="annot"><span class="annottext">ppr :: IsSubmult -&gt; SDoc
+</span><a href="#local-6989586621682406945"><span class="hs-identifier hs-var hs-var hs-var">ppr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">(String -&gt; SDoc) -&gt; (IsSubmult -&gt; String) -&gt; IsSubmult -&gt; SDoc
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#./GHC.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">IsSubmult -&gt; String
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">IsSubmult -&gt; String
 forall a. Show a =&gt; a -&gt; String
-</span><a href="../../base-4.18.2.0/src/GHC.Show.html#show/GHC.Show.html#show"><span class="hs-identifier hs-var">show</span></a></span><span>
+</span><span class="hs-identifier hs-var">show</span></span><span>
 </span><span id="line-371"></span><span>
 </span><span id="line-372"></span><span class="hs-comment">-- | @submult w1 w2@ check whether a value of multiplicity @w1@ is allowed where a</span><span>
 </span><span id="line-373"></span><span class="hs-comment">-- value of multiplicity @w2@ is expected. This is a partial order.</span><span>
@@ -476,7 +476,7 @@ forall a. Show a =&gt; a -&gt; String
 </span><span class="hs-identifier">_</span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IsSubmult
 </span><a href="GHC.Core.Multiplicity.html#Unknown"><span class="hs-identifier hs-var">Unknown</span></a></span><span>
 </span><span id="line-381"></span><span>
-</span><span id="line-382"></span><span class="annot"><a href="GHC.Core.Multiplicity.html#pprArrowWithMultiplicity"><span class="hs-identifier hs-type">pprArrowWithMultiplicity</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Var.html#FunTyFlag"><span class="hs-identifier hs-type">FunTyFlag</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/Data.Either.html#Either/Data.Either.html#Either"><span class="hs-identifier hs-type">Either</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span><span>
+</span><span id="line-382"></span><span class="annot"><a href="GHC.Core.Multiplicity.html#pprArrowWithMultiplicity"><span class="hs-identifier hs-type">pprArrowWithMultiplicity</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.Types.Var.html#FunTyFlag"><span class="hs-identifier hs-type">FunTyFlag</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Utils.Outputable.html#SDoc"><span class="hs-identifier hs-type">SDoc</span></a></span><span>
 </span><span id="line-383"></span><span class="hs-comment">-- Pretty-print a multiplicity arrow.  The multiplicity itself</span><span>
 </span><span id="line-384"></span><span class="hs-comment">-- is described by the (Either Bool SDoc)</span><span>
 </span><span id="line-385"></span><span class="hs-comment">--    Left False   -- Many</span><span>
@@ -484,37 +484,37 @@ forall a. Show a =&gt; a -&gt; String
 </span><span id="line-387"></span><span class="hs-comment">--    Right doc    -- Something else</span><span>
 </span><span id="line-388"></span><span class="hs-comment">-- In the Right case, the doc is in parens if not atomic</span><span>
 </span><span id="line-389"></span><span id="pprArrowWithMultiplicity"><span class="annot"><span class="annottext">pprArrowWithMultiplicity :: FunTyFlag -&gt; Either Bool SDoc -&gt; SDoc
-</span><a href="GHC.Core.Multiplicity.html#pprArrowWithMultiplicity"><span class="hs-identifier hs-var hs-var">pprArrowWithMultiplicity</span></a></span></span><span> </span><span id="local-6989586621681573533"><span class="annot"><span class="annottext">FunTyFlag
-</span><a href="#local-6989586621681573533"><span class="hs-identifier hs-var">af</span></a></span></span><span> </span><span id="local-6989586621681573534"><span class="annot"><span class="annottext">Either Bool SDoc
-</span><a href="#local-6989586621681573534"><span class="hs-identifier hs-var">pp_mult</span></a></span></span><span>
+</span><a href="GHC.Core.Multiplicity.html#pprArrowWithMultiplicity"><span class="hs-identifier hs-var hs-var">pprArrowWithMultiplicity</span></a></span></span><span> </span><span id="local-6989586621682406950"><span class="annot"><span class="annottext">FunTyFlag
+</span><a href="#local-6989586621682406950"><span class="hs-identifier hs-var">af</span></a></span></span><span> </span><span id="local-6989586621682406951"><span class="annot"><span class="annottext">Either Bool SDoc
+</span><a href="#local-6989586621682406951"><span class="hs-identifier hs-var">pp_mult</span></a></span></span><span>
 </span><span id="line-390"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">FunTyFlag -&gt; Bool
 </span><a href="GHC.Types.Var.html#isFUNArg"><span class="hs-identifier hs-var">isFUNArg</span></a></span><span> </span><span class="annot"><span class="annottext">FunTyFlag
-</span><a href="#local-6989586621681573533"><span class="hs-identifier hs-var">af</span></a></span><span>
+</span><a href="#local-6989586621682406950"><span class="hs-identifier hs-var">af</span></a></span><span>
 </span><span id="line-391"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Either Bool SDoc
-</span><a href="#local-6989586621681573534"><span class="hs-identifier hs-var">pp_mult</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-392"></span><span>      </span><span class="annot"><a href="../../base-4.18.2.0/src/Data.Either.html#Left/Data.Either.html#Left"><span class="hs-identifier hs-type">Left</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621682406951"><span class="hs-identifier hs-var">pp_mult</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-392"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">SDoc
 </span><a href="GHC.Utils.Outputable.html#arrow"><span class="hs-identifier hs-var">arrow</span></a></span><span>
-</span><span id="line-393"></span><span>      </span><span class="annot"><a href="../../base-4.18.2.0/src/Data.Either.html#Left/Data.Either.html#Left"><span class="hs-identifier hs-type">Left</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span id="line-393"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">SDoc
 </span><a href="GHC.Utils.Outputable.html#lollipop"><span class="hs-identifier hs-var">lollipop</span></a></span><span>
-</span><span id="line-394"></span><span>      </span><span class="annot"><a href="../../base-4.18.2.0/src/Data.Either.html#Right/Data.Either.html#Right"><span class="hs-identifier hs-type">Right</span></a></span><span> </span><span id="local-6989586621681573537"><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621681573537"><span class="hs-identifier hs-var">doc</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
+</span><span id="line-394"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621682406954"><span class="annot"><span class="annottext">SDoc
+</span><a href="#local-6989586621682406954"><span class="hs-identifier hs-var">doc</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; SDoc
 forall doc. IsLine doc =&gt; String -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#text"><span class="hs-identifier hs-var">text</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;%&quot;</span></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
-</span><a href="#local-6989586621681573537"><span class="hs-identifier hs-var">doc</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
+</span><a href="#local-6989586621682406954"><span class="hs-identifier hs-var">doc</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc -&gt; SDoc -&gt; SDoc
 forall doc. IsLine doc =&gt; doc -&gt; doc -&gt; doc
 </span><a href="GHC.Utils.Outputable.html#%3C%2B%3E"><span class="hs-operator hs-var">&lt;+&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">SDoc
 </span><a href="GHC.Utils.Outputable.html#arrow"><span class="hs-identifier hs-var">arrow</span></a></span><span>
 </span><span id="line-395"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#otherwise/GHC.Base.html#otherwise"><span class="hs-identifier hs-var">otherwise</span></a></span><span>
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>
 </span><span id="line-396"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">TyCon -&gt; SDoc
 forall a. Outputable a =&gt; a -&gt; SDoc
 </span><a href="GHC.Utils.Outputable.html#ppr"><span class="hs-identifier hs-var">ppr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FunTyFlag -&gt; TyCon
 </span><a href="GHC.Builtin.Types.Prim.html#funTyFlagTyCon"><span class="hs-identifier hs-var">funTyFlagTyCon</span></a></span><span> </span><span class="annot"><span class="annottext">FunTyFlag
-</span><a href="#local-6989586621681573533"><span class="hs-identifier hs-var">af</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682406950"><span class="hs-identifier hs-var">af</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-397"></span><span>
 </span><span id="line-398"></span></pre></body></html>

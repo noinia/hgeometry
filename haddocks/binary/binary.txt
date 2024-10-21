@@ -11,7 +11,7 @@
 --   Serialisation speeds of over 1 G/sec have been observed, so this
 --   library should be suitable for high performance scenarios.
 @package binary
-@version 0.8.9.1
+@version 0.8.9.2
 
 
 -- | Efficient constructions of lazy bytestrings.
@@ -22,12 +22,12 @@ module Data.Binary.Builder
 -- | <a>Builder</a>s denote sequences of bytes. They are <a>Monoid</a>s
 --   where <a>mempty</a> is the zero-length sequence and <a>mappend</a> is
 --   concatenation, which runs in <i>O(1)</i>.
-data () => Builder
+data Builder
 
--- | Execute a <a>Builder</a> and return the generated chunks as a lazy
---   <a>ByteString</a>. The work is performed lazy, i.e., only when a chunk
---   of the lazy <a>ByteString</a> is forced.
-toLazyByteString :: Builder -> ByteString
+-- | Execute a <a>Builder</a> and return the generated chunks as a
+--   <a>LazyByteString</a>. The work is performed lazy, i.e., only when a
+--   chunk of the <a>LazyByteString</a> is forced.
+toLazyByteString :: Builder -> LazyByteString
 
 -- | <i>O(1).</i> The empty Builder, satisfying
 --   
@@ -166,7 +166,7 @@ putStringUtf8 :: String -> Builder
 
 module Data.Binary.Get.Internal
 data Get a
-runCont :: Get a -> forall r. ByteString -> Success a r -> Decoder r
+runCont :: Get a -> forall r. () => ByteString -> Success a r -> Decoder r
 
 -- | A decoder produced by running a <a>Get</a> monad.
 data Decoder a
@@ -265,14 +265,14 @@ label :: String -> Get a -> Get a
 --   <tt>n</tt> bytes are left in the input. If <tt>n &lt;= 0</tt> then the
 --   empty string is returned.
 getByteString :: Int -> Get ByteString
-instance GHC.Base.Monad Data.Binary.Get.Internal.Get
-instance Control.Monad.Fail.MonadFail Data.Binary.Get.Internal.Get
-instance GHC.Base.Applicative Data.Binary.Get.Internal.Get
-instance GHC.Base.MonadPlus Data.Binary.Get.Internal.Get
-instance GHC.Base.Functor Data.Binary.Get.Internal.Get
-instance GHC.Base.Alternative Data.Binary.Get.Internal.Get
-instance GHC.Base.Functor Data.Binary.Get.Internal.Decoder
-instance GHC.Show.Show a => GHC.Show.Show (Data.Binary.Get.Internal.Decoder a)
+instance GHC.Internal.Base.Alternative Data.Binary.Get.Internal.Get
+instance GHC.Internal.Base.Applicative Data.Binary.Get.Internal.Get
+instance GHC.Internal.Base.Functor Data.Binary.Get.Internal.Decoder
+instance GHC.Internal.Base.Functor Data.Binary.Get.Internal.Get
+instance GHC.Internal.Control.Monad.Fail.MonadFail Data.Binary.Get.Internal.Get
+instance GHC.Internal.Base.Monad Data.Binary.Get.Internal.Get
+instance GHC.Internal.Base.MonadPlus Data.Binary.Get.Internal.Get
+instance GHC.Internal.Show.Show a => GHC.Internal.Show.Show (Data.Binary.Get.Internal.Decoder a)
 
 
 -- | The <a>Get</a> monad. A monad for efficiently building structures from
@@ -639,14 +639,14 @@ newtype PutM a
 Put :: PairS a -> PutM a
 [unPut] :: PutM a -> PairS a
 
--- | Run the <a>PutM</a> monad with a serialiser
+-- | Run the <a>Put</a> monad with a serialiser
 runPut :: Put -> ByteString
 
--- | Run the <a>PutM</a> monad with a serialiser and get its result
+-- | Run the <a>Put</a> monad with a serialiser and get its result
 runPutM :: PutM a -> (a, ByteString)
 putBuilder :: Builder -> Put
 
--- | Run the <a>PutM</a> monad
+-- | Run the <a>Put</a> monad
 execPut :: PutM a -> Builder
 
 -- | Pop the ByteString we have constructed so far, if any, yielding a new
@@ -770,11 +770,11 @@ putCharUtf8 :: Char -> Put
 
 -- | Write a String using UTF-8 encoding.
 putStringUtf8 :: String -> Put
-instance GHC.Base.Functor Data.Binary.Put.PutM
-instance GHC.Base.Applicative Data.Binary.Put.PutM
-instance GHC.Base.Monad Data.Binary.Put.PutM
-instance GHC.Base.Monoid (Data.Binary.Put.PutM ())
-instance GHC.Base.Semigroup (Data.Binary.Put.PutM ())
+instance GHC.Internal.Base.Applicative Data.Binary.Put.PutM
+instance GHC.Internal.Base.Functor Data.Binary.Put.PutM
+instance GHC.Internal.Base.Monad Data.Binary.Put.PutM
+instance GHC.Internal.Base.Monoid (Data.Binary.Put.PutM ())
+instance GHC.Internal.Base.Semigroup (Data.Binary.Put.PutM ())
 
 
 -- | Binary serialisation of Haskell values to and from lazy
@@ -811,7 +811,7 @@ module Data.Binary
 --   
 --   For decoding and generating simple external binary formats (e.g. C
 --   structures), Binary may be used, but in general is not suitable for
---   complex protocols. Instead use the <a>PutM</a> and <a>Get</a>
+--   complex protocols. Instead use the <a>Put</a> and <a>Get</a>
 --   primitives directly.
 --   
 --   Instances of Binary should satisfy the following property:
@@ -827,24 +827,20 @@ class Binary t
 
 -- | Encode a value in the Put monad.
 put :: Binary t => t -> Put
+($dmput) :: (Binary t, Generic t, GBinaryPut (Rep t)) => t -> Put
 
 -- | Decode a value in the Get monad
 get :: Binary t => Get t
+($dmget) :: (Binary t, Generic t, GBinaryGet (Rep t)) => Get t
 
 -- | Encode a list of values in the Put monad. The default implementation
 --   may be overridden to be more efficient but must still have the same
 --   encoding format.
 putList :: Binary t => [t] -> Put
-
--- | Encode a value in the Put monad.
-put :: (Binary t, Generic t, GBinaryPut (Rep t)) => t -> Put
-
--- | Decode a value in the Get monad
-get :: (Binary t, Generic t, GBinaryGet (Rep t)) => Get t
-class GBinaryGet f
-gget :: GBinaryGet f => Get (f t)
-class GBinaryPut f
-gput :: GBinaryPut f => f t -> Put
+class GBinaryGet (f :: k -> Type)
+gget :: forall (t :: k). GBinaryGet f => Get (f t)
+class GBinaryPut (f :: k -> Type)
+gput :: forall (t :: k). GBinaryPut f => f t -> Put
 data Get a
 
 -- | Put merely lifts Builder into a Writer monad, applied to ().

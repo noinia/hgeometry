@@ -1,0 +1,466 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Module      :  Distribution.Simple.Setup.Build</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Copyright   :  Isaac Jones 2003-2004</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--                Duncan Coutts 2007</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- License     :  BSD3</span><span>
+</span><span id="line-14"></span><span class="hs-comment">--</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- Maintainer  :  cabal-devel@haskell.org</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- Portability :  portable</span><span>
+</span><span id="line-17"></span><span class="hs-comment">--</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- Definition of the build command-line options.</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- See: @Distribution.Simple.Setup@</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Build.html"><span class="hs-identifier">Distribution.Simple.Setup.Build</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#BuildFlags"><span class="hs-identifier">BuildFlags</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#emptyBuildFlags"><span class="hs-identifier">emptyBuildFlags</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#defaultBuildFlags"><span class="hs-identifier">defaultBuildFlags</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#buildCommand"><span class="hs-identifier">buildCommand</span></a></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Types.DumpBuildInfo.html#DumpBuildInfo"><span class="hs-identifier">DumpBuildInfo</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#buildOptions"><span class="hs-identifier">buildOptions</span></a></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">get</span></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html"><span class="hs-identifier">Distribution.Simple.Command</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt"><span class="hs-identifier">boolOpt</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt%27"><span class="hs-identifier">boolOpt'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html"><span class="hs-identifier">Distribution.Simple.Flag</span></a></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Program.html"><span class="hs-identifier">Distribution.Simple.Program</span></a></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Utils.html"><span class="hs-identifier">Distribution.Simple.Utils</span></a></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.DumpBuildInfo.html"><span class="hs-identifier">Distribution.Types.DumpBuildInfo</span></a></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html"><span class="hs-identifier">Distribution.Verbosity</span></a></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html"><span class="hs-identifier">Distribution.Simple.Setup.Common</span></a></span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="annot"><span class="hs-comment">-- * Build flags</span></span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">data</span><span> </span><span id="BuildFlags"><span class="annot"><a href="Distribution.Simple.Setup.Build.html#BuildFlags"><span class="hs-identifier hs-var">BuildFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="BuildFlags"><span class="annot"><a href="Distribution.Simple.Setup.Build.html#BuildFlags"><span class="hs-identifier hs-var">BuildFlags</span></a></span></span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="buildProgramPaths"><span class="annot"><span class="annottext">BuildFlags -&gt; [(String, String)]
+</span><a href="Distribution.Simple.Setup.Build.html#buildProgramPaths"><span class="hs-identifier hs-var hs-var">buildProgramPaths</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="buildProgramArgs"><span class="annot"><span class="annottext">BuildFlags -&gt; [(String, [String])]
+</span><a href="Distribution.Simple.Setup.Build.html#buildProgramArgs"><span class="hs-identifier hs-var hs-var">buildProgramArgs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="buildDistPref"><span class="annot"><span class="annottext">BuildFlags -&gt; Flag String
+</span><a href="Distribution.Simple.Setup.Build.html#buildDistPref"><span class="hs-identifier hs-var hs-var">buildDistPref</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
+</span><span id="line-51"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="buildVerbosity"><span class="annot"><span class="annottext">BuildFlags -&gt; Flag Verbosity
+</span><a href="Distribution.Simple.Setup.Build.html#buildVerbosity"><span class="hs-identifier hs-var hs-var">buildVerbosity</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><a href="Distribution.Verbosity.html#Verbosity"><span class="hs-identifier hs-type">Verbosity</span></a></span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="buildNumJobs"><span class="annot"><span class="annottext">BuildFlags -&gt; Flag (Maybe Int)
+</span><a href="Distribution.Simple.Setup.Build.html#buildNumJobs"><span class="hs-identifier hs-var hs-var">buildNumJobs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="buildUseSemaphore"><span class="annot"><span class="annottext">BuildFlags -&gt; Flag String
+</span><a href="Distribution.Simple.Setup.Build.html#buildUseSemaphore"><span class="hs-identifier hs-var hs-var">buildUseSemaphore</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-comment">-- TODO: this one should not be here, it's just that the silly</span><span>
+</span><span id="line-55"></span><span>    </span><span class="hs-comment">-- UserHooks stop us from passing extra info in other ways</span><span>
+</span><span id="line-56"></span><span>    </span><span id="buildArgs"><span class="annot"><span class="annottext">BuildFlags -&gt; [String]
+</span><a href="Distribution.Simple.Setup.Build.html#buildArgs"><span class="hs-identifier hs-var hs-var">buildArgs</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">]</span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="buildCabalFilePath"><span class="annot"><span class="annottext">BuildFlags -&gt; Flag String
+</span><a href="Distribution.Simple.Setup.Build.html#buildCabalFilePath"><span class="hs-identifier hs-var hs-var">buildCabalFilePath</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679478210"><span id="local-6989586621679478214"><span id="local-6989586621679478217"><span id="local-6989586621679478255"><span class="annot"><span class="annottext">ReadPrec [BuildFlags]
+ReadPrec BuildFlags
+Int -&gt; ReadS BuildFlags
+ReadS [BuildFlags]
+(Int -&gt; ReadS BuildFlags)
+-&gt; ReadS [BuildFlags]
+-&gt; ReadPrec BuildFlags
+-&gt; ReadPrec [BuildFlags]
+-&gt; Read BuildFlags
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+$creadsPrec :: Int -&gt; ReadS BuildFlags
+readsPrec :: Int -&gt; ReadS BuildFlags
+$creadList :: ReadS [BuildFlags]
+readList :: ReadS [BuildFlags]
+$creadPrec :: ReadPrec BuildFlags
+readPrec :: ReadPrec BuildFlags
+$creadListPrec :: ReadPrec [BuildFlags]
+readListPrec :: ReadPrec [BuildFlags]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679478270"><span id="local-6989586621679478290"><span id="local-6989586621679478294"><span class="annot"><span class="annottext">Int -&gt; BuildFlags -&gt; ShowS
+[BuildFlags] -&gt; ShowS
+BuildFlags -&gt; String
+(Int -&gt; BuildFlags -&gt; ShowS)
+-&gt; (BuildFlags -&gt; String)
+-&gt; ([BuildFlags] -&gt; ShowS)
+-&gt; Show BuildFlags
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; BuildFlags -&gt; ShowS
+showsPrec :: Int -&gt; BuildFlags -&gt; ShowS
+$cshow :: BuildFlags -&gt; String
+show :: BuildFlags -&gt; String
+$cshowList :: [BuildFlags] -&gt; ShowS
+showList :: [BuildFlags] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679478307"><span id="local-6989586621679478309"><span class="annot"><span class="annottext">(forall x. BuildFlags -&gt; Rep BuildFlags x)
+-&gt; (forall x. Rep BuildFlags x -&gt; BuildFlags) -&gt; Generic BuildFlags
+forall x. Rep BuildFlags x -&gt; BuildFlags
+forall x. BuildFlags -&gt; Rep BuildFlags x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cfrom :: forall x. BuildFlags -&gt; Rep BuildFlags x
+from :: forall x. BuildFlags -&gt; Rep BuildFlags x
+$cto :: forall x. Rep BuildFlags x -&gt; BuildFlags
+to :: forall x. Rep BuildFlags x -&gt; BuildFlags
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478315"><span id="local-6989586621679478322"><span id="local-6989586621679478328"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#BuildFlags"><span class="hs-identifier hs-type">BuildFlags</span></a></span></span></span></span><span>
+</span><span id="line-62"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478419"><span id="local-6989586621679478426"><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Structured.html/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#BuildFlags"><span class="hs-identifier hs-type">BuildFlags</span></a></span></span></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#defaultBuildFlags"><span class="hs-identifier hs-type">defaultBuildFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#BuildFlags"><span class="hs-identifier hs-type">BuildFlags</span></a></span><span>
+</span><span id="line-65"></span><span id="defaultBuildFlags"><span class="annot"><span class="annottext">defaultBuildFlags :: BuildFlags
+</span><a href="Distribution.Simple.Setup.Build.html#defaultBuildFlags"><span class="hs-identifier hs-var hs-var">defaultBuildFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-66"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#BuildFlags"><span class="hs-identifier hs-type">BuildFlags</span></a></span><span>
+</span><span id="line-67"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">buildProgramPaths :: [(String, String)]
+</span><a href="Distribution.Simple.Setup.Build.html#buildProgramPaths"><span class="hs-identifier hs-var">buildProgramPaths</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(String, String)]
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-68"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">buildProgramArgs :: [(String, [String])]
+</span><a href="Distribution.Simple.Setup.Build.html#buildProgramArgs"><span class="hs-identifier hs-var">buildProgramArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-69"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">buildDistPref :: Flag String
+</span><a href="Distribution.Simple.Setup.Build.html#buildDistPref"><span class="hs-identifier hs-var">buildDistPref</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag String
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-70"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">buildVerbosity :: Flag Verbosity
+</span><a href="Distribution.Simple.Setup.Build.html#buildVerbosity"><span class="hs-identifier hs-var">buildVerbosity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Verbosity -&gt; Flag Verbosity
+forall a. a -&gt; Flag a
+</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Verbosity
+</span><a href="Distribution.Verbosity.html#normal"><span class="hs-identifier hs-var">normal</span></a></span><span>
+</span><span id="line-71"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">buildNumJobs :: Flag (Maybe Int)
+</span><a href="Distribution.Simple.Setup.Build.html#buildNumJobs"><span class="hs-identifier hs-var">buildNumJobs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag (Maybe Int)
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-72"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">buildUseSemaphore :: Flag String
+</span><a href="Distribution.Simple.Setup.Build.html#buildUseSemaphore"><span class="hs-identifier hs-var">buildUseSemaphore</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag String
+forall a. Flag a
+</span><a href="Distribution.Simple.Flag.html#NoFlag"><span class="hs-identifier hs-var">NoFlag</span></a></span><span>
+</span><span id="line-73"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">buildArgs :: [String]
+</span><a href="Distribution.Simple.Setup.Build.html#buildArgs"><span class="hs-identifier hs-var">buildArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-74"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">buildCabalFilePath :: Flag String
+</span><a href="Distribution.Simple.Setup.Build.html#buildCabalFilePath"><span class="hs-identifier hs-var">buildCabalFilePath</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag String
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-75"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#buildCommand"><span class="hs-identifier hs-type">buildCommand</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Db.html#ProgramDb"><span class="hs-identifier hs-type">ProgramDb</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#BuildFlags"><span class="hs-identifier hs-type">BuildFlags</span></a></span><span>
+</span><span id="line-78"></span><span id="buildCommand"><span class="annot"><span class="annottext">buildCommand :: ProgramDb -&gt; CommandUI BuildFlags
+</span><a href="Distribution.Simple.Setup.Build.html#buildCommand"><span class="hs-identifier hs-var hs-var">buildCommand</span></a></span></span><span> </span><span id="local-6989586621679478503"><span class="annot"><span class="annottext">ProgramDb
+</span><a href="#local-6989586621679478503"><span class="hs-identifier hs-var">progDb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-79"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span>
+</span><span id="line-80"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">commandName :: String
+</span><a href="Distribution.Simple.Command.html#commandName"><span class="hs-identifier hs-var">commandName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;build&quot;</span></span><span>
+</span><span id="line-81"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandSynopsis :: String
+</span><a href="Distribution.Simple.Command.html#commandSynopsis"><span class="hs-identifier hs-var">commandSynopsis</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Compile all/specific components.&quot;</span></span><span>
+</span><span id="line-82"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDescription :: Maybe ShowS
+</span><a href="Distribution.Simple.Command.html#commandDescription"><span class="hs-identifier hs-var">commandDescription</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; Maybe ShowS
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; Maybe ShowS) -&gt; ShowS -&gt; Maybe ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">String
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-83"></span><span>        </span><span class="annot"><span class="annottext">ShowS
+</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Generic.html/Distribution.Utils.Generic.html#wrapText"><span class="hs-identifier hs-var">wrapText</span></a></span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-84"></span><span>          </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Components encompass executables, tests, and benchmarks.\n&quot;</span></span><span>
+</span><span id="line-85"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;\n&quot;</span></span><span>
+</span><span id="line-86"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Affected by configuration options, see `configure`.\n&quot;</span></span><span>
+</span><span id="line-87"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandNotes :: Maybe ShowS
+</span><a href="Distribution.Simple.Command.html#commandNotes"><span class="hs-identifier hs-var">commandNotes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; Maybe ShowS
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; Maybe ShowS) -&gt; ShowS -&gt; Maybe ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679478510"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679478510"><span class="hs-identifier hs-var">pname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-88"></span><span>        </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Examples:\n&quot;</span></span><span>
+</span><span id="line-89"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;  &quot;</span></span><span>
+</span><span id="line-90"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679478510"><span class="hs-identifier hs-var">pname</span></a></span><span>
+</span><span id="line-91"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot; build           &quot;</span></span><span>
+</span><span id="line-92"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;    All the components in the package\n&quot;</span></span><span>
+</span><span id="line-93"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;  &quot;</span></span><span>
+</span><span id="line-94"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679478510"><span class="hs-identifier hs-var">pname</span></a></span><span>
+</span><span id="line-95"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot; build foo       &quot;</span></span><span>
+</span><span id="line-96"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;    A component (i.e. lib, exe, test suite)\n\n&quot;</span></span><span>
+</span><span id="line-97"></span><span>          </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">ProgramDb -&gt; String
+</span><a href="Distribution.Simple.Setup.Common.html#programFlagsDescription"><span class="hs-identifier hs-var">programFlagsDescription</span></a></span><span> </span><span class="annot"><span class="annottext">ProgramDb
+</span><a href="#local-6989586621679478503"><span class="hs-identifier hs-var">progDb</span></a></span><span>
+</span><span id="line-98"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="hs-comment">-- TODO: re-enable once we have support for module/file targets</span><span>
+</span><span id="line-99"></span><span>      </span><span class="hs-comment">--        ++ &quot;  &quot; ++ pname ++ &quot; build Foo.Bar   &quot;</span><span>
+</span><span id="line-100"></span><span>      </span><span class="hs-comment">--        ++ &quot;    A module\n&quot;</span><span>
+</span><span id="line-101"></span><span>      </span><span class="hs-comment">--        ++ &quot;  &quot; ++ pname ++ &quot; build Foo/Bar.hs&quot;</span><span>
+</span><span id="line-102"></span><span>      </span><span class="hs-comment">--        ++ &quot;    A file\n\n&quot;</span><span>
+</span><span id="line-103"></span><span>      </span><span class="hs-comment">--        ++ &quot;If a target is ambiguous it can be qualified with the component &quot;</span><span>
+</span><span id="line-104"></span><span>      </span><span class="hs-comment">--        ++ &quot;name, e.g.\n&quot;</span><span>
+</span><span id="line-105"></span><span>      </span><span class="hs-comment">--        ++ &quot;  &quot; ++ pname ++ &quot; build foo:Foo.Bar\n&quot;</span><span>
+</span><span id="line-106"></span><span>      </span><span class="hs-comment">--        ++ &quot;  &quot; ++ pname ++ &quot; build testsuite1:Foo/Bar.hs\n&quot;</span><span>
+</span><span id="line-107"></span><span>      </span><span class="annot"><span class="annottext">commandUsage :: ShowS
+</span><a href="Distribution.Simple.Command.html#commandUsage"><span class="hs-identifier hs-var">commandUsage</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-108"></span><span>        </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; ShowS
+</span><a href="Distribution.Simple.Command.html#usageAlternatives"><span class="hs-identifier hs-var">usageAlternatives</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;build&quot;</span></span><span> </span><span class="annot"><span class="annottext">([String] -&gt; ShowS) -&gt; [String] -&gt; ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-109"></span><span>          </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;[FLAGS]&quot;</span></span><span>
+</span><span id="line-110"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;COMPONENTS [FLAGS]&quot;</span></span><span>
+</span><span id="line-111"></span><span>          </span><span class="hs-special">]</span><span>
+</span><span id="line-112"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDefaultFlags :: BuildFlags
+</span><a href="Distribution.Simple.Command.html#commandDefaultFlags"><span class="hs-identifier hs-var">commandDefaultFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BuildFlags
+</span><a href="Distribution.Simple.Setup.Build.html#defaultBuildFlags"><span class="hs-identifier hs-var">defaultBuildFlags</span></a></span><span>
+</span><span id="line-113"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandOptions :: ShowOrParseArgs -&gt; [OptionField BuildFlags]
+</span><a href="Distribution.Simple.Command.html#commandOptions"><span class="hs-identifier hs-var">commandOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679478516"><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679478516"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-114"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">(BuildFlags -&gt; Flag Verbosity)
+-&gt; (Flag Verbosity -&gt; BuildFlags -&gt; BuildFlags)
+-&gt; OptionField BuildFlags
+forall flags.
+(flags -&gt; Flag Verbosity)
+-&gt; (Flag Verbosity -&gt; flags -&gt; flags) -&gt; OptionField flags
+</span><a href="Distribution.Simple.Setup.Common.html#optionVerbosity"><span class="hs-identifier hs-var">optionVerbosity</span></a></span><span>
+</span><span id="line-115"></span><span>            </span><span class="annot"><span class="annottext">BuildFlags -&gt; Flag Verbosity
+</span><a href="Distribution.Simple.Setup.Build.html#buildVerbosity"><span class="hs-identifier hs-var">buildVerbosity</span></a></span><span>
+</span><span id="line-116"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679478518"><span class="annot"><span class="annottext">Flag Verbosity
+</span><a href="#local-6989586621679478518"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679478519"><span class="annot"><span class="annottext">BuildFlags
+</span><a href="#local-6989586621679478519"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BuildFlags
+</span><a href="#local-6989586621679478519"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#buildVerbosity"><span class="hs-identifier hs-var">buildVerbosity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679478518"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-117"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(BuildFlags -&gt; Flag String)
+-&gt; (Flag String -&gt; BuildFlags -&gt; BuildFlags)
+-&gt; ShowOrParseArgs
+-&gt; OptionField BuildFlags
+forall flags.
+(flags -&gt; Flag String)
+-&gt; (Flag String -&gt; flags -&gt; flags)
+-&gt; ShowOrParseArgs
+-&gt; OptionField flags
+</span><a href="Distribution.Simple.Setup.Common.html#optionDistPref"><span class="hs-identifier hs-var">optionDistPref</span></a></span><span>
+</span><span id="line-118"></span><span>            </span><span class="annot"><span class="annottext">BuildFlags -&gt; Flag String
+</span><a href="Distribution.Simple.Setup.Build.html#buildDistPref"><span class="hs-identifier hs-var">buildDistPref</span></a></span><span>
+</span><span id="line-119"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679478521"><span class="annot"><span class="annottext">Flag String
+</span><a href="#local-6989586621679478521"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679478522"><span class="annot"><span class="annottext">BuildFlags
+</span><a href="#local-6989586621679478522"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BuildFlags
+</span><a href="#local-6989586621679478522"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#buildDistPref"><span class="hs-identifier hs-var">buildDistPref</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679478521"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-120"></span><span>            </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679478516"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
+</span><span id="line-121"></span><span>        </span><span class="hs-special">]</span><span>
+</span><span id="line-122"></span><span>          </span><span class="annot"><span class="annottext">[OptionField BuildFlags]
+-&gt; [OptionField BuildFlags] -&gt; [OptionField BuildFlags]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">ProgramDb -&gt; ShowOrParseArgs -&gt; [OptionField BuildFlags]
+</span><a href="Distribution.Simple.Setup.Build.html#buildOptions"><span class="hs-identifier hs-var">buildOptions</span></a></span><span> </span><span class="annot"><span class="annottext">ProgramDb
+</span><a href="#local-6989586621679478503"><span class="hs-identifier hs-var">progDb</span></a></span><span> </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679478516"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
+</span><span id="line-123"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#buildOptions"><span class="hs-identifier hs-type">buildOptions</span></a></span><span>
+</span><span id="line-126"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Db.html#ProgramDb"><span class="hs-identifier hs-type">ProgramDb</span></a></span><span>
+</span><span id="line-127"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#ShowOrParseArgs"><span class="hs-identifier hs-type">ShowOrParseArgs</span></a></span><span>
+</span><span id="line-128"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Distribution.Simple.Command.html#OptionField"><span class="hs-identifier hs-type">OptionField</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#BuildFlags"><span class="hs-identifier hs-type">BuildFlags</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-129"></span><span id="buildOptions"><span class="annot"><span class="annottext">buildOptions :: ProgramDb -&gt; ShowOrParseArgs -&gt; [OptionField BuildFlags]
+</span><a href="Distribution.Simple.Setup.Build.html#buildOptions"><span class="hs-identifier hs-var hs-var">buildOptions</span></a></span></span><span> </span><span id="local-6989586621679478523"><span class="annot"><span class="annottext">ProgramDb
+</span><a href="#local-6989586621679478523"><span class="hs-identifier hs-var">progDb</span></a></span></span><span> </span><span id="local-6989586621679478524"><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679478524"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-130"></span><span>  </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">(BuildFlags -&gt; Flag (Maybe Int))
+-&gt; (Flag (Maybe Int) -&gt; BuildFlags -&gt; BuildFlags)
+-&gt; OptionField BuildFlags
+forall flags.
+(flags -&gt; Flag (Maybe Int))
+-&gt; (Flag (Maybe Int) -&gt; flags -&gt; flags) -&gt; OptionField flags
+</span><a href="Distribution.Simple.Setup.Common.html#optionNumJobs"><span class="hs-identifier hs-var">optionNumJobs</span></a></span><span>
+</span><span id="line-131"></span><span>      </span><span class="annot"><span class="annottext">BuildFlags -&gt; Flag (Maybe Int)
+</span><a href="Distribution.Simple.Setup.Build.html#buildNumJobs"><span class="hs-identifier hs-var">buildNumJobs</span></a></span><span>
+</span><span id="line-132"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679478526"><span class="annot"><span class="annottext">Flag (Maybe Int)
+</span><a href="#local-6989586621679478526"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679478527"><span class="annot"><span class="annottext">BuildFlags
+</span><a href="#local-6989586621679478527"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BuildFlags
+</span><a href="#local-6989586621679478527"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#buildNumJobs"><span class="hs-identifier hs-var">buildNumJobs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679478526"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-133"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [String]
+-&gt; String
+-&gt; (BuildFlags -&gt; Flag String)
+-&gt; (Flag String -&gt; BuildFlags -&gt; BuildFlags)
+-&gt; MkOptDescr
+     (BuildFlags -&gt; Flag String)
+     (Flag String -&gt; BuildFlags -&gt; BuildFlags)
+     BuildFlags
+-&gt; OptionField BuildFlags
+forall get set a.
+String
+-&gt; [String]
+-&gt; String
+-&gt; get
+-&gt; set
+-&gt; MkOptDescr get set a
+-&gt; OptionField a
+</span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
+</span><span id="line-134"></span><span>      </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-135"></span><span>      </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;semaphore&quot;</span></span><span class="hs-special">]</span><span>
+</span><span id="line-136"></span><span>      </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;semaphore&quot;</span></span><span>
+</span><span id="line-137"></span><span>      </span><span class="annot"><span class="annottext">BuildFlags -&gt; Flag String
+</span><a href="Distribution.Simple.Setup.Build.html#buildUseSemaphore"><span class="hs-identifier hs-var">buildUseSemaphore</span></a></span><span>
+</span><span id="line-138"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679478529"><span class="annot"><span class="annottext">Flag String
+</span><a href="#local-6989586621679478529"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679478530"><span class="annot"><span class="annottext">BuildFlags
+</span><a href="#local-6989586621679478530"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BuildFlags
+</span><a href="#local-6989586621679478530"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#buildUseSemaphore"><span class="hs-identifier hs-var">buildUseSemaphore</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679478529"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-139"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+-&gt; (String -&gt; Flag String)
+-&gt; (Flag String -&gt; [String])
+-&gt; MkOptDescr
+     (BuildFlags -&gt; Flag String)
+     (Flag String -&gt; BuildFlags -&gt; BuildFlags)
+     BuildFlags
+forall b a.
+Monoid b =&gt;
+String
+-&gt; (String -&gt; b)
+-&gt; (b -&gt; [String])
+-&gt; MkOptDescr (a -&gt; b) (b -&gt; a -&gt; a) a
+</span><a href="Distribution.Simple.Command.html#reqArg%27"><span class="hs-identifier hs-var">reqArg'</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;SEMAPHORE&quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Flag String
+forall a. a -&gt; Flag a
+</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Flag String -&gt; [String]
+forall a. Flag a -&gt; [a]
+</span><a href="Distribution.Simple.Flag.html#flagToList"><span class="hs-identifier hs-var">flagToList</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-140"></span><span>  </span><span class="hs-special">]</span><span>
+</span><span id="line-141"></span><span>    </span><span class="annot"><span class="annottext">[OptionField BuildFlags]
+-&gt; [OptionField BuildFlags] -&gt; [OptionField BuildFlags]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">ProgramDb
+-&gt; ShowOrParseArgs
+-&gt; (BuildFlags -&gt; [(String, String)])
+-&gt; ([(String, String)] -&gt; BuildFlags -&gt; BuildFlags)
+-&gt; [OptionField BuildFlags]
+forall flags.
+ProgramDb
+-&gt; ShowOrParseArgs
+-&gt; (flags -&gt; [(String, String)])
+-&gt; ([(String, String)] -&gt; flags -&gt; flags)
+-&gt; [OptionField flags]
+</span><a href="Distribution.Simple.Setup.Common.html#programDbPaths"><span class="hs-identifier hs-var">programDbPaths</span></a></span><span>
+</span><span id="line-142"></span><span>      </span><span class="annot"><span class="annottext">ProgramDb
+</span><a href="#local-6989586621679478523"><span class="hs-identifier hs-var">progDb</span></a></span><span>
+</span><span id="line-143"></span><span>      </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679478524"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
+</span><span id="line-144"></span><span>      </span><span class="annot"><span class="annottext">BuildFlags -&gt; [(String, String)]
+</span><a href="Distribution.Simple.Setup.Build.html#buildProgramPaths"><span class="hs-identifier hs-var">buildProgramPaths</span></a></span><span>
+</span><span id="line-145"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679478534"><span class="annot"><span class="annottext">[(String, String)]
+</span><a href="#local-6989586621679478534"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679478535"><span class="annot"><span class="annottext">BuildFlags
+</span><a href="#local-6989586621679478535"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BuildFlags
+</span><a href="#local-6989586621679478535"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#buildProgramPaths"><span class="hs-identifier hs-var">buildProgramPaths</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679478534"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-146"></span><span>    </span><span class="annot"><span class="annottext">[OptionField BuildFlags]
+-&gt; [OptionField BuildFlags] -&gt; [OptionField BuildFlags]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">ProgramDb
+-&gt; ShowOrParseArgs
+-&gt; (BuildFlags -&gt; [(String, [String])])
+-&gt; ([(String, [String])] -&gt; BuildFlags -&gt; BuildFlags)
+-&gt; [OptionField BuildFlags]
+forall flags.
+ProgramDb
+-&gt; ShowOrParseArgs
+-&gt; (flags -&gt; [(String, [String])])
+-&gt; ([(String, [String])] -&gt; flags -&gt; flags)
+-&gt; [OptionField flags]
+</span><a href="Distribution.Simple.Setup.Common.html#programDbOption"><span class="hs-identifier hs-var">programDbOption</span></a></span><span>
+</span><span id="line-147"></span><span>      </span><span class="annot"><span class="annottext">ProgramDb
+</span><a href="#local-6989586621679478523"><span class="hs-identifier hs-var">progDb</span></a></span><span>
+</span><span id="line-148"></span><span>      </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679478524"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
+</span><span id="line-149"></span><span>      </span><span class="annot"><span class="annottext">BuildFlags -&gt; [(String, [String])]
+</span><a href="Distribution.Simple.Setup.Build.html#buildProgramArgs"><span class="hs-identifier hs-var">buildProgramArgs</span></a></span><span>
+</span><span id="line-150"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679478537"><span class="annot"><span class="annottext">[(String, [String])]
+</span><a href="#local-6989586621679478537"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679478538"><span class="annot"><span class="annottext">BuildFlags
+</span><a href="#local-6989586621679478538"><span class="hs-identifier hs-var">fs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BuildFlags
+</span><a href="#local-6989586621679478538"><span class="hs-identifier hs-var">fs</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#buildProgramArgs"><span class="hs-identifier hs-var">buildProgramArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679478537"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-151"></span><span>    </span><span class="annot"><span class="annottext">[OptionField BuildFlags]
+-&gt; [OptionField BuildFlags] -&gt; [OptionField BuildFlags]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">ProgramDb
+-&gt; ShowOrParseArgs
+-&gt; (BuildFlags -&gt; [(String, [String])])
+-&gt; ([(String, [String])] -&gt; BuildFlags -&gt; BuildFlags)
+-&gt; [OptionField BuildFlags]
+forall flags.
+ProgramDb
+-&gt; ShowOrParseArgs
+-&gt; (flags -&gt; [(String, [String])])
+-&gt; ([(String, [String])] -&gt; flags -&gt; flags)
+-&gt; [OptionField flags]
+</span><a href="Distribution.Simple.Setup.Common.html#programDbOptions"><span class="hs-identifier hs-var">programDbOptions</span></a></span><span>
+</span><span id="line-152"></span><span>      </span><span class="annot"><span class="annottext">ProgramDb
+</span><a href="#local-6989586621679478523"><span class="hs-identifier hs-var">progDb</span></a></span><span>
+</span><span id="line-153"></span><span>      </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679478524"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
+</span><span id="line-154"></span><span>      </span><span class="annot"><span class="annottext">BuildFlags -&gt; [(String, [String])]
+</span><a href="Distribution.Simple.Setup.Build.html#buildProgramArgs"><span class="hs-identifier hs-var">buildProgramArgs</span></a></span><span>
+</span><span id="line-155"></span><span>      </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679478540"><span class="annot"><span class="annottext">[(String, [String])]
+</span><a href="#local-6989586621679478540"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679478541"><span class="annot"><span class="annottext">BuildFlags
+</span><a href="#local-6989586621679478541"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BuildFlags
+</span><a href="#local-6989586621679478541"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#buildProgramArgs"><span class="hs-identifier hs-var">buildProgramArgs</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679478540"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-156"></span><span>
+</span><span id="line-157"></span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#emptyBuildFlags"><span class="hs-identifier hs-type">emptyBuildFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#BuildFlags"><span class="hs-identifier hs-type">BuildFlags</span></a></span><span>
+</span><span id="line-158"></span><span id="emptyBuildFlags"><span class="annot"><span class="annottext">emptyBuildFlags :: BuildFlags
+</span><a href="Distribution.Simple.Setup.Build.html#emptyBuildFlags"><span class="hs-identifier hs-var hs-var">emptyBuildFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BuildFlags
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-159"></span><span>
+</span><span id="line-160"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478548"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#BuildFlags"><span class="hs-identifier hs-type">BuildFlags</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-161"></span><span>  </span><span id="local-6989586621679478590"><span class="annot"><span class="annottext">mempty :: BuildFlags
+</span><span class="hs-identifier hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BuildFlags
+forall a. (Generic a, GMonoid (Rep a)) =&gt; a
+</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Semigroup.html/Distribution.Compat.Semigroup.html#gmempty"><span class="hs-identifier hs-var">gmempty</span></a></span><span>
+</span><span id="line-162"></span><span>  </span><span id="local-6989586621679478593"><span class="annot"><span class="annottext">mappend :: BuildFlags -&gt; BuildFlags -&gt; BuildFlags
+</span><span class="hs-identifier hs-var hs-var hs-var">mappend</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BuildFlags -&gt; BuildFlags -&gt; BuildFlags
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span>
+</span><span id="line-163"></span><span>
+</span><span id="line-164"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478596"><span id="local-6989586621679478599"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Build.html#BuildFlags"><span class="hs-identifier hs-type">BuildFlags</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-165"></span><span>  </span><span id="local-6989586621679478638"><span class="annot"><span class="annottext">&lt;&gt; :: BuildFlags -&gt; BuildFlags -&gt; BuildFlags
+</span><span class="hs-operator hs-var hs-var hs-var">(&lt;&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">BuildFlags -&gt; BuildFlags -&gt; BuildFlags
+forall a. (Generic a, GSemigroup (Rep a)) =&gt; a -&gt; a -&gt; a
+</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Semigroup.html/Distribution.Compat.Semigroup.html#gmappend"><span class="hs-identifier hs-var">gmappend</span></a></span><span>
+</span><span id="line-166"></span></pre></body></html>

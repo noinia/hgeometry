@@ -313,31 +313,31 @@ fullRender :: Mode -> Int -> Float -> (TextDetails -> a -> a) -> a -> Doc b -> a
 --   to the <tt>Style</tt> and <tt>Mode</tt> types for a description of
 --   rendering mode, line length and ribbons.
 fullRenderAnn :: Mode -> Int -> Float -> (AnnotDetails b -> a -> a) -> a -> Doc b -> a
-instance GHC.Generics.Generic Text.PrettyPrint.Annotated.HughesPJ.TextDetails
-instance GHC.Classes.Eq Text.PrettyPrint.Annotated.HughesPJ.TextDetails
-instance GHC.Show.Show Text.PrettyPrint.Annotated.HughesPJ.TextDetails
 instance GHC.Classes.Eq a => GHC.Classes.Eq (Text.PrettyPrint.Annotated.HughesPJ.AnnotDetails a)
-instance GHC.Show.Show a => GHC.Show.Show (Text.PrettyPrint.Annotated.HughesPJ.AnnotDetails a)
-instance GHC.Generics.Generic (Text.PrettyPrint.Annotated.HughesPJ.Doc a)
-instance GHC.Generics.Generic Text.PrettyPrint.Annotated.HughesPJ.Mode
-instance GHC.Classes.Eq Text.PrettyPrint.Annotated.HughesPJ.Mode
-instance GHC.Show.Show Text.PrettyPrint.Annotated.HughesPJ.Mode
-instance GHC.Generics.Generic Text.PrettyPrint.Annotated.HughesPJ.Style
-instance GHC.Classes.Eq Text.PrettyPrint.Annotated.HughesPJ.Style
-instance GHC.Show.Show Text.PrettyPrint.Annotated.HughesPJ.Style
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Text.PrettyPrint.Annotated.HughesPJ.Span a)
-instance GHC.Show.Show a => GHC.Show.Show (Text.PrettyPrint.Annotated.HughesPJ.Span a)
-instance GHC.Base.Functor Text.PrettyPrint.Annotated.HughesPJ.Span
-instance GHC.Show.Show (Text.PrettyPrint.Annotated.HughesPJ.Doc a)
-instance GHC.Base.Semigroup (Text.PrettyPrint.Annotated.HughesPJ.Doc a)
-instance GHC.Base.Monoid (Text.PrettyPrint.Annotated.HughesPJ.Doc a)
-instance Data.String.IsString (Text.PrettyPrint.Annotated.HughesPJ.Doc a)
 instance GHC.Classes.Eq (Text.PrettyPrint.Annotated.HughesPJ.Doc a)
-instance GHC.Base.Functor Text.PrettyPrint.Annotated.HughesPJ.Doc
-instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Text.PrettyPrint.Annotated.HughesPJ.Doc a)
-instance GHC.Base.Functor Text.PrettyPrint.Annotated.HughesPJ.AnnotDetails
+instance GHC.Classes.Eq Text.PrettyPrint.Annotated.HughesPJ.Mode
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Text.PrettyPrint.Annotated.HughesPJ.Span a)
+instance GHC.Classes.Eq Text.PrettyPrint.Annotated.HughesPJ.Style
+instance GHC.Classes.Eq Text.PrettyPrint.Annotated.HughesPJ.TextDetails
+instance GHC.Internal.Base.Functor Text.PrettyPrint.Annotated.HughesPJ.AnnotDetails
+instance GHC.Internal.Base.Functor Text.PrettyPrint.Annotated.HughesPJ.Doc
+instance GHC.Internal.Base.Functor Text.PrettyPrint.Annotated.HughesPJ.Span
+instance GHC.Internal.Generics.Generic (Text.PrettyPrint.Annotated.HughesPJ.Doc a)
+instance GHC.Internal.Generics.Generic Text.PrettyPrint.Annotated.HughesPJ.Mode
+instance GHC.Internal.Generics.Generic Text.PrettyPrint.Annotated.HughesPJ.Style
+instance GHC.Internal.Generics.Generic Text.PrettyPrint.Annotated.HughesPJ.TextDetails
+instance GHC.Internal.Data.String.IsString (Text.PrettyPrint.Annotated.HughesPJ.Doc a)
+instance GHC.Internal.Base.Monoid (Text.PrettyPrint.Annotated.HughesPJ.Doc a)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Text.PrettyPrint.Annotated.HughesPJ.AnnotDetails a)
+instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Text.PrettyPrint.Annotated.HughesPJ.Doc a)
 instance Control.DeepSeq.NFData Text.PrettyPrint.Annotated.HughesPJ.TextDetails
+instance GHC.Internal.Base.Semigroup (Text.PrettyPrint.Annotated.HughesPJ.Doc a)
+instance GHC.Internal.Show.Show a => GHC.Internal.Show.Show (Text.PrettyPrint.Annotated.HughesPJ.AnnotDetails a)
+instance GHC.Internal.Show.Show (Text.PrettyPrint.Annotated.HughesPJ.Doc a)
+instance GHC.Internal.Show.Show Text.PrettyPrint.Annotated.HughesPJ.Mode
+instance GHC.Internal.Show.Show a => GHC.Internal.Show.Show (Text.PrettyPrint.Annotated.HughesPJ.Span a)
+instance GHC.Internal.Show.Show Text.PrettyPrint.Annotated.HughesPJ.Style
+instance GHC.Internal.Show.Show Text.PrettyPrint.Annotated.HughesPJ.TextDetails
 
 
 -- | This module provides a version of pretty that allows for annotations
@@ -626,20 +626,18 @@ prettyShow :: Pretty a => a -> String
 
 -- | <i>Deprecated: Please use <a>maybeParens</a> instead</i>
 prettyParen :: Bool -> Doc ann -> Doc ann
-instance GHC.Show.Show Text.PrettyPrint.Annotated.HughesPJClass.PrettyLevel
-instance GHC.Classes.Ord Text.PrettyPrint.Annotated.HughesPJClass.PrettyLevel
 instance GHC.Classes.Eq Text.PrettyPrint.Annotated.HughesPJClass.PrettyLevel
+instance GHC.Classes.Ord Text.PrettyPrint.Annotated.HughesPJClass.PrettyLevel
+instance Text.PrettyPrint.Annotated.HughesPJClass.Pretty GHC.Types.Bool
+instance Text.PrettyPrint.Annotated.HughesPJClass.Pretty GHC.Types.Char
+instance Text.PrettyPrint.Annotated.HughesPJClass.Pretty GHC.Types.Double
+instance (Text.PrettyPrint.Annotated.HughesPJClass.Pretty a, Text.PrettyPrint.Annotated.HughesPJClass.Pretty b) => Text.PrettyPrint.Annotated.HughesPJClass.Pretty (GHC.Internal.Data.Either.Either a b)
+instance Text.PrettyPrint.Annotated.HughesPJClass.Pretty GHC.Types.Float
 instance Text.PrettyPrint.Annotated.HughesPJClass.Pretty GHC.Types.Int
 instance Text.PrettyPrint.Annotated.HughesPJClass.Pretty GHC.Num.Integer.Integer
-instance Text.PrettyPrint.Annotated.HughesPJClass.Pretty GHC.Types.Float
-instance Text.PrettyPrint.Annotated.HughesPJClass.Pretty GHC.Types.Double
-instance Text.PrettyPrint.Annotated.HughesPJClass.Pretty ()
-instance Text.PrettyPrint.Annotated.HughesPJClass.Pretty GHC.Types.Bool
-instance Text.PrettyPrint.Annotated.HughesPJClass.Pretty GHC.Types.Ordering
-instance Text.PrettyPrint.Annotated.HughesPJClass.Pretty GHC.Types.Char
-instance Text.PrettyPrint.Annotated.HughesPJClass.Pretty a => Text.PrettyPrint.Annotated.HughesPJClass.Pretty (GHC.Maybe.Maybe a)
-instance (Text.PrettyPrint.Annotated.HughesPJClass.Pretty a, Text.PrettyPrint.Annotated.HughesPJClass.Pretty b) => Text.PrettyPrint.Annotated.HughesPJClass.Pretty (Data.Either.Either a b)
 instance Text.PrettyPrint.Annotated.HughesPJClass.Pretty a => Text.PrettyPrint.Annotated.HughesPJClass.Pretty [a]
+instance Text.PrettyPrint.Annotated.HughesPJClass.Pretty a => Text.PrettyPrint.Annotated.HughesPJClass.Pretty (GHC.Internal.Maybe.Maybe a)
+instance Text.PrettyPrint.Annotated.HughesPJClass.Pretty GHC.Types.Ordering
 instance (Text.PrettyPrint.Annotated.HughesPJClass.Pretty a, Text.PrettyPrint.Annotated.HughesPJClass.Pretty b) => Text.PrettyPrint.Annotated.HughesPJClass.Pretty (a, b)
 instance (Text.PrettyPrint.Annotated.HughesPJClass.Pretty a, Text.PrettyPrint.Annotated.HughesPJClass.Pretty b, Text.PrettyPrint.Annotated.HughesPJClass.Pretty c) => Text.PrettyPrint.Annotated.HughesPJClass.Pretty (a, b, c)
 instance (Text.PrettyPrint.Annotated.HughesPJClass.Pretty a, Text.PrettyPrint.Annotated.HughesPJClass.Pretty b, Text.PrettyPrint.Annotated.HughesPJClass.Pretty c, Text.PrettyPrint.Annotated.HughesPJClass.Pretty d) => Text.PrettyPrint.Annotated.HughesPJClass.Pretty (a, b, c, d)
@@ -647,6 +645,8 @@ instance (Text.PrettyPrint.Annotated.HughesPJClass.Pretty a, Text.PrettyPrint.An
 instance (Text.PrettyPrint.Annotated.HughesPJClass.Pretty a, Text.PrettyPrint.Annotated.HughesPJClass.Pretty b, Text.PrettyPrint.Annotated.HughesPJClass.Pretty c, Text.PrettyPrint.Annotated.HughesPJClass.Pretty d, Text.PrettyPrint.Annotated.HughesPJClass.Pretty e, Text.PrettyPrint.Annotated.HughesPJClass.Pretty f) => Text.PrettyPrint.Annotated.HughesPJClass.Pretty (a, b, c, d, e, f)
 instance (Text.PrettyPrint.Annotated.HughesPJClass.Pretty a, Text.PrettyPrint.Annotated.HughesPJClass.Pretty b, Text.PrettyPrint.Annotated.HughesPJClass.Pretty c, Text.PrettyPrint.Annotated.HughesPJClass.Pretty d, Text.PrettyPrint.Annotated.HughesPJClass.Pretty e, Text.PrettyPrint.Annotated.HughesPJClass.Pretty f, Text.PrettyPrint.Annotated.HughesPJClass.Pretty g) => Text.PrettyPrint.Annotated.HughesPJClass.Pretty (a, b, c, d, e, f, g)
 instance (Text.PrettyPrint.Annotated.HughesPJClass.Pretty a, Text.PrettyPrint.Annotated.HughesPJClass.Pretty b, Text.PrettyPrint.Annotated.HughesPJClass.Pretty c, Text.PrettyPrint.Annotated.HughesPJClass.Pretty d, Text.PrettyPrint.Annotated.HughesPJClass.Pretty e, Text.PrettyPrint.Annotated.HughesPJClass.Pretty f, Text.PrettyPrint.Annotated.HughesPJClass.Pretty g, Text.PrettyPrint.Annotated.HughesPJClass.Pretty h) => Text.PrettyPrint.Annotated.HughesPJClass.Pretty (a, b, c, d, e, f, g, h)
+instance Text.PrettyPrint.Annotated.HughesPJClass.Pretty ()
+instance GHC.Internal.Show.Show Text.PrettyPrint.Annotated.HughesPJClass.PrettyLevel
 
 
 -- | Provides a collection of pretty printer combinators, a set of API's
@@ -909,13 +909,13 @@ OneLineMode :: Mode
 --   and <tt>Mode</tt> types for a description of rendering mode, line
 --   length and ribbons.
 fullRender :: Mode -> Int -> Float -> (TextDetails -> a -> a) -> a -> Doc -> a
-instance GHC.Generics.Generic Text.PrettyPrint.HughesPJ.Doc
-instance GHC.Base.Semigroup Text.PrettyPrint.HughesPJ.Doc
-instance GHC.Base.Monoid Text.PrettyPrint.HughesPJ.Doc
-instance Data.String.IsString Text.PrettyPrint.HughesPJ.Doc
-instance GHC.Show.Show Text.PrettyPrint.HughesPJ.Doc
 instance GHC.Classes.Eq Text.PrettyPrint.HughesPJ.Doc
+instance GHC.Internal.Generics.Generic Text.PrettyPrint.HughesPJ.Doc
+instance GHC.Internal.Data.String.IsString Text.PrettyPrint.HughesPJ.Doc
+instance GHC.Internal.Base.Monoid Text.PrettyPrint.HughesPJ.Doc
 instance Control.DeepSeq.NFData Text.PrettyPrint.HughesPJ.Doc
+instance GHC.Internal.Base.Semigroup Text.PrettyPrint.HughesPJ.Doc
+instance GHC.Internal.Show.Show Text.PrettyPrint.HughesPJ.Doc
 
 
 -- | Provides a collection of pretty printer combinators, a set of API's
@@ -1183,20 +1183,18 @@ prettyShow :: Pretty a => a -> String
 
 -- | <i>Deprecated: Please use <a>maybeParens</a> instead</i>
 prettyParen :: Bool -> Doc -> Doc
-instance GHC.Show.Show Text.PrettyPrint.HughesPJClass.PrettyLevel
-instance GHC.Classes.Ord Text.PrettyPrint.HughesPJClass.PrettyLevel
 instance GHC.Classes.Eq Text.PrettyPrint.HughesPJClass.PrettyLevel
+instance GHC.Classes.Ord Text.PrettyPrint.HughesPJClass.PrettyLevel
+instance Text.PrettyPrint.HughesPJClass.Pretty GHC.Types.Bool
+instance Text.PrettyPrint.HughesPJClass.Pretty GHC.Types.Char
+instance Text.PrettyPrint.HughesPJClass.Pretty GHC.Types.Double
+instance (Text.PrettyPrint.HughesPJClass.Pretty a, Text.PrettyPrint.HughesPJClass.Pretty b) => Text.PrettyPrint.HughesPJClass.Pretty (GHC.Internal.Data.Either.Either a b)
+instance Text.PrettyPrint.HughesPJClass.Pretty GHC.Types.Float
 instance Text.PrettyPrint.HughesPJClass.Pretty GHC.Types.Int
 instance Text.PrettyPrint.HughesPJClass.Pretty GHC.Num.Integer.Integer
-instance Text.PrettyPrint.HughesPJClass.Pretty GHC.Types.Float
-instance Text.PrettyPrint.HughesPJClass.Pretty GHC.Types.Double
-instance Text.PrettyPrint.HughesPJClass.Pretty ()
-instance Text.PrettyPrint.HughesPJClass.Pretty GHC.Types.Bool
-instance Text.PrettyPrint.HughesPJClass.Pretty GHC.Types.Ordering
-instance Text.PrettyPrint.HughesPJClass.Pretty GHC.Types.Char
-instance Text.PrettyPrint.HughesPJClass.Pretty a => Text.PrettyPrint.HughesPJClass.Pretty (GHC.Maybe.Maybe a)
-instance (Text.PrettyPrint.HughesPJClass.Pretty a, Text.PrettyPrint.HughesPJClass.Pretty b) => Text.PrettyPrint.HughesPJClass.Pretty (Data.Either.Either a b)
 instance Text.PrettyPrint.HughesPJClass.Pretty a => Text.PrettyPrint.HughesPJClass.Pretty [a]
+instance Text.PrettyPrint.HughesPJClass.Pretty a => Text.PrettyPrint.HughesPJClass.Pretty (GHC.Internal.Maybe.Maybe a)
+instance Text.PrettyPrint.HughesPJClass.Pretty GHC.Types.Ordering
 instance (Text.PrettyPrint.HughesPJClass.Pretty a, Text.PrettyPrint.HughesPJClass.Pretty b) => Text.PrettyPrint.HughesPJClass.Pretty (a, b)
 instance (Text.PrettyPrint.HughesPJClass.Pretty a, Text.PrettyPrint.HughesPJClass.Pretty b, Text.PrettyPrint.HughesPJClass.Pretty c) => Text.PrettyPrint.HughesPJClass.Pretty (a, b, c)
 instance (Text.PrettyPrint.HughesPJClass.Pretty a, Text.PrettyPrint.HughesPJClass.Pretty b, Text.PrettyPrint.HughesPJClass.Pretty c, Text.PrettyPrint.HughesPJClass.Pretty d) => Text.PrettyPrint.HughesPJClass.Pretty (a, b, c, d)
@@ -1204,3 +1202,5 @@ instance (Text.PrettyPrint.HughesPJClass.Pretty a, Text.PrettyPrint.HughesPJClas
 instance (Text.PrettyPrint.HughesPJClass.Pretty a, Text.PrettyPrint.HughesPJClass.Pretty b, Text.PrettyPrint.HughesPJClass.Pretty c, Text.PrettyPrint.HughesPJClass.Pretty d, Text.PrettyPrint.HughesPJClass.Pretty e, Text.PrettyPrint.HughesPJClass.Pretty f) => Text.PrettyPrint.HughesPJClass.Pretty (a, b, c, d, e, f)
 instance (Text.PrettyPrint.HughesPJClass.Pretty a, Text.PrettyPrint.HughesPJClass.Pretty b, Text.PrettyPrint.HughesPJClass.Pretty c, Text.PrettyPrint.HughesPJClass.Pretty d, Text.PrettyPrint.HughesPJClass.Pretty e, Text.PrettyPrint.HughesPJClass.Pretty f, Text.PrettyPrint.HughesPJClass.Pretty g) => Text.PrettyPrint.HughesPJClass.Pretty (a, b, c, d, e, f, g)
 instance (Text.PrettyPrint.HughesPJClass.Pretty a, Text.PrettyPrint.HughesPJClass.Pretty b, Text.PrettyPrint.HughesPJClass.Pretty c, Text.PrettyPrint.HughesPJClass.Pretty d, Text.PrettyPrint.HughesPJClass.Pretty e, Text.PrettyPrint.HughesPJClass.Pretty f, Text.PrettyPrint.HughesPJClass.Pretty g, Text.PrettyPrint.HughesPJClass.Pretty h) => Text.PrettyPrint.HughesPJClass.Pretty (a, b, c, d, e, f, g, h)
+instance Text.PrettyPrint.HughesPJClass.Pretty ()
+instance GHC.Internal.Show.Show Text.PrettyPrint.HughesPJClass.PrettyLevel

@@ -8,16 +8,16 @@
 </span><span id="line-8"></span><span class="hs-comment">--</span><span>
 </span><span id="line-9"></span><span class="hs-comment">-- Compute the Convex hull of a polygon in linear time.</span><span>
 </span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">HGeometry.ConvexHull.Melkman</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html"><span class="hs-identifier">HGeometry.ConvexHull.Melkman</span></a></span><span>
 </span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#convexHull"><span class="hs-identifier">convexHull</span></a></span><span>
 </span><span id="line-13"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-14"></span><span>
-</span><span id="line-15"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Fold.html#%5E.."><span class="hs-operator">(^..)</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-ad4ffa0d8fed99eb0a82e7ae6f92f74beeaf04ae23235424b0e62e87c817fcef/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-ad4ffa0d8fed99eb0a82e7ae6f92f74beeaf04ae23235424b0e62e87c817fcef/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#%5E.."><span class="hs-operator">(^..)</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-16"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span>
 </span><span id="line-17"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad.ST</span></span><span>
 </span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.Monad.State</span></span><span>
-</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.html"><span class="hs-identifier">Data.Vector</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">V</span></span><span>
-</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Mutable.html"><span class="hs-identifier">Data.Vector.Mutable</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Mut</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.html/Data.Vector.html"><span class="hs-identifier">Data.Vector</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">V</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Mutable.html/Data.Vector.Mutable.html"><span class="hs-identifier">Data.Vector.Mutable</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Mut</span></span><span>
 </span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
 </span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Polygon.Class.html"><span class="hs-identifier">HGeometry.Polygon.Class</span></a></span><span>
 </span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Polygon.Convex.html"><span class="hs-identifier">HGeometry.Polygon.Convex</span></a></span><span>
@@ -28,225 +28,154 @@
 </span><span id="line-28"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-29"></span><span>
 </span><span id="line-30"></span><span>
-</span><span id="line-31"></span><span class="hs-keyword">type</span><span> </span><span id="M"><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#M"><span class="hs-identifier hs-var">M</span></a></span></span><span> </span><span id="local-6989586621679498144"><span class="annot"><a href="#local-6989586621679498144"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679498145"><span class="annot"><a href="#local-6989586621679498145"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679498146"><span class="annot"><a href="#local-6989586621679498146"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">StateT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Mutable.html#MVector"><span class="hs-identifier hs-type">Mut.MVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498144"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498145"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679498144"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679498146"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">type</span><span> </span><span id="M"><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#M"><span class="hs-identifier hs-var">M</span></a></span></span><span> </span><span id="local-6989586621679490834"><span class="annot"><a href="#local-6989586621679490834"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679490835"><span class="annot"><a href="#local-6989586621679490835"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span id="local-6989586621679490836"><span class="annot"><a href="#local-6989586621679490836"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">StateT</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Mutable.html/Data.Vector.Mutable.html#MVector"><span class="hs-identifier hs-type">Mut.MVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490834"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490835"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679490834"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679490836"><span class="hs-identifier hs-type">a</span></a></span><span>
 </span><span id="line-32"></span><span>
-</span><span id="line-33"></span><span id="local-6989586621679497934"><span id="local-6989586621679497935"><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#runM"><span class="hs-identifier hs-type">runM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#M"><span class="hs-identifier hs-type">M</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497934"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497935"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679497934"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Mutable.html#MVector"><span class="hs-identifier hs-type">Mut.MVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497934"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497935"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-33"></span><span id="local-6989586621679490626"><span id="local-6989586621679490627"><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#runM"><span class="hs-identifier hs-type">runM</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#M"><span class="hs-identifier hs-type">M</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490626"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490627"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ST</span></span><span> </span><span class="annot"><a href="#local-6989586621679490626"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Mutable.html/Data.Vector.Mutable.html#MVector"><span class="hs-identifier hs-type">Mut.MVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490626"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490627"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-34"></span><span id="runM"><span class="annot"><span class="annottext">runM :: forall s v. Int -&gt; M s v () -&gt; ST s (MVector s v)
-</span><a href="HGeometry.ConvexHull.Melkman.html#runM"><span class="hs-identifier hs-var hs-var">runM</span></a></span></span><span> </span><span id="local-6989586621679498158"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498158"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679498159"><span class="annot"><span class="annottext">M s v ()
-</span><a href="#local-6989586621679498159"><span class="hs-identifier hs-var">action</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-35"></span><span>  </span><span id="local-6989586621679498160"><span class="annot"><span class="annottext">MVector s v
-</span><a href="#local-6989586621679498160"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ST s (MVector (PrimState (ST s)) v)
+</span><a href="HGeometry.ConvexHull.Melkman.html#runM"><span class="hs-identifier hs-var hs-var">runM</span></a></span></span><span> </span><span id="local-6989586621679490848"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679490848"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679490849"><span class="annot"><span class="annottext">M s v ()
+</span><a href="#local-6989586621679490849"><span class="hs-identifier hs-var">action</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-35"></span><span>  </span><span id="local-6989586621679490850"><span class="annot"><a href="#local-6989586621679490850"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Int -&gt; ST s (MVector (PrimState (ST s)) v)
 forall (m :: * -&gt; *) a.
 PrimMonad m =&gt;
 Int -&gt; m (MVector (PrimState m) a)
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Mutable.html#new"><span class="hs-identifier hs-var">Mut.new</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Mutable.html/Data.Vector.Mutable.html#new"><span class="hs-identifier hs-var">Mut.new</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498158"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-36"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679498163"><span class="annot"><span class="annottext">MVector s v
-</span><a href="#local-6989586621679498163"><span class="hs-identifier hs-var">v'</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679498164"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498164"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">M s v () -&gt; (MVector s v, Int) -&gt; ST s (MVector s v, Int)
-forall (m :: * -&gt; *) s a. Monad m =&gt; StateT s m a -&gt; s -&gt; m s
-</span><span class="hs-identifier hs-var">execStateT</span></span><span> </span><span class="annot"><span class="annottext">M s v ()
-</span><a href="#local-6989586621679498159"><span class="hs-identifier hs-var">action</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; MVector s v -&gt; MVector s v
-forall s a. Int -&gt; MVector s a -&gt; MVector s a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Mutable.html#drop"><span class="hs-identifier hs-var">Mut.drop</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498158"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s v
-</span><a href="#local-6989586621679498160"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
-</span><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
-</span><span id="line-37"></span><span>  </span><span class="annot"><span class="annottext">MVector s v -&gt; ST s (MVector s v)
-forall a. a -&gt; ST s a
-forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
-</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(MVector s v -&gt; ST s (MVector s v))
--&gt; MVector s v -&gt; ST s (MVector s v)
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">MVector s v -&gt; MVector s v
-forall s a. MVector s a -&gt; MVector s a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Mutable.html#tail"><span class="hs-identifier hs-var">Mut.tail</span></a></span><span> </span><span class="annot"><span class="annottext">(MVector s v -&gt; MVector s v) -&gt; MVector s v -&gt; MVector s v
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; MVector s v -&gt; MVector s v
-forall s a. Int -&gt; MVector s a -&gt; MVector s a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Mutable.html#take"><span class="hs-identifier hs-var">Mut.take</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498164"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s v
-</span><a href="#local-6989586621679498163"><span class="hs-identifier hs-var">v'</span></a></span><span>
+</span><a href="#local-6989586621679490848"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679490853"><span class="annot"><a href="#local-6989586621679490853"><span class="hs-identifier hs-var">v'</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679490854"><span class="annot"><a href="#local-6989586621679490854"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">execStateT</span></span><span> </span><span class="annot"><a href="#local-6989586621679490849"><span class="hs-identifier hs-type">action</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Mutable.html/Data.Vector.Mutable.html#drop"><span class="hs-identifier hs-type">Mut.drop</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490848"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490850"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Mutable.html/Data.Vector.Mutable.html#tail"><span class="hs-identifier hs-type">Mut.tail</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Mutable.html/Data.Vector.Mutable.html#take"><span class="hs-identifier hs-type">Mut.take</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490854"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490853"><span class="hs-identifier hs-type">v'</span></a></span><span>
 </span><span id="line-38"></span><span>
-</span><span id="line-39"></span><span id="local-6989586621679497961"><span id="local-6989586621679497962"><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#dequeRemove"><span class="hs-identifier hs-type">dequeRemove</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#M"><span class="hs-identifier hs-type">M</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497961"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497962"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-39"></span><span id="local-6989586621679490654"><span id="local-6989586621679490655"><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#dequeRemove"><span class="hs-identifier hs-type">dequeRemove</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#M"><span class="hs-identifier hs-type">M</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490654"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490655"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-40"></span><span id="dequeRemove"><span class="annot"><span class="annottext">dequeRemove :: forall s a. M s a ()
 </span><a href="HGeometry.ConvexHull.Melkman.html#dequeRemove"><span class="hs-identifier hs-var hs-var">dequeRemove</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-41"></span><span>  </span><span class="annot"><span class="annottext">((MVector s a, Int) -&gt; (MVector s a, Int)) -&gt; M s a ()
+</span><span id="line-41"></span><span>  </span><span class="annot"><span class="annottext">((MVector s a, Int) -&gt; (MVector s a, Int))
+-&gt; StateT (MVector s a, Int) (ST s) ()
 forall s (m :: * -&gt; *). MonadState s m =&gt; (s -&gt; s) -&gt; m ()
-</span><span class="hs-identifier hs-var">modify</span></span><span> </span><span class="annot"><span class="annottext">(((MVector s a, Int) -&gt; (MVector s a, Int)) -&gt; M s a ())
--&gt; ((MVector s a, Int) -&gt; (MVector s a, Int)) -&gt; M s a ()
+</span><span class="hs-identifier hs-var">modify</span></span><span> </span><span class="annot"><span class="annottext">(((MVector s a, Int) -&gt; (MVector s a, Int))
+ -&gt; StateT (MVector s a, Int) (ST s) ())
+-&gt; ((MVector s a, Int) -&gt; (MVector s a, Int))
+-&gt; StateT (MVector s a, Int) (ST s) ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Mutable.html#MVector"><span class="hs-identifier hs-type">Mut.MVector</span></a></span><span> </span><span id="local-6989586621679498181"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498181"><span class="hs-identifier hs-var">offset</span></a></span></span><span> </span><span id="local-6989586621679498182"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498182"><span class="hs-identifier hs-var">len</span></a></span></span><span> </span><span id="local-6989586621679498183"><span class="annot"><span class="annottext">MutableArray s a
-</span><a href="#local-6989586621679498183"><span class="hs-identifier hs-var">arr</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679498184"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498184"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; MutableArray s a -&gt; MVector s a
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Mutable.html/Data.Vector.Mutable.html#MVector"><span class="hs-identifier hs-type">Mut.MVector</span></a></span><span> </span><span id="local-6989586621679490871"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679490871"><span class="hs-identifier hs-var">offset</span></a></span></span><span> </span><span id="local-6989586621679490872"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679490872"><span class="hs-identifier hs-var">len</span></a></span></span><span> </span><span id="local-6989586621679490873"><span class="annot"><span class="annottext">MutableArray s a
+</span><a href="#local-6989586621679490873"><span class="hs-identifier hs-var">arr</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679490874"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679490874"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; MutableArray s a -&gt; MVector s a
 forall s a. Int -&gt; Int -&gt; MutableArray s a -&gt; MVector s a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Mutable.html#MVector"><span class="hs-identifier hs-var">Mut.MVector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498181"><span class="hs-identifier hs-var">offset</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Mutable.html/Data.Vector.Mutable.html#MVector"><span class="hs-identifier hs-var">Mut.MVector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679490871"><span class="hs-identifier hs-var">offset</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498182"><span class="hs-identifier hs-var">len</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679490872"><span class="hs-identifier hs-var">len</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">MutableArray s a
-</span><a href="#local-6989586621679498183"><span class="hs-identifier hs-var">arr</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498184"><span class="hs-identifier hs-var">f</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679490873"><span class="hs-identifier hs-var">arr</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679490874"><span class="hs-identifier hs-var">f</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
 </span><span id="line-42"></span><span>
-</span><span id="line-43"></span><span id="local-6989586621679497973"><span id="local-6989586621679497974"><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#dequeInsert"><span class="hs-identifier hs-type">dequeInsert</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679497973"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#M"><span class="hs-identifier hs-type">M</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497974"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497973"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-43"></span><span id="local-6989586621679490666"><span id="local-6989586621679490667"><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#dequeInsert"><span class="hs-identifier hs-type">dequeInsert</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679490666"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#M"><span class="hs-identifier hs-type">M</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490667"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490666"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-44"></span><span id="dequeInsert"><span class="annot"><span class="annottext">dequeInsert :: forall a s. a -&gt; M s a ()
-</span><a href="HGeometry.ConvexHull.Melkman.html#dequeInsert"><span class="hs-identifier hs-var hs-var">dequeInsert</span></a></span></span><span> </span><span id="local-6989586621679498202"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679498202"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-45"></span><span>  </span><span class="annot"><span class="annottext">((MVector s a, Int) -&gt; (MVector s a, Int)) -&gt; M s a ()
+</span><a href="HGeometry.ConvexHull.Melkman.html#dequeInsert"><span class="hs-identifier hs-var hs-var">dequeInsert</span></a></span></span><span> </span><span id="local-6989586621679490892"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679490892"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-45"></span><span>  </span><span class="annot"><span class="annottext">((MVector s a, Int) -&gt; (MVector s a, Int))
+-&gt; StateT (MVector s a, Int) (ST s) ()
 forall s (m :: * -&gt; *). MonadState s m =&gt; (s -&gt; s) -&gt; m ()
-</span><span class="hs-identifier hs-var">modify</span></span><span> </span><span class="annot"><span class="annottext">(((MVector s a, Int) -&gt; (MVector s a, Int)) -&gt; M s a ())
--&gt; ((MVector s a, Int) -&gt; (MVector s a, Int)) -&gt; M s a ()
+</span><span class="hs-identifier hs-var">modify</span></span><span> </span><span class="annot"><span class="annottext">(((MVector s a, Int) -&gt; (MVector s a, Int))
+ -&gt; StateT (MVector s a, Int) (ST s) ())
+-&gt; ((MVector s a, Int) -&gt; (MVector s a, Int))
+-&gt; StateT (MVector s a, Int) (ST s) ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Mutable.html#MVector"><span class="hs-identifier hs-type">Mut.MVector</span></a></span><span> </span><span id="local-6989586621679498203"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498203"><span class="hs-identifier hs-var">offset</span></a></span></span><span> </span><span id="local-6989586621679498204"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498204"><span class="hs-identifier hs-var">len</span></a></span></span><span> </span><span id="local-6989586621679498205"><span class="annot"><span class="annottext">MutableArray s a
-</span><a href="#local-6989586621679498205"><span class="hs-identifier hs-var">arr</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679498206"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498206"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; MutableArray s a -&gt; MVector s a
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Mutable.html/Data.Vector.Mutable.html#MVector"><span class="hs-identifier hs-type">Mut.MVector</span></a></span><span> </span><span id="local-6989586621679490893"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679490893"><span class="hs-identifier hs-var">offset</span></a></span></span><span> </span><span id="local-6989586621679490894"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679490894"><span class="hs-identifier hs-var">len</span></a></span></span><span> </span><span id="local-6989586621679490895"><span class="annot"><span class="annottext">MutableArray s a
+</span><a href="#local-6989586621679490895"><span class="hs-identifier hs-var">arr</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679490896"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679490896"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; MutableArray s a -&gt; MVector s a
 forall s a. Int -&gt; Int -&gt; MutableArray s a -&gt; MVector s a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Mutable.html#MVector"><span class="hs-identifier hs-var">Mut.MVector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498203"><span class="hs-identifier hs-var">offset</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Mutable.html/Data.Vector.Mutable.html#MVector"><span class="hs-identifier hs-var">Mut.MVector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679490893"><span class="hs-identifier hs-var">offset</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498204"><span class="hs-identifier hs-var">len</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679490894"><span class="hs-identifier hs-var">len</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">MutableArray s a
-</span><a href="#local-6989586621679498205"><span class="hs-identifier hs-var">arr</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498206"><span class="hs-identifier hs-var">f</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679490895"><span class="hs-identifier hs-var">arr</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679490896"><span class="hs-identifier hs-var">f</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
-</span><span id="line-46"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679498207"><span class="annot"><span class="annottext">MVector s a
-</span><a href="#local-6989586621679498207"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StateT (MVector s a, Int) (ST s) (MVector s a, Int)
+</span><span id="line-46"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679490897"><span class="annot"><a href="#local-6989586621679490897"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StateT (MVector s a, Int) (ST s) (MVector s a, Int)
 forall s (m :: * -&gt; *). MonadState s m =&gt; m s
 </span><span class="hs-identifier hs-var">get</span></span><span>
-</span><span id="line-47"></span><span>  </span><span class="annot"><span class="annottext">MVector (PrimState (StateT (MVector s a, Int) (ST s))) a
--&gt; Int -&gt; a -&gt; M s a ()
-forall (m :: * -&gt; *) a.
-PrimMonad m =&gt;
-MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Mutable.html#write"><span class="hs-identifier hs-var">Mut.write</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s a
-MVector (PrimState (StateT (MVector s a, Int) (ST s))) a
-</span><a href="#local-6989586621679498207"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679498202"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-47"></span><span>  </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Mutable.html/Data.Vector.Mutable.html#write"><span class="hs-identifier hs-type">Mut.write</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490897"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span> </span><span class="annot"><a href="#local-6989586621679490892"><span class="hs-identifier hs-type">a</span></a></span><span>
 </span><span id="line-48"></span><span>
-</span><span id="line-49"></span><span id="local-6989586621679498210"><span id="local-6989586621679498211"><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#dequePush"><span class="hs-identifier hs-type">dequePush</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679498210"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#M"><span class="hs-identifier hs-type">M</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498211"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498210"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-49"></span><span id="local-6989586621679490900"><span id="local-6989586621679490901"><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#dequePush"><span class="hs-identifier hs-type">dequePush</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679490900"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#M"><span class="hs-identifier hs-type">M</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490901"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490900"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-50"></span><span id="dequePush"><span class="annot"><span class="annottext">dequePush :: forall a s. a -&gt; M s a ()
-</span><a href="HGeometry.ConvexHull.Melkman.html#dequePush"><span class="hs-identifier hs-var hs-var">dequePush</span></a></span></span><span> </span><span id="local-6989586621679498222"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679498222"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-51"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679498223"><span class="annot"><span class="annottext">MVector s a
-</span><a href="#local-6989586621679498223"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679498224"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498224"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StateT (MVector s a, Int) (ST s) (MVector s a, Int)
+</span><a href="HGeometry.ConvexHull.Melkman.html#dequePush"><span class="hs-identifier hs-var hs-var">dequePush</span></a></span></span><span> </span><span id="local-6989586621679490912"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679490912"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-51"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679490913"><span class="annot"><a href="#local-6989586621679490913"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679490914"><span class="annot"><a href="#local-6989586621679490914"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StateT (MVector s a, Int) (ST s) (MVector s a, Int)
 forall s (m :: * -&gt; *). MonadState s m =&gt; m s
 </span><span class="hs-identifier hs-var">get</span></span><span>
-</span><span id="line-52"></span><span>  </span><span class="annot"><span class="annottext">MVector (PrimState (StateT (MVector s a, Int) (ST s))) a
--&gt; Int -&gt; a -&gt; M s a ()
-forall (m :: * -&gt; *) a.
-PrimMonad m =&gt;
-MVector (PrimState m) a -&gt; Int -&gt; a -&gt; m ()
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Mutable.html#write"><span class="hs-identifier hs-var">Mut.write</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s a
-MVector (PrimState (StateT (MVector s a, Int) (ST s))) a
-</span><a href="#local-6989586621679498223"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498224"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679498222"><span class="hs-identifier hs-var">a</span></a></span><span>
-</span><span id="line-53"></span><span>  </span><span class="annot"><span class="annottext">(MVector s a, Int) -&gt; M s a ()
-forall s (m :: * -&gt; *). MonadState s m =&gt; s -&gt; m ()
-</span><span class="hs-identifier hs-var">put</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MVector s a
-</span><a href="#local-6989586621679498223"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498224"><span class="hs-identifier hs-var">f</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
-forall a. Num a =&gt; a -&gt; a -&gt; a
-</span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
-</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>  </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Mutable.html/Data.Vector.Mutable.html#write"><span class="hs-identifier hs-type">Mut.write</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490913"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490914"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490912"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-53"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">put</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679490913"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679490914"><span class="hs-identifier hs-type">f</span></a></span><span class="annot"><span class="hs-operator hs-type">+</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
 </span><span id="line-54"></span><span>
-</span><span id="line-55"></span><span id="local-6989586621679498226"><span id="local-6989586621679498227"><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#dequePop"><span class="hs-identifier hs-type">dequePop</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#M"><span class="hs-identifier hs-type">M</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498226"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498227"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-55"></span><span id="local-6989586621679490916"><span id="local-6989586621679490917"><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#dequePop"><span class="hs-identifier hs-type">dequePop</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#M"><span class="hs-identifier hs-type">M</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490916"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490917"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-56"></span><span id="dequePop"><span class="annot"><span class="annottext">dequePop :: forall s a. M s a ()
 </span><a href="HGeometry.ConvexHull.Melkman.html#dequePop"><span class="hs-identifier hs-var hs-var">dequePop</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-57"></span><span>  </span><span class="annot"><span class="annottext">((MVector s a, Int) -&gt; (MVector s a, Int)) -&gt; M s a ()
+</span><span id="line-57"></span><span>  </span><span class="annot"><span class="annottext">((MVector s a, Int) -&gt; (MVector s a, Int))
+-&gt; StateT (MVector s a, Int) (ST s) ()
 forall s (m :: * -&gt; *). MonadState s m =&gt; (s -&gt; s) -&gt; m ()
-</span><span class="hs-identifier hs-var">modify</span></span><span> </span><span class="annot"><span class="annottext">(((MVector s a, Int) -&gt; (MVector s a, Int)) -&gt; M s a ())
--&gt; ((MVector s a, Int) -&gt; (MVector s a, Int)) -&gt; M s a ()
+</span><span class="hs-identifier hs-var">modify</span></span><span> </span><span class="annot"><span class="annottext">(((MVector s a, Int) -&gt; (MVector s a, Int))
+ -&gt; StateT (MVector s a, Int) (ST s) ())
+-&gt; ((MVector s a, Int) -&gt; (MVector s a, Int))
+-&gt; StateT (MVector s a, Int) (ST s) ()
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679498233"><span class="annot"><span class="annottext">MVector s a
-</span><a href="#local-6989586621679498233"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679498234"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498234"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MVector s a
-</span><a href="#local-6989586621679498233"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498234"><span class="hs-identifier hs-var">f</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679490923"><span class="annot"><span class="annottext">MVector s a
+</span><a href="#local-6989586621679490923"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679490924"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679490924"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MVector s a
+</span><a href="#local-6989586621679490923"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679490924"><span class="hs-identifier hs-var">f</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
 </span><span id="line-58"></span><span>
-</span><span id="line-59"></span><span id="local-6989586621679497989"><span id="local-6989586621679497990"><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#dequeBottom"><span class="hs-identifier hs-type">dequeBottom</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#M"><span class="hs-identifier hs-type">M</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497989"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497990"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497990"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-59"></span><span id="local-6989586621679490682"><span id="local-6989586621679490683"><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#dequeBottom"><span class="hs-identifier hs-type">dequeBottom</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#M"><span class="hs-identifier hs-type">M</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490682"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490683"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490683"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
 </span><span id="line-60"></span><span id="dequeBottom"><span class="annot"><span class="annottext">dequeBottom :: forall s a. Int -&gt; M s a a
-</span><a href="HGeometry.ConvexHull.Melkman.html#dequeBottom"><span class="hs-identifier hs-var hs-var">dequeBottom</span></a></span></span><span> </span><span id="local-6989586621679498241"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498241"><span class="hs-identifier hs-var">idx</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-61"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679498242"><span class="annot"><span class="annottext">MVector s a
-</span><a href="#local-6989586621679498242"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Int
-</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StateT (MVector s a, Int) (ST s) (MVector s a, Int)
+</span><a href="HGeometry.ConvexHull.Melkman.html#dequeBottom"><span class="hs-identifier hs-var hs-var">dequeBottom</span></a></span></span><span> </span><span id="local-6989586621679490931"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679490931"><span class="hs-identifier hs-var">idx</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679490932"><span class="annot"><a href="#local-6989586621679490932"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StateT (MVector s a, Int) (ST s) (MVector s a, Int)
 forall s (m :: * -&gt; *). MonadState s m =&gt; m s
 </span><span class="hs-identifier hs-var">get</span></span><span>
-</span><span id="line-62"></span><span>  </span><span class="annot"><span class="annottext">MVector (PrimState (StateT (MVector s a, Int) (ST s))) a
--&gt; Int -&gt; M s a a
-forall (m :: * -&gt; *) a.
-PrimMonad m =&gt;
-MVector (PrimState m) a -&gt; Int -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Mutable.html#read"><span class="hs-identifier hs-var">Mut.read</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s a
-MVector (PrimState (StateT (MVector s a, Int) (ST s))) a
-</span><a href="#local-6989586621679498242"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498241"><span class="hs-identifier hs-var">idx</span></a></span><span>
+</span><span id="line-62"></span><span>  </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Mutable.html/Data.Vector.Mutable.html#read"><span class="hs-identifier hs-type">Mut.read</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490932"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490931"><span class="hs-identifier hs-type">idx</span></a></span><span>
 </span><span id="line-63"></span><span>
-</span><span id="line-64"></span><span id="local-6989586621679498244"><span id="local-6989586621679498245"><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#dequeTop"><span class="hs-identifier hs-type">dequeTop</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#M"><span class="hs-identifier hs-type">M</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498244"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498245"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498245"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
+</span><span id="line-64"></span><span id="local-6989586621679490934"><span id="local-6989586621679490935"><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#dequeTop"><span class="hs-identifier hs-type">dequeTop</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#M"><span class="hs-identifier hs-type">M</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490934"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490935"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490935"><span class="hs-identifier hs-type">a</span></a></span></span></span><span>
 </span><span id="line-65"></span><span id="dequeTop"><span class="annot"><span class="annottext">dequeTop :: forall s a. Int -&gt; M s a a
-</span><a href="HGeometry.ConvexHull.Melkman.html#dequeTop"><span class="hs-identifier hs-var hs-var">dequeTop</span></a></span></span><span> </span><span id="local-6989586621679498255"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498255"><span class="hs-identifier hs-var">idx</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-66"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679498256"><span class="annot"><span class="annottext">MVector s a
-</span><a href="#local-6989586621679498256"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679498257"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498257"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StateT (MVector s a, Int) (ST s) (MVector s a, Int)
+</span><a href="HGeometry.ConvexHull.Melkman.html#dequeTop"><span class="hs-identifier hs-var hs-var">dequeTop</span></a></span></span><span> </span><span id="local-6989586621679490945"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679490945"><span class="hs-identifier hs-var">idx</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679490946"><span class="annot"><a href="#local-6989586621679490946"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679490947"><span class="annot"><a href="#local-6989586621679490947"><span class="hs-identifier hs-var">f</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">StateT (MVector s a, Int) (ST s) (MVector s a, Int)
 forall s (m :: * -&gt; *). MonadState s m =&gt; m s
 </span><span class="hs-identifier hs-var">get</span></span><span>
-</span><span id="line-67"></span><span>  </span><span class="annot"><span class="annottext">MVector (PrimState (StateT (MVector s a, Int) (ST s))) a
--&gt; Int -&gt; M s a a
-forall (m :: * -&gt; *) a.
-PrimMonad m =&gt;
-MVector (PrimState m) a -&gt; Int -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.Mutable.html#read"><span class="hs-identifier hs-var">Mut.read</span></a></span><span> </span><span class="annot"><span class="annottext">MVector s a
-MVector (PrimState (StateT (MVector s a, Int) (ST s))) a
-</span><a href="#local-6989586621679498256"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498257"><span class="hs-identifier hs-var">f</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
-forall a. Num a =&gt; a -&gt; a -&gt; a
-</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498255"><span class="hs-identifier hs-var">idx</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
-forall a. Num a =&gt; a -&gt; a -&gt; a
-</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
-</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-67"></span><span>  </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.Mutable.html/Data.Vector.Mutable.html#read"><span class="hs-identifier hs-type">Mut.read</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490946"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679490947"><span class="hs-identifier hs-type">f</span></a></span><span class="annot"><span class="hs-glyph hs-type">-</span></span><span class="annot"><a href="#local-6989586621679490945"><span class="hs-identifier hs-type">idx</span></a></span><span class="annot"><span class="hs-glyph hs-type">-</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
 </span><span id="line-68"></span><span>
 </span><span id="line-69"></span><span class="hs-comment">-- Melkman's algorithm: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.512.9681&amp;rep=rep1&amp;type=pdf</span><span>
 </span><span id="line-70"></span><span>
 </span><span id="line-71"></span><span class="hs-comment">-- | \( O(n) \) Convex hull of a simple polygon.</span><span>
 </span><span id="line-72"></span><span class="hs-comment">--</span><span>
 </span><span id="line-73"></span><span class="hs-comment">--   For algorithmic details see: &lt;https://en.wikipedia.org/wiki/Convex_hull_of_a_simple_polygon&gt;</span><span>
-</span><span id="line-74"></span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#convexHull"><span class="hs-identifier hs-type">convexHull</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679497997"><span class="annot"><a href="#local-6989586621679497997"><span class="hs-identifier hs-type">polygon</span></a></span></span><span> </span><span id="local-6989586621679497998"><span class="annot"><a href="#local-6989586621679497998"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span id="local-6989586621679497999"><span class="annot"><a href="#local-6989586621679497999"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Class.html#Polygon_"><span class="hs-identifier hs-type">Polygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497997"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497998"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497999"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679497999"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679497999"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-75"></span><span>             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679497997"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Implementation.html#ConvexPolygon"><span class="hs-identifier hs-type">ConvexPolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497998"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-74"></span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#convexHull"><span class="hs-identifier hs-type">convexHull</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679490690"><span class="annot"><a href="#local-6989586621679490690"><span class="hs-identifier hs-type">polygon</span></a></span></span><span> </span><span id="local-6989586621679490691"><span class="annot"><a href="#local-6989586621679490691"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span id="local-6989586621679490692"><span class="annot"><a href="#local-6989586621679490692"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Class.html#Polygon_"><span class="hs-identifier hs-type">Polygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490690"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490691"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490692"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679490692"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679490692"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-75"></span><span>             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679490690"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Implementation.html#ConvexPolygon"><span class="hs-identifier hs-type">ConvexPolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490691"><span class="hs-identifier hs-type">point</span></a></span><span>
 </span><span id="line-76"></span><span id="convexHull"><span class="annot"><span class="annottext">convexHull :: forall polygon point r.
 (Polygon_ polygon point r, Ord r, Num r) =&gt;
 polygon -&gt; ConvexPolygon point
-</span><a href="HGeometry.ConvexHull.Melkman.html#convexHull"><span class="hs-identifier hs-var hs-var">convexHull</span></a></span></span><span> </span><span id="local-6989586621679498393"><span class="annot"><span class="annottext">polygon
-</span><a href="#local-6989586621679498393"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector point -&gt; ConvexPolygon point
+</span><a href="HGeometry.ConvexHull.Melkman.html#convexHull"><span class="hs-identifier hs-var hs-var">convexHull</span></a></span></span><span> </span><span id="local-6989586621679491076"><span class="annot"><span class="annottext">polygon
+</span><a href="#local-6989586621679491076"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector point -&gt; ConvexPolygon point
 forall simplePolygon point r (f :: * -&gt; *).
 (SimplePolygon_ simplePolygon point r, Foldable f) =&gt;
 f point -&gt; simplePolygon
@@ -256,7 +185,7 @@ forall (f :: * -&gt; *). Foldable f =&gt; f point -&gt; ConvexPolygon point
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(forall s. ST s (MVector s point)) -&gt; Vector point
 forall a. (forall s. ST s (MVector s a)) -&gt; Vector a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.html#create"><span class="hs-identifier hs-var">V.create</span></a></span><span> </span><span class="annot"><span class="annottext">((forall s. ST s (MVector s point)) -&gt; Vector point)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.html/Data.Vector.html#create"><span class="hs-identifier hs-var">V.create</span></a></span><span> </span><span class="annot"><span class="annottext">((forall s. ST s (MVector s point)) -&gt; Vector point)
 -&gt; (forall s. ST s (MVector s point)) -&gt; Vector point
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; M s point () -&gt; ST s (MVector s point)
@@ -265,48 +194,48 @@ forall s v. Int -&gt; M s v () -&gt; ST s (MVector s v)
 forall a. Vector a -&gt; Int
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
 </span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">Vector point
-</span><a href="#local-6989586621679498398"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(M s point () -&gt; ST s (MVector s point))
+</span><a href="#local-6989586621679491081"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(M s point () -&gt; ST s (MVector s point))
 -&gt; M s point () -&gt; ST s (MVector s point)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; M s point ()
 forall s. Int -&gt; M s point ()
-</span><a href="#local-6989586621679498399"><span class="hs-identifier hs-var">findStartingPoint</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679491082"><span class="hs-identifier hs-var">findStartingPoint</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">2</span></span><span>
 </span><span id="line-77"></span><span>  </span><span class="hs-keyword">where</span><span>
 </span><span id="line-78"></span><span>    </span><span class="hs-comment">-- Find the first spot where 0,n-1,n is not colinear.</span><span>
-</span><span id="line-79"></span><span>    </span><span id="local-6989586621679498093"><span class="annot"><a href="#local-6989586621679498399"><span class="hs-identifier hs-type">findStartingPoint</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#M"><span class="hs-identifier hs-type">M</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498093"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497998"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
-</span><span id="line-80"></span><span>    </span><span id="local-6989586621679498399"><span class="annot"><span class="annottext">findStartingPoint :: forall s. Int -&gt; M s point ()
-</span><a href="#local-6989586621679498399"><span class="hs-identifier hs-var hs-var">findStartingPoint</span></a></span></span><span> </span><span id="local-6989586621679498469"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498469"><span class="hs-identifier hs-var">nth</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-81"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679498470"><span class="annot"><span class="annottext">vPrev :: point
-</span><a href="#local-6989586621679498470"><span class="hs-identifier hs-var hs-var">vPrev</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector point
-</span><a href="#local-6989586621679498398"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">Vector point -&gt; Int -&gt; point
+</span><span id="line-79"></span><span>    </span><span id="local-6989586621679490783"><span class="annot"><a href="#local-6989586621679491082"><span class="hs-identifier hs-type">findStartingPoint</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#M"><span class="hs-identifier hs-type">M</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490783"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679490691"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-80"></span><span>    </span><span id="local-6989586621679491082"><span class="annot"><span class="annottext">findStartingPoint :: forall s. Int -&gt; M s point ()
+</span><a href="#local-6989586621679491082"><span class="hs-identifier hs-var hs-var">findStartingPoint</span></a></span></span><span> </span><span id="local-6989586621679491166"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679491166"><span class="hs-identifier hs-var">nth</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-81"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679491167"><span class="annot"><span class="annottext">vPrev :: point
+</span><a href="#local-6989586621679491167"><span class="hs-identifier hs-var hs-var">vPrev</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector point
+</span><a href="#local-6989586621679491081"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">Vector point -&gt; Int -&gt; point
 forall a. Vector a -&gt; Int -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.html#%21"><span class="hs-operator hs-var">V.!</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498469"><span class="hs-identifier hs-var">nth</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.html/Data.Vector.html#%21"><span class="hs-operator hs-var">V.!</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679491166"><span class="hs-identifier hs-var">nth</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
-</span><span id="line-82"></span><span>          </span><span id="local-6989586621679498472"><span class="annot"><span class="annottext">vNth :: point
-</span><a href="#local-6989586621679498472"><span class="hs-identifier hs-var hs-var">vNth</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector point
-</span><a href="#local-6989586621679498398"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">Vector point -&gt; Int -&gt; point
+</span><span id="line-82"></span><span>          </span><span id="local-6989586621679491169"><span class="annot"><span class="annottext">vNth :: point
+</span><a href="#local-6989586621679491169"><span class="hs-identifier hs-var hs-var">vNth</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector point
+</span><a href="#local-6989586621679491081"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">Vector point -&gt; Int -&gt; point
 forall a. Vector a -&gt; Int -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.html#%21"><span class="hs-operator hs-var">V.!</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498469"><span class="hs-identifier hs-var">nth</span></a></span><span>
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.html/Data.Vector.html#%21"><span class="hs-operator hs-var">V.!</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679491166"><span class="hs-identifier hs-var">nth</span></a></span><span>
 </span><span id="line-83"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; point -&gt; CCW
 forall point r point' point''.
 (Point_ point 2 r, Point_ point' 2 r, Point_ point'' 2 r, Num r,
  Ord r) =&gt;
 point -&gt; point' -&gt; point'' -&gt; CCW
 </span><span class="hs-identifier hs-var">ccw</span></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498474"><span class="hs-identifier hs-var">v1</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498470"><span class="hs-identifier hs-var">vPrev</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498472"><span class="hs-identifier hs-var">vNth</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679491171"><span class="hs-identifier hs-var">v1</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679491167"><span class="hs-identifier hs-var">vPrev</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679491169"><span class="hs-identifier hs-var">vNth</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-84"></span><span>        </span><span class="annot"><span class="annottext">CCW
 </span><span class="hs-identifier hs-var">CoLinear</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; M s point ()
 forall s. Int -&gt; M s point ()
-</span><a href="#local-6989586621679498399"><span class="hs-identifier hs-var">findStartingPoint</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498469"><span class="hs-identifier hs-var">nth</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621679491082"><span class="hs-identifier hs-var">findStartingPoint</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679491166"><span class="hs-identifier hs-var">nth</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
@@ -315,7 +244,7 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span id="line-86"></span><span>          </span><span class="annot"><span class="annottext">point -&gt; M s point ()
 forall a s. a -&gt; M s a ()
 </span><a href="HGeometry.ConvexHull.Melkman.html#dequePush"><span class="hs-identifier hs-var">dequePush</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498474"><span class="hs-identifier hs-var">v1</span></a></span><span> </span><span class="annot"><span class="annottext">M s point () -&gt; M s point () -&gt; M s point ()
+</span><a href="#local-6989586621679491171"><span class="hs-identifier hs-var">v1</span></a></span><span> </span><span class="annot"><span class="annottext">M s point () -&gt; M s point () -&gt; M s point ()
 forall a b.
 StateT (MVector s point, Int) (ST s) a
 -&gt; StateT (MVector s point, Int) (ST s) b
@@ -324,35 +253,35 @@ forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; m b -&gt; m b
 </span><span class="hs-operator hs-var">&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">point -&gt; M s point ()
 forall a s. a -&gt; M s a ()
 </span><a href="HGeometry.ConvexHull.Melkman.html#dequePush"><span class="hs-identifier hs-var">dequePush</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498470"><span class="hs-identifier hs-var">vPrev</span></a></span><span>
+</span><a href="#local-6989586621679491167"><span class="hs-identifier hs-var">vPrev</span></a></span><span>
 </span><span id="line-87"></span><span>          </span><span class="annot"><span class="annottext">point -&gt; M s point ()
 forall a s. a -&gt; M s a ()
 </span><a href="HGeometry.ConvexHull.Melkman.html#dequePush"><span class="hs-identifier hs-var">dequePush</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498472"><span class="hs-identifier hs-var">vNth</span></a></span><span class="hs-special">;</span><span> </span><span class="annot"><span class="annottext">point -&gt; M s point ()
+</span><a href="#local-6989586621679491169"><span class="hs-identifier hs-var">vNth</span></a></span><span class="hs-special">;</span><span> </span><span class="annot"><span class="annottext">point -&gt; M s point ()
 forall a s. a -&gt; M s a ()
 </span><a href="HGeometry.ConvexHull.Melkman.html#dequeInsert"><span class="hs-identifier hs-var">dequeInsert</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498472"><span class="hs-identifier hs-var">vNth</span></a></span><span>
+</span><a href="#local-6989586621679491169"><span class="hs-identifier hs-var">vNth</span></a></span><span>
 </span><span id="line-88"></span><span>          </span><span class="annot"><span class="annottext">(point -&gt; M s point ()) -&gt; Vector point -&gt; M s point ()
 forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; Vector a -&gt; m ()
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.html#mapM_"><span class="hs-identifier hs-var">V.mapM_</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; M s point ()
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.html/Data.Vector.html#mapM_"><span class="hs-identifier hs-var">V.mapM_</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; M s point ()
 forall {t} {s}.
 (Dimension t ~ 2, Point_ t 2 (NumType t), Num (NumType t),
  Ord (NumType t)) =&gt;
 t -&gt; StateT (MVector s t, Int) (ST s) ()
-</span><a href="#local-6989586621679498478"><span class="hs-identifier hs-var">build</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Vector point -&gt; Vector point
+</span><a href="#local-6989586621679491175"><span class="hs-identifier hs-var">build</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Vector point -&gt; Vector point
 forall a. Int -&gt; Vector a -&gt; Vector a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.html#drop"><span class="hs-identifier hs-var">V.drop</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498469"><span class="hs-identifier hs-var">nth</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.html/Data.Vector.html#drop"><span class="hs-identifier hs-var">V.drop</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679491166"><span class="hs-identifier hs-var">nth</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector point
-</span><a href="#local-6989586621679498398"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679491081"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-89"></span><span>        </span><span class="annot"><span class="annottext">CCW
 </span><span class="hs-identifier hs-var">CW</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-90"></span><span>          </span><span class="annot"><span class="annottext">point -&gt; M s point ()
 forall a s. a -&gt; M s a ()
 </span><a href="HGeometry.ConvexHull.Melkman.html#dequePush"><span class="hs-identifier hs-var">dequePush</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498470"><span class="hs-identifier hs-var">vPrev</span></a></span><span> </span><span class="annot"><span class="annottext">M s point () -&gt; M s point () -&gt; M s point ()
+</span><a href="#local-6989586621679491167"><span class="hs-identifier hs-var">vPrev</span></a></span><span> </span><span class="annot"><span class="annottext">M s point () -&gt; M s point () -&gt; M s point ()
 forall a b.
 StateT (MVector s point, Int) (ST s) a
 -&gt; StateT (MVector s point, Int) (ST s) b
@@ -361,45 +290,45 @@ forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; m b -&gt; m b
 </span><span class="hs-operator hs-var">&gt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">point -&gt; M s point ()
 forall a s. a -&gt; M s a ()
 </span><a href="HGeometry.ConvexHull.Melkman.html#dequePush"><span class="hs-identifier hs-var">dequePush</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498474"><span class="hs-identifier hs-var">v1</span></a></span><span>
+</span><a href="#local-6989586621679491171"><span class="hs-identifier hs-var">v1</span></a></span><span>
 </span><span id="line-91"></span><span>          </span><span class="annot"><span class="annottext">point -&gt; M s point ()
 forall a s. a -&gt; M s a ()
 </span><a href="HGeometry.ConvexHull.Melkman.html#dequePush"><span class="hs-identifier hs-var">dequePush</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498472"><span class="hs-identifier hs-var">vNth</span></a></span><span class="hs-special">;</span><span> </span><span class="annot"><span class="annottext">point -&gt; M s point ()
+</span><a href="#local-6989586621679491169"><span class="hs-identifier hs-var">vNth</span></a></span><span class="hs-special">;</span><span> </span><span class="annot"><span class="annottext">point -&gt; M s point ()
 forall a s. a -&gt; M s a ()
 </span><a href="HGeometry.ConvexHull.Melkman.html#dequeInsert"><span class="hs-identifier hs-var">dequeInsert</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498472"><span class="hs-identifier hs-var">vNth</span></a></span><span>
+</span><a href="#local-6989586621679491169"><span class="hs-identifier hs-var">vNth</span></a></span><span>
 </span><span id="line-92"></span><span>          </span><span class="annot"><span class="annottext">(point -&gt; M s point ()) -&gt; Vector point -&gt; M s point ()
 forall (m :: * -&gt; *) a b. Monad m =&gt; (a -&gt; m b) -&gt; Vector a -&gt; m ()
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.html#mapM_"><span class="hs-identifier hs-var">V.mapM_</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; M s point ()
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.html/Data.Vector.html#mapM_"><span class="hs-identifier hs-var">V.mapM_</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; M s point ()
 forall {t} {s}.
 (Dimension t ~ 2, Point_ t 2 (NumType t), Num (NumType t),
  Ord (NumType t)) =&gt;
 t -&gt; StateT (MVector s t, Int) (ST s) ()
-</span><a href="#local-6989586621679498478"><span class="hs-identifier hs-var">build</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Vector point -&gt; Vector point
+</span><a href="#local-6989586621679491175"><span class="hs-identifier hs-var">build</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; Vector point -&gt; Vector point
 forall a. Int -&gt; Vector a -&gt; Vector a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.html#drop"><span class="hs-identifier hs-var">V.drop</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679498469"><span class="hs-identifier hs-var">nth</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.html/Data.Vector.html#drop"><span class="hs-identifier hs-var">V.drop</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679491166"><span class="hs-identifier hs-var">nth</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector point
-</span><a href="#local-6989586621679498398"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679491081"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-93"></span><span>
-</span><span id="line-94"></span><span>    </span><span id="local-6989586621679498474"><span class="annot"><span class="annottext">v1 :: point
-</span><a href="#local-6989586621679498474"><span class="hs-identifier hs-var hs-var">v1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector point
-</span><a href="#local-6989586621679498398"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">Vector point -&gt; Int -&gt; point
+</span><span id="line-94"></span><span>    </span><span id="local-6989586621679491171"><span class="annot"><span class="annottext">v1 :: point
+</span><a href="#local-6989586621679491171"><span class="hs-identifier hs-var hs-var">v1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector point
+</span><a href="#local-6989586621679491081"><span class="hs-identifier hs-var">vs</span></a></span><span> </span><span class="annot"><span class="annottext">Vector point -&gt; Int -&gt; point
 forall a. Vector a -&gt; Int -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.html#%21"><span class="hs-operator hs-var">V.!</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.html/Data.Vector.html#%21"><span class="hs-operator hs-var">V.!</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span>
-</span><span id="line-95"></span><span>    </span><span id="local-6989586621679498398"><span class="annot"><span class="annottext">vs :: Vector point
-</span><a href="#local-6989586621679498398"><span class="hs-identifier hs-var hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[point] -&gt; Vector point
+</span><span id="line-95"></span><span>    </span><span id="local-6989586621679491081"><span class="annot"><span class="annottext">vs :: Vector point
+</span><a href="#local-6989586621679491081"><span class="hs-identifier hs-var hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[point] -&gt; Vector point
 forall a. [a] -&gt; Vector a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/vector-0.13.1.0-29d63c43381c98813efe04876e9ecdc0f12f411fd574c0bcbf808e7a8274dea3/share/doc/html/src/Data.Vector.html#fromList"><span class="hs-identifier hs-var">V.fromList</span></a></span><span> </span><span class="annot"><span class="annottext">([point] -&gt; Vector point) -&gt; [point] -&gt; Vector point
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.1.0-bf0f18a3eeccc5967610b39419dd0b125bc2a02f2f2e142ce44a3540e12b36d0/share/doc/html/src/Data.Vector.html/Data.Vector.html#fromList"><span class="hs-identifier hs-var">V.fromList</span></a></span><span> </span><span class="annot"><span class="annottext">([point] -&gt; Vector point) -&gt; [point] -&gt; Vector point
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">polygon
-</span><a href="#local-6989586621679498393"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">polygon -&gt; Getting (Endo [point]) polygon point -&gt; [point]
+</span><a href="#local-6989586621679491076"><span class="hs-identifier hs-var">pg</span></a></span><span class="annot"><span class="annottext">polygon -&gt; Getting (Endo [point]) polygon point -&gt; [point]
 forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
-</span><a href="file:///home/runner/.cabal/store/ghc-9.6.4/lens-5.3.2-265367c874810d7a66f414a6092805a8af4d20ea822a9817a85a455b1e9e2700/share/doc/html/src/Control.Lens.Fold.html#%5E.."><span class="hs-operator hs-var">^..</span></a></span><span class="annot"><span class="annottext">Getting (Endo [point]) polygon point
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-ad4ffa0d8fed99eb0a82e7ae6f92f74beeaf04ae23235424b0e62e87c817fcef/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#%5E.."><span class="hs-operator hs-var">^..</span></a></span><span class="annot"><span class="annottext">Getting (Endo [point]) polygon point
 (Vertex polygon -&gt; Const (Endo [point]) (Vertex polygon))
 -&gt; polygon -&gt; Const (Endo [point]) polygon
 forall polygon.
@@ -410,11 +339,10 @@ IndexedTraversal1' (VertexIx polygon) polygon (Vertex polygon)
 </span><span id="line-96"></span><span>
 </span><span id="line-97"></span><span>
 </span><span id="line-98"></span><span>
-</span><span id="line-99"></span><span>    </span><span id="local-6989586621679498478"><span class="annot"><span class="annottext">build :: t -&gt; StateT (MVector s t, Int) (ST s) ()
-</span><a href="#local-6989586621679498478"><span class="hs-identifier hs-var hs-var">build</span></a></span></span><span> </span><span id="local-6989586621679498689"><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679498689"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-100"></span><span>      </span><span id="local-6989586621679498690"><span class="annot"><span class="annottext">CCW
-</span><a href="#local-6989586621679498690"><span class="hs-identifier hs-var">botTurn</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">t -&gt; t -&gt; t -&gt; CCW
+</span><span id="line-99"></span><span>    </span><span id="local-6989586621679491175"><span class="annot"><span class="annottext">build :: t -&gt; StateT (MVector s t, Int) (ST s) ()
+</span><a href="#local-6989586621679491175"><span class="hs-identifier hs-var hs-var">build</span></a></span></span><span> </span><span id="local-6989586621679491386"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679491386"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-100"></span><span>      </span><span id="local-6989586621679491387"><span class="annot"><a href="#local-6989586621679491387"><span class="hs-identifier hs-var">botTurn</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">t -&gt; t -&gt; t -&gt; CCW
 forall point r point' point''.
 (Point_ point 2 r, Point_ point' 2 r, Point_ point'' 2 r, Num r,
  Ord r) =&gt;
@@ -427,7 +355,7 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 forall a. a -&gt; StateT (MVector s t, Int) (ST s) a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679498689"><span class="hs-identifier hs-var">v</span></a></span><span>     </span><span class="annot"><span class="annottext">StateT (MVector s t, Int) (ST s) (t -&gt; t -&gt; CCW)
+</span><a href="#local-6989586621679491386"><span class="hs-identifier hs-var">v</span></a></span><span>     </span><span class="annot"><span class="annottext">StateT (MVector s t, Int) (ST s) (t -&gt; t -&gt; CCW)
 -&gt; StateT (MVector s t, Int) (ST s) t
 -&gt; StateT (MVector s t, Int) (ST s) (t -&gt; CCW)
 forall a b.
@@ -450,89 +378,14 @@ forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f
 forall s a. Int -&gt; M s a a
 </span><a href="HGeometry.ConvexHull.Melkman.html#dequeBottom"><span class="hs-identifier hs-var">dequeBottom</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span>
-</span><span id="line-101"></span><span>      </span><span id="local-6989586621679498692"><span class="annot"><span class="annottext">CCW
-</span><a href="#local-6989586621679498692"><span class="hs-identifier hs-var">topTurn</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">t -&gt; t -&gt; t -&gt; CCW
-forall point r point' point''.
-(Point_ point 2 r, Point_ point' 2 r, Point_ point'' 2 r, Num r,
- Ord r) =&gt;
-point -&gt; point' -&gt; point'' -&gt; CCW
-</span><span class="hs-identifier hs-var">ccw</span></span><span> </span><span class="annot"><span class="annottext">(t -&gt; t -&gt; t -&gt; CCW)
--&gt; StateT (MVector s t, Int) (ST s) t
--&gt; StateT (MVector s t, Int) (ST s) (t -&gt; t -&gt; CCW)
-forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; StateT (MVector s t, Int) (ST s) t
-forall s a. Int -&gt; M s a a
-</span><a href="HGeometry.ConvexHull.Melkman.html#dequeTop"><span class="hs-identifier hs-var">dequeTop</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">StateT (MVector s t, Int) (ST s) (t -&gt; t -&gt; CCW)
--&gt; StateT (MVector s t, Int) (ST s) t
--&gt; StateT (MVector s t, Int) (ST s) (t -&gt; CCW)
-forall a b.
-StateT (MVector s t, Int) (ST s) (a -&gt; b)
--&gt; StateT (MVector s t, Int) (ST s) a
--&gt; StateT (MVector s t, Int) (ST s) b
-forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; StateT (MVector s t, Int) (ST s) t
-forall s a. Int -&gt; M s a a
-</span><a href="HGeometry.ConvexHull.Melkman.html#dequeTop"><span class="hs-identifier hs-var">dequeTop</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><span class="hs-number">0</span></span><span>    </span><span class="annot"><span class="annottext">StateT (MVector s t, Int) (ST s) (t -&gt; CCW)
--&gt; StateT (MVector s t, Int) (ST s) t
--&gt; StateT (MVector s t, Int) (ST s) CCW
-forall a b.
-StateT (MVector s t, Int) (ST s) (a -&gt; b)
--&gt; StateT (MVector s t, Int) (ST s) a
--&gt; StateT (MVector s t, Int) (ST s) b
-forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">t -&gt; StateT (MVector s t, Int) (ST s) t
-forall a. a -&gt; StateT (MVector s t, Int) (ST s) a
-forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
-</span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679498689"><span class="hs-identifier hs-var">v</span></a></span><span>
-</span><span id="line-102"></span><span>      </span><span class="annot"><span class="annottext">Bool
--&gt; StateT (MVector s t, Int) (ST s) ()
--&gt; StateT (MVector s t, Int) (ST s) ()
-forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
-</span><span class="hs-identifier hs-var">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CCW
-</span><a href="#local-6989586621679498690"><span class="hs-identifier hs-var">botTurn</span></a></span><span> </span><span class="annot"><span class="annottext">CCW -&gt; CCW -&gt; Bool
-forall a. Eq a =&gt; a -&gt; a -&gt; Bool
-</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">CCW
-</span><span class="hs-identifier hs-var">CW</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
-</span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">CCW
-</span><a href="#local-6989586621679498692"><span class="hs-identifier hs-var">topTurn</span></a></span><span> </span><span class="annot"><span class="annottext">CCW -&gt; CCW -&gt; Bool
-forall a. Eq a =&gt; a -&gt; a -&gt; Bool
-</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">CCW
-</span><span class="hs-identifier hs-var">CW</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(StateT (MVector s t, Int) (ST s) ()
- -&gt; StateT (MVector s t, Int) (ST s) ())
--&gt; StateT (MVector s t, Int) (ST s) ()
--&gt; StateT (MVector s t, Int) (ST s) ()
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-103"></span><span>        </span><span class="annot"><span class="annottext">t -&gt; StateT (MVector s t, Int) (ST s) ()
-forall {a} {t} {s}.
-(Dimension a ~ 2, Dimension t ~ 2, NumType t ~ NumType a,
- Point_ a 2 (NumType a), Point_ t 2 (NumType a), Num (NumType a),
- Ord (NumType a)) =&gt;
-t -&gt; StateT (MVector s a, Int) (ST s) ()
-</span><a href="#local-6989586621679498695"><span class="hs-identifier hs-var">backtrackTop</span></a></span><span> </span><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679498689"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">;</span><span> </span><span class="annot"><span class="annottext">t -&gt; StateT (MVector s t, Int) (ST s) ()
-forall a s. a -&gt; M s a ()
-</span><a href="HGeometry.ConvexHull.Melkman.html#dequePush"><span class="hs-identifier hs-var">dequePush</span></a></span><span> </span><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679498689"><span class="hs-identifier hs-var">v</span></a></span><span>
-</span><span id="line-104"></span><span>        </span><span class="annot"><span class="annottext">t -&gt; StateT (MVector s t, Int) (ST s) ()
-forall {t} {a} {s}.
-(Dimension t ~ 2, Dimension a ~ 2, NumType a ~ NumType t,
- Point_ t 2 (NumType t), Point_ a 2 (NumType t), Num (NumType t),
- Ord (NumType t)) =&gt;
-t -&gt; StateT (MVector s a, Int) (ST s) ()
-</span><a href="#local-6989586621679498696"><span class="hs-identifier hs-var">backtrackBot</span></a></span><span> </span><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679498689"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">;</span><span> </span><span class="annot"><span class="annottext">t -&gt; StateT (MVector s t, Int) (ST s) ()
-forall a s. a -&gt; M s a ()
-</span><a href="HGeometry.ConvexHull.Melkman.html#dequeInsert"><span class="hs-identifier hs-var">dequeInsert</span></a></span><span> </span><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679498689"><span class="hs-identifier hs-var">v</span></a></span><span>
-</span><span id="line-105"></span><span>    </span><span id="local-6989586621679498695"><span class="annot"><span class="annottext">backtrackTop :: t -&gt; StateT (MVector s a, Int) (ST s) ()
-</span><a href="#local-6989586621679498695"><span class="hs-identifier hs-var hs-var">backtrackTop</span></a></span></span><span> </span><span id="local-6989586621679498831"><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679498831"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-106"></span><span>      </span><span id="local-6989586621679498832"><span class="annot"><span class="annottext">CCW
-</span><a href="#local-6989586621679498832"><span class="hs-identifier hs-var">turn</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; t -&gt; CCW
+</span><span id="line-101"></span><span>      </span><span id="local-6989586621679491389"><span class="annot"><a href="#local-6989586621679491389"><span class="hs-identifier hs-var">topTurn</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ccw</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;$&gt;</span></span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#dequeTop"><span class="hs-identifier hs-type">dequeTop</span></a></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;*&gt;</span></span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#dequeTop"><span class="hs-identifier hs-type">dequeTop</span></a></span><span> </span><span class="annot"><span class="hs-number">0</span></span><span>    </span><span class="annot"><span class="hs-operator hs-type">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><a href="#local-6989586621679491386"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-102"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">when</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679491387"><span class="hs-identifier hs-type">botTurn</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">==</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">CW</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">||</span></span><span> </span><span class="annot"><a href="#local-6989586621679491389"><span class="hs-identifier hs-type">topTurn</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">==</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">CW</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-103"></span><span>        </span><span class="annot"><a href="#local-6989586621679491392"><span class="hs-identifier hs-type">backtrackTop</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679491386"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">;</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#dequePush"><span class="hs-identifier hs-type">dequePush</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679491386"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-104"></span><span>        </span><span class="annot"><a href="#local-6989586621679491393"><span class="hs-identifier hs-type">backtrackBot</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679491386"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">;</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#dequeInsert"><span class="hs-identifier hs-type">dequeInsert</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679491386"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-105"></span><span>    </span><span id="local-6989586621679491392"><span class="annot"><span class="annottext">backtrackTop :: t -&gt; StateT (MVector s a, Int) (ST s) ()
+</span><a href="#local-6989586621679491392"><span class="hs-identifier hs-var hs-var">backtrackTop</span></a></span></span><span> </span><span id="local-6989586621679491528"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679491528"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-106"></span><span>      </span><span id="local-6989586621679491529"><span class="annot"><a href="#local-6989586621679491529"><span class="hs-identifier hs-var">turn</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; t -&gt; CCW
 forall point r point' point''.
 (Point_ point 2 r, Point_ point' 2 r, Point_ point'' 2 r, Num r,
  Ord r) =&gt;
@@ -567,32 +420,14 @@ forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f
 forall a. a -&gt; StateT (MVector s a, Int) (ST s) a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679498831"><span class="hs-identifier hs-var">v</span></a></span><span>
-</span><span id="line-107"></span><span>      </span><span class="annot"><span class="annottext">Bool
--&gt; StateT (MVector s a, Int) (ST s) ()
--&gt; StateT (MVector s a, Int) (ST s) ()
-forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
-</span><span class="hs-identifier hs-var">unless</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CCW
-</span><a href="#local-6989586621679498832"><span class="hs-identifier hs-var">turn</span></a></span><span> </span><span class="annot"><span class="annottext">CCW -&gt; CCW -&gt; Bool
-forall a. Eq a =&gt; a -&gt; a -&gt; Bool
-</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">CCW
-</span><span class="hs-identifier hs-var">CCW</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(StateT (MVector s a, Int) (ST s) ()
- -&gt; StateT (MVector s a, Int) (ST s) ())
--&gt; StateT (MVector s a, Int) (ST s) ()
--&gt; StateT (MVector s a, Int) (ST s) ()
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-108"></span><span>        </span><span class="annot"><span class="annottext">StateT (MVector s a, Int) (ST s) ()
-forall s a. M s a ()
-</span><a href="HGeometry.ConvexHull.Melkman.html#dequePop"><span class="hs-identifier hs-var">dequePop</span></a></span><span>
-</span><span id="line-109"></span><span>        </span><span class="annot"><span class="annottext">t -&gt; StateT (MVector s a, Int) (ST s) ()
-</span><a href="#local-6989586621679498695"><span class="hs-identifier hs-var">backtrackTop</span></a></span><span> </span><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679498831"><span class="hs-identifier hs-var">v</span></a></span><span>
-</span><span id="line-110"></span><span>    </span><span id="local-6989586621679498696"><span class="annot"><span class="annottext">backtrackBot :: t -&gt; StateT (MVector s a, Int) (ST s) ()
-</span><a href="#local-6989586621679498696"><span class="hs-identifier hs-var hs-var">backtrackBot</span></a></span></span><span> </span><span id="local-6989586621679498968"><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679498968"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-111"></span><span>      </span><span id="local-6989586621679498969"><span class="annot"><span class="annottext">CCW
-</span><a href="#local-6989586621679498969"><span class="hs-identifier hs-var">turn</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">t -&gt; a -&gt; a -&gt; CCW
+</span><a href="#local-6989586621679491528"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-107"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">unless</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679491529"><span class="hs-identifier hs-type">turn</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">==</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">CCW</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-108"></span><span>        </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#dequePop"><span class="hs-identifier hs-type">dequePop</span></a></span><span>
+</span><span id="line-109"></span><span>        </span><span class="annot"><a href="#local-6989586621679491392"><span class="hs-identifier hs-type">backtrackTop</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679491528"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-110"></span><span>    </span><span id="local-6989586621679491393"><span class="annot"><span class="annottext">backtrackBot :: t -&gt; StateT (MVector s a, Int) (ST s) ()
+</span><a href="#local-6989586621679491393"><span class="hs-identifier hs-var hs-var">backtrackBot</span></a></span></span><span> </span><span id="local-6989586621679491665"><span class="annot"><span class="annottext">t
+</span><a href="#local-6989586621679491665"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-111"></span><span>      </span><span id="local-6989586621679491666"><span class="annot"><a href="#local-6989586621679491666"><span class="hs-identifier hs-var">turn</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">t -&gt; a -&gt; a -&gt; CCW
 forall point r point' point''.
 (Point_ point 2 r, Point_ point' 2 r, Point_ point'' 2 r, Num r,
  Ord r) =&gt;
@@ -605,7 +440,7 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 forall a. a -&gt; StateT (MVector s a, Int) (ST s) a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679498968"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">StateT (MVector s a, Int) (ST s) (a -&gt; a -&gt; CCW)
+</span><a href="#local-6989586621679491665"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">StateT (MVector s a, Int) (ST s) (a -&gt; a -&gt; CCW)
 -&gt; StateT (MVector s a, Int) (ST s) a
 -&gt; StateT (MVector s a, Int) (ST s) (a -&gt; CCW)
 forall a b.
@@ -628,24 +463,7 @@ forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f
 forall s a. Int -&gt; M s a a
 </span><a href="HGeometry.ConvexHull.Melkman.html#dequeBottom"><span class="hs-identifier hs-var">dequeBottom</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span>
-</span><span id="line-112"></span><span>      </span><span class="annot"><span class="annottext">Bool
--&gt; StateT (MVector s a, Int) (ST s) ()
--&gt; StateT (MVector s a, Int) (ST s) ()
-forall (f :: * -&gt; *). Applicative f =&gt; Bool -&gt; f () -&gt; f ()
-</span><span class="hs-identifier hs-var">unless</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CCW
-</span><a href="#local-6989586621679498969"><span class="hs-identifier hs-var">turn</span></a></span><span> </span><span class="annot"><span class="annottext">CCW -&gt; CCW -&gt; Bool
-forall a. Eq a =&gt; a -&gt; a -&gt; Bool
-</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">CCW
-</span><span class="hs-identifier hs-var">CCW</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(StateT (MVector s a, Int) (ST s) ()
- -&gt; StateT (MVector s a, Int) (ST s) ())
--&gt; StateT (MVector s a, Int) (ST s) ()
--&gt; StateT (MVector s a, Int) (ST s) ()
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-113"></span><span>        </span><span class="annot"><span class="annottext">StateT (MVector s a, Int) (ST s) ()
-forall s a. M s a ()
-</span><a href="HGeometry.ConvexHull.Melkman.html#dequeRemove"><span class="hs-identifier hs-var">dequeRemove</span></a></span><span>
-</span><span id="line-114"></span><span>        </span><span class="annot"><span class="annottext">t -&gt; StateT (MVector s a, Int) (ST s) ()
-</span><a href="#local-6989586621679498696"><span class="hs-identifier hs-var">backtrackBot</span></a></span><span> </span><span class="annot"><span class="annottext">t
-</span><a href="#local-6989586621679498968"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-112"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">unless</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679491666"><span class="hs-identifier hs-type">turn</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">==</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">CCW</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-113"></span><span>        </span><span class="annot"><a href="HGeometry.ConvexHull.Melkman.html#dequeRemove"><span class="hs-identifier hs-type">dequeRemove</span></a></span><span>
+</span><span id="line-114"></span><span>        </span><span class="annot"><a href="#local-6989586621679491393"><span class="hs-identifier hs-type">backtrackBot</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679491665"><span class="hs-identifier hs-type">v</span></a></span><span>
 </span><span id="line-115"></span></pre></body></html>

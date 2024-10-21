@@ -13,7 +13,7 @@
 --   are constructed in such a way that while ghc-pkg depends on Cabal, the
 --   GHC library and program do not have to depend on Cabal.
 @package ghc-boot
-@version 9.6.4
+@version 9.10.1
 
 
 -- | Note [Base Dir] ~~~~~~~~~~~~~~~~~ GHC's base directory or top
@@ -51,13 +51,13 @@ addToSS :: SizedSeq a -> a -> SizedSeq a
 addListToSS :: SizedSeq a -> [a] -> SizedSeq a
 ssElts :: SizedSeq a -> [a]
 sizeSS :: SizedSeq a -> Word
-instance GHC.Show.Show a => GHC.Show.Show (GHC.Data.SizedSeq.SizedSeq a)
-instance GHC.Generics.Generic (GHC.Data.SizedSeq.SizedSeq a)
-instance GHC.Base.Functor GHC.Data.SizedSeq.SizedSeq
-instance Data.Foldable.Foldable GHC.Data.SizedSeq.SizedSeq
-instance Data.Traversable.Traversable GHC.Data.SizedSeq.SizedSeq
 instance Data.Binary.Class.Binary a => Data.Binary.Class.Binary (GHC.Data.SizedSeq.SizedSeq a)
+instance GHC.Internal.Data.Foldable.Foldable GHC.Data.SizedSeq.SizedSeq
+instance GHC.Internal.Base.Functor GHC.Data.SizedSeq.SizedSeq
+instance GHC.Internal.Generics.Generic (GHC.Data.SizedSeq.SizedSeq a)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (GHC.Data.SizedSeq.SizedSeq a)
+instance GHC.Internal.Show.Show a => GHC.Internal.Show.Show (GHC.Data.SizedSeq.SizedSeq a)
+instance GHC.Internal.Data.Traversable.Traversable GHC.Data.SizedSeq.SizedSeq
 
 
 -- | See <tt>GHC.LanguageExtensions</tt> for an explanation on why this is
@@ -86,124 +86,6 @@ configureHandleEncoding :: IO ()
 module GHC.LanguageExtensions
 instance Data.Binary.Class.Binary GHC.LanguageExtensions.Type.Extension
 
-
--- | Platform architecture and OS
---   
---   We need it in ghc-boot because ghc-pkg needs it.
-module GHC.Platform.ArchOS
-
--- | Platform architecture and OS.
-data ArchOS
-ArchOS :: Arch -> OS -> ArchOS
-[archOS_arch] :: ArchOS -> Arch
-[archOS_OS] :: ArchOS -> OS
-
--- | Architectures
---   
---   TODO: It might be nice to extend these constructors with information
---   about what instruction set extensions an architecture might support.
-data Arch
-ArchUnknown :: Arch
-ArchX86 :: Arch
-ArchX86_64 :: Arch
-ArchPPC :: Arch
-ArchPPC_64 :: PPC_64ABI -> Arch
-ArchS390X :: Arch
-ArchARM :: ArmISA -> [ArmISAExt] -> ArmABI -> Arch
-ArchAArch64 :: Arch
-ArchAlpha :: Arch
-ArchMipseb :: Arch
-ArchMipsel :: Arch
-ArchRISCV64 :: Arch
-ArchLoongArch64 :: Arch
-ArchJavaScript :: Arch
-ArchWasm32 :: Arch
-
--- | Operating systems.
---   
---   Using OSUnknown to generate code should produce a sensible default,
---   but no promises.
-data OS
-OSUnknown :: OS
-OSLinux :: OS
-OSDarwin :: OS
-OSSolaris2 :: OS
-OSMinGW32 :: OS
-OSFreeBSD :: OS
-OSDragonFly :: OS
-OSOpenBSD :: OS
-OSNetBSD :: OS
-OSKFreeBSD :: OS
-OSHaiku :: OS
-OSQNXNTO :: OS
-OSAIX :: OS
-OSHurd :: OS
-OSWasi :: OS
-OSGhcjs :: OS
-
--- | ARM Instruction Set Architecture
-data ArmISA
-ARMv5 :: ArmISA
-ARMv6 :: ArmISA
-ARMv7 :: ArmISA
-
--- | ARM extensions
-data ArmISAExt
-VFPv2 :: ArmISAExt
-VFPv3 :: ArmISAExt
-VFPv3D16 :: ArmISAExt
-NEON :: ArmISAExt
-IWMMX2 :: ArmISAExt
-
--- | ARM ABI
-data ArmABI
-SOFT :: ArmABI
-SOFTFP :: ArmABI
-HARD :: ArmABI
-
--- | PowerPC 64-bit ABI
-data PPC_64ABI
-
--- | PowerPC64
-ELF_V1 :: PPC_64ABI
-
--- | PowerPC64 LE
-ELF_V2 :: PPC_64ABI
-
--- | See Note [Platform Syntax].
-stringEncodeArch :: Arch -> String
-
--- | See Note [Platform Syntax].
-stringEncodeOS :: OS -> String
-instance GHC.Classes.Ord GHC.Platform.ArchOS.ArmISA
-instance GHC.Classes.Eq GHC.Platform.ArchOS.ArmISA
-instance GHC.Show.Show GHC.Platform.ArchOS.ArmISA
-instance GHC.Read.Read GHC.Platform.ArchOS.ArmISA
-instance GHC.Classes.Ord GHC.Platform.ArchOS.ArmISAExt
-instance GHC.Classes.Eq GHC.Platform.ArchOS.ArmISAExt
-instance GHC.Show.Show GHC.Platform.ArchOS.ArmISAExt
-instance GHC.Read.Read GHC.Platform.ArchOS.ArmISAExt
-instance GHC.Classes.Ord GHC.Platform.ArchOS.ArmABI
-instance GHC.Classes.Eq GHC.Platform.ArchOS.ArmABI
-instance GHC.Show.Show GHC.Platform.ArchOS.ArmABI
-instance GHC.Read.Read GHC.Platform.ArchOS.ArmABI
-instance GHC.Classes.Ord GHC.Platform.ArchOS.PPC_64ABI
-instance GHC.Classes.Eq GHC.Platform.ArchOS.PPC_64ABI
-instance GHC.Show.Show GHC.Platform.ArchOS.PPC_64ABI
-instance GHC.Read.Read GHC.Platform.ArchOS.PPC_64ABI
-instance GHC.Classes.Ord GHC.Platform.ArchOS.Arch
-instance GHC.Classes.Eq GHC.Platform.ArchOS.Arch
-instance GHC.Show.Show GHC.Platform.ArchOS.Arch
-instance GHC.Read.Read GHC.Platform.ArchOS.Arch
-instance GHC.Classes.Ord GHC.Platform.ArchOS.OS
-instance GHC.Classes.Eq GHC.Platform.ArchOS.OS
-instance GHC.Show.Show GHC.Platform.ArchOS.OS
-instance GHC.Read.Read GHC.Platform.ArchOS.OS
-instance GHC.Classes.Ord GHC.Platform.ArchOS.ArchOS
-instance GHC.Classes.Eq GHC.Platform.ArchOS.ArchOS
-instance GHC.Show.Show GHC.Platform.ArchOS.ArchOS
-instance GHC.Read.Read GHC.Platform.ArchOS.ArchOS
-
 module GHC.Platform.Host
 hostPlatformArch :: Arch
 hostPlatformOS :: OS
@@ -218,12 +100,12 @@ Serialized :: TypeRep -> [Word8] -> Serialized
 
 -- | Put a Typeable value that we are able to actually turn into bytes into
 --   a <a>Serialized</a> value ready for deserialization later
-toSerialized :: forall a. Typeable a => (a -> [Word8]) -> a -> Serialized
+toSerialized :: Typeable a => (a -> [Word8]) -> a -> Serialized
 
 -- | If the <a>Serialized</a> value contains something of the given type,
 --   then use the specified deserializer to return <tt>Just</tt> that.
 --   Otherwise return <tt>Nothing</tt>.
-fromSerialized :: forall a. Typeable a => ([Word8] -> a) -> Serialized -> Maybe a
+fromSerialized :: Typeable a => ([Word8] -> a) -> Serialized -> Maybe a
 
 -- | Use a <a>Data</a> instance to implement a serialization scheme dual to
 --   that of <a>deserializeWithData</a>
@@ -252,15 +134,8 @@ readRawSetting :: (Show a, Read a) => FilePath -> RawSettings -> String -> Eithe
 --   [GHC's many UTF-8 implementations] in <a>GHC.Encoding.UTF8</a> for an
 --   overview.
 module GHC.Utils.Encoding.UTF8
-
--- | Decode a single character at the given <a>Addr#</a>.
 utf8DecodeCharAddr# :: Addr# -> Int# -> (# Char#, Int# #)
-
--- | Decode a single codepoint starting at the given <a>Ptr</a>.
 utf8DecodeCharPtr :: Ptr Word8 -> (Char, Int)
-
--- | Decode a single codepoint starting at the given byte offset into a
---   <a>ByteArray#</a>.
 utf8DecodeCharByteArray# :: ByteArray# -> Int# -> (# Char#, Int# #)
 
 -- | Find the start of the codepoint preceding the codepoint at the given
@@ -343,14 +218,14 @@ head :: ShortText -> Char
 --   <a>ShortText</a>s and returns <a>Just</a> the remainder of the second
 --   iff the first is its prefix, and otherwise Nothing.
 stripPrefix :: ShortText -> ShortText -> Maybe ShortText
-instance Control.DeepSeq.NFData GHC.Data.ShortText.ShortText
-instance GHC.Base.Monoid GHC.Data.ShortText.ShortText
-instance GHC.Base.Semigroup GHC.Data.ShortText.ShortText
 instance Data.Binary.Class.Binary GHC.Data.ShortText.ShortText
-instance GHC.Classes.Ord GHC.Data.ShortText.ShortText
 instance GHC.Classes.Eq GHC.Data.ShortText.ShortText
-instance GHC.Show.Show GHC.Data.ShortText.ShortText
-instance Data.String.IsString GHC.Data.ShortText.ShortText
+instance GHC.Internal.Data.String.IsString GHC.Data.ShortText.ShortText
+instance GHC.Internal.Base.Monoid GHC.Data.ShortText.ShortText
+instance Control.DeepSeq.NFData GHC.Data.ShortText.ShortText
+instance GHC.Classes.Ord GHC.Data.ShortText.ShortText
+instance GHC.Internal.Base.Semigroup GHC.Data.ShortText.ShortText
+instance GHC.Internal.Show.Show GHC.Data.ShortText.ShortText
 
 
 -- | This module provides the view of GHC's database of registered packages
@@ -558,9 +433,9 @@ DbReadWrite :: DbMode
 --   <a>DbReadWrite</a> mode. So it is like <a>Maybe</a> but with a type
 --   argument for the mode to enforce that the mode is used consistently.
 data DbOpenMode (mode :: DbMode) t
-[DbOpenReadOnly] :: DbOpenMode 'DbReadOnly t
-[DbOpenReadWrite] :: t -> DbOpenMode 'DbReadWrite t
-isDbOpenReadMode :: DbOpenMode mode t -> Bool
+[DbOpenReadOnly] :: forall t. DbOpenMode 'DbReadOnly t
+[DbOpenReadWrite] :: forall t. t -> DbOpenMode 'DbReadWrite t
+isDbOpenReadMode :: forall (mode :: DbMode) t. DbOpenMode mode t -> Bool
 
 -- | Read the part of the package DB that GHC is interested in.
 readPackageDbForGhc :: FilePath -> IO [DbUnitInfo]
@@ -575,7 +450,7 @@ readPackageDbForGhc :: FilePath -> IO [DbUnitInfo]
 --   If we open the package db in read only mode, we get its contents.
 --   Otherwise we additionally receive a PackageDbLock that represents a
 --   lock on the database, so that we can safely update it later.
-readPackageDbForGhcPkg :: Binary pkgs => FilePath -> DbOpenMode mode t -> IO (pkgs, DbOpenMode mode PackageDbLock)
+readPackageDbForGhcPkg :: forall pkgs (mode :: DbMode) t. Binary pkgs => FilePath -> DbOpenMode mode t -> IO (pkgs, DbOpenMode mode PackageDbLock)
 
 -- | Write the whole of the package DB, both parts.
 writePackageDb :: Binary pkgs => FilePath -> [DbUnitInfo] -> pkgs -> IO ()
@@ -600,18 +475,18 @@ mkMungePathUrl :: FilePathST -> FilePathST -> (FilePathST -> FilePathST, FilePat
 --   "$topdir" variable. The "topdir" is the location of the ghc
 --   installation (obtained from the -B option).
 mungeUnitInfoPaths :: FilePathST -> FilePathST -> GenericUnitInfo a b c d e -> GenericUnitInfo a b c d e
-instance (GHC.Show.Show uid, GHC.Show.Show modulename, GHC.Show.Show mod, GHC.Show.Show srcpkgid, GHC.Show.Show srcpkgname) => GHC.Show.Show (GHC.Unit.Database.GenericUnitInfo srcpkgid srcpkgname uid modulename mod)
-instance (GHC.Classes.Eq uid, GHC.Classes.Eq modulename, GHC.Classes.Eq mod, GHC.Classes.Eq srcpkgid, GHC.Classes.Eq srcpkgname) => GHC.Classes.Eq (GHC.Unit.Database.GenericUnitInfo srcpkgid srcpkgname uid modulename mod)
-instance GHC.Show.Show GHC.Unit.Database.DbModule
-instance GHC.Classes.Eq GHC.Unit.Database.DbModule
-instance GHC.Show.Show GHC.Unit.Database.DbInstUnitId
-instance GHC.Classes.Eq GHC.Unit.Database.DbInstUnitId
-instance GHC.Base.Functor (GHC.Unit.Database.DbOpenMode mode)
-instance Data.Foldable.Foldable (GHC.Unit.Database.DbOpenMode mode)
-instance Data.Traversable.Traversable (GHC.Unit.Database.DbOpenMode mode)
-instance Data.Binary.Class.Binary GHC.Unit.Database.DbUnitInfo
-instance Data.Binary.Class.Binary GHC.Unit.Database.DbModule
 instance Data.Binary.Class.Binary GHC.Unit.Database.DbInstUnitId
+instance Data.Binary.Class.Binary GHC.Unit.Database.DbModule
+instance Data.Binary.Class.Binary GHC.Unit.Database.DbUnitInfo
+instance GHC.Classes.Eq GHC.Unit.Database.DbInstUnitId
+instance GHC.Classes.Eq GHC.Unit.Database.DbModule
+instance (GHC.Classes.Eq uid, GHC.Classes.Eq modulename, GHC.Classes.Eq mod, GHC.Classes.Eq srcpkgid, GHC.Classes.Eq srcpkgname) => GHC.Classes.Eq (GHC.Unit.Database.GenericUnitInfo srcpkgid srcpkgname uid modulename mod)
+instance GHC.Internal.Data.Foldable.Foldable (GHC.Unit.Database.DbOpenMode mode)
+instance GHC.Internal.Base.Functor (GHC.Unit.Database.DbOpenMode mode)
+instance GHC.Internal.Show.Show GHC.Unit.Database.DbInstUnitId
+instance GHC.Internal.Show.Show GHC.Unit.Database.DbModule
+instance (GHC.Internal.Show.Show uid, GHC.Internal.Show.Show modulename, GHC.Internal.Show.Show mod, GHC.Internal.Show.Show srcpkgid, GHC.Internal.Show.Show srcpkgname) => GHC.Internal.Show.Show (GHC.Unit.Database.GenericUnitInfo srcpkgid srcpkgname uid modulename mod)
+instance GHC.Internal.Data.Traversable.Traversable (GHC.Unit.Database.DbOpenMode mode)
 
 module GHC.Version
 cProjectGitCommitId :: String

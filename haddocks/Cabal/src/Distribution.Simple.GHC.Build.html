@@ -1,0 +1,267 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.GHC.Build.html"><span class="hs-identifier">Distribution.Simple.GHC.Build</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Control.Monad.IO.Class.html/Control.Monad.IO.Class.html"><span class="hs-identifier">Control.Monad.IO.Class</span></a></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../containers-0.7-7628/src//Data.Set.html/Data.Set.html"><span class="hs-identifier">Data.Set</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Set</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.PackageDescription.html/Distribution.PackageDescription.html"><span class="hs-identifier">Distribution.PackageDescription</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">PD</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.Executable.html/Distribution.Types.Executable.html#buildInfo"><span class="hs-identifier">buildInfo</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html"><span class="hs-identifier">Distribution.Simple.Build.Inputs</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html"><span class="hs-identifier">Distribution.Simple.Flag</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier">Flag</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.GHC.Build.ExtraSources.html"><span class="hs-identifier">Distribution.Simple.GHC.Build.ExtraSources</span></a></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.GHC.Build.Link.html"><span class="hs-identifier">Distribution.Simple.GHC.Build.Link</span></a></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.GHC.Build.Modules.html"><span class="hs-identifier">Distribution.Simple.GHC.Build.Modules</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.GHC.Build.Utils.html"><span class="hs-identifier">Distribution.Simple.GHC.Build.Utils</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.GHC.Build.Utils.html#withDynFLib"><span class="hs-identifier">withDynFLib</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.LocalBuildInfo.html"><span class="hs-identifier">Distribution.Simple.LocalBuildInfo</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Program.html"><span class="hs-identifier">Distribution.Simple.Program</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Utils.html"><span class="hs-identifier">Distribution.Simple.Utils</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.ComponentLocalBuildInfo.html"><span class="hs-identifier">Distribution.Types.ComponentLocalBuildInfo</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.ComponentLocalBuildInfo.html#componentIsIndefinite"><span class="hs-identifier">componentIsIndefinite</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.ParStrat.html"><span class="hs-identifier">Distribution.Types.ParStrat</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Utils.NubList.html"><span class="hs-identifier">Distribution.Utils.NubList</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Utils.NubList.html#fromNubListR"><span class="hs-identifier">fromNubListR</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../directory-1.3.8.3-07b9/src//System.Directory.html/System.Directory.html"><span class="hs-identifier">System.Directory</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../directory-1.3.8.3-07b9/src//System.Directory.html/System.Directory.html#exeExtension"><span class="hs-identifier">exeExtension</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.html/System.FilePath.html"><span class="hs-identifier">System.FilePath</span></a></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-comment">{-
+Note [Build Target Dir vs Target Dir]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Where to place the build result (targetDir) and the build artifacts (buildTargetDir).
+
+\* For libraries, targetDir == buildTargetDir, where both the library and
+artifacts are put together.
+
+\* For executables or foreign libs, buildTargetDir == targetDir/&lt;name-of-target-dir&gt;-tmp, where
+    the targetDir is the location where the target (e.g. the executable) is written to
+    and buildTargetDir is where the compilation artifacts (e.g. Main.o) will live
+  Arguably, this difference should not exist (#9498) (TODO)
+
+For instance, for a component `cabal-benchmarks`:
+  targetDir == &lt;buildDir&gt;/cabal-benchmarks
+  buildTargetDir == &lt;buildDir&gt;/cabal-benchmarks/cabal-benchmarks-tmp
+
+Or, for a library `Cabal`:
+  targetDir == &lt;buildDir&gt;/.
+  buildTargetDir == targetDir
+
+Furthermore, we need to account for the limit of characters in ghc
+invocations that different OSes constrain us to. Cabal invocations can
+rapidly reach this limit, in part, due to the long length of cabal v2
+prefixes. To minimize the likelihood, we use
+`makeRelativeToCurrentDirectory` to shorten the paths used in invocations
+(see da6321bb).
+
+However, in executables, we don't do this. It seems that we don't need to do it
+for executable-like components because the linking step, instead of passing as
+an argument the path to each module, it simply passes the module name, the sources dir, and --make.
+RM: I believe we can use --make + module names instead of paths-to-objects
+for linking libraries too (2024-01) (TODO)
+-}</span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- | The main build phase of building a component.</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- Includes building Haskell modules, extra build sources, and linking.</span><span>
+</span><span id="line-62"></span><span class="annot"><a href="Distribution.Simple.GHC.Build.html#build"><span class="hs-identifier hs-type">build</span></a></span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.ParStrat.html#ParStrat"><span class="hs-identifier hs-type">ParStrat</span></a></span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.PackageDescription.html/Distribution.Types.PackageDescription.html#PackageDescription"><span class="hs-identifier hs-type">PackageDescription</span></a></span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Distribution.Simple.Build.Inputs.html#PreBuildComponentInputs"><span class="hs-identifier hs-type">PreBuildComponentInputs</span></a></span><span>
+</span><span id="line-66"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ The context and component being built in it.</span></span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span id="build"><span class="annot"><span class="annottext">build :: Flag ParStrat
+-&gt; PackageDescription -&gt; PreBuildComponentInputs -&gt; IO ()
+</span><a href="Distribution.Simple.GHC.Build.html#build"><span class="hs-identifier hs-var hs-var">build</span></a></span></span><span> </span><span id="local-6989586621679486609"><span class="annot"><span class="annottext">Flag ParStrat
+</span><a href="#local-6989586621679486609"><span class="hs-identifier hs-var">numJobs</span></a></span></span><span> </span><span id="local-6989586621679486610"><span class="annot"><span class="annottext">PackageDescription
+</span><a href="#local-6989586621679486610"><span class="hs-identifier hs-var">pkg_descr</span></a></span></span><span> </span><span id="local-6989586621679486611"><span class="annot"><span class="annottext">PreBuildComponentInputs
+</span><a href="#local-6989586621679486611"><span class="hs-identifier hs-var">pbci</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-keyword">let</span><span>
+</span><span id="line-70"></span><span>    </span><span id="local-6989586621679486612"><span class="annot"><span class="annottext">verbosity :: Verbosity
+</span><a href="#local-6989586621679486612"><span class="hs-identifier hs-var hs-var hs-var">verbosity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PreBuildComponentInputs -&gt; Verbosity
+</span><a href="Distribution.Simple.Build.Inputs.html#buildVerbosity"><span class="hs-identifier hs-var">buildVerbosity</span></a></span><span> </span><span class="annot"><span class="annottext">PreBuildComponentInputs
+</span><a href="#local-6989586621679486611"><span class="hs-identifier hs-var">pbci</span></a></span><span>
+</span><span id="line-71"></span><span>    </span><span id="local-6989586621679486614"><span class="annot"><span class="annottext">component :: Component
+</span><a href="#local-6989586621679486614"><span class="hs-identifier hs-var hs-var hs-var">component</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PreBuildComponentInputs -&gt; Component
+</span><a href="Distribution.Simple.Build.Inputs.html#buildComponent"><span class="hs-identifier hs-var">buildComponent</span></a></span><span> </span><span class="annot"><span class="annottext">PreBuildComponentInputs
+</span><a href="#local-6989586621679486611"><span class="hs-identifier hs-var">pbci</span></a></span><span>
+</span><span id="line-72"></span><span>    </span><span id="local-6989586621679486616"><span class="annot"><span class="annottext">isLib :: Bool
+</span><a href="#local-6989586621679486616"><span class="hs-identifier hs-var hs-var hs-var">isLib</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PreBuildComponentInputs -&gt; Bool
+</span><a href="Distribution.Simple.Build.Inputs.html#buildIsLib"><span class="hs-identifier hs-var">buildIsLib</span></a></span><span> </span><span class="annot"><span class="annottext">PreBuildComponentInputs
+</span><a href="#local-6989586621679486611"><span class="hs-identifier hs-var">pbci</span></a></span><span>
+</span><span id="line-73"></span><span>    </span><span id="local-6989586621679486618"><span class="annot"><span class="annottext">lbi :: LocalBuildInfo
+</span><a href="#local-6989586621679486618"><span class="hs-identifier hs-var hs-var hs-var">lbi</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PreBuildComponentInputs -&gt; LocalBuildInfo
+</span><a href="Distribution.Simple.Build.Inputs.html#localBuildInfo"><span class="hs-identifier hs-var">localBuildInfo</span></a></span><span> </span><span class="annot"><span class="annottext">PreBuildComponentInputs
+</span><a href="#local-6989586621679486611"><span class="hs-identifier hs-var">pbci</span></a></span><span>
+</span><span id="line-74"></span><span>    </span><span id="local-6989586621679486620"><span class="annot"><span class="annottext">clbi :: ComponentLocalBuildInfo
+</span><a href="#local-6989586621679486620"><span class="hs-identifier hs-var hs-var hs-var">clbi</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PreBuildComponentInputs -&gt; ComponentLocalBuildInfo
+</span><a href="Distribution.Simple.Build.Inputs.html#buildCLBI"><span class="hs-identifier hs-var">buildCLBI</span></a></span><span> </span><span class="annot"><span class="annottext">PreBuildComponentInputs
+</span><a href="#local-6989586621679486611"><span class="hs-identifier hs-var">pbci</span></a></span><span>
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-comment">-- Create a few directories for building the component</span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-comment">-- See Note [Build Target Dir vs Target Dir]</span><span>
+</span><span id="line-78"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679486622"><span class="annot"><span class="annottext">targetDir_absolute :: FilePath
+</span><a href="#local-6989586621679486622"><span class="hs-identifier hs-var hs-var hs-var">targetDir_absolute</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; ComponentLocalBuildInfo -&gt; FilePath
+</span><a href="Distribution.Simple.LocalBuildInfo.html#componentBuildDir"><span class="hs-identifier hs-var">componentBuildDir</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679486618"><span class="hs-identifier hs-var">lbi</span></a></span><span> </span><span class="annot"><span class="annottext">ComponentLocalBuildInfo
+</span><a href="#local-6989586621679486620"><span class="hs-identifier hs-var">clbi</span></a></span><span>
+</span><span id="line-79"></span><span>      </span><span id="local-6989586621679486626"><span class="annot"><span class="annottext">buildTargetDir_absolute :: FilePath
+</span><a href="#local-6989586621679486626"><span class="hs-identifier hs-var hs-var hs-var">buildTargetDir_absolute</span></a></span></span><span>
+</span><span id="line-80"></span><span>        </span><span class="hs-comment">-- Libraries use the target dir for building (see above)</span><span>
+</span><span id="line-81"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679486616"><span class="hs-identifier hs-var">isLib</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679486622"><span class="hs-identifier hs-var">targetDir_absolute</span></a></span><span>
+</span><span id="line-82"></span><span>        </span><span class="hs-comment">-- In other cases, use targetDir/&lt;name-of-target-dir&gt;-tmp</span><span>
+</span><span id="line-83"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679486627"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679486627"><span class="hs-identifier hs-var">targetDirName</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span class="annot"><span class="annottext">[FilePath]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[FilePath] -&gt; [FilePath]
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">reverse</span></span><span> </span><span class="annot"><span class="annottext">([FilePath] -&gt; [FilePath]) -&gt; [FilePath] -&gt; [FilePath]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; [FilePath]
+</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#splitDirectories"><span class="hs-identifier hs-var">splitDirectories</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679486622"><span class="hs-identifier hs-var">targetDir_absolute</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-84"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679486622"><span class="hs-identifier hs-var">targetDir_absolute</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; FilePath
+</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#%3C%2F%3E"><span class="hs-operator hs-var">&lt;/&gt;</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679486627"><span class="hs-identifier hs-var">targetDirName</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath -&gt; FilePath
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;-tmp&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath
+forall a. HasCallStack =&gt; FilePath -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;GHC.build: targetDir is empty&quot;</span></span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span>  </span><span class="annot"><span class="annottext">IO () -&gt; IO ()
+forall a. IO a -&gt; IO a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><a href="../../base-4.20.0.0-4014/src//Control.Monad.IO.Class.html/Control.Monad.IO.Class.html#liftIO"><span class="hs-identifier hs-var">liftIO</span></a></span><span> </span><span class="annot"><span class="annottext">(IO () -&gt; IO ()) -&gt; IO () -&gt; IO ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-88"></span><span>    </span><span class="annot"><span class="annottext">Verbosity -&gt; Bool -&gt; FilePath -&gt; IO ()
+</span><a href="Distribution.Simple.Utils.html#createDirectoryIfMissingVerbose"><span class="hs-identifier hs-var">createDirectoryIfMissingVerbose</span></a></span><span> </span><span class="annot"><span class="annottext">Verbosity
+</span><a href="#local-6989586621679486612"><span class="hs-identifier hs-var">verbosity</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679486622"><span class="hs-identifier hs-var">targetDir_absolute</span></a></span><span>
+</span><span id="line-89"></span><span>    </span><span class="annot"><span class="annottext">Verbosity -&gt; Bool -&gt; FilePath -&gt; IO ()
+</span><a href="Distribution.Simple.Utils.html#createDirectoryIfMissingVerbose"><span class="hs-identifier hs-var">createDirectoryIfMissingVerbose</span></a></span><span> </span><span class="annot"><span class="annottext">Verbosity
+</span><a href="#local-6989586621679486612"><span class="hs-identifier hs-var">verbosity</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679486626"><span class="hs-identifier hs-var">buildTargetDir_absolute</span></a></span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span>  </span><span class="hs-comment">-- See Note [Build Target Dir vs Target Dir] as well</span><span>
+</span><span id="line-92"></span><span>  </span><span id="local-6989586621679486634"><span class="annot"><a href="#local-6989586621679486634"><span class="hs-identifier hs-var">_targetDir</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO FilePath -&gt; IO FilePath
+forall a. IO a -&gt; IO a
+forall (m :: * -&gt; *) a. MonadIO m =&gt; IO a -&gt; m a
+</span><a href="../../base-4.20.0.0-4014/src//Control.Monad.IO.Class.html/Control.Monad.IO.Class.html#liftIO"><span class="hs-identifier hs-var">liftIO</span></a></span><span> </span><span class="annot"><span class="annottext">(IO FilePath -&gt; IO FilePath) -&gt; IO FilePath -&gt; IO FilePath
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO FilePath
+</span><a href="../../directory-1.3.8.3-07b9/src//System.Directory.html/System.Directory.html#makeRelativeToCurrentDirectory"><span class="hs-identifier hs-var">makeRelativeToCurrentDirectory</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679486622"><span class="hs-identifier hs-var">targetDir_absolute</span></a></span><span>
+</span><span id="line-93"></span><span>  </span><span id="local-6989586621679486636"><span class="annot"><a href="#local-6989586621679486636"><span class="hs-identifier hs-var">buildTargetDir</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-94"></span><span>    </span><span class="hs-comment">-- To preserve the previous behaviour, we don't use relative dirs for</span><span>
+</span><span id="line-95"></span><span>    </span><span class="hs-comment">-- executables. Historically, this isn't needed to reduce the CLI limit</span><span>
+</span><span id="line-96"></span><span>    </span><span class="hs-comment">-- (unlike for libraries) because we link executables with the module names</span><span>
+</span><span id="line-97"></span><span>    </span><span class="hs-comment">-- instead of passing the path to object file -- that's something else we</span><span>
+</span><span id="line-98"></span><span>    </span><span class="hs-comment">-- can now fix after the refactor lands.</span><span>
+</span><span id="line-99"></span><span>    </span><span class="hs-keyword">if</span><span> </span><span class="annot"><a href="#local-6989586621679486616"><span class="hs-identifier hs-type">isLib</span></a></span><span>
+</span><span id="line-100"></span><span>      </span><span class="hs-keyword">then</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Control.Monad.IO.Class.html/Control.Monad.IO.Class.html#liftIO"><span class="hs-identifier hs-type">liftIO</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="../../directory-1.3.8.3-07b9/src//System.Directory.html/System.Directory.html#makeRelativeToCurrentDirectory"><span class="hs-identifier hs-type">makeRelativeToCurrentDirectory</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679486626"><span class="hs-identifier hs-type">buildTargetDir_absolute</span></a></span><span>
+</span><span id="line-101"></span><span>      </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="annot"><a href="#local-6989586621679486626"><span class="hs-identifier hs-type">buildTargetDir_absolute</span></a></span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679486637"><span class="annot"><a href="#local-6989586621679486637"><span class="hs-identifier hs-var">ghcProg</span></a></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Control.Monad.IO.Class.html/Control.Monad.IO.Class.html#liftIO"><span class="hs-identifier hs-type">liftIO</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Db.html#requireProgram"><span class="hs-identifier hs-type">requireProgram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679486612"><span class="hs-identifier hs-type">verbosity</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Program.Builtin.html#ghcProgram"><span class="hs-identifier hs-type">ghcProgram</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.LocalBuildInfo.html#withPrograms"><span class="hs-identifier hs-var">withPrograms</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679486618"><span class="hs-identifier hs-type">lbi</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-104"></span><span>
+</span><span id="line-105"></span><span>  </span><span class="hs-comment">-- Determine in which ways we want to build the component</span><span>
+</span><span id="line-106"></span><span>  </span><span class="hs-keyword">let</span><span>
+</span><span id="line-107"></span><span>    </span><span id="local-6989586621679486641"><span class="annot"><a href="#local-6989586621679486641"><span class="hs-identifier hs-var hs-var">wantVanilla</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679486616"><span class="hs-identifier hs-var">isLib</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; Bool
+</span><a href="Distribution.Types.LocalBuildInfo.html#withVanillaLib"><span class="hs-identifier hs-var">withVanillaLib</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679486618"><span class="hs-identifier hs-var">lbi</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-108"></span><span>    </span><span class="hs-comment">-- Arguably, wantStatic should be &quot;withFullyStaticExe lbi&quot; for executables,</span><span>
+</span><span id="line-109"></span><span>    </span><span class="hs-comment">-- but it was not before the refactor.</span><span>
+</span><span id="line-110"></span><span>    </span><span id="local-6989586621679486643"><span class="annot"><a href="#local-6989586621679486643"><span class="hs-identifier hs-var hs-var">wantStatic</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679486616"><span class="hs-identifier hs-var">isLib</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; Bool
+</span><a href="Distribution.Types.LocalBuildInfo.html#withStaticLib"><span class="hs-identifier hs-var">withStaticLib</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679486618"><span class="hs-identifier hs-var">lbi</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679486646"><span class="hs-identifier hs-var">wantDynamic</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679486648"><span class="hs-identifier hs-var">wantProf</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-111"></span><span>    </span><span id="local-6989586621679486646"><span class="annot"><a href="#local-6989586621679486646"><span class="hs-identifier hs-var hs-var">wantDynamic</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Component
+</span><a href="#local-6989586621679486614"><span class="hs-identifier hs-var">component</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-112"></span><span>      </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.Component.html/Distribution.Types.Component.html#CLib"><span class="hs-identifier hs-type">CLib</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; Bool
+</span><a href="Distribution.Types.LocalBuildInfo.html#withSharedLib"><span class="hs-identifier hs-var">withSharedLib</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679486618"><span class="hs-identifier hs-var">lbi</span></a></span><span>
+</span><span id="line-113"></span><span>      </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.Component.html/Distribution.Types.Component.html#CFLib"><span class="hs-identifier hs-type">CFLib</span></a></span><span> </span><span id="local-6989586621679486652"><span class="annot"><span class="annottext">ForeignLib
+</span><a href="#local-6989586621679486652"><span class="hs-identifier hs-var">flib</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ForeignLib -&gt; Bool
+</span><a href="Distribution.Simple.GHC.Build.Utils.html#withDynFLib"><span class="hs-identifier hs-var">withDynFLib</span></a></span><span> </span><span class="annot"><span class="annottext">ForeignLib
+</span><a href="#local-6989586621679486652"><span class="hs-identifier hs-var">flib</span></a></span><span>
+</span><span id="line-114"></span><span>      </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.Component.html/Distribution.Types.Component.html#CExe"><span class="hs-identifier hs-type">CExe</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; Bool
+</span><a href="Distribution.Types.LocalBuildInfo.html#withDynExe"><span class="hs-identifier hs-var">withDynExe</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679486618"><span class="hs-identifier hs-var">lbi</span></a></span><span>
+</span><span id="line-115"></span><span>      </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.Component.html/Distribution.Types.Component.html#CTest"><span class="hs-identifier hs-type">CTest</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; Bool
+</span><a href="Distribution.Types.LocalBuildInfo.html#withDynExe"><span class="hs-identifier hs-var">withDynExe</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679486618"><span class="hs-identifier hs-var">lbi</span></a></span><span>
+</span><span id="line-116"></span><span>      </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Types.Component.html/Distribution.Types.Component.html#CBench"><span class="hs-identifier hs-type">CBench</span></a></span><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; Bool
+</span><a href="Distribution.Types.LocalBuildInfo.html#withDynExe"><span class="hs-identifier hs-var">withDynExe</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679486618"><span class="hs-identifier hs-var">lbi</span></a></span><span>
+</span><span id="line-117"></span><span>    </span><span id="local-6989586621679486648"><span class="annot"><a href="#local-6989586621679486648"><span class="hs-identifier hs-var hs-var">wantProf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679486616"><span class="hs-identifier hs-var">isLib</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; Bool
+</span><a href="Distribution.Types.LocalBuildInfo.html#withProfLib"><span class="hs-identifier hs-var">withProfLib</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679486618"><span class="hs-identifier hs-var">lbi</span></a></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo -&gt; Bool
+</span><a href="Distribution.Types.LocalBuildInfo.html#withProfExe"><span class="hs-identifier hs-var">withProfExe</span></a></span><span> </span><span class="annot"><span class="annottext">LocalBuildInfo
+</span><a href="#local-6989586621679486618"><span class="hs-identifier hs-var">lbi</span></a></span><span>
+</span><span id="line-118"></span><span>
+</span><span id="line-119"></span><span>    </span><span class="hs-comment">-- See also Note [Building Haskell Modules accounting for TH] in Distribution.Simple.GHC.Build.Modules</span><span>
+</span><span id="line-120"></span><span>    </span><span class="hs-comment">-- We build static by default if no other way is wanted.</span><span>
+</span><span id="line-121"></span><span>    </span><span class="hs-comment">-- For executables and foreign libraries, there should only be one wanted way.</span><span>
+</span><span id="line-122"></span><span>    </span><span id="local-6989586621679486664"><span class="annot"><a href="#local-6989586621679486664"><span class="hs-identifier hs-var hs-var">wantedWays</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-123"></span><span>      </span><span class="annot"><span class="annottext">[BuildWay] -&gt; Set BuildWay
+forall a. Ord a =&gt; [a] -&gt; Set a
+</span><a href="../../containers-0.7-7628/src//Data.Set.Internal.html/Data.Set.Internal.html#fromList"><span class="hs-identifier hs-var">Set.fromList</span></a></span><span> </span><span class="annot"><span class="annottext">([BuildWay] -&gt; Set BuildWay) -&gt; [BuildWay] -&gt; Set BuildWay
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-124"></span><span>        </span><span class="hs-comment">-- If building a library, we accumulate all the ways,</span><span>
+</span><span id="line-125"></span><span>        </span><span class="hs-comment">-- otherwise, we take just one.</span><span>
+</span><span id="line-126"></span><span>        </span><span class="hs-special">(</span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679486616"><span class="hs-identifier hs-var">isLib</span></a></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">[BuildWay] -&gt; [BuildWay]
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">Int -&gt; [BuildWay] -&gt; [BuildWay]
+forall a. Int -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">take</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([BuildWay] -&gt; [BuildWay]) -&gt; [BuildWay] -&gt; [BuildWay]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-127"></span><span>          </span><span class="hs-special">[</span><span class="annot"><span class="annottext">BuildWay
+</span><a href="Distribution.Simple.GHC.Build.Modules.html#ProfWay"><span class="hs-identifier hs-var">ProfWay</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679486648"><span class="hs-identifier hs-var">wantProf</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-128"></span><span>            </span><span class="hs-comment">-- I don't see why we shouldn't build with dynamic</span><span>
+</span><span id="line-129"></span><span>            </span><span class="hs-comment">-- indefinite components.</span><span>
+</span><span id="line-130"></span><span>            </span><span class="annot"><span class="annottext">[BuildWay] -&gt; [BuildWay] -&gt; [BuildWay]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">BuildWay
+</span><a href="Distribution.Simple.GHC.Build.Modules.html#DynWay"><span class="hs-identifier hs-var">DynWay</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679486646"><span class="hs-identifier hs-var">wantDynamic</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ComponentLocalBuildInfo -&gt; Bool
+</span><a href="Distribution.Types.ComponentLocalBuildInfo.html#componentIsIndefinite"><span class="hs-identifier hs-var">componentIsIndefinite</span></a></span><span> </span><span class="annot"><span class="annottext">ComponentLocalBuildInfo
+</span><a href="#local-6989586621679486620"><span class="hs-identifier hs-var">clbi</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-131"></span><span>            </span><span class="annot"><span class="annottext">[BuildWay] -&gt; [BuildWay] -&gt; [BuildWay]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">BuildWay
+</span><a href="Distribution.Simple.GHC.Build.Modules.html#StaticWay"><span class="hs-identifier hs-var">StaticWay</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679486643"><span class="hs-identifier hs-var">wantStatic</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679486641"><span class="hs-identifier hs-var">wantVanilla</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679486646"><span class="hs-identifier hs-var">wantDynamic</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679486648"><span class="hs-identifier hs-var">wantProf</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-132"></span><span>
+</span><span id="line-133"></span><span>  </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Control.Monad.IO.Class.html/Control.Monad.IO.Class.html#liftIO"><span class="hs-identifier hs-type">liftIO</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Utils.html#info"><span class="hs-identifier hs-type">info</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679486612"><span class="hs-identifier hs-type">verbosity</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-string">&quot;Wanted build ways: &quot;</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">++</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../containers-0.7-7628/src//Data.Set.Internal.html/Data.Set.Internal.html#toList"><span class="hs-identifier hs-type">Set.toList</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679486664"><span class="hs-identifier hs-type">wantedWays</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-134"></span><span>
+</span><span id="line-135"></span><span>  </span><span class="hs-comment">-- We need a separate build and link phase, and C sources must be compiled</span><span>
+</span><span id="line-136"></span><span>  </span><span class="hs-comment">-- after Haskell modules, because C sources may depend on stub headers</span><span>
+</span><span id="line-137"></span><span>  </span><span class="hs-comment">-- generated from compiling Haskell modules (#842, #3294).</span><span>
+</span><span id="line-138"></span><span>  </span><span id="local-6989586621679486675"><span class="annot"><a href="#local-6989586621679486675"><span class="hs-identifier hs-var">buildOpts</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Simple.GHC.Build.Modules.html#buildHaskellModules"><span class="hs-identifier hs-type">buildHaskellModules</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679486609"><span class="hs-identifier hs-type">numJobs</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679486637"><span class="hs-identifier hs-type">ghcProg</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679486610"><span class="hs-identifier hs-type">pkg_descr</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679486626"><span class="hs-identifier hs-type">buildTargetDir_absolute</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679486664"><span class="hs-identifier hs-type">wantedWays</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679486611"><span class="hs-identifier hs-type">pbci</span></a></span><span>
+</span><span id="line-139"></span><span>  </span><span id="local-6989586621679486677"><span class="annot"><a href="#local-6989586621679486677"><span class="hs-identifier hs-var">extraSources</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><a href="Distribution.Simple.GHC.Build.ExtraSources.html#buildAllExtraSources"><span class="hs-identifier hs-type">buildAllExtraSources</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679486637"><span class="hs-identifier hs-type">ghcProg</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679486636"><span class="hs-identifier hs-type">buildTargetDir</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679486611"><span class="hs-identifier hs-type">pbci</span></a></span><span>
+</span><span id="line-140"></span><span>  </span><span class="annot"><a href="Distribution.Simple.GHC.Build.Link.html#linkOrLoadComponent"><span class="hs-identifier hs-type">linkOrLoadComponent</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679486637"><span class="hs-identifier hs-type">ghcProg</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679486610"><span class="hs-identifier hs-type">pkg_descr</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Utils.NubList.html#fromNubListR"><span class="hs-identifier hs-var">fromNubListR</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679486677"><span class="hs-identifier hs-type">extraSources</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679486636"><span class="hs-identifier hs-type">buildTargetDir</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679486622"><span class="hs-identifier hs-type">targetDir_absolute</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679486664"><span class="hs-identifier hs-type">wantedWays</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679486675"><span class="hs-identifier hs-type">buildOpts</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679486611"><span class="hs-identifier hs-type">pbci</span></a></span><span>
+</span><span id="line-141"></span></pre></body></html>

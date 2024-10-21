@@ -36,7 +36,7 @@
 --   <a>text-icu package</a> based on the well-respected and liberally
 --   licensed <a>ICU library</a>.
 @package text
-@version 2.0.2
+@version 2.1.1
 
 
 -- | Packed, unboxed, heap-resident arrays. Suitable for performance
@@ -54,12 +54,12 @@
 module Data.Text.Array
 
 -- | Immutable array type.
-data Array
-ByteArray :: ByteArray# -> Array
+type Array = ByteArray
+pattern ByteArray :: () => ByteArray# -> ByteArray
 
 -- | Mutable array type, for use in the ST monad.
-data MArray s
-MutableByteArray :: MutableByteArray# s -> MArray s
+type MArray = MutableByteArray
+pattern MutableByteArray :: () => MutableByteArray# s -> MutableByteArray s
 
 resizeM :: MArray s -> Int -> ST s (MArray s)
 
@@ -89,11 +89,11 @@ compare :: Array -> Int -> Array -> Int -> Int -> Ordering
 
 -- | Run an action in the ST monad and return an immutable array of its
 --   result.
-run :: (forall s. ST s (MArray s)) -> Array
+run :: (forall s. () => ST s (MArray s)) -> Array
 
 -- | Run an action in the ST monad and return an immutable array of its
 --   result paired with whatever else the action returns.
-run2 :: (forall s. ST s (MArray s, a)) -> (Array, a)
+run2 :: (forall s. () => ST s (MArray s, a)) -> (Array, a)
 
 -- | Convert an immutable array to a list.
 toList :: Array -> Int -> Int -> [Word8]
@@ -106,10 +106,10 @@ unsafeFreeze :: MArray s -> ST s Array
 unsafeIndex :: Array -> Int -> Word8
 
 -- | Create an uninitialized mutable array.
-new :: forall s. Int -> ST s (MArray s)
+new :: Int -> ST s (MArray s)
 
 -- | Create an uninitialized mutable pinned array.
-newPinned :: forall s. Int -> ST s (MArray s)
+newPinned :: Int -> ST s (MArray s)
 
 newFilled :: Int -> Int -> ST s (MArray s)
 
@@ -196,9 +196,12 @@ ignore :: OnError a b
 -- | Replace an invalid input with a valid output.
 replace :: b -> OnError a b
 instance GHC.Classes.Eq Data.Text.Encoding.Error.UnicodeException
-instance GHC.Show.Show Data.Text.Encoding.Error.UnicodeException
-instance GHC.Exception.Type.Exception Data.Text.Encoding.Error.UnicodeException
+instance GHC.Internal.Exception.Type.Exception Data.Text.Encoding.Error.UnicodeException
 instance Control.DeepSeq.NFData Data.Text.Encoding.Error.UnicodeException
+instance GHC.Internal.Show.Show Data.Text.Encoding.Error.UnicodeException
+
+module Data.Text.Internal.ArrayUtils
+memchr :: ByteArray# -> Int -> Int -> Word8 -> Int
 
 module Data.Text.Internal.Builder.Int.Digits
 digits :: ByteString
@@ -271,15 +274,15 @@ CodePoint :: Int -> CodePoint
 utf8DecodeStart :: Word8 -> DecoderResult
 
 utf8DecodeContinue :: Word8 -> DecoderState -> CodePoint -> DecoderResult
-instance GHC.Show.Show Data.Text.Internal.Encoding.Utf8.DecoderState
 instance GHC.Classes.Eq Data.Text.Internal.Encoding.Utf8.DecoderState
+instance GHC.Internal.Show.Show Data.Text.Internal.Encoding.Utf8.DecoderState
 
 module Data.Text.Internal.Fusion.CaseMapping
-unI64 :: Int64 -> _
-upperMapping :: Char# -> _
-lowerMapping :: Char# -> _
-titleMapping :: Char# -> _
-foldMapping :: Char# -> _
+unI64 :: Int64 -> Int64#
+upperMapping :: Char# -> Int64#
+lowerMapping :: Char# -> Int64#
+titleMapping :: Char# -> Int64#
+foldMapping :: Char# -> Int64#
 
 module Data.Text.Internal.PrimCompat
 word8ToWord# :: Word8# -> Word#
@@ -301,9 +304,9 @@ T :: !Integer -> !Int -> T
 digitToInt :: Char -> Int
 hexDigitToInt :: Char -> Int
 perhaps :: a -> IParser t a -> IParser t a
-instance GHC.Base.Functor (Data.Text.Internal.Read.IParser t)
-instance GHC.Base.Applicative (Data.Text.Internal.Read.IParser t)
-instance GHC.Base.Monad (Data.Text.Internal.Read.IParser t)
+instance GHC.Internal.Base.Applicative (Data.Text.Internal.Read.IParser t)
+instance GHC.Internal.Base.Functor (Data.Text.Internal.Read.IParser t)
+instance GHC.Internal.Base.Monad (Data.Text.Internal.Read.IParser t)
 
 
 -- | <i>Warning</i>: this is an internal module, and does not have a stable
@@ -364,8 +367,12 @@ module Data.Text.Internal
 data Text
 Text :: {-# UNPACK #-} !Array -> {-# UNPACK #-} !Int -> {-# UNPACK #-} !Int -> Text
 
+-- | Type synonym for the strict flavour of <a>Text</a>.
+type StrictText = Text
+
 -- | Construct a <a>Text</a> without invisibly pinning its byte array in
---   memory if its length has dwindled to zero.
+--   memory if its length has dwindled to zero. It ensures that empty
+--   <a>Text</a> values are shared.
 text :: Array -> Int -> Int -> Text
 
 -- | <i>Deprecated: Use text instead</i>
@@ -383,9 +390,6 @@ safe :: Char -> Char
 
 -- | <i>O(1)</i> The empty <a>Text</a>.
 empty :: Text
-
--- | A non-inlined version of <a>empty</a>.
-empty_ :: Text
 
 -- | <i>O(n)</i> Appends one <a>Text</a> to the other by copying both of
 --   them into a new <a>Text</a>.
@@ -430,9 +434,9 @@ module Data.Text.Internal.StrictBuilder
 
 -- | A delayed representation of strict <a>Text</a>.
 data StrictBuilder
-StrictBuilder :: {-# UNPACK #-} !Int -> (forall s. MArray s -> Int -> ST s ()) -> StrictBuilder
+StrictBuilder :: {-# UNPACK #-} !Int -> (forall s. () => MArray s -> Int -> ST s ()) -> StrictBuilder
 [sbLength] :: StrictBuilder -> {-# UNPACK #-} !Int
-[sbWrite] :: StrictBuilder -> forall s. MArray s -> Int -> ST s ()
+[sbWrite] :: StrictBuilder -> forall s. () => MArray s -> Int -> ST s ()
 
 -- | Use <a>StrictBuilder</a> to build <a>Text</a>.
 toText :: StrictBuilder -> Text
@@ -449,8 +453,8 @@ unsafeFromByteString :: ByteString -> StrictBuilder
 
 -- | Unsafe: This may not be valid UTF-8 text.
 unsafeFromWord8 :: Word8 -> StrictBuilder
-instance GHC.Base.Semigroup Data.Text.Internal.StrictBuilder.StrictBuilder
-instance GHC.Base.Monoid Data.Text.Internal.StrictBuilder.StrictBuilder
+instance GHC.Internal.Base.Monoid Data.Text.Internal.StrictBuilder.StrictBuilder
+instance GHC.Internal.Base.Semigroup Data.Text.Internal.StrictBuilder.StrictBuilder
 
 
 -- | Fast substring search for <a>Text</a>, based on work by Boyer, Moore,
@@ -515,9 +519,9 @@ lowerBound :: Int -> Size -> Int
 --   <a>Nothing</a> in the indeterminate case.
 compareSize :: Size -> Size -> Maybe Ordering
 isEmpty :: Size -> Bool
-instance GHC.Show.Show Data.Text.Internal.Fusion.Size.Size
 instance GHC.Classes.Eq Data.Text.Internal.Fusion.Size.Size
-instance GHC.Num.Num Data.Text.Internal.Fusion.Size.Size
+instance GHC.Internal.Num.Num Data.Text.Internal.Fusion.Size.Size
+instance GHC.Internal.Show.Show Data.Text.Internal.Fusion.Size.Size
 
 
 -- | <i>Warning</i>: this is an internal module, and does not have a stable
@@ -1322,10 +1326,62 @@ getCompleteLen :: Utf8State -> Int
 
 -- | Exported for testing.
 getPartialUtf8 :: Utf8State -> ByteString
-instance GHC.Show.Show Data.Text.Internal.Encoding.PartialUtf8CodePoint
 instance GHC.Classes.Eq Data.Text.Internal.Encoding.PartialUtf8CodePoint
-instance GHC.Show.Show Data.Text.Internal.Encoding.Utf8State
 instance GHC.Classes.Eq Data.Text.Internal.Encoding.Utf8State
+instance GHC.Internal.Show.Show Data.Text.Internal.Encoding.PartialUtf8CodePoint
+instance GHC.Internal.Show.Show Data.Text.Internal.Encoding.Utf8State
+
+
+-- | Native implementation of <a>Validate</a>.
+module Data.Text.Internal.Validate.Native
+
+-- | Native implementation of <a>isValidUtf8ByteString</a>.
+isValidUtf8ByteStringHaskell :: ByteString -> Bool
+
+-- | Native implementation of <a>isValidUtf8ByteArrayUnpinned</a> and
+--   <a>isValidUtf8ByteArrayPinned</a>.
+isValidUtf8ByteArrayHaskell :: ByteArray -> Int -> Int -> Bool
+
+
+-- | Test whether or not a sequence of bytes is a valid UTF-8 byte
+--   sequence. In the GHC Haskell ecosystem, there are several
+--   representations of byte sequences. The only one that the stable
+--   <tt>text</tt> API concerns itself with is <a>ByteString</a>. Part of
+--   bytestring-to-text decoding is <a>isValidUtf8ByteString</a>, a
+--   high-performance UTF-8 validation routine written in C++ with
+--   fallbacks for various platforms. The C++ code backing this routine is
+--   nontrivial, so in the interest of reuse, this module additionally
+--   exports functions for working with the GC-managed <tt>ByteArray</tt>
+--   type. These <tt>ByteArray</tt> functions are not used anywhere else in
+--   <tt>text</tt>. They are for the benefit of library and application
+--   authors who do not use <a>ByteString</a> but still need to
+--   interoperate with <tt>text</tt>.
+module Data.Text.Internal.Validate
+
+-- | Is the ByteString a valid UTF-8 byte sequence?
+isValidUtf8ByteString :: ByteString -> Bool
+
+-- | For pinned byte arrays larger than 128KiB, this switches to the safe
+--   FFI so that it does not prevent GC. This threshold (128KiB) was chosen
+--   somewhat arbitrarily and may change in the future.
+isValidUtf8ByteArray :: ByteArray -> Int -> Int -> Bool
+
+-- | This uses the <tt>unsafe</tt> FFI. GC waits for all <tt>unsafe</tt>
+--   FFI calls to complete before starting. Consequently, an
+--   <tt>unsafe</tt> FFI call does not run concurrently with GC and is not
+--   interrupted by GC. Since relocation cannot happen concurrently with an
+--   <tt>unsafe</tt> FFI call, it is safe to call this function with an
+--   unpinned byte array argument. It is also safe to call this with a
+--   pinned <tt>ByteArray</tt> argument.
+isValidUtf8ByteArrayUnpinned :: ByteArray -> Int -> Int -> Bool
+
+-- | This uses the <tt>safe</tt> FFI. GC may run concurrently with
+--   <tt>safe</tt> FFI calls. Consequently, unpinned objects may be
+--   relocated while a <tt>safe</tt> FFI call is executing. The byte array
+--   argument <i>must</i> be pinned, and the calling context is responsible
+--   for enforcing this. If the byte array is not pinned, this function's
+--   behavior is undefined.
+isValidUtf8ByteArrayPinned :: ByteArray -> Int -> Int -> Bool
 
 
 -- | A module containing unsafe <a>Text</a> operations, for very very
@@ -1348,17 +1404,6 @@ inlineInterleaveST :: ST s a -> ST s a
 --   particular, you should do no memory allocation inside an
 --   <a>inlinePerformIO</a> block.
 inlinePerformIO :: IO a -> a
-
--- | This version of <a>unsafePerformIO</a> is more efficient because it
---   omits the check that the IO is only being performed by a single
---   thread. Hence, when you use <a>unsafeDupablePerformIO</a>, there is a
---   possibility that the IO action may be performed multiple times (on a
---   multiprocessor), and you should therefore ensure that it gives the
---   same results each time. It may even happen that one of the duplicated
---   IO actions is only run partially, and then interrupted in the middle
---   without an exception being raised. Therefore, functions like
---   <a>bracket</a> cannot be used safely within
---   <a>unsafeDupablePerformIO</a>.
 unsafeDupablePerformIO :: IO a -> a
 data Iter
 Iter :: {-# UNPACK #-} !Char -> {-# UNPACK #-} !Int -> Iter
@@ -1410,11 +1455,11 @@ takeWord8 :: Int -> Text -> Text
 -- | <i>O(1)</i> Unchecked drop of <tt>k</tt> <tt>Word8</tt>s from the
 --   front of a <a>Text</a>.
 dropWord8 :: Int -> Text -> Text
-instance GHC.Show.Show Data.Text.Unsafe.Iter
+instance GHC.Internal.Show.Show Data.Text.Unsafe.Iter
 
 
 module Data.Text.Internal.Private
-runText :: (forall s. (MArray s -> Int -> ST s Text) -> ST s Text) -> Text
+runText :: (forall s. () => (MArray s -> Int -> ST s Text) -> ST s Text) -> Text
 span_ :: (Char -> Bool) -> Text -> (# Text, Text #)
 
 -- | For the sake of performance this function does not check that a char
@@ -1953,7 +1998,7 @@ validateUtf8Chunk :: ByteString -> (Int, Maybe Utf8State)
 --   <a>+</a>) (<a>validateUtf8More</a> s' more) </pre></li>
 --   </ul>
 validateUtf8More :: Utf8State -> ByteString -> (Int, Maybe Utf8State)
-instance GHC.Show.Show Data.Text.Encoding.Decoding
+instance GHC.Internal.Show.Show Data.Text.Encoding.Decoding
 
 
 -- | Support for using <a>Text</a> data with native code via the Haskell
@@ -2024,15 +2069,15 @@ dropWord8 :: I8 -> Text -> Text
 --   the end of the prefix will be advanced by several additional
 --   <a>Word8</a> units to maintain its validity.
 takeWord8 :: I8 -> Text -> Text
-instance GHC.Show.Show Data.Text.Foreign.I8
-instance GHC.Real.Real Data.Text.Foreign.I8
-instance GHC.Read.Read Data.Text.Foreign.I8
-instance GHC.Classes.Ord Data.Text.Foreign.I8
-instance GHC.Num.Num Data.Text.Foreign.I8
-instance GHC.Real.Integral Data.Text.Foreign.I8
+instance GHC.Internal.Enum.Bounded Data.Text.Foreign.I8
+instance GHC.Internal.Enum.Enum Data.Text.Foreign.I8
 instance GHC.Classes.Eq Data.Text.Foreign.I8
-instance GHC.Enum.Enum Data.Text.Foreign.I8
-instance GHC.Enum.Bounded Data.Text.Foreign.I8
+instance GHC.Internal.Real.Integral Data.Text.Foreign.I8
+instance GHC.Internal.Num.Num Data.Text.Foreign.I8
+instance GHC.Classes.Ord Data.Text.Foreign.I8
+instance GHC.Internal.Read.Read Data.Text.Foreign.I8
+instance GHC.Internal.Real.Real Data.Text.Foreign.I8
+instance GHC.Internal.Show.Show Data.Text.Foreign.I8
 
 
 -- | A time and space-efficient implementation of Unicode text. Suitable
@@ -2057,6 +2102,9 @@ module Data.Text
 
 -- | A space efficient, packed, unboxed Unicode text type.
 data Text
+
+-- | Type synonym for the strict flavour of <a>Text</a>.
+type StrictText = Text
 
 -- | <i>O(n)</i> Convert a <a>String</a> into a <a>Text</a>. Performs
 --   replacement on invalid scalar values, so <tt><a>unpack</a> .
@@ -2197,15 +2245,6 @@ intersperse :: Char -> Text -> Text
 --   ["br","le","ud","e"]
 --   </pre>
 transpose :: [Text] -> [Text]
-
--- | <i>O(n)</i> Reverse the characters of a string.
---   
---   Example:
---   
---   <pre>
---   &gt;&gt;&gt; T.reverse "desrever"
---   "reversed"
---   </pre>
 reverse :: Text -> Text
 
 -- | <i>O(m+n)</i> Replace every non-overlapping occurrence of
@@ -2427,7 +2466,7 @@ minimum :: HasCallStack => Text -> Char
 -- | O(n) Test whether <a>Text</a> contains only ASCII code-points (i.e.
 --   only U+0000 through U+007F).
 --   
---   This is a more efficient version of <tt><a>all</a>
+--   This is a more efficient version of <tt><tt>all</tt>
 --   <a>isAscii</a></tt>.
 --   
 --   <pre>
@@ -2495,14 +2534,14 @@ scanr1 :: (Char -> Char -> Char) -> Text -> Text
 --   Applies a function to each element of a <a>Text</a>, passing an
 --   accumulating parameter from left to right, and returns a final
 --   <a>Text</a>. Performs replacement on invalid scalar values.
-mapAccumL :: forall a. (a -> Char -> (a, Char)) -> a -> Text -> (a, Text)
+mapAccumL :: (a -> Char -> (a, Char)) -> a -> Text -> (a, Text)
 
 -- | The <a>mapAccumR</a> function behaves like a combination of <a>map</a>
 --   and a strict <a>foldr</a>; it applies a function to each element of a
 --   <a>Text</a>, passing an accumulating parameter from right to left, and
 --   returning a final value of this accumulator together with the new
 --   <a>Text</a>. Performs replacement on invalid scalar values.
-mapAccumR :: forall a. (a -> Char -> (a, Char)) -> a -> Text -> (a, Text)
+mapAccumR :: (a -> Char -> (a, Char)) -> a -> Text -> (a, Text)
 
 -- | <i>O(n*m)</i> <a>replicate</a> <tt>n</tt> <tt>t</tt> is a <a>Text</a>
 --   consisting of the input <tt>t</tt> repeated <tt>n</tt> times.
@@ -3046,18 +3085,18 @@ unpackCStringAscii# :: Addr# -> Text
 --   <a>splitAt</a> and <a>length</a> and is useful on its own in streaming
 --   and parsing libraries.
 measureOff :: Int -> Text -> Int
-instance GHC.Classes.Eq Data.Text.Internal.Text
-instance GHC.Classes.Ord Data.Text.Internal.Text
-instance GHC.Read.Read Data.Text.Internal.Text
-instance GHC.Base.Semigroup Data.Text.Internal.Text
-instance GHC.Base.Monoid Data.Text.Internal.Text
-instance Data.String.IsString Data.Text.Internal.Text
-instance GHC.IsList.IsList Data.Text.Internal.Text
-instance Control.DeepSeq.NFData Data.Text.Internal.Text
 instance Data.Binary.Class.Binary Data.Text.Internal.Text
-instance Data.Data.Data Data.Text.Internal.Text
+instance GHC.Internal.Data.Data.Data Data.Text.Internal.Text
+instance GHC.Classes.Eq Data.Text.Internal.Text
+instance GHC.Internal.IsList.IsList Data.Text.Internal.Text
+instance GHC.Internal.Data.String.IsString Data.Text.Internal.Text
 instance Language.Haskell.TH.Syntax.Lift Data.Text.Internal.Text
+instance GHC.Internal.Base.Monoid Data.Text.Internal.Text
+instance Control.DeepSeq.NFData Data.Text.Internal.Text
+instance GHC.Classes.Ord Data.Text.Internal.Text
 instance Text.Printf.PrintfArg Data.Text.Internal.Text
+instance GHC.Internal.Read.Read Data.Text.Internal.Text
+instance GHC.Internal.Base.Semigroup Data.Text.Internal.Text
 
 
 -- | Functions used frequently when reading textual data.
@@ -3151,6 +3190,9 @@ module Data.Text.Internal.Lazy
 data Text
 Empty :: Text
 Chunk :: {-# UNPACK #-} !Text -> Text -> Text
+
+-- | Type synonym for the lazy flavour of <a>Text</a>.
+type LazyText = Text
 
 -- | Smart constructor for <a>Chunk</a>. Guarantees the data type
 --   invariant.
@@ -3379,6 +3421,9 @@ encodeUtf8BuilderEscaped :: BoundedPrim Word8 -> Text -> Builder
 module Data.Text.Lazy
 data Text
 
+-- | Type synonym for the lazy flavour of <a>Text</a>.
+type LazyText = Text
+
 -- | <i>O(n)</i> Convert a <a>String</a> into a <a>Text</a>.
 --   
 --   Performs replacement on invalid scalar values, so <tt><a>unpack</a> .
@@ -3409,10 +3454,10 @@ fromChunks :: [Text] -> Text
 toChunks :: Text -> [Text]
 
 -- | <i>O(n)</i> Convert a lazy <a>Text</a> into a strict <a>Text</a>.
-toStrict :: Text -> Text
+toStrict :: LazyText -> StrictText
 
 -- | <i>O(c)</i> Convert a strict <a>Text</a> into a lazy <a>Text</a>.
-fromStrict :: Text -> Text
+fromStrict :: StrictText -> LazyText
 
 -- | Consume the chunks of a lazy <a>Text</a> with a natural right fold.
 foldrChunks :: (Text -> a -> a) -> a -> Text -> a
@@ -4252,19 +4297,19 @@ zip :: Text -> Text -> [(Char, Char)]
 --   function given as the first argument, instead of a tupling function.
 --   Performs replacement on invalid scalar values.
 zipWith :: (Char -> Char -> Char) -> Text -> Text -> Text
-instance GHC.Classes.Eq Data.Text.Internal.Lazy.Text
-instance GHC.Classes.Ord Data.Text.Internal.Lazy.Text
-instance GHC.Show.Show Data.Text.Internal.Lazy.Text
-instance GHC.Read.Read Data.Text.Internal.Lazy.Text
-instance GHC.Base.Semigroup Data.Text.Internal.Lazy.Text
-instance GHC.Base.Monoid Data.Text.Internal.Lazy.Text
-instance Data.String.IsString Data.Text.Internal.Lazy.Text
-instance GHC.IsList.IsList Data.Text.Internal.Lazy.Text
-instance Control.DeepSeq.NFData Data.Text.Internal.Lazy.Text
 instance Data.Binary.Class.Binary Data.Text.Internal.Lazy.Text
-instance Data.Data.Data Data.Text.Internal.Lazy.Text
+instance GHC.Internal.Data.Data.Data Data.Text.Internal.Lazy.Text
+instance GHC.Classes.Eq Data.Text.Internal.Lazy.Text
+instance GHC.Internal.IsList.IsList Data.Text.Internal.Lazy.Text
+instance GHC.Internal.Data.String.IsString Data.Text.Internal.Lazy.Text
 instance Language.Haskell.TH.Syntax.Lift Data.Text.Internal.Lazy.Text
+instance GHC.Internal.Base.Monoid Data.Text.Internal.Lazy.Text
+instance Control.DeepSeq.NFData Data.Text.Internal.Lazy.Text
+instance GHC.Classes.Ord Data.Text.Internal.Lazy.Text
 instance Text.Printf.PrintfArg Data.Text.Internal.Lazy.Text
+instance GHC.Internal.Read.Read Data.Text.Internal.Lazy.Text
+instance GHC.Internal.Base.Semigroup Data.Text.Internal.Lazy.Text
+instance GHC.Internal.Show.Show Data.Text.Internal.Lazy.Text
 
 
 -- | Functions used frequently when reading textual data.
@@ -4463,13 +4508,13 @@ ensureFree :: Int -> Builder
 
 -- | Ensure that <tt>n</tt> many elements are available, and then use
 --   <tt>f</tt> to write some elements into the memory.
-writeN :: Int -> (forall s. MArray s -> Int -> ST s ()) -> Builder
-instance GHC.Base.Semigroup Data.Text.Internal.Builder.Builder
-instance GHC.Base.Monoid Data.Text.Internal.Builder.Builder
-instance Data.String.IsString Data.Text.Internal.Builder.Builder
-instance GHC.Show.Show Data.Text.Internal.Builder.Builder
+writeN :: Int -> (forall s. () => MArray s -> Int -> ST s ()) -> Builder
 instance GHC.Classes.Eq Data.Text.Internal.Builder.Builder
+instance GHC.Internal.Data.String.IsString Data.Text.Internal.Builder.Builder
+instance GHC.Internal.Base.Monoid Data.Text.Internal.Builder.Builder
 instance GHC.Classes.Ord Data.Text.Internal.Builder.Builder
+instance GHC.Internal.Base.Semigroup Data.Text.Internal.Builder.Builder
+instance GHC.Internal.Show.Show Data.Text.Internal.Builder.Builder
 
 
 -- | Efficient construction of lazy <tt>Text</tt> values. The principal
@@ -4625,10 +4670,58 @@ realFloat :: RealFloat a => a -> Builder
 --   <tt>base-4.11</tt>. The next major version of <tt>text</tt> will
 --   switch to the more correct <tt>base-4.12</tt> serialisation.
 formatRealFloat :: RealFloat a => FPFormat -> Maybe Int -> a -> Builder
-instance GHC.Enum.Bounded Data.Text.Lazy.Builder.RealFloat.FPFormat
-instance GHC.Show.Show Data.Text.Lazy.Builder.RealFloat.FPFormat
-instance GHC.Read.Read Data.Text.Lazy.Builder.RealFloat.FPFormat
-instance GHC.Enum.Enum Data.Text.Lazy.Builder.RealFloat.FPFormat
+instance GHC.Internal.Enum.Bounded Data.Text.Lazy.Builder.RealFloat.FPFormat
+instance GHC.Internal.Enum.Enum Data.Text.Lazy.Builder.RealFloat.FPFormat
+instance GHC.Internal.Read.Read Data.Text.Lazy.Builder.RealFloat.FPFormat
+instance GHC.Internal.Show.Show Data.Text.Lazy.Builder.RealFloat.FPFormat
+
+
+-- | Efficient UTF-8 support for text I/O. Unlike <tt>Data.Text.IO</tt>,
+--   these functions do not depend on the locale and do not do line ending
+--   conversion.
+module Data.Text.IO.Utf8
+
+-- | The <a>readFile</a> function reads a file and returns the contents of
+--   the file as a string. The entire file is read strictly, as with
+--   <a>getContents</a>.
+readFile :: FilePath -> IO Text
+
+-- | Write a string to a file. The file is truncated to zero length before
+--   writing begins.
+writeFile :: FilePath -> Text -> IO ()
+
+-- | Write a string to the end of a file.
+appendFile :: FilePath -> Text -> IO ()
+
+-- | Read the remaining contents of a <a>Handle</a> as a string.
+hGetContents :: Handle -> IO Text
+
+-- | Read a single line from a handle.
+hGetLine :: Handle -> IO Text
+
+-- | Write a string to a handle.
+hPutStr :: Handle -> Text -> IO ()
+
+-- | Write a string to a handle, followed by a newline.
+hPutStrLn :: Handle -> Text -> IO ()
+
+-- | The <a>interact</a> function takes a function of type <tt>Text -&gt;
+--   Text</tt> as its argument. The entire input from the standard input
+--   device is passed to this function as its argument, and the resulting
+--   string is output on the standard output device.
+interact :: (Text -> Text) -> IO ()
+
+-- | Read all user input on <tt>stdin</tt> as a single string.
+getContents :: IO Text
+
+-- | Read a single line of user input from <tt>stdin</tt>.
+getLine :: IO Text
+
+-- | Write a string to <tt>stdout</tt>.
+putStr :: Text -> IO ()
+
+-- | Write a string to <tt>stdout</tt>, followed by a newline.
+putStrLn :: Text -> IO ()
 
 
 -- | Efficient locale-sensitive support for text I/O.
@@ -4636,10 +4729,13 @@ instance GHC.Enum.Enum Data.Text.Lazy.Builder.RealFloat.FPFormat
 --   The functions in this module obey the runtime system's locale,
 --   character set encoding, and line ending conversion settings.
 --   
+--   If you want to do I/O using the UTF-8 encoding, use
+--   <tt>Data.Text.IO.Utf8</tt>, which is faster than this module.
+--   
 --   If you know in advance that you will be working with data that has a
---   specific encoding (e.g. UTF-8), and your application is highly
---   performance sensitive, you may find that it is faster to perform I/O
---   with bytestrings and to encode and decode yourself than to use the
+--   specific encoding, and your application is highly performance
+--   sensitive, you may find that it is faster to perform I/O with
+--   bytestrings and to encode and decode yourself than to use the
 --   functions in this module.
 module Data.Text.IO
 

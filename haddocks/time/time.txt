@@ -27,11 +27,6 @@ type DayOfYear = Int
 --   on reckoning.
 type WeekOfYear = Int
 
--- | Bidirectional abstract constructor for ISO 8601 Ordinal Date format.
---   Invalid day numbers will be clipped to the correct range (1 to 365 or
---   366).
-pattern YearDay :: Year -> DayOfYear -> Day
-
 -- | Is this year a leap year according to the proleptic Gregorian
 --   calendar?
 isLeapYear :: Year -> Bool
@@ -42,6 +37,11 @@ toOrdinalDate :: Day -> (Year, DayOfYear)
 -- | Convert from ISO 8601 Ordinal Date format. Invalid day numbers will be
 --   clipped to the correct range (1 to 365 or 366).
 fromOrdinalDate :: Year -> DayOfYear -> Day
+
+-- | Bidirectional abstract constructor for ISO 8601 Ordinal Date format.
+--   Invalid day numbers will be clipped to the correct range (1 to 365 or
+--   366).
+pattern YearDay :: Year -> DayOfYear -> Day
 
 -- | Convert from ISO 8601 Ordinal Date format. Invalid day numbers return
 --   <a>Nothing</a>
@@ -236,15 +236,15 @@ fromYearMonthValid :: Year -> MonthOfYear -> Maybe Month
 --   clipped to the correct range.
 pattern MonthDay :: Month -> DayOfMonth -> Day
 fromMonthDayValid :: Month -> DayOfMonth -> Maybe Day
-instance Data.Data.Data Data.Time.Calendar.Month.Month
-instance GHC.Classes.Ord Data.Time.Calendar.Month.Month
-instance GHC.Classes.Eq Data.Time.Calendar.Month.Month
-instance Control.DeepSeq.NFData Data.Time.Calendar.Month.Month
-instance GHC.Enum.Enum Data.Time.Calendar.Month.Month
-instance GHC.Ix.Ix Data.Time.Calendar.Month.Month
-instance GHC.Show.Show Data.Time.Calendar.Month.Month
-instance GHC.Read.Read Data.Time.Calendar.Month.Month
+instance GHC.Internal.Data.Data.Data Data.Time.Calendar.Month.Month
 instance Data.Time.Calendar.Days.DayPeriod Data.Time.Calendar.Month.Month
+instance GHC.Internal.Enum.Enum Data.Time.Calendar.Month.Month
+instance GHC.Classes.Eq Data.Time.Calendar.Month.Month
+instance GHC.Internal.Ix.Ix Data.Time.Calendar.Month.Month
+instance Control.DeepSeq.NFData Data.Time.Calendar.Month.Month
+instance GHC.Classes.Ord Data.Time.Calendar.Month.Month
+instance GHC.Internal.Read.Read Data.Time.Calendar.Month.Month
+instance GHC.Internal.Show.Show Data.Time.Calendar.Month.Month
 
 
 -- | Year quarters.
@@ -282,24 +282,24 @@ type DayOfQuarter = Int
 -- | Bidirectional abstract constructor. Invalid days of quarter will be
 --   clipped to the correct range.
 pattern QuarterDay :: Quarter -> DayOfQuarter -> Day
-instance GHC.Ix.Ix Data.Time.Calendar.Quarter.QuarterOfYear
-instance GHC.Show.Show Data.Time.Calendar.Quarter.QuarterOfYear
-instance GHC.Read.Read Data.Time.Calendar.Quarter.QuarterOfYear
-instance Data.Data.Data Data.Time.Calendar.Quarter.QuarterOfYear
-instance GHC.Classes.Ord Data.Time.Calendar.Quarter.QuarterOfYear
-instance GHC.Classes.Eq Data.Time.Calendar.Quarter.QuarterOfYear
-instance Data.Data.Data Data.Time.Calendar.Quarter.Quarter
-instance GHC.Classes.Ord Data.Time.Calendar.Quarter.Quarter
-instance GHC.Classes.Eq Data.Time.Calendar.Quarter.Quarter
-instance Control.DeepSeq.NFData Data.Time.Calendar.Quarter.Quarter
-instance GHC.Enum.Enum Data.Time.Calendar.Quarter.Quarter
-instance GHC.Ix.Ix Data.Time.Calendar.Quarter.Quarter
-instance GHC.Show.Show Data.Time.Calendar.Quarter.Quarter
-instance GHC.Read.Read Data.Time.Calendar.Quarter.Quarter
+instance GHC.Internal.Enum.Bounded Data.Time.Calendar.Quarter.QuarterOfYear
+instance GHC.Internal.Data.Data.Data Data.Time.Calendar.Quarter.Quarter
+instance GHC.Internal.Data.Data.Data Data.Time.Calendar.Quarter.QuarterOfYear
 instance Data.Time.Calendar.Days.DayPeriod Data.Time.Calendar.Quarter.Quarter
-instance GHC.Enum.Enum Data.Time.Calendar.Quarter.QuarterOfYear
-instance GHC.Enum.Bounded Data.Time.Calendar.Quarter.QuarterOfYear
+instance GHC.Internal.Enum.Enum Data.Time.Calendar.Quarter.Quarter
+instance GHC.Internal.Enum.Enum Data.Time.Calendar.Quarter.QuarterOfYear
+instance GHC.Classes.Eq Data.Time.Calendar.Quarter.Quarter
+instance GHC.Classes.Eq Data.Time.Calendar.Quarter.QuarterOfYear
+instance GHC.Internal.Ix.Ix Data.Time.Calendar.Quarter.Quarter
+instance GHC.Internal.Ix.Ix Data.Time.Calendar.Quarter.QuarterOfYear
+instance Control.DeepSeq.NFData Data.Time.Calendar.Quarter.Quarter
 instance Control.DeepSeq.NFData Data.Time.Calendar.Quarter.QuarterOfYear
+instance GHC.Classes.Ord Data.Time.Calendar.Quarter.Quarter
+instance GHC.Classes.Ord Data.Time.Calendar.Quarter.QuarterOfYear
+instance GHC.Internal.Read.Read Data.Time.Calendar.Quarter.Quarter
+instance GHC.Internal.Read.Read Data.Time.Calendar.Quarter.QuarterOfYear
+instance GHC.Internal.Show.Show Data.Time.Calendar.Quarter.Quarter
+instance GHC.Internal.Show.Show Data.Time.Calendar.Quarter.QuarterOfYear
 
 
 -- | Week-based calendars
@@ -461,6 +461,11 @@ MkFormat :: (t -> Maybe String) -> ReadP t -> Format t
 
 -- | Read a value in the format
 [formatReadP] :: Format t -> ReadP t
+formatString :: (TimeLocale -> t -> String) -> FormatOptions -> t -> String
+data PadOption
+class FormatTime t
+
+formatCharacter :: FormatTime t => Bool -> Char -> Maybe (FormatOptions -> t -> String)
 
 -- | Substitute various time-related information for each %-code in the
 --   string, as per <a>formatCharacter</a>.
@@ -739,23 +744,14 @@ MkFormatOptions :: TimeLocale -> Maybe FormatNumericPadding -> Maybe Int -> Form
 [foLocale] :: FormatOptions -> TimeLocale
 [foPadding] :: FormatOptions -> Maybe FormatNumericPadding
 [foWidth] :: FormatOptions -> Maybe Int
-class FormatTime t
-
-formatCharacter :: FormatTime t => Bool -> Char -> Maybe (FormatOptions -> t -> String)
 class (Num t, Ord t, Show t) => ShowPadded t
-data PadOption
 formatGeneral :: Bool -> Bool -> Int -> Char -> (TimeLocale -> PadOption -> t -> String) -> FormatOptions -> t -> String
-formatString :: (TimeLocale -> t -> String) -> FormatOptions -> t -> String
 formatNumber :: ShowPadded i => Bool -> Int -> Char -> (t -> i) -> FormatOptions -> t -> String
 formatNumberStd :: Int -> (t -> Integer) -> FormatOptions -> t -> String
 showPaddedFixed :: HasResolution a => PadOption -> PadOption -> Fixed a -> String
 showPaddedFixedFraction :: HasResolution a => PadOption -> Fixed a -> String
 quotBy :: (Real a, Integral b) => a -> a -> b
 remBy :: Real a => a -> a -> a
-data ParseNumericPadding
-NoPadding :: ParseNumericPadding
-SpacePadding :: ParseNumericPadding
-ZeroPadding :: ParseNumericPadding
 
 -- | The class of types which can be parsed given a UNIX-style time format
 --   string.
@@ -772,6 +768,10 @@ parseTimeSpecifier :: ParseTime t => Proxy t -> TimeLocale -> Maybe ParseNumeric
 --   was a Thursday). In the absence of <tt>%C</tt> or <tt>%Y</tt>, century
 --   is 1969 - 2068.
 buildTime :: ParseTime t => TimeLocale -> [(Char, String)] -> Maybe t
+data ParseNumericPadding
+NoPadding :: ParseNumericPadding
+SpacePadding :: ParseNumericPadding
+ZeroPadding :: ParseNumericPadding
 parseSpecifiers :: ParseTime t => Proxy t -> TimeLocale -> String -> ReadP [(Char, String)]
 timeSubstituteTimeSpecifier :: TimeLocale -> Char -> Maybe String
 timeParseTimeSpecifier :: TimeLocale -> Maybe ParseNumericPadding -> Char -> ReadP String
@@ -1051,6 +1051,57 @@ class FormatTime t
 --   point and &lt;width&gt; (default 12) decimal places.</li>
 --   </ul>
 formatTime :: FormatTime t => TimeLocale -> String -> t -> String
+data TimeLocale
+TimeLocale :: [(String, String)] -> [(String, String)] -> (String, String) -> String -> String -> String -> String -> [TimeZone] -> TimeLocale
+
+-- | full and abbreviated week days, starting with Sunday
+[wDays] :: TimeLocale -> [(String, String)]
+
+-- | full and abbreviated months
+[months] :: TimeLocale -> [(String, String)]
+
+-- | AM/PM symbols
+[amPm] :: TimeLocale -> (String, String)
+
+-- | formatting strings
+[dateTimeFmt] :: TimeLocale -> String
+
+-- | formatting strings
+[dateFmt] :: TimeLocale -> String
+
+-- | formatting strings
+[timeFmt] :: TimeLocale -> String
+
+-- | formatting strings
+[time12Fmt] :: TimeLocale -> String
+
+-- | time zones known by name
+[knownTimeZones] :: TimeLocale -> [TimeZone]
+
+-- | Locale representing American usage.
+--   
+--   <a>knownTimeZones</a> contains only the ten time-zones mentioned in
+--   RFC 822 sec. 5: "UT", "GMT", "EST", "EDT", "CST", "CDT", "MST", "MDT",
+--   "PST", "PDT". Note that the parsing functions will regardless parse
+--   "UTC", single-letter military time-zones, and +HHMM format.
+defaultTimeLocale :: TimeLocale
+
+-- | Construct format string according to <a>ISO-8601</a>.
+--   
+--   The <tt>Maybe String</tt> argument allows to supply an optional time
+--   specification. E.g.:
+--   
+--   <pre>
+--   <a>iso8601DateFormat</a> Nothing            == "%Y-%m-%d"           -- i.e. <tt><i>YYYY-MM-DD</i></tt>
+--   <a>iso8601DateFormat</a> (Just "%H:%M:%S")  == "%Y-%m-%dT%H:%M:%S"  -- i.e. <tt><i>YYYY-MM-DD</i>T<i>HH:MM:SS</i></tt>
+--   </pre>
+
+-- | <i>Deprecated: use <a>Data.Time.Format.ISO8601</a> functions
+--   instead</i>
+iso8601DateFormat :: Maybe String -> String
+
+-- | Format string according to <a>RFC822</a>.
+rfc822DateFormat :: String
 
 -- | Parses a time value given a format string. Missing information will be
 --   derived from 1970-01-01 00:00 UTC (which was a Thursday). Supports the
@@ -1099,54 +1150,6 @@ readPTime :: ParseTime t => Bool -> TimeLocale -> String -> ReadP t
 -- | The class of types which can be parsed given a UNIX-style time format
 --   string.
 class ParseTime t
-data TimeLocale
-TimeLocale :: [(String, String)] -> [(String, String)] -> (String, String) -> String -> [TimeZone] -> TimeLocale
-
--- | full and abbreviated week days, starting with Sunday
-[wDays] :: TimeLocale -> [(String, String)]
-
--- | full and abbreviated months
-[months] :: TimeLocale -> [(String, String)]
-
--- | AM/PM symbols
-[amPm] :: TimeLocale -> (String, String)
-
--- | formatting strings
-
--- | formatting strings
-
--- | formatting strings
-
--- | formatting strings
-[dateTimeFmt, dateFmt, timeFmt, time12Fmt] :: TimeLocale -> String
-
--- | time zones known by name
-[knownTimeZones] :: TimeLocale -> [TimeZone]
-
--- | Locale representing American usage.
---   
---   <a>knownTimeZones</a> contains only the ten time-zones mentioned in
---   RFC 822 sec. 5: "UT", "GMT", "EST", "EDT", "CST", "CDT", "MST", "MDT",
---   "PST", "PDT". Note that the parsing functions will regardless parse
---   "UTC", single-letter military time-zones, and +HHMM format.
-defaultTimeLocale :: TimeLocale
-
--- | Construct format string according to <a>ISO-8601</a>.
---   
---   The <tt>Maybe String</tt> argument allows to supply an optional time
---   specification. E.g.:
---   
---   <pre>
---   <a>iso8601DateFormat</a> Nothing            == "%Y-%m-%d"           -- i.e. <tt><i>YYYY-MM-DD</i></tt>
---   <a>iso8601DateFormat</a> (Just "%H:%M:%S")  == "%Y-%m-%dT%H:%M:%S"  -- i.e. <tt><i>YYYY-MM-DD</i>T<i>HH:MM:SS</i></tt>
---   </pre>
-
--- | <i>Deprecated: use <a>Data.Time.Format.ISO8601</a> functions
---   instead</i>
-iso8601DateFormat :: Maybe String -> String
-
--- | Format string according to <a>RFC822</a>.
-rfc822DateFormat :: String
 
 module Data.Time.LocalTime
 
@@ -1443,7 +1446,7 @@ taiToUTCTime :: LeapSecondMap -> AbsoluteTime -> Maybe UTCTime
 -- | TAI clock, if it exists. Note that it is unlikely to be set correctly,
 --   without due care and attention.
 taiClock :: Maybe (DiffTime, IO AbsoluteTime)
-instance GHC.Show.Show Data.Time.Clock.Internal.AbsoluteTime.AbsoluteTime
+instance GHC.Internal.Show.Show Data.Time.Clock.Internal.AbsoluteTime.AbsoluteTime
 
 module Data.Time.Calendar
 
@@ -1871,13 +1874,13 @@ recurringIntervalFormat :: Format a -> Format b -> Format (Int, a, b)
 -- | Like <a>makeTimeOfDayValid</a>, but accepts <tt>24 0 0</tt> per ISO
 --   8601:2004(E) sec. 4.2.3
 isoMakeTimeOfDayValid :: Int -> Int -> Pico -> Maybe TimeOfDay
-instance Data.Time.Format.ISO8601.ISO8601 Data.Time.Calendar.Days.Day
-instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.TimeOfDay.TimeOfDay
-instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.TimeZone.TimeZone
-instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.LocalTime.LocalTime
-instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.ZonedTime.ZonedTime
-instance Data.Time.Format.ISO8601.ISO8601 Data.Time.Clock.Internal.UTCTime.UTCTime
+instance Data.Fixed.HasResolution Data.Time.Format.ISO8601.E14
+instance Data.Fixed.HasResolution Data.Time.Format.ISO8601.E16
 instance Data.Time.Format.ISO8601.ISO8601 Data.Time.Calendar.CalendarDiffDays.CalendarDiffDays
 instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.CalendarDiffTime.CalendarDiffTime
-instance Data.Fixed.HasResolution Data.Time.Format.ISO8601.E16
-instance Data.Fixed.HasResolution Data.Time.Format.ISO8601.E14
+instance Data.Time.Format.ISO8601.ISO8601 Data.Time.Calendar.Days.Day
+instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.LocalTime.LocalTime
+instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.TimeOfDay.TimeOfDay
+instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.TimeZone.TimeZone
+instance Data.Time.Format.ISO8601.ISO8601 Data.Time.Clock.Internal.UTCTime.UTCTime
+instance Data.Time.Format.ISO8601.ISO8601 Data.Time.LocalTime.Internal.ZonedTime.ZonedTime

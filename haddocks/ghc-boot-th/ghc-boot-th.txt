@@ -12,7 +12,7 @@
 --   minimal set of transitive dependencies, since it is intended to be
 --   depended upon by user code.
 @package ghc-boot-th
-@version 9.6.4
+@version 9.10.1
 
 module GHC.ForeignSrcLang.Type
 
@@ -39,9 +39,9 @@ LangJs :: ForeignSrcLang
 
 -- | Object (.o)
 RawObject :: ForeignSrcLang
-instance GHC.Generics.Generic GHC.ForeignSrcLang.Type.ForeignSrcLang
-instance GHC.Show.Show GHC.ForeignSrcLang.Type.ForeignSrcLang
 instance GHC.Classes.Eq GHC.ForeignSrcLang.Type.ForeignSrcLang
+instance GHC.Internal.Generics.Generic GHC.ForeignSrcLang.Type.ForeignSrcLang
+instance GHC.Internal.Show.Show GHC.ForeignSrcLang.Type.ForeignSrcLang
 
 
 -- | A data type defining the language extensions supported by GHC.
@@ -109,6 +109,7 @@ TypeData :: Extension
 InstanceSigs :: Extension
 ApplicativeDo :: Extension
 LinearTypes :: Extension
+RequiredTypeArguments :: Extension
 StandaloneDeriving :: Extension
 DeriveDataTypeable :: Extension
 AutoDeriveTypeable :: Extension
@@ -181,12 +182,15 @@ LexicalNegation :: Extension
 FieldSelectors :: Extension
 OverloadedRecordDot :: Extension
 OverloadedRecordUpdate :: Extension
-instance GHC.Enum.Bounded GHC.LanguageExtensions.Type.Extension
-instance GHC.Generics.Generic GHC.LanguageExtensions.Type.Extension
-instance GHC.Show.Show GHC.LanguageExtensions.Type.Extension
-instance GHC.Enum.Enum GHC.LanguageExtensions.Type.Extension
+TypeAbstractions :: Extension
+ExtendedLiterals :: Extension
+ListTuplePuns :: Extension
+instance GHC.Internal.Enum.Bounded GHC.LanguageExtensions.Type.Extension
+instance GHC.Internal.Enum.Enum GHC.LanguageExtensions.Type.Extension
 instance GHC.Classes.Eq GHC.LanguageExtensions.Type.Extension
+instance GHC.Internal.Generics.Generic GHC.LanguageExtensions.Type.Extension
 instance GHC.Classes.Ord GHC.LanguageExtensions.Type.Extension
+instance GHC.Internal.Show.Show GHC.LanguageExtensions.Type.Extension
 
 
 -- | Functions to evaluate whether or not a string is a valid identifier.

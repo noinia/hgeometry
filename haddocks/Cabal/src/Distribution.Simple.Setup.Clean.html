@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE RankNTypes #-}</span><span>
+</span><span id="line-6"></span><span>
+</span><span id="line-7"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Module      :  Distribution.Simple.Setup.Clean</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Copyright   :  Isaac Jones 2003-2004</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--                Duncan Coutts 2007</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- License     :  BSD3</span><span>
+</span><span id="line-14"></span><span class="hs-comment">--</span><span>
+</span><span id="line-15"></span><span class="hs-comment">-- Maintainer  :  cabal-devel@haskell.org</span><span>
+</span><span id="line-16"></span><span class="hs-comment">-- Portability :  portable</span><span>
+</span><span id="line-17"></span><span class="hs-comment">--</span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- Definition of the clean command-line options.</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- See: @Distribution.Simple.Setup@</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html"><span class="hs-identifier">Distribution.Simple.Setup.Clean</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#CleanFlags"><span class="hs-identifier">CleanFlags</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#emptyCleanFlags"><span class="hs-identifier">emptyCleanFlags</span></a></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#defaultCleanFlags"><span class="hs-identifier">defaultCleanFlags</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#cleanCommand"><span class="hs-identifier">cleanCommand</span></a></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Prelude.html/Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">get</span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html"><span class="hs-identifier">Distribution.Simple.Command</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt"><span class="hs-identifier">boolOpt</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#boolOpt%27"><span class="hs-identifier">boolOpt'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html"><span class="hs-identifier">Distribution.Simple.Flag</span></a></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Verbosity.html"><span class="hs-identifier">Distribution.Verbosity</span></a></span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Common.html"><span class="hs-identifier">Distribution.Simple.Setup.Common</span></a></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="annot"><span class="hs-comment">-- * Clean flags</span></span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- ------------------------------------------------------------</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-keyword">data</span><span> </span><span id="CleanFlags"><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#CleanFlags"><span class="hs-identifier hs-var">CleanFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="CleanFlags"><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#CleanFlags"><span class="hs-identifier hs-var">CleanFlags</span></a></span></span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="cleanSaveConf"><span class="annot"><span class="annottext">CleanFlags -&gt; Flag Bool
+</span><a href="Distribution.Simple.Setup.Clean.html#cleanSaveConf"><span class="hs-identifier hs-var hs-var">cleanSaveConf</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="cleanDistPref"><span class="annot"><span class="annottext">CleanFlags -&gt; Flag FilePath
+</span><a href="Distribution.Simple.Setup.Clean.html#cleanDistPref"><span class="hs-identifier hs-var hs-var">cleanDistPref</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="cleanVerbosity"><span class="annot"><span class="annottext">CleanFlags -&gt; Flag Verbosity
+</span><a href="Distribution.Simple.Setup.Clean.html#cleanVerbosity"><span class="hs-identifier hs-var hs-var">cleanVerbosity</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><a href="Distribution.Verbosity.html#Verbosity"><span class="hs-identifier hs-type">Verbosity</span></a></span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="cleanCabalFilePath"><span class="annot"><span class="annottext">CleanFlags -&gt; Flag FilePath
+</span><a href="Distribution.Simple.Setup.Clean.html#cleanCabalFilePath"><span class="hs-identifier hs-var hs-var">cleanCabalFilePath</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-type">Flag</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679477800"><span id="local-6989586621679477812"><span id="local-6989586621679477816"><span class="annot"><span class="annottext">Int -&gt; CleanFlags -&gt; ShowS
+[CleanFlags] -&gt; ShowS
+CleanFlags -&gt; FilePath
+(Int -&gt; CleanFlags -&gt; ShowS)
+-&gt; (CleanFlags -&gt; FilePath)
+-&gt; ([CleanFlags] -&gt; ShowS)
+-&gt; Show CleanFlags
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; FilePath) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; CleanFlags -&gt; ShowS
+showsPrec :: Int -&gt; CleanFlags -&gt; ShowS
+$cshow :: CleanFlags -&gt; FilePath
+show :: CleanFlags -&gt; FilePath
+$cshowList :: [CleanFlags] -&gt; ShowS
+showList :: [CleanFlags] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679477826"><span id="local-6989586621679477828"><span class="annot"><span class="annottext">(forall x. CleanFlags -&gt; Rep CleanFlags x)
+-&gt; (forall x. Rep CleanFlags x -&gt; CleanFlags) -&gt; Generic CleanFlags
+forall x. Rep CleanFlags x -&gt; CleanFlags
+forall x. CleanFlags -&gt; Rep CleanFlags x
+forall a.
+(forall x. a -&gt; Rep a x) -&gt; (forall x. Rep a x -&gt; a) -&gt; Generic a
+$cfrom :: forall x. CleanFlags -&gt; Rep CleanFlags x
+from :: forall x. CleanFlags -&gt; Rep CleanFlags x
+$cto :: forall x. Rep CleanFlags x -&gt; CleanFlags
+to :: forall x. Rep CleanFlags x -&gt; CleanFlags
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">)</span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679477834"><span id="local-6989586621679477841"><span id="local-6989586621679477847"><span class="annot"><span class="hs-identifier hs-type">Binary</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#CleanFlags"><span class="hs-identifier hs-type">CleanFlags</span></a></span></span></span></span><span>
+</span><span id="line-51"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679477900"><span id="local-6989586621679477907"><span class="annot"><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Utils.Structured.html/Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#CleanFlags"><span class="hs-identifier hs-type">CleanFlags</span></a></span></span></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#defaultCleanFlags"><span class="hs-identifier hs-type">defaultCleanFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#CleanFlags"><span class="hs-identifier hs-type">CleanFlags</span></a></span><span>
+</span><span id="line-54"></span><span id="defaultCleanFlags"><span class="annot"><span class="annottext">defaultCleanFlags :: CleanFlags
+</span><a href="Distribution.Simple.Setup.Clean.html#defaultCleanFlags"><span class="hs-identifier hs-var hs-var">defaultCleanFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-55"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#CleanFlags"><span class="hs-identifier hs-type">CleanFlags</span></a></span><span>
+</span><span id="line-56"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">cleanSaveConf :: Flag Bool
+</span><a href="Distribution.Simple.Setup.Clean.html#cleanSaveConf"><span class="hs-identifier hs-var">cleanSaveConf</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Flag Bool
+forall a. a -&gt; Flag a
+</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-57"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">cleanDistPref :: Flag FilePath
+</span><a href="Distribution.Simple.Setup.Clean.html#cleanDistPref"><span class="hs-identifier hs-var">cleanDistPref</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag FilePath
+forall a. Flag a
+</span><a href="Distribution.Simple.Flag.html#NoFlag"><span class="hs-identifier hs-var">NoFlag</span></a></span><span>
+</span><span id="line-58"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">cleanVerbosity :: Flag Verbosity
+</span><a href="Distribution.Simple.Setup.Clean.html#cleanVerbosity"><span class="hs-identifier hs-var">cleanVerbosity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Verbosity -&gt; Flag Verbosity
+forall a. a -&gt; Flag a
+</span><a href="Distribution.Simple.Flag.html#Flag"><span class="hs-identifier hs-var">Flag</span></a></span><span> </span><span class="annot"><span class="annottext">Verbosity
+</span><a href="Distribution.Verbosity.html#normal"><span class="hs-identifier hs-var">normal</span></a></span><span>
+</span><span id="line-59"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">cleanCabalFilePath :: Flag FilePath
+</span><a href="Distribution.Simple.Setup.Clean.html#cleanCabalFilePath"><span class="hs-identifier hs-var">cleanCabalFilePath</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Flag FilePath
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-60"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#cleanCommand"><span class="hs-identifier hs-type">cleanCommand</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#CleanFlags"><span class="hs-identifier hs-type">CleanFlags</span></a></span><span>
+</span><span id="line-63"></span><span id="cleanCommand"><span class="annot"><span class="annottext">cleanCommand :: CommandUI CleanFlags
+</span><a href="Distribution.Simple.Setup.Clean.html#cleanCommand"><span class="hs-identifier hs-var hs-var">cleanCommand</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-64"></span><span>  </span><span class="annot"><a href="Distribution.Simple.Command.html#CommandUI"><span class="hs-identifier hs-type">CommandUI</span></a></span><span>
+</span><span id="line-65"></span><span>    </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">commandName :: FilePath
+</span><a href="Distribution.Simple.Command.html#commandName"><span class="hs-identifier hs-var">commandName</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;clean&quot;</span></span><span>
+</span><span id="line-66"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandSynopsis :: FilePath
+</span><a href="Distribution.Simple.Command.html#commandSynopsis"><span class="hs-identifier hs-var">commandSynopsis</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;Clean up after a build.&quot;</span></span><span>
+</span><span id="line-67"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDescription :: Maybe ShowS
+</span><a href="Distribution.Simple.Command.html#commandDescription"><span class="hs-identifier hs-var">commandDescription</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ShowS -&gt; Maybe ShowS
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; Maybe ShowS) -&gt; ShowS -&gt; Maybe ShowS
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-68"></span><span>        </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;Removes .hi, .o, preprocessed sources, etc.\n&quot;</span></span><span>
+</span><span id="line-69"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandNotes :: Maybe ShowS
+</span><a href="Distribution.Simple.Command.html#commandNotes"><span class="hs-identifier hs-var">commandNotes</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe ShowS
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-70"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandUsage :: ShowS
+</span><a href="Distribution.Simple.Command.html#commandUsage"><span class="hs-identifier hs-var">commandUsage</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679477966"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679477966"><span class="hs-identifier hs-var">pname</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-71"></span><span>        </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;Usage: &quot;</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621679477966"><span class="hs-identifier hs-var">pname</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; ShowS
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot; clean [FLAGS]\n&quot;</span></span><span>
+</span><span id="line-72"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandDefaultFlags :: CleanFlags
+</span><a href="Distribution.Simple.Command.html#commandDefaultFlags"><span class="hs-identifier hs-var">commandDefaultFlags</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CleanFlags
+</span><a href="Distribution.Simple.Setup.Clean.html#defaultCleanFlags"><span class="hs-identifier hs-var">defaultCleanFlags</span></a></span><span>
+</span><span id="line-73"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">commandOptions :: ShowOrParseArgs -&gt; [OptionField CleanFlags]
+</span><a href="Distribution.Simple.Command.html#commandOptions"><span class="hs-identifier hs-var">commandOptions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679477969"><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679477969"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-74"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">(CleanFlags -&gt; Flag Verbosity)
+-&gt; (Flag Verbosity -&gt; CleanFlags -&gt; CleanFlags)
+-&gt; OptionField CleanFlags
+forall flags.
+(flags -&gt; Flag Verbosity)
+-&gt; (Flag Verbosity -&gt; flags -&gt; flags) -&gt; OptionField flags
+</span><a href="Distribution.Simple.Setup.Common.html#optionVerbosity"><span class="hs-identifier hs-var">optionVerbosity</span></a></span><span> </span><span class="annot"><span class="annottext">CleanFlags -&gt; Flag Verbosity
+</span><a href="Distribution.Simple.Setup.Clean.html#cleanVerbosity"><span class="hs-identifier hs-var">cleanVerbosity</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679477971"><span class="annot"><span class="annottext">Flag Verbosity
+</span><a href="#local-6989586621679477971"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679477972"><span class="annot"><span class="annottext">CleanFlags
+</span><a href="#local-6989586621679477972"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CleanFlags
+</span><a href="#local-6989586621679477972"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#cleanVerbosity"><span class="hs-identifier hs-var">cleanVerbosity</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679477971"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-75"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(CleanFlags -&gt; Flag FilePath)
+-&gt; (Flag FilePath -&gt; CleanFlags -&gt; CleanFlags)
+-&gt; ShowOrParseArgs
+-&gt; OptionField CleanFlags
+forall flags.
+(flags -&gt; Flag FilePath)
+-&gt; (Flag FilePath -&gt; flags -&gt; flags)
+-&gt; ShowOrParseArgs
+-&gt; OptionField flags
+</span><a href="Distribution.Simple.Setup.Common.html#optionDistPref"><span class="hs-identifier hs-var">optionDistPref</span></a></span><span>
+</span><span id="line-76"></span><span>            </span><span class="annot"><span class="annottext">CleanFlags -&gt; Flag FilePath
+</span><a href="Distribution.Simple.Setup.Clean.html#cleanDistPref"><span class="hs-identifier hs-var">cleanDistPref</span></a></span><span>
+</span><span id="line-77"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679477974"><span class="annot"><span class="annottext">Flag FilePath
+</span><a href="#local-6989586621679477974"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679477975"><span class="annot"><span class="annottext">CleanFlags
+</span><a href="#local-6989586621679477975"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CleanFlags
+</span><a href="#local-6989586621679477975"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#cleanDistPref"><span class="hs-identifier hs-var">cleanDistPref</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679477974"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-78"></span><span>            </span><span class="annot"><span class="annottext">ShowOrParseArgs
+</span><a href="#local-6989586621679477969"><span class="hs-identifier hs-var">showOrParseArgs</span></a></span><span>
+</span><span id="line-79"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">FilePath
+-&gt; LFlags
+-&gt; FilePath
+-&gt; (CleanFlags -&gt; Flag Bool)
+-&gt; (Flag Bool -&gt; CleanFlags -&gt; CleanFlags)
+-&gt; MkOptDescr
+     (CleanFlags -&gt; Flag Bool)
+     (Flag Bool -&gt; CleanFlags -&gt; CleanFlags)
+     CleanFlags
+-&gt; OptionField CleanFlags
+forall get set a.
+FilePath
+-&gt; LFlags
+-&gt; FilePath
+-&gt; get
+-&gt; set
+-&gt; MkOptDescr get set a
+-&gt; OptionField a
+</span><a href="Distribution.Simple.Command.html#option"><span class="hs-identifier hs-var">option</span></a></span><span>
+</span><span id="line-80"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;s&quot;</span></span><span>
+</span><span id="line-81"></span><span>            </span><span class="hs-special">[</span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;save-configure&quot;</span></span><span class="hs-special">]</span><span>
+</span><span id="line-82"></span><span>            </span><span class="annot"><span class="annottext">FilePath
+</span><span class="hs-string">&quot;Do not remove the configuration file (dist/setup-config) during cleaning.  Saves need to reconfigure.&quot;</span></span><span>
+</span><span id="line-83"></span><span>            </span><span class="annot"><span class="annottext">CleanFlags -&gt; Flag Bool
+</span><a href="Distribution.Simple.Setup.Clean.html#cleanSaveConf"><span class="hs-identifier hs-var">cleanSaveConf</span></a></span><span>
+</span><span id="line-84"></span><span>            </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679477977"><span class="annot"><span class="annottext">Flag Bool
+</span><a href="#local-6989586621679477977"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679477978"><span class="annot"><span class="annottext">CleanFlags
+</span><a href="#local-6989586621679477978"><span class="hs-identifier hs-var">flags</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CleanFlags
+</span><a href="#local-6989586621679477978"><span class="hs-identifier hs-var">flags</span></a></span><span class="hs-special">{</span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#cleanSaveConf"><span class="hs-identifier hs-var">cleanSaveConf</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679477977"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>            </span><span class="annot"><span class="annottext">MkOptDescr
+  (CleanFlags -&gt; Flag Bool)
+  (Flag Bool -&gt; CleanFlags -&gt; CleanFlags)
+  CleanFlags
+forall a. MkOptDescr (a -&gt; Flag Bool) (Flag Bool -&gt; a -&gt; a) a
+</span><a href="Distribution.Simple.Setup.Common.html#trueArg"><span class="hs-identifier hs-var">trueArg</span></a></span><span>
+</span><span id="line-86"></span><span>        </span><span class="hs-special">]</span><span>
+</span><span id="line-87"></span><span>    </span><span class="hs-special">}</span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#emptyCleanFlags"><span class="hs-identifier hs-type">emptyCleanFlags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#CleanFlags"><span class="hs-identifier hs-type">CleanFlags</span></a></span><span>
+</span><span id="line-90"></span><span id="emptyCleanFlags"><span class="annot"><span class="annottext">emptyCleanFlags :: CleanFlags
+</span><a href="Distribution.Simple.Setup.Clean.html#emptyCleanFlags"><span class="hs-identifier hs-var hs-var">emptyCleanFlags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CleanFlags
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679477986"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#CleanFlags"><span class="hs-identifier hs-type">CleanFlags</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-93"></span><span>  </span><span id="local-6989586621679478012"><span class="annot"><span class="annottext">mempty :: CleanFlags
+</span><span class="hs-identifier hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CleanFlags
+forall a. (Generic a, GMonoid (Rep a)) =&gt; a
+</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Semigroup.html/Distribution.Compat.Semigroup.html#gmempty"><span class="hs-identifier hs-var">gmempty</span></a></span><span>
+</span><span id="line-94"></span><span>  </span><span id="local-6989586621679478015"><span class="annot"><span class="annottext">mappend :: CleanFlags -&gt; CleanFlags -&gt; CleanFlags
+</span><span class="hs-identifier hs-var hs-var hs-var">mappend</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CleanFlags -&gt; CleanFlags -&gt; CleanFlags
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span>
+</span><span id="line-95"></span><span>
+</span><span id="line-96"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679478018"><span id="local-6989586621679478021"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="Distribution.Simple.Setup.Clean.html#CleanFlags"><span class="hs-identifier hs-type">CleanFlags</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-97"></span><span>  </span><span id="local-6989586621679478046"><span class="annot"><span class="annottext">&lt;&gt; :: CleanFlags -&gt; CleanFlags -&gt; CleanFlags
+</span><span class="hs-operator hs-var hs-var hs-var">(&lt;&gt;)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CleanFlags -&gt; CleanFlags -&gt; CleanFlags
+forall a. (Generic a, GSemigroup (Rep a)) =&gt; a -&gt; a -&gt; a
+</span><a href="../../Cabal-syntax-3.12.0.0-d78a/src//Distribution.Compat.Semigroup.html/Distribution.Compat.Semigroup.html#gmappend"><span class="hs-identifier hs-var">gmappend</span></a></span><span>
+</span><span id="line-98"></span></pre></body></html>

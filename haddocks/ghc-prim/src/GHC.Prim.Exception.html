@@ -5,7 +5,7 @@
 </span><span id="line-5"></span><span class="hs-comment">-- | Primitive exceptions.</span><span>
 </span><span id="line-6"></span><span class="hs-comment">--</span><span>
 </span><span id="line-7"></span><span class="hs-comment">-- Users should not import this module.  It is GHC internal only.</span><span>
-</span><span id="line-8"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">GHC.Prim.Exception</span><span>
+</span><span id="line-8"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="GHC.Prim.Exception.html"><span class="hs-identifier">GHC.Prim.Exception</span></a></span><span>
 </span><span id="line-9"></span><span>   </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="GHC.Prim.Exception.html#raiseOverflow"><span class="hs-identifier">raiseOverflow</span></a></span><span>
 </span><span id="line-10"></span><span>   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Prim.Exception.html#raiseUnderflow"><span class="hs-identifier">raiseUnderflow</span></a></span><span>
 </span><span id="line-11"></span><span>   </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.Prim.Exception.html#raiseDivZero"><span class="hs-identifier">raiseDivZero</span></a></span><span>
@@ -29,21 +29,21 @@
 </span><span id="line-29"></span><span class="hs-comment">-- See also: Note [Wired-in exceptions are not CAFfy] in GHC.Core.Make.</span><span>
 </span><span id="line-30"></span><span>
 </span><span id="line-31"></span><span class="annot"><span class="hs-comment">-- | Raise 'GHC.Exception.Type.overflowException'</span></span><span>
-</span><span id="line-32"></span><span id="local-6989586621679086164"><span class="annot"><a href="GHC.Prim.Exception.html#raiseOverflow"><span class="hs-identifier hs-type">raiseOverflow</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679086164"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-32"></span><span id="local-6989586621679142571"><span class="annot"><a href="GHC.Prim.Exception.html#raiseOverflow"><span class="hs-identifier hs-type">raiseOverflow</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679142571"><span class="hs-identifier hs-type">a</span></a></span></span><span>
 </span><span id="line-33"></span><span id="raiseOverflow"><span class="annot"><span class="annottext">raiseOverflow :: forall a. a
 </span><a href="GHC.Prim.Exception.html#raiseOverflow"><span class="hs-identifier hs-var hs-var">raiseOverflow</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(# #) -&gt; a
 forall b. (# #) -&gt; b
 </span><a href="GHC.Prim.html#raiseOverflow%23"><span class="hs-identifier hs-var">raiseOverflow#</span></a></span><span> </span><span class="hs-special">(#</span><span> </span><span class="hs-special">#)</span><span>
 </span><span id="line-34"></span><span>
 </span><span id="line-35"></span><span class="annot"><span class="hs-comment">-- | Raise 'GHC.Exception.Type.underflowException'</span></span><span>
-</span><span id="line-36"></span><span id="local-6989586621679086173"><span class="annot"><a href="GHC.Prim.Exception.html#raiseUnderflow"><span class="hs-identifier hs-type">raiseUnderflow</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679086173"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-36"></span><span id="local-6989586621679142580"><span class="annot"><a href="GHC.Prim.Exception.html#raiseUnderflow"><span class="hs-identifier hs-type">raiseUnderflow</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679142580"><span class="hs-identifier hs-type">a</span></a></span></span><span>
 </span><span id="line-37"></span><span id="raiseUnderflow"><span class="annot"><span class="annottext">raiseUnderflow :: forall a. a
 </span><a href="GHC.Prim.Exception.html#raiseUnderflow"><span class="hs-identifier hs-var hs-var">raiseUnderflow</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(# #) -&gt; a
 forall b. (# #) -&gt; b
 </span><a href="GHC.Prim.html#raiseUnderflow%23"><span class="hs-identifier hs-var">raiseUnderflow#</span></a></span><span> </span><span class="hs-special">(#</span><span> </span><span class="hs-special">#)</span><span>
 </span><span id="line-38"></span><span>
 </span><span id="line-39"></span><span class="annot"><span class="hs-comment">-- | Raise 'GHC.Exception.Type.divZeroException'</span></span><span>
-</span><span id="line-40"></span><span id="local-6989586621679086174"><span class="annot"><a href="GHC.Prim.Exception.html#raiseDivZero"><span class="hs-identifier hs-type">raiseDivZero</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679086174"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-40"></span><span id="local-6989586621679142581"><span class="annot"><a href="GHC.Prim.Exception.html#raiseDivZero"><span class="hs-identifier hs-type">raiseDivZero</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679142581"><span class="hs-identifier hs-type">a</span></a></span></span><span>
 </span><span id="line-41"></span><span id="raiseDivZero"><span class="annot"><span class="annottext">raiseDivZero :: forall a. a
 </span><a href="GHC.Prim.Exception.html#raiseDivZero"><span class="hs-identifier hs-var hs-var">raiseDivZero</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(# #) -&gt; a
 forall b. (# #) -&gt; b

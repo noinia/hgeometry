@@ -11,7 +11,7 @@
 --   easier concurrency, and a more composable API. You can read more about
 --   it at <a>https://github.com/fpco/typed-process/#readme</a>.
 @package process
-@version 1.6.17.0
+@version 1.6.19.0
 
 
 -- | <b>Note:</b> This module exports internal implementation details that
@@ -53,7 +53,7 @@ ClosedHandle :: ExitCode -> ProcessHandle__
 type PHANDLE = CPid
 closePHANDLE :: PHANDLE -> IO ()
 mkProcessHandle :: PHANDLE -> Bool -> IO ProcessHandle
-data () => CGid
+data CGid
 type GroupID = CGid
 type UserID = CUid
 modifyProcessHandle :: ProcessHandle -> (ProcessHandle__ -> IO (ProcessHandle__, a)) -> IO a
@@ -88,17 +88,16 @@ CreateProcess :: CmdSpec -> Maybe FilePath -> Maybe [(String, String)] -> StdStr
 --   process (on Windows, only works if std_in, std_out, and std_err are
 --   all Inherit). This implementation will call close on every fd from 3
 --   to the maximum of open files, which can be slow for high maximum of
---   open files.
+--   open files. XXX verify what happens with fds in nodejs child processes
 [close_fds] :: CreateProcess -> Bool
 
--- | Create a new process group
+-- | Create a new process group. On JavaScript this also creates a new
+--   session.
 [create_group] :: CreateProcess -> Bool
 
 -- | Delegate control-C handling. Use this for interactive console
 --   processes to let them handle control-C themselves (see below for
 --   details).
---   
---   On Windows this has no effect.
 [delegate_ctlc] :: CreateProcess -> Bool
 
 -- | Use the windows DETACHED_PROCESS flag when creating the process; does
@@ -111,18 +110,19 @@ CreateProcess :: CmdSpec -> Maybe FilePath -> Maybe [(String, String)] -> StdStr
 --   Default: <tt>False</tt>
 [create_new_console] :: CreateProcess -> Bool
 
--- | Use posix setsid to start the new process in a new session; does
---   nothing on other platforms.
+-- | Use posix setsid to start the new process in a new session; starts
+--   process in a new session on JavaScript; does nothing on other
+--   platforms.
 [new_session] :: CreateProcess -> Bool
 
--- | Use posix setgid to set child process's group id; does nothing on
---   other platforms.
+-- | Use posix setgid to set child process's group id; works for JavaScript
+--   when system running nodejs is posix. does nothing on other platforms.
 --   
 --   Default: <tt>Nothing</tt>
 [child_group] :: CreateProcess -> Maybe GroupID
 
--- | Use posix setuid to set child process's user id; does nothing on other
---   platforms.
+-- | Use posix setuid to set child process's user id; works for JavaScript
+--   when system running nodejs is posix. does nothing on other platforms.
 --   
 --   Default: <tt>Nothing</tt>
 [child_user] :: CreateProcess -> Maybe UserID
@@ -157,6 +157,13 @@ ShellCommand :: String -> CmdSpec
 --   filename does not already have an extension. For full details see the
 --   <a>documentation</a> for the Windows <tt>SearchPath</tt> API.</li>
 --   </ul>
+--   
+--   Windows does not have a mechanism for passing multiple arguments. When
+--   using <tt>RawCommand</tt> on Windows, the command line is serialised
+--   into a string, with arguments quoted separately. Command line parsing
+--   is up individual programs, so the default behaviour may not work for
+--   some programs. If you are not getting the desired results, construct
+--   the command line yourself and use <a>ShellCommand</a>.
 RawCommand :: FilePath -> [String] -> CmdSpec
 data StdStream
 
@@ -209,13 +216,6 @@ createProcess_ :: String -> CreateProcess -> IO (Maybe Handle, Maybe Handle, May
 --   emulated stub that probably duplicates or overrides your own signal
 --   handling).</i>
 runGenProcess_ :: String -> CreateProcess -> Maybe CLong -> Maybe CLong -> IO (Maybe Handle, Maybe Handle, Maybe Handle, ProcessHandle)
-
--- | Turn an existing file descriptor into a Handle. This is used by
---   various external libraries to make Handles.
---   
---   Makes a binary Handle. This is for historical reasons; it should
---   probably be a text Handle with the default encoding and newline
---   translation instead.
 fdToHandle :: FD -> IO Handle
 startDelegateControlC :: IO ()
 endDelegateControlC :: ExitCode -> IO ()
@@ -223,8 +223,6 @@ stopDelegateControlC :: IO ()
 unwrapHandles :: ProcRetHandles -> (Maybe Handle, Maybe Handle, Maybe Handle, ProcessHandle)
 pPrPr_disableITimers :: IO ()
 c_execvpe :: CString -> Ptr CString -> Ptr CString -> IO CInt
-ignoreSignal :: CLong
-defaultSignal :: CLong
 
 -- | <tt>runInteractiveProcess</tt> blocks signals around the fork(). Since
 --   blocking/unblocking of signals is a global state operation, we need to
@@ -234,6 +232,8 @@ defaultSignal :: CLong
 --   protect their changes with the same lock. See
 --   <a>https://github.com/haskell/process/pull/154</a>.
 runInteractiveProcess_lock :: MVar ()
+ignoreSignal :: CLong
+defaultSignal :: CLong
 withFilePathException :: FilePath -> IO a -> IO a
 withCEnvironment :: [(String, String)] -> (Ptr CString -> IO a) -> IO a
 translate :: String -> String
@@ -407,17 +407,16 @@ CreateProcess :: CmdSpec -> Maybe FilePath -> Maybe [(String, String)] -> StdStr
 --   process (on Windows, only works if std_in, std_out, and std_err are
 --   all Inherit). This implementation will call close on every fd from 3
 --   to the maximum of open files, which can be slow for high maximum of
---   open files.
+--   open files. XXX verify what happens with fds in nodejs child processes
 [close_fds] :: CreateProcess -> Bool
 
--- | Create a new process group
+-- | Create a new process group. On JavaScript this also creates a new
+--   session.
 [create_group] :: CreateProcess -> Bool
 
 -- | Delegate control-C handling. Use this for interactive console
 --   processes to let them handle control-C themselves (see below for
 --   details).
---   
---   On Windows this has no effect.
 [delegate_ctlc] :: CreateProcess -> Bool
 
 -- | Use the windows DETACHED_PROCESS flag when creating the process; does
@@ -430,18 +429,19 @@ CreateProcess :: CmdSpec -> Maybe FilePath -> Maybe [(String, String)] -> StdStr
 --   Default: <tt>False</tt>
 [create_new_console] :: CreateProcess -> Bool
 
--- | Use posix setsid to start the new process in a new session; does
---   nothing on other platforms.
+-- | Use posix setsid to start the new process in a new session; starts
+--   process in a new session on JavaScript; does nothing on other
+--   platforms.
 [new_session] :: CreateProcess -> Bool
 
--- | Use posix setgid to set child process's group id; does nothing on
---   other platforms.
+-- | Use posix setgid to set child process's group id; works for JavaScript
+--   when system running nodejs is posix. does nothing on other platforms.
 --   
 --   Default: <tt>Nothing</tt>
 [child_group] :: CreateProcess -> Maybe GroupID
 
--- | Use posix setuid to set child process's user id; does nothing on other
---   platforms.
+-- | Use posix setuid to set child process's user id; works for JavaScript
+--   when system running nodejs is posix. does nothing on other platforms.
 --   
 --   Default: <tt>Nothing</tt>
 [child_user] :: CreateProcess -> Maybe UserID
@@ -476,6 +476,13 @@ ShellCommand :: String -> CmdSpec
 --   filename does not already have an extension. For full details see the
 --   <a>documentation</a> for the Windows <tt>SearchPath</tt> API.</li>
 --   </ul>
+--   
+--   Windows does not have a mechanism for passing multiple arguments. When
+--   using <tt>RawCommand</tt> on Windows, the command line is serialised
+--   into a string, with arguments quoted separately. Command line parsing
+--   is up individual programs, so the default behaviour may not work for
+--   some programs. If you are not getting the desired results, construct
+--   the command line yourself and use <a>ShellCommand</a>.
 RawCommand :: FilePath -> [String] -> CmdSpec
 data StdStream
 
@@ -564,10 +571,9 @@ readCreateProcess :: CreateProcess -> String -> IO String
 --   Output is returned strictly, so this is not suitable for launching
 --   processes that require interaction over the standard file streams.
 --   
---   This function throws an <a>IOException</a> if the process
---   <a>ExitCode</a> is anything other than <a>ExitSuccess</a>. If instead
---   you want to get the <a>ExitCode</a> then use
---   <a>readProcessWithExitCode</a>.
+--   This function throws an <a>IOError</a> if the process <a>ExitCode</a>
+--   is anything other than <a>ExitSuccess</a>. If instead you want to get
+--   the <a>ExitCode</a> then use <a>readProcessWithExitCode</a>.
 --   
 --   Users of this function should compile with <tt>-threaded</tt> if they
 --   want other Haskell threads to keep running while waiting on the result
@@ -583,7 +589,8 @@ readCreateProcess :: CreateProcess -> String -> IO String
 --   <ul>
 --   <li>The command to run, which must be in the $PATH, or an absolute or
 --   relative path</li>
---   <li>A list of separate command line arguments to the program</li>
+--   <li>A list of separate command line arguments to the program. See
+--   <a>RawCommand</a> for further discussion of Windows semantics.</li>
 --   <li>A string to pass on standard input to the forked process.</li>
 --   </ul>
 readProcess :: FilePath -> [String] -> String -> IO String

@@ -383,69 +383,69 @@ type GmpSize# = Int#
 narrowGmpSize# :: Int# -> Int#
 narrowCInt# :: Int# -> Int#
 bignat_compare :: WordArray# -> WordArray# -> Int#
+c_mpn_cmp :: ByteArray# -> ByteArray# -> GmpSize# -> Int#
 bignat_add :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+c_mpn_add :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpLimb
 bignat_add_word :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> State# RealWorld
+c_mpn_add_1 :: MutableByteArray# s -> ByteArray# -> GmpSize# -> GmpLimb# -> IO GmpLimb
 bignat_sub :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> (# State# RealWorld, Bool# #)
+c_mpn_sub :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpLimb
 bignat_sub_word :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> (# State# RealWorld, Bool# #)
+c_mpn_sub_1 :: MutableByteArray# s -> ByteArray# -> GmpSize# -> GmpLimb# -> IO GmpLimb
 bignat_mul :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+c_mpn_mul :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpLimb
 bignat_mul_word :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> State# RealWorld
+c_mpn_mul_1 :: MutableByteArray# s -> ByteArray# -> GmpSize# -> GmpLimb# -> IO GmpLimb
 bignat_popcount :: WordArray# -> Word#
+c_mpn_popcount :: ByteArray# -> GmpSize# -> Word#
 bignat_shiftl :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> State# RealWorld
+c_mpn_lshift :: MutableByteArray# s -> ByteArray# -> GmpSize# -> Word# -> IO GmpLimb
 bignat_shiftr :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> State# RealWorld
+c_mpn_rshift :: MutableByteArray# s -> ByteArray# -> GmpSize# -> Word# -> IO GmpLimb
 bignat_or :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+c_mpn_ior_n :: MutableByteArray# s -> ByteArray# -> ByteArray# -> GmpSize# -> IO ()
 bignat_xor :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+c_mpn_xor_n :: MutableByteArray# s -> ByteArray# -> ByteArray# -> GmpSize# -> IO ()
 bignat_and :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+c_mpn_and_n :: MutableByteArray# s -> ByteArray# -> ByteArray# -> GmpSize# -> IO ()
 bignat_and_not :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+c_mpn_andn_n :: MutableByteArray# s -> ByteArray# -> ByteArray# -> GmpSize# -> IO ()
 bignat_quotrem :: MutableWordArray# RealWorld -> MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+c_mpn_tdiv_qr :: MutableByteArray# s -> MutableByteArray# s -> GmpSize# -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO ()
 bignat_quot :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+c_mpn_tdiv_q :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO ()
 bignat_rem :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+c_mpn_tdiv_r :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO ()
 bignat_quotrem_word :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> (# State# RealWorld, Word# #)
+c_mpn_divrem_1 :: MutableByteArray# s -> GmpSize# -> ByteArray# -> GmpSize# -> GmpLimb# -> IO GmpLimb
 bignat_quot_word :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> State# RealWorld
 bignat_rem_word :: WordArray# -> Word# -> Word#
+c_mpn_mod_1 :: ByteArray# -> GmpSize# -> GmpLimb# -> GmpLimb#
 bignat_gcd :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+c_mpn_gcd# :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpSize
 bignat_gcd_word :: WordArray# -> Word# -> Word#
+c_mpn_gcd_1# :: ByteArray# -> GmpSize# -> GmpLimb# -> GmpLimb#
 bignat_gcd_word_word :: Word# -> Word# -> Word#
+integer_gmp_gcd_word :: GmpLimb# -> GmpLimb# -> GmpLimb#
 bignat_encode_double :: WordArray# -> Int# -> Double#
+c_mpn_get_d :: ByteArray# -> GmpSize# -> Int# -> Double#
 bignat_shiftr_neg :: MutableWordArray# RealWorld -> WordArray# -> Word# -> State# RealWorld -> State# RealWorld
+c_mpn_rshift_2c :: MutableByteArray# s -> ByteArray# -> GmpSize# -> Word# -> IO GmpLimb
 bignat_powmod_word :: WordArray# -> WordArray# -> Word# -> Word#
+integer_gmp_powm1# :: ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> GmpLimb# -> GmpLimb#
 bignat_powmod_words :: Word# -> Word# -> Word# -> Word#
+integer_gmp_powm_word :: GmpLimb# -> GmpLimb# -> GmpLimb# -> GmpLimb#
 bignat_powmod :: MutableWordArray# RealWorld -> WordArray# -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
-integer_powmod :: Integer -> Natural -> Natural -> Natural
 sbignat_powmod :: MutableWordArray# RealWorld -> Int# -> WordArray# -> WordArray# -> WordArray# -> State# RealWorld -> State# RealWorld
+integer_powmod :: Integer -> Natural -> Natural -> Natural
+integer_gmp_powm# :: MutableByteArray# RealWorld -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpSize
 integer_gcde :: Integer -> Integer -> (# Integer, Integer, Integer #)
+integer_gmp_gcdext# :: MutableByteArray# s -> Addr# -> MutableByteArray# s -> Addr# -> MutableByteArray# s -> Addr# -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO ()
 integer_recip_mod :: Integer -> Natural -> (# Natural | () #)
 
 -- | Return 0 for invalid inputs
 sbignat_recip_mod :: Int# -> BigNat# -> BigNat# -> BigNat#
-integer_gmp_gcd_word :: GmpLimb# -> GmpLimb# -> GmpLimb#
-c_mpn_gcd_1# :: ByteArray# -> GmpSize# -> GmpLimb# -> GmpLimb#
-c_mpn_gcd# :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpSize
-integer_gmp_gcdext# :: MutableByteArray# s -> Addr# -> MutableByteArray# s -> Addr# -> MutableByteArray# s -> Addr# -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO ()
 integer_gmp_invert# :: MutableByteArray# RealWorld -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpSize
-c_mpn_add_1 :: MutableByteArray# s -> ByteArray# -> GmpSize# -> GmpLimb# -> IO GmpLimb
-c_mpn_sub_1 :: MutableByteArray# s -> ByteArray# -> GmpSize# -> GmpLimb# -> IO GmpLimb
-c_mpn_mul_1 :: MutableByteArray# s -> ByteArray# -> GmpSize# -> GmpLimb# -> IO GmpLimb
-c_mpn_add :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpLimb
-c_mpn_sub :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpLimb
-c_mpn_mul :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpLimb
-c_mpn_cmp :: ByteArray# -> ByteArray# -> GmpSize# -> Int#
-c_mpn_tdiv_qr :: MutableByteArray# s -> MutableByteArray# s -> GmpSize# -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO ()
-c_mpn_tdiv_q :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO ()
-c_mpn_tdiv_r :: MutableByteArray# s -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO ()
-c_mpn_divrem_1 :: MutableByteArray# s -> GmpSize# -> ByteArray# -> GmpSize# -> GmpLimb# -> IO GmpLimb
-c_mpn_mod_1 :: ByteArray# -> GmpSize# -> GmpLimb# -> GmpLimb#
-c_mpn_rshift :: MutableByteArray# s -> ByteArray# -> GmpSize# -> Word# -> IO GmpLimb
-c_mpn_rshift_2c :: MutableByteArray# s -> ByteArray# -> GmpSize# -> Word# -> IO GmpLimb
-c_mpn_lshift :: MutableByteArray# s -> ByteArray# -> GmpSize# -> Word# -> IO GmpLimb
-c_mpn_and_n :: MutableByteArray# s -> ByteArray# -> ByteArray# -> GmpSize# -> IO ()
-c_mpn_andn_n :: MutableByteArray# s -> ByteArray# -> ByteArray# -> GmpSize# -> IO ()
-c_mpn_ior_n :: MutableByteArray# s -> ByteArray# -> ByteArray# -> GmpSize# -> IO ()
-c_mpn_xor_n :: MutableByteArray# s -> ByteArray# -> ByteArray# -> GmpSize# -> IO ()
-c_mpn_popcount :: ByteArray# -> GmpSize# -> Word#
-c_mpn_get_d :: ByteArray# -> GmpSize# -> Int# -> Double#
-integer_gmp_powm# :: MutableByteArray# RealWorld -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> IO GmpSize
-integer_gmp_powm_word :: GmpLimb# -> GmpLimb# -> GmpLimb# -> GmpLimb#
-integer_gmp_powm1# :: ByteArray# -> GmpSize# -> ByteArray# -> GmpSize# -> GmpLimb# -> GmpLimb#
 
 
 -- | Selected backend
@@ -1022,8 +1022,8 @@ module GHC.Num.Natural
 --   Invariant: numbers &lt;= 0xffffffffffffffff use the <a>NS</a>
 --   constructor
 data Natural
-NS :: !Word# -> Natural
-NB :: !BigNat# -> Natural
+NS :: Word# -> Natural
+NB :: ByteArray# -> Natural
 
 -- | Check Natural invariants
 naturalCheck# :: Natural -> Bool#
@@ -1061,9 +1061,6 @@ naturalFromWord2# :: Word# -> Word# -> Natural
 -- | Create a Natural from a Word
 naturalFromWord :: Word -> Natural
 
--- | Create a Natural from a list of Word
-naturalFromWordList :: [Word] -> Natural
-
 -- | Convert the lower bits of a Natural into a Word#
 naturalToWord# :: Natural -> Word#
 
@@ -1080,6 +1077,28 @@ naturalToWordClamp :: Natural -> Word
 --   <tt>(##)</tt> if value doesn't fit in <a>Word</a>.
 naturalToWordMaybe# :: Natural -> (# (# #) | Word# #)
 
+-- | Create a Natural from a list of Word
+naturalFromWordList :: [Word] -> Natural
+
+-- | Write a Natural in base-256 representation and return the number of
+--   bytes written.
+--   
+--   The endianness is selected with the Bool# parameter: most significant
+--   byte first (big-endian) if <tt>1#</tt> or least significant byte first
+--   (little-endian) if <tt>0#</tt>.
+naturalToMutableByteArray# :: Natural -> MutableByteArray# s -> Word# -> Bool# -> State# s -> (# State# s, Word# #)
+
+-- | Read a Natural in base-256 representation from a ByteArray#.
+--   
+--   The size is given in bytes.
+--   
+--   The endianness is selected with the Bool# parameter: most significant
+--   byte first (big-endian) if <tt>1#</tt> or least significant byte first
+--   (little-endian) if <tt>0#</tt>.
+--   
+--   Null higher limbs are automatically trimed.
+naturalFromByteArray# :: Word# -> ByteArray# -> Word# -> Bool# -> State# s -> (# State# s, Natural #)
+
 -- | Encode (# Natural mantissa, Int# exponent #) into a Double#
 naturalEncodeDouble# :: Natural -> Int# -> Double#
 
@@ -1088,6 +1107,44 @@ naturalEncodeDouble# :: Natural -> Int# -> Double#
 --   TODO: Not sure if it's worth to write <a>Float</a> optimized versions
 --   here
 naturalEncodeFloat# :: Natural -> Int# -> Float#
+
+-- | Write a <a>Natural</a> to <tt><i>addr</i></tt> in base-256
+--   representation and return the number of bytes written.
+--   
+--   The endianness is selected with the Bool# parameter: write most
+--   significant byte first (big-endian) if <tt>1#</tt> or least
+--   significant byte first (little-endian) if <tt>0#</tt>.
+naturalToAddr# :: Natural -> Addr# -> Bool# -> State# s -> (# State# s, Word# #)
+
+-- | Write a <a>Natural</a> to <tt><i>addr</i></tt> in base-256
+--   representation and return the number of bytes written.
+--   
+--   The endianness is selected with the Bool# parameter: write most
+--   significant byte first (big-endian) if <tt>1#</tt> or least
+--   significant byte first (little-endian) if <tt>0#</tt>.
+naturalToAddr :: Natural -> Addr# -> Bool# -> IO Word
+
+-- | Read a Natural in base-256 representation from an Addr#.
+--   
+--   The size is given in bytes.
+--   
+--   The endianness is selected with the Bool# parameter: most significant
+--   byte first (big-endian) if <tt>1#</tt> or least significant byte first
+--   (little-endian) if <tt>0#</tt>.
+--   
+--   Null higher limbs are automatically trimed.
+naturalFromAddr# :: Word# -> Addr# -> Bool# -> State# s -> (# State# s, Natural #)
+
+-- | Read a Natural in base-256 representation from an Addr#.
+--   
+--   The size is given in bytes.
+--   
+--   The endianness is selected with the Bool# parameter: most significant
+--   byte first (big-endian) if <tt>1#</tt> or least significant byte first
+--   (little-endian) if <tt>0#</tt>.
+--   
+--   Null higher limbs are automatically trimed.
+naturalFromAddr :: Word# -> Addr# -> Bool# -> IO Natural
 
 -- | Equality test for Natural
 naturalEq# :: Natural -> Natural -> Bool#
@@ -1145,6 +1202,26 @@ naturalShiftL# :: Natural -> Word# -> Natural
 
 -- | Left shift
 naturalShiftL :: Natural -> Word -> Natural
+naturalAnd :: Natural -> Natural -> Natural
+naturalAndNot :: Natural -> Natural -> Natural
+naturalOr :: Natural -> Natural -> Natural
+naturalXor :: Natural -> Natural -> Natural
+naturalTestBit# :: Natural -> Word# -> Bool#
+naturalTestBit :: Natural -> Word -> Bool
+naturalBit# :: Word# -> Natural
+naturalBit :: Word -> Natural
+
+naturalSetBit# :: Natural -> Word# -> Natural
+
+naturalSetBit :: Natural -> Word -> Natural
+
+naturalClearBit# :: Natural -> Word# -> Natural
+
+naturalClearBit :: Natural -> Word -> Natural
+
+naturalComplementBit# :: Natural -> Word# -> Natural
+
+naturalComplementBit :: Natural -> Word -> Natural
 
 -- | Add two naturals
 naturalAdd :: Natural -> Natural -> Natural
@@ -1187,26 +1264,6 @@ naturalQuot :: Natural -> Natural -> Natural
 
 -- | Return division remainder
 naturalRem :: Natural -> Natural -> Natural
-naturalAnd :: Natural -> Natural -> Natural
-naturalAndNot :: Natural -> Natural -> Natural
-naturalOr :: Natural -> Natural -> Natural
-naturalXor :: Natural -> Natural -> Natural
-naturalTestBit# :: Natural -> Word# -> Bool#
-naturalTestBit :: Natural -> Word -> Bool
-naturalBit# :: Word# -> Natural
-naturalBit :: Word -> Natural
-
-naturalSetBit# :: Natural -> Word# -> Natural
-
-naturalSetBit :: Natural -> Word -> Natural
-
-naturalClearBit# :: Natural -> Word# -> Natural
-
-naturalClearBit :: Natural -> Word -> Natural
-
-naturalComplementBit# :: Natural -> Word# -> Natural
-
-naturalComplementBit :: Natural -> Word -> Natural
 
 -- | Compute greatest common divisor.
 naturalGcd :: Natural -> Natural -> Natural
@@ -1241,63 +1298,6 @@ naturalPowMod :: Natural -> Natural -> Natural -> Natural
 --   
 --   <tt>base</tt> must be &gt; 1
 naturalSizeInBase# :: Word# -> Natural -> Word#
-
--- | Write a <a>Natural</a> to <tt><i>addr</i></tt> in base-256
---   representation and return the number of bytes written.
---   
---   The endianness is selected with the Bool# parameter: write most
---   significant byte first (big-endian) if <tt>1#</tt> or least
---   significant byte first (little-endian) if <tt>0#</tt>.
-naturalToAddr# :: Natural -> Addr# -> Bool# -> State# s -> (# State# s, Word# #)
-
--- | Write a <a>Natural</a> to <tt><i>addr</i></tt> in base-256
---   representation and return the number of bytes written.
---   
---   The endianness is selected with the Bool# parameter: write most
---   significant byte first (big-endian) if <tt>1#</tt> or least
---   significant byte first (little-endian) if <tt>0#</tt>.
-naturalToAddr :: Natural -> Addr# -> Bool# -> IO Word
-
--- | Read a Natural in base-256 representation from an Addr#.
---   
---   The size is given in bytes.
---   
---   The endianness is selected with the Bool# parameter: most significant
---   byte first (big-endian) if <tt>1#</tt> or least significant byte first
---   (little-endian) if <tt>0#</tt>.
---   
---   Null higher limbs are automatically trimed.
-naturalFromAddr# :: Word# -> Addr# -> Bool# -> State# s -> (# State# s, Natural #)
-
--- | Read a Natural in base-256 representation from an Addr#.
---   
---   The size is given in bytes.
---   
---   The endianness is selected with the Bool# parameter: most significant
---   byte first (big-endian) if <tt>1#</tt> or least significant byte first
---   (little-endian) if <tt>0#</tt>.
---   
---   Null higher limbs are automatically trimed.
-naturalFromAddr :: Word# -> Addr# -> Bool# -> IO Natural
-
--- | Write a Natural in base-256 representation and return the number of
---   bytes written.
---   
---   The endianness is selected with the Bool# parameter: most significant
---   byte first (big-endian) if <tt>1#</tt> or least significant byte first
---   (little-endian) if <tt>0#</tt>.
-naturalToMutableByteArray# :: Natural -> MutableByteArray# s -> Word# -> Bool# -> State# s -> (# State# s, Word# #)
-
--- | Read a Natural in base-256 representation from a ByteArray#.
---   
---   The size is given in bytes.
---   
---   The endianness is selected with the Bool# parameter: most significant
---   byte first (big-endian) if <tt>1#</tt> or least significant byte first
---   (little-endian) if <tt>0#</tt>.
---   
---   Null higher limbs are automatically trimed.
-naturalFromByteArray# :: Word# -> ByteArray# -> Word# -> Bool# -> State# s -> (# State# s, Natural #)
 instance GHC.Classes.Eq GHC.Num.Natural.Natural
 instance GHC.Classes.Ord GHC.Num.Natural.Natural
 
@@ -1312,36 +1312,48 @@ module GHC.Num.Integer
 --   Integers are stored in a kind of sign-magnitude form, hence do not
 --   expect two's complement form when using bit operations.
 --   
---   If the value is small (fit into an <a>Int</a>), <a>IS</a> constructor
---   is used. Otherwise <a>Integer</a> and <a>IN</a> constructors are used
---   to store a <a>BigNat</a> representing respectively the positive or the
---   negative value magnitude.
+--   If the value is small (i.e., fits into an <a>Int</a>), the <a>IS</a>
+--   constructor is used. Otherwise <a>IP</a> and <a>IN</a> constructors
+--   are used to store a <a>BigNat</a> representing the positive or the
+--   negative value magnitude, respectively.
 --   
---   Invariant: <a>Integer</a> and <a>IN</a> are used iff value doesn't fit
---   in <a>IS</a>
+--   Invariant: <a>IP</a> and <a>IN</a> are used iff the value does not fit
+--   in <a>IS</a>.
 data Integer
 
 -- | iff value in <tt>[minBound::<a>Int</a>, maxBound::<a>Int</a>]</tt>
 --   range
-IS :: !Int# -> Integer
+IS :: Int# -> Integer
 
 -- | iff value in <tt>]maxBound::<a>Int</a>, +inf[</tt> range
-IP :: !BigNat# -> Integer
+IP :: ByteArray# -> Integer
 
 -- | iff value in <tt>]-inf, minBound::<a>Int</a>[</tt> range
-IN :: !BigNat# -> Integer
-
--- | Check Integer invariants
-integerCheck# :: Integer -> Bool#
+IN :: ByteArray# -> Integer
 
 -- | Check Integer invariants
 integerCheck :: Integer -> Bool
+
+-- | Check Integer invariants
+integerCheck# :: Integer -> Bool#
 
 -- | Integer Zero
 integerZero :: Integer
 
 -- | Integer One
 integerOne :: Integer
+
+-- | Create an Integer from an Int#
+integerFromInt# :: Int# -> Integer
+
+-- | Create an Integer from an Int
+integerFromInt :: Int -> Integer
+
+-- | Truncates <a>Integer</a> to least-significant <a>Int#</a>
+integerToInt# :: Integer -> Int#
+
+-- | Truncates <a>Integer</a> to least-significant <a>Int#</a>
+integerToInt :: Integer -> Int
 
 -- | Create a positive Integer from a BigNat
 integerFromBigNat# :: BigNat# -> Integer
@@ -1359,18 +1371,6 @@ integerToBigNatSign# :: Integer -> (# Int#, BigNat# #)
 --   
 --   Return 0 for negative Integers.
 integerToBigNatClamp# :: Integer -> BigNat#
-
--- | Create an Integer from an Int#
-integerFromInt# :: Int# -> Integer
-
--- | Create an Integer from an Int
-integerFromInt :: Int -> Integer
-
--- | Truncates <a>Integer</a> to least-significant <a>Int#</a>
-integerToInt# :: Integer -> Int#
-
--- | Truncates <a>Integer</a> to least-significant <a>Int#</a>
-integerToInt :: Integer -> Int
 
 -- | Convert a Word# into an Integer
 integerFromWord# :: Word# -> Integer
@@ -1393,9 +1393,6 @@ integerToWord :: Integer -> Word
 -- | Convert a Natural into an Integer
 integerFromNatural :: Natural -> Integer
 
--- | Convert a list of Word into an Integer
-integerFromWordList :: Bool -> [Word] -> Integer
-
 -- | Convert an Integer into a Natural
 --   
 --   Return 0 for negative Integers.
@@ -1410,6 +1407,116 @@ integerToNatural :: Integer -> Natural
 --   
 --   Throw an Underflow exception if input is negative.
 integerToNaturalThrow :: Integer -> Natural
+
+-- | Convert an Int64# into an Integer
+integerFromInt64# :: Int64# -> Integer
+
+-- | Convert a Word64# into an Integer
+integerFromWord64# :: Word64# -> Integer
+
+-- | Convert an Integer into an Int64#
+integerToInt64# :: Integer -> Int64#
+
+-- | Convert an Integer into a Word64#
+integerToWord64# :: Integer -> Word64#
+
+-- | Decode a Double# into (# Integer mantissa, Int# exponent #)
+integerDecodeDouble# :: Double# -> (# Integer, Int# #)
+
+-- | Encode (# Integer mantissa, Int# exponent #) into a Double#
+integerEncodeDouble# :: Integer -> Int# -> Double#
+
+-- | Encode (Integer mantissa, Int exponent) into a Double
+integerEncodeDouble :: Integer -> Int -> Double
+
+-- | Encode (# Integer mantissa, Int# exponent #) into a Float#
+--   
+--   TODO: Not sure if it's worth to write <a>Float</a> optimized versions
+--   here
+integerEncodeFloat# :: Integer -> Int# -> Float#
+
+-- | Write an <a>Integer</a> (without sign) to <tt><i>addr</i></tt> in
+--   base-256 representation and return the number of bytes written.
+--   
+--   The endianness is selected with the Bool# parameter: write most
+--   significant byte first (big-endian) if <tt>1#</tt> or least
+--   significant byte first (little-endian) if <tt>0#</tt>.
+integerToAddr# :: Integer -> Addr# -> Bool# -> State# s -> (# State# s, Word# #)
+
+-- | Write an <a>Integer</a> (without sign) to <tt><i>addr</i></tt> in
+--   base-256 representation and return the number of bytes written.
+--   
+--   The endianness is selected with the Bool# parameter: write most
+--   significant byte first (big-endian) if <tt>1#</tt> or least
+--   significant byte first (little-endian) if <tt>0#</tt>.
+integerToAddr :: Integer -> Addr# -> Bool# -> IO Word
+
+-- | Read an <a>Integer</a> (without sign) in base-256 representation from
+--   an Addr#.
+--   
+--   The size is given in bytes.
+--   
+--   The endianness is selected with the Bool# parameter: most significant
+--   byte first (big-endian) if <tt>1#</tt> or least significant byte first
+--   (little-endian) if <tt>0#</tt>.
+--   
+--   Null higher limbs are automatically trimed.
+integerFromAddr# :: Word# -> Addr# -> Bool# -> State# s -> (# State# s, Integer #)
+
+-- | Read an <a>Integer</a> (without sign) in base-256 representation from
+--   an Addr#.
+--   
+--   The size is given in bytes.
+--   
+--   The endianness is selected with the Bool# parameter: most significant
+--   byte first (big-endian) if <tt>1#</tt> or least significant byte first
+--   (little-endian) if <tt>0#</tt>.
+--   
+--   Null higher limbs are automatically trimed.
+integerFromAddr :: Word# -> Addr# -> Bool# -> IO Integer
+
+-- | Convert a list of Word into an Integer
+integerFromWordList :: Bool -> [Word] -> Integer
+
+-- | Write an <a>Integer</a> (without sign) in base-256 representation and
+--   return the number of bytes written.
+--   
+--   The endianness is selected with the Bool# parameter: most significant
+--   byte first (big-endian) if <tt>1#</tt> or least significant byte first
+--   (little-endian) if <tt>0#</tt>.
+integerToMutableByteArray# :: Integer -> MutableByteArray# s -> Word# -> Bool# -> State# s -> (# State# s, Word# #)
+
+-- | Write an <a>Integer</a> (without sign) in base-256 representation and
+--   return the number of bytes written.
+--   
+--   The endianness is selected with the Bool# parameter: most significant
+--   byte first (big-endian) if <tt>1#</tt> or least significant byte first
+--   (little-endian) if <tt>0#</tt>.
+integerToMutableByteArray :: Integer -> MutableByteArray# RealWorld -> Word# -> Bool# -> IO Word
+
+-- | Read an <a>Integer</a> (without sign) in base-256 representation from
+--   a ByteArray#.
+--   
+--   The size is given in bytes.
+--   
+--   The endianness is selected with the Bool# parameter: most significant
+--   byte first (big-endian) if <tt>1#</tt> or least significant byte first
+--   (little-endian) if <tt>0#</tt>.
+--   
+--   Null higher limbs are automatically trimed.
+integerFromByteArray# :: Word# -> ByteArray# -> Word# -> Bool# -> State# s -> (# State# s, Integer #)
+
+-- | Read an <a>Integer</a> (without sign) in base-256 representation from
+--   a ByteArray#.
+--   
+--   The size is given in bytes.
+--   
+--   The endianness is selected with the Bool# parameter: most significant
+--   byte first (big-endian) if <tt>1#</tt> or least significant byte first
+--   (little-endian) if <tt>0#</tt>.
+--   
+--   Null higher limbs are automatically trimed.
+integerFromByteArray :: Word# -> ByteArray# -> Word# -> Bool# -> Integer
 
 -- | Negative predicate
 integerIsNegative# :: Integer -> Bool#
@@ -1491,65 +1598,6 @@ integerSignum :: Integer -> Integer
 --   argument is negative, zero, or positive, respectively
 integerSignum# :: Integer -> Int#
 
--- | Count number of set bits. For negative arguments returns the negated
---   population count of the absolute value.
-integerPopCount# :: Integer -> Int#
-
--- | Positive <a>Integer</a> for which only <i>n</i>-th bit is set
-integerBit# :: Word# -> Integer
-
--- | <a>Integer</a> for which only <i>n</i>-th bit is set
-integerBit :: Word -> Integer
-
--- | Test if <i>n</i>-th bit is set.
---   
---   Fake 2's complement for negative values (might be slow)
-integerTestBit# :: Integer -> Word# -> Bool#
-
--- | Test if <i>n</i>-th bit is set. For negative Integers it tests the
---   n-th bit of the negated argument.
---   
---   Fake 2's complement for negative values (might be slow)
-integerTestBit :: Integer -> Word -> Bool
-
--- | Shift-right operation
---   
---   Fake 2's complement for negative values (might be slow)
-integerShiftR# :: Integer -> Word# -> Integer
-
--- | Shift-right operation
---   
---   Fake 2's complement for negative values (might be slow)
-integerShiftR :: Integer -> Word -> Integer
-
--- | Shift-left operation
-integerShiftL# :: Integer -> Word# -> Integer
-
--- | Shift-left operation
---   
---   Remember that bits are stored in sign-magnitude form, hence the
---   behavior of negative Integers is different from negative Int's
---   behavior.
-integerShiftL :: Integer -> Word -> Integer
-
--- | Bitwise OR operation
---   
---   Fake 2's complement for negative values (might be slow)
-integerOr :: Integer -> Integer -> Integer
-
--- | Bitwise XOR operation
---   
---   Fake 2's complement for negative values (might be slow)
-integerXor :: Integer -> Integer -> Integer
-
--- | Bitwise AND operation
---   
---   Fake 2's complement for negative values (might be slow)
-integerAnd :: Integer -> Integer -> Integer
-
--- | Binary complement of the
-integerComplement :: Integer -> Integer
-
 -- | Simultaneous <a>integerQuot</a> and <a>integerRem</a>.
 --   
 --   Divisor must be non-zero otherwise the GHC runtime will terminate with
@@ -1620,119 +1668,6 @@ integerLogBase :: Integer -> Integer -> Word
 -- | Indicate if the value is a power of two and which one
 integerIsPowerOf2# :: Integer -> (# (# #) | Word# #)
 
--- | Convert an Int64# into an Integer
-integerFromInt64# :: Int64# -> Integer
-
--- | Convert a Word64# into an Integer
-integerFromWord64# :: Word64# -> Integer
-
--- | Convert an Integer into an Int64#
-integerToInt64# :: Integer -> Int64#
-
--- | Convert an Integer into a Word64#
-integerToWord64# :: Integer -> Word64#
-
--- | Decode a Double# into (# Integer mantissa, Int# exponent #)
-integerDecodeDouble# :: Double# -> (# Integer, Int# #)
-
--- | Encode (# Integer mantissa, Int# exponent #) into a Double#
-integerEncodeDouble# :: Integer -> Int# -> Double#
-
--- | Encode (Integer mantissa, Int exponent) into a Double
-integerEncodeDouble :: Integer -> Int -> Double
-
--- | Encode (# Integer mantissa, Int# exponent #) into a Float#
---   
---   TODO: Not sure if it's worth to write <a>Float</a> optimized versions
---   here
-integerEncodeFloat# :: Integer -> Int# -> Float#
-
--- | Compute the number of digits of the Integer (without the sign) in the
---   given base.
---   
---   <tt>base</tt> must be &gt; 1
-integerSizeInBase# :: Word# -> Integer -> Word#
-
--- | Write an <a>Integer</a> (without sign) to <tt><i>addr</i></tt> in
---   base-256 representation and return the number of bytes written.
---   
---   The endianness is selected with the Bool# parameter: write most
---   significant byte first (big-endian) if <tt>1#</tt> or least
---   significant byte first (little-endian) if <tt>0#</tt>.
-integerToAddr# :: Integer -> Addr# -> Bool# -> State# s -> (# State# s, Word# #)
-
--- | Write an <a>Integer</a> (without sign) to <tt><i>addr</i></tt> in
---   base-256 representation and return the number of bytes written.
---   
---   The endianness is selected with the Bool# parameter: write most
---   significant byte first (big-endian) if <tt>1#</tt> or least
---   significant byte first (little-endian) if <tt>0#</tt>.
-integerToAddr :: Integer -> Addr# -> Bool# -> IO Word
-
--- | Read an <a>Integer</a> (without sign) in base-256 representation from
---   an Addr#.
---   
---   The size is given in bytes.
---   
---   The endianness is selected with the Bool# parameter: most significant
---   byte first (big-endian) if <tt>1#</tt> or least significant byte first
---   (little-endian) if <tt>0#</tt>.
---   
---   Null higher limbs are automatically trimed.
-integerFromAddr# :: Word# -> Addr# -> Bool# -> State# s -> (# State# s, Integer #)
-
--- | Read an <a>Integer</a> (without sign) in base-256 representation from
---   an Addr#.
---   
---   The size is given in bytes.
---   
---   The endianness is selected with the Bool# parameter: most significant
---   byte first (big-endian) if <tt>1#</tt> or least significant byte first
---   (little-endian) if <tt>0#</tt>.
---   
---   Null higher limbs are automatically trimed.
-integerFromAddr :: Word# -> Addr# -> Bool# -> IO Integer
-
--- | Write an <a>Integer</a> (without sign) in base-256 representation and
---   return the number of bytes written.
---   
---   The endianness is selected with the Bool# parameter: most significant
---   byte first (big-endian) if <tt>1#</tt> or least significant byte first
---   (little-endian) if <tt>0#</tt>.
-integerToMutableByteArray# :: Integer -> MutableByteArray# s -> Word# -> Bool# -> State# s -> (# State# s, Word# #)
-
--- | Write an <a>Integer</a> (without sign) in base-256 representation and
---   return the number of bytes written.
---   
---   The endianness is selected with the Bool# parameter: most significant
---   byte first (big-endian) if <tt>1#</tt> or least significant byte first
---   (little-endian) if <tt>0#</tt>.
-integerToMutableByteArray :: Integer -> MutableByteArray# RealWorld -> Word# -> Bool# -> IO Word
-
--- | Read an <a>Integer</a> (without sign) in base-256 representation from
---   a ByteArray#.
---   
---   The size is given in bytes.
---   
---   The endianness is selected with the Bool# parameter: most significant
---   byte first (big-endian) if <tt>1#</tt> or least significant byte first
---   (little-endian) if <tt>0#</tt>.
---   
---   Null higher limbs are automatically trimed.
-integerFromByteArray# :: Word# -> ByteArray# -> Word# -> Bool# -> State# s -> (# State# s, Integer #)
-
--- | Read an <a>Integer</a> (without sign) in base-256 representation from
---   a ByteArray#.
---   
---   The size is given in bytes.
---   
---   The endianness is selected with the Bool# parameter: most significant
---   byte first (big-endian) if <tt>1#</tt> or least significant byte first
---   (little-endian) if <tt>0#</tt>.
---   
---   Null higher limbs are automatically trimed.
-integerFromByteArray :: Word# -> ByteArray# -> Word# -> Bool# -> Integer
-
 -- | Get the extended GCD of two integers.
 --   
 --   `integerGcde# a b` returns (# g,x,y #) where * ax + by = g = |gcd a b|
@@ -1759,6 +1694,71 @@ integerRecipMod# :: Integer -> Natural -> (# Natural | () #)
 --   If e is negative, we use <a>integerRecipMod#</a> to try to find a
 --   modular multiplicative inverse (which may not exist).
 integerPowMod# :: Integer -> Integer -> Natural -> (# Natural | () #)
+
+-- | Count number of set bits. For negative arguments returns the negated
+--   population count of the absolute value.
+integerPopCount# :: Integer -> Int#
+
+-- | Positive <a>Integer</a> for which only <i>n</i>-th bit is set
+integerBit# :: Word# -> Integer
+
+-- | <a>Integer</a> for which only <i>n</i>-th bit is set
+integerBit :: Word -> Integer
+
+-- | Test if <i>n</i>-th bit is set.
+--   
+--   Fake 2's complement for negative values (might be slow)
+integerTestBit# :: Integer -> Word# -> Bool#
+
+-- | Test if <i>n</i>-th bit is set. For negative Integers it tests the
+--   n-th bit of the negated argument.
+--   
+--   Fake 2's complement for negative values (might be slow)
+integerTestBit :: Integer -> Word -> Bool
+
+-- | Shift-right operation
+--   
+--   Fake 2's complement for negative values (might be slow)
+integerShiftR# :: Integer -> Word# -> Integer
+
+-- | Shift-right operation
+--   
+--   Fake 2's complement for negative values (might be slow)
+integerShiftR :: Integer -> Word -> Integer
+
+-- | Shift-left operation
+integerShiftL# :: Integer -> Word# -> Integer
+
+-- | Shift-left operation
+--   
+--   Remember that bits are stored in sign-magnitude form, hence the
+--   behavior of negative Integers is different from negative Int's
+--   behavior.
+integerShiftL :: Integer -> Word -> Integer
+
+-- | Bitwise OR operation
+--   
+--   Fake 2's complement for negative values (might be slow)
+integerOr :: Integer -> Integer -> Integer
+
+-- | Bitwise XOR operation
+--   
+--   Fake 2's complement for negative values (might be slow)
+integerXor :: Integer -> Integer -> Integer
+
+-- | Bitwise AND operation
+--   
+--   Fake 2's complement for negative values (might be slow)
+integerAnd :: Integer -> Integer -> Integer
+
+-- | Binary complement of the
+integerComplement :: Integer -> Integer
+
+-- | Compute the number of digits of the Integer (without the sign) in the
+--   given base.
+--   
+--   <tt>base</tt> must be &gt; 1
+integerSizeInBase# :: Word# -> Integer -> Word#
 instance GHC.Classes.Eq GHC.Num.Integer.Integer
 instance GHC.Classes.Ord GHC.Num.Integer.Integer
 

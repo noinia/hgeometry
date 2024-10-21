@@ -1,12 +1,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
 </span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
-</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">GHC.SysTools.Terminal</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.SysTools.Terminal.html#stderrSupportsAnsiColors"><span class="hs-identifier">stderrSupportsAnsiColors</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="GHC.SysTools.Terminal.html"><span class="hs-identifier">GHC.SysTools.Terminal</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.SysTools.Terminal.html#stderrSupportsAnsiColors"><span class="hs-identifier">stderrSupportsAnsiColors</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-4"></span><span>
 </span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Prelude.html"><span class="hs-identifier">GHC.Prelude</span></a></span><span class="hs-cpp">
 
 #if !defined(mingw32_HOST_OS)
-</span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/System.Environment.html#/System.Environment.html"><span class="hs-identifier">System.Environment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../base-4.18.2.0/src/System.Environment.html#lookupEnv/System.Environment.html#lookupEnv"><span class="hs-identifier">lookupEnv</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/System.IO.html#/System.IO.html"><span class="hs-identifier">System.IO</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.IO.Handle.html#hIsTerminalDevice/GHC.IO.Handle.html#hIsTerminalDevice"><span class="hs-identifier">hIsTerminalDevice</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.IO.StdHandles.html#stderr/GHC.IO.StdHandles.html#stderr"><span class="hs-identifier">stderr</span></a></span><span class="hs-special">)</span><span class="hs-cpp">
+</span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//System.Environment.html/System.Environment.html"><span class="hs-identifier">System.Environment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">lookupEnv</span></span><span class="hs-special">)</span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//System.IO.html/System.IO.html"><span class="hs-identifier">System.IO</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">hIsTerminalDevice</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">stderr</span></span><span class="hs-special">)</span><span class="hs-cpp">
 #else
 </span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">GHC.IO</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">catchException</span><span class="hs-special">)</span><span>
 </span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">GHC.Utils.Exception</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">try</span><span class="hs-special">)</span><span>
@@ -15,7 +15,7 @@
 </span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">System.Win32</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">Win32</span><span class="hs-cpp">
 #endif
 </span><span>
-</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/System.IO.Unsafe.html#/System.IO.Unsafe.html"><span class="hs-identifier">System.IO.Unsafe</span></a></span><span class="hs-cpp">
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//System.IO.Unsafe.html/System.IO.Unsafe.html"><span class="hs-identifier">System.IO.Unsafe</span></a></span><span class="hs-cpp">
 
 #if defined(mingw32_HOST_OS) &amp;&amp; !defined(WINAPI)
 </span><span class="hs-cpp"># if defined(i386_HOST_ARCH)
@@ -33,7 +33,7 @@
 </span><span id="line-33"></span><span id="stderrSupportsAnsiColors"><span class="annot"><span class="annottext">stderrSupportsAnsiColors :: Bool
 </span><a href="GHC.SysTools.Terminal.html#stderrSupportsAnsiColors"><span class="hs-identifier hs-var hs-var">stderrSupportsAnsiColors</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IO Bool -&gt; Bool
 forall a. IO a -&gt; a
-</span><a href="../../base-4.18.2.0/src/GHC.IO.Unsafe.html#unsafePerformIO/GHC.IO.Unsafe.html#unsafePerformIO"><span class="hs-identifier hs-var">unsafePerformIO</span></a></span><span> </span><span class="annot"><span class="annottext">IO Bool
+</span><span class="hs-identifier hs-var">unsafePerformIO</span></span><span> </span><span class="annot"><span class="annottext">IO Bool
 </span><a href="GHC.SysTools.Terminal.html#stderrSupportsAnsiColors%27"><span class="hs-identifier hs-var">stderrSupportsAnsiColors'</span></a></span><span>
 </span><span id="line-34"></span><span class="hs-pragma">{-# NOINLINE</span><span> </span><span class="annot"><a href="GHC.SysTools.Terminal.html#stderrSupportsAnsiColors"><span class="hs-pragma hs-type">stderrSupportsAnsiColors</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
 </span><span id="line-35"></span><span>
@@ -43,28 +43,11 @@ forall a. IO a -&gt; a
 </span><a href="GHC.SysTools.Terminal.html#stderrSupportsAnsiColors%27"><span class="hs-identifier hs-var hs-var">stderrSupportsAnsiColors'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span class="hs-cpp">
 #if !defined(mingw32_HOST_OS)
 </span><span>  </span><span class="hs-comment">-- Equivalent of https://hackage.haskell.org/package/ansi-terminal/docs/System-Console-ANSI.html#v:hSupportsANSI</span><span>
-</span><span id="line-41"></span><span>  </span><span id="local-6989586621681495223"><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621681495223"><span class="hs-identifier hs-var">isTerminal</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Handle -&gt; IO Bool
-</span><a href="../../base-4.18.2.0/src/GHC.IO.Handle.html#hIsTerminalDevice/GHC.IO.Handle.html#hIsTerminalDevice"><span class="hs-identifier hs-var">hIsTerminalDevice</span></a></span><span> </span><span class="annot"><span class="annottext">Handle
-</span><a href="../../base-4.18.2.0/src/GHC.IO.StdHandles.html#stderr/GHC.IO.StdHandles.html#stderr"><span class="hs-identifier hs-var">stderr</span></a></span><span>
-</span><span id="line-42"></span><span>  </span><span id="local-6989586621681495224"><span class="annot"><span class="annottext">Maybe String
-</span><a href="#local-6989586621681495224"><span class="hs-identifier hs-var">term</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; IO (Maybe String)
-</span><a href="../../base-4.18.2.0/src/System.Environment.html#lookupEnv/System.Environment.html#lookupEnv"><span class="hs-identifier hs-var">lookupEnv</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;TERM&quot;</span></span><span>
-</span><span id="line-43"></span><span>  </span><span class="annot"><span class="annottext">Bool -&gt; IO Bool
-forall a. a -&gt; IO a
-forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#pure/GHC.Base.html#pure"><span class="hs-identifier hs-var">pure</span></a></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; IO Bool) -&gt; Bool -&gt; IO Bool
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#%24/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="#local-6989586621681495223"><span class="hs-identifier hs-var">isTerminal</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
-</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Maybe String
-</span><a href="#local-6989586621681495224"><span class="hs-identifier hs-var">term</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe String -&gt; Maybe String -&gt; Bool
-forall a. Eq a =&gt; a -&gt; a -&gt; Bool
-</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Maybe String
-forall a. a -&gt; Maybe a
-</span><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Just/GHC.Maybe.html#Just"><span class="hs-identifier hs-var">Just</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;dumb&quot;</span></span><span class="hs-cpp">
+</span><span id="line-41"></span><span>  </span><span id="local-6989586621682323905"><span class="annot"><a href="#local-6989586621682323905"><span class="hs-identifier hs-var">isTerminal</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Handle -&gt; IO Bool
+</span><span class="hs-identifier hs-var">hIsTerminalDevice</span></span><span> </span><span class="annot"><span class="annottext">Handle
+</span><span class="hs-identifier hs-var">stderr</span></span><span>
+</span><span id="line-42"></span><span>  </span><span id="local-6989586621682323906"><span class="annot"><a href="#local-6989586621682323906"><span class="hs-identifier hs-var">term</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">lookupEnv</span></span><span> </span><span class="annot"><span class="hs-string">&quot;TERM&quot;</span></span><span>
+</span><span id="line-43"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">pure</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="#local-6989586621682323905"><span class="hs-identifier hs-type">isTerminal</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&amp;&amp;</span></span><span> </span><span class="annot"><a href="#local-6989586621682323906"><span class="hs-identifier hs-type">term</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">/=</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="hs-string">&quot;dumb&quot;</span></span><span class="hs-cpp">
 #else
 </span><span>  </span><span class="hs-identifier">h</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-identifier">Win32.getStdHandle</span><span> </span><span class="hs-identifier">Win32.sTD_ERROR_HANDLE</span><span>
 </span><span id="line-46"></span><span>         </span><span class="hs-special">`</span><span class="hs-identifier">catchException</span><span class="hs-special">`</span><span> </span><span class="hs-glyph">\</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier">IOError</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>

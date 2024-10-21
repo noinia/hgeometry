@@ -10,7 +10,7 @@
 </span><span id="line-10"></span><span class="hs-comment">--      associated, a stack slot is never &quot;freed&quot; or removed from the StackMap again,</span><span>
 </span><span id="line-11"></span><span class="hs-comment">--      it remains associated until we are done with the current CmmProc.</span><span>
 </span><span id="line-12"></span><span class="hs-comment">--</span><span>
-</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">GHC.CmmToAsm.Reg.Linear.StackMap</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html"><span class="hs-identifier">GHC.CmmToAsm.Reg.Linear.StackMap</span></a></span><span> </span><span class="hs-special">(</span><span>
 </span><span id="line-14"></span><span>        </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#StackSlot"><span class="hs-identifier">StackSlot</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-15"></span><span>        </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#StackMap"><span class="hs-identifier">StackMap</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span>
 </span><span id="line-16"></span><span>        </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#emptyStackMap"><span class="hs-identifier">emptyStackMap</span></a></span><span class="hs-special">,</span><span>
@@ -47,7 +47,7 @@
 </span><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#emptyStackMap"><span class="hs-identifier hs-var hs-var">emptyStackMap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; UniqFM Unique Int -&gt; StackMap
 </span><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#StackMap"><span class="hs-identifier hs-var">StackMap</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">UniqFM Unique Int
-forall key elt. UniqFM key elt
+forall {k} (key :: k) elt. UniqFM key elt
 </span><a href="GHC.Types.Unique.FM.html#emptyUFM"><span class="hs-identifier hs-var">emptyUFM</span></a></span><span>
 </span><span id="line-45"></span><span>
 </span><span id="line-46"></span><span>
@@ -57,45 +57,45 @@ forall key elt. UniqFM key elt
 </span><span id="line-50"></span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#getStackSlotFor"><span class="hs-identifier hs-type">getStackSlotFor</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#StackMap"><span class="hs-identifier hs-type">StackMap</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Types.Unique.html#Unique"><span class="hs-identifier hs-type">Unique</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#StackMap"><span class="hs-identifier hs-type">StackMap</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span>
 </span><span id="line-51"></span><span>
 </span><span id="line-52"></span><span id="getStackSlotFor"><span class="annot"><span class="annottext">getStackSlotFor :: StackMap -&gt; Unique -&gt; (StackMap, Int)
-</span><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#getStackSlotFor"><span class="hs-identifier hs-var hs-var">getStackSlotFor</span></a></span></span><span> </span><span id="local-6989586621681531502"><span class="annot"><span class="annottext">fs :: StackMap
-</span><a href="#local-6989586621681531502"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#StackMap"><span class="hs-identifier hs-type">StackMap</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621681531503"><span class="annot"><span class="annottext">UniqFM Unique Int
-</span><a href="#local-6989586621681531503"><span class="hs-identifier hs-var">reserved</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621681531504"><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621681531504"><span class="hs-identifier hs-var">reg</span></a></span></span><span>
-</span><span id="line-53"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Just/GHC.Maybe.html#Just"><span class="hs-identifier hs-type">Just</span></a></span><span> </span><span id="local-6989586621681531505"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621681531505"><span class="hs-identifier hs-var">slot</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">UniqFM Unique Int -&gt; Unique -&gt; Maybe Int
+</span><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#getStackSlotFor"><span class="hs-identifier hs-var hs-var">getStackSlotFor</span></a></span></span><span> </span><span id="local-6989586621682364192"><span class="annot"><span class="annottext">fs :: StackMap
+</span><a href="#local-6989586621682364192"><span class="hs-identifier hs-var">fs</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#StackMap"><span class="hs-identifier hs-type">StackMap</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682364193"><span class="annot"><span class="annottext">UniqFM Unique Int
+</span><a href="#local-6989586621682364193"><span class="hs-identifier hs-var">reserved</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621682364194"><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682364194"><span class="hs-identifier hs-var">reg</span></a></span></span><span>
+</span><span id="line-53"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682364195"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682364195"><span class="hs-identifier hs-var">slot</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">UniqFM Unique Int -&gt; Unique -&gt; Maybe Int
 forall key elt. Uniquable key =&gt; UniqFM key elt -&gt; key -&gt; Maybe elt
 </span><a href="GHC.Types.Unique.FM.html#lookupUFM"><span class="hs-identifier hs-var">lookupUFM</span></a></span><span> </span><span class="annot"><span class="annottext">UniqFM Unique Int
-</span><a href="#local-6989586621681531503"><span class="hs-identifier hs-var">reserved</span></a></span><span> </span><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621681531504"><span class="hs-identifier hs-var">reg</span></a></span><span>  </span><span class="hs-glyph">=</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">StackMap
-</span><a href="#local-6989586621681531502"><span class="hs-identifier hs-var">fs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621681531505"><span class="hs-identifier hs-var">slot</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682364193"><span class="hs-identifier hs-var">reserved</span></a></span><span> </span><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682364194"><span class="hs-identifier hs-var">reg</span></a></span><span>  </span><span class="hs-glyph">=</span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="annottext">StackMap
+</span><a href="#local-6989586621682364192"><span class="hs-identifier hs-var">fs</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682364195"><span class="hs-identifier hs-var">slot</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-54"></span><span>
-</span><span id="line-55"></span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#getStackSlotFor"><span class="hs-identifier hs-var">getStackSlotFor</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#StackMap"><span class="hs-identifier hs-type">StackMap</span></a></span><span> </span><span id="local-6989586621681531507"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621681531507"><span class="hs-identifier hs-var">freeSlot</span></a></span></span><span> </span><span id="local-6989586621681531508"><span class="annot"><span class="annottext">UniqFM Unique Int
-</span><a href="#local-6989586621681531508"><span class="hs-identifier hs-var">reserved</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621681531509"><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621681531509"><span class="hs-identifier hs-var">reg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-55"></span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#getStackSlotFor"><span class="hs-identifier hs-var">getStackSlotFor</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#StackMap"><span class="hs-identifier hs-type">StackMap</span></a></span><span> </span><span id="local-6989586621682364197"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682364197"><span class="hs-identifier hs-var">freeSlot</span></a></span></span><span> </span><span id="local-6989586621682364198"><span class="annot"><span class="annottext">UniqFM Unique Int
+</span><a href="#local-6989586621682364198"><span class="hs-identifier hs-var">reserved</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621682364199"><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682364199"><span class="hs-identifier hs-var">reg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-56"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; UniqFM Unique Int -&gt; StackMap
 </span><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#StackMap"><span class="hs-identifier hs-var">StackMap</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621681531507"><span class="hs-identifier hs-var">freeSlot</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+</span><a href="#local-6989586621682364197"><span class="hs-identifier hs-var">freeSlot</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
 forall a. Num a =&gt; a -&gt; a -&gt; a
-</span><a href="../../base-4.18.2.0/src/GHC.Num.html#%2B/GHC.Num.html#%2B"><span class="hs-operator hs-var">+</span></a></span><span class="annot"><span class="annottext">Int
+</span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">UniqFM Unique Int -&gt; Unique -&gt; Int -&gt; UniqFM Unique Int
 forall key elt.
 Uniquable key =&gt;
 UniqFM key elt -&gt; key -&gt; elt -&gt; UniqFM key elt
 </span><a href="GHC.Types.Unique.FM.html#addToUFM"><span class="hs-identifier hs-var">addToUFM</span></a></span><span> </span><span class="annot"><span class="annottext">UniqFM Unique Int
-</span><a href="#local-6989586621681531508"><span class="hs-identifier hs-var">reserved</span></a></span><span> </span><span class="annot"><span class="annottext">Unique
-</span><a href="#local-6989586621681531509"><span class="hs-identifier hs-var">reg</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621681531507"><span class="hs-identifier hs-var">freeSlot</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621681531507"><span class="hs-identifier hs-var">freeSlot</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621682364198"><span class="hs-identifier hs-var">reserved</span></a></span><span> </span><span class="annot"><span class="annottext">Unique
+</span><a href="#local-6989586621682364199"><span class="hs-identifier hs-var">reg</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682364197"><span class="hs-identifier hs-var">freeSlot</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682364197"><span class="hs-identifier hs-var">freeSlot</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-57"></span><span>
 </span><span id="line-58"></span><span class="annot"><span class="hs-comment">-- | Return the number of stack slots that were allocated</span></span><span>
 </span><span id="line-59"></span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#getStackUse"><span class="hs-identifier hs-type">getStackUse</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#StackMap"><span class="hs-identifier hs-type">StackMap</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
 </span><span id="line-60"></span><span id="getStackUse"><span class="annot"><span class="annottext">getStackUse :: StackMap -&gt; Int
-</span><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#getStackUse"><span class="hs-identifier hs-var hs-var">getStackUse</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#StackMap"><span class="hs-identifier hs-type">StackMap</span></a></span><span> </span><span id="local-6989586621681531512"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621681531512"><span class="hs-identifier hs-var">freeSlot</span></a></span></span><span> </span><span class="annot"><span class="annottext">UniqFM Unique Int
+</span><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#getStackUse"><span class="hs-identifier hs-var hs-var">getStackUse</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.CmmToAsm.Reg.Linear.StackMap.html#StackMap"><span class="hs-identifier hs-type">StackMap</span></a></span><span> </span><span id="local-6989586621682364202"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621682364202"><span class="hs-identifier hs-var">freeSlot</span></a></span></span><span> </span><span class="annot"><span class="annottext">UniqFM Unique Int
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621681531512"><span class="hs-identifier hs-var">freeSlot</span></a></span><span>
+</span><a href="#local-6989586621682364202"><span class="hs-identifier hs-var">freeSlot</span></a></span><span>
 </span><span id="line-61"></span><span>
 </span><span id="line-62"></span></pre></body></html>

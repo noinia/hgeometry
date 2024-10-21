@@ -14,7 +14,7 @@
 --   The declared cost of each operation is either worst-case or amortized,
 --   but remains valid even if structures are shared.
 @package containers
-@version 0.6.7
+@version 0.7
 
 
 module Utils.Containers.Internal.BitUtil
@@ -71,8 +71,8 @@ unconsQ :: BitQueue -> Maybe (Bool, BitQueue)
 -- | Convert a bit queue to a list of bits by unconsing. This is used to
 --   test that the queue functions properly.
 toListQ :: BitQueue -> [Bool]
-instance GHC.Show.Show Utils.Containers.Internal.BitQueue.BitQueue
-instance GHC.Show.Show Utils.Containers.Internal.BitQueue.BitQueueB
+instance GHC.Internal.Show.Show Utils.Containers.Internal.BitQueue.BitQueue
+instance GHC.Internal.Show.Show Utils.Containers.Internal.BitQueue.BitQueueB
 
 
 -- | A strict pair
@@ -621,8 +621,7 @@ toList :: Set a -> [a]
 
 -- | &lt;math&gt;. Create a set from a list of elements.
 --   
---   If the elements are ordered, a linear-time implementation is used,
---   with the performance equal to <a>fromDistinctAscList</a>.
+--   If the elements are ordered, a linear-time implementation is used.
 fromList :: Ord a => [a] -> Set a
 
 -- | &lt;math&gt;. Convert the set to an ascending list of elements.
@@ -699,26 +698,26 @@ bin :: a -> Set a -> Set a -> Set a
 balanced :: Set a -> Bool
 link :: a -> Set a -> Set a -> Set a
 merge :: Set a -> Set a -> Set a
-instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Set.Internal.Intersection a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Set.Internal.Intersection a)
-instance GHC.Show.Show a => GHC.Show.Show (Data.Set.Internal.Intersection a)
-instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Set.Internal.Set a)
-instance GHC.Base.Semigroup (Data.Set.Internal.MergeSet a)
-instance GHC.Base.Monoid (Data.Set.Internal.MergeSet a)
-instance GHC.Classes.Ord a => GHC.Base.Semigroup (Data.Set.Internal.Intersection a)
-instance GHC.Classes.Ord a => GHC.Base.Monoid (Data.Set.Internal.Set a)
-instance GHC.Classes.Ord a => GHC.Base.Semigroup (Data.Set.Internal.Set a)
-instance Data.Foldable.Foldable Data.Set.Internal.Set
-instance (Data.Data.Data a, GHC.Classes.Ord a) => Data.Data.Data (Data.Set.Internal.Set a)
-instance GHC.Classes.Ord a => GHC.IsList.IsList (Data.Set.Internal.Set a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Set.Internal.Set a)
-instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Set.Internal.Set a)
-instance GHC.Show.Show a => GHC.Show.Show (Data.Set.Internal.Set a)
+instance (GHC.Internal.Data.Data.Data a, GHC.Classes.Ord a) => GHC.Internal.Data.Data.Data (Data.Set.Internal.Set a)
 instance Data.Functor.Classes.Eq1 Data.Set.Internal.Set
-instance Data.Functor.Classes.Ord1 Data.Set.Internal.Set
-instance Data.Functor.Classes.Show1 Data.Set.Internal.Set
-instance (GHC.Read.Read a, GHC.Classes.Ord a) => GHC.Read.Read (Data.Set.Internal.Set a)
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Set.Internal.Intersection a)
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Set.Internal.Set a)
+instance GHC.Internal.Data.Foldable.Foldable Data.Set.Internal.Set
+instance GHC.Classes.Ord a => GHC.Internal.IsList.IsList (Data.Set.Internal.Set a)
+instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Set.Internal.Set a)
+instance GHC.Internal.Base.Monoid (Data.Set.Internal.MergeSet a)
+instance GHC.Classes.Ord a => GHC.Internal.Base.Monoid (Data.Set.Internal.Set a)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Set.Internal.Set a)
+instance Data.Functor.Classes.Ord1 Data.Set.Internal.Set
+instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Set.Internal.Intersection a)
+instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Set.Internal.Set a)
+instance (GHC.Internal.Read.Read a, GHC.Classes.Ord a) => GHC.Internal.Read.Read (Data.Set.Internal.Set a)
+instance GHC.Classes.Ord a => GHC.Internal.Base.Semigroup (Data.Set.Internal.Intersection a)
+instance GHC.Internal.Base.Semigroup (Data.Set.Internal.MergeSet a)
+instance GHC.Classes.Ord a => GHC.Internal.Base.Semigroup (Data.Set.Internal.Set a)
+instance Data.Functor.Classes.Show1 Data.Set.Internal.Set
+instance GHC.Internal.Show.Show a => GHC.Internal.Show.Show (Data.Set.Internal.Intersection a)
+instance GHC.Internal.Show.Show a => GHC.Internal.Show.Show (Data.Set.Internal.Set a)
 
 
 -- | <h1>Finite Sets</h1>
@@ -785,8 +784,7 @@ singleton :: a -> Set a
 
 -- | &lt;math&gt;. Create a set from a list of elements.
 --   
---   If the elements are ordered, a linear-time implementation is used,
---   with the performance equal to <a>fromDistinctAscList</a>.
+--   If the elements are ordered, a linear-time implementation is used.
 fromList :: Ord a => [a] -> Set a
 
 -- | &lt;math&gt;. Build a set from an ascending list in linear time.
@@ -1450,7 +1448,8 @@ replicate :: Int -> a -> Seq a
 --   </pre>
 replicateA :: Applicative f => Int -> f a -> f (Seq a)
 
--- | <a>replicateM</a> is a sequence counterpart of <a>replicateM</a>.
+-- | <a>replicateM</a> is the <tt>Seq</tt> counterpart of
+--   <tt>Control.Monad.<a>replicateM</a></tt>.
 --   
 --   <pre>
 --   replicateM n x = sequence (replicate n x)
@@ -1702,7 +1701,7 @@ adjust :: (a -> a) -> Int -> Seq a -> Seq a
 --      Just x -&gt; let !x' = f x
 --                in update i x' xs
 --   </pre>
-adjust' :: forall a. (a -> a) -> Int -> Seq a -> Seq a
+adjust' :: (a -> a) -> Int -> Seq a -> Seq a
 
 -- | &lt;math&gt;. Replace the element at the specified position. If the
 --   position is out of range, the original sequence is returned.
@@ -1875,92 +1874,92 @@ unzip :: Seq (a, b) -> (Seq a, Seq b)
 --   better off simply calculating the sequence of pairs and using
 --   <a>fmap</a> to extract each component sequence.
 unzipWith :: (a -> (b, c)) -> Seq a -> (Seq b, Seq c)
-instance GHC.Read.Read a => GHC.Read.Read (Data.Sequence.Internal.ViewL a)
-instance GHC.Show.Show a => GHC.Show.Show (Data.Sequence.Internal.ViewL a)
-instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Sequence.Internal.ViewL a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Sequence.Internal.ViewL a)
-instance GHC.Read.Read a => GHC.Read.Read (Data.Sequence.Internal.ViewR a)
-instance GHC.Show.Show a => GHC.Show.Show (Data.Sequence.Internal.ViewR a)
-instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Sequence.Internal.ViewR a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Sequence.Internal.ViewR a)
-instance GHC.Generics.Generic1 Data.Sequence.Internal.FingerTree
-instance GHC.Generics.Generic (Data.Sequence.Internal.FingerTree a)
-instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Sequence.Internal.FingerTree a)
-instance GHC.Generics.Generic1 Data.Sequence.Internal.Digit
-instance GHC.Generics.Generic (Data.Sequence.Internal.Digit a)
-instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Sequence.Internal.Digit a)
-instance GHC.Generics.Generic1 Data.Sequence.Internal.Node
-instance GHC.Generics.Generic (Data.Sequence.Internal.Node a)
-instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Sequence.Internal.Node a)
-instance GHC.Generics.Generic1 Data.Sequence.Internal.Elem
-instance GHC.Generics.Generic (Data.Sequence.Internal.Elem a)
-instance Data.Data.Data a => Data.Data.Data (Data.Sequence.Internal.ViewL a)
-instance GHC.Generics.Generic1 Data.Sequence.Internal.ViewL
-instance GHC.Generics.Generic (Data.Sequence.Internal.ViewL a)
-instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Sequence.Internal.ViewL a)
-instance Data.Data.Data a => Data.Data.Data (Data.Sequence.Internal.ViewR a)
-instance GHC.Generics.Generic1 Data.Sequence.Internal.ViewR
-instance GHC.Generics.Generic (Data.Sequence.Internal.ViewR a)
-instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Sequence.Internal.ViewR a)
-instance Data.Sequence.Internal.UnzipWith Data.Sequence.Internal.Elem
-instance Data.Sequence.Internal.UnzipWith Data.Sequence.Internal.Node
-instance Data.Sequence.Internal.UnzipWith Data.Sequence.Internal.Digit
-instance Data.Sequence.Internal.UnzipWith Data.Sequence.Internal.FingerTree
-instance Data.Sequence.Internal.UnzipWith Data.Sequence.Internal.Seq
-instance GHC.Base.Functor Data.Sequence.Internal.ViewR
-instance Data.Foldable.Foldable Data.Sequence.Internal.ViewR
-instance Data.Traversable.Traversable Data.Sequence.Internal.ViewR
-instance Data.Data.Data a => Data.Data.Data (Data.Sequence.Internal.Seq a)
-instance GHC.Base.Functor Data.Sequence.Internal.ViewL
-instance Data.Foldable.Foldable Data.Sequence.Internal.ViewL
-instance Data.Traversable.Traversable Data.Sequence.Internal.ViewL
-instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Sequence.Internal.Seq a)
-instance GHC.Base.Functor Data.Sequence.Internal.Seq
-instance Data.Foldable.Foldable Data.Sequence.Internal.Seq
-instance Data.Traversable.Traversable Data.Sequence.Internal.Seq
-instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Sequence.Internal.Seq a)
-instance GHC.Base.Monad Data.Sequence.Internal.Seq
-instance Control.Monad.Fix.MonadFix Data.Sequence.Internal.Seq
-instance GHC.Base.Applicative Data.Sequence.Internal.Seq
-instance GHC.Base.MonadPlus Data.Sequence.Internal.Seq
-instance GHC.Base.Alternative Data.Sequence.Internal.Seq
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Sequence.Internal.Seq a)
-instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Sequence.Internal.Seq a)
-instance GHC.Show.Show a => GHC.Show.Show (Data.Sequence.Internal.Seq a)
-instance Data.Functor.Classes.Show1 Data.Sequence.Internal.Seq
+instance GHC.Internal.Base.Alternative Data.Sequence.Internal.Seq
+instance GHC.Internal.Base.Applicative Data.Sequence.Internal.Seq
+instance GHC.Internal.Data.Data.Data a => GHC.Internal.Data.Data.Data (Data.Sequence.Internal.Seq a)
+instance GHC.Internal.Data.Data.Data a => GHC.Internal.Data.Data.Data (Data.Sequence.Internal.ViewL a)
+instance GHC.Internal.Data.Data.Data a => GHC.Internal.Data.Data.Data (Data.Sequence.Internal.ViewR a)
 instance Data.Functor.Classes.Eq1 Data.Sequence.Internal.Seq
-instance Data.Functor.Classes.Ord1 Data.Sequence.Internal.Seq
-instance GHC.Read.Read a => GHC.Read.Read (Data.Sequence.Internal.Seq a)
-instance Data.Functor.Classes.Read1 Data.Sequence.Internal.Seq
-instance GHC.Base.Monoid (Data.Sequence.Internal.Seq a)
-instance GHC.Base.Semigroup (Data.Sequence.Internal.Seq a)
-instance GHC.IsList.IsList (Data.Sequence.Internal.Seq a)
-instance (a GHC.Types.~ GHC.Types.Char) => Data.String.IsString (Data.Sequence.Internal.Seq a)
-instance Control.Monad.Zip.MonadZip Data.Sequence.Internal.Seq
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Sequence.Internal.Seq a)
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Sequence.Internal.ViewL a)
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Sequence.Internal.ViewR a)
+instance GHC.Internal.Data.Foldable.Foldable Data.Sequence.Internal.Digit
+instance GHC.Internal.Data.Foldable.Foldable Data.Sequence.Internal.Elem
+instance GHC.Internal.Data.Foldable.Foldable Data.Sequence.Internal.FingerTree
+instance GHC.Internal.Data.Foldable.Foldable Data.Sequence.Internal.Node
+instance GHC.Internal.Data.Foldable.Foldable Data.Sequence.Internal.Seq
+instance GHC.Internal.Data.Foldable.Foldable Data.Sequence.Internal.ViewL
+instance GHC.Internal.Data.Foldable.Foldable Data.Sequence.Internal.ViewR
+instance GHC.Internal.Base.Functor Data.Sequence.Internal.Digit
+instance GHC.Internal.Base.Functor Data.Sequence.Internal.Elem
+instance GHC.Internal.Base.Functor Data.Sequence.Internal.FingerTree
+instance GHC.Internal.Base.Functor Data.Sequence.Internal.Node
+instance GHC.Internal.Base.Functor Data.Sequence.Internal.Seq
+instance GHC.Internal.Base.Functor Data.Sequence.Internal.ViewL
+instance GHC.Internal.Base.Functor Data.Sequence.Internal.ViewR
+instance GHC.Internal.Generics.Generic1 Data.Sequence.Internal.Digit
+instance GHC.Internal.Generics.Generic1 Data.Sequence.Internal.Elem
+instance GHC.Internal.Generics.Generic1 Data.Sequence.Internal.FingerTree
+instance GHC.Internal.Generics.Generic1 Data.Sequence.Internal.Node
+instance GHC.Internal.Generics.Generic1 Data.Sequence.Internal.ViewL
+instance GHC.Internal.Generics.Generic1 Data.Sequence.Internal.ViewR
+instance GHC.Internal.Generics.Generic (Data.Sequence.Internal.Digit a)
+instance GHC.Internal.Generics.Generic (Data.Sequence.Internal.Elem a)
+instance GHC.Internal.Generics.Generic (Data.Sequence.Internal.FingerTree a)
+instance GHC.Internal.Generics.Generic (Data.Sequence.Internal.Node a)
+instance GHC.Internal.Generics.Generic (Data.Sequence.Internal.ViewL a)
+instance GHC.Internal.Generics.Generic (Data.Sequence.Internal.ViewR a)
+instance GHC.Internal.IsList.IsList (Data.Sequence.Internal.Seq a)
+instance (a GHC.Types.~ GHC.Types.Char) => GHC.Internal.Data.String.IsString (Data.Sequence.Internal.Seq a)
+instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Sequence.Internal.Digit a)
+instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Sequence.Internal.FingerTree a)
+instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Sequence.Internal.Node a)
+instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Sequence.Internal.Seq a)
+instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Sequence.Internal.ViewL a)
+instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Sequence.Internal.ViewR a)
 instance Data.Sequence.Internal.MaybeForce (Data.Sequence.Internal.Elem a)
-instance Data.Sequence.Internal.Sized a => Data.Sequence.Internal.Sized (Data.Sequence.Internal.FingerTree a)
-instance Data.Sequence.Internal.Sized (Data.Sequence.Internal.Elem a)
-instance GHC.Base.Functor Data.Sequence.Internal.Elem
-instance Data.Foldable.Foldable Data.Sequence.Internal.Elem
-instance Data.Traversable.Traversable Data.Sequence.Internal.Elem
-instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Sequence.Internal.Elem a)
-instance Data.Foldable.Foldable Data.Sequence.Internal.FingerTree
-instance GHC.Base.Functor Data.Sequence.Internal.FingerTree
-instance Data.Traversable.Traversable Data.Sequence.Internal.FingerTree
-instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Sequence.Internal.FingerTree a)
-instance Data.Sequence.Internal.MaybeForce (Data.Sequence.Internal.Node a)
-instance Data.Foldable.Foldable Data.Sequence.Internal.Node
-instance GHC.Base.Functor Data.Sequence.Internal.Node
-instance Data.Traversable.Traversable Data.Sequence.Internal.Node
-instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Sequence.Internal.Node a)
-instance Data.Sequence.Internal.Sized (Data.Sequence.Internal.Node a)
-instance Data.Foldable.Foldable Data.Sequence.Internal.Digit
-instance GHC.Base.Functor Data.Sequence.Internal.Digit
-instance Data.Traversable.Traversable Data.Sequence.Internal.Digit
-instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Sequence.Internal.Digit a)
-instance Data.Sequence.Internal.Sized a => Data.Sequence.Internal.Sized (Data.Sequence.Internal.Digit a)
 instance Data.Sequence.Internal.MaybeForce (Data.Sequence.Internal.ForceBox a)
+instance Data.Sequence.Internal.MaybeForce (Data.Sequence.Internal.Node a)
+instance GHC.Internal.Control.Monad.Fix.MonadFix Data.Sequence.Internal.Seq
+instance GHC.Internal.Base.MonadPlus Data.Sequence.Internal.Seq
+instance GHC.Internal.Base.Monad Data.Sequence.Internal.Seq
+instance Control.Monad.Zip.MonadZip Data.Sequence.Internal.Seq
+instance GHC.Internal.Base.Monoid (Data.Sequence.Internal.Seq a)
+instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Sequence.Internal.Digit a)
+instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Sequence.Internal.Elem a)
+instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Sequence.Internal.FingerTree a)
+instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Sequence.Internal.Node a)
+instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Sequence.Internal.Seq a)
+instance Data.Functor.Classes.Ord1 Data.Sequence.Internal.Seq
+instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Sequence.Internal.Seq a)
+instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Sequence.Internal.ViewL a)
+instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Sequence.Internal.ViewR a)
+instance Data.Functor.Classes.Read1 Data.Sequence.Internal.Seq
+instance GHC.Internal.Read.Read a => GHC.Internal.Read.Read (Data.Sequence.Internal.Seq a)
+instance GHC.Internal.Read.Read a => GHC.Internal.Read.Read (Data.Sequence.Internal.ViewL a)
+instance GHC.Internal.Read.Read a => GHC.Internal.Read.Read (Data.Sequence.Internal.ViewR a)
+instance GHC.Internal.Base.Semigroup (Data.Sequence.Internal.Seq a)
+instance Data.Functor.Classes.Show1 Data.Sequence.Internal.Seq
+instance GHC.Internal.Show.Show a => GHC.Internal.Show.Show (Data.Sequence.Internal.Seq a)
+instance GHC.Internal.Show.Show a => GHC.Internal.Show.Show (Data.Sequence.Internal.ViewL a)
+instance GHC.Internal.Show.Show a => GHC.Internal.Show.Show (Data.Sequence.Internal.ViewR a)
+instance Data.Sequence.Internal.Sized a => Data.Sequence.Internal.Sized (Data.Sequence.Internal.Digit a)
+instance Data.Sequence.Internal.Sized (Data.Sequence.Internal.Elem a)
+instance Data.Sequence.Internal.Sized a => Data.Sequence.Internal.Sized (Data.Sequence.Internal.FingerTree a)
 instance Data.Sequence.Internal.Sized (Data.Sequence.Internal.ForceBox a)
+instance Data.Sequence.Internal.Sized (Data.Sequence.Internal.Node a)
+instance GHC.Internal.Data.Traversable.Traversable Data.Sequence.Internal.Digit
+instance GHC.Internal.Data.Traversable.Traversable Data.Sequence.Internal.Elem
+instance GHC.Internal.Data.Traversable.Traversable Data.Sequence.Internal.FingerTree
+instance GHC.Internal.Data.Traversable.Traversable Data.Sequence.Internal.Node
+instance GHC.Internal.Data.Traversable.Traversable Data.Sequence.Internal.Seq
+instance GHC.Internal.Data.Traversable.Traversable Data.Sequence.Internal.ViewL
+instance GHC.Internal.Data.Traversable.Traversable Data.Sequence.Internal.ViewR
+instance Data.Sequence.Internal.UnzipWith Data.Sequence.Internal.Digit
+instance Data.Sequence.Internal.UnzipWith Data.Sequence.Internal.Elem
+instance Data.Sequence.Internal.UnzipWith Data.Sequence.Internal.FingerTree
+instance Data.Sequence.Internal.UnzipWith Data.Sequence.Internal.Node
+instance Data.Sequence.Internal.UnzipWith Data.Sequence.Internal.Seq
 
 
 -- | <h1>WARNING</h1>
@@ -2320,7 +2319,8 @@ replicate :: Int -> a -> Seq a
 --   </pre>
 replicateA :: Applicative f => Int -> f a -> f (Seq a)
 
--- | <a>replicateM</a> is a sequence counterpart of <a>replicateM</a>.
+-- | <a>replicateM</a> is the <tt>Seq</tt> counterpart of
+--   <tt>Control.Monad.<a>replicateM</a></tt>.
 --   
 --   <pre>
 --   replicateM n x = sequence (replicate n x)
@@ -2641,7 +2641,7 @@ adjust :: (a -> a) -> Int -> Seq a -> Seq a
 --      Just x -&gt; let !x' = f x
 --                in update i x' xs
 --   </pre>
-adjust' :: forall a. (a -> a) -> Int -> Seq a -> Seq a
+adjust' :: (a -> a) -> Int -> Seq a -> Seq a
 
 -- | &lt;math&gt;. Replace the element at the specified position. If the
 --   position is out of range, the original sequence is returned.
@@ -2896,18 +2896,18 @@ unfoldForestM :: Monad m => (b -> m (a, [b])) -> [b] -> m [Tree a]
 --   
 --   See <a>unfoldTree</a> for more info.
 --   
---   Implemented using an algorithm adapted from /Breadth-First Numbering:
---   Lessons from a Small Exercise in Algorithm Design<i>, by Chris
---   Okasaki, </i>ICFP'00/.
+--   Implemented using an algorithm adapted from <i>Breadth-First
+--   Numbering: Lessons from a Small Exercise in Algorithm Design</i>, by
+--   Chris Okasaki, <i>ICFP'00</i>.
 unfoldTreeM_BF :: Monad m => (b -> m (a, [b])) -> b -> m (Tree a)
 
 -- | Monadic forest builder, in breadth-first order
 --   
 --   See <a>unfoldForest</a> for more info.
 --   
---   Implemented using an algorithm adapted from /Breadth-First Numbering:
---   Lessons from a Small Exercise in Algorithm Design<i>, by Chris
---   Okasaki, </i>ICFP'00/.
+--   Implemented using an algorithm adapted from <i>Breadth-First
+--   Numbering: Lessons from a Small Exercise in Algorithm Design</i>, by
+--   Chris Okasaki, <i>ICFP'00</i>.
 unfoldForestM_BF :: Monad m => (b -> m (a, [b])) -> [b] -> m [Tree a]
 
 -- | Fold a tree into a "summary" value in depth-first order.
@@ -3018,27 +3018,27 @@ drawTree :: Tree String -> String
 --   `- 20
 --   </pre>
 drawForest :: [Tree String] -> String
-instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Tree.Tree a)
-instance GHC.Generics.Generic1 Data.Tree.Tree
-instance GHC.Generics.Generic (Data.Tree.Tree a)
-instance Data.Data.Data a => Data.Data.Data (Data.Tree.Tree a)
-instance GHC.Show.Show a => GHC.Show.Show (Data.Tree.Tree a)
-instance GHC.Read.Read a => GHC.Read.Read (Data.Tree.Tree a)
-instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Tree.Tree a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Tree.Tree a)
+instance GHC.Internal.Base.Applicative Data.Tree.Tree
+instance GHC.Internal.Data.Data.Data a => GHC.Internal.Data.Data.Data (Data.Tree.Tree a)
 instance Data.Functor.Classes.Eq1 Data.Tree.Tree
-instance Data.Functor.Classes.Ord1 Data.Tree.Tree
-instance Data.Functor.Classes.Show1 Data.Tree.Tree
-instance Data.Functor.Classes.Read1 Data.Tree.Tree
-instance GHC.Base.Functor Data.Tree.Tree
-instance GHC.Base.Applicative Data.Tree.Tree
-instance GHC.Base.Monad Data.Tree.Tree
-instance Control.Monad.Fix.MonadFix Data.Tree.Tree
-instance Data.Traversable.Traversable Data.Tree.Tree
-instance Data.Foldable.Foldable Data.Tree.Tree
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.Tree.Tree a)
 instance Data.Foldable1.Foldable1 Data.Tree.Tree
-instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Tree.Tree a)
+instance GHC.Internal.Data.Foldable.Foldable Data.Tree.Tree
+instance GHC.Internal.Base.Functor Data.Tree.Tree
+instance GHC.Internal.Generics.Generic1 Data.Tree.Tree
+instance GHC.Internal.Generics.Generic (Data.Tree.Tree a)
+instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.Tree.Tree a)
+instance GHC.Internal.Control.Monad.Fix.MonadFix Data.Tree.Tree
+instance GHC.Internal.Base.Monad Data.Tree.Tree
 instance Control.Monad.Zip.MonadZip Data.Tree.Tree
+instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Tree.Tree a)
+instance Data.Functor.Classes.Ord1 Data.Tree.Tree
+instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Tree.Tree a)
+instance Data.Functor.Classes.Read1 Data.Tree.Tree
+instance GHC.Internal.Read.Read a => GHC.Internal.Read.Read (Data.Tree.Tree a)
+instance Data.Functor.Classes.Show1 Data.Tree.Tree
+instance GHC.Internal.Show.Show a => GHC.Internal.Show.Show (Data.Tree.Tree a)
+instance GHC.Internal.Data.Traversable.Traversable Data.Tree.Tree
 
 
 -- | <h1>Finite Graphs</h1>
@@ -3235,7 +3235,7 @@ transposeG :: Graph -> Graph
 -- | &lt;math&gt;. A spanning forest of the part of the graph reachable
 --   from the listed vertices, obtained from a depth-first search of the
 --   graph starting at each of the listed vertices in order.
-dfs :: Graph -> [Vertex] -> Forest Vertex
+dfs :: Graph -> [Vertex] -> [Tree Vertex]
 
 -- | &lt;math&gt;. A spanning forest of the graph, obtained from a
 --   depth-first search of the graph starting from each vertex in an
@@ -3321,7 +3321,11 @@ data SCC vertex
 AcyclicSCC :: vertex -> SCC vertex
 
 -- | A maximal set of mutually reachable vertices.
-CyclicSCC :: [vertex] -> SCC vertex
+NECyclicSCC :: {-# UNPACK #-} !NonEmpty vertex -> SCC vertex
+
+-- | Partial pattern synonym for backward compatibility with <tt>containers
+--   &lt; 0.7</tt>.
+pattern CyclicSCC :: [vertex] -> SCC vertex
 
 -- | &lt;math&gt;. The strongly connected components of a directed graph,
 --   reverse topologically sorted.
@@ -3362,23 +3366,24 @@ Node :: a -> [Tree a] -> Tree a
 
 -- | This type synonym exists primarily for historical reasons.
 type Forest a = [Tree a]
-instance GHC.Read.Read vertex => GHC.Read.Read (Data.Graph.SCC vertex)
-instance GHC.Show.Show vertex => GHC.Show.Show (Data.Graph.SCC vertex)
-instance GHC.Classes.Eq vertex => GHC.Classes.Eq (Data.Graph.SCC vertex)
-instance Data.Data.Data vertex => Data.Data.Data (Data.Graph.SCC vertex)
-instance GHC.Generics.Generic1 Data.Graph.SCC
-instance GHC.Generics.Generic (Data.Graph.SCC vertex)
-instance Language.Haskell.TH.Syntax.Lift vertex => Language.Haskell.TH.Syntax.Lift (Data.Graph.SCC vertex)
-instance GHC.Base.Monad (Data.Graph.SetM s)
-instance GHC.Base.Functor (Data.Graph.SetM s)
-instance GHC.Base.Applicative (Data.Graph.SetM s)
+instance GHC.Internal.Base.Applicative (Data.Graph.SetM s)
+instance GHC.Internal.Data.Data.Data vertex => GHC.Internal.Data.Data.Data (Data.Graph.SCC vertex)
 instance Data.Functor.Classes.Eq1 Data.Graph.SCC
-instance Data.Functor.Classes.Show1 Data.Graph.SCC
-instance Data.Functor.Classes.Read1 Data.Graph.SCC
-instance Data.Foldable.Foldable Data.Graph.SCC
-instance Data.Traversable.Traversable Data.Graph.SCC
+instance GHC.Classes.Eq vertex => GHC.Classes.Eq (Data.Graph.SCC vertex)
+instance Data.Foldable1.Foldable1 Data.Graph.SCC
+instance GHC.Internal.Data.Foldable.Foldable Data.Graph.SCC
+instance GHC.Internal.Base.Functor Data.Graph.SCC
+instance GHC.Internal.Base.Functor (Data.Graph.SetM s)
+instance GHC.Internal.Generics.Generic1 Data.Graph.SCC
+instance GHC.Internal.Generics.Generic (Data.Graph.SCC vertex)
+instance Language.Haskell.TH.Syntax.Lift vertex => Language.Haskell.TH.Syntax.Lift (Data.Graph.SCC vertex)
+instance GHC.Internal.Base.Monad (Data.Graph.SetM s)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Graph.SCC a)
-instance GHC.Base.Functor Data.Graph.SCC
+instance Data.Functor.Classes.Read1 Data.Graph.SCC
+instance GHC.Internal.Read.Read vertex => GHC.Internal.Read.Read (Data.Graph.SCC vertex)
+instance Data.Functor.Classes.Show1 Data.Graph.SCC
+instance GHC.Internal.Show.Show vertex => GHC.Internal.Show.Show (Data.Graph.SCC vertex)
+instance GHC.Internal.Data.Traversable.Traversable Data.Graph.SCC
 
 
 -- | <h1>WARNING</h1>
@@ -3630,6 +3635,8 @@ insert :: Ord k => k -> a -> Map k a -> Map k a
 --   insertWith (++) 7 "xxx" (fromList [(5,"a"), (3,"b")]) == fromList [(3, "b"), (5, "a"), (7, "xxx")]
 --   insertWith (++) 5 "xxx" empty                         == singleton 5 "xxx"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertWith :: Ord k => (a -> a -> a) -> k -> a -> Map k a -> Map k a
 
 -- | &lt;math&gt;. Insert with a function, combining key, new value and old
@@ -3645,6 +3652,8 @@ insertWith :: Ord k => (a -> a -> a) -> k -> a -> Map k a -> Map k a
 --   insertWithKey f 7 "xxx" (fromList [(5,"a"), (3,"b")]) == fromList [(3, "b"), (5, "a"), (7, "xxx")]
 --   insertWithKey f 5 "xxx" empty                         == singleton 5 "xxx"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> Map k a -> Map k a
 
 -- | &lt;math&gt;. Combines insert operation with old value retrieval. The
@@ -3667,6 +3676,8 @@ insertWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> Map k a -> Map k a
 --   insertLookup 5 "x" (fromList [(5,"a"), (3,"b")]) == (Just "a", fromList [(3, "b"), (5, "x")])
 --   insertLookup 7 "x" (fromList [(5,"a"), (3,"b")]) == (Nothing,  fromList [(3, "b"), (5, "a"), (7, "x")])
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertLookupWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> Map k a -> (Maybe a, Map k a)
 
 -- | &lt;math&gt;. Delete a key and its value from the map. When the key is
@@ -3817,6 +3828,8 @@ union :: Ord k => Map k a -> Map k a -> Map k a
 --   <pre>
 --   unionWith (++) (fromList [(5, "a"), (3, "b")]) (fromList [(5, "A"), (7, "C")]) == fromList [(3, "b"), (5, "aA"), (7, "C")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 unionWith :: Ord k => (a -> a -> a) -> Map k a -> Map k a -> Map k a
 
 -- | &lt;math&gt;. Union with a combining function.
@@ -3825,6 +3838,8 @@ unionWith :: Ord k => (a -> a -> a) -> Map k a -> Map k a -> Map k a
 --   let f key left_value right_value = (show key) ++ ":" ++ left_value ++ "|" ++ right_value
 --   unionWithKey f (fromList [(5, "a"), (3, "b")]) (fromList [(5, "A"), (7, "C")]) == fromList [(3, "b"), (5, "5:a|A"), (7, "C")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 unionWithKey :: Ord k => (k -> a -> a -> a) -> Map k a -> Map k a -> Map k a
 
 -- | The union of a list of maps: (<tt><a>unions</a> == <a>foldl</a>
@@ -4055,7 +4070,7 @@ merge :: Ord k => SimpleWhenMissing k a c -> SimpleWhenMissing k b c -> SimpleWh
 --   zipWithMaybeMatched :: (k -&gt; x -&gt; y -&gt; Maybe z)
 --                       -&gt; SimpleWhenMatched k x y z
 --   </pre>
-zipWithMaybeMatched :: Applicative f => (k -> x -> y -> Maybe z) -> WhenMatched f k x y z
+zipWithMaybeMatched :: forall (f :: Type -> Type) k x y z. Applicative f => (k -> x -> y -> Maybe z) -> WhenMatched f k x y z
 
 -- | When a key is found in both maps, apply a function to the key and
 --   values and use the result in the merged map.
@@ -4064,7 +4079,7 @@ zipWithMaybeMatched :: Applicative f => (k -> x -> y -> Maybe z) -> WhenMatched 
 --   zipWithMatched :: (k -&gt; x -&gt; y -&gt; z)
 --                  -&gt; SimpleWhenMatched k x y z
 --   </pre>
-zipWithMatched :: Applicative f => (k -> x -> y -> z) -> WhenMatched f k x y z
+zipWithMatched :: forall (f :: Type -> Type) k x y z. Applicative f => (k -> x -> y -> z) -> WhenMatched f k x y z
 
 -- | Map over the entries whose keys are missing from the other map,
 --   optionally removing some. This is the most powerful
@@ -4081,7 +4096,7 @@ zipWithMatched :: Applicative f => (k -> x -> y -> z) -> WhenMatched f k x y z
 --   
 --   but <tt>mapMaybeMissing</tt> uses fewer unnecessary <a>Applicative</a>
 --   operations.
-mapMaybeMissing :: Applicative f => (k -> x -> Maybe y) -> WhenMissing f k x y
+mapMaybeMissing :: forall (f :: Type -> Type) k x y. Applicative f => (k -> x -> Maybe y) -> WhenMissing f k x y
 
 -- | Drop all the entries whose keys are missing from the other map.
 --   
@@ -4094,7 +4109,7 @@ mapMaybeMissing :: Applicative f => (k -> x -> Maybe y) -> WhenMissing f k x y
 --   </pre>
 --   
 --   but <tt>dropMissing</tt> is much faster.
-dropMissing :: Applicative f => WhenMissing f k x y
+dropMissing :: forall (f :: Type -> Type) k x y. Applicative f => WhenMissing f k x y
 
 -- | Preserve, unchanged, the entries whose keys are missing from the other
 --   map.
@@ -4108,7 +4123,7 @@ dropMissing :: Applicative f => WhenMissing f k x y
 --   </pre>
 --   
 --   but <tt>preserveMissing</tt> is much faster.
-preserveMissing :: Applicative f => WhenMissing f k x x
+preserveMissing :: forall (f :: Type -> Type) k x. Applicative f => WhenMissing f k x x
 
 -- | Force the entries whose keys are missing from the other map and
 --   otherwise preserve them unchanged.
@@ -4122,7 +4137,7 @@ preserveMissing :: Applicative f => WhenMissing f k x x
 --   </pre>
 --   
 --   but <tt>preserveMissing'</tt> is quite a bit faster.
-preserveMissing' :: Applicative f => WhenMissing f k x x
+preserveMissing' :: forall (f :: Type -> Type) k x. Applicative f => WhenMissing f k x x
 
 -- | Map over the entries whose keys are missing from the other map.
 --   
@@ -4135,7 +4150,7 @@ preserveMissing' :: Applicative f => WhenMissing f k x x
 --   </pre>
 --   
 --   but <tt>mapMissing</tt> is somewhat faster.
-mapMissing :: Applicative f => (k -> x -> y) -> WhenMissing f k x y
+mapMissing :: forall (f :: Type -> Type) k x y. Applicative f => (k -> x -> y) -> WhenMissing f k x y
 
 -- | Filter the entries whose keys are missing from the other map.
 --   
@@ -4148,7 +4163,7 @@ mapMissing :: Applicative f => (k -> x -> y) -> WhenMissing f k x y
 --   </pre>
 --   
 --   but this should be a little faster.
-filterMissing :: Applicative f => (k -> x -> Bool) -> WhenMissing f k x x
+filterMissing :: forall (f :: Type -> Type) k x. Applicative f => (k -> x -> Bool) -> WhenMissing f k x x
 
 -- | A tactic for dealing with keys present in one map but not the other in
 --   <a>merge</a> or <a>mergeA</a>.
@@ -4156,10 +4171,10 @@ filterMissing :: Applicative f => (k -> x -> Bool) -> WhenMissing f k x x
 --   A tactic of type <tt> WhenMissing f k x z </tt> is an abstract
 --   representation of a function of type <tt> k -&gt; x -&gt; f (Maybe z)
 --   </tt>.
-data WhenMissing f k x y
-WhenMissing :: (Map k x -> f (Map k y)) -> (k -> x -> f (Maybe y)) -> WhenMissing f k x y
-[missingSubtree] :: WhenMissing f k x y -> Map k x -> f (Map k y)
-[missingKey] :: WhenMissing f k x y -> k -> x -> f (Maybe y)
+data WhenMissing (f :: Type -> Type) k x y
+WhenMissing :: (Map k x -> f (Map k y)) -> (k -> x -> f (Maybe y)) -> WhenMissing (f :: Type -> Type) k x y
+[missingSubtree] :: WhenMissing (f :: Type -> Type) k x y -> Map k x -> f (Map k y)
+[missingKey] :: WhenMissing (f :: Type -> Type) k x y -> k -> x -> f (Maybe y)
 
 -- | A tactic for dealing with keys present in both maps in <a>merge</a> or
 --   <a>mergeA</a>.
@@ -4167,9 +4182,9 @@ WhenMissing :: (Map k x -> f (Map k y)) -> (k -> x -> f (Maybe y)) -> WhenMissin
 --   A tactic of type <tt> WhenMatched f k x y z </tt> is an abstract
 --   representation of a function of type <tt> k -&gt; x -&gt; y -&gt; f
 --   (Maybe z) </tt>.
-newtype WhenMatched f k x y z
-WhenMatched :: (k -> x -> y -> f (Maybe z)) -> WhenMatched f k x y z
-[matchedKey] :: WhenMatched f k x y z -> k -> x -> y -> f (Maybe z)
+newtype WhenMatched (f :: Type -> Type) k x y z
+WhenMatched :: (k -> x -> y -> f (Maybe z)) -> WhenMatched (f :: Type -> Type) k x y z
+[matchedKey] :: WhenMatched (f :: Type -> Type) k x y z -> k -> x -> y -> f (Maybe z)
 
 -- | An applicative version of <a>merge</a>.
 --   
@@ -4388,6 +4403,8 @@ mapKeys :: Ord k2 => (k1 -> k2) -> Map k1 a -> Map k2 a
 --   mapKeysWith (++) (\ _ -&gt; 1) (fromList [(1,"b"), (2,"a"), (3,"d"), (4,"c")]) == singleton 1 "cdab"
 --   mapKeysWith (++) (\ _ -&gt; 3) (fromList [(1,"b"), (2,"a"), (3,"d"), (4,"c")]) == singleton 3 "cdab"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 mapKeysWith :: Ord k2 => (a -> a -> a) -> (k1 -> k2) -> Map k1 a -> Map k2 a
 
 -- | &lt;math&gt;. <tt><a>mapKeysMonotonic</a> f s == <a>mapKeys</a> f
@@ -4584,8 +4601,8 @@ toList :: Map k a -> [(k, a)]
 --   <a>fromAscList</a>. If the list contains more than one value for the
 --   same key, the last value for the key is retained.
 --   
---   If the keys of the list are ordered, linear-time implementation is
---   used, with the performance equal to <a>fromDistinctAscList</a>.
+--   If the keys of the list are ordered, a linear-time implementation is
+--   used.
 --   
 --   <pre>
 --   fromList [] == empty
@@ -4598,8 +4615,52 @@ fromList :: Ord k => [(k, a)] -> Map k a
 --   combining function. See also <a>fromAscListWith</a>.
 --   
 --   <pre>
---   fromListWith (++) [(5,"a"), (5,"b"), (3,"b"), (3,"a"), (5,"a")] == fromList [(3, "ab"), (5, "aba")]
+--   fromListWith (++) [(5,"a"), (5,"b"), (3,"x"), (5,"c")] == fromList [(3, "x"), (5, "cba")]
 --   fromListWith (++) [] == empty
+--   </pre>
+--   
+--   Note the reverse ordering of <tt>"cba"</tt> in the example.
+--   
+--   The symmetric combining function <tt>f</tt> is applied in a left-fold
+--   over the list, as <tt>f new old</tt>.
+--   
+--   <h3>Performance</h3>
+--   
+--   You should ensure that the given <tt>f</tt> is fast with this order of
+--   arguments.
+--   
+--   Symmetric functions may be slow in one order, and fast in another. For
+--   the common case of collecting values of matching keys in a list, as
+--   above:
+--   
+--   The complexity of <tt>(++) a b</tt> is &lt;math&gt;, so it is fast
+--   when given a short list as its first argument. Thus:
+--   
+--   <pre>
+--   fromListWith       (++)  (replicate 1000000 (3, "x"))   -- O(n),  fast
+--   fromListWith (flip (++)) (replicate 1000000 (3, "x"))   -- O(n²), extremely slow
+--   </pre>
+--   
+--   because they evaluate as, respectively:
+--   
+--   <pre>
+--   fromList [(3, "x" ++ ("x" ++ "xxxxx..xxxxx"))]   -- O(n)
+--   fromList [(3, ("xxxxx..xxxxx" ++ "x") ++ "x")]   -- O(n²)
+--   </pre>
+--   
+--   Thus, to get good performance with an operation like <tt>(++)</tt>
+--   while also preserving the same order as in the input list, reverse the
+--   input:
+--   
+--   <pre>
+--   fromListWith (++) (reverse [(5,"a"), (5,"b"), (5,"c")]) == fromList [(5, "abc")]
+--   </pre>
+--   
+--   and it is always fast to combine singleton-list values <tt>[v]</tt>
+--   with <tt>fromListWith (++)</tt>, as in:
+--   
+--   <pre>
+--   fromListWith (++) $ reverse $ map (\(k, v) -&gt; (k, [v])) someListOfTuples
 --   </pre>
 fromListWith :: Ord k => (a -> a -> a) -> [(k, a)] -> Map k a
 
@@ -4611,6 +4672,8 @@ fromListWith :: Ord k => (a -> a -> a) -> [(k, a)] -> Map k a
 --   fromListWithKey f [(5,"a"), (5,"b"), (3,"b"), (3,"a"), (5,"c")] == fromList [(3, "3:a|b"), (5, "5:c|5:b|a")]
 --   fromListWithKey f [] == empty
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromListWithKey :: Ord k => (k -> a -> a -> a) -> [(k, a)] -> Map k a
 
 -- | &lt;math&gt;. Convert the map to a list of key/value pairs where the
@@ -4661,6 +4724,8 @@ fromAscListWith :: Eq k => (a -> a -> a) -> [(k, a)] -> Map k a
 --   valid (fromAscListWithKey f [(3,"b"), (5,"a"), (5,"b"), (5,"b")]) == True
 --   valid (fromAscListWithKey f [(5,"a"), (3,"b"), (5,"b"), (5,"b")]) == False
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromAscListWithKey :: Eq k => (k -> a -> a -> a) -> [(k, a)] -> Map k a
 
 -- | &lt;math&gt;. Build a map from an ascending list of distinct elements
@@ -4693,6 +4758,8 @@ fromDescList :: Eq k => [(k, a)] -> Map k a
 --   valid (fromDescListWith (++) [(5,"a"), (5,"b"), (3,"b")]) == True
 --   valid (fromDescListWith (++) [(5,"a"), (3,"b"), (5,"b")]) == False
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromDescListWith :: Eq k => (a -> a -> a) -> [(k, a)] -> Map k a
 
 -- | &lt;math&gt;. Build a map from a descending list in linear time with a
@@ -4705,6 +4772,8 @@ fromDescListWith :: Eq k => (a -> a -> a) -> [(k, a)] -> Map k a
 --   valid (fromDescListWithKey f [(5,"a"), (5,"b"), (5,"b"), (3,"b")]) == True
 --   valid (fromDescListWithKey f [(5,"a"), (3,"b"), (5,"b"), (5,"b")]) == False
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromDescListWithKey :: Eq k => (k -> a -> a -> a) -> [(k, a)] -> Map k a
 
 -- | &lt;math&gt;. Build a map from a descending list of distinct elements
@@ -5205,66 +5274,75 @@ insertMax :: k -> a -> Map k a -> Map k a
 link :: k -> a -> Map k a -> Map k a -> Map k a
 link2 :: Map k a -> Map k a -> Map k a
 glue :: Map k a -> Map k a -> Map k a
+fromDistinctAscList_linkTop :: Map k a -> Stack k a -> FromDistinctMonoState k a
+fromDistinctAscList_linkAll :: FromDistinctMonoState k a -> Map k a
+fromDistinctDescList_linkTop :: Map k a -> Stack k a -> FromDistinctMonoState k a
+fromDistinctDescList_linkAll :: FromDistinctMonoState k a -> Map k a
 data MaybeS a
 NothingS :: MaybeS a
 JustS :: !a -> MaybeS a
-
--- | Identity functor and monad. (a non-strict monad)
-newtype () => Identity a
+newtype Identity a
 Identity :: a -> Identity a
 [runIdentity] :: Identity a -> a
+data FromDistinctMonoState k a
+State0 :: !Stack k a -> FromDistinctMonoState k a
+State1 :: !Map k a -> !Stack k a -> FromDistinctMonoState k a
+data Stack k a
+Push :: !k -> a -> !Map k a -> !Stack k a -> Stack k a
+Nada :: Stack k a
+foldl'Stack :: (b -> k -> a -> Map k a -> b) -> b -> Stack k a -> b
 
 -- | Map covariantly over a <tt><a>WhenMissing</a> f k x</tt>.
-mapWhenMissing :: (Applicative f, Monad f) => (a -> b) -> WhenMissing f k x a -> WhenMissing f k x b
+mapWhenMissing :: forall (f :: Type -> Type) a b k x. (Applicative f, Monad f) => (a -> b) -> WhenMissing f k x a -> WhenMissing f k x b
 
 -- | Map covariantly over a <tt><a>WhenMatched</a> f k x y</tt>.
-mapWhenMatched :: Functor f => (a -> b) -> WhenMatched f k x y a -> WhenMatched f k x y b
+mapWhenMatched :: forall (f :: Type -> Type) a b k x y. Functor f => (a -> b) -> WhenMatched f k x y a -> WhenMatched f k x y b
 
 -- | Map contravariantly over a <tt><a>WhenMissing</a> f k _ x</tt>.
-lmapWhenMissing :: (b -> a) -> WhenMissing f k a x -> WhenMissing f k b x
+lmapWhenMissing :: forall b a (f :: Type -> Type) k x. (b -> a) -> WhenMissing f k a x -> WhenMissing f k b x
 
 -- | Map contravariantly over a <tt><a>WhenMatched</a> f k _ y z</tt>.
-contramapFirstWhenMatched :: (b -> a) -> WhenMatched f k a y z -> WhenMatched f k b y z
+contramapFirstWhenMatched :: forall b a (f :: Type -> Type) k y z. (b -> a) -> WhenMatched f k a y z -> WhenMatched f k b y z
 
 -- | Map contravariantly over a <tt><a>WhenMatched</a> f k x _ z</tt>.
-contramapSecondWhenMatched :: (b -> a) -> WhenMatched f k x a z -> WhenMatched f k x b z
+contramapSecondWhenMatched :: forall b a (f :: Type -> Type) k x z. (b -> a) -> WhenMatched f k x a z -> WhenMatched f k x b z
 
 -- | Map covariantly over a <tt><a>WhenMissing</a> f k x</tt>, using only a
 --   'Functor f' constraint.
-mapGentlyWhenMissing :: Functor f => (a -> b) -> WhenMissing f k x a -> WhenMissing f k x b
+mapGentlyWhenMissing :: forall (f :: Type -> Type) a b k x. Functor f => (a -> b) -> WhenMissing f k x a -> WhenMissing f k x b
 
 -- | Map covariantly over a <tt><a>WhenMatched</a> f k x</tt>, using only a
 --   'Functor f' constraint.
-mapGentlyWhenMatched :: Functor f => (a -> b) -> WhenMatched f k x y a -> WhenMatched f k x y b
-instance (Language.Haskell.TH.Syntax.Lift k, Language.Haskell.TH.Syntax.Lift a) => Language.Haskell.TH.Syntax.Lift (Data.Map.Internal.Map k a)
-instance GHC.Base.Functor f => GHC.Base.Functor (Data.Map.Internal.WhenMatched f k x y)
-instance (GHC.Base.Monad f, GHC.Base.Applicative f) => Control.Category.Category (Data.Map.Internal.WhenMatched f k x)
-instance (GHC.Base.Monad f, GHC.Base.Applicative f) => GHC.Base.Applicative (Data.Map.Internal.WhenMatched f k x y)
-instance (GHC.Base.Monad f, GHC.Base.Applicative f) => GHC.Base.Monad (Data.Map.Internal.WhenMatched f k x y)
-instance (GHC.Base.Applicative f, GHC.Base.Monad f) => GHC.Base.Functor (Data.Map.Internal.WhenMissing f k x)
-instance (GHC.Base.Applicative f, GHC.Base.Monad f) => Control.Category.Category (Data.Map.Internal.WhenMissing f k)
-instance (GHC.Base.Applicative f, GHC.Base.Monad f) => GHC.Base.Applicative (Data.Map.Internal.WhenMissing f k x)
-instance (GHC.Base.Applicative f, GHC.Base.Monad f) => GHC.Base.Monad (Data.Map.Internal.WhenMissing f k x)
-instance GHC.Classes.Ord k => GHC.Base.Monoid (Data.Map.Internal.Map k v)
-instance GHC.Classes.Ord k => GHC.Base.Semigroup (Data.Map.Internal.Map k v)
-instance (Data.Data.Data k, Data.Data.Data a, GHC.Classes.Ord k) => Data.Data.Data (Data.Map.Internal.Map k a)
-instance GHC.Classes.Ord k => GHC.IsList.IsList (Data.Map.Internal.Map k v)
-instance (GHC.Classes.Eq k, GHC.Classes.Eq a) => GHC.Classes.Eq (Data.Map.Internal.Map k a)
-instance (GHC.Classes.Ord k, GHC.Classes.Ord v) => GHC.Classes.Ord (Data.Map.Internal.Map k v)
-instance Data.Functor.Classes.Eq2 Data.Map.Internal.Map
-instance GHC.Classes.Eq k => Data.Functor.Classes.Eq1 (Data.Map.Internal.Map k)
-instance Data.Functor.Classes.Ord2 Data.Map.Internal.Map
-instance GHC.Classes.Ord k => Data.Functor.Classes.Ord1 (Data.Map.Internal.Map k)
-instance Data.Functor.Classes.Show2 Data.Map.Internal.Map
-instance GHC.Show.Show k => Data.Functor.Classes.Show1 (Data.Map.Internal.Map k)
-instance (GHC.Classes.Ord k, GHC.Read.Read k) => Data.Functor.Classes.Read1 (Data.Map.Internal.Map k)
-instance GHC.Base.Functor (Data.Map.Internal.Map k)
-instance Data.Traversable.Traversable (Data.Map.Internal.Map k)
-instance Data.Foldable.Foldable (Data.Map.Internal.Map k)
+mapGentlyWhenMatched :: forall (f :: Type -> Type) a b k x y. Functor f => (a -> b) -> WhenMatched f k x y a -> WhenMatched f k x y b
+instance (GHC.Internal.Base.Monad f, GHC.Internal.Base.Applicative f) => GHC.Internal.Base.Applicative (Data.Map.Internal.WhenMatched f k x y)
+instance (GHC.Internal.Base.Applicative f, GHC.Internal.Base.Monad f) => GHC.Internal.Base.Applicative (Data.Map.Internal.WhenMissing f k x)
 instance Data.Bifoldable.Bifoldable Data.Map.Internal.Map
+instance (GHC.Internal.Base.Monad f, GHC.Internal.Base.Applicative f) => GHC.Internal.Control.Category.Category (Data.Map.Internal.WhenMatched f k x)
+instance (GHC.Internal.Base.Applicative f, GHC.Internal.Base.Monad f) => GHC.Internal.Control.Category.Category (Data.Map.Internal.WhenMissing f k)
+instance (GHC.Internal.Data.Data.Data k, GHC.Internal.Data.Data.Data a, GHC.Classes.Ord k) => GHC.Internal.Data.Data.Data (Data.Map.Internal.Map k a)
+instance GHC.Classes.Eq k => Data.Functor.Classes.Eq1 (Data.Map.Internal.Map k)
+instance Data.Functor.Classes.Eq2 Data.Map.Internal.Map
+instance (GHC.Classes.Eq k, GHC.Classes.Eq a) => GHC.Classes.Eq (Data.Map.Internal.Map k a)
+instance GHC.Internal.Data.Foldable.Foldable (Data.Map.Internal.Map k)
+instance GHC.Internal.Base.Functor (Data.Map.Internal.Map k)
+instance GHC.Internal.Base.Functor f => GHC.Internal.Base.Functor (Data.Map.Internal.WhenMatched f k x y)
+instance (GHC.Internal.Base.Applicative f, GHC.Internal.Base.Monad f) => GHC.Internal.Base.Functor (Data.Map.Internal.WhenMissing f k x)
+instance GHC.Classes.Ord k => GHC.Internal.IsList.IsList (Data.Map.Internal.Map k v)
+instance (Language.Haskell.TH.Syntax.Lift k, Language.Haskell.TH.Syntax.Lift a) => Language.Haskell.TH.Syntax.Lift (Data.Map.Internal.Map k a)
+instance (GHC.Internal.Base.Monad f, GHC.Internal.Base.Applicative f) => GHC.Internal.Base.Monad (Data.Map.Internal.WhenMatched f k x y)
+instance (GHC.Internal.Base.Applicative f, GHC.Internal.Base.Monad f) => GHC.Internal.Base.Monad (Data.Map.Internal.WhenMissing f k x)
+instance GHC.Classes.Ord k => GHC.Internal.Base.Monoid (Data.Map.Internal.Map k v)
 instance (Control.DeepSeq.NFData k, Control.DeepSeq.NFData a) => Control.DeepSeq.NFData (Data.Map.Internal.Map k a)
-instance (GHC.Classes.Ord k, GHC.Read.Read k, GHC.Read.Read e) => GHC.Read.Read (Data.Map.Internal.Map k e)
-instance (GHC.Show.Show k, GHC.Show.Show a) => GHC.Show.Show (Data.Map.Internal.Map k a)
+instance GHC.Classes.Ord k => Data.Functor.Classes.Ord1 (Data.Map.Internal.Map k)
+instance Data.Functor.Classes.Ord2 Data.Map.Internal.Map
+instance (GHC.Classes.Ord k, GHC.Classes.Ord v) => GHC.Classes.Ord (Data.Map.Internal.Map k v)
+instance (GHC.Classes.Ord k, GHC.Internal.Read.Read k) => Data.Functor.Classes.Read1 (Data.Map.Internal.Map k)
+instance (GHC.Classes.Ord k, GHC.Internal.Read.Read k, GHC.Internal.Read.Read e) => GHC.Internal.Read.Read (Data.Map.Internal.Map k e)
+instance GHC.Classes.Ord k => GHC.Internal.Base.Semigroup (Data.Map.Internal.Map k v)
+instance GHC.Internal.Show.Show k => Data.Functor.Classes.Show1 (Data.Map.Internal.Map k)
+instance Data.Functor.Classes.Show2 Data.Map.Internal.Map
+instance (GHC.Internal.Show.Show k, GHC.Internal.Show.Show a) => GHC.Internal.Show.Show (Data.Map.Internal.Map k a)
+instance GHC.Internal.Data.Traversable.Traversable (Data.Map.Internal.Map k)
 
 
 -- | This module defines an API for writing functions that merge two maps.
@@ -5394,7 +5472,7 @@ merge :: Ord k => SimpleWhenMissing k a c -> SimpleWhenMissing k b c -> SimpleWh
 --   zipWithMaybeMatched :: (k -&gt; x -&gt; y -&gt; Maybe z)
 --                       -&gt; SimpleWhenMatched k x y z
 --   </pre>
-zipWithMaybeMatched :: Applicative f => (k -> x -> y -> Maybe z) -> WhenMatched f k x y z
+zipWithMaybeMatched :: forall (f :: Type -> Type) k x y z. Applicative f => (k -> x -> y -> Maybe z) -> WhenMatched f k x y z
 
 -- | When a key is found in both maps, apply a function to the key and
 --   values and use the result in the merged map.
@@ -5403,7 +5481,7 @@ zipWithMaybeMatched :: Applicative f => (k -> x -> y -> Maybe z) -> WhenMatched 
 --   zipWithMatched :: (k -&gt; x -&gt; y -&gt; z)
 --                  -&gt; SimpleWhenMatched k x y z
 --   </pre>
-zipWithMatched :: Applicative f => (k -> x -> y -> z) -> WhenMatched f k x y z
+zipWithMatched :: forall (f :: Type -> Type) k x y z. Applicative f => (k -> x -> y -> z) -> WhenMatched f k x y z
 
 -- | Map over the entries whose keys are missing from the other map,
 --   optionally removing some. This is the most powerful
@@ -5420,7 +5498,7 @@ zipWithMatched :: Applicative f => (k -> x -> y -> z) -> WhenMatched f k x y z
 --   
 --   but <tt>mapMaybeMissing</tt> uses fewer unnecessary <a>Applicative</a>
 --   operations.
-mapMaybeMissing :: Applicative f => (k -> x -> Maybe y) -> WhenMissing f k x y
+mapMaybeMissing :: forall (f :: Type -> Type) k x y. Applicative f => (k -> x -> Maybe y) -> WhenMissing f k x y
 
 -- | Drop all the entries whose keys are missing from the other map.
 --   
@@ -5433,7 +5511,7 @@ mapMaybeMissing :: Applicative f => (k -> x -> Maybe y) -> WhenMissing f k x y
 --   </pre>
 --   
 --   but <tt>dropMissing</tt> is much faster.
-dropMissing :: Applicative f => WhenMissing f k x y
+dropMissing :: forall (f :: Type -> Type) k x y. Applicative f => WhenMissing f k x y
 
 -- | Preserve, unchanged, the entries whose keys are missing from the other
 --   map.
@@ -5447,7 +5525,7 @@ dropMissing :: Applicative f => WhenMissing f k x y
 --   </pre>
 --   
 --   but <tt>preserveMissing</tt> is much faster.
-preserveMissing :: Applicative f => WhenMissing f k x x
+preserveMissing :: forall (f :: Type -> Type) k x. Applicative f => WhenMissing f k x x
 
 -- | Map over the entries whose keys are missing from the other map.
 --   
@@ -5460,7 +5538,7 @@ preserveMissing :: Applicative f => WhenMissing f k x x
 --   </pre>
 --   
 --   but <tt>mapMissing</tt> is somewhat faster.
-mapMissing :: Applicative f => (k -> x -> y) -> WhenMissing f k x y
+mapMissing :: forall (f :: Type -> Type) k x y. Applicative f => (k -> x -> y) -> WhenMissing f k x y
 
 -- | Filter the entries whose keys are missing from the other map.
 --   
@@ -5473,7 +5551,7 @@ mapMissing :: Applicative f => (k -> x -> y) -> WhenMissing f k x y
 --   </pre>
 --   
 --   but this should be a little faster.
-filterMissing :: Applicative f => (k -> x -> Bool) -> WhenMissing f k x x
+filterMissing :: forall (f :: Type -> Type) k x. Applicative f => (k -> x -> Bool) -> WhenMissing f k x x
 
 -- | A tactic for dealing with keys present in one map but not the other in
 --   <a>merge</a> or <a>mergeA</a>.
@@ -5481,7 +5559,7 @@ filterMissing :: Applicative f => (k -> x -> Bool) -> WhenMissing f k x x
 --   A tactic of type <tt> WhenMissing f k x z </tt> is an abstract
 --   representation of a function of type <tt> k -&gt; x -&gt; f (Maybe z)
 --   </tt>.
-data WhenMissing f k x y
+data WhenMissing (f :: Type -> Type) k x y
 
 -- | A tactic for dealing with keys present in both maps in <a>merge</a> or
 --   <a>mergeA</a>.
@@ -5489,7 +5567,7 @@ data WhenMissing f k x y
 --   A tactic of type <tt> WhenMatched f k x y z </tt> is an abstract
 --   representation of a function of type <tt> k -&gt; x -&gt; y -&gt; f
 --   (Maybe z) </tt>.
-data WhenMatched f k x y z
+data WhenMatched (f :: Type -> Type) k x y z
 
 -- | An applicative version of <a>merge</a>.
 --   
@@ -5589,19 +5667,19 @@ traverseMissing :: Applicative f => (k -> x -> f y) -> WhenMissing f k x y
 filterAMissing :: Applicative f => (k -> x -> f Bool) -> WhenMissing f k x x
 
 -- | Map covariantly over a <tt><a>WhenMissing</a> f k x</tt>.
-mapWhenMissing :: (Applicative f, Monad f) => (a -> b) -> WhenMissing f k x a -> WhenMissing f k x b
+mapWhenMissing :: forall (f :: Type -> Type) a b k x. (Applicative f, Monad f) => (a -> b) -> WhenMissing f k x a -> WhenMissing f k x b
 
 -- | Map covariantly over a <tt><a>WhenMatched</a> f k x y</tt>.
-mapWhenMatched :: Functor f => (a -> b) -> WhenMatched f k x y a -> WhenMatched f k x y b
+mapWhenMatched :: forall (f :: Type -> Type) a b k x y. Functor f => (a -> b) -> WhenMatched f k x y a -> WhenMatched f k x y b
 
 -- | Map contravariantly over a <tt><a>WhenMissing</a> f k _ x</tt>.
-lmapWhenMissing :: (b -> a) -> WhenMissing f k a x -> WhenMissing f k b x
+lmapWhenMissing :: forall b a (f :: Type -> Type) k x. (b -> a) -> WhenMissing f k a x -> WhenMissing f k b x
 
 -- | Map contravariantly over a <tt><a>WhenMatched</a> f k _ y z</tt>.
-contramapFirstWhenMatched :: (b -> a) -> WhenMatched f k a y z -> WhenMatched f k b y z
+contramapFirstWhenMatched :: forall b a (f :: Type -> Type) k y z. (b -> a) -> WhenMatched f k a y z -> WhenMatched f k b y z
 
 -- | Map contravariantly over a <tt><a>WhenMatched</a> f k x _ z</tt>.
-contramapSecondWhenMatched :: (b -> a) -> WhenMatched f k x a z -> WhenMatched f k x b z
+contramapSecondWhenMatched :: forall b a (f :: Type -> Type) k x z. (b -> a) -> WhenMatched f k x a z -> WhenMatched f k x b z
 
 -- | Along with zipWithMaybeAMatched, witnesses the isomorphism between
 --   <tt>WhenMatched f k x y z</tt> and <tt>k -&gt; x -&gt; y -&gt; f
@@ -5817,6 +5895,13 @@ empty :: IntSet
 
 -- | &lt;math&gt;. A set of one element.
 singleton :: Key -> IntSet
+
+-- | &lt;math&gt;. Create a set from a range of integers.
+--   
+--   <pre>
+--   fromRange (low, high) == fromList [low..high]
+--   </pre>
+fromRange :: (Key, Key) -> IntSet
 
 -- | &lt;math&gt;. Add a value to the set. There is no left- or right bias
 --   for IntSets.
@@ -6076,16 +6161,16 @@ suffixBitMask :: Int
 prefixBitMask :: Int
 bitmapOf :: Int -> BitMap
 zero :: Int -> Mask -> Bool
-instance Language.Haskell.TH.Syntax.Lift Data.IntSet.Internal.IntSet
-instance GHC.IsList.IsList Data.IntSet.Internal.IntSet
-instance GHC.Base.Monoid Data.IntSet.Internal.IntSet
-instance GHC.Base.Semigroup Data.IntSet.Internal.IntSet
-instance Data.Data.Data Data.IntSet.Internal.IntSet
+instance GHC.Internal.Data.Data.Data Data.IntSet.Internal.IntSet
 instance GHC.Classes.Eq Data.IntSet.Internal.IntSet
-instance GHC.Classes.Ord Data.IntSet.Internal.IntSet
-instance GHC.Show.Show Data.IntSet.Internal.IntSet
-instance GHC.Read.Read Data.IntSet.Internal.IntSet
+instance GHC.Internal.IsList.IsList Data.IntSet.Internal.IntSet
+instance Language.Haskell.TH.Syntax.Lift Data.IntSet.Internal.IntSet
+instance GHC.Internal.Base.Monoid Data.IntSet.Internal.IntSet
 instance Control.DeepSeq.NFData Data.IntSet.Internal.IntSet
+instance GHC.Classes.Ord Data.IntSet.Internal.IntSet
+instance GHC.Internal.Read.Read Data.IntSet.Internal.IntSet
+instance GHC.Internal.Base.Semigroup Data.IntSet.Internal.IntSet
+instance GHC.Internal.Show.Show Data.IntSet.Internal.IntSet
 
 
 -- | <h1>Finite Int Sets</h1>
@@ -6147,6 +6232,13 @@ singleton :: Key -> IntSet
 
 -- | &lt;math&gt;. Create a set from a list of integers.
 fromList :: [Key] -> IntSet
+
+-- | &lt;math&gt;. Create a set from a range of integers.
+--   
+--   <pre>
+--   fromRange (low, high) == fromList [low..high]
+--   </pre>
+fromRange :: (Key, Key) -> IntSet
 
 -- | &lt;math&gt;. Build a set from an ascending list of elements. <i>The
 --   precondition (input list is ascending) is not checked.</i>
@@ -6717,6 +6809,8 @@ insert :: Key -> a -> IntMap a -> IntMap a
 --   insertWith (++) 7 "xxx" (fromList [(5,"a"), (3,"b")]) == fromList [(3, "b"), (5, "a"), (7, "xxx")]
 --   insertWith (++) 5 "xxx" empty                         == singleton 5 "xxx"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertWith :: (a -> a -> a) -> Key -> a -> IntMap a -> IntMap a
 
 -- | &lt;math&gt;. Insert with a combining function.
@@ -6731,6 +6825,8 @@ insertWith :: (a -> a -> a) -> Key -> a -> IntMap a -> IntMap a
 --   insertWithKey f 7 "xxx" (fromList [(5,"a"), (3,"b")]) == fromList [(3, "b"), (5, "a"), (7, "xxx")]
 --   insertWithKey f 5 "xxx" empty                         == singleton 5 "xxx"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertWithKey :: (Key -> a -> a -> a) -> Key -> a -> IntMap a -> IntMap a
 
 -- | &lt;math&gt;. The expression (<tt><a>insertLookupWithKey</a> f k x
@@ -6753,6 +6849,8 @@ insertWithKey :: (Key -> a -> a -> a) -> Key -> a -> IntMap a -> IntMap a
 --   insertLookup 5 "x" (fromList [(5,"a"), (3,"b")]) == (Just "a", fromList [(3, "b"), (5, "x")])
 --   insertLookup 7 "x" (fromList [(5,"a"), (3,"b")]) == (Nothing,  fromList [(3, "b"), (5, "a"), (7, "x")])
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertLookupWithKey :: (Key -> a -> a -> a) -> Key -> a -> IntMap a -> (Maybe a, IntMap a)
 
 -- | &lt;math&gt;. Delete a key and its value from the map. When the key is
@@ -6876,6 +6974,8 @@ union :: IntMap a -> IntMap a -> IntMap a
 --   <pre>
 --   unionWith (++) (fromList [(5, "a"), (3, "b")]) (fromList [(5, "A"), (7, "C")]) == fromList [(3, "b"), (5, "aA"), (7, "C")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 unionWith :: (a -> a -> a) -> IntMap a -> IntMap a -> IntMap a
 
 -- | &lt;math&gt;. The union with a combining function.
@@ -6884,6 +6984,8 @@ unionWith :: (a -> a -> a) -> IntMap a -> IntMap a -> IntMap a
 --   let f key left_value right_value = (show key) ++ ":" ++ left_value ++ "|" ++ right_value
 --   unionWithKey f (fromList [(5, "a"), (3, "b")]) (fromList [(5, "A"), (7, "C")]) == fromList [(3, "b"), (5, "5:a|A"), (7, "C")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 unionWithKey :: (Key -> a -> a -> a) -> IntMap a -> IntMap a -> IntMap a
 
 -- | The union of a list of maps.
@@ -7092,7 +7194,7 @@ merge :: SimpleWhenMissing a c -> SimpleWhenMissing b c -> SimpleWhenMatched a b
 --     :: (Key -&gt; x -&gt; y -&gt; Maybe z)
 --     -&gt; SimpleWhenMatched x y z
 --   </pre>
-zipWithMaybeMatched :: Applicative f => (Key -> x -> y -> Maybe z) -> WhenMatched f x y z
+zipWithMaybeMatched :: forall (f :: Type -> Type) x y z. Applicative f => (Key -> x -> y -> Maybe z) -> WhenMatched f x y z
 
 -- | When a key is found in both maps, apply a function to the key and
 --   values and use the result in the merged map.
@@ -7102,7 +7204,7 @@ zipWithMaybeMatched :: Applicative f => (Key -> x -> y -> Maybe z) -> WhenMatche
 --     :: (Key -&gt; x -&gt; y -&gt; z)
 --     -&gt; SimpleWhenMatched x y z
 --   </pre>
-zipWithMatched :: Applicative f => (Key -> x -> y -> z) -> WhenMatched f x y z
+zipWithMatched :: forall (f :: Type -> Type) x y z. Applicative f => (Key -> x -> y -> z) -> WhenMatched f x y z
 
 -- | Map over the entries whose keys are missing from the other map,
 --   optionally removing some. This is the most powerful
@@ -7119,7 +7221,7 @@ zipWithMatched :: Applicative f => (Key -> x -> y -> z) -> WhenMatched f x y z
 --   
 --   but <tt>mapMaybeMissing</tt> uses fewer unnecessary <a>Applicative</a>
 --   operations.
-mapMaybeMissing :: Applicative f => (Key -> x -> Maybe y) -> WhenMissing f x y
+mapMaybeMissing :: forall (f :: Type -> Type) x y. Applicative f => (Key -> x -> Maybe y) -> WhenMissing f x y
 
 -- | Drop all the entries whose keys are missing from the other map.
 --   
@@ -7132,7 +7234,7 @@ mapMaybeMissing :: Applicative f => (Key -> x -> Maybe y) -> WhenMissing f x y
 --   </pre>
 --   
 --   but <tt>dropMissing</tt> is much faster.
-dropMissing :: Applicative f => WhenMissing f x y
+dropMissing :: forall (f :: Type -> Type) x y. Applicative f => WhenMissing f x y
 
 -- | Preserve, unchanged, the entries whose keys are missing from the other
 --   map.
@@ -7146,7 +7248,7 @@ dropMissing :: Applicative f => WhenMissing f x y
 --   </pre>
 --   
 --   but <tt>preserveMissing</tt> is much faster.
-preserveMissing :: Applicative f => WhenMissing f x x
+preserveMissing :: forall (f :: Type -> Type) x. Applicative f => WhenMissing f x x
 
 -- | Map over the entries whose keys are missing from the other map.
 --   
@@ -7159,7 +7261,7 @@ preserveMissing :: Applicative f => WhenMissing f x x
 --   </pre>
 --   
 --   but <tt>mapMissing</tt> is somewhat faster.
-mapMissing :: Applicative f => (Key -> x -> y) -> WhenMissing f x y
+mapMissing :: forall (f :: Type -> Type) x y. Applicative f => (Key -> x -> y) -> WhenMissing f x y
 
 -- | Filter the entries whose keys are missing from the other map.
 --   
@@ -7172,7 +7274,7 @@ mapMissing :: Applicative f => (Key -> x -> y) -> WhenMissing f x y
 --   </pre>
 --   
 --   but this should be a little faster.
-filterMissing :: Applicative f => (Key -> x -> Bool) -> WhenMissing f x x
+filterMissing :: forall (f :: Type -> Type) x. Applicative f => (Key -> x -> Bool) -> WhenMissing f x x
 
 -- | A tactic for dealing with keys present in one map but not the other in
 --   <a>merge</a> or <a>mergeA</a>.
@@ -7180,10 +7282,10 @@ filterMissing :: Applicative f => (Key -> x -> Bool) -> WhenMissing f x x
 --   A tactic of type <tt>WhenMissing f k x z</tt> is an abstract
 --   representation of a function of type <tt>Key -&gt; x -&gt; f (Maybe
 --   z)</tt>.
-data WhenMissing f x y
-WhenMissing :: (IntMap x -> f (IntMap y)) -> (Key -> x -> f (Maybe y)) -> WhenMissing f x y
-[missingSubtree] :: WhenMissing f x y -> IntMap x -> f (IntMap y)
-[missingKey] :: WhenMissing f x y -> Key -> x -> f (Maybe y)
+data WhenMissing (f :: Type -> Type) x y
+WhenMissing :: (IntMap x -> f (IntMap y)) -> (Key -> x -> f (Maybe y)) -> WhenMissing (f :: Type -> Type) x y
+[missingSubtree] :: WhenMissing (f :: Type -> Type) x y -> IntMap x -> f (IntMap y)
+[missingKey] :: WhenMissing (f :: Type -> Type) x y -> Key -> x -> f (Maybe y)
 
 -- | A tactic for dealing with keys present in both maps in <a>merge</a> or
 --   <a>mergeA</a>.
@@ -7191,9 +7293,9 @@ WhenMissing :: (IntMap x -> f (IntMap y)) -> (Key -> x -> f (Maybe y)) -> WhenMi
 --   A tactic of type <tt>WhenMatched f x y z</tt> is an abstract
 --   representation of a function of type <tt>Key -&gt; x -&gt; y -&gt; f
 --   (Maybe z)</tt>.
-newtype WhenMatched f x y z
-WhenMatched :: (Key -> x -> y -> f (Maybe z)) -> WhenMatched f x y z
-[matchedKey] :: WhenMatched f x y z -> Key -> x -> y -> f (Maybe z)
+newtype WhenMatched (f :: Type -> Type) x y z
+WhenMatched :: (Key -> x -> y -> f (Maybe z)) -> WhenMatched (f :: Type -> Type) x y z
+[matchedKey] :: WhenMatched (f :: Type -> Type) x y z -> Key -> x -> y -> f (Maybe z)
 
 -- | An applicative version of <a>merge</a>.
 --   
@@ -7415,6 +7517,8 @@ mapKeys :: (Key -> Key) -> IntMap a -> IntMap a
 --   mapKeysWith (++) (\ _ -&gt; 1) (fromList [(1,"b"), (2,"a"), (3,"d"), (4,"c")]) == singleton 1 "cdab"
 --   mapKeysWith (++) (\ _ -&gt; 3) (fromList [(1,"b"), (2,"a"), (3,"d"), (4,"c")]) == singleton 3 "cdab"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 mapKeysWith :: (a -> a -> a) -> (Key -> Key) -> IntMap a -> IntMap a
 
 -- | &lt;math&gt;. <tt><a>mapKeysMonotonic</a> f s == <a>mapKeys</a> f
@@ -7596,12 +7700,56 @@ toList :: IntMap a -> [(Key, a)]
 --   </pre>
 fromList :: [(Key, a)] -> IntMap a
 
--- | &lt;math&gt;. Create a map from a list of key/value pairs with a
+-- | &lt;math&gt;. Build a map from a list of key/value pairs with a
 --   combining function. See also <a>fromAscListWith</a>.
 --   
 --   <pre>
---   fromListWith (++) [(5,"a"), (5,"b"), (3,"b"), (3,"a"), (5,"c")] == fromList [(3, "ab"), (5, "cba")]
+--   fromListWith (++) [(5,"a"), (5,"b"), (3,"x"), (5,"c")] == fromList [(3, "x"), (5, "cba")]
 --   fromListWith (++) [] == empty
+--   </pre>
+--   
+--   Note the reverse ordering of <tt>"cba"</tt> in the example.
+--   
+--   The symmetric combining function <tt>f</tt> is applied in a left-fold
+--   over the list, as <tt>f new old</tt>.
+--   
+--   <h3>Performance</h3>
+--   
+--   You should ensure that the given <tt>f</tt> is fast with this order of
+--   arguments.
+--   
+--   Symmetric functions may be slow in one order, and fast in another. For
+--   the common case of collecting values of matching keys in a list, as
+--   above:
+--   
+--   The complexity of <tt>(++) a b</tt> is &lt;math&gt;, so it is fast
+--   when given a short list as its first argument. Thus:
+--   
+--   <pre>
+--   fromListWith       (++)  (replicate 1000000 (3, "x"))   -- O(n),  fast
+--   fromListWith (flip (++)) (replicate 1000000 (3, "x"))   -- O(n²), extremely slow
+--   </pre>
+--   
+--   because they evaluate as, respectively:
+--   
+--   <pre>
+--   fromList [(3, "x" ++ ("x" ++ "xxxxx..xxxxx"))]   -- O(n)
+--   fromList [(3, ("xxxxx..xxxxx" ++ "x") ++ "x")]   -- O(n²)
+--   </pre>
+--   
+--   Thus, to get good performance with an operation like <tt>(++)</tt>
+--   while also preserving the same order as in the input list, reverse the
+--   input:
+--   
+--   <pre>
+--   fromListWith (++) (reverse [(5,"a"), (5,"b"), (5,"c")]) == fromList [(5, "abc")]
+--   </pre>
+--   
+--   and it is always fast to combine singleton-list values <tt>[v]</tt>
+--   with <tt>fromListWith (++)</tt>, as in:
+--   
+--   <pre>
+--   fromListWith (++) $ reverse $ map (\(k, v) -&gt; (k, [v])) someListOfTuples
 --   </pre>
 fromListWith :: (a -> a -> a) -> [(Key, a)] -> IntMap a
 
@@ -7613,6 +7761,8 @@ fromListWith :: (a -> a -> a) -> [(Key, a)] -> IntMap a
 --   fromListWithKey f [(5,"a"), (5,"b"), (3,"b"), (3,"a"), (5,"c")] == fromList [(3, "3:a|b"), (5, "5:c|5:b|a")]
 --   fromListWithKey f [] == empty
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromListWithKey :: (Key -> a -> a -> a) -> [(Key, a)] -> IntMap a
 
 -- | &lt;math&gt;. Convert the map to a list of key/value pairs where the
@@ -7647,6 +7797,8 @@ fromAscList :: [(Key, a)] -> IntMap a
 --   <pre>
 --   fromAscListWith (++) [(3,"b"), (5,"a"), (5,"b")] == fromList [(3, "b"), (5, "ba")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromAscListWith :: (a -> a -> a) -> [(Key, a)] -> IntMap a
 
 -- | &lt;math&gt;. Build a map from a list of key/value pairs where the
@@ -7657,6 +7809,8 @@ fromAscListWith :: (a -> a -> a) -> [(Key, a)] -> IntMap a
 --   let f key new_value old_value = (show key) ++ ":" ++ new_value ++ "|" ++ old_value
 --   fromAscListWithKey f [(3,"b"), (5,"a"), (5,"b")] == fromList [(3, "b"), (5, "5:b|a")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromAscListWithKey :: (Key -> a -> a -> a) -> [(Key, a)] -> IntMap a
 
 -- | &lt;math&gt;. Build a map from a list of key/value pairs where the
@@ -8052,52 +8206,52 @@ branchMask :: Prefix -> Prefix -> Mask
 highestBitMask :: Word -> Word
 
 -- | Map covariantly over a <tt><a>WhenMissing</a> f x</tt>.
-mapWhenMissing :: (Applicative f, Monad f) => (a -> b) -> WhenMissing f x a -> WhenMissing f x b
+mapWhenMissing :: forall (f :: Type -> Type) a b x. (Applicative f, Monad f) => (a -> b) -> WhenMissing f x a -> WhenMissing f x b
 
 -- | Map covariantly over a <tt><a>WhenMatched</a> f x y</tt>.
-mapWhenMatched :: Functor f => (a -> b) -> WhenMatched f x y a -> WhenMatched f x y b
+mapWhenMatched :: forall (f :: Type -> Type) a b x y. Functor f => (a -> b) -> WhenMatched f x y a -> WhenMatched f x y b
 
 -- | Map contravariantly over a <tt><a>WhenMissing</a> f _ x</tt>.
-lmapWhenMissing :: (b -> a) -> WhenMissing f a x -> WhenMissing f b x
+lmapWhenMissing :: forall b a (f :: Type -> Type) x. (b -> a) -> WhenMissing f a x -> WhenMissing f b x
 
 -- | Map contravariantly over a <tt><a>WhenMatched</a> f _ y z</tt>.
-contramapFirstWhenMatched :: (b -> a) -> WhenMatched f a y z -> WhenMatched f b y z
+contramapFirstWhenMatched :: forall b a (f :: Type -> Type) y z. (b -> a) -> WhenMatched f a y z -> WhenMatched f b y z
 
 -- | Map contravariantly over a <tt><a>WhenMatched</a> f x _ z</tt>.
-contramapSecondWhenMatched :: (b -> a) -> WhenMatched f x a z -> WhenMatched f x b z
+contramapSecondWhenMatched :: forall b a (f :: Type -> Type) x z. (b -> a) -> WhenMatched f x a z -> WhenMatched f x b z
 
 -- | Map covariantly over a <tt><a>WhenMissing</a> f x</tt>, using only a
 --   'Functor f' constraint.
-mapGentlyWhenMissing :: Functor f => (a -> b) -> WhenMissing f x a -> WhenMissing f x b
+mapGentlyWhenMissing :: forall (f :: Type -> Type) a b x. Functor f => (a -> b) -> WhenMissing f x a -> WhenMissing f x b
 
 -- | Map covariantly over a <tt><a>WhenMatched</a> f k x</tt>, using only a
 --   'Functor f' constraint.
-mapGentlyWhenMatched :: Functor f => (a -> b) -> WhenMatched f x y a -> WhenMatched f x y b
-instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.IntMap.Internal.IntMap a)
-instance GHC.Base.Functor f => GHC.Base.Functor (Data.IntMap.Internal.WhenMatched f x y)
-instance (GHC.Base.Monad f, GHC.Base.Applicative f) => Control.Category.Category (Data.IntMap.Internal.WhenMatched f x)
-instance (GHC.Base.Monad f, GHC.Base.Applicative f) => GHC.Base.Applicative (Data.IntMap.Internal.WhenMatched f x y)
-instance (GHC.Base.Monad f, GHC.Base.Applicative f) => GHC.Base.Monad (Data.IntMap.Internal.WhenMatched f x y)
-instance (GHC.Base.Applicative f, GHC.Base.Monad f) => GHC.Base.Functor (Data.IntMap.Internal.WhenMissing f x)
-instance (GHC.Base.Applicative f, GHC.Base.Monad f) => Control.Category.Category (Data.IntMap.Internal.WhenMissing f)
-instance (GHC.Base.Applicative f, GHC.Base.Monad f) => GHC.Base.Applicative (Data.IntMap.Internal.WhenMissing f x)
-instance (GHC.Base.Applicative f, GHC.Base.Monad f) => GHC.Base.Monad (Data.IntMap.Internal.WhenMissing f x)
-instance GHC.Base.Monoid (Data.IntMap.Internal.IntMap a)
-instance GHC.Base.Semigroup (Data.IntMap.Internal.IntMap a)
-instance Data.Foldable.Foldable Data.IntMap.Internal.IntMap
-instance Data.Traversable.Traversable Data.IntMap.Internal.IntMap
-instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.IntMap.Internal.IntMap a)
-instance Data.Data.Data a => Data.Data.Data (Data.IntMap.Internal.IntMap a)
-instance GHC.IsList.IsList (Data.IntMap.Internal.IntMap a)
-instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.IntMap.Internal.IntMap a)
+mapGentlyWhenMatched :: forall (f :: Type -> Type) a b x y. Functor f => (a -> b) -> WhenMatched f x y a -> WhenMatched f x y b
+instance (GHC.Internal.Base.Monad f, GHC.Internal.Base.Applicative f) => GHC.Internal.Base.Applicative (Data.IntMap.Internal.WhenMatched f x y)
+instance (GHC.Internal.Base.Applicative f, GHC.Internal.Base.Monad f) => GHC.Internal.Base.Applicative (Data.IntMap.Internal.WhenMissing f x)
+instance (GHC.Internal.Base.Monad f, GHC.Internal.Base.Applicative f) => GHC.Internal.Control.Category.Category (Data.IntMap.Internal.WhenMatched f x)
+instance (GHC.Internal.Base.Applicative f, GHC.Internal.Base.Monad f) => GHC.Internal.Control.Category.Category (Data.IntMap.Internal.WhenMissing f)
+instance GHC.Internal.Data.Data.Data a => GHC.Internal.Data.Data.Data (Data.IntMap.Internal.IntMap a)
 instance Data.Functor.Classes.Eq1 Data.IntMap.Internal.IntMap
-instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.IntMap.Internal.IntMap a)
+instance GHC.Classes.Eq a => GHC.Classes.Eq (Data.IntMap.Internal.IntMap a)
+instance GHC.Internal.Data.Foldable.Foldable Data.IntMap.Internal.IntMap
+instance GHC.Internal.Base.Functor Data.IntMap.Internal.IntMap
+instance GHC.Internal.Base.Functor f => GHC.Internal.Base.Functor (Data.IntMap.Internal.WhenMatched f x y)
+instance (GHC.Internal.Base.Applicative f, GHC.Internal.Base.Monad f) => GHC.Internal.Base.Functor (Data.IntMap.Internal.WhenMissing f x)
+instance GHC.Internal.IsList.IsList (Data.IntMap.Internal.IntMap a)
+instance Language.Haskell.TH.Syntax.Lift a => Language.Haskell.TH.Syntax.Lift (Data.IntMap.Internal.IntMap a)
+instance (GHC.Internal.Base.Monad f, GHC.Internal.Base.Applicative f) => GHC.Internal.Base.Monad (Data.IntMap.Internal.WhenMatched f x y)
+instance (GHC.Internal.Base.Applicative f, GHC.Internal.Base.Monad f) => GHC.Internal.Base.Monad (Data.IntMap.Internal.WhenMissing f x)
+instance GHC.Internal.Base.Monoid (Data.IntMap.Internal.IntMap a)
+instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.IntMap.Internal.IntMap a)
 instance Data.Functor.Classes.Ord1 Data.IntMap.Internal.IntMap
-instance GHC.Base.Functor Data.IntMap.Internal.IntMap
-instance GHC.Show.Show a => GHC.Show.Show (Data.IntMap.Internal.IntMap a)
-instance Data.Functor.Classes.Show1 Data.IntMap.Internal.IntMap
-instance GHC.Read.Read e => GHC.Read.Read (Data.IntMap.Internal.IntMap e)
+instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.IntMap.Internal.IntMap a)
 instance Data.Functor.Classes.Read1 Data.IntMap.Internal.IntMap
+instance GHC.Internal.Read.Read e => GHC.Internal.Read.Read (Data.IntMap.Internal.IntMap e)
+instance GHC.Internal.Base.Semigroup (Data.IntMap.Internal.IntMap a)
+instance Data.Functor.Classes.Show1 Data.IntMap.Internal.IntMap
+instance GHC.Internal.Show.Show a => GHC.Internal.Show.Show (Data.IntMap.Internal.IntMap a)
+instance GHC.Internal.Data.Traversable.Traversable Data.IntMap.Internal.IntMap
 
 
 -- | This module defines an API for writing functions that merge two maps.
@@ -8228,7 +8382,7 @@ merge :: SimpleWhenMissing a c -> SimpleWhenMissing b c -> SimpleWhenMatched a b
 --     :: (Key -&gt; x -&gt; y -&gt; Maybe z)
 --     -&gt; SimpleWhenMatched x y z
 --   </pre>
-zipWithMaybeMatched :: Applicative f => (Key -> x -> y -> Maybe z) -> WhenMatched f x y z
+zipWithMaybeMatched :: forall (f :: Type -> Type) x y z. Applicative f => (Key -> x -> y -> Maybe z) -> WhenMatched f x y z
 
 -- | When a key is found in both maps, apply a function to the key and
 --   values and use the result in the merged map.
@@ -8238,7 +8392,7 @@ zipWithMaybeMatched :: Applicative f => (Key -> x -> y -> Maybe z) -> WhenMatche
 --     :: (Key -&gt; x -&gt; y -&gt; z)
 --     -&gt; SimpleWhenMatched x y z
 --   </pre>
-zipWithMatched :: Applicative f => (Key -> x -> y -> z) -> WhenMatched f x y z
+zipWithMatched :: forall (f :: Type -> Type) x y z. Applicative f => (Key -> x -> y -> z) -> WhenMatched f x y z
 
 -- | Map over the entries whose keys are missing from the other map,
 --   optionally removing some. This is the most powerful
@@ -8255,7 +8409,7 @@ zipWithMatched :: Applicative f => (Key -> x -> y -> z) -> WhenMatched f x y z
 --   
 --   but <tt>mapMaybeMissing</tt> uses fewer unnecessary <a>Applicative</a>
 --   operations.
-mapMaybeMissing :: Applicative f => (Key -> x -> Maybe y) -> WhenMissing f x y
+mapMaybeMissing :: forall (f :: Type -> Type) x y. Applicative f => (Key -> x -> Maybe y) -> WhenMissing f x y
 
 -- | Drop all the entries whose keys are missing from the other map.
 --   
@@ -8268,7 +8422,7 @@ mapMaybeMissing :: Applicative f => (Key -> x -> Maybe y) -> WhenMissing f x y
 --   </pre>
 --   
 --   but <tt>dropMissing</tt> is much faster.
-dropMissing :: Applicative f => WhenMissing f x y
+dropMissing :: forall (f :: Type -> Type) x y. Applicative f => WhenMissing f x y
 
 -- | Preserve, unchanged, the entries whose keys are missing from the other
 --   map.
@@ -8282,7 +8436,7 @@ dropMissing :: Applicative f => WhenMissing f x y
 --   </pre>
 --   
 --   but <tt>preserveMissing</tt> is much faster.
-preserveMissing :: Applicative f => WhenMissing f x x
+preserveMissing :: forall (f :: Type -> Type) x. Applicative f => WhenMissing f x x
 
 -- | Map over the entries whose keys are missing from the other map.
 --   
@@ -8295,7 +8449,7 @@ preserveMissing :: Applicative f => WhenMissing f x x
 --   </pre>
 --   
 --   but <tt>mapMissing</tt> is somewhat faster.
-mapMissing :: Applicative f => (Key -> x -> y) -> WhenMissing f x y
+mapMissing :: forall (f :: Type -> Type) x y. Applicative f => (Key -> x -> y) -> WhenMissing f x y
 
 -- | Filter the entries whose keys are missing from the other map.
 --   
@@ -8308,7 +8462,7 @@ mapMissing :: Applicative f => (Key -> x -> y) -> WhenMissing f x y
 --   </pre>
 --   
 --   but this should be a little faster.
-filterMissing :: Applicative f => (Key -> x -> Bool) -> WhenMissing f x x
+filterMissing :: forall (f :: Type -> Type) x. Applicative f => (Key -> x -> Bool) -> WhenMissing f x x
 
 -- | A tactic for dealing with keys present in one map but not the other in
 --   <a>merge</a> or <a>mergeA</a>.
@@ -8316,7 +8470,7 @@ filterMissing :: Applicative f => (Key -> x -> Bool) -> WhenMissing f x x
 --   A tactic of type <tt>WhenMissing f k x z</tt> is an abstract
 --   representation of a function of type <tt>Key -&gt; x -&gt; f (Maybe
 --   z)</tt>.
-data WhenMissing f x y
+data WhenMissing (f :: Type -> Type) x y
 
 -- | A tactic for dealing with keys present in both maps in <a>merge</a> or
 --   <a>mergeA</a>.
@@ -8324,7 +8478,7 @@ data WhenMissing f x y
 --   A tactic of type <tt>WhenMatched f x y z</tt> is an abstract
 --   representation of a function of type <tt>Key -&gt; x -&gt; y -&gt; f
 --   (Maybe z)</tt>.
-data WhenMatched f x y z
+data WhenMatched (f :: Type -> Type) x y z
 
 -- | An applicative version of <a>merge</a>.
 --   
@@ -8424,19 +8578,19 @@ traverseMissing :: Applicative f => (Key -> x -> f y) -> WhenMissing f x y
 filterAMissing :: Applicative f => (Key -> x -> f Bool) -> WhenMissing f x x
 
 -- | Map covariantly over a <tt><a>WhenMissing</a> f x</tt>.
-mapWhenMissing :: (Applicative f, Monad f) => (a -> b) -> WhenMissing f x a -> WhenMissing f x b
+mapWhenMissing :: forall (f :: Type -> Type) a b x. (Applicative f, Monad f) => (a -> b) -> WhenMissing f x a -> WhenMissing f x b
 
 -- | Map covariantly over a <tt><a>WhenMatched</a> f x y</tt>.
-mapWhenMatched :: Functor f => (a -> b) -> WhenMatched f x y a -> WhenMatched f x y b
+mapWhenMatched :: forall (f :: Type -> Type) a b x y. Functor f => (a -> b) -> WhenMatched f x y a -> WhenMatched f x y b
 
 -- | Map contravariantly over a <tt><a>WhenMissing</a> f _ x</tt>.
-lmapWhenMissing :: (b -> a) -> WhenMissing f a x -> WhenMissing f b x
+lmapWhenMissing :: forall b a (f :: Type -> Type) x. (b -> a) -> WhenMissing f a x -> WhenMissing f b x
 
 -- | Map contravariantly over a <tt><a>WhenMatched</a> f _ y z</tt>.
-contramapFirstWhenMatched :: (b -> a) -> WhenMatched f a y z -> WhenMatched f b y z
+contramapFirstWhenMatched :: forall b a (f :: Type -> Type) y z. (b -> a) -> WhenMatched f a y z -> WhenMatched f b y z
 
 -- | Map contravariantly over a <tt><a>WhenMatched</a> f x _ z</tt>.
-contramapSecondWhenMatched :: (b -> a) -> WhenMatched f x a z -> WhenMatched f x b z
+contramapSecondWhenMatched :: forall b a (f :: Type -> Type) x z. (b -> a) -> WhenMatched f x a z -> WhenMatched f x b z
 
 -- | Along with zipWithMaybeAMatched, witnesses the isomorphism between
 --   <tt>WhenMatched f x y z</tt> and <tt>Key -&gt; x -&gt; y -&gt; f
@@ -8722,6 +8876,8 @@ insert :: Ord k => k -> a -> Map k a -> Map k a
 --   insertWith (++) 7 "xxx" (fromList [(5,"a"), (3,"b")]) == fromList [(3, "b"), (5, "a"), (7, "xxx")]
 --   insertWith (++) 5 "xxx" empty                         == singleton 5 "xxx"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertWith :: Ord k => (a -> a -> a) -> k -> a -> Map k a -> Map k a
 
 -- | &lt;math&gt;. Insert with a function, combining key, new value and old
@@ -8737,6 +8893,8 @@ insertWith :: Ord k => (a -> a -> a) -> k -> a -> Map k a -> Map k a
 --   insertWithKey f 7 "xxx" (fromList [(5,"a"), (3,"b")]) == fromList [(3, "b"), (5, "a"), (7, "xxx")]
 --   insertWithKey f 5 "xxx" empty                         == singleton 5 "xxx"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> Map k a -> Map k a
 
 -- | &lt;math&gt;. Combines insert operation with old value retrieval. The
@@ -8759,6 +8917,8 @@ insertWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> Map k a -> Map k a
 --   insertLookup 5 "x" (fromList [(5,"a"), (3,"b")]) == (Just "a", fromList [(3, "b"), (5, "x")])
 --   insertLookup 7 "x" (fromList [(5,"a"), (3,"b")]) == (Nothing,  fromList [(3, "b"), (5, "a"), (7, "x")])
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertLookupWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> Map k a -> (Maybe a, Map k a)
 
 -- | &lt;math&gt;. Delete a key and its value from the map. When the key is
@@ -8909,6 +9069,8 @@ union :: Ord k => Map k a -> Map k a -> Map k a
 --   <pre>
 --   unionWith (++) (fromList [(5, "a"), (3, "b")]) (fromList [(5, "A"), (7, "C")]) == fromList [(3, "b"), (5, "aA"), (7, "C")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 unionWith :: Ord k => (a -> a -> a) -> Map k a -> Map k a -> Map k a
 
 -- | &lt;math&gt;. Union with a combining function.
@@ -8917,6 +9079,8 @@ unionWith :: Ord k => (a -> a -> a) -> Map k a -> Map k a -> Map k a
 --   let f key left_value right_value = (show key) ++ ":" ++ left_value ++ "|" ++ right_value
 --   unionWithKey f (fromList [(5, "a"), (3, "b")]) (fromList [(5, "A"), (7, "C")]) == fromList [(3, "b"), (5, "5:a|A"), (7, "C")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 unionWithKey :: Ord k => (k -> a -> a -> a) -> Map k a -> Map k a -> Map k a
 
 -- | The union of a list of maps: (<tt><a>unions</a> == <a>foldl</a>
@@ -9147,7 +9311,7 @@ runWhenMissing :: WhenMissing f k x y -> k -> x -> f (Maybe y)
 --   zipWithMaybeMatched :: (k -&gt; x -&gt; y -&gt; Maybe z)
 --                       -&gt; SimpleWhenMatched k x y z
 --   </pre>
-zipWithMaybeMatched :: Applicative f => (k -> x -> y -> Maybe z) -> WhenMatched f k x y z
+zipWithMaybeMatched :: forall (f :: Type -> Type) k x y z. Applicative f => (k -> x -> y -> Maybe z) -> WhenMatched f k x y z
 
 -- | When a key is found in both maps, apply a function to the key and
 --   values and use the result in the merged map.
@@ -9156,7 +9320,7 @@ zipWithMaybeMatched :: Applicative f => (k -> x -> y -> Maybe z) -> WhenMatched 
 --   zipWithMatched :: (k -&gt; x -&gt; y -&gt; z)
 --                  -&gt; SimpleWhenMatched k x y z
 --   </pre>
-zipWithMatched :: Applicative f => (k -> x -> y -> z) -> WhenMatched f k x y z
+zipWithMatched :: forall (f :: Type -> Type) k x y z. Applicative f => (k -> x -> y -> z) -> WhenMatched f k x y z
 
 -- | Map over the entries whose keys are missing from the other map,
 --   optionally removing some. This is the most powerful
@@ -9173,7 +9337,7 @@ zipWithMatched :: Applicative f => (k -> x -> y -> z) -> WhenMatched f k x y z
 --   
 --   but <tt>mapMaybeMissing</tt> uses fewer unnecessary <a>Applicative</a>
 --   operations.
-mapMaybeMissing :: Applicative f => (k -> x -> Maybe y) -> WhenMissing f k x y
+mapMaybeMissing :: forall (f :: Type -> Type) k x y. Applicative f => (k -> x -> Maybe y) -> WhenMissing f k x y
 
 -- | Drop all the entries whose keys are missing from the other map.
 --   
@@ -9186,7 +9350,7 @@ mapMaybeMissing :: Applicative f => (k -> x -> Maybe y) -> WhenMissing f k x y
 --   </pre>
 --   
 --   but <tt>dropMissing</tt> is much faster.
-dropMissing :: Applicative f => WhenMissing f k x y
+dropMissing :: forall (f :: Type -> Type) k x y. Applicative f => WhenMissing f k x y
 
 -- | Preserve, unchanged, the entries whose keys are missing from the other
 --   map.
@@ -9200,7 +9364,7 @@ dropMissing :: Applicative f => WhenMissing f k x y
 --   </pre>
 --   
 --   but <tt>preserveMissing</tt> is much faster.
-preserveMissing :: Applicative f => WhenMissing f k x x
+preserveMissing :: forall (f :: Type -> Type) k x. Applicative f => WhenMissing f k x x
 
 -- | Force the entries whose keys are missing from the other map and
 --   otherwise preserve them unchanged.
@@ -9214,7 +9378,7 @@ preserveMissing :: Applicative f => WhenMissing f k x x
 --   </pre>
 --   
 --   but <tt>preserveMissing'</tt> is quite a bit faster.
-preserveMissing' :: Applicative f => WhenMissing f k x x
+preserveMissing' :: forall (f :: Type -> Type) k x. Applicative f => WhenMissing f k x x
 
 -- | Map over the entries whose keys are missing from the other map.
 --   
@@ -9227,7 +9391,7 @@ preserveMissing' :: Applicative f => WhenMissing f k x x
 --   </pre>
 --   
 --   but <tt>mapMissing</tt> is somewhat faster.
-mapMissing :: Applicative f => (k -> x -> y) -> WhenMissing f k x y
+mapMissing :: forall (f :: Type -> Type) k x y. Applicative f => (k -> x -> y) -> WhenMissing f k x y
 
 -- | Filter the entries whose keys are missing from the other map.
 --   
@@ -9240,7 +9404,7 @@ mapMissing :: Applicative f => (k -> x -> y) -> WhenMissing f k x y
 --   </pre>
 --   
 --   but this should be a little faster.
-filterMissing :: Applicative f => (k -> x -> Bool) -> WhenMissing f k x x
+filterMissing :: forall (f :: Type -> Type) k x. Applicative f => (k -> x -> Bool) -> WhenMissing f k x x
 
 -- | A tactic for dealing with keys present in one map but not the other in
 --   <a>merge</a> or <a>mergeA</a>.
@@ -9248,10 +9412,10 @@ filterMissing :: Applicative f => (k -> x -> Bool) -> WhenMissing f k x x
 --   A tactic of type <tt> WhenMissing f k x z </tt> is an abstract
 --   representation of a function of type <tt> k -&gt; x -&gt; f (Maybe z)
 --   </tt>.
-data WhenMissing f k x y
-WhenMissing :: (Map k x -> f (Map k y)) -> (k -> x -> f (Maybe y)) -> WhenMissing f k x y
-[missingSubtree] :: WhenMissing f k x y -> Map k x -> f (Map k y)
-[missingKey] :: WhenMissing f k x y -> k -> x -> f (Maybe y)
+data WhenMissing (f :: Type -> Type) k x y
+WhenMissing :: (Map k x -> f (Map k y)) -> (k -> x -> f (Maybe y)) -> WhenMissing (f :: Type -> Type) k x y
+[missingSubtree] :: WhenMissing (f :: Type -> Type) k x y -> Map k x -> f (Map k y)
+[missingKey] :: WhenMissing (f :: Type -> Type) k x y -> k -> x -> f (Maybe y)
 
 -- | A tactic for dealing with keys present in both maps in <a>merge</a> or
 --   <a>mergeA</a>.
@@ -9259,9 +9423,9 @@ WhenMissing :: (Map k x -> f (Map k y)) -> (k -> x -> f (Maybe y)) -> WhenMissin
 --   A tactic of type <tt> WhenMatched f k x y z </tt> is an abstract
 --   representation of a function of type <tt> k -&gt; x -&gt; y -&gt; f
 --   (Maybe z) </tt>.
-newtype WhenMatched f k x y z
-WhenMatched :: (k -> x -> y -> f (Maybe z)) -> WhenMatched f k x y z
-[matchedKey] :: WhenMatched f k x y z -> k -> x -> y -> f (Maybe z)
+newtype WhenMatched (f :: Type -> Type) k x y z
+WhenMatched :: (k -> x -> y -> f (Maybe z)) -> WhenMatched (f :: Type -> Type) k x y z
+[matchedKey] :: WhenMatched (f :: Type -> Type) k x y z -> k -> x -> y -> f (Maybe z)
 
 -- | An applicative version of <a>merge</a>.
 --   
@@ -9361,10 +9525,10 @@ traverseMissing :: Applicative f => (k -> x -> f y) -> WhenMissing f k x y
 filterAMissing :: Applicative f => (k -> x -> f Bool) -> WhenMissing f k x x
 
 -- | Map covariantly over a <tt><a>WhenMissing</a> f k x</tt>.
-mapWhenMissing :: Functor f => (a -> b) -> WhenMissing f k x a -> WhenMissing f k x b
+mapWhenMissing :: forall (f :: Type -> Type) a b k x. Functor f => (a -> b) -> WhenMissing f k x a -> WhenMissing f k x b
 
 -- | Map covariantly over a <tt><a>WhenMatched</a> f k x y</tt>.
-mapWhenMatched :: Functor f => (a -> b) -> WhenMatched f k x y a -> WhenMatched f k x y b
+mapWhenMatched :: forall (f :: Type -> Type) a b k x y. Functor f => (a -> b) -> WhenMatched f k x y a -> WhenMatched f k x y b
 
 -- | &lt;math&gt;. An unsafe universal combining function.
 --   
@@ -9486,6 +9650,8 @@ mapKeys :: Ord k2 => (k1 -> k2) -> Map k1 a -> Map k2 a
 --   mapKeysWith (++) (\ _ -&gt; 1) (fromList [(1,"b"), (2,"a"), (3,"d"), (4,"c")]) == singleton 1 "cdab"
 --   mapKeysWith (++) (\ _ -&gt; 3) (fromList [(1,"b"), (2,"a"), (3,"d"), (4,"c")]) == singleton 3 "cdab"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 mapKeysWith :: Ord k2 => (a -> a -> a) -> (k1 -> k2) -> Map k1 a -> Map k2 a
 
 -- | &lt;math&gt;. <tt><a>mapKeysMonotonic</a> f s == <a>mapKeys</a> f
@@ -9682,8 +9848,8 @@ toList :: Map k a -> [(k, a)]
 --   <a>fromAscList</a>. If the list contains more than one value for the
 --   same key, the last value for the key is retained.
 --   
---   If the keys of the list are ordered, linear-time implementation is
---   used, with the performance equal to <a>fromDistinctAscList</a>.
+--   If the keys of the list are ordered, a linear-time implementation is
+--   used.
 --   
 --   <pre>
 --   fromList [] == empty
@@ -9696,8 +9862,52 @@ fromList :: Ord k => [(k, a)] -> Map k a
 --   combining function. See also <a>fromAscListWith</a>.
 --   
 --   <pre>
---   fromListWith (++) [(5,"a"), (5,"b"), (3,"b"), (3,"a"), (5,"a")] == fromList [(3, "ab"), (5, "aba")]
+--   fromListWith (++) [(5,"a"), (5,"b"), (3,"x"), (5,"c")] == fromList [(3, "x"), (5, "cba")]
 --   fromListWith (++) [] == empty
+--   </pre>
+--   
+--   Note the reverse ordering of <tt>"cba"</tt> in the example.
+--   
+--   The symmetric combining function <tt>f</tt> is applied in a left-fold
+--   over the list, as <tt>f new old</tt>.
+--   
+--   <h3>Performance</h3>
+--   
+--   You should ensure that the given <tt>f</tt> is fast with this order of
+--   arguments.
+--   
+--   Symmetric functions may be slow in one order, and fast in another. For
+--   the common case of collecting values of matching keys in a list, as
+--   above:
+--   
+--   The complexity of <tt>(++) a b</tt> is &lt;math&gt;, so it is fast
+--   when given a short list as its first argument. Thus:
+--   
+--   <pre>
+--   fromListWith       (++)  (replicate 1000000 (3, "x"))   -- O(n),  fast
+--   fromListWith (flip (++)) (replicate 1000000 (3, "x"))   -- O(n²), extremely slow
+--   </pre>
+--   
+--   because they evaluate as, respectively:
+--   
+--   <pre>
+--   fromList [(3, "x" ++ ("x" ++ "xxxxx..xxxxx"))]   -- O(n)
+--   fromList [(3, ("xxxxx..xxxxx" ++ "x") ++ "x")]   -- O(n²)
+--   </pre>
+--   
+--   Thus, to get good performance with an operation like <tt>(++)</tt>
+--   while also preserving the same order as in the input list, reverse the
+--   input:
+--   
+--   <pre>
+--   fromListWith (++) (reverse [(5,"a"), (5,"b"), (5,"c")]) == fromList [(5, "abc")]
+--   </pre>
+--   
+--   and it is always fast to combine singleton-list values <tt>[v]</tt>
+--   with <tt>fromListWith (++)</tt>, as in:
+--   
+--   <pre>
+--   fromListWith (++) $ reverse $ map (\(k, v) -&gt; (k, [v])) someListOfTuples
 --   </pre>
 fromListWith :: Ord k => (a -> a -> a) -> [(k, a)] -> Map k a
 
@@ -9709,6 +9919,8 @@ fromListWith :: Ord k => (a -> a -> a) -> [(k, a)] -> Map k a
 --   fromListWithKey f [(5,"a"), (5,"b"), (3,"b"), (3,"a"), (5,"c")] == fromList [(3, "3:a|b"), (5, "5:c|5:b|a")]
 --   fromListWithKey f [] == empty
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromListWithKey :: Ord k => (k -> a -> a -> a) -> [(k, a)] -> Map k a
 
 -- | &lt;math&gt;. Convert the map to a list of key/value pairs where the
@@ -9747,6 +9959,8 @@ fromAscList :: Eq k => [(k, a)] -> Map k a
 --   valid (fromAscListWith (++) [(3,"b"), (5,"a"), (5,"b")]) == True
 --   valid (fromAscListWith (++) [(5,"a"), (3,"b"), (5,"b")]) == False
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromAscListWith :: Eq k => (a -> a -> a) -> [(k, a)] -> Map k a
 
 -- | &lt;math&gt;. Build a map from an ascending list in linear time with a
@@ -9759,6 +9973,8 @@ fromAscListWith :: Eq k => (a -> a -> a) -> [(k, a)] -> Map k a
 --   valid (fromAscListWithKey f [(3,"b"), (5,"a"), (5,"b"), (5,"b")]) == True
 --   valid (fromAscListWithKey f [(5,"a"), (3,"b"), (5,"b"), (5,"b")]) == False
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromAscListWithKey :: Eq k => (k -> a -> a -> a) -> [(k, a)] -> Map k a
 
 -- | &lt;math&gt;. Build a map from an ascending list of distinct elements
@@ -9791,6 +10007,8 @@ fromDescList :: Eq k => [(k, a)] -> Map k a
 --   valid (fromDescListWith (++) [(5,"a"), (5,"b"), (3,"b")]) == True
 --   valid (fromDescListWith (++) [(5,"a"), (3,"b"), (5,"b")]) == False
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromDescListWith :: Eq k => (a -> a -> a) -> [(k, a)] -> Map k a
 
 -- | &lt;math&gt;. Build a map from a descending list in linear time with a
@@ -9803,6 +10021,8 @@ fromDescListWith :: Eq k => (a -> a -> a) -> [(k, a)] -> Map k a
 --   valid (fromDescListWithKey f [(5,"a"), (5,"b"), (5,"b"), (3,"b")]) == True
 --   valid (fromDescListWithKey f [(5,"a"), (3,"b"), (5,"b"), (5,"b")]) == False
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromDescListWithKey :: Eq k => (k -> a -> a -> a) -> [(k, a)] -> Map k a
 
 -- | &lt;math&gt;. Build a map from a descending list of distinct elements
@@ -10439,8 +10659,8 @@ fromArgSet :: Set (Arg k a) -> Map k a
 --   <a>fromAscList</a>. If the list contains more than one value for the
 --   same key, the last value for the key is retained.
 --   
---   If the keys of the list are ordered, linear-time implementation is
---   used, with the performance equal to <a>fromDistinctAscList</a>.
+--   If the keys of the list are ordered, a linear-time implementation is
+--   used.
 --   
 --   <pre>
 --   fromList [] == empty
@@ -10453,8 +10673,52 @@ fromList :: Ord k => [(k, a)] -> Map k a
 --   combining function. See also <a>fromAscListWith</a>.
 --   
 --   <pre>
---   fromListWith (++) [(5,"a"), (5,"b"), (3,"b"), (3,"a"), (5,"a")] == fromList [(3, "ab"), (5, "aba")]
+--   fromListWith (++) [(5,"a"), (5,"b"), (3,"x"), (5,"c")] == fromList [(3, "x"), (5, "cba")]
 --   fromListWith (++) [] == empty
+--   </pre>
+--   
+--   Note the reverse ordering of <tt>"cba"</tt> in the example.
+--   
+--   The symmetric combining function <tt>f</tt> is applied in a left-fold
+--   over the list, as <tt>f new old</tt>.
+--   
+--   <h3>Performance</h3>
+--   
+--   You should ensure that the given <tt>f</tt> is fast with this order of
+--   arguments.
+--   
+--   Symmetric functions may be slow in one order, and fast in another. For
+--   the common case of collecting values of matching keys in a list, as
+--   above:
+--   
+--   The complexity of <tt>(++) a b</tt> is &lt;math&gt;, so it is fast
+--   when given a short list as its first argument. Thus:
+--   
+--   <pre>
+--   fromListWith       (++)  (replicate 1000000 (3, "x"))   -- O(n),  fast
+--   fromListWith (flip (++)) (replicate 1000000 (3, "x"))   -- O(n²), extremely slow
+--   </pre>
+--   
+--   because they evaluate as, respectively:
+--   
+--   <pre>
+--   fromList [(3, "x" ++ ("x" ++ "xxxxx..xxxxx"))]   -- O(n)
+--   fromList [(3, ("xxxxx..xxxxx" ++ "x") ++ "x")]   -- O(n²)
+--   </pre>
+--   
+--   Thus, to get good performance with an operation like <tt>(++)</tt>
+--   while also preserving the same order as in the input list, reverse the
+--   input:
+--   
+--   <pre>
+--   fromListWith (++) (reverse [(5,"a"), (5,"b"), (5,"c")]) == fromList [(5, "abc")]
+--   </pre>
+--   
+--   and it is always fast to combine singleton-list values <tt>[v]</tt>
+--   with <tt>fromListWith (++)</tt>, as in:
+--   
+--   <pre>
+--   fromListWith (++) $ reverse $ map (\(k, v) -&gt; (k, [v])) someListOfTuples
 --   </pre>
 fromListWith :: Ord k => (a -> a -> a) -> [(k, a)] -> Map k a
 
@@ -10466,6 +10730,8 @@ fromListWith :: Ord k => (a -> a -> a) -> [(k, a)] -> Map k a
 --   fromListWithKey f [(5,"a"), (5,"b"), (3,"b"), (3,"a"), (5,"c")] == fromList [(3, "3:a|b"), (5, "5:c|5:b|a")]
 --   fromListWithKey f [] == empty
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromListWithKey :: Ord k => (k -> a -> a -> a) -> [(k, a)] -> Map k a
 
 -- | &lt;math&gt;. Build a map from an ascending list in linear time.
@@ -10488,6 +10754,8 @@ fromAscList :: Eq k => [(k, a)] -> Map k a
 --   valid (fromAscListWith (++) [(3,"b"), (5,"a"), (5,"b")]) == True
 --   valid (fromAscListWith (++) [(5,"a"), (3,"b"), (5,"b")]) == False
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromAscListWith :: Eq k => (a -> a -> a) -> [(k, a)] -> Map k a
 
 -- | &lt;math&gt;. Build a map from an ascending list in linear time with a
@@ -10500,6 +10768,8 @@ fromAscListWith :: Eq k => (a -> a -> a) -> [(k, a)] -> Map k a
 --   valid (fromAscListWithKey f [(3,"b"), (5,"a"), (5,"b"), (5,"b")]) == True
 --   valid (fromAscListWithKey f [(5,"a"), (3,"b"), (5,"b"), (5,"b")]) == False
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromAscListWithKey :: Eq k => (k -> a -> a -> a) -> [(k, a)] -> Map k a
 
 -- | &lt;math&gt;. Build a map from an ascending list of distinct elements
@@ -10532,6 +10802,8 @@ fromDescList :: Eq k => [(k, a)] -> Map k a
 --   valid (fromDescListWith (++) [(5,"a"), (5,"b"), (3,"b")]) == True
 --   valid (fromDescListWith (++) [(5,"a"), (3,"b"), (5,"b")]) == False
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromDescListWith :: Eq k => (a -> a -> a) -> [(k, a)] -> Map k a
 
 -- | &lt;math&gt;. Build a map from a descending list in linear time with a
@@ -10544,6 +10816,8 @@ fromDescListWith :: Eq k => (a -> a -> a) -> [(k, a)] -> Map k a
 --   valid (fromDescListWithKey f [(5,"a"), (5,"b"), (5,"b"), (3,"b")]) == True
 --   valid (fromDescListWithKey f [(5,"a"), (3,"b"), (5,"b"), (5,"b")]) == False
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromDescListWithKey :: Eq k => (k -> a -> a -> a) -> [(k, a)] -> Map k a
 
 -- | &lt;math&gt;. Build a map from a descending list of distinct elements
@@ -10579,6 +10853,8 @@ insert :: Ord k => k -> a -> Map k a -> Map k a
 --   insertWith (++) 7 "xxx" (fromList [(5,"a"), (3,"b")]) == fromList [(3, "b"), (5, "a"), (7, "xxx")]
 --   insertWith (++) 5 "xxx" empty                         == singleton 5 "xxx"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertWith :: Ord k => (a -> a -> a) -> k -> a -> Map k a -> Map k a
 
 -- | &lt;math&gt;. Insert with a function, combining key, new value and old
@@ -10594,6 +10870,8 @@ insertWith :: Ord k => (a -> a -> a) -> k -> a -> Map k a -> Map k a
 --   insertWithKey f 7 "xxx" (fromList [(5,"a"), (3,"b")]) == fromList [(3, "b"), (5, "a"), (7, "xxx")]
 --   insertWithKey f 5 "xxx" empty                         == singleton 5 "xxx"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> Map k a -> Map k a
 
 -- | &lt;math&gt;. Combines insert operation with old value retrieval. The
@@ -10616,6 +10894,8 @@ insertWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> Map k a -> Map k a
 --   insertLookup 5 "x" (fromList [(5,"a"), (3,"b")]) == (Just "a", fromList [(3, "b"), (5, "x")])
 --   insertLookup 7 "x" (fromList [(5,"a"), (3,"b")]) == (Nothing,  fromList [(3, "b"), (5, "a"), (7, "x")])
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertLookupWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> Map k a -> (Maybe a, Map k a)
 
 -- | &lt;math&gt;. Delete a key and its value from the map. When the key is
@@ -10906,6 +11186,8 @@ union :: Ord k => Map k a -> Map k a -> Map k a
 --   <pre>
 --   unionWith (++) (fromList [(5, "a"), (3, "b")]) (fromList [(5, "A"), (7, "C")]) == fromList [(3, "b"), (5, "aA"), (7, "C")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 unionWith :: Ord k => (a -> a -> a) -> Map k a -> Map k a -> Map k a
 
 -- | &lt;math&gt;. Union with a combining function.
@@ -10914,6 +11196,8 @@ unionWith :: Ord k => (a -> a -> a) -> Map k a -> Map k a -> Map k a
 --   let f key left_value right_value = (show key) ++ ":" ++ left_value ++ "|" ++ right_value
 --   unionWithKey f (fromList [(5, "a"), (3, "b")]) (fromList [(5, "A"), (7, "C")]) == fromList [(3, "b"), (5, "5:a|A"), (7, "C")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 unionWithKey :: Ord k => (k -> a -> a -> a) -> Map k a -> Map k a -> Map k a
 
 -- | The union of a list of maps: (<tt><a>unions</a> == <a>foldl</a>
@@ -11152,6 +11436,8 @@ mapKeys :: Ord k2 => (k1 -> k2) -> Map k1 a -> Map k2 a
 --   mapKeysWith (++) (\ _ -&gt; 1) (fromList [(1,"b"), (2,"a"), (3,"d"), (4,"c")]) == singleton 1 "cdab"
 --   mapKeysWith (++) (\ _ -&gt; 3) (fromList [(1,"b"), (2,"a"), (3,"d"), (4,"c")]) == singleton 3 "cdab"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 mapKeysWith :: Ord k2 => (a -> a -> a) -> (k1 -> k2) -> Map k1 a -> Map k2 a
 
 -- | &lt;math&gt;. <tt><a>mapKeysMonotonic</a> f s == <a>mapKeys</a> f
@@ -11961,7 +12247,7 @@ merge :: Ord k => SimpleWhenMissing k a c -> SimpleWhenMissing k b c -> SimpleWh
 --   zipWithMaybeMatched :: (k -&gt; x -&gt; y -&gt; Maybe z)
 --                       -&gt; SimpleWhenMatched k x y z
 --   </pre>
-zipWithMaybeMatched :: Applicative f => (k -> x -> y -> Maybe z) -> WhenMatched f k x y z
+zipWithMaybeMatched :: forall (f :: Type -> Type) k x y z. Applicative f => (k -> x -> y -> Maybe z) -> WhenMatched f k x y z
 
 -- | When a key is found in both maps, apply a function to the key and
 --   values and use the result in the merged map.
@@ -11970,7 +12256,7 @@ zipWithMaybeMatched :: Applicative f => (k -> x -> y -> Maybe z) -> WhenMatched 
 --   zipWithMatched :: (k -&gt; x -&gt; y -&gt; z)
 --                  -&gt; SimpleWhenMatched k x y z
 --   </pre>
-zipWithMatched :: Applicative f => (k -> x -> y -> z) -> WhenMatched f k x y z
+zipWithMatched :: forall (f :: Type -> Type) k x y z. Applicative f => (k -> x -> y -> z) -> WhenMatched f k x y z
 
 -- | Map over the entries whose keys are missing from the other map,
 --   optionally removing some. This is the most powerful
@@ -11987,7 +12273,7 @@ zipWithMatched :: Applicative f => (k -> x -> y -> z) -> WhenMatched f k x y z
 --   
 --   but <tt>mapMaybeMissing</tt> uses fewer unnecessary <a>Applicative</a>
 --   operations.
-mapMaybeMissing :: Applicative f => (k -> x -> Maybe y) -> WhenMissing f k x y
+mapMaybeMissing :: forall (f :: Type -> Type) k x y. Applicative f => (k -> x -> Maybe y) -> WhenMissing f k x y
 
 -- | Drop all the entries whose keys are missing from the other map.
 --   
@@ -12000,7 +12286,7 @@ mapMaybeMissing :: Applicative f => (k -> x -> Maybe y) -> WhenMissing f k x y
 --   </pre>
 --   
 --   but <tt>dropMissing</tt> is much faster.
-dropMissing :: Applicative f => WhenMissing f k x y
+dropMissing :: forall (f :: Type -> Type) k x y. Applicative f => WhenMissing f k x y
 
 -- | Preserve, unchanged, the entries whose keys are missing from the other
 --   map.
@@ -12014,7 +12300,7 @@ dropMissing :: Applicative f => WhenMissing f k x y
 --   </pre>
 --   
 --   but <tt>preserveMissing</tt> is much faster.
-preserveMissing :: Applicative f => WhenMissing f k x x
+preserveMissing :: forall (f :: Type -> Type) k x. Applicative f => WhenMissing f k x x
 
 -- | Force the entries whose keys are missing from the other map and
 --   otherwise preserve them unchanged.
@@ -12028,7 +12314,7 @@ preserveMissing :: Applicative f => WhenMissing f k x x
 --   </pre>
 --   
 --   but <tt>preserveMissing'</tt> is quite a bit faster.
-preserveMissing' :: Applicative f => WhenMissing f k x x
+preserveMissing' :: forall (f :: Type -> Type) k x. Applicative f => WhenMissing f k x x
 
 -- | Map over the entries whose keys are missing from the other map.
 --   
@@ -12041,7 +12327,7 @@ preserveMissing' :: Applicative f => WhenMissing f k x x
 --   </pre>
 --   
 --   but <tt>mapMissing</tt> is somewhat faster.
-mapMissing :: Applicative f => (k -> x -> y) -> WhenMissing f k x y
+mapMissing :: forall (f :: Type -> Type) k x y. Applicative f => (k -> x -> y) -> WhenMissing f k x y
 
 -- | Filter the entries whose keys are missing from the other map.
 --   
@@ -12054,7 +12340,7 @@ mapMissing :: Applicative f => (k -> x -> y) -> WhenMissing f k x y
 --   </pre>
 --   
 --   but this should be a little faster.
-filterMissing :: Applicative f => (k -> x -> Bool) -> WhenMissing f k x x
+filterMissing :: forall (f :: Type -> Type) k x. Applicative f => (k -> x -> Bool) -> WhenMissing f k x x
 
 -- | A tactic for dealing with keys present in one map but not the other in
 --   <a>merge</a> or <a>mergeA</a>.
@@ -12062,7 +12348,7 @@ filterMissing :: Applicative f => (k -> x -> Bool) -> WhenMissing f k x x
 --   A tactic of type <tt> WhenMissing f k x z </tt> is an abstract
 --   representation of a function of type <tt> k -&gt; x -&gt; f (Maybe z)
 --   </tt>.
-data WhenMissing f k x y
+data WhenMissing (f :: Type -> Type) k x y
 
 -- | A tactic for dealing with keys present in both maps in <a>merge</a> or
 --   <a>mergeA</a>.
@@ -12070,7 +12356,7 @@ data WhenMissing f k x y
 --   A tactic of type <tt> WhenMatched f k x y z </tt> is an abstract
 --   representation of a function of type <tt> k -&gt; x -&gt; y -&gt; f
 --   (Maybe z) </tt>.
-data WhenMatched f k x y z
+data WhenMatched (f :: Type -> Type) k x y z
 
 -- | An applicative version of <a>merge</a>.
 --   
@@ -12170,10 +12456,10 @@ traverseMissing :: Applicative f => (k -> x -> f y) -> WhenMissing f k x y
 filterAMissing :: Applicative f => (k -> x -> f Bool) -> WhenMissing f k x x
 
 -- | Map covariantly over a <tt><a>WhenMissing</a> f k x</tt>.
-mapWhenMissing :: Functor f => (a -> b) -> WhenMissing f k x a -> WhenMissing f k x b
+mapWhenMissing :: forall (f :: Type -> Type) a b k x. Functor f => (a -> b) -> WhenMissing f k x a -> WhenMissing f k x b
 
 -- | Map covariantly over a <tt><a>WhenMatched</a> f k x y</tt>.
-mapWhenMatched :: Functor f => (a -> b) -> WhenMatched f k x y a -> WhenMatched f k x y b
+mapWhenMatched :: forall (f :: Type -> Type) a b k x y. Functor f => (a -> b) -> WhenMatched f k x y a -> WhenMatched f k x y b
 
 -- | Along with zipWithMaybeAMatched, witnesses the isomorphism between
 --   <tt>WhenMatched f k x y z</tt> and <tt>k -&gt; x -&gt; y -&gt; f
@@ -12306,8 +12592,8 @@ fromArgSet :: Set (Arg k a) -> Map k a
 --   <a>fromAscList</a>. If the list contains more than one value for the
 --   same key, the last value for the key is retained.
 --   
---   If the keys of the list are ordered, linear-time implementation is
---   used, with the performance equal to <a>fromDistinctAscList</a>.
+--   If the keys of the list are ordered, a linear-time implementation is
+--   used.
 --   
 --   <pre>
 --   fromList [] == empty
@@ -12320,8 +12606,52 @@ fromList :: Ord k => [(k, a)] -> Map k a
 --   combining function. See also <a>fromAscListWith</a>.
 --   
 --   <pre>
---   fromListWith (++) [(5,"a"), (5,"b"), (3,"b"), (3,"a"), (5,"a")] == fromList [(3, "ab"), (5, "aba")]
+--   fromListWith (++) [(5,"a"), (5,"b"), (3,"x"), (5,"c")] == fromList [(3, "x"), (5, "cba")]
 --   fromListWith (++) [] == empty
+--   </pre>
+--   
+--   Note the reverse ordering of <tt>"cba"</tt> in the example.
+--   
+--   The symmetric combining function <tt>f</tt> is applied in a left-fold
+--   over the list, as <tt>f new old</tt>.
+--   
+--   <h3>Performance</h3>
+--   
+--   You should ensure that the given <tt>f</tt> is fast with this order of
+--   arguments.
+--   
+--   Symmetric functions may be slow in one order, and fast in another. For
+--   the common case of collecting values of matching keys in a list, as
+--   above:
+--   
+--   The complexity of <tt>(++) a b</tt> is &lt;math&gt;, so it is fast
+--   when given a short list as its first argument. Thus:
+--   
+--   <pre>
+--   fromListWith       (++)  (replicate 1000000 (3, "x"))   -- O(n),  fast
+--   fromListWith (flip (++)) (replicate 1000000 (3, "x"))   -- O(n²), extremely slow
+--   </pre>
+--   
+--   because they evaluate as, respectively:
+--   
+--   <pre>
+--   fromList [(3, "x" ++ ("x" ++ "xxxxx..xxxxx"))]   -- O(n)
+--   fromList [(3, ("xxxxx..xxxxx" ++ "x") ++ "x")]   -- O(n²)
+--   </pre>
+--   
+--   Thus, to get good performance with an operation like <tt>(++)</tt>
+--   while also preserving the same order as in the input list, reverse the
+--   input:
+--   
+--   <pre>
+--   fromListWith (++) (reverse [(5,"a"), (5,"b"), (5,"c")]) == fromList [(5, "abc")]
+--   </pre>
+--   
+--   and it is always fast to combine singleton-list values <tt>[v]</tt>
+--   with <tt>fromListWith (++)</tt>, as in:
+--   
+--   <pre>
+--   fromListWith (++) $ reverse $ map (\(k, v) -&gt; (k, [v])) someListOfTuples
 --   </pre>
 fromListWith :: Ord k => (a -> a -> a) -> [(k, a)] -> Map k a
 
@@ -12333,6 +12663,8 @@ fromListWith :: Ord k => (a -> a -> a) -> [(k, a)] -> Map k a
 --   fromListWithKey f [(5,"a"), (5,"b"), (3,"b"), (3,"a"), (5,"c")] == fromList [(3, "3:a|b"), (5, "5:c|5:b|a")]
 --   fromListWithKey f [] == empty
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromListWithKey :: Ord k => (k -> a -> a -> a) -> [(k, a)] -> Map k a
 
 -- | &lt;math&gt;. Build a map from an ascending list in linear time.
@@ -12367,6 +12699,8 @@ fromAscListWith :: Eq k => (a -> a -> a) -> [(k, a)] -> Map k a
 --   valid (fromAscListWithKey f [(3,"b"), (5,"a"), (5,"b"), (5,"b")]) == True
 --   valid (fromAscListWithKey f [(5,"a"), (3,"b"), (5,"b"), (5,"b")]) == False
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromAscListWithKey :: Eq k => (k -> a -> a -> a) -> [(k, a)] -> Map k a
 
 -- | &lt;math&gt;. Build a map from an ascending list of distinct elements
@@ -12399,6 +12733,8 @@ fromDescList :: Eq k => [(k, a)] -> Map k a
 --   valid (fromDescListWith (++) [(5,"a"), (5,"b"), (3,"b")]) == True
 --   valid (fromDescListWith (++) [(5,"a"), (3,"b"), (5,"b")]) == False
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromDescListWith :: Eq k => (a -> a -> a) -> [(k, a)] -> Map k a
 
 -- | &lt;math&gt;. Build a map from a descending list in linear time with a
@@ -12411,6 +12747,8 @@ fromDescListWith :: Eq k => (a -> a -> a) -> [(k, a)] -> Map k a
 --   valid (fromDescListWithKey f [(5,"a"), (5,"b"), (5,"b"), (3,"b")]) == True
 --   valid (fromDescListWithKey f [(5,"a"), (3,"b"), (5,"b"), (5,"b")]) == False
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromDescListWithKey :: Eq k => (k -> a -> a -> a) -> [(k, a)] -> Map k a
 
 -- | &lt;math&gt;. Build a map from a descending list of distinct elements
@@ -12446,6 +12784,8 @@ insert :: Ord k => k -> a -> Map k a -> Map k a
 --   insertWith (++) 7 "xxx" (fromList [(5,"a"), (3,"b")]) == fromList [(3, "b"), (5, "a"), (7, "xxx")]
 --   insertWith (++) 5 "xxx" empty                         == singleton 5 "xxx"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertWith :: Ord k => (a -> a -> a) -> k -> a -> Map k a -> Map k a
 
 -- | &lt;math&gt;. Insert with a function, combining key, new value and old
@@ -12461,6 +12801,8 @@ insertWith :: Ord k => (a -> a -> a) -> k -> a -> Map k a -> Map k a
 --   insertWithKey f 7 "xxx" (fromList [(5,"a"), (3,"b")]) == fromList [(3, "b"), (5, "a"), (7, "xxx")]
 --   insertWithKey f 5 "xxx" empty                         == singleton 5 "xxx"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> Map k a -> Map k a
 
 -- | &lt;math&gt;. Combines insert operation with old value retrieval. The
@@ -12483,6 +12825,8 @@ insertWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> Map k a -> Map k a
 --   insertLookup 5 "x" (fromList [(5,"a"), (3,"b")]) == (Just "a", fromList [(3, "b"), (5, "x")])
 --   insertLookup 7 "x" (fromList [(5,"a"), (3,"b")]) == (Nothing,  fromList [(3, "b"), (5, "a"), (7, "x")])
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertLookupWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> Map k a -> (Maybe a, Map k a)
 
 -- | &lt;math&gt;. Delete a key and its value from the map. When the key is
@@ -12773,6 +13117,8 @@ union :: Ord k => Map k a -> Map k a -> Map k a
 --   <pre>
 --   unionWith (++) (fromList [(5, "a"), (3, "b")]) (fromList [(5, "A"), (7, "C")]) == fromList [(3, "b"), (5, "aA"), (7, "C")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 unionWith :: Ord k => (a -> a -> a) -> Map k a -> Map k a -> Map k a
 
 -- | &lt;math&gt;. Union with a combining function.
@@ -12781,6 +13127,8 @@ unionWith :: Ord k => (a -> a -> a) -> Map k a -> Map k a -> Map k a
 --   let f key left_value right_value = (show key) ++ ":" ++ left_value ++ "|" ++ right_value
 --   unionWithKey f (fromList [(5, "a"), (3, "b")]) (fromList [(5, "A"), (7, "C")]) == fromList [(3, "b"), (5, "5:a|A"), (7, "C")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 unionWithKey :: Ord k => (k -> a -> a -> a) -> Map k a -> Map k a -> Map k a
 
 -- | The union of a list of maps: (<tt><a>unions</a> == <a>foldl</a>
@@ -13019,6 +13367,8 @@ mapKeys :: Ord k2 => (k1 -> k2) -> Map k1 a -> Map k2 a
 --   mapKeysWith (++) (\ _ -&gt; 1) (fromList [(1,"b"), (2,"a"), (3,"d"), (4,"c")]) == singleton 1 "cdab"
 --   mapKeysWith (++) (\ _ -&gt; 3) (fromList [(1,"b"), (2,"a"), (3,"d"), (4,"c")]) == singleton 3 "cdab"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 mapKeysWith :: Ord k2 => (a -> a -> a) -> (k1 -> k2) -> Map k1 a -> Map k2 a
 
 -- | &lt;math&gt;. <tt><a>mapKeysMonotonic</a> f s == <a>mapKeys</a> f
@@ -13883,12 +14233,56 @@ fromSet :: (Key -> a) -> IntSet -> IntMap a
 --   </pre>
 fromList :: [(Key, a)] -> IntMap a
 
--- | &lt;math&gt;. Create a map from a list of key/value pairs with a
+-- | &lt;math&gt;. Build a map from a list of key/value pairs with a
 --   combining function. See also <a>fromAscListWith</a>.
 --   
 --   <pre>
---   fromListWith (++) [(5,"a"), (5,"b"), (3,"b"), (3,"a"), (5,"a")] == fromList [(3, "ab"), (5, "aba")]
+--   fromListWith (++) [(5,"a"), (5,"b"), (3,"x"), (5,"c")] == fromList [(3, "x"), (5, "cba")]
 --   fromListWith (++) [] == empty
+--   </pre>
+--   
+--   Note the reverse ordering of <tt>"cba"</tt> in the example.
+--   
+--   The symmetric combining function <tt>f</tt> is applied in a left-fold
+--   over the list, as <tt>f new old</tt>.
+--   
+--   <h3>Performance</h3>
+--   
+--   You should ensure that the given <tt>f</tt> is fast with this order of
+--   arguments.
+--   
+--   Symmetric functions may be slow in one order, and fast in another. For
+--   the common case of collecting values of matching keys in a list, as
+--   above:
+--   
+--   The complexity of <tt>(++) a b</tt> is &lt;math&gt;, so it is fast
+--   when given a short list as its first argument. Thus:
+--   
+--   <pre>
+--   fromListWith       (++)  (replicate 1000000 (3, "x"))   -- O(n),  fast
+--   fromListWith (flip (++)) (replicate 1000000 (3, "x"))   -- O(n²), extremely slow
+--   </pre>
+--   
+--   because they evaluate as, respectively:
+--   
+--   <pre>
+--   fromList [(3, "x" ++ ("x" ++ "xxxxx..xxxxx"))]   -- O(n)
+--   fromList [(3, ("xxxxx..xxxxx" ++ "x") ++ "x")]   -- O(n²)
+--   </pre>
+--   
+--   Thus, to get good performance with an operation like <tt>(++)</tt>
+--   while also preserving the same order as in the input list, reverse the
+--   input:
+--   
+--   <pre>
+--   fromListWith (++) (reverse [(5,"a"), (5,"b"), (5,"c")]) == fromList [(5, "abc")]
+--   </pre>
+--   
+--   and it is always fast to combine singleton-list values <tt>[v]</tt>
+--   with <tt>fromListWith (++)</tt>, as in:
+--   
+--   <pre>
+--   fromListWith (++) $ reverse $ map (\(k, v) -&gt; (k, [v])) someListOfTuples
 --   </pre>
 fromListWith :: (a -> a -> a) -> [(Key, a)] -> IntMap a
 
@@ -13900,6 +14294,8 @@ fromListWith :: (a -> a -> a) -> [(Key, a)] -> IntMap a
 --   fromListWithKey f [(5,"a"), (5,"b"), (3,"b"), (3,"a"), (5,"c")] == fromList [(3, "3:a|b"), (5, "5:c|5:b|a")]
 --   fromListWithKey f [] == empty
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromListWithKey :: (Key -> a -> a -> a) -> [(Key, a)] -> IntMap a
 
 -- | &lt;math&gt;. Build a map from a list of key/value pairs where the
@@ -13918,6 +14314,8 @@ fromAscList :: [(Key, a)] -> IntMap a
 --   <pre>
 --   fromAscListWith (++) [(3,"b"), (5,"a"), (5,"b")] == fromList [(3, "b"), (5, "ba")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromAscListWith :: (a -> a -> a) -> [(Key, a)] -> IntMap a
 
 -- | &lt;math&gt;. Build a map from a list of key/value pairs where the
@@ -13927,6 +14325,8 @@ fromAscListWith :: (a -> a -> a) -> [(Key, a)] -> IntMap a
 --   <pre>
 --   fromAscListWith (++) [(3,"b"), (5,"a"), (5,"b")] == fromList [(3, "b"), (5, "ba")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromAscListWithKey :: (Key -> a -> a -> a) -> [(Key, a)] -> IntMap a
 
 -- | &lt;math&gt;. Build a map from a list of key/value pairs where the
@@ -13960,6 +14360,8 @@ insert :: Key -> a -> IntMap a -> IntMap a
 --   insertWith (++) 7 "xxx" (fromList [(5,"a"), (3,"b")]) == fromList [(3, "b"), (5, "a"), (7, "xxx")]
 --   insertWith (++) 5 "xxx" empty                         == singleton 5 "xxx"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertWith :: (a -> a -> a) -> Key -> a -> IntMap a -> IntMap a
 
 -- | &lt;math&gt;. Insert with a combining function.
@@ -13977,6 +14379,8 @@ insertWith :: (a -> a -> a) -> Key -> a -> IntMap a -> IntMap a
 --   
 --   If the key exists in the map, this function is lazy in <tt>value</tt>
 --   but strict in the result of <tt>f</tt>.
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertWithKey :: (Key -> a -> a -> a) -> Key -> a -> IntMap a -> IntMap a
 
 -- | &lt;math&gt;. The expression (<tt><a>insertLookupWithKey</a> f k x
@@ -13999,6 +14403,8 @@ insertWithKey :: (Key -> a -> a -> a) -> Key -> a -> IntMap a -> IntMap a
 --   insertLookup 5 "x" (fromList [(5,"a"), (3,"b")]) == (Just "a", fromList [(3, "b"), (5, "x")])
 --   insertLookup 7 "x" (fromList [(5,"a"), (3,"b")]) == (Nothing,  fromList [(3, "b"), (5, "a"), (7, "x")])
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertLookupWithKey :: (Key -> a -> a -> a) -> Key -> a -> IntMap a -> (Maybe a, IntMap a)
 
 -- | &lt;math&gt;. Delete a key and its value from the map. When the key is
@@ -14223,6 +14629,8 @@ union :: IntMap a -> IntMap a -> IntMap a
 --   <pre>
 --   unionWith (++) (fromList [(5, "a"), (3, "b")]) (fromList [(5, "A"), (7, "C")]) == fromList [(3, "b"), (5, "aA"), (7, "C")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 unionWith :: (a -> a -> a) -> IntMap a -> IntMap a -> IntMap a
 
 -- | &lt;math&gt;. The union with a combining function.
@@ -14231,6 +14639,8 @@ unionWith :: (a -> a -> a) -> IntMap a -> IntMap a -> IntMap a
 --   let f key left_value right_value = (show key) ++ ":" ++ left_value ++ "|" ++ right_value
 --   unionWithKey f (fromList [(5, "a"), (3, "b")]) (fromList [(5, "A"), (7, "C")]) == fromList [(3, "b"), (5, "5:a|A"), (7, "C")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 unionWithKey :: (Key -> a -> a -> a) -> IntMap a -> IntMap a -> IntMap a
 
 -- | The union of a list of maps.
@@ -14462,6 +14872,8 @@ mapKeys :: (Key -> Key) -> IntMap a -> IntMap a
 --   mapKeysWith (++) (\ _ -&gt; 1) (fromList [(1,"b"), (2,"a"), (3,"d"), (4,"c")]) == singleton 1 "cdab"
 --   mapKeysWith (++) (\ _ -&gt; 3) (fromList [(1,"b"), (2,"a"), (3,"d"), (4,"c")]) == singleton 3 "cdab"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 mapKeysWith :: (a -> a -> a) -> (Key -> Key) -> IntMap a -> IntMap a
 
 -- | &lt;math&gt;. <tt><a>mapKeysMonotonic</a> f s == <a>mapKeys</a> f
@@ -15092,12 +15504,56 @@ fromSet :: (Key -> a) -> IntSet -> IntMap a
 --   </pre>
 fromList :: [(Key, a)] -> IntMap a
 
--- | &lt;math&gt;. Create a map from a list of key/value pairs with a
+-- | &lt;math&gt;. Build a map from a list of key/value pairs with a
 --   combining function. See also <a>fromAscListWith</a>.
 --   
 --   <pre>
---   fromListWith (++) [(5,"a"), (5,"b"), (3,"b"), (3,"a"), (5,"a")] == fromList [(3, "ab"), (5, "aba")]
+--   fromListWith (++) [(5,"a"), (5,"b"), (3,"x"), (5,"c")] == fromList [(3, "x"), (5, "cba")]
 --   fromListWith (++) [] == empty
+--   </pre>
+--   
+--   Note the reverse ordering of <tt>"cba"</tt> in the example.
+--   
+--   The symmetric combining function <tt>f</tt> is applied in a left-fold
+--   over the list, as <tt>f new old</tt>.
+--   
+--   <h3>Performance</h3>
+--   
+--   You should ensure that the given <tt>f</tt> is fast with this order of
+--   arguments.
+--   
+--   Symmetric functions may be slow in one order, and fast in another. For
+--   the common case of collecting values of matching keys in a list, as
+--   above:
+--   
+--   The complexity of <tt>(++) a b</tt> is &lt;math&gt;, so it is fast
+--   when given a short list as its first argument. Thus:
+--   
+--   <pre>
+--   fromListWith       (++)  (replicate 1000000 (3, "x"))   -- O(n),  fast
+--   fromListWith (flip (++)) (replicate 1000000 (3, "x"))   -- O(n²), extremely slow
+--   </pre>
+--   
+--   because they evaluate as, respectively:
+--   
+--   <pre>
+--   fromList [(3, "x" ++ ("x" ++ "xxxxx..xxxxx"))]   -- O(n)
+--   fromList [(3, ("xxxxx..xxxxx" ++ "x") ++ "x")]   -- O(n²)
+--   </pre>
+--   
+--   Thus, to get good performance with an operation like <tt>(++)</tt>
+--   while also preserving the same order as in the input list, reverse the
+--   input:
+--   
+--   <pre>
+--   fromListWith (++) (reverse [(5,"a"), (5,"b"), (5,"c")]) == fromList [(5, "abc")]
+--   </pre>
+--   
+--   and it is always fast to combine singleton-list values <tt>[v]</tt>
+--   with <tt>fromListWith (++)</tt>, as in:
+--   
+--   <pre>
+--   fromListWith (++) $ reverse $ map (\(k, v) -&gt; (k, [v])) someListOfTuples
 --   </pre>
 fromListWith :: (a -> a -> a) -> [(Key, a)] -> IntMap a
 
@@ -15109,6 +15565,8 @@ fromListWith :: (a -> a -> a) -> [(Key, a)] -> IntMap a
 --   fromListWithKey f [(5,"a"), (5,"b"), (3,"b"), (3,"a"), (5,"c")] == fromList [(3, "3:a|b"), (5, "5:c|5:b|a")]
 --   fromListWithKey f [] == empty
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromListWithKey :: (Key -> a -> a -> a) -> [(Key, a)] -> IntMap a
 
 -- | &lt;math&gt;. Build a map from a list of key/value pairs where the
@@ -15127,6 +15585,8 @@ fromAscList :: [(Key, a)] -> IntMap a
 --   <pre>
 --   fromAscListWith (++) [(3,"b"), (5,"a"), (5,"b")] == fromList [(3, "b"), (5, "ba")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromAscListWith :: (a -> a -> a) -> [(Key, a)] -> IntMap a
 
 -- | &lt;math&gt;. Build a map from a list of key/value pairs where the
@@ -15136,6 +15596,8 @@ fromAscListWith :: (a -> a -> a) -> [(Key, a)] -> IntMap a
 --   <pre>
 --   fromAscListWith (++) [(3,"b"), (5,"a"), (5,"b")] == fromList [(3, "b"), (5, "ba")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromAscListWithKey :: (Key -> a -> a -> a) -> [(Key, a)] -> IntMap a
 
 -- | &lt;math&gt;. Build a map from a list of key/value pairs where the
@@ -15169,6 +15631,8 @@ insert :: Key -> a -> IntMap a -> IntMap a
 --   insertWith (++) 7 "xxx" (fromList [(5,"a"), (3,"b")]) == fromList [(3, "b"), (5, "a"), (7, "xxx")]
 --   insertWith (++) 5 "xxx" empty                         == singleton 5 "xxx"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertWith :: (a -> a -> a) -> Key -> a -> IntMap a -> IntMap a
 
 -- | &lt;math&gt;. Insert with a combining function.
@@ -15186,6 +15650,8 @@ insertWith :: (a -> a -> a) -> Key -> a -> IntMap a -> IntMap a
 --   
 --   If the key exists in the map, this function is lazy in <tt>value</tt>
 --   but strict in the result of <tt>f</tt>.
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertWithKey :: (Key -> a -> a -> a) -> Key -> a -> IntMap a -> IntMap a
 
 -- | &lt;math&gt;. The expression (<tt><a>insertLookupWithKey</a> f k x
@@ -15208,6 +15674,8 @@ insertWithKey :: (Key -> a -> a -> a) -> Key -> a -> IntMap a -> IntMap a
 --   insertLookup 5 "x" (fromList [(5,"a"), (3,"b")]) == (Just "a", fromList [(3, "b"), (5, "x")])
 --   insertLookup 7 "x" (fromList [(5,"a"), (3,"b")]) == (Nothing,  fromList [(3, "b"), (5, "a"), (7, "x")])
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertLookupWithKey :: (Key -> a -> a -> a) -> Key -> a -> IntMap a -> (Maybe a, IntMap a)
 
 -- | &lt;math&gt;. Delete a key and its value from the map. When the key is
@@ -15432,6 +15900,8 @@ union :: IntMap a -> IntMap a -> IntMap a
 --   <pre>
 --   unionWith (++) (fromList [(5, "a"), (3, "b")]) (fromList [(5, "A"), (7, "C")]) == fromList [(3, "b"), (5, "aA"), (7, "C")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 unionWith :: (a -> a -> a) -> IntMap a -> IntMap a -> IntMap a
 
 -- | &lt;math&gt;. The union with a combining function.
@@ -15440,6 +15910,8 @@ unionWith :: (a -> a -> a) -> IntMap a -> IntMap a -> IntMap a
 --   let f key left_value right_value = (show key) ++ ":" ++ left_value ++ "|" ++ right_value
 --   unionWithKey f (fromList [(5, "a"), (3, "b")]) (fromList [(5, "A"), (7, "C")]) == fromList [(3, "b"), (5, "5:a|A"), (7, "C")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 unionWithKey :: (Key -> a -> a -> a) -> IntMap a -> IntMap a -> IntMap a
 
 -- | The union of a list of maps.
@@ -15671,6 +16143,8 @@ mapKeys :: (Key -> Key) -> IntMap a -> IntMap a
 --   mapKeysWith (++) (\ _ -&gt; 1) (fromList [(1,"b"), (2,"a"), (3,"d"), (4,"c")]) == singleton 1 "cdab"
 --   mapKeysWith (++) (\ _ -&gt; 3) (fromList [(1,"b"), (2,"a"), (3,"d"), (4,"c")]) == singleton 3 "cdab"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 mapKeysWith :: (a -> a -> a) -> (Key -> Key) -> IntMap a -> IntMap a
 
 -- | &lt;math&gt;. <tt><a>mapKeysMonotonic</a> f s == <a>mapKeys</a> f
@@ -16315,7 +16789,7 @@ merge :: SimpleWhenMissing a c -> SimpleWhenMissing b c -> SimpleWhenMatched a b
 --   zipWithMaybeMatched :: (k -&gt; x -&gt; y -&gt; Maybe z)
 --                       -&gt; SimpleWhenMatched k x y z
 --   </pre>
-zipWithMaybeMatched :: Applicative f => (Key -> x -> y -> Maybe z) -> WhenMatched f x y z
+zipWithMaybeMatched :: forall (f :: Type -> Type) x y z. Applicative f => (Key -> x -> y -> Maybe z) -> WhenMatched f x y z
 
 -- | When a key is found in both maps, apply a function to the key and
 --   values and use the result in the merged map.
@@ -16324,7 +16798,7 @@ zipWithMaybeMatched :: Applicative f => (Key -> x -> y -> Maybe z) -> WhenMatche
 --   zipWithMatched :: (k -&gt; x -&gt; y -&gt; z)
 --                  -&gt; SimpleWhenMatched k x y z
 --   </pre>
-zipWithMatched :: Applicative f => (Key -> x -> y -> z) -> WhenMatched f x y z
+zipWithMatched :: forall (f :: Type -> Type) x y z. Applicative f => (Key -> x -> y -> z) -> WhenMatched f x y z
 
 -- | Map over the entries whose keys are missing from the other map,
 --   optionally removing some. This is the most powerful
@@ -16341,7 +16815,7 @@ zipWithMatched :: Applicative f => (Key -> x -> y -> z) -> WhenMatched f x y z
 --   
 --   but <tt>mapMaybeMissing</tt> uses fewer unnecessary <a>Applicative</a>
 --   operations.
-mapMaybeMissing :: Applicative f => (Key -> x -> Maybe y) -> WhenMissing f x y
+mapMaybeMissing :: forall (f :: Type -> Type) x y. Applicative f => (Key -> x -> Maybe y) -> WhenMissing f x y
 
 -- | Drop all the entries whose keys are missing from the other map.
 --   
@@ -16354,7 +16828,7 @@ mapMaybeMissing :: Applicative f => (Key -> x -> Maybe y) -> WhenMissing f x y
 --   </pre>
 --   
 --   but <tt>dropMissing</tt> is much faster.
-dropMissing :: Applicative f => WhenMissing f x y
+dropMissing :: forall (f :: Type -> Type) x y. Applicative f => WhenMissing f x y
 
 -- | Preserve, unchanged, the entries whose keys are missing from the other
 --   map.
@@ -16368,7 +16842,7 @@ dropMissing :: Applicative f => WhenMissing f x y
 --   </pre>
 --   
 --   but <tt>preserveMissing</tt> is much faster.
-preserveMissing :: Applicative f => WhenMissing f x x
+preserveMissing :: forall (f :: Type -> Type) x. Applicative f => WhenMissing f x x
 
 -- | Map over the entries whose keys are missing from the other map.
 --   
@@ -16381,7 +16855,7 @@ preserveMissing :: Applicative f => WhenMissing f x x
 --   </pre>
 --   
 --   but <tt>mapMissing</tt> is somewhat faster.
-mapMissing :: Applicative f => (Key -> x -> y) -> WhenMissing f x y
+mapMissing :: forall (f :: Type -> Type) x y. Applicative f => (Key -> x -> y) -> WhenMissing f x y
 
 -- | Filter the entries whose keys are missing from the other map.
 --   
@@ -16394,7 +16868,7 @@ mapMissing :: Applicative f => (Key -> x -> y) -> WhenMissing f x y
 --   </pre>
 --   
 --   but this should be a little faster.
-filterMissing :: Applicative f => (Key -> x -> Bool) -> WhenMissing f x x
+filterMissing :: forall (f :: Type -> Type) x. Applicative f => (Key -> x -> Bool) -> WhenMissing f x x
 
 -- | A tactic for dealing with keys present in one map but not the other in
 --   <a>merge</a> or <a>mergeA</a>.
@@ -16402,7 +16876,7 @@ filterMissing :: Applicative f => (Key -> x -> Bool) -> WhenMissing f x x
 --   A tactic of type <tt>WhenMissing f k x z</tt> is an abstract
 --   representation of a function of type <tt>Key -&gt; x -&gt; f (Maybe
 --   z)</tt>.
-data WhenMissing f x y
+data WhenMissing (f :: Type -> Type) x y
 
 -- | A tactic for dealing with keys present in both maps in <a>merge</a> or
 --   <a>mergeA</a>.
@@ -16410,7 +16884,7 @@ data WhenMissing f x y
 --   A tactic of type <tt>WhenMatched f x y z</tt> is an abstract
 --   representation of a function of type <tt>Key -&gt; x -&gt; y -&gt; f
 --   (Maybe z)</tt>.
-data WhenMatched f x y z
+data WhenMatched (f :: Type -> Type) x y z
 
 -- | An applicative version of <a>merge</a>.
 --   
@@ -16510,10 +16984,10 @@ traverseMissing :: Applicative f => (Key -> x -> f y) -> WhenMissing f x y
 filterAMissing :: Applicative f => (Key -> x -> f Bool) -> WhenMissing f x x
 
 -- | Map covariantly over a <tt><a>WhenMissing</a> f k x</tt>.
-mapWhenMissing :: Functor f => (a -> b) -> WhenMissing f x a -> WhenMissing f x b
+mapWhenMissing :: forall (f :: Type -> Type) a b x. Functor f => (a -> b) -> WhenMissing f x a -> WhenMissing f x b
 
 -- | Map covariantly over a <tt><a>WhenMatched</a> f k x y</tt>.
-mapWhenMatched :: Functor f => (a -> b) -> WhenMatched f x y a -> WhenMatched f x y b
+mapWhenMatched :: forall (f :: Type -> Type) a b x y. Functor f => (a -> b) -> WhenMatched f x y a -> WhenMatched f x y b
 
 -- | Along with zipWithMaybeAMatched, witnesses the isomorphism between
 --   <tt>WhenMatched f x y z</tt> and <tt>Key -&gt; x -&gt; y -&gt; f
@@ -16620,12 +17094,56 @@ fromSet :: (Key -> a) -> IntSet -> IntMap a
 --   </pre>
 fromList :: [(Key, a)] -> IntMap a
 
--- | &lt;math&gt;. Create a map from a list of key/value pairs with a
+-- | &lt;math&gt;. Build a map from a list of key/value pairs with a
 --   combining function. See also <a>fromAscListWith</a>.
 --   
 --   <pre>
---   fromListWith (++) [(5,"a"), (5,"b"), (3,"b"), (3,"a"), (5,"c")] == fromList [(3, "ab"), (5, "cba")]
+--   fromListWith (++) [(5,"a"), (5,"b"), (3,"x"), (5,"c")] == fromList [(3, "x"), (5, "cba")]
 --   fromListWith (++) [] == empty
+--   </pre>
+--   
+--   Note the reverse ordering of <tt>"cba"</tt> in the example.
+--   
+--   The symmetric combining function <tt>f</tt> is applied in a left-fold
+--   over the list, as <tt>f new old</tt>.
+--   
+--   <h3>Performance</h3>
+--   
+--   You should ensure that the given <tt>f</tt> is fast with this order of
+--   arguments.
+--   
+--   Symmetric functions may be slow in one order, and fast in another. For
+--   the common case of collecting values of matching keys in a list, as
+--   above:
+--   
+--   The complexity of <tt>(++) a b</tt> is &lt;math&gt;, so it is fast
+--   when given a short list as its first argument. Thus:
+--   
+--   <pre>
+--   fromListWith       (++)  (replicate 1000000 (3, "x"))   -- O(n),  fast
+--   fromListWith (flip (++)) (replicate 1000000 (3, "x"))   -- O(n²), extremely slow
+--   </pre>
+--   
+--   because they evaluate as, respectively:
+--   
+--   <pre>
+--   fromList [(3, "x" ++ ("x" ++ "xxxxx..xxxxx"))]   -- O(n)
+--   fromList [(3, ("xxxxx..xxxxx" ++ "x") ++ "x")]   -- O(n²)
+--   </pre>
+--   
+--   Thus, to get good performance with an operation like <tt>(++)</tt>
+--   while also preserving the same order as in the input list, reverse the
+--   input:
+--   
+--   <pre>
+--   fromListWith (++) (reverse [(5,"a"), (5,"b"), (5,"c")]) == fromList [(5, "abc")]
+--   </pre>
+--   
+--   and it is always fast to combine singleton-list values <tt>[v]</tt>
+--   with <tt>fromListWith (++)</tt>, as in:
+--   
+--   <pre>
+--   fromListWith (++) $ reverse $ map (\(k, v) -&gt; (k, [v])) someListOfTuples
 --   </pre>
 fromListWith :: (a -> a -> a) -> [(Key, a)] -> IntMap a
 
@@ -16637,6 +17155,8 @@ fromListWith :: (a -> a -> a) -> [(Key, a)] -> IntMap a
 --   fromListWithKey f [(5,"a"), (5,"b"), (3,"b"), (3,"a"), (5,"c")] == fromList [(3, "3:a|b"), (5, "5:c|5:b|a")]
 --   fromListWithKey f [] == empty
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromListWithKey :: (Key -> a -> a -> a) -> [(Key, a)] -> IntMap a
 
 -- | &lt;math&gt;. Build a map from a list of key/value pairs where the
@@ -16655,6 +17175,8 @@ fromAscList :: [(Key, a)] -> IntMap a
 --   <pre>
 --   fromAscListWith (++) [(3,"b"), (5,"a"), (5,"b")] == fromList [(3, "b"), (5, "ba")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromAscListWith :: (a -> a -> a) -> [(Key, a)] -> IntMap a
 
 -- | &lt;math&gt;. Build a map from a list of key/value pairs where the
@@ -16665,6 +17187,8 @@ fromAscListWith :: (a -> a -> a) -> [(Key, a)] -> IntMap a
 --   let f key new_value old_value = (show key) ++ ":" ++ new_value ++ "|" ++ old_value
 --   fromAscListWithKey f [(3,"b"), (5,"a"), (5,"b")] == fromList [(3, "b"), (5, "5:b|a")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 fromAscListWithKey :: (Key -> a -> a -> a) -> [(Key, a)] -> IntMap a
 
 -- | &lt;math&gt;. Build a map from a list of key/value pairs where the
@@ -16698,6 +17222,8 @@ insert :: Key -> a -> IntMap a -> IntMap a
 --   insertWith (++) 7 "xxx" (fromList [(5,"a"), (3,"b")]) == fromList [(3, "b"), (5, "a"), (7, "xxx")]
 --   insertWith (++) 5 "xxx" empty                         == singleton 5 "xxx"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertWith :: (a -> a -> a) -> Key -> a -> IntMap a -> IntMap a
 
 -- | &lt;math&gt;. Insert with a combining function.
@@ -16712,6 +17238,8 @@ insertWith :: (a -> a -> a) -> Key -> a -> IntMap a -> IntMap a
 --   insertWithKey f 7 "xxx" (fromList [(5,"a"), (3,"b")]) == fromList [(3, "b"), (5, "a"), (7, "xxx")]
 --   insertWithKey f 5 "xxx" empty                         == singleton 5 "xxx"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertWithKey :: (Key -> a -> a -> a) -> Key -> a -> IntMap a -> IntMap a
 
 -- | &lt;math&gt;. The expression (<tt><a>insertLookupWithKey</a> f k x
@@ -16734,6 +17262,8 @@ insertWithKey :: (Key -> a -> a -> a) -> Key -> a -> IntMap a -> IntMap a
 --   insertLookup 5 "x" (fromList [(5,"a"), (3,"b")]) == (Just "a", fromList [(3, "b"), (5, "x")])
 --   insertLookup 7 "x" (fromList [(5,"a"), (3,"b")]) == (Nothing,  fromList [(3, "b"), (5, "a"), (7, "x")])
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 insertLookupWithKey :: (Key -> a -> a -> a) -> Key -> a -> IntMap a -> (Maybe a, IntMap a)
 
 -- | &lt;math&gt;. Delete a key and its value from the map. When the key is
@@ -16961,6 +17491,8 @@ union :: IntMap a -> IntMap a -> IntMap a
 --   <pre>
 --   unionWith (++) (fromList [(5, "a"), (3, "b")]) (fromList [(5, "A"), (7, "C")]) == fromList [(3, "b"), (5, "aA"), (7, "C")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 unionWith :: (a -> a -> a) -> IntMap a -> IntMap a -> IntMap a
 
 -- | &lt;math&gt;. The union with a combining function.
@@ -16969,6 +17501,8 @@ unionWith :: (a -> a -> a) -> IntMap a -> IntMap a -> IntMap a
 --   let f key left_value right_value = (show key) ++ ":" ++ left_value ++ "|" ++ right_value
 --   unionWithKey f (fromList [(5, "a"), (3, "b")]) (fromList [(5, "A"), (7, "C")]) == fromList [(3, "b"), (5, "5:a|A"), (7, "C")]
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 unionWithKey :: (Key -> a -> a -> a) -> IntMap a -> IntMap a -> IntMap a
 
 -- | The union of a list of maps.
@@ -17200,6 +17734,8 @@ mapKeys :: (Key -> Key) -> IntMap a -> IntMap a
 --   mapKeysWith (++) (\ _ -&gt; 1) (fromList [(1,"b"), (2,"a"), (3,"d"), (4,"c")]) == singleton 1 "cdab"
 --   mapKeysWith (++) (\ _ -&gt; 3) (fromList [(1,"b"), (2,"a"), (3,"d"), (4,"c")]) == singleton 3 "cdab"
 --   </pre>
+--   
+--   Also see the performance note on <a>fromListWith</a>.
 mapKeysWith :: (a -> a -> a) -> (Key -> Key) -> IntMap a -> IntMap a
 
 -- | &lt;math&gt;. <tt><a>mapKeysMonotonic</a> f s == <a>mapKeys</a> f

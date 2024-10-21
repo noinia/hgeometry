@@ -1,34 +1,36 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679420180"><span id="local-6989586621679420181"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
-</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric      #-}</span><span>
-</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Distribution.Types.PackageId</span><span>
-</span><span id="line-4"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier">PackageIdentifier</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-5"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageId"><span class="hs-identifier">PackageId</span></a></span><span>
-</span><span id="line-6"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-7"></span><span>
-</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
-</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/Prelude.html#/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-10"></span><span>
-</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Parsec.html"><span class="hs-identifier">Distribution.Parsec</span></a></span><span>            </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Parsec.html#Parsec"><span class="hs-identifier">Parsec</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#simpleParsec"><span class="hs-identifier">simpleParsec</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Pretty.html"><span class="hs-identifier">Distribution.Pretty</span></a></span><span>
-</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html"><span class="hs-identifier">Distribution.Types.PackageName</span></a></span><span>
-</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Version.html"><span class="hs-identifier">Distribution.Version</span></a></span><span>           </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Version.html#Version"><span class="hs-identifier">Version</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Types.Version.html#nullVersion"><span class="hs-identifier">nullVersion</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-15"></span><span>
-</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/Data.List.NonEmpty.html#/Data.List.NonEmpty.html"><span class="hs-identifier">Data.List.NonEmpty</span></a></span><span>              </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NE</span></span><span>
-</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Distribution.Compat.CharParsing.html"><span class="hs-identifier">Distribution.Compat.CharParsing</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">P</span></span><span>
-</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6/src/Text.PrettyPrint.html#/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span>                </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Disp</span></span><span>
-</span><span id="line-19"></span><span>
-</span><span id="line-20"></span><span class="annot"><span class="hs-comment">-- | Type alias so we can use the shorter name PackageId.</span></span><span>
-</span><span id="line-21"></span><span class="hs-keyword">type</span><span> </span><span id="PackageId"><span class="annot"><a href="Distribution.Types.PackageId.html#PackageId"><span class="hs-identifier hs-var">PackageId</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span><span>
-</span><span id="line-22"></span><span>
-</span><span id="line-23"></span><span class="annot"><span class="hs-comment">-- | The name and version of a package.</span></span><span>
-</span><span id="line-24"></span><span class="hs-keyword">data</span><span> </span><span id="PackageIdentifier"><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-var">PackageIdentifier</span></a></span></span><span>
-</span><span id="line-25"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span id="PackageIdentifier"><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-var">PackageIdentifier</span></a></span></span><span> </span><span class="hs-special">{</span><span>
-</span><span id="line-26"></span><span>        </span><span id="pkgName"><span class="annot"><span class="annottext">PackageIdentifier -&gt; PackageName
-</span><a href="Distribution.Types.PackageId.html#pkgName"><span class="hs-identifier hs-var hs-var">pkgName</span></a></span></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-comment">-- ^The name of this package, eg. foo</span></span><span>
-</span><span id="line-27"></span><span>        </span><span id="pkgVersion"><span class="annot"><span class="annottext">PackageIdentifier -&gt; Version
-</span><a href="Distribution.Types.PackageId.html#pkgVersion"><span class="hs-identifier hs-var hs-var">pkgVersion</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.Version.html#Version"><span class="hs-identifier hs-type">Version</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^the version of this package, eg 1.2</span></span><span>
-</span><span id="line-28"></span><span>     </span><span class="hs-special">}</span><span>
-</span><span id="line-29"></span><span>     </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679420189"><span id="local-6989586621679420191"><span class="annot"><span class="annottext">(forall x. PackageIdentifier -&gt; Rep PackageIdentifier x)
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679494823"><span id="local-6989586621679494824"></span></span><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE DeriveGeneric #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Distribution.Types.PackageId.html"><span class="hs-identifier">Distribution.Types.PackageId</span></a></span><span>
+</span><span id="line-5"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier">PackageIdentifier</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-6"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageId"><span class="hs-identifier">PackageId</span></a></span><span>
+</span><span id="line-7"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Compat.Prelude.html"><span class="hs-identifier">Distribution.Compat.Prelude</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Prelude.html/Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-11"></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Parsec.html"><span class="hs-identifier">Distribution.Parsec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Parsec.html#Parsec"><span class="hs-identifier">Parsec</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#simpleParsec"><span class="hs-identifier">simpleParsec</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Pretty.html"><span class="hs-identifier">Distribution.Pretty</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html"><span class="hs-identifier">Distribution.Types.PackageName</span></a></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Distribution.Version.html"><span class="hs-identifier">Distribution.Version</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.Version.html#Version"><span class="hs-identifier">Version</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Distribution.Types.Version.html#nullVersion"><span class="hs-identifier">nullVersion</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.List.NonEmpty.html/Data.List.NonEmpty.html"><span class="hs-identifier">Data.List.NonEmpty</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NE</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Distribution.Compat.CharParsing.html"><span class="hs-identifier">Distribution.Compat.CharParsing</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">P</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.html/Text.PrettyPrint.html"><span class="hs-identifier">Text.PrettyPrint</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Disp</span></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="annot"><span class="hs-comment">-- | Type alias so we can use the shorter name PackageId.</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">type</span><span> </span><span id="PackageId"><span class="annot"><a href="Distribution.Types.PackageId.html#PackageId"><span class="hs-identifier hs-var">PackageId</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="annot"><span class="hs-comment">-- | The name and version of a package.</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">data</span><span> </span><span id="PackageIdentifier"><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-var">PackageIdentifier</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PackageIdentifier"><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-var">PackageIdentifier</span></a></span></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="pkgName"><span class="annot"><span class="annottext">PackageIdentifier -&gt; PackageName
+</span><a href="Distribution.Types.PackageId.html#pkgName"><span class="hs-identifier hs-var hs-var">pkgName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.PackageName.html#PackageName"><span class="hs-identifier hs-type">PackageName</span></a></span><span>
+</span><span id="line-27"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ The name of this package, eg. foo</span></span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="pkgVersion"><span class="annot"><span class="annottext">PackageIdentifier -&gt; Version
+</span><a href="Distribution.Types.PackageId.html#pkgVersion"><span class="hs-identifier hs-var hs-var">pkgVersion</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Distribution.Types.Version.html#Version"><span class="hs-identifier hs-type">Version</span></a></span><span>
+</span><span id="line-29"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ the version of this package, eg 1.2</span></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679494832"><span id="local-6989586621679494834"><span class="annot"><span class="annottext">(forall x. PackageIdentifier -&gt; Rep PackageIdentifier x)
 -&gt; (forall x. Rep PackageIdentifier x -&gt; PackageIdentifier)
 -&gt; Generic PackageIdentifier
 forall x. Rep PackageIdentifier x -&gt; PackageIdentifier
@@ -39,7 +41,7 @@ $cfrom :: forall x. PackageIdentifier -&gt; Rep PackageIdentifier x
 from :: forall x. PackageIdentifier -&gt; Rep PackageIdentifier x
 $cto :: forall x. Rep PackageIdentifier x -&gt; PackageIdentifier
 to :: forall x. Rep PackageIdentifier x -&gt; PackageIdentifier
-</span><a href="../../base-4.18.2.0/src/GHC.Generics.html#Generic/GHC.Generics.html#Generic"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></a></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679420195"><span id="local-6989586621679420199"><span id="local-6989586621679420202"><span id="local-6989586621679420216"><span class="annot"><span class="annottext">ReadPrec [PackageIdentifier]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679494840"><span id="local-6989586621679494844"><span id="local-6989586621679494847"><span id="local-6989586621679494861"><span class="annot"><span class="annottext">ReadPrec [PackageIdentifier]
 ReadPrec PackageIdentifier
 Int -&gt; ReadS PackageIdentifier
 ReadS [PackageIdentifier]
@@ -59,7 +61,7 @@ $creadPrec :: ReadPrec PackageIdentifier
 readPrec :: ReadPrec PackageIdentifier
 $creadListPrec :: ReadPrec [PackageIdentifier]
 readListPrec :: ReadPrec [PackageIdentifier]
-</span><a href="../../base-4.18.2.0/src/GHC.Read.html#Read/GHC.Read.html#Read"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></a></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679420220"><span id="local-6989586621679420228"><span id="local-6989586621679420232"><span class="annot"><span class="annottext">Int -&gt; PackageIdentifier -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679494868"><span id="local-6989586621679494876"><span id="local-6989586621679494880"><span class="annot"><span class="annottext">Int -&gt; PackageIdentifier -&gt; ShowS
 [PackageIdentifier] -&gt; ShowS
 PackageIdentifier -&gt; String
 (Int -&gt; PackageIdentifier -&gt; ShowS)
@@ -74,7 +76,7 @@ $cshow :: PackageIdentifier -&gt; String
 show :: PackageIdentifier -&gt; String
 $cshowList :: [PackageIdentifier] -&gt; ShowS
 showList :: [PackageIdentifier] -&gt; ShowS
-</span><a href="../../base-4.18.2.0/src/GHC.Show.html#Show/GHC.Show.html#Show"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></a></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679420236"><span id="local-6989586621679420242"><span class="annot"><span class="annottext">PackageIdentifier -&gt; PackageIdentifier -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679494885"><span id="local-6989586621679494891"><span class="annot"><span class="annottext">PackageIdentifier -&gt; PackageIdentifier -&gt; Bool
 (PackageIdentifier -&gt; PackageIdentifier -&gt; Bool)
 -&gt; (PackageIdentifier -&gt; PackageIdentifier -&gt; Bool)
 -&gt; Eq PackageIdentifier
@@ -83,7 +85,7 @@ $c== :: PackageIdentifier -&gt; PackageIdentifier -&gt; Bool
 == :: PackageIdentifier -&gt; PackageIdentifier -&gt; Bool
 $c/= :: PackageIdentifier -&gt; PackageIdentifier -&gt; Bool
 /= :: PackageIdentifier -&gt; PackageIdentifier -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679420249"><span id="local-6989586621679420255"><span id="local-6989586621679420259"><span id="local-6989586621679420263"><span id="local-6989586621679420266"><span id="local-6989586621679420269"><span id="local-6989586621679420272"><span class="annot"><span class="annottext">Eq PackageIdentifier
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679494898"><span id="local-6989586621679494904"><span id="local-6989586621679494908"><span id="local-6989586621679494912"><span id="local-6989586621679494915"><span id="local-6989586621679494918"><span id="local-6989586621679494921"><span class="annot"><span class="annottext">Eq PackageIdentifier
 Eq PackageIdentifier =&gt;
 (PackageIdentifier -&gt; PackageIdentifier -&gt; Ordering)
 -&gt; (PackageIdentifier -&gt; PackageIdentifier -&gt; Bool)
@@ -120,7 +122,7 @@ $cmax :: PackageIdentifier -&gt; PackageIdentifier -&gt; PackageIdentifier
 max :: PackageIdentifier -&gt; PackageIdentifier -&gt; PackageIdentifier
 $cmin :: PackageIdentifier -&gt; PackageIdentifier -&gt; PackageIdentifier
 min :: PackageIdentifier -&gt; PackageIdentifier -&gt; PackageIdentifier
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/Data.Typeable.Internal.html#Typeable/Data.Typeable.Internal.html#Typeable"><span class="hs-identifier hs-type">Typeable</span></a></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679420278"><span id="local-6989586621679420284"><span id="local-6989586621679420288"><span id="local-6989586621679420290"><span id="local-6989586621679420292"><span id="local-6989586621679420298"><span id="local-6989586621679420303"><span id="local-6989586621679420306"><span id="local-6989586621679420309"><span id="local-6989586621679420312"><span id="local-6989586621679420315"><span id="local-6989586621679420318"><span id="local-6989586621679420323"><span id="local-6989586621679420328"><span class="annot"><span class="annottext">Typeable PackageIdentifier
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Typeable</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679494931"><span id="local-6989586621679494937"><span id="local-6989586621679494941"><span id="local-6989586621679494943"><span id="local-6989586621679494945"><span id="local-6989586621679494951"><span id="local-6989586621679494956"><span id="local-6989586621679494959"><span id="local-6989586621679494962"><span id="local-6989586621679494965"><span id="local-6989586621679494968"><span id="local-6989586621679494971"><span id="local-6989586621679494976"><span id="local-6989586621679494981"><span class="annot"><span class="annottext">Typeable PackageIdentifier
 Typeable PackageIdentifier =&gt;
 (forall (c :: * -&gt; *).
  (forall d b. Data d =&gt; c (d -&gt; b) -&gt; d -&gt; c b)
@@ -307,166 +309,131 @@ gmapMo :: forall (m :: * -&gt; *).
 MonadPlus m =&gt;
 (forall d. Data d =&gt; d -&gt; m d)
 -&gt; PackageIdentifier -&gt; m PackageIdentifier
-</span><a href="../../base-4.18.2.0/src/Data.Data.html#Data/Data.Data.html#Data"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></a></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-30"></span><span>
-</span><span id="line-31"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679420334"><span id="local-6989586621679420341"><span id="local-6989586621679420347"><span class="annot"><a href="../../binary-0.8.9.1/src/Data.Binary.Class.html#Binary/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span></span></span></span><span>
-</span><span id="line-32"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679420377"><span id="local-6989586621679420384"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span></span></span><span>
-</span><span id="line-33"></span><span>
-</span><span id="line-34"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679420421"><span class="annot"><a href="Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-35"></span><span>  </span><span id="local-6989586621679420431"><span class="annot"><span class="annottext">pretty :: PackageIdentifier -&gt; Doc
-</span><a href="#local-6989586621679420431"><span class="hs-identifier hs-var hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span><span> </span><span id="local-6989586621679420433"><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679420433"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679420434"><span class="annot"><span class="annottext">Version
-</span><a href="#local-6989586621679420434"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span>
-</span><span id="line-36"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Version
-</span><a href="#local-6989586621679420434"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Version -&gt; Version -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Data</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679494991"><span id="local-6989586621679494998"><span id="local-6989586621679495004"><span class="annot"><a href="../../binary-0.8.9.2-2c55/src//Data.Binary.Class.html/Data.Binary.Class.html#Binary"><span class="hs-identifier hs-type">Binary</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span></span></span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679495034"><span id="local-6989586621679495041"><span class="annot"><a href="Distribution.Utils.Structured.html#Structured"><span class="hs-identifier hs-type">Structured</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span></span></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679495078"><span class="annot"><a href="Distribution.Pretty.html#Pretty"><span class="hs-identifier hs-type">Pretty</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-37"></span><span>  </span><span id="local-6989586621679495088"><span class="annot"><span class="annottext">pretty :: PackageIdentifier -&gt; Doc
+</span><a href="#local-6989586621679495088"><span class="hs-identifier hs-var hs-var hs-var">pretty</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span><span> </span><span id="local-6989586621679495090"><span class="annot"><span class="annottext">PackageName
+</span><a href="#local-6989586621679495090"><span class="hs-identifier hs-var">n</span></a></span></span><span> </span><span id="local-6989586621679495091"><span class="annot"><span class="annottext">Version
+</span><a href="#local-6989586621679495091"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Version
+</span><a href="#local-6989586621679495091"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Version -&gt; Version -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Version
 </span><a href="Distribution.Types.Version.html#nullVersion"><span class="hs-identifier hs-var">nullVersion</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PackageName -&gt; Doc
 forall a. Pretty a =&gt; a -&gt; Doc
 </span><a href="Distribution.Pretty.html#pretty"><span class="hs-identifier hs-var">pretty</span></a></span><span> </span><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679420433"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-comment">-- if no version, don't show version.</span><span>
-</span><span id="line-37"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#otherwise/GHC.Base.html#otherwise"><span class="hs-identifier hs-var">otherwise</span></a></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PackageName -&gt; Doc
+</span><a href="#local-6989586621679495090"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="hs-comment">-- if no version, don't show version.</span><span>
+</span><span id="line-39"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PackageName -&gt; Doc
 forall a. Pretty a =&gt; a -&gt; Doc
 </span><a href="Distribution.Pretty.html#pretty"><span class="hs-identifier hs-var">pretty</span></a></span><span> </span><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679420433"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
+</span><a href="#local-6989586621679495090"><span class="hs-identifier hs-var">n</span></a></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
 </span><a href="Distribution.Compat.Prelude.html#%3C%3C%3E%3E"><span class="hs-operator hs-var">&lt;&lt;&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Doc
-</span><a href="../../pretty-1.1.3.6/src/Text.PrettyPrint.HughesPJ.html#char/Text.PrettyPrint.HughesPJ.html#char"><span class="hs-identifier hs-var">Disp.char</span></a></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="../../pretty-1.1.3.6-b010/src//Text.PrettyPrint.HughesPJ.html/Text.PrettyPrint.HughesPJ.html#char"><span class="hs-identifier hs-var">Disp.char</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'-'</span></span><span> </span><span class="annot"><span class="annottext">Doc -&gt; Doc -&gt; Doc
 </span><a href="Distribution.Compat.Prelude.html#%3C%3C%3E%3E"><span class="hs-operator hs-var">&lt;&lt;&gt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Version -&gt; Doc
 forall a. Pretty a =&gt; a -&gt; Doc
 </span><a href="Distribution.Pretty.html#pretty"><span class="hs-identifier hs-var">pretty</span></a></span><span> </span><span class="annot"><span class="annottext">Version
-</span><a href="#local-6989586621679420434"><span class="hs-identifier hs-var">v</span></a></span><span>
-</span><span id="line-38"></span><span>
-</span><span id="line-39"></span><span class="hs-comment">-- |</span><span>
-</span><span id="line-40"></span><span class="hs-comment">--</span><span>
-</span><span id="line-41"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;foo-bar-0&quot; :: Maybe PackageIdentifier</span><span>
-</span><span id="line-42"></span><span class="hs-comment">-- Just (PackageIdentifier {pkgName = PackageName &quot;foo-bar&quot;, pkgVersion = mkVersion [0]})</span><span>
-</span><span id="line-43"></span><span class="hs-comment">--</span><span>
-</span><span id="line-44"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;foo-bar&quot; :: Maybe PackageIdentifier</span><span>
-</span><span id="line-45"></span><span class="hs-comment">-- Just (PackageIdentifier {pkgName = PackageName &quot;foo-bar&quot;, pkgVersion = mkVersion []})</span><span>
-</span><span id="line-46"></span><span class="hs-comment">--</span><span>
-</span><span id="line-47"></span><span class="hs-comment">-- /Note:/ Stricter than 'Text' instance</span><span>
+</span><a href="#local-6989586621679495091"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-42"></span><span class="hs-comment">--</span><span>
+</span><span id="line-43"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;foo-bar-0&quot; :: Maybe PackageIdentifier</span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- Just (PackageIdentifier {pkgName = PackageName &quot;foo-bar&quot;, pkgVersion = mkVersion [0]})</span><span>
+</span><span id="line-45"></span><span class="hs-comment">--</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;foo-bar&quot; :: Maybe PackageIdentifier</span><span>
+</span><span id="line-47"></span><span class="hs-comment">-- Just (PackageIdentifier {pkgName = PackageName &quot;foo-bar&quot;, pkgVersion = mkVersion []})</span><span>
 </span><span id="line-48"></span><span class="hs-comment">--</span><span>
-</span><span id="line-49"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;foo-bar-0-0&quot; :: Maybe PackageIdentifier</span><span>
-</span><span id="line-50"></span><span class="hs-comment">-- Nothing</span><span>
-</span><span id="line-51"></span><span class="hs-comment">--</span><span>
-</span><span id="line-52"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;foo-bar.0&quot; :: Maybe PackageIdentifier</span><span>
-</span><span id="line-53"></span><span class="hs-comment">-- Nothing</span><span>
-</span><span id="line-54"></span><span class="hs-comment">--</span><span>
-</span><span id="line-55"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;foo-bar.4-2&quot; :: Maybe PackageIdentifier</span><span>
-</span><span id="line-56"></span><span class="hs-comment">-- Nothing</span><span>
-</span><span id="line-57"></span><span class="hs-comment">--</span><span>
-</span><span id="line-58"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;1.2.3&quot; :: Maybe PackageIdentifier</span><span>
-</span><span id="line-59"></span><span class="hs-comment">-- Nothing</span><span>
-</span><span id="line-60"></span><span class="hs-comment">--</span><span>
-</span><span id="line-61"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#Parsec"><span class="hs-identifier hs-type">Parsec</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-62"></span><span>  </span><span id="local-6989586621679420476"><span class="annot"><span class="annottext">parsec :: forall (m :: * -&gt; *). CabalParsing m =&gt; m PackageIdentifier
-</span><a href="#local-6989586621679420476"><span class="hs-identifier hs-var hs-var hs-var hs-var">parsec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-63"></span><span>      </span><span id="local-6989586621679420478"><span class="annot"><span class="annottext">NonEmpty String
-</span><a href="#local-6989586621679420478"><span class="hs-identifier hs-var">xs'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m String -&gt; m Char -&gt; m (NonEmpty String)
+</span><span id="line-49"></span><span class="hs-comment">-- /Note:/ Stricter than 'Text' instance</span><span>
+</span><span id="line-50"></span><span class="hs-comment">--</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;foo-bar-0-0&quot; :: Maybe PackageIdentifier</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- Nothing</span><span>
+</span><span id="line-53"></span><span class="hs-comment">--</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;foo-bar.0&quot; :: Maybe PackageIdentifier</span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- Nothing</span><span>
+</span><span id="line-56"></span><span class="hs-comment">--</span><span>
+</span><span id="line-57"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;foo-bar.4-2&quot; :: Maybe PackageIdentifier</span><span>
+</span><span id="line-58"></span><span class="hs-comment">-- Nothing</span><span>
+</span><span id="line-59"></span><span class="hs-comment">--</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- &gt;&gt;&gt; simpleParsec &quot;1.2.3&quot; :: Maybe PackageIdentifier</span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- Nothing</span><span>
+</span><span id="line-62"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#Parsec"><span class="hs-identifier hs-type">Parsec</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-63"></span><span>  </span><span id="local-6989586621679495133"><span class="annot"><span class="annottext">parsec :: forall (m :: * -&gt; *). CabalParsing m =&gt; m PackageIdentifier
+</span><a href="#local-6989586621679495133"><span class="hs-identifier hs-var hs-var hs-var">parsec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-64"></span><span>    </span><span id="local-6989586621679495135"><span class="annot"><a href="#local-6989586621679495135"><span class="hs-identifier hs-var">xs'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">m String -&gt; m Char -&gt; m (NonEmpty String)
 forall (m :: * -&gt; *) a sep.
 Alternative m =&gt;
 m a -&gt; m sep -&gt; m (NonEmpty a)
 </span><a href="Distribution.Compat.Parsing.html#sepByNonEmpty"><span class="hs-identifier hs-var">P.sepByNonEmpty</span></a></span><span> </span><span class="annot"><span class="annottext">m String
-</span><a href="#local-6989586621679420480"><span class="hs-identifier hs-var">component</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; m Char
+</span><a href="#local-6989586621679495137"><span class="hs-identifier hs-var">component</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; m Char
 forall (m :: * -&gt; *). CharParsing m =&gt; Char -&gt; m Char
 </span><a href="Distribution.Compat.CharParsing.html#char"><span class="hs-identifier hs-var">P.char</span></a></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'-'</span></span><span class="hs-special">)</span><span>
-</span><span id="line-64"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621679420482"><span class="annot"><span class="annottext">Version
-</span><a href="#local-6989586621679420482"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679420483"><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679420483"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">String -&gt; Maybe Version
-forall a. Parsec a =&gt; String -&gt; Maybe a
-</span><a href="Distribution.Parsec.html#simpleParsec"><span class="hs-identifier hs-var">simpleParsec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonEmpty String -&gt; String
-forall a. NonEmpty a -&gt; a
-</span><a href="../../base-4.18.2.0/src/Data.List.NonEmpty.html#last/Data.List.NonEmpty.html#last"><span class="hs-identifier hs-var">NE.last</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty String
-</span><a href="#local-6989586621679420478"><span class="hs-identifier hs-var">xs'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-65"></span><span>          </span><span class="annot"><span class="annottext">Maybe Version
-</span><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Nothing/GHC.Maybe.html#Nothing"><span class="hs-identifier hs-var">Nothing</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Version, [String]) -&gt; m (Version, [String])
+</span><span id="line-65"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679495139"><span class="annot"><a href="#local-6989586621679495139"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679495140"><span class="annot"><a href="#local-6989586621679495140"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="Distribution.Parsec.html#simpleParsec"><span class="hs-identifier hs-type">simpleParsec</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../base-4.20.0.0-4014/src//Data.List.NonEmpty.html/Data.List.NonEmpty.html#last"><span class="hs-identifier hs-type">NE.last</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679495135"><span class="hs-identifier hs-type">xs'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-66"></span><span>      </span><span class="annot"><span class="annottext">Maybe Version
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Version, [String]) -&gt; m (Version, [String])
 forall a. a -&gt; m a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#return/GHC.Base.html#return"><span class="hs-identifier hs-var">return</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Version
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Version
 </span><a href="Distribution.Types.Version.html#nullVersion"><span class="hs-identifier hs-var">nullVersion</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">NonEmpty String -&gt; [String]
 forall a. NonEmpty a -&gt; [a]
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
-</span><a href="../../base-4.18.2.0/src/Data.Foldable.html#toList/Data.Foldable.html#toList"><span class="hs-identifier hs-var">toList</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty String
-</span><a href="#local-6989586621679420478"><span class="hs-identifier hs-var">xs'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- all components are version</span><span>
-</span><span id="line-66"></span><span>          </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Just/GHC.Maybe.html#Just"><span class="hs-identifier hs-type">Just</span></a></span><span> </span><span id="local-6989586621679420486"><span class="annot"><span class="annottext">Version
-</span><a href="#local-6989586621679420486"><span class="hs-identifier hs-var">v</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Version, [String]) -&gt; m (Version, [String])
+</span><span class="hs-identifier hs-var">toList</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty String
+</span><a href="#local-6989586621679495135"><span class="hs-identifier hs-var">xs'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- all components are version</span><span>
+</span><span id="line-67"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679495143"><span class="annot"><span class="annottext">Version
+</span><a href="#local-6989586621679495143"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Version, [String]) -&gt; m (Version, [String])
 forall a. a -&gt; m a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#return/GHC.Base.html#return"><span class="hs-identifier hs-var">return</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Version
-</span><a href="#local-6989586621679420486"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">NonEmpty String -&gt; [String]
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Version
+</span><a href="#local-6989586621679495143"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">NonEmpty String -&gt; [String]
 forall a. NonEmpty a -&gt; [a]
-</span><a href="../../base-4.18.2.0/src/Data.List.NonEmpty.html#init/Data.List.NonEmpty.html#init"><span class="hs-identifier hs-var">NE.init</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty String
-</span><a href="#local-6989586621679420478"><span class="hs-identifier hs-var">xs'</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-67"></span><span>      </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
-</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[String] -&gt; Bool
-forall a. [a] -&gt; Bool
-forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
-</span><a href="../../base-4.18.2.0/src/Data.Foldable.html#null/Data.Foldable.html#null"><span class="hs-identifier hs-var">null</span></a></span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679420483"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
-</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Bool) -&gt; [String] -&gt; Bool
+</span><a href="../../base-4.20.0.0-4014/src//Data.List.NonEmpty.html/Data.List.NonEmpty.html#init"><span class="hs-identifier hs-var">NE.init</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty String
+</span><a href="#local-6989586621679495135"><span class="hs-identifier hs-var">xs'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span>    </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="hs-identifier hs-type">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">null</span></span><span> </span><span class="annot"><a href="#local-6989586621679495140"><span class="hs-identifier hs-type">xs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-type">&amp;&amp;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">all</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679495149"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679495149"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; String -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Bool
-</span><a href="../../base-4.18.2.0/src/Data.Foldable.html#all/Data.Foldable.html#all"><span class="hs-identifier hs-var">all</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679420492"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679420492"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>  </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; String -&gt; Bool
-forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Bool
-</span><a href="../../base-4.18.2.0/src/Data.Foldable.html#all/Data.Foldable.html#all"><span class="hs-identifier hs-var">all</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><span class="hs-identifier hs-var">all</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'.'</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679420492"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="#local-6989586621679495149"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
 </span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; String -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Bool
-</span><a href="../../base-4.18.2.0/src/Data.Foldable.html#all/Data.Foldable.html#all"><span class="hs-identifier hs-var">all</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
-</span><a href="../../base-4.18.2.0/src/GHC.Unicode.html#isDigit/GHC.Unicode.html#isDigit"><span class="hs-identifier hs-var">isDigit</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679420492"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679420483"><span class="hs-identifier hs-var">xs</span></a></span><span>
-</span><span id="line-68"></span><span>      </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">PackageIdentifier -&gt; m PackageIdentifier
-forall a. a -&gt; m a
-forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#return/GHC.Base.html#return"><span class="hs-identifier hs-var">return</span></a></span><span> </span><span class="annot"><span class="annottext">(PackageIdentifier -&gt; m PackageIdentifier)
--&gt; PackageIdentifier -&gt; m PackageIdentifier
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#%24/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">PackageName -&gt; Version -&gt; PackageIdentifier
-</span><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-var">PackageIdentifier</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; PackageName
-</span><a href="Distribution.Types.PackageName.html#mkPackageName"><span class="hs-identifier hs-var">mkPackageName</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; String
-forall a. [a] -&gt; [[a]] -&gt; [a]
-</span><a href="../../base-4.18.2.0/src/Data.OldList.html#intercalate/Data.OldList.html#intercalate"><span class="hs-identifier hs-var">intercalate</span></a></span><span>  </span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;-&quot;</span></span><span> </span><span class="annot"><span class="annottext">[String]
-</span><a href="#local-6989586621679420483"><span class="hs-identifier hs-var">xs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Version
-</span><a href="#local-6989586621679420482"><span class="hs-identifier hs-var">v</span></a></span><span>
-</span><span id="line-69"></span><span>      </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">String -&gt; m PackageIdentifier
-forall a. String -&gt; m a
-forall (m :: * -&gt; *) a. MonadFail m =&gt; String -&gt; m a
-</span><a href="../../base-4.18.2.0/src/Control.Monad.Fail.html#fail/Control.Monad.Fail.html#fail"><span class="hs-identifier hs-var">fail</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><span class="hs-string">&quot;all digits or a dot in a portion of package name&quot;</span></span><span>
-</span><span id="line-70"></span><span>    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-71"></span><span>      </span><span id="local-6989586621679420480"><span class="annot"><span class="annottext">component :: m String
-</span><a href="#local-6989586621679420480"><span class="hs-identifier hs-var hs-var">component</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; m String
+</span><span class="hs-identifier hs-var">all</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
+</span><span class="hs-identifier hs-var">isDigit</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679495149"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679495140"><span class="hs-identifier hs-type">xs</span></a></span><span>
+</span><span id="line-69"></span><span>      </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">$</span></span><span> </span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.PackageName.html#mkPackageName"><span class="hs-identifier hs-type">mkPackageName</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">intercalate</span></span><span> </span><span class="annot"><span class="hs-string">&quot;-&quot;</span></span><span> </span><span class="annot"><a href="#local-6989586621679495140"><span class="hs-identifier hs-type">xs</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679495139"><span class="hs-identifier hs-type">v</span></a></span><span>
+</span><span id="line-70"></span><span>      </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="hs-identifier hs-type">fail</span></span><span> </span><span class="annot"><span class="hs-string">&quot;all digits or a dot in a portion of package name&quot;</span></span><span>
+</span><span id="line-71"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-72"></span><span>      </span><span id="local-6989586621679495137"><span class="annot"><span class="annottext">component :: m String
+</span><a href="#local-6989586621679495137"><span class="hs-identifier hs-var hs-var">component</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; m String
 forall (m :: * -&gt; *). CharParsing m =&gt; (Char -&gt; Bool) -&gt; m String
-</span><a href="Distribution.Compat.CharParsing.html#munch1"><span class="hs-identifier hs-var">P.munch1</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679420504"><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679420504"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>  </span><span class="annot"><span class="annottext">Char -&gt; Bool
-</span><a href="../../base-4.18.2.0/src/GHC.Unicode.html#isAlphaNum/GHC.Unicode.html#isAlphaNum"><span class="hs-identifier hs-var">isAlphaNum</span></a></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679420504"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><a href="Distribution.Compat.CharParsing.html#munch1"><span class="hs-identifier hs-var">P.munch1</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679495161"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679495161"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
+</span><span class="hs-identifier hs-var">isAlphaNum</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679495161"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Char
-</span><a href="#local-6989586621679420504"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
+</span><a href="#local-6989586621679495161"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Char -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">'.'</span></span><span class="hs-special">)</span><span>
-</span><span id="line-72"></span><span>
-</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.4.8.1/src/Control.DeepSeq.html#NFData/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-74"></span><span>    </span><span id="local-6989586621679420514"><span class="annot"><span class="annottext">rnf :: PackageIdentifier -&gt; ()
-</span><a href="#local-6989586621679420514"><span class="hs-identifier hs-var hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span><span> </span><span id="local-6989586621679420516"><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679420516"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679420517"><span class="annot"><span class="annottext">Version
-</span><a href="#local-6989586621679420517"><span class="hs-identifier hs-var">version</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PackageName -&gt; ()
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#NFData"><span class="hs-identifier hs-type">NFData</span></a></span><span> </span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-75"></span><span>  </span><span id="local-6989586621679495171"><span class="annot"><span class="annottext">rnf :: PackageIdentifier -&gt; ()
+</span><a href="#local-6989586621679495171"><span class="hs-identifier hs-var hs-var hs-var">rnf</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Distribution.Types.PackageId.html#PackageIdentifier"><span class="hs-identifier hs-type">PackageIdentifier</span></a></span><span> </span><span id="local-6989586621679495173"><span class="annot"><span class="annottext">PackageName
+</span><a href="#local-6989586621679495173"><span class="hs-identifier hs-var">name</span></a></span></span><span> </span><span id="local-6989586621679495174"><span class="annot"><span class="annottext">Version
+</span><a href="#local-6989586621679495174"><span class="hs-identifier hs-var">version</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PackageName -&gt; ()
 forall a. NFData a =&gt; a -&gt; ()
-</span><a href="../../deepseq-1.4.8.1/src/Control.DeepSeq.html#rnf/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">PackageName
-</span><a href="#local-6989586621679420516"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">() -&gt; () -&gt; ()
+</span><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">PackageName
+</span><a href="#local-6989586621679495173"><span class="hs-identifier hs-var">name</span></a></span><span> </span><span class="annot"><span class="annottext">() -&gt; () -&gt; ()
 forall a b. a -&gt; b -&gt; b
 </span><span class="hs-operator hs-var">`seq`</span></span><span> </span><span class="annot"><span class="annottext">Version -&gt; ()
 forall a. NFData a =&gt; a -&gt; ()
-</span><a href="../../deepseq-1.4.8.1/src/Control.DeepSeq.html#rnf/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">Version
-</span><a href="#local-6989586621679420517"><span class="hs-identifier hs-var">version</span></a></span><span>
-</span><span id="line-75"></span></pre></body></html>
+</span><a href="../../deepseq-1.5.0.0-2bd9/src//Control.DeepSeq.html/Control.DeepSeq.html#rnf"><span class="hs-identifier hs-var">rnf</span></a></span><span> </span><span class="annot"><span class="annottext">Version
+</span><a href="#local-6989586621679495174"><span class="hs-identifier hs-var">version</span></a></span><span>
+</span><span id="line-76"></span></pre></body></html>

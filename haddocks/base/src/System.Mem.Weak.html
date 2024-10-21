@@ -32,7 +32,7 @@
 </span><span id="line-32"></span><span class="hs-comment">-- alive for ever.  One way to solve this is to purge the table</span><span>
 </span><span id="line-33"></span><span class="hs-comment">-- occasionally, by deleting entries whose keys have died.</span><span>
 </span><span id="line-34"></span><span class="hs-comment">--</span><span>
-</span><span id="line-35"></span><span class="hs-comment">-- The weak pointers in this library</span><span>
+</span><span id="line-35"></span><span class="hs-comment">-- The weak pointers in this module</span><span>
 </span><span id="line-36"></span><span class="hs-comment">-- support another approach, called /finalization/.</span><span>
 </span><span id="line-37"></span><span class="hs-comment">-- When the key referred to by a weak pointer dies, the storage manager</span><span>
 </span><span id="line-38"></span><span class="hs-comment">-- arranges to run a programmer-specified finalizer.  In the case of memo</span><span>
@@ -43,55 +43,72 @@
 </span><span id="line-43"></span><span class="hs-comment">-- key\/value pair might itself contain a pointer to the key.</span><span>
 </span><span id="line-44"></span><span class="hs-comment">-- So the memo table keeps the value alive, which keeps the key alive,</span><span>
 </span><span id="line-45"></span><span class="hs-comment">-- even though there may be no other references to the key so both should</span><span>
-</span><span id="line-46"></span><span class="hs-comment">-- die.  The weak pointers in this library provide a slight</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- die.  The weak pointers in this module provide a slight</span><span>
 </span><span id="line-47"></span><span class="hs-comment">-- generalisation of the basic weak-pointer idea, in which each</span><span>
 </span><span id="line-48"></span><span class="hs-comment">-- weak pointer actually contains both a key and a value.</span><span>
 </span><span id="line-49"></span><span class="hs-comment">--</span><span>
-</span><span id="line-50"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
-</span><span id="line-51"></span><span>
-</span><span id="line-52"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">System.Mem.Weak</span><span> </span><span class="hs-special">(</span><span>
-</span><span id="line-53"></span><span>        </span><span class="annot"><span class="hs-comment">-- * The @Weak@ type</span></span><span>
-</span><span id="line-54"></span><span>        </span><span class="annot"><a href="GHC.Weak.html#Weak"><span class="hs-identifier">Weak</span></a></span><span class="hs-special">,</span><span>                   </span><span class="hs-comment">-- abstract</span><span>
-</span><span id="line-55"></span><span>
-</span><span id="line-56"></span><span>        </span><span class="annot"><span class="hs-comment">-- * The general interface</span></span><span>
-</span><span id="line-57"></span><span>        </span><span class="annot"><a href="GHC.Weak.html#mkWeak"><span class="hs-identifier">mkWeak</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-58"></span><span>        </span><span class="annot"><a href="GHC.Weak.html#deRefWeak"><span class="hs-identifier">deRefWeak</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-59"></span><span>        </span><span class="annot"><a href="GHC.Weak.html#finalize"><span class="hs-identifier">finalize</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-60"></span><span>
-</span><span id="line-61"></span><span>        </span><span class="annot"><span class="hs-comment">-- * Specialised versions</span></span><span>
-</span><span id="line-62"></span><span>        </span><span class="annot"><a href="System.Mem.Weak.html#mkWeakPtr"><span class="hs-identifier">mkWeakPtr</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-63"></span><span>        </span><span class="annot"><a href="System.Mem.Weak.html#addFinalizer"><span class="hs-identifier">addFinalizer</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-64"></span><span>        </span><span class="annot"><a href="System.Mem.Weak.html#mkWeakPair"><span class="hs-identifier">mkWeakPair</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-65"></span><span>        </span><span class="hs-comment">-- replaceFinaliser</span><span>
-</span><span id="line-66"></span><span>
-</span><span id="line-67"></span><span>        </span><span class="annot"><span class="hs-comment">-- * A precise semantics</span></span><span>
-</span><span id="line-68"></span><span>
-</span><span id="line-69"></span><span>        </span><span class="annot"><span class="hs-comment">-- $precise</span></span><span>
-</span><span id="line-70"></span><span>
-</span><span id="line-71"></span><span>        </span><span class="annot"><span class="hs-comment">-- * Implementation notes</span></span><span>
-</span><span id="line-72"></span><span>
-</span><span id="line-73"></span><span>        </span><span class="annot"><span class="hs-comment">-- $notes</span></span><span>
-</span><span id="line-74"></span><span>   </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-75"></span><span>
-</span><span id="line-76"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Weak.html"><span class="hs-identifier">GHC.Weak</span></a></span><span>
-</span><span id="line-77"></span><span>
-</span><span id="line-78"></span><span class="hs-comment">-- | A specialised version of 'mkWeak', where the key and the value are</span><span>
-</span><span id="line-79"></span><span class="hs-comment">-- the same object:</span><span>
-</span><span id="line-80"></span><span class="hs-comment">--</span><span>
-</span><span id="line-81"></span><span class="hs-comment">-- &gt; mkWeakPtr key finalizer = mkWeak key key finalizer</span><span>
-</span><span id="line-82"></span><span class="hs-comment">--</span><span>
-</span><span id="line-83"></span><span id="local-6989586621679681802"><span class="annot"><a href="System.Mem.Weak.html#mkWeakPtr"><span class="hs-identifier hs-type">mkWeakPtr</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679681802"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Maybe.html#Maybe"><span class="hs-identifier hs-type">Maybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../ghc-prim-0.10.0/src/GHC.Types.html#IO/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../ghc-prim-0.10.0/src/GHC.Types.html#IO/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Weak.html#Weak"><span class="hs-identifier hs-type">Weak</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679681802"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span></span><span>
-</span><span id="line-84"></span><span id="mkWeakPtr"><span class="annot"><span class="annottext">mkWeakPtr :: forall k. k -&gt; Maybe (IO ()) -&gt; IO (Weak k)
-</span><a href="System.Mem.Weak.html#mkWeakPtr"><span class="hs-identifier hs-var hs-var">mkWeakPtr</span></a></span></span><span> </span><span id="local-6989586621679681822"><span class="annot"><span class="annottext">k
-</span><a href="#local-6989586621679681822"><span class="hs-identifier hs-var">key</span></a></span></span><span> </span><span id="local-6989586621679681823"><span class="annot"><span class="annottext">Maybe (IO ())
-</span><a href="#local-6989586621679681823"><span class="hs-identifier hs-var">finalizer</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">k -&gt; k -&gt; Maybe (IO ()) -&gt; IO (Weak k)
+</span><span id="line-50"></span><span class="hs-comment">-- See [Stretching the storage manager: weak pointers and stable names in</span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- Haskell](https://www.microsoft.com/en-us/research/publication/stretching-the-storage-manager-weak-pointers-and-stable-names-in-haskell/)</span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- by Simon Peyton Jones, Simon Marlow and Conal Elliott for detailed discussion</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- of weak pointers. An implementation of a memo table with weak pointers</span><span>
+</span><span id="line-54"></span><span class="hs-comment">-- can be found in [@stable-memo@](https://hackage.haskell.org/package/stable-memo)</span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- package.</span><span>
+</span><span id="line-56"></span><span class="hs-comment">--</span><span>
+</span><span id="line-57"></span><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="System.Mem.Weak.html"><span class="hs-identifier">System.Mem.Weak</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-60"></span><span>        </span><span class="annot"><span class="hs-comment">-- * The @Weak@ type</span></span><span>
+</span><span id="line-61"></span><span>        </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Weak.html/GHC.Internal.Weak.html#Weak"><span class="hs-identifier">Weak</span></a></span><span class="hs-special">,</span><span>                   </span><span class="hs-comment">-- abstract</span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span>        </span><span class="annot"><span class="hs-comment">-- * The general interface</span></span><span>
+</span><span id="line-64"></span><span>        </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Weak.html/GHC.Internal.Weak.html#mkWeak"><span class="hs-identifier">mkWeak</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-65"></span><span>        </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Weak.html/GHC.Internal.Weak.html#deRefWeak"><span class="hs-identifier">deRefWeak</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-66"></span><span>        </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Weak.html/GHC.Internal.Weak.html#finalize"><span class="hs-identifier">finalize</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-67"></span><span>
+</span><span id="line-68"></span><span>        </span><span class="annot"><span class="hs-comment">-- * Specialised versions</span></span><span>
+</span><span id="line-69"></span><span>        </span><span class="annot"><a href="System.Mem.Weak.html#mkWeakPtr"><span class="hs-identifier">mkWeakPtr</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-70"></span><span>        </span><span class="annot"><a href="System.Mem.Weak.html#addFinalizer"><span class="hs-identifier">addFinalizer</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-71"></span><span>        </span><span class="annot"><a href="System.Mem.Weak.html#mkWeakPair"><span class="hs-identifier">mkWeakPair</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-72"></span><span>        </span><span class="hs-comment">-- replaceFinaliser</span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span>        </span><span class="annot"><span class="hs-comment">-- * Handling exceptions</span></span><span>
+</span><span id="line-75"></span><span>        </span><span class="hs-comment">-- | When an exception is thrown by a finalizer called by the</span><span>
+</span><span id="line-76"></span><span>        </span><span class="hs-comment">-- garbage collector, GHC calls a global handler which can be set with</span><span>
+</span><span id="line-77"></span><span>        </span><span class="hs-comment">-- 'setFinalizerExceptionHandler'. Note that any exceptions thrown by</span><span>
+</span><span id="line-78"></span><span>        </span><span class="hs-comment">-- this handler will be ignored.</span><span>
+</span><span id="line-79"></span><span>        </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Weak.Finalize.html/GHC.Internal.Weak.Finalize.html#setFinalizerExceptionHandler"><span class="hs-identifier">setFinalizerExceptionHandler</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-80"></span><span>        </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Weak.Finalize.html/GHC.Internal.Weak.Finalize.html#getFinalizerExceptionHandler"><span class="hs-identifier">getFinalizerExceptionHandler</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-81"></span><span>        </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Weak.Finalize.html/GHC.Internal.Weak.Finalize.html#printToHandleFinalizerExceptionHandler"><span class="hs-identifier">printToHandleFinalizerExceptionHandler</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span>        </span><span class="annot"><span class="hs-comment">-- * A precise semantics</span></span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span>        </span><span class="annot"><span class="hs-comment">-- $precise</span></span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span>        </span><span class="annot"><span class="hs-comment">-- * Implementation notes</span></span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span>        </span><span class="annot"><span class="hs-comment">-- $notes</span></span><span>
+</span><span id="line-90"></span><span>   </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Prelude.html"><span class="hs-identifier">Prelude</span></a></span><span>
+</span><span id="line-93"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Weak.html/GHC.Internal.Weak.html"><span class="hs-identifier">GHC.Internal.Weak</span></a></span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span class="hs-comment">-- | A specialised version of 'mkWeak', where the key and the value are</span><span>
+</span><span id="line-96"></span><span class="hs-comment">-- the same object:</span><span>
+</span><span id="line-97"></span><span class="hs-comment">--</span><span>
+</span><span id="line-98"></span><span class="hs-comment">-- &gt; mkWeakPtr key finalizer = mkWeak key key finalizer</span><span>
+</span><span id="line-99"></span><span class="hs-comment">--</span><span>
+</span><span id="line-100"></span><span id="local-6989586621679148598"><span class="annot"><a href="System.Mem.Weak.html#mkWeakPtr"><span class="hs-identifier hs-type">mkWeakPtr</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679148598"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Maybe.html/GHC.Internal.Maybe.html#Maybe"><span class="hs-identifier hs-type">Maybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Weak.html/GHC.Internal.Weak.html#Weak"><span class="hs-identifier hs-type">Weak</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679148598"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-101"></span><span id="mkWeakPtr"><span class="annot"><span class="annottext">mkWeakPtr :: forall k. k -&gt; Maybe (IO ()) -&gt; IO (Weak k)
+</span><a href="System.Mem.Weak.html#mkWeakPtr"><span class="hs-identifier hs-var hs-var">mkWeakPtr</span></a></span></span><span> </span><span id="local-6989586621679148621"><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679148621"><span class="hs-identifier hs-var">key</span></a></span></span><span> </span><span id="local-6989586621679148622"><span class="annot"><span class="annottext">Maybe (IO ())
+</span><a href="#local-6989586621679148622"><span class="hs-identifier hs-var">finalizer</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">k -&gt; k -&gt; Maybe (IO ()) -&gt; IO (Weak k)
 forall k v. k -&gt; v -&gt; Maybe (IO ()) -&gt; IO (Weak v)
-</span><a href="GHC.Weak.html#mkWeak"><span class="hs-identifier hs-var">mkWeak</span></a></span><span> </span><span class="annot"><span class="annottext">k
-</span><a href="#local-6989586621679681822"><span class="hs-identifier hs-var">key</span></a></span><span> </span><span class="annot"><span class="annottext">k
-</span><a href="#local-6989586621679681822"><span class="hs-identifier hs-var">key</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (IO ())
-</span><a href="#local-6989586621679681823"><span class="hs-identifier hs-var">finalizer</span></a></span><span>
-</span><span id="line-85"></span><span>
-</span><span id="line-86"></span><span class="annot"><span class="hs-comment">{-|
+</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Weak.html/GHC.Internal.Weak.html#mkWeak"><span class="hs-identifier hs-var">mkWeak</span></a></span><span> </span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679148621"><span class="hs-identifier hs-var">key</span></a></span><span> </span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679148621"><span class="hs-identifier hs-var">key</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (IO ())
+</span><a href="#local-6989586621679148622"><span class="hs-identifier hs-var">finalizer</span></a></span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span class="annot"><span class="hs-comment">{-|
   A specialised version of 'mkWeakPtr', where the 'Weak' object
   returned is simply thrown away (however the finalizer will be
   remembered by the garbage collector, and will still be run
@@ -99,50 +116,46 @@ forall k v. k -&gt; v -&gt; Maybe (IO ()) -&gt; IO (Weak v)
 
   Note: adding a finalizer to a 'Foreign.ForeignPtr.ForeignPtr' using
   'addFinalizer' won't work; use the specialised version
-  'Foreign.ForeignPtr.addForeignPtrFinalizer' instead.  For discussion
+  'GHC.Internal.Foreign.ForeignPtr.addForeignPtrFinalizer' instead.  For discussion
   see the 'Weak' type.
 .
 -}</span></span><span>
-</span><span id="line-98"></span><span id="local-6989586621679681807"><span class="annot"><a href="System.Mem.Weak.html#addFinalizer"><span class="hs-identifier hs-type">addFinalizer</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679681807"><span class="hs-identifier hs-type">key</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../ghc-prim-0.10.0/src/GHC.Types.html#IO/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../ghc-prim-0.10.0/src/GHC.Types.html#IO/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
-</span><span id="line-99"></span><span id="addFinalizer"><span class="annot"><span class="annottext">addFinalizer :: forall key. key -&gt; IO () -&gt; IO ()
-</span><a href="System.Mem.Weak.html#addFinalizer"><span class="hs-identifier hs-var hs-var">addFinalizer</span></a></span></span><span> </span><span id="local-6989586621679681828"><span class="annot"><span class="annottext">key
-</span><a href="#local-6989586621679681828"><span class="hs-identifier hs-var">key</span></a></span></span><span> </span><span id="local-6989586621679681829"><span class="annot"><span class="annottext">IO ()
-</span><a href="#local-6989586621679681829"><span class="hs-identifier hs-var">finalizer</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-100"></span><span>   </span><span class="annot"><span class="annottext">Weak key
-</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">key -&gt; Maybe (IO ()) -&gt; IO (Weak key)
+</span><span id="line-115"></span><span id="local-6989586621679148603"><span class="annot"><a href="System.Mem.Weak.html#addFinalizer"><span class="hs-identifier hs-type">addFinalizer</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679148603"><span class="hs-identifier hs-type">key</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span><span>
+</span><span id="line-116"></span><span id="addFinalizer"><span class="annot"><span class="annottext">addFinalizer :: forall key. key -&gt; IO () -&gt; IO ()
+</span><a href="System.Mem.Weak.html#addFinalizer"><span class="hs-identifier hs-var hs-var">addFinalizer</span></a></span></span><span> </span><span id="local-6989586621679148627"><span class="annot"><span class="annottext">key
+</span><a href="#local-6989586621679148627"><span class="hs-identifier hs-var">key</span></a></span></span><span> </span><span id="local-6989586621679148628"><span class="annot"><span class="annottext">IO ()
+</span><a href="#local-6989586621679148628"><span class="hs-identifier hs-var">finalizer</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-117"></span><span>   </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">key -&gt; Maybe (IO ()) -&gt; IO (Weak key)
 forall k. k -&gt; Maybe (IO ()) -&gt; IO (Weak k)
 </span><a href="System.Mem.Weak.html#mkWeakPtr"><span class="hs-identifier hs-var">mkWeakPtr</span></a></span><span> </span><span class="annot"><span class="annottext">key
-</span><a href="#local-6989586621679681828"><span class="hs-identifier hs-var">key</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IO () -&gt; Maybe (IO ())
+</span><a href="#local-6989586621679148627"><span class="hs-identifier hs-var">key</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IO () -&gt; Maybe (IO ())
 forall a. a -&gt; Maybe a
-</span><a href="GHC.Maybe.html#Just"><span class="hs-identifier hs-var">Just</span></a></span><span> </span><span class="annot"><span class="annottext">IO ()
-</span><a href="#local-6989586621679681829"><span class="hs-identifier hs-var">finalizer</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- throw it away</span><span>
-</span><span id="line-101"></span><span>   </span><span class="annot"><span class="annottext">() -&gt; IO ()
-forall a. a -&gt; IO a
-forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
-</span><a href="GHC.Base.html#return"><span class="hs-identifier hs-var">return</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-102"></span><span>
-</span><span id="line-103"></span><span class="hs-comment">-- | A specialised version of 'mkWeak' where the value is actually a pair</span><span>
-</span><span id="line-104"></span><span class="hs-comment">-- of the key and value passed to 'mkWeakPair':</span><span>
-</span><span id="line-105"></span><span class="hs-comment">--</span><span>
-</span><span id="line-106"></span><span class="hs-comment">-- &gt; mkWeakPair key val finalizer = mkWeak key (key,val) finalizer</span><span>
-</span><span id="line-107"></span><span class="hs-comment">--</span><span>
-</span><span id="line-108"></span><span class="hs-comment">-- The advantage of this is that the key can be retrieved by 'deRefWeak'</span><span>
-</span><span id="line-109"></span><span class="hs-comment">-- in addition to the value.</span><span>
-</span><span id="line-110"></span><span id="local-6989586621679681812"><span id="local-6989586621679681813"><span class="annot"><a href="System.Mem.Weak.html#mkWeakPair"><span class="hs-identifier hs-type">mkWeakPair</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679681812"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679681813"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="GHC.Maybe.html#Maybe"><span class="hs-identifier hs-type">Maybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../ghc-prim-0.10.0/src/GHC.Types.html#IO/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../ghc-prim-0.10.0/src/GHC.Types.html#IO/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="GHC.Weak.html#Weak"><span class="hs-identifier hs-type">Weak</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679681812"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679681813"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
-</span><span id="line-111"></span><span id="mkWeakPair"><span class="annot"><span class="annottext">mkWeakPair :: forall k v. k -&gt; v -&gt; Maybe (IO ()) -&gt; IO (Weak (k, v))
-</span><a href="System.Mem.Weak.html#mkWeakPair"><span class="hs-identifier hs-var hs-var">mkWeakPair</span></a></span></span><span> </span><span id="local-6989586621679681830"><span class="annot"><span class="annottext">k
-</span><a href="#local-6989586621679681830"><span class="hs-identifier hs-var">key</span></a></span></span><span> </span><span id="local-6989586621679681831"><span class="annot"><span class="annottext">v
-</span><a href="#local-6989586621679681831"><span class="hs-identifier hs-var">val</span></a></span></span><span> </span><span id="local-6989586621679681832"><span class="annot"><span class="annottext">Maybe (IO ())
-</span><a href="#local-6989586621679681832"><span class="hs-identifier hs-var">finalizer</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">k -&gt; (k, v) -&gt; Maybe (IO ()) -&gt; IO (Weak (k, v))
+</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Maybe.html/GHC.Internal.Maybe.html#Just"><span class="hs-identifier hs-var">Just</span></a></span><span> </span><span class="annot"><span class="annottext">IO ()
+</span><a href="#local-6989586621679148628"><span class="hs-identifier hs-var">finalizer</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- throw it away</span><span>
+</span><span id="line-118"></span><span>   </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Base.html/GHC.Internal.Base.html#return"><span class="hs-identifier hs-type">return</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span class="hs-comment">-- | A specialised version of 'mkWeak' where the value is actually a pair</span><span>
+</span><span id="line-121"></span><span class="hs-comment">-- of the key and value passed to 'mkWeakPair':</span><span>
+</span><span id="line-122"></span><span class="hs-comment">--</span><span>
+</span><span id="line-123"></span><span class="hs-comment">-- &gt; mkWeakPair key val finalizer = mkWeak key (key,val) finalizer</span><span>
+</span><span id="line-124"></span><span class="hs-comment">--</span><span>
+</span><span id="line-125"></span><span class="hs-comment">-- The advantage of this is that the key can be retrieved by 'deRefWeak'</span><span>
+</span><span id="line-126"></span><span class="hs-comment">-- in addition to the value.</span><span>
+</span><span id="line-127"></span><span id="local-6989586621679148608"><span id="local-6989586621679148609"><span class="annot"><a href="System.Mem.Weak.html#mkWeakPair"><span class="hs-identifier hs-type">mkWeakPair</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679148608"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679148609"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Maybe.html/GHC.Internal.Maybe.html#Maybe"><span class="hs-identifier hs-type">Maybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../ghc-prim-0.11.0-633d/src//GHC.Types.html/GHC.Types.html#IO"><span class="hs-identifier hs-type">IO</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Weak.html/GHC.Internal.Weak.html#Weak"><span class="hs-identifier hs-type">Weak</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679148608"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679148609"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-128"></span><span id="mkWeakPair"><span class="annot"><span class="annottext">mkWeakPair :: forall k v. k -&gt; v -&gt; Maybe (IO ()) -&gt; IO (Weak (k, v))
+</span><a href="System.Mem.Weak.html#mkWeakPair"><span class="hs-identifier hs-var hs-var">mkWeakPair</span></a></span></span><span> </span><span id="local-6989586621679148629"><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679148629"><span class="hs-identifier hs-var">key</span></a></span></span><span> </span><span id="local-6989586621679148630"><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679148630"><span class="hs-identifier hs-var">val</span></a></span></span><span> </span><span id="local-6989586621679148631"><span class="annot"><span class="annottext">Maybe (IO ())
+</span><a href="#local-6989586621679148631"><span class="hs-identifier hs-var">finalizer</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">k -&gt; (k, v) -&gt; Maybe (IO ()) -&gt; IO (Weak (k, v))
 forall k v. k -&gt; v -&gt; Maybe (IO ()) -&gt; IO (Weak v)
-</span><a href="GHC.Weak.html#mkWeak"><span class="hs-identifier hs-var">mkWeak</span></a></span><span> </span><span class="annot"><span class="annottext">k
-</span><a href="#local-6989586621679681830"><span class="hs-identifier hs-var">key</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">k
-</span><a href="#local-6989586621679681830"><span class="hs-identifier hs-var">key</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">v
-</span><a href="#local-6989586621679681831"><span class="hs-identifier hs-var">val</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe (IO ())
-</span><a href="#local-6989586621679681832"><span class="hs-identifier hs-var">finalizer</span></a></span><span>
-</span><span id="line-112"></span><span>
-</span><span id="line-113"></span><span>
-</span><span id="line-114"></span><span class="annot"><span class="hs-comment">{- $precise
+</span><a href="../../ghc-internal-9.1001.0-79a4/src//GHC.Internal.Weak.html/GHC.Internal.Weak.html#mkWeak"><span class="hs-identifier hs-var">mkWeak</span></a></span><span> </span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679148629"><span class="hs-identifier hs-var">key</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679148629"><span class="hs-identifier hs-var">key</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679148630"><span class="hs-identifier hs-var">val</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe (IO ())
+</span><a href="#local-6989586621679148631"><span class="hs-identifier hs-var">finalizer</span></a></span><span>
+</span><span id="line-129"></span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span class="annot"><span class="hs-comment">{- $precise
 
 The above informal specification is fine for simple situations, but
 matters can get complicated.  In particular, it needs to be clear
@@ -174,8 +187,8 @@ A heap object is /reachable/ if:
 
  * It is the value or finalizer of a weak pointer object whose key is reachable.
 -}</span></span><span>
-</span><span id="line-146"></span><span>
-</span><span id="line-147"></span><span class="annot"><span class="hs-comment">{- $notes
+</span><span id="line-163"></span><span>
+</span><span id="line-164"></span><span class="annot"><span class="hs-comment">{- $notes
 
 A finalizer is not always called after its weak pointer\'s object becomes
 unreachable. If the object becomes unreachable right before the program exits,
@@ -191,4 +204,4 @@ notice. See the commit of issue
 finalizer that throws exceptions is discouraged.
 
 -}</span></span><span>
-</span><span id="line-163"></span></pre></body></html>
+</span><span id="line-180"></span></pre></body></html>

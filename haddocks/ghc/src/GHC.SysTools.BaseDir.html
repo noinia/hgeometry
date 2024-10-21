@@ -11,8 +11,8 @@
 -----------------------------------------------------------------------------
 -}</span><span>
 </span><span id="line-13"></span><span>
-</span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">GHC.SysTools.BaseDir</span><span>
-</span><span id="line-15"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="../../ghc-boot-9.6.4/src/GHC.BaseDir.html#expandTopDir/GHC.BaseDir.html#expandTopDir"><span class="hs-identifier">expandTopDir</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.SysTools.BaseDir.html#expandToolDir"><span class="hs-identifier">expandToolDir</span></a></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="GHC.SysTools.BaseDir.html"><span class="hs-identifier">GHC.SysTools.BaseDir</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="../../ghc-boot-9.10.1-5e10/src//GHC.BaseDir.html/GHC.BaseDir.html#expandTopDir"><span class="hs-identifier">expandTopDir</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.SysTools.BaseDir.html#expandToolDir"><span class="hs-identifier">expandToolDir</span></a></span><span>
 </span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.SysTools.BaseDir.html#findTopDir"><span class="hs-identifier">findTopDir</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.SysTools.BaseDir.html#findToolDir"><span class="hs-identifier">findToolDir</span></a></span><span>
 </span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="GHC.SysTools.BaseDir.html#tryFindTopDir"><span class="hs-identifier">tryFindTopDir</span></a></span><span>
 </span><span id="line-18"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
@@ -20,12 +20,12 @@
 </span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Prelude.html"><span class="hs-identifier">GHC.Prelude</span></a></span><span>
 </span><span id="line-21"></span><span>
 </span><span id="line-22"></span><span class="hs-comment">-- See Note [Base Dir] for why some of this logic is shared with ghc-pkg.</span><span>
-</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../ghc-boot-9.6.4/src/GHC.BaseDir.html#/GHC.BaseDir.html"><span class="hs-identifier">GHC.BaseDir</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../ghc-boot-9.10.1-5e10/src//GHC.BaseDir.html/GHC.BaseDir.html"><span class="hs-identifier">GHC.BaseDir</span></a></span><span>
 </span><span id="line-24"></span><span>
 </span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Utils.Panic.html"><span class="hs-identifier">GHC.Utils.Panic</span></a></span><span>
 </span><span id="line-26"></span><span>
-</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/System.Environment.html#/System.Environment.html"><span class="hs-identifier">System.Environment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../base-4.18.2.0/src/System.Environment.html#lookupEnv/System.Environment.html#lookupEnv"><span class="hs-identifier">lookupEnv</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../template-haskell-2.20.0.0/src/System.FilePath.html#/System.FilePath.html"><span class="hs-identifier">System.FilePath</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../base-4.20.0.0-4014/src//System.Environment.html/System.Environment.html"><span class="hs-identifier">System.Environment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">lookupEnv</span></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../template-haskell-2.22.0.0-0c48/src//System.FilePath.html/System.FilePath.html"><span class="hs-identifier">System.FilePath</span></a></span><span>
 </span><span id="line-29"></span><span>
 </span><span id="line-30"></span><span class="hs-comment">-- Windows</span><span class="hs-cpp">
 #if defined(mingw32_HOST_OS)
@@ -123,8 +123,8 @@ play nice with the system compiler instead.
 </span><span id="line-123"></span><span class="hs-comment">-- on Windows, leave the string untouched otherwise.</span><span>
 </span><span id="line-124"></span><span class="annot"><a href="GHC.SysTools.BaseDir.html#expandToolDir"><span class="hs-identifier hs-type">expandToolDir</span></a></span><span>
 </span><span id="line-125"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ whether we use the ambient mingw toolchain</span></span><span>
-</span><span id="line-126"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Maybe/GHC.Maybe.html#Maybe"><span class="hs-identifier hs-type">Maybe</span></a></span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.IO.html#FilePath/GHC.IO.html#FilePath"><span class="hs-identifier hs-type">FilePath</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^ tooldir</span></span><span>
-</span><span id="line-127"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Base.html#String/GHC.Base.html#String"><span class="hs-identifier hs-type">String</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Base.html#String/GHC.Base.html#String"><span class="hs-identifier hs-type">String</span></a></span><span class="hs-cpp">
+</span><span id="line-126"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ tooldir</span></span><span>
+</span><span id="line-127"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-cpp">
 #if defined(mingw32_HOST_OS)
 </span><span class="hs-identifier">expandToolDir</span><span> </span><span class="hs-identifier">False</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">Just</span><span> </span><span class="hs-identifier">tool_dir</span><span class="hs-special">)</span><span> </span><span class="hs-identifier">s</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">expandPathVar</span><span> </span><span class="hs-string">&quot;tooldir&quot;</span><span> </span><span class="hs-identifier">tool_dir</span><span> </span><span class="hs-identifier">s</span><span>
 </span><span id="line-130"></span><span class="hs-identifier">expandToolDir</span><span> </span><span class="hs-identifier">False</span><span> </span><span class="hs-identifier">Nothing</span><span>         </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">panic</span><span> </span><span class="hs-string">&quot;Could not determine $tooldir&quot;</span><span>
@@ -133,85 +133,81 @@ play nice with the system compiler instead.
 </span><span id="expandToolDir"><span class="annot"><span class="annottext">expandToolDir :: Bool -&gt; Maybe FilePath -&gt; FilePath -&gt; FilePath
 </span><a href="GHC.SysTools.BaseDir.html#expandToolDir"><span class="hs-identifier hs-var hs-var">expandToolDir</span></a></span></span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">Maybe FilePath
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621681500819"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621681500819"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621681500819"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-cpp">
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621682328885"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621682328885"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621682328885"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-cpp">
 #endif
 </span><span>
 </span><span id="line-136"></span><span class="annot"><span class="hs-comment">-- | Returns a Unix-format path pointing to TopDir.</span></span><span>
-</span><span id="line-137"></span><span class="annot"><a href="GHC.SysTools.BaseDir.html#findTopDir"><span class="hs-identifier hs-type">findTopDir</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Maybe/GHC.Maybe.html#Maybe"><span class="hs-identifier hs-type">Maybe</span></a></span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Base.html#String/GHC.Base.html#String"><span class="hs-identifier hs-type">String</span></a></span><span> </span><span class="hs-comment">-- Maybe TopDir path (without the '-B' prefix).</span><span>
-</span><span id="line-138"></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Base.html#String/GHC.Base.html#String"><span class="hs-identifier hs-type">String</span></a></span><span>    </span><span class="hs-comment">-- TopDir (in Unix format '/' separated)</span><span>
+</span><span id="line-137"></span><span class="annot"><a href="GHC.SysTools.BaseDir.html#findTopDir"><span class="hs-identifier hs-type">findTopDir</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="hs-comment">-- Maybe TopDir path (without the '-B' prefix).</span><span>
+</span><span id="line-138"></span><span>           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>    </span><span class="hs-comment">-- TopDir (in Unix format '/' separated)</span><span>
 </span><span id="line-139"></span><span id="findTopDir"><span class="annot"><span class="annottext">findTopDir :: Maybe FilePath -&gt; IO FilePath
-</span><a href="GHC.SysTools.BaseDir.html#findTopDir"><span class="hs-identifier hs-var hs-var">findTopDir</span></a></span></span><span> </span><span id="local-6989586621681500820"><span class="annot"><span class="annottext">Maybe FilePath
-</span><a href="#local-6989586621681500820"><span class="hs-identifier hs-var">m_minusb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-140"></span><span>  </span><span id="local-6989586621681500821"><span class="annot"><span class="annottext">Maybe FilePath
-</span><a href="#local-6989586621681500821"><span class="hs-identifier hs-var">maybe_exec_dir</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Maybe FilePath -&gt; IO (Maybe FilePath)
+</span><a href="GHC.SysTools.BaseDir.html#findTopDir"><span class="hs-identifier hs-var hs-var">findTopDir</span></a></span></span><span> </span><span id="local-6989586621682328886"><span class="annot"><span class="annottext">Maybe FilePath
+</span><a href="#local-6989586621682328886"><span class="hs-identifier hs-var">m_minusb</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-140"></span><span>  </span><span id="local-6989586621682328887"><span class="annot"><a href="#local-6989586621682328887"><span class="hs-identifier hs-var">maybe_exec_dir</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Maybe FilePath -&gt; IO (Maybe FilePath)
 </span><a href="GHC.SysTools.BaseDir.html#tryFindTopDir"><span class="hs-identifier hs-var">tryFindTopDir</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe FilePath
-</span><a href="#local-6989586621681500820"><span class="hs-identifier hs-var">m_minusb</span></a></span><span>
-</span><span id="line-141"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe FilePath
-</span><a href="#local-6989586621681500821"><span class="hs-identifier hs-var">maybe_exec_dir</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621682328886"><span class="hs-identifier hs-var">m_minusb</span></a></span><span>
+</span><span id="line-141"></span><span>  </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621682328887"><span class="hs-identifier hs-type">maybe_exec_dir</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-142"></span><span>      </span><span class="hs-comment">-- &quot;Just&quot; on Windows, &quot;Nothing&quot; on unix</span><span>
 </span><span id="line-143"></span><span>      </span><span class="annot"><span class="annottext">Maybe FilePath
-</span><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Nothing/GHC.Maybe.html#Nothing"><span class="hs-identifier hs-var">Nothing</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">GhcException -&gt; IO FilePath
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">GhcException -&gt; IO FilePath
 forall a. GhcException -&gt; IO a
 </span><a href="GHC.Utils.Panic.html#throwGhcExceptionIO"><span class="hs-identifier hs-var">throwGhcExceptionIO</span></a></span><span> </span><span class="annot"><span class="annottext">(GhcException -&gt; IO FilePath) -&gt; GhcException -&gt; IO FilePath
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#%24/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span>
+</span><span class="hs-operator hs-var">$</span></span><span>
 </span><span id="line-144"></span><span>          </span><span class="annot"><span class="annottext">FilePath -&gt; GhcException
 </span><a href="GHC.Utils.Panic.html#InstallationError"><span class="hs-identifier hs-var">InstallationError</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;missing -B&lt;dir&gt; option&quot;</span></span><span>
-</span><span id="line-145"></span><span>      </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Just/GHC.Maybe.html#Just"><span class="hs-identifier hs-type">Just</span></a></span><span> </span><span id="local-6989586621681500824"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621681500824"><span class="hs-identifier hs-var">dir</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO FilePath
+</span><span id="line-145"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682328890"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621682328890"><span class="hs-identifier hs-var">dir</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO FilePath
 forall a. a -&gt; IO a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#return/GHC.Base.html#return"><span class="hs-identifier hs-var">return</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621681500824"><span class="hs-identifier hs-var">dir</span></a></span><span>
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621682328890"><span class="hs-identifier hs-var">dir</span></a></span><span>
 </span><span id="line-146"></span><span>
 </span><span id="line-147"></span><span class="annot"><a href="GHC.SysTools.BaseDir.html#tryFindTopDir"><span class="hs-identifier hs-type">tryFindTopDir</span></a></span><span>
-</span><span id="line-148"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Maybe/GHC.Maybe.html#Maybe"><span class="hs-identifier hs-type">Maybe</span></a></span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Base.html#String/GHC.Base.html#String"><span class="hs-identifier hs-type">String</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Maybe TopDir path (without the '-B' prefix).</span></span><span>
-</span><span id="line-149"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Maybe/GHC.Maybe.html#Maybe"><span class="hs-identifier hs-type">Maybe</span></a></span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Base.html#String/GHC.Base.html#String"><span class="hs-identifier hs-type">String</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-comment">-- ^ TopDir (in Unix format '/' separated)</span></span><span>
+</span><span id="line-148"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Maybe TopDir path (without the '-B' prefix).</span></span><span>
+</span><span id="line-149"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-comment">-- ^ TopDir (in Unix format '/' separated)</span></span><span>
 </span><span id="line-150"></span><span id="tryFindTopDir"><span class="annot"><span class="annottext">tryFindTopDir :: Maybe FilePath -&gt; IO (Maybe FilePath)
-</span><a href="GHC.SysTools.BaseDir.html#tryFindTopDir"><span class="hs-identifier hs-var hs-var">tryFindTopDir</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Just/GHC.Maybe.html#Just"><span class="hs-identifier hs-type">Just</span></a></span><span> </span><span id="local-6989586621681500826"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621681500826"><span class="hs-identifier hs-var">minusb</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe FilePath -&gt; IO (Maybe FilePath)
+</span><a href="GHC.SysTools.BaseDir.html#tryFindTopDir"><span class="hs-identifier hs-var hs-var">tryFindTopDir</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682328892"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621682328892"><span class="hs-identifier hs-var">minusb</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe FilePath -&gt; IO (Maybe FilePath)
 forall a. a -&gt; IO a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#return/GHC.Base.html#return"><span class="hs-identifier hs-var">return</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe FilePath -&gt; IO (Maybe FilePath))
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Maybe FilePath -&gt; IO (Maybe FilePath))
 -&gt; Maybe FilePath -&gt; IO (Maybe FilePath)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#%24/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; Maybe FilePath
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; Maybe FilePath
 forall a. a -&gt; Maybe a
-</span><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Just/GHC.Maybe.html#Just"><span class="hs-identifier hs-var">Just</span></a></span><span> </span><span class="annot"><span class="annottext">(FilePath -&gt; Maybe FilePath) -&gt; FilePath -&gt; Maybe FilePath
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(FilePath -&gt; Maybe FilePath) -&gt; FilePath -&gt; Maybe FilePath
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#%24/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath
-</span><a href="../../filepath-1.4.200.1/src/System.FilePath.Posix.html#normalise/System.FilePath.Posix.html#normalise"><span class="hs-identifier hs-var">normalise</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621681500826"><span class="hs-identifier hs-var">minusb</span></a></span><span>
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; FilePath
+</span><a href="../../filepath-1.5.2.0-8683/src//System.FilePath.Posix.html/System.FilePath.Posix.html#normalise"><span class="hs-identifier hs-var">normalise</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621682328892"><span class="hs-identifier hs-var">minusb</span></a></span><span>
 </span><span id="line-151"></span><span class="annot"><a href="GHC.SysTools.BaseDir.html#tryFindTopDir"><span class="hs-identifier hs-var">tryFindTopDir</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe FilePath
-</span><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Nothing/GHC.Maybe.html#Nothing"><span class="hs-identifier hs-var">Nothing</span></a></span><span>
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
 </span><span id="line-152"></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span class="hs-comment">-- The _GHC_TOP_DIR environment variable can be used to specify</span><span>
 </span><span id="line-153"></span><span>         </span><span class="hs-comment">-- the top dir when the -B argument is not specified. It is not</span><span>
 </span><span id="line-154"></span><span>         </span><span class="hs-comment">-- intended for use by users, it was added specifically for the</span><span>
 </span><span id="line-155"></span><span>         </span><span class="hs-comment">-- purpose of running GHC within GHCi.</span><span>
-</span><span id="line-156"></span><span>         </span><span id="local-6989586621681500828"><span class="annot"><span class="annottext">Maybe FilePath
-</span><a href="#local-6989586621681500828"><span class="hs-identifier hs-var">maybe_env_top_dir</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO (Maybe FilePath)
-</span><a href="../../base-4.18.2.0/src/System.Environment.html#lookupEnv/System.Environment.html#lookupEnv"><span class="hs-identifier hs-var">lookupEnv</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><span id="line-156"></span><span>         </span><span id="local-6989586621682328894"><span class="annot"><a href="#local-6989586621682328894"><span class="hs-identifier hs-var">maybe_env_top_dir</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; IO (Maybe FilePath)
+</span><span class="hs-identifier hs-var">lookupEnv</span></span><span> </span><span class="annot"><span class="annottext">FilePath
 </span><span class="hs-string">&quot;_GHC_TOP_DIR&quot;</span></span><span>
-</span><span id="line-157"></span><span>         </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Maybe FilePath
-</span><a href="#local-6989586621681500828"><span class="hs-identifier hs-var">maybe_env_top_dir</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-158"></span><span>             </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Just/GHC.Maybe.html#Just"><span class="hs-identifier hs-type">Just</span></a></span><span> </span><span id="local-6989586621681500829"><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621681500829"><span class="hs-identifier hs-var">env_top_dir</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe FilePath -&gt; IO (Maybe FilePath)
+</span><span id="line-157"></span><span>         </span><span class="hs-keyword">case</span><span> </span><span class="annot"><a href="#local-6989586621682328894"><span class="hs-identifier hs-type">maybe_env_top_dir</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-158"></span><span>             </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621682328895"><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621682328895"><span class="hs-identifier hs-var">env_top_dir</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe FilePath -&gt; IO (Maybe FilePath)
 forall a. a -&gt; IO a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#return/GHC.Base.html#return"><span class="hs-identifier hs-var">return</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe FilePath -&gt; IO (Maybe FilePath))
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(Maybe FilePath -&gt; IO (Maybe FilePath))
 -&gt; Maybe FilePath -&gt; IO (Maybe FilePath)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#%24/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; Maybe FilePath
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">FilePath -&gt; Maybe FilePath
 forall a. a -&gt; Maybe a
-</span><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Just/GHC.Maybe.html#Just"><span class="hs-identifier hs-var">Just</span></a></span><span> </span><span class="annot"><span class="annottext">FilePath
-</span><a href="#local-6989586621681500829"><span class="hs-identifier hs-var">env_top_dir</span></a></span><span>
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">FilePath
+</span><a href="#local-6989586621682328895"><span class="hs-identifier hs-var">env_top_dir</span></a></span><span>
 </span><span id="line-159"></span><span>             </span><span class="hs-comment">-- Try directory of executable</span><span>
 </span><span id="line-160"></span><span>             </span><span class="annot"><span class="annottext">Maybe FilePath
-</span><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Nothing/GHC.Maybe.html#Nothing"><span class="hs-identifier hs-var">Nothing</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IO (Maybe FilePath)
-</span><a href="../../ghc-boot-9.6.4/src/GHC.BaseDir.html#getBaseDir/GHC.BaseDir.html#getBaseDir"><span class="hs-identifier hs-var">getBaseDir</span></a></span><span>
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IO (Maybe FilePath)
+</span><a href="../../ghc-boot-9.10.1-5e10/src//GHC.BaseDir.html/GHC.BaseDir.html#getBaseDir"><span class="hs-identifier hs-var">getBaseDir</span></a></span><span>
 </span><span id="line-161"></span><span>
 </span><span id="line-162"></span><span>
 </span><span id="line-163"></span><span class="hs-comment">-- See Note [tooldir: How GHC finds mingw on Windows]</span><span>
@@ -221,8 +217,8 @@ forall a. a -&gt; Maybe a
 </span><span id="line-167"></span><span class="hs-comment">-- If the distro toolchain is being used we treat Windows the same as Linux</span><span>
 </span><span id="line-168"></span><span class="annot"><a href="GHC.SysTools.BaseDir.html#findToolDir"><span class="hs-identifier hs-type">findToolDir</span></a></span><span>
 </span><span id="line-169"></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ whether we use the ambient mingw toolchain</span></span><span>
-</span><span id="line-170"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.IO.html#FilePath/GHC.IO.html#FilePath"><span class="hs-identifier hs-type">FilePath</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^ topdir</span></span><span>
-</span><span id="line-171"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Maybe/GHC.Maybe.html#Maybe"><span class="hs-identifier hs-type">Maybe</span></a></span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.IO.html#FilePath/GHC.IO.html#FilePath"><span class="hs-identifier hs-type">FilePath</span></a></span><span class="hs-special">)</span><span class="hs-cpp">
+</span><span id="line-170"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ topdir</span></span><span>
+</span><span id="line-171"></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">FilePath</span></span><span class="hs-special">)</span><span class="hs-cpp">
 #if defined(mingw32_HOST_OS)
 </span><span class="hs-identifier">findToolDir</span><span> </span><span class="hs-identifier">False</span><span> </span><span class="hs-identifier">top_dir</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">go</span><span> </span><span class="hs-number">0</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">top_dir</span><span> </span><span class="hs-operator">&lt;/&gt;</span><span> </span><span class="hs-string">&quot;..&quot;</span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
 </span><span id="line-174"></span><span>  </span><span class="hs-keyword">where</span><span> </span><span class="hs-identifier">maxDepth</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-number">3</span><span>
@@ -245,8 +241,8 @@ forall a. a -&gt; Maybe a
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe FilePath -&gt; IO (Maybe FilePath)
 forall a. a -&gt; IO a
 forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
-</span><a href="../../base-4.18.2.0/src/GHC.Base.html#return/GHC.Base.html#return"><span class="hs-identifier hs-var">return</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe FilePath
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Maybe FilePath
 forall a. Maybe a
-</span><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Nothing/GHC.Maybe.html#Nothing"><span class="hs-identifier hs-var">Nothing</span></a></span><span class="hs-cpp">
+</span><span class="hs-identifier hs-var">Nothing</span></span><span class="hs-cpp">
 #endif
 </span></pre></body></html>

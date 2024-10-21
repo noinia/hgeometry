@@ -2,7 +2,7 @@
 </span><span id="line-2"></span><span class="hs-comment">-- | The LLVM abstract syntax.</span><span>
 </span><span id="line-3"></span><span class="hs-comment">--</span><span>
 </span><span id="line-4"></span><span>
-</span><span id="line-5"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">GHC.Llvm.Syntax</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-5"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="GHC.Llvm.Syntax.html"><span class="hs-identifier">GHC.Llvm.Syntax</span></a></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-6"></span><span>
 </span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="GHC.Prelude.html"><span class="hs-identifier">GHC.Prelude</span></a></span><span>
 </span><span id="line-8"></span><span>
@@ -75,7 +75,7 @@
 </span><span id="line-63"></span><span>
 </span><span id="line-64"></span><span>    </span><span class="annot"><span class="hs-comment">-- | Prefix data</span></span><span>
 </span><span id="line-65"></span><span>    </span><span id="funcPrefix"><span class="annot"><span class="annottext">LlvmFunction -&gt; Maybe LlvmStatic
-</span><a href="GHC.Llvm.Syntax.html#funcPrefix"><span class="hs-identifier hs-var hs-var">funcPrefix</span></a></span></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Maybe/GHC.Maybe.html#Maybe"><span class="hs-identifier hs-type">Maybe</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmStatic"><span class="hs-identifier hs-type">LlvmStatic</span></a></span><span class="hs-special">,</span><span>
+</span><a href="GHC.Llvm.Syntax.html#funcPrefix"><span class="hs-identifier hs-var hs-var">funcPrefix</span></a></span></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmStatic"><span class="hs-identifier hs-type">LlvmStatic</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-66"></span><span>
 </span><span id="line-67"></span><span>    </span><span class="annot"><span class="hs-comment">-- | The body of the functions.</span></span><span>
 </span><span id="line-68"></span><span>    </span><span id="funcBody"><span class="annot"><span class="annottext">LlvmFunction -&gt; LlvmBlocks
@@ -101,7 +101,7 @@
 </span><span id="line-87"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="SyncAcqRel"><span class="annot"><a href="GHC.Llvm.Syntax.html#SyncAcqRel"><span class="hs-identifier hs-var">SyncAcqRel</span></a></span></span><span>
 </span><span id="line-88"></span><span>  </span><span class="annot"><span class="hs-comment">-- | Full sequential Consistency operation.</span></span><span>
 </span><span id="line-89"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="SyncSeqCst"><span class="annot"><a href="GHC.Llvm.Syntax.html#SyncSeqCst"><span class="hs-identifier hs-var">SyncSeqCst</span></a></span></span><span>
-</span><span id="line-90"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621681804592"><span id="local-6989586621681804594"><span id="local-6989586621681804598"><span class="annot"><span class="annottext">Int -&gt; LlvmSyncOrdering -&gt; ShowS
+</span><span id="line-90"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682622712"><span id="local-6989586621682622714"><span id="local-6989586621682622718"><span class="annot"><span class="annottext">Int -&gt; LlvmSyncOrdering -&gt; ShowS
 [LlvmSyncOrdering] -&gt; ShowS
 LlvmSyncOrdering -&gt; String
 (Int -&gt; LlvmSyncOrdering -&gt; ShowS)
@@ -116,7 +116,7 @@ $cshow :: LlvmSyncOrdering -&gt; String
 show :: LlvmSyncOrdering -&gt; String
 $cshowList :: [LlvmSyncOrdering] -&gt; ShowS
 showList :: [LlvmSyncOrdering] -&gt; ShowS
-</span><a href="../../base-4.18.2.0/src/GHC.Show.html#Show/GHC.Show.html#Show"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></a></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681804602"><span id="local-6989586621681804604"><span class="annot"><span class="annottext">LlvmSyncOrdering -&gt; LlvmSyncOrdering -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682622723"><span id="local-6989586621682622728"><span class="annot"><span class="annottext">LlvmSyncOrdering -&gt; LlvmSyncOrdering -&gt; Bool
 (LlvmSyncOrdering -&gt; LlvmSyncOrdering -&gt; Bool)
 -&gt; (LlvmSyncOrdering -&gt; LlvmSyncOrdering -&gt; Bool)
 -&gt; Eq LlvmSyncOrdering
@@ -141,7 +141,7 @@ $c/= :: LlvmSyncOrdering -&gt; LlvmSyncOrdering -&gt; Bool
 </span><span id="line-103"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="LAO_Min"><span class="annot"><a href="GHC.Llvm.Syntax.html#LAO_Min"><span class="hs-identifier hs-var">LAO_Min</span></a></span></span><span>
 </span><span id="line-104"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="LAO_Umax"><span class="annot"><a href="GHC.Llvm.Syntax.html#LAO_Umax"><span class="hs-identifier hs-var">LAO_Umax</span></a></span></span><span>
 </span><span id="line-105"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="LAO_Umin"><span class="annot"><a href="GHC.Llvm.Syntax.html#LAO_Umin"><span class="hs-identifier hs-var">LAO_Umin</span></a></span></span><span>
-</span><span id="line-106"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621681804620"><span id="local-6989586621681804622"><span id="local-6989586621681804626"><span class="annot"><span class="annottext">Int -&gt; LlvmAtomicOp -&gt; ShowS
+</span><span id="line-106"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682622744"><span id="local-6989586621682622746"><span id="local-6989586621682622750"><span class="annot"><span class="annottext">Int -&gt; LlvmAtomicOp -&gt; ShowS
 [LlvmAtomicOp] -&gt; ShowS
 LlvmAtomicOp -&gt; String
 (Int -&gt; LlvmAtomicOp -&gt; ShowS)
@@ -156,7 +156,7 @@ $cshow :: LlvmAtomicOp -&gt; String
 show :: LlvmAtomicOp -&gt; String
 $cshowList :: [LlvmAtomicOp] -&gt; ShowS
 showList :: [LlvmAtomicOp] -&gt; ShowS
-</span><a href="../../base-4.18.2.0/src/GHC.Show.html#Show/GHC.Show.html#Show"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></a></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621681804629"><span id="local-6989586621681804631"><span class="annot"><span class="annottext">LlvmAtomicOp -&gt; LlvmAtomicOp -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621682622753"><span id="local-6989586621682622757"><span class="annot"><span class="annottext">LlvmAtomicOp -&gt; LlvmAtomicOp -&gt; Bool
 (LlvmAtomicOp -&gt; LlvmAtomicOp -&gt; Bool)
 -&gt; (LlvmAtomicOp -&gt; LlvmAtomicOp -&gt; Bool) -&gt; Eq LlvmAtomicOp
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -211,7 +211,7 @@ $c/= :: LlvmAtomicOp -&gt; LlvmAtomicOp -&gt; Bool
       * value: Variable/Constant to store.
       * ptr:   Location to store the value in
   -}</span></span><span>
-</span><span id="line-153"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Store"><span class="annot"><a href="GHC.Llvm.Syntax.html#Store"><span class="hs-identifier hs-var">Store</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LMAlign"><span class="hs-identifier hs-type">LMAlign</span></a></span><span>
+</span><span id="line-153"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Store"><span class="annot"><a href="GHC.Llvm.Syntax.html#Store"><span class="hs-identifier hs-var">Store</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LMAlign"><span class="hs-identifier hs-type">LMAlign</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Llvm.MetaData.html#MetaAnnot"><span class="hs-identifier hs-type">MetaAnnot</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-154"></span><span>
 </span><span id="line-155"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     Multiway branch
@@ -228,7 +228,7 @@ $c/= :: LlvmAtomicOp -&gt; LlvmAtomicOp -&gt; Bool
     Return a result.
       * result: The variable or constant to return
   -}</span></span><span>
-</span><span id="line-170"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Return"><span class="annot"><a href="GHC.Llvm.Syntax.html#Return"><span class="hs-identifier hs-var">Return</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../base-4.18.2.0/src/GHC.Maybe.html#Maybe/GHC.Maybe.html#Maybe"><span class="hs-identifier hs-type">Maybe</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-170"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Return"><span class="annot"><a href="GHC.Llvm.Syntax.html#Return"><span class="hs-identifier hs-var">Return</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-171"></span><span>
 </span><span id="line-172"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     An instruction for the optimizer that the code following is not reachable
@@ -247,12 +247,7 @@ $c/= :: LlvmAtomicOp -&gt; LlvmAtomicOp -&gt; Bool
   -}</span></span><span>
 </span><span id="line-187"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Nop"><span class="annot"><a href="GHC.Llvm.Syntax.html#Nop"><span class="hs-identifier hs-var">Nop</span></a></span></span><span>
 </span><span id="line-188"></span><span>
-</span><span id="line-189"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
-    A LLVM statement with metadata attached to it.
-  -}</span></span><span>
-</span><span id="line-192"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="MetaStmt"><span class="annot"><a href="GHC.Llvm.Syntax.html#MetaStmt"><span class="hs-identifier hs-var">MetaStmt</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Llvm.MetaData.html#MetaAnnot"><span class="hs-identifier hs-type">MetaAnnot</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><a href="GHC.Llvm.Syntax.html#LlvmStatement"><span class="hs-identifier hs-type">LlvmStatement</span></a></span><span>
-</span><span id="line-193"></span><span>
-</span><span id="line-194"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621681804648"><span id="local-6989586621681804681"><span class="annot"><span class="annottext">LlvmStatement -&gt; LlvmStatement -&gt; Bool
+</span><span id="line-189"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682622773"><span id="local-6989586621682622806"><span class="annot"><span class="annottext">LlvmStatement -&gt; LlvmStatement -&gt; Bool
 (LlvmStatement -&gt; LlvmStatement -&gt; Bool)
 -&gt; (LlvmStatement -&gt; LlvmStatement -&gt; Bool) -&gt; Eq LlvmStatement
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -261,100 +256,100 @@ $c== :: LlvmStatement -&gt; LlvmStatement -&gt; Bool
 $c/= :: LlvmStatement -&gt; LlvmStatement -&gt; Bool
 /= :: LlvmStatement -&gt; LlvmStatement -&gt; Bool
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-195"></span><span>
-</span><span id="line-196"></span><span>
-</span><span id="line-197"></span><span class="annot"><span class="hs-comment">-- | Llvm Expressions</span></span><span>
-</span><span id="line-198"></span><span class="hs-keyword">data</span><span> </span><span id="LlvmExpression"><span class="annot"><a href="GHC.Llvm.Syntax.html#LlvmExpression"><span class="hs-identifier hs-var">LlvmExpression</span></a></span></span><span>
-</span><span id="line-199"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
+</span><span id="line-190"></span><span>
+</span><span id="line-191"></span><span>
+</span><span id="line-192"></span><span class="annot"><span class="hs-comment">-- | Llvm Expressions</span></span><span>
+</span><span id="line-193"></span><span class="hs-keyword">data</span><span> </span><span id="LlvmExpression"><span class="annot"><a href="GHC.Llvm.Syntax.html#LlvmExpression"><span class="hs-identifier hs-var">LlvmExpression</span></a></span></span><span>
+</span><span id="line-194"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     Allocate amount * sizeof(tp) bytes on the stack
       * tp:     LlvmType to reserve room for
       * amount: The nr of tp's which must be allocated
   -}</span></span><span>
-</span><span id="line-204"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="Alloca"><span class="annot"><a href="GHC.Llvm.Syntax.html#Alloca"><span class="hs-identifier hs-var">Alloca</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmType"><span class="hs-identifier hs-type">LlvmType</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
-</span><span id="line-205"></span><span>
-</span><span id="line-206"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
+</span><span id="line-199"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="Alloca"><span class="annot"><a href="GHC.Llvm.Syntax.html#Alloca"><span class="hs-identifier hs-var">Alloca</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmType"><span class="hs-identifier hs-type">LlvmType</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-200"></span><span>
+</span><span id="line-201"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     Perform the machine operator op on the operands left and right
       * op:    operator
       * left:  left operand
       * right: right operand
   -}</span></span><span>
-</span><span id="line-212"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="LlvmOp"><span class="annot"><a href="GHC.Llvm.Syntax.html#LlvmOp"><span class="hs-identifier hs-var">LlvmOp</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmMachOp"><span class="hs-identifier hs-type">LlvmMachOp</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span>
-</span><span id="line-213"></span><span>
-</span><span id="line-214"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
+</span><span id="line-207"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="LlvmOp"><span class="annot"><a href="GHC.Llvm.Syntax.html#LlvmOp"><span class="hs-identifier hs-var">LlvmOp</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmMachOp"><span class="hs-identifier hs-type">LlvmMachOp</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span>
+</span><span id="line-208"></span><span>
+</span><span id="line-209"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     Perform a compare operation on the operands left and right
       * op:    operator
       * left:  left operand
       * right: right operand
   -}</span></span><span>
-</span><span id="line-220"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Compare"><span class="annot"><a href="GHC.Llvm.Syntax.html#Compare"><span class="hs-identifier hs-var">Compare</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmCmpOp"><span class="hs-identifier hs-type">LlvmCmpOp</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span>
-</span><span id="line-221"></span><span>
-</span><span id="line-222"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
+</span><span id="line-215"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Compare"><span class="annot"><a href="GHC.Llvm.Syntax.html#Compare"><span class="hs-identifier hs-var">Compare</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmCmpOp"><span class="hs-identifier hs-type">LlvmCmpOp</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span>
+</span><span id="line-216"></span><span>
+</span><span id="line-217"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     Extract a scalar element from a vector
       * val: The vector
       * idx: The index of the scalar within the vector
   -}</span></span><span>
-</span><span id="line-227"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Extract"><span class="annot"><a href="GHC.Llvm.Syntax.html#Extract"><span class="hs-identifier hs-var">Extract</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span>
-</span><span id="line-228"></span><span>
-</span><span id="line-229"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
+</span><span id="line-222"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Extract"><span class="annot"><a href="GHC.Llvm.Syntax.html#Extract"><span class="hs-identifier hs-var">Extract</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span>
+</span><span id="line-223"></span><span>
+</span><span id="line-224"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     Extract a scalar element from a structure
       * val: The structure
       * idx: The index of the scalar within the structure
     Corresponds to &quot;extractvalue&quot; instruction.
   -}</span></span><span>
-</span><span id="line-235"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ExtractV"><span class="annot"><a href="GHC.Llvm.Syntax.html#ExtractV"><span class="hs-identifier hs-var">ExtractV</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
-</span><span id="line-236"></span><span>
-</span><span id="line-237"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
+</span><span id="line-230"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ExtractV"><span class="annot"><a href="GHC.Llvm.Syntax.html#ExtractV"><span class="hs-identifier hs-var">ExtractV</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-231"></span><span>
+</span><span id="line-232"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     Insert a scalar element into a vector
       * val:   The source vector
       * elt:   The scalar to insert
       * index: The index at which to insert the scalar
   -}</span></span><span>
-</span><span id="line-243"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Insert"><span class="annot"><a href="GHC.Llvm.Syntax.html#Insert"><span class="hs-identifier hs-var">Insert</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span>
-</span><span id="line-244"></span><span>
-</span><span id="line-245"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
+</span><span id="line-238"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Insert"><span class="annot"><a href="GHC.Llvm.Syntax.html#Insert"><span class="hs-identifier hs-var">Insert</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span>
+</span><span id="line-239"></span><span>
+</span><span id="line-240"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     Allocate amount * sizeof(tp) bytes on the heap
       * tp:     LlvmType to reserve room for
       * amount: The nr of tp's which must be allocated
   -}</span></span><span>
-</span><span id="line-250"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Malloc"><span class="annot"><a href="GHC.Llvm.Syntax.html#Malloc"><span class="hs-identifier hs-var">Malloc</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmType"><span class="hs-identifier hs-type">LlvmType</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
-</span><span id="line-251"></span><span>
-</span><span id="line-252"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
+</span><span id="line-245"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Malloc"><span class="annot"><a href="GHC.Llvm.Syntax.html#Malloc"><span class="hs-identifier hs-var">Malloc</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmType"><span class="hs-identifier hs-type">LlvmType</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-246"></span><span>
+</span><span id="line-247"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     Load the value at location ptr
   -}</span></span><span>
-</span><span id="line-255"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Load"><span class="annot"><a href="GHC.Llvm.Syntax.html#Load"><span class="hs-identifier hs-var">Load</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LMAlign"><span class="hs-identifier hs-type">LMAlign</span></a></span><span>
-</span><span id="line-256"></span><span>
-</span><span id="line-257"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
+</span><span id="line-250"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Load"><span class="annot"><a href="GHC.Llvm.Syntax.html#Load"><span class="hs-identifier hs-var">Load</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LMAlign"><span class="hs-identifier hs-type">LMAlign</span></a></span><span>
+</span><span id="line-251"></span><span>
+</span><span id="line-252"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     Atomic load of the value at location ptr
   -}</span></span><span>
-</span><span id="line-260"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ALoad"><span class="annot"><a href="GHC.Llvm.Syntax.html#ALoad"><span class="hs-identifier hs-var">ALoad</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Syntax.html#LlvmSyncOrdering"><span class="hs-identifier hs-type">LlvmSyncOrdering</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Syntax.html#SingleThreaded"><span class="hs-identifier hs-type">SingleThreaded</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span>
-</span><span id="line-261"></span><span>
-</span><span id="line-262"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
+</span><span id="line-255"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ALoad"><span class="annot"><a href="GHC.Llvm.Syntax.html#ALoad"><span class="hs-identifier hs-var">ALoad</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Syntax.html#LlvmSyncOrdering"><span class="hs-identifier hs-type">LlvmSyncOrdering</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Syntax.html#SingleThreaded"><span class="hs-identifier hs-type">SingleThreaded</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span>
+</span><span id="line-256"></span><span>
+</span><span id="line-257"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     Navigate in a structure, selecting elements
       * inbound: Is the pointer inbounds? (computed pointer doesn't overflow)
       * ptr:     Location of the structure
       * indexes: A list of indexes to select the correct value.
   -}</span></span><span>
-</span><span id="line-268"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GetElemPtr"><span class="annot"><a href="GHC.Llvm.Syntax.html#GetElemPtr"><span class="hs-identifier hs-var">GetElemPtr</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-269"></span><span>
-</span><span id="line-270"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
+</span><span id="line-263"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="GetElemPtr"><span class="annot"><a href="GHC.Llvm.Syntax.html#GetElemPtr"><span class="hs-identifier hs-var">GetElemPtr</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-264"></span><span>
+</span><span id="line-265"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     Cast the variable from to the to type. This is an abstraction of three
     cast operators in Llvm, inttoptr, ptrtoint and bitcast.
        * cast: Cast type
        * from: Variable to cast
        * to:   type to cast to
   -}</span></span><span>
-</span><span id="line-277"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Cast"><span class="annot"><a href="GHC.Llvm.Syntax.html#Cast"><span class="hs-identifier hs-var">Cast</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmCastOp"><span class="hs-identifier hs-type">LlvmCastOp</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmType"><span class="hs-identifier hs-type">LlvmType</span></a></span><span>
-</span><span id="line-278"></span><span>
-</span><span id="line-279"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
+</span><span id="line-272"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Cast"><span class="annot"><a href="GHC.Llvm.Syntax.html#Cast"><span class="hs-identifier hs-var">Cast</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmCastOp"><span class="hs-identifier hs-type">LlvmCastOp</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmType"><span class="hs-identifier hs-type">LlvmType</span></a></span><span>
+</span><span id="line-273"></span><span>
+</span><span id="line-274"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     Atomic read-modify-write operation
        * op:       Atomic operation
        * addr:     Address to modify
        * operand:  Operand to operation
        * ordering: Ordering requirement
   -}</span></span><span>
-</span><span id="line-286"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="AtomicRMW"><span class="annot"><a href="GHC.Llvm.Syntax.html#AtomicRMW"><span class="hs-identifier hs-var">AtomicRMW</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Syntax.html#LlvmAtomicOp"><span class="hs-identifier hs-type">LlvmAtomicOp</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Syntax.html#LlvmSyncOrdering"><span class="hs-identifier hs-type">LlvmSyncOrdering</span></a></span><span>
-</span><span id="line-287"></span><span>
-</span><span id="line-288"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
+</span><span id="line-281"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="AtomicRMW"><span class="annot"><a href="GHC.Llvm.Syntax.html#AtomicRMW"><span class="hs-identifier hs-var">AtomicRMW</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Syntax.html#LlvmAtomicOp"><span class="hs-identifier hs-type">LlvmAtomicOp</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Syntax.html#LlvmSyncOrdering"><span class="hs-identifier hs-type">LlvmSyncOrdering</span></a></span><span>
+</span><span id="line-282"></span><span>
+</span><span id="line-283"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     Compare-and-exchange operation
        * addr:     Address to modify
        * old:      Expected value
@@ -365,9 +360,9 @@ $c/= :: LlvmStatement -&gt; LlvmStatement -&gt; Bool
 
     Result is an @i1@, true if store was successful.
   -}</span></span><span>
-</span><span id="line-299"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="CmpXChg"><span class="annot"><a href="GHC.Llvm.Syntax.html#CmpXChg"><span class="hs-identifier hs-var">CmpXChg</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Syntax.html#LlvmSyncOrdering"><span class="hs-identifier hs-type">LlvmSyncOrdering</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Syntax.html#LlvmSyncOrdering"><span class="hs-identifier hs-type">LlvmSyncOrdering</span></a></span><span>
-</span><span id="line-300"></span><span>
-</span><span id="line-301"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
+</span><span id="line-294"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="CmpXChg"><span class="annot"><a href="GHC.Llvm.Syntax.html#CmpXChg"><span class="hs-identifier hs-var">CmpXChg</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Syntax.html#LlvmSyncOrdering"><span class="hs-identifier hs-type">LlvmSyncOrdering</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Syntax.html#LlvmSyncOrdering"><span class="hs-identifier hs-type">LlvmSyncOrdering</span></a></span><span>
+</span><span id="line-295"></span><span>
+</span><span id="line-296"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     Call a function. The result is the value of the expression.
       * tailJumps: CallType to signal if the function should be tail called
       * fnptrval:  An LLVM value containing a pointer to a function to be
@@ -376,9 +371,9 @@ $c/= :: LlvmStatement -&gt; LlvmStatement -&gt; Bool
       * attrs:     A list of function attributes for the call. Only NoReturn,
                    NoUnwind, ReadOnly and ReadNone are valid here.
   -}</span></span><span>
-</span><span id="line-310"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Call"><span class="annot"><a href="GHC.Llvm.Syntax.html#Call"><span class="hs-identifier hs-var">Call</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmCallType"><span class="hs-identifier hs-type">LlvmCallType</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmFuncAttr"><span class="hs-identifier hs-type">LlvmFuncAttr</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-311"></span><span>
-</span><span id="line-312"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
+</span><span id="line-305"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Call"><span class="annot"><a href="GHC.Llvm.Syntax.html#Call"><span class="hs-identifier hs-var">Call</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmCallType"><span class="hs-identifier hs-type">LlvmCallType</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmFuncAttr"><span class="hs-identifier hs-type">LlvmFuncAttr</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-306"></span><span>
+</span><span id="line-307"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     Call a function as above but potentially taking metadata as arguments.
       * tailJumps: CallType to signal if the function should be tail called
       * fnptrval:  An LLVM value containing a pointer to a function to be
@@ -387,9 +382,9 @@ $c/= :: LlvmStatement -&gt; LlvmStatement -&gt; Bool
       * attrs:     A list of function attributes for the call. Only NoReturn,
                    NoUnwind, ReadOnly and ReadNone are valid here.
   -}</span></span><span>
-</span><span id="line-321"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="CallM"><span class="annot"><a href="GHC.Llvm.Syntax.html#CallM"><span class="hs-identifier hs-var">CallM</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmCallType"><span class="hs-identifier hs-type">LlvmCallType</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Llvm.MetaData.html#MetaExpr"><span class="hs-identifier hs-type">MetaExpr</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmFuncAttr"><span class="hs-identifier hs-type">LlvmFuncAttr</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-322"></span><span>
-</span><span id="line-323"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
+</span><span id="line-316"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="CallM"><span class="annot"><a href="GHC.Llvm.Syntax.html#CallM"><span class="hs-identifier hs-var">CallM</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmCallType"><span class="hs-identifier hs-type">LlvmCallType</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Llvm.MetaData.html#MetaExpr"><span class="hs-identifier hs-type">MetaExpr</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmFuncAttr"><span class="hs-identifier hs-type">LlvmFuncAttr</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-317"></span><span>
+</span><span id="line-318"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     Merge variables from different basic blocks which are predecessors of this
     basic block in a new variable of type tp.
       * tp:         type of the merged variable, must match the types of the
@@ -397,9 +392,9 @@ $c/= :: LlvmStatement -&gt; LlvmStatement -&gt; Bool
       * predecessors: A list of variables and the basic block that they originate
                       from.
   -}</span></span><span>
-</span><span id="line-331"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Phi"><span class="annot"><a href="GHC.Llvm.Syntax.html#Phi"><span class="hs-identifier hs-var">Phi</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmType"><span class="hs-identifier hs-type">LlvmType</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span class="hs-special">,</span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
-</span><span id="line-332"></span><span>
-</span><span id="line-333"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
+</span><span id="line-326"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Phi"><span class="annot"><a href="GHC.Llvm.Syntax.html#Phi"><span class="hs-identifier hs-var">Phi</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmType"><span class="hs-identifier hs-type">LlvmType</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span class="hs-special">,</span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-327"></span><span>
+</span><span id="line-328"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     Inline assembly expression. Syntax is very similar to the style used by GCC.
       * assembly:    Actual inline assembly code.
       * constraints: Operand constraints.
@@ -410,14 +405,14 @@ $c/= :: LlvmStatement -&gt; LlvmStatement -&gt; Bool
       * alignstack:  Should the stack be conservatively aligned before this
                      expression is executed.
   -}</span></span><span>
-</span><span id="line-344"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Asm"><span class="annot"><a href="GHC.Llvm.Syntax.html#Asm"><span class="hs-identifier hs-var">Asm</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LMString"><span class="hs-identifier hs-type">LMString</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LMString"><span class="hs-identifier hs-type">LMString</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmType"><span class="hs-identifier hs-type">LlvmType</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
-</span><span id="line-345"></span><span>
-</span><span id="line-346"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
+</span><span id="line-339"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Asm"><span class="annot"><a href="GHC.Llvm.Syntax.html#Asm"><span class="hs-identifier hs-var">Asm</span></a></span></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LMString"><span class="hs-identifier hs-type">LMString</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LMString"><span class="hs-identifier hs-type">LMString</span></a></span><span> </span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmType"><span class="hs-identifier hs-type">LlvmType</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Llvm.Types.html#LlvmVar"><span class="hs-identifier hs-type">LlvmVar</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-340"></span><span>
+</span><span id="line-341"></span><span>  </span><span class="annot"><span class="hs-comment">{- |
     A LLVM expression with metadata attached to it.
   -}</span></span><span>
-</span><span id="line-349"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="MExpr"><span class="annot"><a href="GHC.Llvm.Syntax.html#MExpr"><span class="hs-identifier hs-var">MExpr</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Llvm.MetaData.html#MetaAnnot"><span class="hs-identifier hs-type">MetaAnnot</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><a href="GHC.Llvm.Syntax.html#LlvmExpression"><span class="hs-identifier hs-type">LlvmExpression</span></a></span><span>
-</span><span id="line-350"></span><span>
-</span><span id="line-351"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621681804706"><span id="local-6989586621681804772"><span class="annot"><span class="annottext">LlvmExpression -&gt; LlvmExpression -&gt; Bool
+</span><span id="line-344"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="MExpr"><span class="annot"><a href="GHC.Llvm.Syntax.html#MExpr"><span class="hs-identifier hs-var">MExpr</span></a></span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="GHC.Llvm.MetaData.html#MetaAnnot"><span class="hs-identifier hs-type">MetaAnnot</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><a href="GHC.Llvm.Syntax.html#LlvmExpression"><span class="hs-identifier hs-type">LlvmExpression</span></a></span><span>
+</span><span id="line-345"></span><span>
+</span><span id="line-346"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621682622832"><span id="local-6989586621682622900"><span class="annot"><span class="annottext">LlvmExpression -&gt; LlvmExpression -&gt; Bool
 (LlvmExpression -&gt; LlvmExpression -&gt; Bool)
 -&gt; (LlvmExpression -&gt; LlvmExpression -&gt; Bool) -&gt; Eq LlvmExpression
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -426,5 +421,5 @@ $c== :: LlvmExpression -&gt; LlvmExpression -&gt; Bool
 $c/= :: LlvmExpression -&gt; LlvmExpression -&gt; Bool
 /= :: LlvmExpression -&gt; LlvmExpression -&gt; Bool
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-352"></span><span>
-</span><span id="line-353"></span></pre></body></html>
+</span><span id="line-347"></span><span>
+</span><span id="line-348"></span></pre></body></html>
