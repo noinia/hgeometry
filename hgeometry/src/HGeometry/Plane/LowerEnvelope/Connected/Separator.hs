@@ -13,7 +13,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator
   ( planarSeparator
   ) where
 
-import           Control.Lens ((^..),(^?))
+import           Control.Lens ((^..),(^?), asIndex)
 import qualified Data.Foldable as F
 import           Data.Kind (Type)
 import qualified Data.List as List
@@ -22,6 +22,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map (Map)
 import qualified Data.Map as Map
 import           Data.Maybe (fromMaybe, isJust)
+import           Data.Ord (comparing)
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import           Data.Tree
@@ -52,6 +53,16 @@ sqrt' = floor . sqrt . fromIntegral
 
 type Separator k = ([k],Vector 2 [k])
 
+
+-- | Extracts the maximum from a non-empty list using the given ordering
+viewMaximumBy              :: (a -> a -> Ordering) -> NonEmpty a -> (a, [a])
+viewMaximumBy cmp (x0:|xs) = foldr (\x (m,rest) -> case x `cmp` m of
+                                                     LT -> (m, x:rest)
+                                                     EQ -> (m, x:rest)
+                                                     GT -> (x, m:rest)
+
+                                   ) (x0, []) xs
+
 -- | Returns a pair (separator, Vector2 verticesSubGraphA verticesSubGraphB)
 -- so that
 --
@@ -59,12 +70,12 @@ type Separator k = ([k],Vector 2 [k])
 -- 2) the size of the separator is at most sqrt(n).
 -- 3) the vertex sets of A and B have weight at most 2/3 the total weight
 planarSeparator    :: Ord k => PlaneGraph' k v e -> Separator k
-planarSeparator gr = case trees of
-    ((tr,m):|rest)
+planarSeparator gr = case viewMaximumBy (comparing snd) trees of
+    ((tr,m),rest)
       | m <= twoThirds -> groupComponents
       | otherwise      -> planarSeparator' tr m -- we should also add the remaining vertices
   where
-    trees = NonEmpty.sortOn snd . fmap (\t -> (t, length t)) $ bff gr
+    trees = (\t -> (t, length t)) <$> bff gr
     n     = sum $ fmap snd trees
     half = n `div` 2
     twoThirds = 2 * (n `div` 3)

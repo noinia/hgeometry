@@ -67,7 +67,7 @@ toPlaneGraphMap :: (Plane_ plane r, Num r, Ord r)
                 => MinimizationDiagram r plane -> PlaneGraphMap (Point 2 r) (First r) (E r)
 toPlaneGraphMap = mapWithKeyMerge toTriangulatedGr . asMap
 
-
+-- | Helper function to construct a triangulated plane graph
 toTriangulatedGr   :: (Plane_ plane r, Num r, Ord r)
                    => plane -> Region r (Point 2 r)
                    -> PlaneGraphMap (Point 2 r) (First r) (E r)
