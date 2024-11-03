@@ -13,6 +13,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Separator
   ( planarSeparator
   ) where
 
+import           Control.Lens ((^..),(^?))
 import qualified Data.Foldable as F
 import           Data.Kind (Type)
 import qualified Data.List as List
@@ -20,47 +21,16 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map (Map)
 import qualified Data.Map as Map
-import           Data.Maybe (fromMaybe)
+import           Data.Maybe (fromMaybe, isJust)
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import           Data.Tree
+import           HGeometry.Foldable.Util ()
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Vector
-
---------------------------------------------------------------------------------
--- * BFS
-
--- | Computes a breath first forest
--- (O(n \log n))
-bff    :: Ord k => PlaneGraph k v e -> [Tree k]
-bff gr = go (Map.keysSet gr)
-  where
-    go remaining = case Set.minView remaining of
-      Nothing              -> []
-      Just (v, remaining') -> let (remaining'', t) = bfs gr v remaining'
-                              in t : go remaining''
-
--- | Turn the map into a tree.
-toTree   :: Ord k => Map k [k] -> k -> Tree k
-toTree m = go
-  where
-    go s = Node s $ map go (fromMaybe [] $ Map.lookup s m)
-
--- | BFS from the given starting vertex, and the set of still-to-visit vertices.
--- returns the remaining still-to-visit vertices and the tree.
-bfs      :: Ord k => PlaneGraph k v e -> k -> Set k -> (Set k, Tree k)
-bfs gr s = fmap (flip toTree s) . bfs' [s]
-  where
-    bfs' lvl remaining = foldr visit (remaining, Map.empty) lvl
-
-    visit v (remaining, m) = let chs = filter (flip Set.member remaining) $ neighs v
-                             in (foldr Set.delete remaining chs, Map.insert v chs m)
-    neighs v = maybe [] (Map.elems . fst) $ Map.lookup v gr
-
---------------------------------------------------------------------------------
-
-
-
+import           Hiraffe.AdjacencyListRep.Map
+import           Hiraffe.BFS.Pure
+import           Hiraffe.Graph.Class
 
 --------------------------------------------------------------------------------
 
@@ -88,15 +58,14 @@ type Separator k = ([k],Vector 2 [k])
 -- 1) there are no edges connecting subGraph A and subgraph B,
 -- 2) the size of the separator is at most sqrt(n).
 -- 3) the vertex sets of A and B have weight at most 2/3 the total weight
-planarSeparator    :: Ord k => PlaneGraph k v e -> Separator k
+planarSeparator    :: Ord k => PlaneGraph' k v e -> Separator k
 planarSeparator gr = case trees of
-    []                 -> ([],Vector2 [] [])
-    ((tr,m):rest)
+    ((tr,m):|rest)
       | m <= twoThirds -> groupComponents
       | otherwise      -> planarSeparator' tr m -- we should also add the remaining vertices
   where
-    trees = List.sortOn snd . map (\t -> (t, length t)) $ bff gr
-    n     = sum $ map snd trees
+    trees = NonEmpty.sortOn snd . fmap (\t -> (t, length t)) $ bff gr
+    n     = sum $ fmap snd trees
     half = n `div` 2
     twoThirds = 2 * (n `div` 3)
 
@@ -129,7 +98,7 @@ planarSeparator gr = case trees of
 
 
 -- | contracts the plane graph so that we get a spanning tree of diameter at most sqrt(n).
-contract :: PlaneGraph k v e -> Tree k -> (PlaneGraph k v e, Tree k)
+contract :: PlaneGraph' k v e -> Tree k -> (PlaneGraph' k v e, Tree k)
 contract = undefined
 
 trim _ _ tr = tr
@@ -137,7 +106,7 @@ trim _ _ tr = tr
 
 -- | Given a spanning tree of the graph that has diameter r, compute
 -- a separator of size at most 2r+1
-planarSeparatorTree       :: Ord k => PlaneGraph k v e -> Tree k -> Separator k
+planarSeparatorTree       :: Ord k => PlaneGraph' k v e -> Tree k -> Separator k
 planarSeparatorTree gr tr = (sep, foldMap F.toList <$> trees)
   -- FIXME: continue searching
   where
@@ -283,14 +252,15 @@ type EndPoint a = (a, [Tree a], [Tree a])
 
 -- | Split the leaf of the path
 splitLeaf            :: Ord k
-                     => PlaneGraph k v e
+                     => PlaneGraph' k v e
                      -> (k,k) -> SplitTree k (Tree k) -> SplitTree k (EndPoint k)
 splitLeaf gr (v',w') = fmap $ \(Node u chs) -> split u chs (if u == v' then w' else v')
   where
     split v chs w = case List.break (hasEdge v) chs of
                       (before, _:after) -> (v, before, after)
                       _                 -> error "splitLeaf: absurd. edge not found!?"
-    hasEdge v w = maybe False (F.elem (root w) . fst) $ Map.lookup v gr
+    hasEdge v w = isJust $ gr^?edgeAt (v, root w)
+      -- maybe False (F.elem (root w) . fst) $ gr^?vertexAt v
     -- note: this is linear in the number of edges out of v
 
 -- | Turn the split tree into a separator, and the trees inside the cycle, and outside the
@@ -373,8 +343,11 @@ annotate              :: Tree k -> Tree (Weighted Int k)
 annotate (Node v chs) = let chs' = map annotate chs
                         in Node (Weighted (1 + costs chs') v) chs'
 
-graphEdges :: Ord k => PlaneGraph k v e -> Set (k,k)
-graphEdges = Map.foldMapWithKey (\u (es,_) -> Set.fromList [ (u,v) | v <- Map.elems es, u <= v])
+graphEdges   :: Ord k => PlaneGraph' k v e -> Set (k,k)
+graphEdges gr = Set.fromList [ (u,v) | (u,v) <- gr^..edges.asIndex, u <= v ]
+
+
+  -- Map.foldMapWithKey (\u (es,_) -> Set.fromList [ (u,v) | v <- Map.elems es, u <= v])
 
 treeEdges              :: Ord k => Tree k -> Set (k,k)
 treeEdges (Node u chs) = Set.fromList [ orient (u,v) | Node v _ <- chs ]

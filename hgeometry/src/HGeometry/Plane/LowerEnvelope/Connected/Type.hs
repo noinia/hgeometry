@@ -101,3 +101,43 @@ type CircularList a = [a]
 
 
 --------------------------------------------------------------------------------
+
+-- data MDVertexIx = UnboundedVertexIx
+--                 | BoundedVertexIx {-# UNPACK #-}!Int
+--                 deriving (Show,Read,Eq,Ord)
+
+-- data MDVertex r plane = UnboundedVertex
+--                       | BoundedVertex { _location :: Point 2 r
+--                                       , _definers :: Vector 3 plane
+--                                       }
+--                       deriving (Show,Eq,Ord)
+
+
+-- instance HasVertices' (MinimizationDiagram r plane) where
+--   -- | invariant: vertexIx == UnboundedVertex <=> vertex = UnboundedVertex
+--   type VertexIx (MinimizationDiagram r plane) = MDVertexIx
+--   type Vertex (MinimizationDiagram r plane)   = MDVertex r plane
+--   vertexAt = \case
+--     UnboundedVertexIx -> pure UnboundedVertex
+--     BoundedVertexIx i ->
+
+-- instance HasVertices (MinimizationDiagram r plane) (MinimizationDiagram r plane) where
+-- instance HasDarts' (MinimizationDiagram r plane) where
+--   type DartIx (MinimizationDiagram r plane) = (MDVertexIx, MDVertexIx)
+--   type Dart (MinimizationDiagram r plane)   = (MDVertex r plane, MDVertex r plane)
+--   dartAt = undefined
+
+-- instance HasDarts (MinimizationDiagram r plane) (MinimizationDiagram r plane) where
+
+-- instance DiGraph_ (MinimizationDiagram r plane) where
+--   diGraphFromAdjacencyLists = undefined
+--   endPoints = undefined
+--   outNeighboursOf = undefined
+--   twinDartOf = undefined
+
+
+-- -- | Produce a triangulated plane graph on the bounded vertices.  every vertex is
+-- -- represented by its point, it stores a list of its outgoing edges, and some data.
+-- toGraph :: (Plane_ plane r, Num r, Ord r)
+--         => MinimizationDiagram r plane -> PlaneGraph (Point 2 r) (First r) (E r)
+-- toGraph = mapWithKeyMerge toTriangulatedGr . asMap

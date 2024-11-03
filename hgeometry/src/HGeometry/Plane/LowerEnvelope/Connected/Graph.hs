@@ -9,9 +9,9 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Plane.LowerEnvelope.Connected.Graph
-  ( PlaneGraph
+  ( PlaneGraph'
   , E(..)
-  , toPlaneGraph
+  , toPlaneGraph'
   ) where
 
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -24,12 +24,20 @@ import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Point
 import           HGeometry.Vector
+import           Hiraffe.AdjacencyListRep.Map
+import qualified Data.Map.NonEmpty as NEMap
 
 --------------------------------------------------------------------------------
 
 -- | A Plane graph storing vertices of type v that are identified by keys of type k, and
 -- some ordered sequence of edges (which are ordered using e).
-type PlaneGraph k v e = Map k (Map e k, v)
+type PlaneGraph' k v e = GGraph (Map e) k v e
+
+
+
+-- | A Plane graph storing vertices of type v that are identified by keys of type k, and
+-- some ordered sequence of edges (which are ordered using e).
+type PlaneGraphMap k v e = Map k (Map e k, v)
 
 
 
@@ -41,16 +49,28 @@ instance (Ord r, Num r) => Eq (E r) where
 instance (Ord r, Num r) => Ord (E r) where
   (E v) `compare` (E u) = ccwCmpAroundWith (Vector2 0 1) (origin :: Point 2 r) (Point v) (Point u)
 
+
 -- | Produce a triangulated plane graph on the bounded vertices.  every vertex is
 -- represented by its point, it stores a list of its outgoing edges, and some data.
-toPlaneGraph :: (Plane_ plane r, Num r, Ord r)
-             => MinimizationDiagram r plane -> PlaneGraph (Point 2 r) (First r) (E r)
-toPlaneGraph = mapWithKeyMerge toTriangulatedGr . asMap
+toPlaneGraph' :: (Plane_ plane r, Num r, Ord r)
+             => MinimizationDiagram r plane -> PlaneGraph' (Point 2 r) (First r) (E r)
+toPlaneGraph' = Graph . NEMap.unsafeFromMap
+             . fmap (\(neighOrder, x) -> VertexData x (mkNeighMap neighOrder) neighOrder)
+             . toPlaneGraphMap
+  where
+    mkNeighMap = Map.foldMapWithKey (\e i -> Map.singleton i e)
+
+
+-- | Produce a triangulated plane graph on the bounded vertices.  every vertex is
+-- represented by its point, it stores a list of its outgoing edges, and some data.
+toPlaneGraphMap :: (Plane_ plane r, Num r, Ord r)
+                => MinimizationDiagram r plane -> PlaneGraphMap (Point 2 r) (First r) (E r)
+toPlaneGraphMap = mapWithKeyMerge toTriangulatedGr . asMap
 
 
 toTriangulatedGr   :: (Plane_ plane r, Num r, Ord r)
                    => plane -> Region r (Point 2 r)
-                   -> PlaneGraph (Point 2 r) (First r) (E r)
+                   -> PlaneGraphMap (Point 2 r) (First r) (E r)
 toTriangulatedGr h = Map.mapWithKey (\v adjs -> (adjs, First $ evalAt v h)) . \case
   Bounded vertices       -> case vertices of
     (v0:v1:vs) -> triangulate v0 v1 vs
