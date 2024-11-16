@@ -5,7 +5,6 @@ module HGeometry.Plane.LowerEnvelope.Type
   ) where
 
 import           Control.Lens
-import qualified Data.Set as Set
 import qualified Data.Vector as Vector
 import           HGeometry.Algorithms.BinarySearch
 import           HGeometry.HyperPlane.Class
@@ -15,7 +14,7 @@ import           HGeometry.Plane.LowerEnvelope.Connected
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Sequence.Alternating (Alternating(..))
-import qualified HGeometry.Sequence.Alternating as Alternating
+
 
 --------------------------------------------------------------------------------
 -- * Data type defining a lower envelope
@@ -44,5 +43,5 @@ pointLocateParallel q (Alternating h0 hs) = case binarySearchIn (q `liesRightOf`
                                               AllFalse _      -> h0
   where
     q' `liesRightOf` (sep, _)  = case sep of
-                                   VerticalLineThrough x -> q^.xCoord > x
+                                   VerticalLineThrough x -> q'^.xCoord > x
                                    NonVertical l         -> verticalSideTest q l == GT
