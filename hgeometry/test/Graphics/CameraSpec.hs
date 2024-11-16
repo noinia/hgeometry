@@ -1,7 +1,6 @@
 module Graphics.CameraSpec where
 
 import Control.Lens
-import HGeometry.Ext
 import HGeometry.Graphics.Camera
 import HGeometry.Point
 import HGeometry.Transformation
