@@ -17,16 +17,16 @@ module HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Map (Map)
 import qualified Data.Map as Map
+import qualified Data.Map.NonEmpty as NEMap
 import           Data.Semigroup (First(..))
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
+import           HGeometry.PlaneGraph.Type (E(..))
 import           HGeometry.Point
 import           HGeometry.Vector
 import           Hiraffe.AdjacencyListRep.Map
-import qualified Data.Map.NonEmpty as NEMap
-
 --------------------------------------------------------------------------------
 
 -- | A Plane graph storing vertices of type v that are identified by keys of type k, and
@@ -38,16 +38,6 @@ type PlaneGraph' k v e = GGraph (Map e) k v e
 -- | A Plane graph storing vertices of type v that are identified by keys of type k, and
 -- some ordered sequence of edges (which are ordered using e).
 type PlaneGraphMap k v e = Map k (Map e k, v)
-
-
-
-newtype E r = E (Vector 2 r)
-  deriving newtype (Show)
-
-instance (Ord r, Num r) => Eq (E r) where
-  a == b = a `compare` b == EQ
-instance (Ord r, Num r) => Ord (E r) where
-  (E v) `compare` (E u) = ccwCmpAroundWith (Vector2 0 1) (origin :: Point 2 r) (Point v) (Point u)
 
 
 -- | Produce a triangulated plane graph on the bounded vertices.  every vertex is

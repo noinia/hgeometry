@@ -1,12 +1,17 @@
 module HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
-  ( MonoidalMap, getMap
+  ( MonoidalMap(..)
   , unionsWithKey
   , mapWithKeyMerge
+
+  , MonoidalNEMap(..)
   ) where
 
 import qualified Data.Foldable as F
+import           Data.Foldable1
 import           Data.Map (Map)
 import qualified Data.Map as Map
+import           Data.Map.NonEmpty (NEMap)
+import qualified Data.Map.NonEmpty as NEMap
 
 --------------------------------------------------------------------------------
 -- * Operations on Maps
@@ -23,10 +28,22 @@ mapWithKeyMerge f = getMap . Map.foldMapWithKey (\k v -> MonoidalMap $ f k v)
 -- | A Map in which we combine conflicting elements by using their semigroup operation
 -- rather than picking the left value (as is done in the default Data.Map)
 newtype MonoidalMap k v = MonoidalMap { getMap :: Map k v }
-  deriving (Show)
+  deriving stock (Show)
+  deriving newtype (Functor,Foldable)
 
 instance (Ord k, Semigroup v) => Semigroup (MonoidalMap k v) where
   (MonoidalMap ma) <> (MonoidalMap mb) = MonoidalMap $ Map.unionWith (<>) ma mb
 
 instance (Ord k, Semigroup v) => Monoid (MonoidalMap k v) where
   mempty = MonoidalMap mempty
+
+--------------------------------------------------------------------------------
+
+-- | A NonEmpty Map in which we combine conflicting elements by using their semigroup
+-- operation rather than picking the left value (as is done in the default Data.Map)
+newtype MonoidalNEMap k v = MonoidalNEMap { getNEMap :: NEMap k v }
+  deriving stock (Show)
+  deriving newtype (Functor,Foldable,Foldable1)
+
+instance (Ord k, Semigroup v) => Semigroup (MonoidalNEMap k v) where
+  (MonoidalNEMap ma) <> (MonoidalNEMap mb) = MonoidalNEMap $ NEMap.unionWith (<>) ma mb

@@ -14,6 +14,7 @@ module HGeometry.PlaneGraph
   , module Hiraffe.PlanarGraph.Class
   , PlaneGraph(..)
   , fromAdjacencyRep
+  , fromConnectedSegments
   ) where
 
 import HGeometry.PlaneGraph.Class
