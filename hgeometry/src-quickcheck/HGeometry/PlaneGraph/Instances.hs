@@ -68,6 +68,25 @@ instance ( Arbitrary r
 -- 5) return the largest connected component
 
 
+-- | Generate an arbitrary Plane Graph
+arbitraryPlaneGraph       :: forall proxy s r.
+                             ( Ord r, Fractional r, Arbitrary r
+                             , Show r
+                             )
+                          => proxy s -> Gen (PlaneGraph s (Point 2 r) () ())
+arbitraryPlaneGraph proxy = do
+    n                             <- scale (*2) arbitrary
+    (pts :: NonEmpty (Point 2 r)) <- genNDistinct (max 10 n) arbitrary
+    -- need at least a few vertices so that we generate at least a triangle in the planar graph
+    case voronoiDiagram pts of
+      AllColinear _  -> arbitraryPlaneGraph proxy -- retry
+      ConnectedVD vd -> do gr <- markWitherableEdges (toPlaneGraph' . asMD $ vd)
+                           case traverseNeighbourOrder NEMap.nonEmptyMap $ largestComponent gr of
+                             Nothing  -> arbitraryPlaneGraph proxy -- retry
+                             Just gr' -> pure $ toPlaneGraph proxy gr'
+
+--------------------------------------------------------------------------------
+
  -- | Returns the largest connected component in the graph; i.e. it shrinks
 -- the graph to contain only the vertices/edges in this connected component.
 largestComponent    :: (Ord i, Witherable f)
@@ -76,39 +95,8 @@ largestComponent gr = witherGraphTo tr gr
   where
     tr = maximumBy (comparing length) $ bff gr
 
--- | pre: n >= 1
-genNDistinct       :: Eq a => Int -> Gen a -> Gen (NonEmpty a)
-genNDistinct n gen = NonEmpty.fromList <$> go [] n
-  where
-    go acc 0  = pure acc
-    go acc n' = do x <- gen `suchThat` (\x' -> all (/= x') acc)
-                   go (x:acc) (n'-1)
 
-arbitraryPlaneGraph       :: forall proxy s r.
-                             (Ord r, Fractional r, Arbitrary r
-                             , Show r
-                             )
-                          => proxy s -> Gen (PlaneGraph s (Point 2 r) () ())
-arbitraryPlaneGraph proxy = do
-    n                             <- arbitrary
-    (pts :: NonEmpty (Point 2 r)) <- genNDistinct (max 10 n) arbitrary
-    -- need at least 6 vertices so that we generate at least a triangle in the planar graph
-    case voronoiDiagram pts of
-      AllColinear _  -> arbitraryPlaneGraph proxy -- retry
-      ConnectedVD vd -> toPlaneGraph proxy . mapNeighbourOrder NEMap.unsafeFromMap
-                      . largestComponent
-                     <$> markWitherableEdges (toPlaneGraph' . asMD $ vd)
-
-
--- | Apply some mapping function over the vertexData
-mapNeighbourOrder' :: (f i -> g i) -> VertexData f i v e -> VertexData g i v e
-mapNeighbourOrder' f (VertexData x nm os) = VertexData x nm (f os)
-
-mapNeighbourOrder :: (f i -> g i) -> GGraph f i v e -> GGraph g i v e
-mapNeighbourOrder f (Graph m) = Graph $ fmap (mapNeighbourOrder' f) m
-
--- asMD :: VoronoiDiagram
-
+-- | Convert a Vornooi diagram into a minimization diagram again
 asMD :: ( Point_ point 2 r
         , Num r, Ord r
         ) => VoronoiDiagram' point -> MinimizationDiagram r (Plane r)
@@ -177,3 +165,13 @@ toPlaneGraph _ (Graph m) = PlaneGraph $ (planarGraph theDarts)&vertexData .~ vtx
 
 sequence' :: Applicative m => NonEmpty (NonEmpty (m a, b)) -> m (NonEmpty (NonEmpty (a,b)))
 sequence' = traverse $ traverse (\(fa,b) -> (,b) <$> fa)
+
+--------------------------------------------------------------------------------0
+
+-- | pre: n >= 1
+genNDistinct       :: Eq a => Int -> Gen a -> Gen (NonEmpty a)
+genNDistinct n gen = NonEmpty.fromList <$> go [] n
+  where
+    go acc 0  = pure acc
+    go acc n' = do x <- gen `suchThat` (\x' -> all (/= x') acc)
+                   go (x:acc) (n'-1)

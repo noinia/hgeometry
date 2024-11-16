@@ -13,6 +13,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.PlaneGraph.Type
   ( PlaneGraph(..)
+  , fromAdjacencyRep
   -- , VertexData(VertexData), location
   ) where
 
@@ -29,8 +30,13 @@ import           HGeometry.PlaneGraph.Class
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Transformation
-import           Hiraffe.PlanarGraph
+import           Hiraffe.AdjacencyListRep.Map
+import           Hiraffe.Graph.Class
+import           Hiraffe.PlanarGraph ( PlanarGraph, World(..)
+                                     , DartId, VertexId, FaceId
+                                     )
 import qualified Hiraffe.PlanarGraph as PG
+import           Hiraffe.PlanarGraph.Class
 
 --------------------------------------------------------------------------------
 -- * The PlaneGraph type
@@ -174,3 +180,115 @@ instance ( Point_ v 2 r
 
 
   -- boundingBox = boundingBoxList' . F.toList . fmap (^._2.location) . vertices
+
+
+--------------------------------------------------------------------------------
+
+{-
+-- | Constructs a connected plane graph
+--
+-- pre: The segments form a single connected component
+--
+-- running time: \(O(n\log n)\)
+fromConnectedSegments      :: ( Foldable1 f, Ord r, Num r
+                              , LineSegment_ lineSegment point
+                              , Point_ point 2 r
+                              )
+                           => f lineSegment
+                           -> PlaneGraph s (NonEmpty.NonEmpty point) lineSegment () r
+fromConnectedSegments segs = PlaneGraph $ planarGraph dts & PG.vertexData .~ vxData
+  where
+    -- compute the points, with for every point a list of its darts around it
+
+
+
+
+    pts :: NEMap point [(point, (dart, lineSegment))]
+    pts = ifoldMap1 (\i seg -> NEMap.sigleton (seg^.start)
+
+                    ) (toNonEmpty segs)
+
+      -- foldMap1 (\
+
+      --              )
+
+      --   $ NonEmpty.zipWith mkArc (0 :| [1..])
+
+
+
+
+
+
+
+
+    pts         = Map.fromListWith (<>) . concatMap f . zipWith g [0..] . F.toList $ segs
+
+
+
+    f (s :+ e)  = [ ( s^.start.core
+                    , SP (sing $ s^.start.extra) [(s^.end.core)   :+ h Positive e])
+                  , ( s^.end.core
+                    , SP (sing $ s^.end.extra)   [(s^.start.core) :+ h Negative e])
+                  ]
+
+    mkArc i seg = seg :+
+
+    (s :+ e) = s :+ (Arc i :+ e)
+
+
+
+    h d (a :+ e) = (Dart a d, e)
+
+    sing = NonEmpty.singleton
+
+    vts    ::
+    vts    = map (\(p,sp) -> (p,map (^.extra) . sortAround' (ext p) <$> sp))
+           . Map.assocs $ pts
+
+    -- vertex Data
+    vxData = V.fromList . map (\(p,sp) -> VertexData p (sp^._1)) $ vts
+    -- The darts
+    dts    = fmap (^._2._2) vts
+
+-}
+
+
+-- | Given a connected plane graph in adjacency list format; convert it into an actual
+-- PlaneGraph.
+--
+-- \(O(n\log n)\)
+fromAdjacencyRep       :: (Point_ vertex 2 r, Ord i, Foldable1 f)
+                       => proxy s -> GGraph f i vertex e -> PlaneGraph s vertex e ()
+fromAdjacencyRep proxy = PlaneGraph . PG.fromAdjacencyRep proxy
+
+
+-- toPlaneGraph proxy (Graph m) = gr&vertexData .~  (\(VertexData x _ _) -> x <$> fromFoldable1 m)
+--   where
+--     gr = PlaneGraph $ planarGraph theDarts
+
+--     vtxData =
+
+--     --  a non-empty list of vertices, with for each vertex the darts in order around the vertex
+--     theDarts  = evalState (sequence' theDarts) (0 :+ Map.empty)
+
+--     theDarts' = toNonEmpty $ imap toIncidentDarts m
+--     -- turn the outgoing edges of u into darts
+--     toIncidentDarts u (VertexData _ neighMap neighOrder) =
+--       (\v -> (toDart u v, neighMap Map.! u)) <$> toNonEmpty neighOrder
+--     -- create the dart corresponding to vertices u and v
+
+--     toDart u v | u <= v    =  flip Dart Positive <$> arc u v
+--                | otherwise =  flip Dart Negative <$> arc v u
+
+--     arc u v = gets (arcOf (u,v)) >>= \case
+--                 Just a  -> pure a
+--                 Nothing -> do a <- nextArc
+--                               modify $ insertArc (u,v) a
+--                               pure a
+
+--     arcOf x       = Map.lookup x . view extra
+--     insertArc k v = over extra $ Map.insert k v
+
+--     nextArc = do i <- gets (view core)
+--                  modify $ over core (+1)
+--                  pure $ Arc i
