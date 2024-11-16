@@ -17,6 +17,7 @@ module HGeometry.VoronoiDiagram.ViaLowerEnvelope
   , voronoiDiagram
   , voronoiVertices
   -- , edgeGeometries
+  , pointToPlane
   ) where
 
 import           Control.Lens
@@ -104,9 +105,12 @@ voronoiDiagramWith :: ( Point_ point 2 r, Functor nonEmpty, Ord point
 voronoiDiagramWith lowerEnv pts = case lowerEnv . fmap (\p -> pointToPlane p :+ p) $ pts of
     ParallelStrips strips -> AllColinear $ fmap (^.extra) strips
     ConnectedEnvelope env -> ConnectedVD . VoronoiDiagram . cmap (^.extra) $ env
+
+
+-- | lifts the point to a plane; so that the lower envelope corresponds to the VD
+pointToPlane :: (Point_ point 2 r, Num r) => point -> Plane r
+pointToPlane = flipZ . liftPointToPlane
   where
-    -- lifts the point to a plane; so that the lower envelope corresponds to the VD
-    pointToPlane = flipZ . liftPointToPlane
     flipZ = over (hyperPlaneCoefficients.traverse) negate
 
 

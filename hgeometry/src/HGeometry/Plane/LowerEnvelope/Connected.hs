@@ -9,7 +9,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Plane.LowerEnvelope.Connected
-  ( MinimizationDiagram
+  ( MinimizationDiagram(..)
   , asMap
   , Region(..)
   , CircularList

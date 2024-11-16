@@ -10,9 +10,12 @@
 --------------------------------------------------------------------------------
 module HGeometry.PlaneGraph.Instances
   ( arbitraryPlaneGraph
+  , QuickCheckWorld
   ) where
 
 import Control.Lens
+import Control.Monad.State
+import           Control.Subcategory.Functor
 import Data.Coerce
 import Data.Foldable1
 import qualified Data.List.NonEmpty as NonEmpty
@@ -24,24 +27,36 @@ import Data.Proxy
 import qualified Data.Set as Set
 import Data.Set(Set)
 import Data.Tree
+import qualified Data.Vector.NonEmpty as Vector
+import HGeometry.Ext
+import HGeometry.Foldable.Util
+import HGeometry.HyperPlane.NonVertical
 import HGeometry.Instances ()
+import HGeometry.Plane.LowerEnvelope.Connected(MinimizationDiagram(..))
 import HGeometry.Plane.LowerEnvelope.Connected.Graph
 import HGeometry.PlaneGraph
 import HGeometry.Point
+import HGeometry.Properties
 import HGeometry.VoronoiDiagram
+import HGeometry.VoronoiDiagram.ViaLowerEnvelope
 import Hiraffe.AdjacencyListRep.Map
 import Hiraffe.BFS.Pure
+import Hiraffe.PlanarGraph(planarGraph, vertexData)
+import Hiraffe.PlanarGraph.Dart(Arc(..), Dart(..), Direction(..))
 import Prelude hiding (filter)
-import Test.QuickCheck
+import Test.QuickCheck hiding (Positive, Negative)
 import Test.QuickCheck.Instances ()
 import Witherable
 
+
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 data QuickCheckWorld
 
 instance ( Arbitrary r
-         , Ord r
+         , Ord r, Fractional r
+         , Show r
          ) => Arbitrary (PlaneGraph QuickCheckWorld (Point 2 r) () ()) where
   arbitrary = arbitraryPlaneGraph Proxy
 
@@ -61,23 +76,52 @@ largestComponent gr = witherGraphTo tr gr
   where
     tr = maximumBy (comparing length) $ bff gr
 
+-- | pre: n >= 1
+genNDistinct       :: Eq a => Int -> Gen a -> Gen (NonEmpty a)
+genNDistinct n gen = NonEmpty.fromList <$> go [] n
+  where
+    go acc 0  = pure acc
+    go acc n' = do x <- gen `suchThat` (\x' -> all (/= x') acc)
+                   go (x:acc) (n'-1)
+
 arbitraryPlaneGraph       :: forall proxy s r.
-                             (Ord r)
+                             (Ord r, Fractional r, Arbitrary r
+                             , Show r
+                             )
                           => proxy s -> Gen (PlaneGraph s (Point 2 r) () ())
 arbitraryPlaneGraph proxy = do
-    (pts :: NonEmpty (Point 2 r)) <- arbitrary
+    n                             <- arbitrary
+    (pts :: NonEmpty (Point 2 r)) <- genNDistinct (max 10 n) arbitrary
+    -- need at least 6 vertices so that we generate at least a triangle in the planar graph
     case voronoiDiagram pts of
       AllColinear _  -> arbitraryPlaneGraph proxy -- retry
-      ConnectedVD vd -> toPlaneGraph proxy . largestComponent
-                        <$> markWitherableEdges (toPlaneGraph' . asMD $ vd)
+      ConnectedVD vd -> toPlaneGraph proxy . mapNeighbourOrder NEMap.unsafeFromMap
+                      . largestComponent
+                     <$> markWitherableEdges (toPlaneGraph' . asMD $ vd)
+
+
+-- | Apply some mapping function over the vertexData
+mapNeighbourOrder' :: (f i -> g i) -> VertexData f i v e -> VertexData g i v e
+mapNeighbourOrder' f (VertexData x nm os) = VertexData x nm (f os)
+
+mapNeighbourOrder :: (f i -> g i) -> GGraph f i v e -> GGraph g i v e
+mapNeighbourOrder f (Graph m) = Graph $ fmap (mapNeighbourOrder' f) m
 
 -- asMD :: VoronoiDiagram
-asMD = undefined
+
+asMD :: ( Point_ point 2 r
+        , Num r, Ord r
+        ) => VoronoiDiagram' point -> MinimizationDiagram r (Plane r)
+asMD = MinimizationDiagram . Map.mapKeys pointToPlane . coerce
 
 
 -- | select a random subset of edges. I.e. it marks the edges we want to retain.
-markWitherableEdges    :: GGraph f i v e -> Gen (GGraph f i v (Bool,e))
-markWitherableEdges gr = gr&edges %%~ \x -> (,x) <$> arbitrary
+markWitherableEdges    :: Ord i => GGraph f i v e -> Gen (GGraph f i v (Bool,e))
+markWitherableEdges gr = gr&edges %%~ \x -> (,x) <$> arbitrary'
+  where
+    arbitrary' = frequency [ (19, pure  True)
+                           , (1,  pure False)
+                           ]
 
 -- | Retain only the selected subset of the vertices, and the edges marked
 witherGraphTo               :: ( Foldable1 g, Witherable f, Ord i
@@ -96,11 +140,40 @@ witherGraphTo vs (Graph gr) = Graph $ fmap removeEdges m
 
 
 -- | Given a connected plane graph in adjacency list format; convert it into an actual
--- PlaneGraph
-toPlaneGraph                 :: (Ord r, Foldable1 f
-                                )
-                             => proxy s
-                             -> GGraph f (Point 2 r) v e -> PlaneGraph s (Point 2 r) () ()
-toPlaneGraph proxy (Graph m) = fromAdjacencyLists . fmap f . NEMap.assocs $ m
+-- PlaneGraph.
+--
+-- \(O(n\log n)\)
+toPlaneGraph             :: (Ord r, Foldable1 f)
+                         => proxy s
+                         -> GGraph f (Point 2 r) v e -> PlaneGraph s (Point 2 r) () ()
+toPlaneGraph _ (Graph m) = PlaneGraph $ (planarGraph theDarts)&vertexData .~ vtxData
   where
-    f (vi, VertexData v eData neighs) = (vi, v, (\vj -> (vj, eData Map.! vj)) <$> neighs)
+    vtxData = Vector.fromNonEmptyN1 (length m) (NEMap.keys m)
+
+    --  a non-empty list of vertices, with for each vertex the darts in order around the vertex
+    theDarts  = evalState (sequence' theDarts') (0 :+ Map.empty)
+    theDarts' = toNonEmpty $ NEMap.mapWithKey toIncidentDarts m
+    -- turn the outgoing edges of u into darts
+    toIncidentDarts u (VertexData _ _ neighOrder) =
+      (\v -> (toDart u v, ())) <$> toNonEmpty neighOrder
+    -- create the dart corresponding to vertices u and v
+
+    toDart u v | u <= v    =  flip Dart Positive <$> arc u v
+               | otherwise =  flip Dart Negative <$> arc v u
+
+    arc u v = gets (arcOf (u,v)) >>= \case
+                Just a  -> pure a
+                Nothing -> do a <- nextArc
+                              modify $ insertArc (u,v) a
+                              pure a
+
+    arcOf x       = Map.lookup x . view extra
+    insertArc k v = over extra $ Map.insert k v
+
+    nextArc = do i <- gets (view core)
+                 modify $ over core (+1)
+                 pure $ Arc i
+
+
+sequence' :: Applicative m => NonEmpty (NonEmpty (m a, b)) -> m (NonEmpty (NonEmpty (a,b)))
+sequence' = traverse $ traverse (\(fa,b) -> (,b) <$> fa)
