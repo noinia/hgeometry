@@ -1,0 +1,223 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE QuasiQuotes #-}</span><span>
+</span><span id="line-3"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Module      :  Ply.Writer</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- Helper module to write PLY files; so that we can export simple 3D scenes.</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="PLY.Writer.html"><span class="hs-identifier">PLY.Writer</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="PLY.Writer.html#renderOutputToFile"><span class="hs-identifier">renderOutputToFile</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="PLY.Writer.html#renderOutput"><span class="hs-identifier">renderOutput</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-223c80970ea2a6a580915713968707eae4531d14d67c98fda8007384a0c03c49/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Lazy.Char8</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Char8</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html"><span class="hs-identifier">HGeometry.Ext</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Triangle</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/file-io-0.1.4-d405096865a6990ede6bcfadaae47a30029f4e9c5e7f8b33802845711d86d8d9/share/doc/html/src/System.File.OsPath.html/System.File.OsPath.html"><span class="hs-identifier">System.File.OsPath</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">File</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">System.OsPath</span></span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="annot"><span class="hs-comment">-- | Writes the the points and triangles to a file in PLY format.</span></span><span>
+</span><span id="line-31"></span><span id="local-6989586621679132827"><span id="local-6989586621679132829"><span id="local-6989586621679132830"><span class="annot"><a href="PLY.Writer.html#renderOutputToFile"><span class="hs-identifier hs-type">renderOutputToFile</span></a></span><span>           </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679132827"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679132829"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679132830"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679132830"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>                             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">OsPath</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679132827"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679132829"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>                             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Triangle</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679132829"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-34"></span><span>                             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-35"></span><span id="renderOutputToFile"><span class="annot"><span class="annottext">renderOutputToFile :: forall (f :: * -&gt; *) point r.
+(Foldable1 f, Point_ point 3 r, Show r) =&gt;
+OsPath -&gt; f (point :+ Int) -&gt; [Triangle (point :+ Int)] -&gt; IO ()
+</span><a href="PLY.Writer.html#renderOutputToFile"><span class="hs-identifier hs-var hs-var">renderOutputToFile</span></a></span></span><span> </span><span id="local-6989586621679133023"><span class="annot"><span class="annottext">OsPath
+</span><a href="#local-6989586621679133023"><span class="hs-identifier hs-var">fp</span></a></span></span><span> </span><span id="local-6989586621679133024"><span class="annot"><span class="annottext">f (point :+ Int)
+</span><a href="#local-6989586621679133024"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span id="local-6989586621679133025"><span class="annot"><span class="annottext">[Triangle (point :+ Int)]
+</span><a href="#local-6989586621679133025"><span class="hs-identifier hs-var">ts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">OsPath -&gt; ByteString -&gt; IO ()
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/file-io-0.1.4-d405096865a6990ede6bcfadaae47a30029f4e9c5e7f8b33802845711d86d8d9/share/doc/html/src/System.File.OsPath.Internal.html/System.File.OsPath.Internal.html#writeFile"><span class="hs-identifier hs-var">File.writeFile</span></a></span><span> </span><span class="annot"><span class="annottext">OsPath
+</span><a href="#local-6989586621679133023"><span class="hs-identifier hs-var">fp</span></a></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; IO ()) -&gt; ByteString -&gt; IO ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">f (point :+ Int) -&gt; [Triangle (point :+ Int)] -&gt; ByteString
+forall (f :: * -&gt; *) point r.
+(Foldable1 f, Point_ point 3 r, Show r) =&gt;
+f (point :+ Int) -&gt; [Triangle (point :+ Int)] -&gt; ByteString
+</span><a href="PLY.Writer.html#renderOutput"><span class="hs-identifier hs-var">renderOutput</span></a></span><span> </span><span class="annot"><span class="annottext">f (point :+ Int)
+</span><a href="#local-6989586621679133024"><span class="hs-identifier hs-var">pts</span></a></span><span> </span><span class="annot"><span class="annottext">[Triangle (point :+ Int)]
+</span><a href="#local-6989586621679133025"><span class="hs-identifier hs-var">ts</span></a></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- | Generates the content of the PLY file for the given non-empty list of points and the</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- list of triangles</span><span>
+</span><span id="line-39"></span><span class="hs-comment">--  assumes points are 0 indexed.</span><span>
+</span><span id="line-40"></span><span id="local-6989586621679132873"><span id="local-6989586621679132874"><span id="local-6989586621679132875"><span class="annot"><a href="PLY.Writer.html#renderOutput"><span class="hs-identifier hs-type">renderOutput</span></a></span><span>                             </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679132873"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679132874"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679132875"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679132875"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>                                         </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679132873"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679132874"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Triangle</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679132874"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-42"></span><span>                                         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char8.ByteString</span></span></span></span></span><span>
+</span><span id="line-43"></span><span id="renderOutput"><span class="annot"><span class="annottext">renderOutput :: forall (f :: * -&gt; *) point r.
+(Foldable1 f, Point_ point 3 r, Show r) =&gt;
+f (point :+ Int) -&gt; [Triangle (point :+ Int)] -&gt; ByteString
+</span><a href="PLY.Writer.html#renderOutput"><span class="hs-identifier hs-var hs-var">renderOutput</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">f (point :+ Int) -&gt; [point :+ Int]
+forall a. f a -&gt; [a]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679133171"><span class="annot"><span class="annottext">[point :+ Int]
+</span><a href="#local-6989586621679133171"><span class="hs-identifier hs-var">pts</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679133172"><span class="annot"><span class="annottext">[Triangle (point :+ Int)]
+</span><a href="#local-6989586621679133172"><span class="hs-identifier hs-var">ts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-44"></span><span>    </span><span class="annot"><span class="annottext">[ByteString] -&gt; ByteString
+</span><span class="hs-identifier hs-var">Char8.unlines</span></span><span> </span><span class="annot"><span class="annottext">([ByteString] -&gt; ByteString) -&gt; [ByteString] -&gt; ByteString
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[ByteString]
+</span><a href="#local-6989586621679133174"><span class="hs-identifier hs-var">hdr</span></a></span><span> </span><span class="annot"><span class="annottext">[ByteString] -&gt; [ByteString] -&gt; [ByteString]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">((point :+ Int) -&gt; ByteString) -&gt; [point :+ Int] -&gt; [ByteString]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(point :+ Int) -&gt; ByteString
+forall point r extra.
+(Point_ point 3 r, Show r) =&gt;
+(point :+ extra) -&gt; ByteString
+</span><a href="PLY.Writer.html#renderPt"><span class="hs-identifier hs-var">renderPt</span></a></span><span> </span><span class="annot"><span class="annottext">[point :+ Int]
+</span><a href="#local-6989586621679133171"><span class="hs-identifier hs-var">pts</span></a></span><span> </span><span class="annot"><span class="annottext">[ByteString] -&gt; [ByteString] -&gt; [ByteString]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">(Triangle (point :+ Int) -&gt; ByteString)
+-&gt; [Triangle (point :+ Int)] -&gt; [ByteString]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">Triangle (point :+ Int) -&gt; ByteString
+forall point r.
+(Point_ point 3 r, Show r) =&gt;
+Triangle (point :+ Int) -&gt; ByteString
+</span><a href="PLY.Writer.html#renderTri"><span class="hs-identifier hs-var">renderTri</span></a></span><span> </span><span class="annot"><span class="annottext">[Triangle (point :+ Int)]
+</span><a href="#local-6989586621679133172"><span class="hs-identifier hs-var">ts</span></a></span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-46"></span><span>    </span><span id="local-6989586621679133174"><span class="annot"><span class="annottext">hdr :: [ByteString]
+</span><a href="#local-6989586621679133174"><span class="hs-identifier hs-var hs-var">hdr</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;ply&quot;</span></span><span>
+</span><span id="line-47"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;format ascii 1.0&quot;</span></span><span>
+</span><span id="line-48"></span><span>          </span><span class="hs-special">,</span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;element vertex &quot;</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; ByteString -&gt; ByteString
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; ByteString
+forall a. Show a =&gt; a -&gt; ByteString
+</span><a href="PLY.Writer.html#showT"><span class="hs-identifier hs-var">showT</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; ByteString) -&gt; Int -&gt; ByteString
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[point :+ Int] -&gt; Int
+forall a. [a] -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[point :+ Int]
+</span><a href="#local-6989586621679133171"><span class="hs-identifier hs-var">pts</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-49"></span><span>          </span><span class="hs-special">,</span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;property float32 x&quot;</span></span><span>
+</span><span id="line-50"></span><span>          </span><span class="hs-special">,</span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;property float32 y&quot;</span></span><span>
+</span><span id="line-51"></span><span>          </span><span class="hs-special">,</span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;property float32 z&quot;</span></span><span>
+</span><span id="line-52"></span><span>          </span><span class="hs-special">,</span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;element face &quot;</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; ByteString -&gt; ByteString
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; ByteString
+forall a. Show a =&gt; a -&gt; ByteString
+</span><a href="PLY.Writer.html#showT"><span class="hs-identifier hs-var">showT</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; ByteString) -&gt; Int -&gt; ByteString
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[Triangle (point :+ Int)] -&gt; Int
+forall a. [a] -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[Triangle (point :+ Int)]
+</span><a href="#local-6989586621679133172"><span class="hs-identifier hs-var">ts</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span>          </span><span class="hs-special">,</span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;property list uchar int vertex_index&quot;</span></span><span>
+</span><span id="line-54"></span><span>          </span><span class="hs-special">,</span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;end_header&quot;</span></span><span>
+</span><span id="line-55"></span><span>          </span><span class="hs-special">]</span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="annot"><span class="hs-comment">-- | Writes a Point to ply format</span></span><span>
+</span><span id="line-58"></span><span id="local-6989586621679132886"><span id="local-6989586621679132887"><span id="local-6989586621679132888"><span class="annot"><a href="PLY.Writer.html#renderPt"><span class="hs-identifier hs-type">renderPt</span></a></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679132886"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679132887"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679132887"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679132886"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679132888"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char8.ByteString</span></span></span></span></span><span>
+</span><span id="line-59"></span><span id="renderPt"><span class="annot"><span class="annottext">renderPt :: forall point r extra.
+(Point_ point 3 r, Show r) =&gt;
+(point :+ extra) -&gt; ByteString
+</span><a href="PLY.Writer.html#renderPt"><span class="hs-identifier hs-var hs-var">renderPt</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679133305"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679133305"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><span class="annottext">extra
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point3</span></span><span> </span><span id="local-6989586621679133308"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679133308"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679133309"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679133309"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span id="local-6989586621679133310"><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679133310"><span class="hs-identifier hs-var">z</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ASetter (Point 3 r) (Point 3 ByteString) r ByteString
+-&gt; (r -&gt; ByteString) -&gt; Point 3 r -&gt; Point 3 ByteString
+forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-223c80970ea2a6a580915713968707eae4531d14d67c98fda8007384a0c03c49/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#over"><span class="hs-identifier hs-var">over</span></a></span><span> </span><span class="annot"><span class="annottext">ASetter (Point 3 r) (Point 3 ByteString) r ByteString
+(NumType (Point 3 r) -&gt; Identity (NumType (Point 3 ByteString)))
+-&gt; Point 3 r -&gt; Identity (Point 3 ByteString)
+forall point point'.
+HasCoordinates point point' =&gt;
+IndexedTraversal1 Int point point' (NumType point) (NumType point')
+IndexedTraversal1
+  Int
+  (Point 3 r)
+  (Point 3 ByteString)
+  (NumType (Point 3 r))
+  (NumType (Point 3 ByteString))
+</span><span class="hs-identifier hs-var">coordinates</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; ByteString
+forall a. Show a =&gt; a -&gt; ByteString
+</span><a href="PLY.Writer.html#showT"><span class="hs-identifier hs-var">showT</span></a></span><span> </span><span class="annot"><span class="annottext">(Point 3 r -&gt; Point 3 ByteString)
+-&gt; Point 3 r -&gt; Point 3 ByteString
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679133305"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Point 3 r) point (Point 3 r) -&gt; Point 3 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-223c80970ea2a6a580915713968707eae4531d14d67c98fda8007384a0c03c49/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 3 r) point (Point 3 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' point (Point 3 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span>
+</span><span id="line-60"></span><span>                    </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">[ByteString] -&gt; ByteString
+</span><span class="hs-identifier hs-var">Char8.unwords</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679133308"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679133309"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">ByteString
+</span><a href="#local-6989586621679133310"><span class="hs-identifier hs-var">z</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span class="annot"><span class="hs-comment">-- | Writes a triangle to ply format</span></span><span>
+</span><span id="line-63"></span><span id="local-6989586621679132889"><span id="local-6989586621679132890"><span class="annot"><a href="PLY.Writer.html#renderTri"><span class="hs-identifier hs-type">renderTri</span></a></span><span>                  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679132889"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679132890"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679132890"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>                           </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Triangle</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679132889"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char8.ByteString</span></span></span></span><span>
+</span><span id="line-65"></span><span id="renderTri"><span class="annot"><span class="annottext">renderTri :: forall point r.
+(Point_ point 3 r, Show r) =&gt;
+Triangle (point :+ Int) -&gt; ByteString
+</span><a href="PLY.Writer.html#renderTri"><span class="hs-identifier hs-var hs-var">renderTri</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Triangle</span></span><span> </span><span id="local-6989586621679133323"><span class="annot"><span class="annottext">point :+ Int
+</span><a href="#local-6989586621679133323"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679133324"><span class="annot"><span class="annottext">point :+ Int
+</span><a href="#local-6989586621679133324"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679133325"><span class="annot"><span class="annottext">point :+ Int
+</span><a href="#local-6989586621679133325"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679133329"><span class="annot"><span class="annottext">i :: (core :+ a) -&gt; ByteString
+</span><a href="#local-6989586621679133329"><span class="hs-identifier hs-var hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679133330"><span class="annot"><span class="annottext">core :+ a
+</span><a href="#local-6989586621679133330"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; ByteString
+forall a. Show a =&gt; a -&gt; ByteString
+</span><a href="PLY.Writer.html#showT"><span class="hs-identifier hs-var">showT</span></a></span><span> </span><span class="annot"><span class="annottext">(a -&gt; ByteString) -&gt; a -&gt; ByteString
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">core :+ a
+</span><a href="#local-6989586621679133330"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">(core :+ a) -&gt; Getting a (core :+ a) a -&gt; a
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-223c80970ea2a6a580915713968707eae4531d14d67c98fda8007384a0c03c49/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting a (core :+ a) a
+forall core extra extra' (f :: * -&gt; *).
+Functor f =&gt;
+(extra -&gt; f extra') -&gt; (core :+ extra) -&gt; f (core :+ extra')
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#extra"><span class="hs-identifier hs-var">extra</span></a></span><span> </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">[ByteString] -&gt; ByteString
+</span><span class="hs-identifier hs-var">Char8.unwords</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">ByteString
+</span><span class="hs-string">&quot;3&quot;</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">(point :+ Int) -&gt; ByteString
+forall {a} {core}. Show a =&gt; (core :+ a) -&gt; ByteString
+</span><a href="#local-6989586621679133329"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">point :+ Int
+</span><a href="#local-6989586621679133323"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(point :+ Int) -&gt; ByteString
+forall {a} {core}. Show a =&gt; (core :+ a) -&gt; ByteString
+</span><a href="#local-6989586621679133329"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">point :+ Int
+</span><a href="#local-6989586621679133324"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(point :+ Int) -&gt; ByteString
+forall {a} {core}. Show a =&gt; (core :+ a) -&gt; ByteString
+</span><a href="#local-6989586621679133329"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">point :+ Int
+</span><a href="#local-6989586621679133325"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="annot"><span class="hs-comment">-- | Helper to output stuff to bytestrings</span></span><span>
+</span><span id="line-68"></span><span id="local-6989586621679132892"><span class="annot"><a href="PLY.Writer.html#showT"><span class="hs-identifier hs-type">showT</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679132892"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679132892"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Char8.ByteString</span></span></span><span>
+</span><span id="line-69"></span><span id="showT"><span class="annot"><span class="annottext">showT :: forall a. Show a =&gt; a -&gt; ByteString
+</span><a href="PLY.Writer.html#showT"><span class="hs-identifier hs-var hs-var">showT</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; ByteString
+</span><span class="hs-identifier hs-var">Char8.pack</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; ByteString) -&gt; (a -&gt; String) -&gt; a -&gt; ByteString
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; String
+forall a. Show a =&gt; a -&gt; String
+</span><span class="hs-identifier hs-var">show</span></span><span>
+</span><span id="line-70"></span></pre></body></html>
