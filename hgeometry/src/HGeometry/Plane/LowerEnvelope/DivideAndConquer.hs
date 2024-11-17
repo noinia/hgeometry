@@ -2,36 +2,38 @@ module HGeometry.Plane.LowerEnvelope.DivideAndConquer
   ( lowerEnvelope
   ) where
 
-import           Control.Lens
-import           Data.Foldable1
-import qualified Data.List as List
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
-import qualified Data.Set as Set
-import           Data.Word
-import           HGeometry.Ext
-import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Intersection
-import           HGeometry.Line
-import           HGeometry.Line.General
-import           HGeometry.Line.LineEQ
-import qualified HGeometry.Line.LowerEnvelope as LowerEnvelope
-import           HGeometry.Line.PointAndVector
-import           HGeometry.Plane.LowerEnvelope.AdjListForm
-import           HGeometry.Plane.LowerEnvelope.EpsApproximation
-import qualified HGeometry.Plane.LowerEnvelope.Naive as Naive
-import           HGeometry.Plane.LowerEnvelope.Type
-import           HGeometry.Plane.LowerEnvelope.VertexForm
-import           HGeometry.Point
-import           HGeometry.Properties
-import           HGeometry.Vector
-import           Witherable
+-- import           Control.Lens
+-- import           Data.Foldable1
+-- import qualified Data.List as List
+-- import           Data.List.NonEmpty (NonEmpty(..))
+-- import qualified Data.List.NonEmpty as NonEmpty
+-- import qualified Data.Map as Map
+-- import qualified Data.Set as Set
+-- import           Data.Word
+-- import           HGeometry.Ext
+-- import           HGeometry.HyperPlane.Class
+-- import           HGeometry.HyperPlane.NonVertical
+-- import           HGeometry.Intersection
+-- import           HGeometry.Line
+-- import           HGeometry.Line.General
+-- import           HGeometry.Line.LineEQ
+-- import qualified HGeometry.Line.LowerEnvelope as LowerEnvelope
+-- import           HGeometry.Line.PointAndVector
+-- import           HGeometry.Plane.LowerEnvelope.AdjListForm
+-- import           HGeometry.Plane.LowerEnvelope.EpsApproximation
+-- import qualified HGeometry.Plane.LowerEnvelope.Naive as Naive
+-- import           HGeometry.Plane.LowerEnvelope.Type
+-- import           HGeometry.Plane.LowerEnvelope.VertexForm
+-- import           HGeometry.Point
+-- import           HGeometry.Properties
+-- import           HGeometry.Vector
+-- import           Witherable
 
 --------------------------------------------------------------------------------
 
+lowerEnvelope = undefined
 
+{-
 
 -- | below this value we use the naive algorithm.
 nZero :: Int
@@ -274,3 +276,6 @@ planarSeparator gr = case List.break (\lvl -> accumSize lvl < half) lvls of
 
 -- planarSeparators :: PlanarGraph_ planarGraph
 --                  => planarGraph -> Tree
+
+
+-}

@@ -149,10 +149,10 @@ testIpe inFp outFp = do
                (addStyleSheet opacitiesStyle $ singlePageFromContent out)
 
 
-theEdges :: PlaneGraph (Point 2 R) h (E R) -> IpeObject' Group R
-theEdges = ipeGroup . Map.foldMapWithKey (\v (adjs, _) ->
-               foldMap (\w -> [ iO $ defIO (ClosedLineSegment v w)
-                              ]) adjs)
+-- theEdges :: PlaneGraph' (Point 2 R) h (E R) -> IpeObject' Group R
+-- theEdges = ipeGroup . Map.foldMapWithKey (\v (adjs, _) ->
+--                foldMap (\w -> [ iO $ defIO (ClosedLineSegment v w)
+--                               ]) adjs)
 
 
 -- -- build a triangulated graph from the points in the input file

@@ -1,7 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  HGeometryPlaneGraph.Type
+-- Module      :  HGeometry.PlaneGraph.Type
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -13,24 +13,41 @@
 --------------------------------------------------------------------------------
 module HGeometry.PlaneGraph.Type
   ( PlaneGraph(..)
+  , fromAdjacencyRep
+  , fromConnectedSegments
   -- , VertexData(VertexData), location
+
+  , E(..)
   ) where
 
 import           Control.Lens hiding (holes, holesOf, (.=))
 import           Data.Coerce
 import           Data.Foldable1
+import           Data.Foldable1.WithIndex
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
+import qualified Data.Map.NonEmpty as NEMap
 import qualified Data.Vector.NonEmpty as Vector
 import           Data.YAML
 import           GHC.Generics (Generic)
 import           HGeometry.Box
 import           HGeometry.Foldable.Sort (sortBy )
+import           HGeometry.LineSegment
+import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.PlaneGraph.Class
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Transformation
-import           Hiraffe.PlanarGraph
+import           HGeometry.Vector
+import           Hiraffe.AdjacencyListRep.Map
+import           Hiraffe.Graph.Class
+import           Hiraffe.PlanarGraph ( PlanarGraph, World(..)
+                                     , DartId, VertexId, FaceId
+                                     )
 import qualified Hiraffe.PlanarGraph as PG
+import           Hiraffe.PlanarGraph.Class
+import qualified Hiraffe.PlanarGraph.Dart as Dart
+
 
 --------------------------------------------------------------------------------
 -- * The PlaneGraph type
@@ -174,3 +191,69 @@ instance ( Point_ v 2 r
 
 
   -- boundingBox = boundingBoxList' . F.toList . fmap (^._2.location) . vertices
+
+
+--------------------------------------------------------------------------------
+
+-- | Constructs a connected plane graph
+--
+-- pre: The segments form a single connected component
+--      No two segments partially overlap.
+--
+-- running time: \(O(n\log n)\)
+fromConnectedSegments      :: ( Foldable1 f, Ord r, Num r
+                              , LineSegment_ lineSegment point
+                              , Point_ point 2 r
+                              )
+                           => f lineSegment
+                           -> PlaneGraph s (NonEmpty.NonEmpty point) lineSegment ()
+fromConnectedSegments segs = PlaneGraph $
+                             (PG.planarGraph theDarts)&PG.vertexData .~ vtxData
+  where
+    -- to get the darts we simply convert the NEMap (_, NEMap _ (dart, seg)) into
+    -- a NonEmpty (NonEmpty (dart, seg))
+    theDarts = toNonEmpty . snd  <$> verts
+    vtxData  = Vector.fromNonEmpty $ fst <$> verts
+
+    -- Collects all edges per vertex
+    verts    = toNonEmpty . ifoldMap1 f $ toNonEmpty segs
+
+    -- Creates two vertices with one edge each ; combines them into a single Map
+    f i seg = let u = seg^.start
+                  v = seg^.end
+                  d = Dart.Dart (Dart.Arc i) Dart.Positive
+              in    singleton (u^.asPoint) (vtx (d          ,seg) u v)
+                 <> singleton (v^.asPoint) (vtx (Dart.twin d,seg) v u)
+
+    singleton k v = MonoidalNEMap $ NEMap.singleton k v
+
+-- | Helper type to represent the vertex data of a vertex. The NEMap
+-- represents the edges ordered cyclically around the vertex
+type VtxData v r e = (v, NEMap.NEMap (E r) e)
+
+-- | Creates the vertex data
+vtx       :: (Point_ point 2 r, Ord r, Num r)
+          => e -> point -> point -> VtxData (NonEmpty.NonEmpty point) r e
+vtx e p q = (NonEmpty.singleton p, NEMap.singleton (E $ q .-. p) e)
+
+--------------------------------------------------------------------------------
+
+-- | Given a connected plane graph in adjacency list format; convert it into an actual
+-- PlaneGraph.
+--
+-- \(O(n\log n)\)
+fromAdjacencyRep       :: (Point_ vertex 2 r, Ord i, Foldable1 f)
+                       => proxy s -> GGraph f i vertex e -> PlaneGraph s vertex e ()
+fromAdjacencyRep proxy = PlaneGraph . PG.fromAdjacencyRep proxy
+
+
+--------------------------------------------------------------------------------
+
+-- | Helper type to sort vectors cyclically around the origine
+newtype E r = E (Vector 2 r)
+  deriving newtype (Show)
+
+instance (Ord r, Num r) => Eq (E r) where
+  a == b = a `compare` b == EQ
+instance (Ord r, Num r) => Ord (E r) where
+  (E v) `compare` (E u) = ccwCmpAroundWith (Vector2 0 1) (origin :: Point 2 r) (Point v) (Point u)

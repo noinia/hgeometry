@@ -50,6 +50,7 @@ common setup
       , hgeometry:svg
       , hgeometry:miso
       , hgeometry:geojson
+      , hgeometry:quickcheck
       , hiraffe                   >= 0.1
       , containers                >= 0.6
       , vector                    >= 0.13
@@ -76,6 +77,7 @@ common setup
       , file-io
       , filepath
       , geojson                   >= 4.1.1
+      , QuickCheck                >= 2.15.0
 
       -- , dependent-map             >= 0.4
       -- , dependent-sum             >= 0.7.1
@@ -269,3 +271,26 @@ executable hgeometry-skia
         Base
         GeometryStore
         GeometryStore.Helper
+
+
+--------------------------------------------------------------------------------
+executable hgeometry-draw
+  import:         setup, miso-setup
+  hs-source-dirs: draw
+  main-is:        Main.hs
+  -- other-modules:
+  --       Options
+
+
+--------------------------------------------------------------------------------
+
+-- Renders a 3D model of the lower envelope of a set of planes
+executable hgeometry-lowerEnv
+  import:         setup, miso-setup
+  hs-source-dirs: lowerEnv
+  main-is:        Main.hs
+  build-depends:
+     hgeometry:ply-writer
+
+  -- other-modules:
+  --       Options

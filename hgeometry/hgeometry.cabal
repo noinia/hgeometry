@@ -50,6 +50,7 @@ common all-setup
       , hgeometry-combinatorial   >= 1.0.0.0       && < 2
       , hiraffe                   >= 0.1           && < 1
       , containers                >= 0.6           && < 1
+      , nonempty-containers       >= 0.3.4.5       && < 0.4
       , dlist                     >= 0.7           && < 1.1
       , bytestring                >= 0.11          && < 1
       , vector:vector             >= 0.13          && < 1
@@ -391,7 +392,7 @@ library
         HGeometry.ConvexHull.Melkman
 
         -- HGeometry.ConvexHull.R3.Naive
-        -- HGeometry.ConvexHull.R3.Naive.Dual
+        HGeometry.ConvexHull.R3.Naive.Dual
 
         HGeometry.BezierSpline
 
@@ -419,7 +420,7 @@ library
 
 
         HGeometry.VoronoiDiagram
-
+        HGeometry.VoronoiDiagram.ViaLowerEnvelope
 
         HGeometry.SegmentTree
         HGeometry.SegmentTree.Base
@@ -460,7 +461,6 @@ library
         -- HGeometry.Plane.LowerEnvelope.DivideAndConquer
         -- HGeometry.Plane.LowerEnvelope.EpsApproximation
 
-        HGeometry.VoronoiDiagram.ViaLowerEnvelope
 
 
 
@@ -492,6 +492,7 @@ library ipe
 
           Ipe.IpeRender
           Ipe.IpeToIpe
+          -- HGeometry.PlaneGraph.Draw
 
 
     other-modules:
@@ -570,6 +571,7 @@ library quickcheck
     exposed-modules:
       HGeometry.Instances
       HGeometry.Polygon.Instances
+      HGeometry.PlaneGraph.Instances
     other-modules:
       Paths_hgeometry
     autogen-modules:
@@ -603,6 +605,16 @@ library vector-quickcheck
       HGeometry.Vector.Instances
     build-depends:
          hgeometry:vector
+
+library ply-writer
+    import: all-setup
+    visibility: public
+    hs-source-dirs: ply/src
+    exposed-modules:
+      PLY.Writer
+    build-depends:
+         hgeometry:point
+       , hgeometry:kernel
 
 --------------------------------------------------------------------------------
 -- * Test Suites
@@ -699,6 +711,7 @@ test-suite hspec
       Spec
       ConvexHull.ConvexHullSpec
       ConvexHull.MelkmanSpec
+      ConvexHull.R3Spec
       ClosestPair.ClosestPairSpec
       IntervalTreeSpec
       LowerEnvelope.RegionsSpec

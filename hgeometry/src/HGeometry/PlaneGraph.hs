@@ -13,6 +13,8 @@ module HGeometry.PlaneGraph
   , module HGeometry.PlaneGraph.Class
   , module Hiraffe.PlanarGraph.Class
   , PlaneGraph(..)
+  , fromAdjacencyRep
+  , fromConnectedSegments
   ) where
 
 import HGeometry.PlaneGraph.Class
