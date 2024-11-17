@@ -606,6 +606,16 @@ library vector-quickcheck
     build-depends:
          hgeometry:vector
 
+library ply-writer
+    import: all-setup
+    visibility: public
+    hs-source-dirs: ply/src
+    exposed-modules:
+      PLY.Writer
+    build-depends:
+         hgeometry:point
+       , hgeometry:kernel
+
 --------------------------------------------------------------------------------
 -- * Test Suites
 --------------------------------------------------------------------------------
