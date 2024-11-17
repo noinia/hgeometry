@@ -80,7 +80,7 @@ arbitraryPlaneGraph proxy = do
     -- need at least a few vertices so that we generate at least a triangle in the planar graph
     case voronoiDiagram pts of
       AllColinear _  -> arbitraryPlaneGraph proxy -- retry
-      ConnectedVD vd -> do gr <- markWitherableEdges (toPlaneGraph' . asMD $ vd)
+      ConnectedVD vd -> do gr <- markWitherableEdges (toTriangulatedPlaneGraph' . asMD $ vd)
                            case traverseNeighbourOrder NEMap.nonEmptyMap $ largestComponent gr of
                              Nothing  -> arbitraryPlaneGraph proxy -- retry
                              Just gr' -> pure $ toPlaneGraph proxy gr'

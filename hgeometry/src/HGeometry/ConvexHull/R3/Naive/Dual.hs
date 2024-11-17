@@ -52,7 +52,12 @@ type Facet point = [point]
 facets :: UpperHull point -> [Facet point]
 facets = \case
     ParallelStrips _      -> error "facets: parallel strips; no bounded facets"
-    ConnectedEnvelope env -> env^..boundedVertices.traverse.to toFacet
-  where
-    toFacet   :: BoundedVertexF f (plane :+ point) -> Facet point
-    toFacet v = (^.extra) <$> v^.definers.to toList
+    ConnectedEnvelope env -> undefined
+
+  --   toPlaneGraph' env
+
+
+  --     env^..boundedVertices.traverse.to toFacet
+  -- where
+  --   toFacet   :: BoundedVertexF f (plane :+ point) -> Facet point
+  --   toFacet v = (^.extra) <$> v^.definers.to toList

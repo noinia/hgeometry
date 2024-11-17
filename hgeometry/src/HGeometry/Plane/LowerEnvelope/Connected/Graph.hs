@@ -11,6 +11,7 @@
 module HGeometry.Plane.LowerEnvelope.Connected.Graph
   ( PlaneGraph'
   , E(..)
+  , toTriangulatedPlaneGraph'
   , toPlaneGraph'
   ) where
 
@@ -42,20 +43,35 @@ type PlaneGraphMap k v e = Map k (Map e k, v)
 
 -- | Produce a triangulated plane graph on the bounded vertices.  every vertex is
 -- represented by its point, it stores a list of its outgoing edges, and some data.
+toTriangulatedPlaneGraph' :: (Plane_ plane r, Num r, Ord r)
+                          => MinimizationDiagram r plane
+                          -> PlaneGraph' (Point 2 r) (First r) (E r)
+toTriangulatedPlaneGraph' = toPlaneGraph'' . toTriangulatedPlaneGraphMap
+
+-- | Produce a plane graph on the bounded vertices.  every vertex is represented by its
+-- point, it stores a list of its outgoing edges, and some data.
 toPlaneGraph' :: (Plane_ plane r, Num r, Ord r)
              => MinimizationDiagram r plane -> PlaneGraph' (Point 2 r) (First r) (E r)
-toPlaneGraph' = Graph . NEMap.unsafeFromMap
-             . fmap (\(neighOrder, x) -> VertexData x (mkNeighMap neighOrder) neighOrder)
-             . toPlaneGraphMap
+toPlaneGraph' = toPlaneGraph'' . toPlaneGraphMap
+
+-- | Helper to produce the graphs
+toPlaneGraph'' :: (Ord r)
+               => PlaneGraphMap (Point 2 r) (First r) (E r)
+               -> PlaneGraph' (Point 2 r) (First r) (E r)
+toPlaneGraph'' = Graph . NEMap.unsafeFromMap
+               . fmap (\(neighOrder, x) -> VertexData x (mkNeighMap neighOrder) neighOrder)
   where
     mkNeighMap = Map.foldMapWithKey (\e i -> Map.singleton i e)
 
+--------------------------------------------------------------------------------
 
 -- | Produce a triangulated plane graph on the bounded vertices.  every vertex is
 -- represented by its point, it stores a list of its outgoing edges, and some data.
-toPlaneGraphMap :: (Plane_ plane r, Num r, Ord r)
-                => MinimizationDiagram r plane -> PlaneGraphMap (Point 2 r) (First r) (E r)
-toPlaneGraphMap = mapWithKeyMerge toTriangulatedGr . asMap
+toTriangulatedPlaneGraphMap :: (Plane_ plane r, Num r, Ord r)
+                            => MinimizationDiagram r plane
+                            -> PlaneGraphMap (Point 2 r) (First r) (E r)
+toTriangulatedPlaneGraphMap = mapWithKeyMerge toTriangulatedGr . asMap
+
 
 -- | Helper function to construct a triangulated plane graph
 toTriangulatedGr   :: (Plane_ plane r, Num r, Ord r)
@@ -78,4 +94,31 @@ toTriangulatedGr h = Map.mapWithKey (\v adjs -> (adjs, First $ evalAt v h)) . \c
                                   , (v, Map.fromList [ edge v u, edge v w])
                                   , (w, Map.fromList [ edge w u, edge w v])
                                   ]
+    edge u v = ((E $ v .-. u), v)
+
+--------------------------------------------------------------------------------
+
+-- | Produce a plane graph on the bounded vertices.  every vertex is represented by its
+-- point, it stores a list of its outgoing edges (to other bounded vertices), and some
+-- data.
+toPlaneGraphMap :: (Plane_ plane r, Num r, Ord r)
+                => MinimizationDiagram r plane -> PlaneGraphMap (Point 2 r) (First r) (E r)
+toPlaneGraphMap = mapWithKeyMerge toGr . asMap
+
+
+-- | Helper function to construct a plane graph
+toGr   :: (Plane_ plane r, Num r, Ord r)
+       => plane -> Region r (Point 2 r)
+       -> PlaneGraphMap (Point 2 r) (First r) (E r)
+toGr h = Map.mapWithKey (\v adjs -> (adjs, First $ evalAt v h)) . \case
+  Bounded vertices       -> case vertices of
+    (_:v1:vs) -> Map.unionsWith (<>) $ zipWith mkEdge vertices (v1:vs)
+    _         -> error "toGR: absurd, <2 vertices"
+  Unbounded _ vertices _ -> case vertices of
+    _  :| []  -> Map.empty
+    u  :| vs  -> Map.unionsWith (<>) $ zipWith mkEdge (u:vs) vs
+  where
+    mkEdge u v = Map.fromList [ (u, (uncurry Map.singleton $ edge u v))
+                              , (v, (uncurry Map.singleton $ edge v u))
+                              ]
     edge u v = ((E $ v .-. u), v)
