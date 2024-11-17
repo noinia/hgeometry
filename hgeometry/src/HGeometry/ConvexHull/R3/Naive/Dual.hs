@@ -55,7 +55,7 @@ type Facet point = NonEmpty point
 -- | Outputs the facets of the upper hull.
 facets :: (Ord (NumType point)) => UpperHull point -> [Facet point]
 facets = \case
-    ParallelStrips _      -> error "facets: parallel strips; no bounded facets"
+    ParallelStrips _      -> [] -- error "facets: parallel strips; no bounded facets"
     ConnectedEnvelope env -> toFacet <$> Map.elems theVertices
       where
         theVertices = mapWithKeyMerge (\h reg -> Map.fromList [ (v,NonEmpty.singleton h)
