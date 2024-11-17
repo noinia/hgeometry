@@ -2,6 +2,7 @@
 module Main(main) where
 
 import           Control.Lens
+import qualified Data.Foldable as F
 import qualified Data.List.NonEmpty as NonEmpty
 import           HGeometry.Ext
 import           HGeometry.Number.Real.Rational
@@ -9,6 +10,7 @@ import           HGeometry.Plane.LowerEnvelope
 import           HGeometry.PlaneGraph
 import           HGeometry.PlaneGraph.Instances
 import           HGeometry.Point
+import           HGeometry.Triangle
 import           HGeometry.VoronoiDiagram.ViaLowerEnvelope
 import           Ipe
 import           PLY.Writer
@@ -30,12 +32,16 @@ myPlanes = NonEmpty.fromList $ zipWith (\i p -> pointToPlane p :+ (i,p)) [0..]
            , Point2 48 144
            ]
 
-verticesOf = \case
-  ParallelStrips _      -> undefined
-  ConnectedEnvelope env -> undefined
+verticesOf = NonEmpty.fromList . foldMap F.toList . trianglesOf
+trianglesOf _ = [ Triangle (origin :+ 0) (Point3 10 0 1  :+ 1) (Point3 0 10 2  :+ 2) ]
 
-trianglesOf env = []
+
+  -- \case
+  -- ParallelStrips _      -> undefined
+  -- ConnectedEnvelope env -> undefined
+
+-- trianglesOf env = []
 
 main :: IO ()
-main = renderOutputToFile [osp|myLowerEnv|] (verticesOf $ lowerEnvelope myPlanes)
-                                            (trianglesOf $ lowerEnvelope myPlanes)
+main = renderOutputToFile [osp|myLowerEnv.ply|] (verticesOf $ lowerEnvelope myPlanes)
+                                                (trianglesOf $ lowerEnvelope myPlanes)
