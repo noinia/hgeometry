@@ -7,25 +7,29 @@ module HGeometry.ConvexHull.R3.Naive.Dual
   , facets
   ) where
 
-import Control.Lens
-import Data.Foldable (toList)
-import Data.Foldable1
-import Data.List (find)
-import Data.List.NonEmpty (NonEmpty(..))
-import Data.Maybe (isNothing)
-import HGeometry.Combinatorial.Util
-import HGeometry.Duality
-import HGeometry.Ext
-import HGeometry.HalfSpace
-import HGeometry.HyperPlane
-import HGeometry.HyperPlane.NonVertical
-import HGeometry.Intersection (intersects)
-import HGeometry.Plane.LowerEnvelope
-import HGeometry.Plane.LowerEnvelope.Naive
-import HGeometry.Point
-import HGeometry.Properties
-import HGeometry.Triangle
-import HGeometry.Vector
+import           Control.Lens
+import           Data.Foldable (toList)
+import           Data.Foldable1
+import           Data.List (find)
+import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Map (Map)
+import qualified Data.Map as Map
+import           Data.Maybe (isNothing)
+import           HGeometry.Combinatorial.Util
+import           HGeometry.Duality
+import           HGeometry.Ext
+import           HGeometry.HalfSpace
+import           HGeometry.HyperPlane
+import           HGeometry.HyperPlane.NonVertical
+import           HGeometry.Intersection (intersects)
+import           HGeometry.Plane.LowerEnvelope
+import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap (mapWithKeyMerge)
+import           HGeometry.Plane.LowerEnvelope.Naive
+import           HGeometry.Point
+import           HGeometry.Properties
+import           HGeometry.Triangle
+import           HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
@@ -46,18 +50,25 @@ upperHull :: ( Point_ point 3 r
 upperHull = lowerEnvelope . fmap (\p -> dualHyperPlane p :+ p)
 
 
-type Facet point = [point]
+type Facet point = NonEmpty point
 
 -- | Outputs the facets of the upper hull.
-facets :: UpperHull point -> [Facet point]
+facets :: (Ord (NumType point)) => UpperHull point -> [Facet point]
 facets = \case
     ParallelStrips _      -> error "facets: parallel strips; no bounded facets"
-    ConnectedEnvelope env -> undefined
+    ConnectedEnvelope env -> toFacet <$> Map.elems theVertices
+      where
+        theVertices = mapWithKeyMerge (\h reg -> Map.fromList [ (v,NonEmpty.singleton h)
+                                                              | v <- verticesOf reg ]
+                                      ) (asMap env)
+        verticesOf = \case
+          Bounded vertices       -> vertices
+          Unbounded _ vertices _ -> NonEmpty.toList vertices
 
-  --   toPlaneGraph' env
-
-
-  --     env^..boundedVertices.traverse.to toFacet
-  -- where
-  --   toFacet   :: BoundedVertexF f (plane :+ point) -> Facet point
-  --   toFacet v = (^.extra) <$> v^.definers.to toList
+        toFacet hv = (^.extra) <$> hv
+  -- We want all vertices v of the lower envelope; let H_v denote all planes that
+  -- intersect in v.
+  --
+  -- In the primal v is actually a plane; the facet is then defined by all points to the
+  -- planes in H_v. So, we want to compute H_v, and then take the convex hull of those
+  -- points (in the plane dual  to v)
