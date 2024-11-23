@@ -16,6 +16,7 @@ module HGeometry.HyperPlane.NonVertical
   , asNonVerticalHyperPlane
   , Plane
   , Plane_, pattern Plane_
+  , module HGeometry.HyperPlane.Class
   ) where
 
 import           Control.DeepSeq
