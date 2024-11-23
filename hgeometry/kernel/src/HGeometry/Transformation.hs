@@ -28,45 +28,49 @@ module HGeometry.Transformation
   ) where
 
 import           Control.Lens hiding ((<.>))
+import           Data.Semialign
 import           HGeometry.Box.Boxable
 import           HGeometry.Box.Class
 import qualified HGeometry.Box.Class as Box
-import           HGeometry.Point
 import           HGeometry.Matrix
+import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Transformation.Internal
 import           HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
--- | Given a rectangle r and a geometry g with its boundingbox,
+-- | Given a box r and a geometry g with its boundingbox,
 -- transform the g to fit r.
-fitToBox     :: forall rectangle g point r.
-                ( NumType g ~ r, Dimension g ~ 2
+fitToBox     :: forall box d g point r.
+                ( NumType g ~ r, Dimension g ~ d
                 , IsTransformable g
                 , IsBoxable g
-                , Rectangle_ rectangle point
-                , Point_ point 2 r
+                , Box_ box point
+                , Point_ point d r
                 , Ord r, Fractional r
-                -- , HasComponents (Vector 2 (ClosedInterval r)) (Vector 2 r)
-                ) => rectangle -> g -> g
+                , TransformationConstraints d r
+                , Functor (Vector d), Zip (Vector d)
+                ) => box -> g -> g
 fitToBox r g = transformBy (fitToBoxTransform r g) g
 {-# INLINE fitToBox #-}
 
--- | Given a rectangle r and a geometry g with its boundingbox,
+-- | Given a box r and a geometry g with its boundingbox,
 -- compute a transformation can fit g to r.
-fitToBoxTransform     :: forall rectangle g point r.
-                         ( NumType g ~ r, Dimension g ~ 2
+fitToBoxTransform     :: forall box d g point r.
+                         ( NumType g ~ r, Dimension g ~ d
                          , IsTransformable g
                          , IsBoxable g
-                         , Rectangle_ rectangle point
-                         , Point_ point 2 r
+                         , Box_ box point
+                         , Point_ point d r
                          , Ord r, Fractional r
-                         ) => rectangle -> g -> Transformation 2 r
+                         , TransformationConstraints d r
+                         , Functor (Vector d), Zip (Vector d)
+                         ) => box -> g -> Transformation d r
 fitToBoxTransform r g = translation v2 |.| uniformScaling lam |.| translation v1
   where
     b = boundingBox g
-    v1  :: Vector 2 r
+    v1  :: Vector d r
     v1  = negated $ b^.minPoint.vector
     v2  = r^.minPoint.vector
     lam = minimum1Of components $ liftI2 (/) (Box.size r) (Box.size b)
