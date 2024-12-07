@@ -16,6 +16,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.VertexForm
   ) where
 
 import qualified Data.Foldable as F
+import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
@@ -48,14 +49,19 @@ type VertexForm r plane = Map (Point 3 r) (Definers plane)
 
 -- | in CCW order, starting with the plane that is minimal at the vertical up direction
 -- from their common vertex.
-newtype Definers plane = Definers [plane]
+newtype Definers plane = Definers (NonEmpty plane)
   deriving stock (Show,Eq,Ord)
-  deriving newtype (Functor,Foldable)
+  deriving newtype (Functor,Foldable,Foldable1)
 
 -- | Given the planes in order, starting with the one that is closest in the up direction,
 -- construct the Definers.
-fromCCWList :: [plane] -> Definers plane
+fromCCWList :: NonEmpty plane -> Definers plane
 fromCCWList = Definers
+
+-- | Given the planes in order, starting with the one that is closest in the up direction,
+-- construct the Definers.
+fromCCWList' :: [plane] -> Definers plane
+fromCCWList' = fromCCWList . NonEmpty.fromList
 
 -- | Smart constructor for creating the definers of three planes
 definers                                    :: forall plane r.(Plane_ plane r, Ord r, Fractional r)
@@ -66,7 +72,7 @@ definers (Three h1@(Plane_ a1 b1 c1) h2 h3) =
        intersect l12 l13 >>= \case
          Line_x_Line_Line _             -> Nothing
          Line_x_Line_Point (Point2 x y) -> Just ( Point3 x y (a1 * x + b1* y + c1)
-                                                , Definers [hMin, hTwo, hThree]
+                                                , fromCCWList' [hMin, hTwo, hThree]
                                                 )
            where
              (hMin,h,h')   = extractMinOn (evalAt $ Point2 x (y+1)) h1 h2 h3

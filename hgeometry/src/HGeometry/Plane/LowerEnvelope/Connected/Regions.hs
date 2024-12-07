@@ -49,10 +49,11 @@ import           HGeometry.Vector
 
 -- | returns the CCW predecessor, and CCW successor of the given plane.
 findNeighbours                   :: Eq plane => plane -> Definers plane -> Maybe (plane,plane)
-findNeighbours h (Definers defs) = withNeighs <$> List.elemIndex h defs
+findNeighbours h (Definers defs) = withNeighs <$> elemIndex h defs
   where
-    withNeighs i = (defs List.!! ((i-1) `mod` k), defs List.!! ((i+1) `mod` k))
+    withNeighs i = (defs NonEmpty.!! ((i-1) `mod` k), defs NonEmpty.!! ((i+1) `mod` k))
     k = length defs
+    elemIndex q = List.elemIndex q . F.toList
 -- TODO not exactly the best implementation yet
 
 
@@ -70,17 +71,16 @@ insertPlane (Point2 x y) plane (Definers planes) = Definers $ go plane planes
 
     -- We first test if the new plane is the new first plane (i.e. that is minimal just
     -- above the vertex.)
-    go h hs = case hs of
-      []                   -> [h] -- this case should never happen really
-      (h':hs') | h == h'   -> hs
-               | otherwise -> case evalAt q h `compare` evalAt q h' of
-                                LT -> h : insert  h  h' hs' h
-                                EQ -> case evalAt q' h `compare` evalAt q' h' of
-                                        LT -> h  : insert h  h' hs' h
-                                        _  -> h' : insert h' h  hs' h'
+    go h hs@(h':|hs')
+      | h == h'   = hs
+      | otherwise = case evalAt q h `compare` evalAt q h' of
+                      LT -> h :| insert  h  h' hs' h
+                      EQ -> case evalAt q' h `compare` evalAt q' h' of
+                              LT -> h  :| insert h  h' hs' h
+                              _  -> h' :| insert h' h  hs' h'
                                         -- h and h' cannot both be equal at v, q and q'
                                         -- unless they are the same plane.
-                                GT -> h' : insert h' h  hs' h'
+                      GT -> h' :| insert h' h  hs' h'
 
     -- | try to insert h into the cyclic order.
     -- pre: hPrev is guaranteed to be in the output, and occurs before h and hNxt
@@ -140,10 +140,9 @@ fromVertexForm :: (Plane_ plane r, Ord plane, Ord r, Fractional r)
                => VertexForm r plane -> MinimizationDiagram r plane
 fromVertexForm = MinimizationDiagram
                . NEMap.mapWithKey sortAroundBoundary . mapWithKeyMerge1 (\v defs ->
-                    NEMap.fromList . fmap (,Set.singleton (v,defs)) . toNonEmpty' $ defs)
+                    NEMap.fromList . fmap (,Set.singleton (v,defs)) . toNonEmpty $ defs)
                . f
   where
-    toNonEmpty' = NonEmpty.fromList . F.toList --FIXME
     f = NEMap.unsafeFromMap -- FIXME
 
 -- for each vertex v, we go through its definers defs; and for each such plane h, we
