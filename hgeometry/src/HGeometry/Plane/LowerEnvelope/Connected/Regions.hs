@@ -21,11 +21,14 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
   ) where
 
 import qualified Data.Foldable as F
+import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map (Map)
 import qualified Data.Map as Map
+import           Data.Map.NonEmpty (NEMap)
+import qualified Data.Map.NonEmpty as NEMap
 import           Data.Maybe (fromMaybe, listToMaybe)
 import           Data.Set (Set)
 import qualified Data.Set as Set
@@ -37,10 +40,10 @@ import           HGeometry.Line
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
+import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector
-import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm
 
 ----------------------------------------
 
@@ -136,10 +139,13 @@ mergeDefiners (Point3 x y _) = foldr (insertPlane $ Point2 x y)
 fromVertexForm :: (Plane_ plane r, Ord plane, Ord r, Fractional r)
                => VertexForm r plane -> MinimizationDiagram r plane
 fromVertexForm = MinimizationDiagram
-               . Map.mapWithKey sortAroundBoundary . mapWithKeyMerge (\v defs ->
-                    Map.fromList [ (h, Set.singleton (v,defs))
-                                 | h <- F.toList defs
-                                 ])
+               . NEMap.mapWithKey sortAroundBoundary . mapWithKeyMerge1 (\v defs ->
+                    NEMap.fromList . fmap (,Set.singleton (v,defs)) . toNonEmpty' $ defs)
+               . f
+  where
+    toNonEmpty' = NonEmpty.fromList . F.toList --FIXME
+    f = NEMap.unsafeFromMap -- FIXME
+
 -- for each vertex v, we go through its definers defs; and for each such plane h, we
 -- associate it with with the set {(v,defs)}. the foldMapWithKey part thus collects all
 -- vertices (together with their definers) incident to h. i.e. it combines these sets {(v,
