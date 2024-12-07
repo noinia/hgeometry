@@ -12,7 +12,7 @@ import           Data.Foldable
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
+import qualified Data.Map.NonEmpty as NEMap
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
@@ -99,7 +99,8 @@ instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
          )
          => HasDefaultIpeOut (VoronoiDiagram' point) where
   type DefaultIpeOut (VoronoiDiagram' point) = Group
-  defIO = ipeGroup . zipWith render (cycle $ drop 3 basicNamedColors) . Map.assocs . VD.asMap
+  defIO = ipeGroup . zipWith render (cycle $ drop 3 basicNamedColors)
+        . toList . NEMap.assocs . VD.asMap
     where
       render color (site, voronoiRegion) = iO' $ ipeGroup
                  [ iO $ defIO (site^.asPoint) ! attr SStroke  color

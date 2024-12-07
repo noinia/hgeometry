@@ -24,7 +24,9 @@ import           Control.Lens
 import           Control.Subcategory.Functor
 import           Data.Foldable1
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
+-- import qualified Data.Map as Map
+import           Data.Map.NonEmpty (NEMap)
+import qualified Data.Map.NonEmpty as NEMap
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Vector as Vector
@@ -74,7 +76,7 @@ _VoronoiDiagramLowerEnvelope = coerced
 
 -- | Get, for each point, its Voronoi region
 asMap :: (Point_ point 2 r, Ord point)
-      => VoronoiDiagram' point -> Map.Map point (Region r (Point 2 r))
+      => VoronoiDiagram' point -> NEMap.NEMap point (Region r (Point 2 r))
 asMap = LowerEnvelope.asMap . view _VoronoiDiagramLowerEnvelope
 
 --------------------------------------------------------------------------------

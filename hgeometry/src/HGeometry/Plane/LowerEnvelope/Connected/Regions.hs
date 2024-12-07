@@ -21,11 +21,14 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
   ) where
 
 import qualified Data.Foldable as F
+import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map (Map)
 import qualified Data.Map as Map
+import           Data.Map.NonEmpty (NEMap)
+import qualified Data.Map.NonEmpty as NEMap
 import           Data.Maybe (fromMaybe, listToMaybe)
 import           Data.Set (Set)
 import qualified Data.Set as Set
@@ -37,19 +40,20 @@ import           HGeometry.Line
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
+import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector
-import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm
 
 ----------------------------------------
 
 -- | returns the CCW predecessor, and CCW successor of the given plane.
 findNeighbours                   :: Eq plane => plane -> Definers plane -> Maybe (plane,plane)
-findNeighbours h (Definers defs) = withNeighs <$> List.elemIndex h defs
+findNeighbours h (Definers defs) = withNeighs <$> elemIndex h defs
   where
-    withNeighs i = (defs List.!! ((i-1) `mod` k), defs List.!! ((i+1) `mod` k))
+    withNeighs i = (defs NonEmpty.!! ((i-1) `mod` k), defs NonEmpty.!! ((i+1) `mod` k))
     k = length defs
+    elemIndex q = List.elemIndex q . F.toList
 -- TODO not exactly the best implementation yet
 
 
@@ -67,17 +71,16 @@ insertPlane (Point2 x y) plane (Definers planes) = Definers $ go plane planes
 
     -- We first test if the new plane is the new first plane (i.e. that is minimal just
     -- above the vertex.)
-    go h hs = case hs of
-      []                   -> [h] -- this case should never happen really
-      (h':hs') | h == h'   -> hs
-               | otherwise -> case evalAt q h `compare` evalAt q h' of
-                                LT -> h : insert  h  h' hs' h
-                                EQ -> case evalAt q' h `compare` evalAt q' h' of
-                                        LT -> h  : insert h  h' hs' h
-                                        _  -> h' : insert h' h  hs' h'
+    go h hs@(h':|hs')
+      | h == h'   = hs
+      | otherwise = case evalAt q h `compare` evalAt q h' of
+                      LT -> h :| insert  h  h' hs' h
+                      EQ -> case evalAt q' h `compare` evalAt q' h' of
+                              LT -> h  :| insert h  h' hs' h
+                              _  -> h' :| insert h' h  hs' h'
                                         -- h and h' cannot both be equal at v, q and q'
                                         -- unless they are the same plane.
-                                GT -> h' : insert h' h  hs' h'
+                      GT -> h' :| insert h' h  hs' h'
 
     -- | try to insert h into the cyclic order.
     -- pre: hPrev is guaranteed to be in the output, and occurs before h and hNxt
@@ -136,10 +139,12 @@ mergeDefiners (Point3 x y _) = foldr (insertPlane $ Point2 x y)
 fromVertexForm :: (Plane_ plane r, Ord plane, Ord r, Fractional r)
                => VertexForm r plane -> MinimizationDiagram r plane
 fromVertexForm = MinimizationDiagram
-               . Map.mapWithKey sortAroundBoundary . mapWithKeyMerge (\v defs ->
-                    Map.fromList [ (h, Set.singleton (v,defs))
-                                 | h <- F.toList defs
-                                 ])
+               . NEMap.mapWithKey sortAroundBoundary . mapWithKeyMerge1 (\v defs ->
+                    NEMap.fromList . fmap (,Set.singleton (v,defs)) . toNonEmpty $ defs)
+               . f
+  where
+    f = NEMap.unsafeFromMap -- FIXME
+
 -- for each vertex v, we go through its definers defs; and for each such plane h, we
 -- associate it with with the set {(v,defs)}. the foldMapWithKey part thus collects all
 -- vertices (together with their definers) incident to h. i.e. it combines these sets {(v,

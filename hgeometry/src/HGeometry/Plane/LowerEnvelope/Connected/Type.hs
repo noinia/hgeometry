@@ -44,8 +44,8 @@ module HGeometry.Plane.LowerEnvelope.Connected.Type
 
 import           Control.Subcategory.Functor
 import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Map (Map)
-import qualified Data.Map as Map
+import           Data.Map.NonEmpty (NEMap)
+import qualified Data.Map.NonEmpty as NEMap
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector
@@ -57,7 +57,7 @@ import           HGeometry.Vector.NonEmpty.Util ()
 
 -- | A minimization daigram just maps every plane on the lower envelope to the region
 -- above which it is minimal. Every plane has at most one such a region.
-newtype MinimizationDiagram r plane = MinimizationDiagram (Map plane (Region r (Point 2 r)))
+newtype MinimizationDiagram r plane = MinimizationDiagram (NEMap plane (Region r (Point 2 r)))
   deriving stock (Show,Eq)
 
 type instance NumType   (MinimizationDiagram r plane) = r
@@ -67,12 +67,13 @@ instance Constrained (MinimizationDiagram r) where
   type Dom (MinimizationDiagram r) plane = (Ord plane, NumType plane ~ r)
 
 instance CFunctor (MinimizationDiagram r) where
-  cmap f (MinimizationDiagram m) = MinimizationDiagram $ Map.mapKeys f m
+  cmap f (MinimizationDiagram m) = MinimizationDiagram $ NEMap.mapKeys f m
 
 
 
 -- | Get the underlying Map that relates every plane in the envelope to its projected region
-asMap                         :: MinimizationDiagram r plane -> Map plane (Region r (Point 2 r))
+asMap                         :: MinimizationDiagram r plane
+                              -> NEMap plane (Region r (Point 2 r))
 asMap (MinimizationDiagram m) = m
 
 

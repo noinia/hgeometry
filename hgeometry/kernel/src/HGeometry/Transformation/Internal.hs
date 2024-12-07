@@ -11,13 +11,14 @@
 --------------------------------------------------------------------------------
 module HGeometry.Transformation.Internal where
 
-import           Control.Lens (iso,set,Iso,over,iover)
-import           GHC.TypeLits
-import           HGeometry.Matrix
-import           HGeometry.Point
-import           HGeometry.Properties
-import           HGeometry.Vector
-import           HGeometry.Ext
+import Control.Lens (iso,set,Iso,over,iover)
+import Data.List.NonEmpty (NonEmpty(..))
+import GHC.TypeLits
+import HGeometry.Ext
+import HGeometry.Matrix
+import HGeometry.Point
+import HGeometry.Properties
+import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
@@ -133,6 +134,12 @@ instance ( Fractional r
 instance IsTransformable core => IsTransformable (core :+ extra) where
   -- ^ transforms only the core.
   transformBy t = over core (transformBy t)
+
+instance IsTransformable geom => IsTransformable [geom] where
+  transformBy t = fmap (transformBy t)
+
+instance IsTransformable geom => IsTransformable (NonEmpty geom) where
+  transformBy t = fmap (transformBy t)
 
 --------------------------------------------------------------------------------
 -- * Common transformations

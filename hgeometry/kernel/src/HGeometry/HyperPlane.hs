@@ -13,9 +13,11 @@ module HGeometry.HyperPlane
   , HyperPlane(..)
   , MkHyperPlaneConstraints
   , cmpInDirection
+  , module HGeometry.HyperPlane.NonVertical
   ) where
 
 --------------------------------------------------------------------------------
 
 import HGeometry.HyperPlane.Class
 import HGeometry.HyperPlane.Internal
+import HGeometry.HyperPlane.NonVertical
