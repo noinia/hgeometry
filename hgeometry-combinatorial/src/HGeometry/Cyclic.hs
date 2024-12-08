@@ -42,7 +42,7 @@ import           HGeometry.Vector.NonEmpty.Util ()
 -- | A cyclic sequence type
 newtype Cyclic v a = Cyclic (v a)
  deriving newtype (Functor,Foldable,Foldable1,NFData,Eq,ToJSON,FromJSON)
- deriving stock (Generic)
+ deriving stock (Generic,Show)
 -- not sure if we want this Eq instance or not .
 
 

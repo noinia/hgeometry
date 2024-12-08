@@ -14,8 +14,6 @@ module HGeometry.Plane.LowerEnvelope.Connected.Type
   ( MinimizationDiagram(..)
   , asMap
   , Region(..)
-  , CircularList
-
 
   --   LowerEnvelope'(LowerEnvelope)
   -- , theUnboundedVertex, boundedVertices
@@ -44,9 +42,12 @@ module HGeometry.Plane.LowerEnvelope.Connected.Type
 
 import           Control.Subcategory.Functor
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map.NonEmpty (NEMap)
 import qualified Data.Map.NonEmpty as NEMap
+import           HGeometry.Cyclic
 import           HGeometry.Point
+import           HGeometry.Polygon.Convex
 import           HGeometry.Properties
 import           HGeometry.Vector
 import           HGeometry.Vector.NonEmpty.Util ()
@@ -80,7 +81,7 @@ asMap (MinimizationDiagram m) = m
 
 -- | A region in the minimization diagram. The boundary is given in CCW order; i.e. the
 -- region is to the left of the boundary.
-data Region r point = Bounded   (CircularList point)
+data Region r point = Bounded   (Cyclic NonEmpty point)
                     | Unbounded (Vector 2 r)
                                 -- ^ vector indicating the direction of the unbounded edge
                                 -- incident to the first vertex. Note that this vector
@@ -96,9 +97,14 @@ data Region r point = Bounded   (CircularList point)
 type instance NumType   (Region r point) = r
 type instance Dimension (Region r point) = Dimension point
 
--- | bounded regions are really circular lists, but we just represent them as lists for
--- now.
-type CircularList a = [a]
+
+
+
+
+
+-- -- | bounded regions are really circular lists, but we just represent them as lists for
+-- -- now.
+-- type CircularList a = [a]
 
 
 --------------------------------------------------------------------------------

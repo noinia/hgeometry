@@ -15,26 +15,18 @@ module HGeometry.Plane.LowerEnvelope.Connected.VertexForm
   , definers
   ) where
 
-import qualified Data.Foldable as F
 import           Data.Foldable1
-import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map (Map)
-import qualified Data.Map as Map
-import           Data.Maybe (fromMaybe, listToMaybe)
-import           Data.Set (Set)
-import qualified Data.Set as Set
+import           Data.Maybe (fromMaybe)
 import           HGeometry.Combinatorial.Util
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Intersection
 import           HGeometry.Line
-import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
-import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Point
-import           HGeometry.Properties
 import           HGeometry.Vector
 
 --------------------------------------------------------------------------------

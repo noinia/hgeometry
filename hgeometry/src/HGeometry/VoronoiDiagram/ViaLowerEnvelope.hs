@@ -32,6 +32,7 @@ import qualified Data.Set as Set
 import qualified Data.Vector as Vector
 import           HGeometry.Duality
 import           HGeometry.Ext
+import           HGeometry.Foldable.Util
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line.General
@@ -126,7 +127,7 @@ voronoiVertices    :: ( Point_ point 2 r, Functor f, Ord point
 voronoiVertices pts = case voronoiDiagram pts of
     AllColinear _  -> mempty
     ConnectedVD vd -> foldMap (\case
-                                  Bounded vs       -> Set.fromList vs
+                                  Bounded vs       -> foldMap Set.singleton vs
                                   Unbounded _ vs _ -> Set.fromList (NonEmpty.toList vs)
                               ) (asMap vd)
 

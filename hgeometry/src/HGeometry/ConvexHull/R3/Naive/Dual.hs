@@ -64,7 +64,7 @@ facets = \case
                                                   (,NonEmpty.singleton h) <$> verticesOf reg
                                        ) (asMap env)
         verticesOf = \case
-          Bounded vertices       -> NonEmpty.fromList vertices -- FIXME
+          Bounded vertices       -> toNonEmpty vertices
           Unbounded _ vertices _ -> vertices
 
         toFacet hv = (^.extra) <$> hv

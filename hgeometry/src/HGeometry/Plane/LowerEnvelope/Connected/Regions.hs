@@ -25,24 +25,18 @@ import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Map (Map)
-import qualified Data.Map as Map
-import           Data.Map.NonEmpty (NEMap)
 import qualified Data.Map.NonEmpty as NEMap
 import           Data.Maybe (fromMaybe, listToMaybe)
 import           Data.Set (Set)
 import qualified Data.Set as Set
-import           HGeometry.Combinatorial.Util
+import           HGeometry.Foldable.Util
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Intersection
-import           HGeometry.Line
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm
 import           HGeometry.Point
-import           HGeometry.Properties
 import           HGeometry.Vector
 
 ----------------------------------------
@@ -167,7 +161,10 @@ sortAroundBoundary h vertices = case inCCWOrder . map project . Set.toList $ ver
                             (vs, (u,v) : ws) -> let chain = NonEmpty.fromList . map (fst . fst)
                                                           $ ws <> vs <> [(u,v)]
                                                 in unboundedRegion h chain v u
-                            (_,  [])         -> Bounded $ map fst vertices'
+                            (_,  [])         -> let vertices'' = fromNonEmpty
+                                                               . NonEmpty.fromList
+                                                               $ map fst vertices'
+                                                in Bounded vertices''
 
 
 -- | Given a plane h, and the single vertex v incident to the region of h, computes the
