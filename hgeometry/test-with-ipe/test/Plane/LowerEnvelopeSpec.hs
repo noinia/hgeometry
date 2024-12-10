@@ -17,6 +17,7 @@ import           Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 import           Golden
+import           HGeometry.Box
 import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
@@ -33,6 +34,7 @@ import           HGeometry.Sequence.Alternating (separators)
 import           HGeometry.Vector
 import           HGeometry.VoronoiDiagram
 import qualified HGeometry.VoronoiDiagram as VD
+import           Hiraffe.Graph.Class
 import           Ipe
 import           Ipe.Color
 import           System.OsPath
@@ -43,26 +45,33 @@ import           Test.QuickCheck.Instances ()
 
 type R = RealNumber 5
 
-instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r
+instance ( Point_ point 2 r, Fractional r, Ord r
          , Show point, Show r
          )
          => HasDefaultIpeOut (Region r point) where
   type DefaultIpeOut (Region r point) = Path
-  defIO region = defIO $ ((uncheckedFromCCWPoints $ map (^.asPoint) vertices)
-                         :: ConvexPolygon (Point 2 r)
-                         )
+  defIO region = defIO $ case toConvexPolygonIn (Box (Point2 (-1000) (-1000))
+                                             (Point2 1000    1000 :: Point 2 r)
+                                        ) region of
+                   Left pg  -> (pg&vertices %~ view asPoint :: ConvexPolygonF NonEmpty (Point 2 r))
+                   Right pg -> pg&vertices %~ view asPoint
+
+
+    -- $ ((uncheckedFromCCWPoints $ map (^.asPoint) vertices)
+    --                      :: ConvexPolygon (Point 2 r)
+    --                      )
 
     -- case fromPoints $ map (^.asPoint) vertices of
     --   Nothing -> error $ "could not create convex polygon?" <> show vertices
     --   Just pg -> defIO (pg :: ConvexPolygon (Point 2 r))
-    where
-      vertices = case region of
-        Bounded vs        -> vs
-        Unbounded v pts u -> let p  = NonEmpty.head pts
-                                 q  = NonEmpty.last pts
-                                 p' = p .-^ (1000 *^ v) -- TODO: clip this somewhere
-                                 q' = q .+^ (1000 *^ u) -- TODO: clip this somewhere
-                             in q' : p' : toList pts
+    -- where
+    --   vertices = case region of
+    --     Bounded vs        -> vs
+    --     Unbounded v pts u -> let p  = NonEmpty.head pts
+    --                              q  = NonEmpty.last pts
+    --                              p' = p .-^ (1000 *^ v) -- TODO: clip this somewhere
+    --                              q' = q .+^ (1000 *^ u) -- TODO: clip this somewhere
+    --                          in q' : p' : toList pts
 
 
 -- colors =

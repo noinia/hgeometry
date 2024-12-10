@@ -12,6 +12,7 @@ module HGeometry.Plane.LowerEnvelope.Connected
   ( MinimizationDiagram(..)
   , asMap
   , Region(..)
+  , toConvexPolygonIn
   , module HGeometry.Plane.LowerEnvelope.Connected.Primitives
   , module HGeometry.Plane.LowerEnvelope.Connected.Regions
   , module HGeometry.Plane.LowerEnvelope.Connected.BruteForce

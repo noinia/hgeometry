@@ -14,6 +14,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Type
   ( MinimizationDiagram(..)
   , asMap
   , Region(..)
+  , toConvexPolygonIn
 
   --   LowerEnvelope'(LowerEnvelope)
   -- , theUnboundedVertex, boundedVertices
@@ -40,14 +41,22 @@ module HGeometry.Plane.LowerEnvelope.Connected.Type
   -- , EdgeDefiners(..)
   ) where
 
+import           Control.Lens
 import           Control.Subcategory.Functor
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map.NonEmpty (NEMap)
 import qualified Data.Map.NonEmpty as NEMap
+import           Data.Monoid (First(..))
+import           HGeometry.Box
 import           HGeometry.Cyclic
+import           HGeometry.Direction
+import           HGeometry.HalfLine
+import           HGeometry.Intersection
+import           HGeometry.LineSegment
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Properties
 import           HGeometry.Vector
 import           HGeometry.Vector.NonEmpty.Util ()
@@ -98,13 +107,93 @@ type instance NumType   (Region r point) = r
 type instance Dimension (Region r point) = Dimension point
 
 
+-- | Helper type for distinguishing original vertices from extra ones.
+data OriginalOrExtra orig extra = Original orig
+                                | Extra    extra
+                                deriving (Show,Eq,Functor)
+
+type instance NumType   (OriginalOrExtra orig extra) = NumType orig
+type instance Dimension (OriginalOrExtra orig extra) = Dimension orig
+
+instance ( HasVector orig orig, HasVector extra extra
+         , HasVector orig orig', HasVector extra extra'
+         , Dimension extra ~ Dimension orig, NumType extra ~ NumType orig
+         , Dimension extra' ~ Dimension orig', NumType extra' ~ NumType orig'
+         ) => HasVector (OriginalOrExtra orig extra) (OriginalOrExtra orig' extra') where
+  vector = lens g (flip s)
+    where
+      g = \case
+        Original o -> o^.vector
+        Extra    e -> e^.vector
+      s v = \case
+        Original o -> Original (o&vector .~ v)
+        Extra    e -> Extra    (e&vector .~ v)
+
+
+instance ( HasCoordinates orig orig', HasCoordinates extra extra'
+         , HasVector orig orig, HasVector extra extra
+         , Dimension extra ~ Dimension orig, NumType extra ~ NumType orig
+         , Dimension extra' ~ Dimension orig', NumType extra' ~ NumType orig'
+         ) => HasCoordinates (OriginalOrExtra orig extra) (OriginalOrExtra orig' extra')
+
+instance (Affine_ orig d r, Affine_ extra d r) => Affine_ (OriginalOrExtra orig extra) d r
+
+instance (Point_ orig d r, Point_ extra d r) => Point_ (OriginalOrExtra orig extra) d r
 
 
 
 
--- -- | bounded regions are really circular lists, but we just represent them as lists for
--- -- now.
--- type CircularList a = [a]
+-- | Computes a convex polygon
+--
+-- pre: the bounding box (strictly) contains all vertices in its interior
+toConvexPolygonIn :: (Rectangle_ rectangle corner, Point_ corner 2 r
+                     , Point_ point 2 r, Ord r, Fractional r
+                     )
+                  => rectangle -> Region r point
+                  -> Either (ConvexPolygonF NonEmpty point)
+                            (ConvexPolygonF NonEmpty (OriginalOrExtra point (Point 2 r)))
+toConvexPolygonIn rect = \case
+    Bounded vertices  -> Left $ uncheckedFromCCWPoints vertices
+    Unbounded u pts v -> let p        = NonEmpty.head pts
+                             q        = NonEmpty.last pts
+                             hp       = HalfLine (p^.asPoint) ((-1) *^ u)
+                             hq       = HalfLine (q^.asPoint) v
+                             extras   = extraPoints hp hq $ Box (rect^.minPoint.asPoint)
+                                                                (rect^.maxPoint.asPoint)
+                         in Right . uncheckedFromCCWPoints $
+                                (Extra <$> extras) <> (Original <$> pts)
+
+-- | computes the extra vertices that we have to insert to make an unbounded region bounded
+extraPoints            :: ( Rectangle_ rectangle corner, Point_ corner 2 r
+                          , Point_ point 2 r
+                          , Fractional r, Ord r
+                          , IsIntersectableWith (HalfLine point) (ClosedLineSegment corner)
+                          , Intersection (HalfLine point) (ClosedLineSegment corner)
+                            ~ Maybe (HalfLineLineSegmentIntersection (Point 2 r) (ClosedLineSegment corner))
+                          )
+                       => HalfLine point -> HalfLine point -> rectangle
+                       -> NonEmpty (Point 2 r)
+extraPoints hp hq rect = q :| cornersInBetween qSide pSide rect <> [p]
+  where
+    (q,qSide) = intersectionPoint hq
+    (p,pSide) = intersectionPoint hp
+
+    intersectionPoint  h = case getFirst $ intersectionPoint' h of
+                             Nothing -> error "extraPoints: precondititon failed "
+                             Just x  -> x
+    intersectionPoint' h = flip ifoldMap (sides rect) $ \side seg ->
+      case h `intersect` seg of
+        Just (HalfLine_x_LineSegment_Point x) -> First $ Just (x, side)
+        _                                     -> First   Nothing
+
+-- | Computes the corners in between the two given sides (in CCW order)
+cornersInBetween          :: (Rectangle_ rectangle point, Point_ point 2 r, Num r)
+                          => CardinalDirection -> CardinalDirection -> rectangle -> [Point 2 r]
+cornersInBetween s e rect = map snd
+                          . takeWhile ((/= e) . fst) . dropWhile ((/= s) . fst)
+                          $ cycle [(East,tr),(North,tl),(West,bl),(South,br)]
+  where
+    Corners tl tr br bl = view asPoint <$> corners rect
 
 
 --------------------------------------------------------------------------------
