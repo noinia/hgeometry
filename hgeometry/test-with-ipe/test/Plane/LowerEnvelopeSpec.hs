@@ -46,15 +46,26 @@ import           Test.QuickCheck.Instances ()
 type R = RealNumber 5
 
 instance ( Point_ point 2 r, Fractional r, Ord r
-         , Show point, Show r
+         , Show point, Show r, IsBoxable point
          )
          => HasDefaultIpeOut (Region r point) where
   type DefaultIpeOut (Region r point) = Path
-  defIO region = defIO $ case toConvexPolygonIn (Box (Point2 (-1000) (-1000))
-                                             (Point2 1000    1000 :: Point 2 r)
-                                        ) region of
+  defIO region = defIO $ case toConvexPolygonIn rect' region of
                    Left pg  -> (pg&vertices %~ view asPoint :: ConvexPolygonF NonEmpty (Point 2 r))
                    Right pg -> pg&vertices %~ view asPoint
+    where
+      rect' = grow 20 $ boundingBox region
+
+instance (Point_ point 2 r, Ord r, Num r, IsBoxable point
+         ) => IsBoxable (Region r point) where
+  boundingBox = \case
+    Bounded pts       -> boundingBox $ toNonEmpty pts
+    Unbounded _ pts _ -> boundingBox pts
+
+grow             :: (Num r, Point_ point d r) => r -> Box point -> Box point
+grow d (Box p q) = Box (p&coordinates %~ subtract d)
+                       (q&coordinates %~ (+d))
+
 
 
     -- $ ((uncheckedFromCCWPoints $ map (^.asPoint) vertices)
@@ -137,10 +148,6 @@ spec = describe "lower envelope tests" $ do
                  [osp|degenerate1_out|]
          testIpe [osp|degenerate2.ipe|]
                  [osp|degenerate2_out|]
-
-         -- testIpeGraph [osp|foo.ipe|]
-         --              [osp|foo_graph_out|]
-
 
 
 -- | Build voronoi diagrams on the input points
@@ -240,9 +247,6 @@ degenerateTests = describe "degnereate inputs" $ do
 
 
 
-grow             :: (Num r, Point_ point d r) => r -> Box point -> Box point
-grow d (Box p q) = Box (p&coordinates %~ subtract d)
-                       (q&coordinates %~ (+d))
 
 
 instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r

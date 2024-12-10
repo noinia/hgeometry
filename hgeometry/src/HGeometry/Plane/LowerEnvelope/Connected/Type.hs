@@ -142,7 +142,6 @@ instance (Point_ orig d r, Point_ extra d r) => Point_ (OriginalOrExtra orig ext
 
 
 
-
 -- | Computes a convex polygon
 --
 -- pre: the bounding box (strictly) contains all vertices in its interior
