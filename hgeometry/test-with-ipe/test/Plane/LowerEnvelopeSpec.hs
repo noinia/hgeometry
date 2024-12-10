@@ -54,7 +54,7 @@ instance ( Point_ point 2 r, Fractional r, Ord r
                    Left pg  -> (pg&vertices %~ view asPoint :: ConvexPolygonF NonEmpty (Point 2 r))
                    Right pg -> pg&vertices %~ view asPoint
     where
-      rect' = grow 20 $ boundingBox region
+      rect' = grow 1000 $ boundingBox region
 
 instance (Point_ point 2 r, Ord r, Num r, IsBoxable point
          ) => IsBoxable (Region r point) where
