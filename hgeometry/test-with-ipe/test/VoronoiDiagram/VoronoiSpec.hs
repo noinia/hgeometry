@@ -106,6 +106,17 @@ degenerateTests = describe "degnereate inputs" $ do
                  ,(VerticalLineThrough 8.5,Point2 9 2)
                  ,(VerticalLineThrough 9.5,Point2 10 2)])
 
+
+  it "buggy four points diagram" $
+    numRegions (voronoiDiagram bug)
+    `shouldBe`
+    Just 4
+
+
+numRegions = \case
+  AllColinear _   -> Nothing
+  ConnectedVD env -> Just . length . HGeometry.VoronoiDiagram.asMap $ env
+
              -- goldenWith [osp|data/test-with-ipe/golden/|]
   --            (ipeContentGolden { name = [osp|voronoi|] })
   --              [ iO' inputs
@@ -148,6 +159,16 @@ inputs = NonEmpty.fromList [origin, Point2 10 10, Point2 10 0]
 
 trivialVD :: VoronoiDiagram (Point 2 R)
 trivialVD = voronoiDiagram inputs
+
+
+bug = NonEmpty.fromList $
+      [ Point2 10 0
+      , Point2 0  10
+      , Point2 30 10
+      , Point2 10 30
+      ]
+
+
 
   -- VoronoiDiagram $ LowerEnvelope vInfty (Seq.fromList [bv])
   -- where

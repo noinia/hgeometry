@@ -82,8 +82,7 @@ instance CFunctor (MinimizationDiagram r) where
 
 
 -- | Get the underlying Map that relates every plane in the envelope to its projected region
-asMap                         :: MinimizationDiagram r plane
-                              -> NEMap plane (Region r (Point 2 r))
+asMap                         :: MinimizationDiagram r plane -> NEMap plane (Region r (Point 2 r))
 asMap (MinimizationDiagram m) = m
 
 
@@ -138,19 +137,19 @@ instance ( HasCoordinates orig orig', HasCoordinates extra extra'
 
 instance (Affine_ orig d r, Affine_ extra d r) => Affine_ (OriginalOrExtra orig extra) d r
 
-instance (Point_ orig d r, Point_ extra d r) => Point_ (OriginalOrExtra orig extra) d r
+instance (Point_ orig d r, Point_ extra d r)   => Point_  (OriginalOrExtra orig extra) d r
 
 
 
 -- | Computes a convex polygon
 --
 -- pre: the bounding box (strictly) contains all vertices in its interior
-toConvexPolygonIn :: (Rectangle_ rectangle corner, Point_ corner 2 r
-                     , Point_ point 2 r, Ord r, Fractional r
-                     )
-                  => rectangle -> Region r point
-                  -> Either (ConvexPolygonF NonEmpty point)
-                            (ConvexPolygonF NonEmpty (OriginalOrExtra point (Point 2 r)))
+toConvexPolygonIn      :: ( Rectangle_ rectangle corner, Point_ corner 2 r
+                          , Point_ point 2 r, Ord r, Fractional r
+                          )
+                       => rectangle -> Region r point
+                       -> Either (ConvexPolygonF NonEmpty point)
+                                 (ConvexPolygonF NonEmpty (OriginalOrExtra point (Point 2 r)))
 toConvexPolygonIn rect = \case
     Bounded vertices  -> Left $ uncheckedFromCCWPoints vertices
     Unbounded u pts v -> let p        = NonEmpty.head pts
@@ -164,11 +163,11 @@ toConvexPolygonIn rect = \case
 
 -- | computes the extra vertices that we have to insert to make an unbounded region bounded
 extraPoints            :: ( Rectangle_ rectangle corner, Point_ corner 2 r
-                          , Point_ point 2 r
-                          , Fractional r, Ord r
+                          , Point_ point 2 r, Fractional r, Ord r
                           , IsIntersectableWith (HalfLine point) (ClosedLineSegment corner)
                           , Intersection (HalfLine point) (ClosedLineSegment corner)
-                            ~ Maybe (HalfLineLineSegmentIntersection (Point 2 r) (ClosedLineSegment corner))
+                            ~ Maybe (HalfLineLineSegmentIntersection (Point 2 r)
+                                                                     (ClosedLineSegment corner))
                           )
                        => HalfLine point -> HalfLine point -> rectangle
                        -> NonEmpty (Point 2 r)
@@ -197,17 +196,6 @@ cornersInBetween s e rect = map snd
 
 --------------------------------------------------------------------------------
 
--- data MDVertexIx = UnboundedVertexIx
---                 | BoundedVertexIx {-# UNPACK #-}!Int
---                 deriving (Show,Read,Eq,Ord)
-
--- data MDVertex r plane = UnboundedVertex
---                       | BoundedVertex { _location :: Point 2 r
---                                       , _definers :: Vector 3 plane
---                                       }
---                       deriving (Show,Eq,Ord)
-
-
 -- instance HasVertices' (MinimizationDiagram r plane) where
 --   -- | invariant: vertexIx == UnboundedVertex <=> vertex = UnboundedVertex
 --   type VertexIx (MinimizationDiagram r plane) = MDVertexIx
@@ -229,10 +217,3 @@ cornersInBetween s e rect = map snd
 --   endPoints = undefined
 --   outNeighboursOf = undefined
 --   twinDartOf = undefined
-
-
--- -- | Produce a triangulated plane graph on the bounded vertices.  every vertex is
--- -- represented by its point, it stores a list of its outgoing edges, and some data.
--- toGraph :: (Plane_ plane r, Num r, Ord r)
---         => MinimizationDiagram r plane -> PlaneGraph (Point 2 r) (First r) (E r)
--- toGraph = mapWithKeyMerge toTriangulatedGr . asMap
