@@ -23,7 +23,10 @@ import           HGeometry.Vector
 import           HGeometry.Box
 import           HGeometry.Line.General
 import           HGeometry.HalfLine
+import           HGeometry.HyperPlane.Class
+import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.VoronoiDiagram
+import           HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
 import           Ipe
 import           Ipe.Color
 import           Test.Hspec.WithTempFile
@@ -111,6 +114,42 @@ degenerateTests = describe "degnereate inputs" $ do
     numRegions (voronoiDiagram bug)
     `shouldBe`
     Just 4
+  it "buggy planes"   $
+    fmap pointToPlane bug `shouldBe`
+    NonEmpty.fromList [ Plane (-20)   0       100
+                      , Plane (-0.0)  (-20.0) 100
+                      , Plane (-60.0) (-20)   1000
+                      , Plane (-20.0) (-60)   1000
+                      ]
+  it "thebuggy definers" $ do
+    let v     = Point3 15 15 (-200)
+        fromCCWList' = fromCCWList . NonEmpty.fromList
+        nonVerticalHyperPlane [a,b,c] = Plane a b c
+        defs1 = fromCCWList'
+                [ nonVerticalHyperPlane [ -20.0, -60.0, 1000.0 ] :+ Point2 10.0 30.0
+                , nonVerticalHyperPlane [ -0.0, -20.0, 100.0 ] :+ Point2 0.0 10.0
+                , nonVerticalHyperPlane [ -60.0, -20.0, 1000.0 ] :+ Point2 30.0 10.0
+                ]
+        defs2 = fromCCWList'
+                [ nonVerticalHyperPlane [ -20.0, -60.0, 1000.0 ] :+ Point2 10.0 30.0
+                , nonVerticalHyperPlane [ -20.0, -0.0, 100.0 ] :+ Point2 10.0 0.0
+                , nonVerticalHyperPlane     [ -60.0, -20.0, 1000.0 ] :+ Point2 30.0 10.0
+                ]
+        defs3 = fromCCWList'
+                [ nonVerticalHyperPlane [ -20.0, -60.0, 1000.0 ] :+ Point2 10.0 30.0
+                , nonVerticalHyperPlane [ -0.0, -20.0, 100.0 ] :+ Point2 0.0 10.0
+                , nonVerticalHyperPlane [ -20.0, -0.0, 100.0 ] :+ Point2 10.0 0.0
+                ]
+        defs4 = fromCCWList'
+                [ nonVerticalHyperPlane [ -0.0, -20.0, 100.0 ] :+ Point2 0.0 10.0
+                , nonVerticalHyperPlane [ -20.0, -0.0, 100.0 ] :+ Point2 10.0 0.0
+                , nonVerticalHyperPlane [ -60.0, -20.0, 1000.0 ] :+ Point2 30.0 10.0
+                ]
+    mergeDefiners v defs1 defs2 `shouldBe` defs3
+    mergeDefiners v defs1 defs3 `shouldBe` defs3
+    mergeDefiners v defs1 defs4 `shouldBe` defs3
+    --FIXME; something is not really right; in the end there should be four definers though.
+
 
 
 numRegions = \case

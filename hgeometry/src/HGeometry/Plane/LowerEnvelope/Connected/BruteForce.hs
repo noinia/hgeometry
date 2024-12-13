@@ -23,22 +23,26 @@ import           HGeometry.Plane.LowerEnvelope.Connected.Regions
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Point
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 -- * The naive O(n^4) time algorithm.
 
 -- | Computes the lower envelope in O(n^4) time.
 bruteForceLowerEnvelope :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                            , Foldable set
-                           -- , Show r, Show plane
+                           , Show r, Show plane
                            ) => set plane -> MinimizationDiagram r plane
 bruteForceLowerEnvelope = fromVertexForm . computeVertexForm
 
 -- | Computes the vertices of the lower envelope
 --
 -- O(n^4) time.
-computeVertexForm        :: (Plane_ plane r, Ord plane, Ord r, Fractional r, Foldable set)
+computeVertexForm        :: (Plane_ plane r, Ord plane, Ord r, Fractional r, Foldable set
+                            , Show plane, Show r
+                            )
                          => set plane -> VertexForm r plane
 computeVertexForm planes = unionsWithKey mergeDefiners
+                           . traceShowId
                          . map (asVertex planes) $ uniqueTriplets planes
 
 asVertex             :: (Plane_ plane r, Foldable f, Ord plane, Ord r, Fractional r)

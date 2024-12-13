@@ -39,6 +39,7 @@ import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm
 import           HGeometry.Point
 import           HGeometry.Vector
 
+import Debug.Trace
 ----------------------------------------
 
 -- | returns the CCW predecessor, and CCW successor of the given plane.
@@ -130,12 +131,12 @@ mergeDefiners (Point3 x y _) = foldr (insertPlane $ Point2 x y)
 -- | Given the vertices of the lower envelope; compute the minimization diagram.
 --
 -- \(O(h\log h)\) assuming that the input is degenerate.
-fromVertexForm :: (Plane_ plane r, Ord plane, Ord r, Fractional r)
+fromVertexForm :: (Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show plane)
                => VertexForm r plane -> MinimizationDiagram r plane
 fromVertexForm = MinimizationDiagram
                . NEMap.mapWithKey sortAroundBoundary . mapWithKeyMerge1 (\v defs ->
                     NEMap.fromList . fmap (,Set.singleton (v,defs)) . toNonEmpty $ defs)
-               . f
+               . f . traceShowId
   where
     f = NEMap.unsafeFromMap -- FIXME
 

@@ -19,7 +19,7 @@ import           Test.Util
 
 import qualified HGeometry.Polygon.Triangulation.TriangulateMonotone as TM
 
-import           Debug.Trace
+-- import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -55,8 +55,7 @@ toMonotoneSpec (TestCase (poly :+ c) sol) = do
         (naiveSet . map toSeg $ algSol) `shouldBe` naiveSet sol
       it "comparing monotone diagonals from the triangualtion with manual solution" $ do
         let gr     = TM.triangulate @() poly
-            algSol = traceShow ("edges", gr^..edges.withIndex)
-                   $ extractDiagonals gr
+            algSol = extractDiagonals gr
         (naiveSet algSol) `shouldBe` naiveSet sol
   where
     toSeg (Vector2 i j) = ClosedLineSegment (poly^?!vertexAt i) (poly^?!vertexAt j)
@@ -69,8 +68,7 @@ toSpec (TestCase (poly :+ c) sol) = do
         (naiveSet . map toSeg $ algSol) `shouldBe` naiveSet sol
       it "comparing diagonals from the triangualtion with manual solution" $ do
         let gr     = triangulate @() poly
-            algSol = traceShow ("edges", gr^..edges.withIndex)
-                   $ extractDiagonals gr
+            algSol = extractDiagonals gr
         (naiveSet algSol) `shouldBe` naiveSet sol
   where
     toSeg (Vector2 i j) = ClosedLineSegment (poly^?!vertexAt i) (poly^?!vertexAt j)
