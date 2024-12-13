@@ -55,6 +55,7 @@ import           HGeometry.HalfLine
 import           HGeometry.Intersection
 import           HGeometry.LineSegment
 import           HGeometry.Point
+import           HGeometry.Point.Either
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Properties
@@ -106,42 +107,7 @@ type instance NumType   (Region r point) = r
 type instance Dimension (Region r point) = Dimension point
 
 
--- | Helper type for distinguishing original vertices from extra ones.
-data OriginalOrExtra orig extra = Original orig
-                                | Extra    extra
-                                deriving (Show,Eq,Functor)
-
-type instance NumType   (OriginalOrExtra orig extra) = NumType orig
-type instance Dimension (OriginalOrExtra orig extra) = Dimension orig
-
-instance ( HasVector orig orig, HasVector extra extra
-         , HasVector orig orig', HasVector extra extra'
-         , Dimension extra ~ Dimension orig, NumType extra ~ NumType orig
-         , Dimension extra' ~ Dimension orig', NumType extra' ~ NumType orig'
-         ) => HasVector (OriginalOrExtra orig extra) (OriginalOrExtra orig' extra') where
-  vector = lens g (flip s)
-    where
-      g = \case
-        Original o -> o^.vector
-        Extra    e -> e^.vector
-      s v = \case
-        Original o -> Original (o&vector .~ v)
-        Extra    e -> Extra    (e&vector .~ v)
-
-
-instance ( HasCoordinates orig orig', HasCoordinates extra extra'
-         , HasVector orig orig, HasVector extra extra
-         , Dimension extra ~ Dimension orig, NumType extra ~ NumType orig
-         , Dimension extra' ~ Dimension orig', NumType extra' ~ NumType orig'
-         ) => HasCoordinates (OriginalOrExtra orig extra) (OriginalOrExtra orig' extra')
-
-instance (Affine_ orig d r, Affine_ extra d r) => Affine_ (OriginalOrExtra orig extra) d r
-
-instance (Point_ orig d r, Point_ extra d r)   => Point_  (OriginalOrExtra orig extra) d r
-
-
-
--- | Computes a convex polygon
+-- | Computes a convex polygon corresponding to the region.
 --
 -- pre: the bounding box (strictly) contains all vertices in its interior
 toConvexPolygonIn      :: ( Rectangle_ rectangle corner, Point_ corner 2 r
