@@ -20,6 +20,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
   , VertexForm
   ) where
 
+import           Data.Coerce
 import qualified Data.Foldable as F
 import           Data.Foldable1
 import qualified Data.List as List
@@ -27,11 +28,15 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.NonEmpty as NEMap
 import           Data.Maybe (fromMaybe, listToMaybe)
+import           Data.Ord (comparing)
 import           Data.Set (Set)
 import qualified Data.Set as Set
+import           HGeometry.Combinatorial.Util
+import           HGeometry.Ext
 import           HGeometry.Foldable.Util
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
+import           HGeometry.NonEmpty.Util
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
@@ -39,7 +44,7 @@ import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm
 import           HGeometry.Point
 import           HGeometry.Vector
 
-import Debug.Trace
+import           Debug.Trace
 ----------------------------------------
 
 -- | returns the CCW predecessor, and CCW successor of the given plane.
@@ -52,78 +57,64 @@ findNeighbours h (Definers defs) = withNeighs <$> elemIndex h defs
 -- TODO not exactly the best implementation yet
 
 
--- | Adds a plane to the definers. In particular, places it in the right cyclic order.
--- pre: the plane is an actual definer; i.e. it also goes through the vertex.
-insertPlane :: forall plane r. (Plane_ plane r, Eq plane, Ord r, Fractional r)
-            => Point 2 r -- ^ the projection of the vertex
-            -> plane     -- ^ the plane that is a definer
-            -> Definers plane -> Definers plane
-insertPlane (Point2 x y) plane (Definers planes) = Definers $ go plane planes
-  where
-    q  = Point2 x     (y+1)
-    q' = Point2 (x-1) (y+1)
-    up = Vector2 0 1
+--------------------------------------------------------------------------------
 
-    -- We first test if the new plane is the new first plane (i.e. that is minimal just
-    -- above the vertex.)
-    go h hs@(h':|hs')
-      | h == h'   = hs
-      | otherwise = case evalAt q h `compare` evalAt q h' of
-                      LT -> h :| insert  h  h' hs' h
-                      EQ -> case evalAt q' h `compare` evalAt q' h' of
-                              LT -> h  :| insert h  h' hs' h
-                              _  -> h' :| insert h' h  hs' h'
-                                        -- h and h' cannot both be equal at v, q and q'
-                                        -- unless they are the same plane.
-                      GT -> h' :| insert h' h  hs' h'
 
-    -- | try to insert h into the cyclic order.
-    -- pre: hPrev is guaranteed to be in the output, and occurs before h and hNxt
-    --      h0 is the final plane that also started the cyclic order.
-    -- hs are the remaining planes in the yclic order.
-    insert hPrev h hs h0 = case hs of
-      [] -> case ccwCmpAroundWith up (origin :: Point 2 r) (Point u) (Point w) of
-              GT -> [h] -- insert h and finish
-              _  -> [] -- h is dominated; don't insert it
-        where
-          u  = fromMaybe err $ intersectionVector h0 hPrev
-          w  = fromMaybe err $ intersectionVector h  h0
-          err = error "insertPlane: insert basecase. absurd"
-      (hNxt:hs')
-        | h == hNxt  -> hs -- duplicate plane; exit early
-        | otherwise  -> case ccwCmpAroundWith up (origin :: Point 2 r) (Point u) (Point w) of
-          GT -> h : finish h hs h0
-          -- we've inserted h, so drop the planes that are dominated by h
-          _  -> hNxt : insert hNxt h hs' h0 -- try to insert at a later position
-        where
-          u  = fromMaybe err $ intersectionVector hNxt hPrev
-          w  = fromMaybe err $ intersectionVector h    hNxt
-          err = error "insertPlane: insert. absurd"
+-- | Compute the plane that is cheapest vertically above the vertex.
+--
+-- pre: all planes contain the given point
+extractH0                   :: (Plane_ plane r, Eq plane, Ord r, Fractional r)
+                            => Point 3 r -> NonEmpty plane -> (plane, [plane])
+extractH0 (Point3 x y _) hs = case extractMinimaBy (comparing $ evalAt (Point2 x (y+1))) hs of
+                                (h0 :| eqs) :+ rest -> (h0, (filter (/= h0) eqs) <> rest)
 
-    -- we've just inserted hNew, so see if we still need/want the remaining planes
-    -- this is essentially List.dropWhile, but we may need the h0 plane in the end.
-    finish hNew hs h0 = case hs of
-      []      -> []
-      (h:hs') -> case ccwCmpAroundWith up (origin :: Point 2 r) (Point u) (Point w) of
-                   LT -> hs  -- hNew's region indeed ends before h's region ends, so keep
-                             -- h and the remaining planes
-                   _  -> finish hNew hs' h0 -- hNew dominates h, so drop h.
-        where
-          hNxt = fromMaybe h0 $ listToMaybe hs'
-
-          u  = fromMaybe err $ intersectionVector hNxt hNew
-          w  = fromMaybe err $ intersectionVector h    hNxt
-          err = error "insertPlane: finish. absurd"
+-- | Given three planes h0, h and h' that all intersect in a common vertex v,
+-- and so that h0 is the lowest plane vertically above v, order the
+-- other two planes in CCW order.
+cmpPlanesAround                     :: (Plane_ plane r, Eq plane, Ord r, Fractional r)
+                                    => plane -> plane -> plane -> Ordering
+cmpPlanesAround h0 h h' | h == h'   = EQ
+                        | otherwise = case snd <$> definers (Three h0 h h') of
+                            Just (Definers (_ :| [hPrev, hSucc])) | h == hPrev -> LT
+                                                                  | otherwise  -> GT
+                            _ -> error "cmpPlanesAround: precondition failed"
+--  note that the first definer will, by definition/by precondition just be h0
 
 -- | Merge two lists of definers.
 --
--- O(n^2), since we are using incremental insertion.
-mergeDefiners                :: (Plane_ plane r, Eq plane, Ord r, Fractional r)
-                             => Point 3 r
-                             -> Definers plane -> Definers plane
-                             -> Definers plane
-mergeDefiners (Point3 x y _) = foldr (insertPlane $ Point2 x y)
--- TODO: improve running time
+-- \(O(n\log n)\), where \(n\) is the total number of planes involved.
+mergeDefiners               :: (Plane_ plane r, Eq plane, Ord r, Fractional r
+                               , Show plane, Show r
+                               )
+                            => Point 3 r
+                            -> Definers plane -> Definers plane
+                            -> Definers plane
+mergeDefiners v defs0 defs1 = case extractH0 v (coerce defs0 <> coerce defs1) of
+    (h0, planes) -> Definers . dropDuplicates $ h0 :| List.sortBy (cmpPlanesAround h0) planes
+  where
+    dropDuplicates = fmap NonEmpty.head . NonEmpty.group1
+-- TODO: We may need some filtering pass to remove planes that are no longer definers
+-- e.g. when some plane passes through v but does not actually show up on the envelope.
+-- I'll leave that for later though.
+--
+-- The general strategy is as follows:
+--
+-- we find the plane h0 that is cheapest vertically above the point
+--
+-- we now define an ordering for any other planes h and h' as follows:
+--
+-- now for any two other planes h, h'
+-- if  h == h then the relation is EQ
+--
+-- otherwise, consider the vertex v defined by
+-- h, h', and h0.
+--
+-- we define h < h' if h appears directly after h0 in the CCW cyclic ordering
+-- of v
+-- and h > h' otherwise
+
+
+
 
 --------------------------------------------------------------------------------
 -- * Converting into a minimization diagram

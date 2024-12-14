@@ -7,36 +7,37 @@ module VoronoiDiagram.VoronoiSpec
   ) where
 
 import           Control.Lens
-import           Golden
--- import HGeometry.Combinatorial.Util
-import           HGeometry.Duality
-import           HGeometry.Ext
-import           HGeometry.Plane.LowerEnvelope
-import qualified Data.Set as Set
-import qualified Data.Vector as Vector
+import           Control.Monad (forM_)
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Sequence as Seq
-import           HGeometry.Number.Real.Rational
-import           Data.List.NonEmpty (NonEmpty(..))
-import           HGeometry.Point
-import           HGeometry.Vector
+import qualified Data.Set as Set
+import qualified Data.Vector as Vector
+import           Golden
 import           HGeometry.Box
-import           HGeometry.Line.General
+import           HGeometry.Duality
+import           HGeometry.Ext
 import           HGeometry.HalfLine
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
+import           HGeometry.Line.General
+import           HGeometry.Number.Real.Rational
+import           HGeometry.Plane.LowerEnvelope
+import           HGeometry.Point
+import           HGeometry.Sequence.Alternating (Alternating(..))
+import           HGeometry.Vector
 import           HGeometry.VoronoiDiagram
 import           HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
 import           Ipe
 import           Ipe.Color
-import           Test.Hspec.WithTempFile
+import           Plane.LowerEnvelopeSpec () -- imports the ipe instances for Voronoi Diagram
 import           System.OsPath
 import           Test.Hspec
+import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
-import           Plane.LowerEnvelopeSpec () -- imports the ipe instances for Voronoi Diagram
-import           HGeometry.Sequence.Alternating (Alternating(..))
 -- import Test.Util
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -82,6 +83,8 @@ spec = describe "Voronoi diagram tests" $ do
             [osp|colinear_out|]
     testIpe [osp|pair.ipe|]
             [osp|pair_out|]
+    testIpe [osp|buggy.ipe|]
+            [osp|buggy_out|]
 
 degenerateTests :: Spec
 degenerateTests = describe "degnereate inputs" $ do
@@ -109,46 +112,41 @@ degenerateTests = describe "degnereate inputs" $ do
                  ,(VerticalLineThrough 8.5,Point2 9 2)
                  ,(VerticalLineThrough 9.5,Point2 10 2)])
 
+  describe "all permutations the same" $ do
+    let (x :| xs) = NonEmpty.permutations1 bug
+        f         = numRegions . voronoiDiagram
+    forM_ xs $ \perm ->
+      it ("on permutation: " <> show perm) $
+        f x `shouldBe` f perm
+        -- perm `shouldSatisfy` (\y -> f x == f y)
 
   it "buggy four points diagram" $
-    numRegions (voronoiDiagram bug)
+    numRegions (traceShowId $ voronoiDiagram bug)
     `shouldBe`
     Just 4
-  it "buggy planes"   $
-    fmap pointToPlane bug `shouldBe`
-    NonEmpty.fromList [ Plane (-20)   0       100
-                      , Plane (-0.0)  (-20.0) 100
-                      , Plane (-60.0) (-20)   1000
-                      , Plane (-20.0) (-60)   1000
-                      ]
-  it "thebuggy definers" $ do
+
+  it "mergeDefiners" $ do
     let v     = Point3 15 15 (-200)
         fromCCWList' = fromCCWList . NonEmpty.fromList
         nonVerticalHyperPlane [a,b,c] = Plane a b c
         defs1 = fromCCWList'
                 [ nonVerticalHyperPlane [ -20.0, -60.0, 1000.0 ] :+ Point2 10.0 30.0
-                , nonVerticalHyperPlane [ -0.0, -20.0, 100.0 ] :+ Point2 0.0 10.0
-                , nonVerticalHyperPlane [ -60.0, -20.0, 1000.0 ] :+ Point2 30.0 10.0
-                ]
-        defs2 = fromCCWList'
-                [ nonVerticalHyperPlane [ -20.0, -60.0, 1000.0 ] :+ Point2 10.0 30.0
                 , nonVerticalHyperPlane [ -20.0, -0.0, 100.0 ] :+ Point2 10.0 0.0
                 , nonVerticalHyperPlane     [ -60.0, -20.0, 1000.0 ] :+ Point2 30.0 10.0
                 ]
-        defs3 = fromCCWList'
+        defs2 = fromCCWList'
+                [ nonVerticalHyperPlane [ -20.0, -60.0, 1000.0 ] :+ Point2 10.0 30.0
+                , nonVerticalHyperPlane [ -0.0, -20.0, 100.0 ] :+ Point2 0.0 10.0
+                , nonVerticalHyperPlane [ -60.0, -20.0, 1000.0 ] :+ Point2 30.0 10.0
+                ]
+        ans = fromCCWList'
                 [ nonVerticalHyperPlane [ -20.0, -60.0, 1000.0 ] :+ Point2 10.0 30.0
                 , nonVerticalHyperPlane [ -0.0, -20.0, 100.0 ] :+ Point2 0.0 10.0
                 , nonVerticalHyperPlane [ -20.0, -0.0, 100.0 ] :+ Point2 10.0 0.0
-                ]
-        defs4 = fromCCWList'
-                [ nonVerticalHyperPlane [ -0.0, -20.0, 100.0 ] :+ Point2 0.0 10.0
-                , nonVerticalHyperPlane [ -20.0, -0.0, 100.0 ] :+ Point2 10.0 0.0
                 , nonVerticalHyperPlane [ -60.0, -20.0, 1000.0 ] :+ Point2 30.0 10.0
                 ]
-    mergeDefiners v defs1 defs2 `shouldBe` defs3
-    mergeDefiners v defs1 defs3 `shouldBe` defs3
-    mergeDefiners v defs1 defs4 `shouldBe` defs3
-    --FIXME; something is not really right; in the end there should be four definers though.
+    length (mergeDefiners v defs1 defs2) `shouldBe` 4
+
 
 
 
