@@ -2,11 +2,15 @@
 module Main(main) where
 
 import           Control.Lens
+import           Data.Colour
+import           Data.Colour.Names
+import           Data.Colour.SRGB (RGB(..),toSRGB24)
 import qualified Data.Foldable as F
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Data.Map.NonEmpty as NEMap
+import           Data.Ord (comparing)
 import           HGeometry.Box
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.NonVertical
@@ -31,13 +35,28 @@ import           System.OsPath
 type R = RealNumber 5
 
 
-myPlanes = NonEmpty.zipWith (\i p -> pointToPlane p :+ (i,p)) (NonEmpty.fromList [0..])
+class HasColour plane where
+  colourOf :: plane -> Colour Double
+instance HasColour (plane :+ (i,point,Colour Double)) where
+  colourOf (_ :+ (_,_,c)) = c
+
+instance Ord (Colour Double) where
+  compare = comparing (\c -> case toSRGB24 c of
+                               RGB r g b -> (r,g,b)
+                      )
+
+pointToPlane' :: (Fractional r, Ord r) => Point 2 r -> Plane r
+pointToPlane' = fmap (/ 10) . pointToPlane
+
+
+
+myPlanes = NonEmpty.zipWith (\i (p :+ c) -> pointToPlane' p :+ (i,p,c)) (NonEmpty.fromList [0..])
          $ myPoints
 myPoints = NonEmpty.fromList $
-           [ Point2 10 0
-           , Point2 0  10
-           , Point2 30 10
-           , Point2 10 30
+           [ Point2 10 0   :+ red
+           , Point2 0  10  :+ green
+           , Point2 30 10  :+ blue
+           , Point2 10 30  :+ (yellow :: Colour Double)
            ]
 
 
@@ -62,28 +81,33 @@ toPolygons = fmap render . NEMap.toAscList . asMap
                            Left pg  -> pg&vertices %~ \v -> (v^.asPoint :+ evalAt v h)
                            Right pg -> pg&vertices %~ \v -> (v^.asPoint :+ evalAt v h)
                      )
-    m = 1000
+    m = 100
     rect = Box (Point2 (negate m) (negate m)) (Point2 m m)
 
+type Vtx r = (Int, Point 3 r :+ VertexAttributes 'Coloured)
+
 -- | Render a minimization diagram
-renderMinimizationDiagram     :: (Plane_ plane r, Ord r, Fractional r)
+renderMinimizationDiagram     :: (Plane_ plane r, Ord r, Fractional r, HasColour plane)
                               => MinimizationDiagram r plane
-                              -> ( NonEmpty (Point 3 r :+ Int)
+                              -> ( NonEmpty (Vtx r)
                                  , NonEmpty (NonEmpty Int)
                                  )
 renderMinimizationDiagram env = (NonEmpty.fromList vs, NonEmpty.fromList fs)
   where
     (_,vs,fs) = foldr render (0,[],[])
-              . NonEmpty.fromList . NonEmpty.take 1
+              -- . NonEmpty.fromList . NonEmpty.take 1
               . toPolygons $ env
 
-    render                            :: (plane, ConvexPolygonF NonEmpty (Point 2 r :+ r))
-                                      -> (Int, [Point 3 r :+ Int], [NonEmpty Int])
-                                      -> (Int, [Point 3 r :+ Int], [NonEmpty Int])
-    render (_,pg) acc@(i,vsAcc,fsAcc) =
-      let vs    = (\(j, Point2 x y :+ z) ->  Point3 x y z :+ (i+j))
+    render                            :: HasColour plane
+                                      => ( plane
+                                         , ConvexPolygonF NonEmpty (Point 2 r :+ r))
+                                      -> (Int, [Vtx r], [NonEmpty Int])
+                                      -> (Int, [Vtx r], [NonEmpty Int])
+    render (h,pg) acc@(i,vsAcc,fsAcc) =
+      let vs    = (\(j, Point2 x y :+ z) -> (i+j, Point3 x y z :+ ats))
                   <$> toNonEmptyOf (vertices.withIndex) pg
-          face' = view extra <$> vs
+          face' = fst <$> vs
+          ats   = VertexAttributes (colourOf h)
       in (i + length vs, F.toList vs <> vsAcc, face' : fsAcc)
 
 
@@ -109,9 +133,11 @@ main = do
            ConnectedEnvelope env -> do
                                       putStrLn "Regions:"
                                       mapM_ print $ toPolygons env
-                                      renderOutputToFile [osp|myLowerEnv.ply|] vs' fs
+                                      -- print vs
+
+                                      renderOutputToFile [osp|myLowerEnv.ply|] vs fs
              where
-               vs'     = fitToBox box . scaleBy (Vector3 1 1 (1/100)) $ vs
+               -- vs'     = vs&traverse._2 %~ scaleBy (Vector3 1 1 (1/100))
                (vs,fs) = renderMinimizationDiagram env
 
 

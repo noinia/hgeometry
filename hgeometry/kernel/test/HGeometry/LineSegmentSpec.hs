@@ -259,7 +259,7 @@ testI = describe "some manual intersection tests" $ do
           describe "manual intersect with line" $ do
             let l = LinePV origin (Vector2 0 (1 :: Int))
             it "man" $ (l `intersects` test1) `shouldBe` True
-            it "sideTest" $ traceShow (hyperPlaneEquation l) $
+            it "sideTest" $
               (onSideTest (test1^.start) l) `shouldBe` EQ
 
 

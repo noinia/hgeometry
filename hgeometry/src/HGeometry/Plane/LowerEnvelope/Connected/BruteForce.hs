@@ -23,7 +23,6 @@ import           HGeometry.Plane.LowerEnvelope.Connected.Regions
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Point
 
-import Debug.Trace
 --------------------------------------------------------------------------------
 -- * The naive O(n^4) time algorithm.
 
@@ -42,7 +41,6 @@ computeVertexForm        :: (Plane_ plane r, Ord plane, Ord r, Fractional r, Fol
                             )
                          => set plane -> VertexForm r plane
 computeVertexForm planes = unionsWithKey mergeDefiners
-                           . traceShowId
                          . map (asVertex planes) $ uniqueTriplets planes
 
 asVertex             :: (Plane_ plane r, Foldable f, Ord plane, Ord r, Fractional r)

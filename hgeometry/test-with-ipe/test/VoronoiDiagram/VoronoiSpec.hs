@@ -121,7 +121,7 @@ degenerateTests = describe "degnereate inputs" $ do
         -- perm `shouldSatisfy` (\y -> f x == f y)
 
   it "buggy four points diagram" $
-    numRegions (traceShowId $ voronoiDiagram bug)
+    numRegions (voronoiDiagram bug)
     `shouldBe`
     Just 4
 

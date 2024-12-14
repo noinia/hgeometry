@@ -44,7 +44,7 @@ import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm
 import           HGeometry.Point
 import           HGeometry.Vector
 
-import           Debug.Trace
+-- import           Debug.Trace
 ----------------------------------------
 
 -- | returns the CCW predecessor, and CCW successor of the given plane.
@@ -127,7 +127,7 @@ fromVertexForm :: (Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show 
 fromVertexForm = MinimizationDiagram
                . NEMap.mapWithKey sortAroundBoundary . mapWithKeyMerge1 (\v defs ->
                     NEMap.fromList . fmap (,Set.singleton (v,defs)) . toNonEmpty $ defs)
-               . f . traceShowId
+               . f
   where
     f = NEMap.unsafeFromMap -- FIXME
 
