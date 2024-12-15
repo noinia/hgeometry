@@ -58,8 +58,8 @@ data Orientation = AsIs | Reversed
 
 -- | Paths consist of Path Segments. PathSegments come in the following forms:
 data PathSegment r = PolyLineSegment        (PolyLine (Point 2 r))
-                   | PolygonPath            (SimplePolygon (Point 2 r))
-                                            {-# UNPACK #-}!Orientation
+                   | PolygonPath            {-# UNPACK #-}!Orientation
+                                            (SimplePolygon (Point 2 r))
                    | CubicBezierSegment     (CubicBezier (Point 2 r))
                    | QuadraticBezierSegment (QuadraticBezier (Point 2 r))
                    | EllipseSegment         (Ellipse r)
@@ -81,7 +81,7 @@ instance Traversable PathSegment where
   traverse f = \case
       PolyLineSegment p        -> PolyLineSegment
                                   <$> traverseOf (cloneTraversal $ vertices.coordinates) f p
-      PolygonPath p o          -> flip PolygonPath o
+      PolygonPath o p          -> PolygonPath o
                                   <$> traverseOf (cloneTraversal $ vertices.coordinates) f p
       CubicBezierSegment b     -> CubicBezierSegment
                                   <$> traverseOf (cloneTraversal $ vertices.coordinates) f b
@@ -96,7 +96,7 @@ instance Traversable PathSegment where
 instance Fractional r => IsTransformable (PathSegment r) where
   transformBy t = \case
     PolyLineSegment p        -> PolyLineSegment $ transformBy t p
-    PolygonPath p o          -> PolygonPath (transformBy t p) o
+    PolygonPath o p          -> PolygonPath o (transformBy t p)
     CubicBezierSegment b     -> CubicBezierSegment $ transformBy t b
     QuadraticBezierSegment b -> QuadraticBezierSegment $ transformBy t b
     EllipseSegment e         -> EllipseSegment $ transformBy t e

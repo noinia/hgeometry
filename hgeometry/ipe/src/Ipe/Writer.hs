@@ -321,7 +321,7 @@ instance (IpeWriteText r, Point_ point 2 r) => IpeWriteText (CubicBezier point) 
 
 instance IpeWriteText r => IpeWriteText (PathSegment r) where
   ipeWriteText (PolyLineSegment    p) = ipeWriteText p
-  ipeWriteText (PolygonPath p orient) = case orient of
+  ipeWriteText (PolygonPath orient p) = case orient of
     AsIs     -> ipeWriteText p
     Reversed -> ipeWriteTextPolygonVertices . NonEmpty.reverse
               $ toNonEmptyOf (outerBoundary.asPoint) p

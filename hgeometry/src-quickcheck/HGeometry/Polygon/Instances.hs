@@ -16,6 +16,7 @@ module HGeometry.Polygon.Instances
 import Control.Lens hiding (elements)
 import Control.Monad.State
 import Data.Aeson (eitherDecodeFileStrict)
+import Data.Maybe (maybeToList)
 import Data.Ord
 import Data.Ratio
 import HGeometry

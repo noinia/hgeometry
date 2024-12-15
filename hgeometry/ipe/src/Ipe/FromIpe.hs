@@ -158,7 +158,7 @@ _asTriangle :: Prism' (Path r) (Triangle (Point 2 r))
 _asTriangle = prism' triToPath path2tri
   where
     triToPath (Triangle p q r) = polygonToPath $ uncheckedFromCCWPoints [p,q,r]
-    path2tri p = case p^..pathSegments.traverse._PolygonPath._1 of
+    path2tri p = case p^..pathSegments.traverse._PolygonPath._2 of
                     []   -> Nothing
                     [pg] -> case pg^..vertices of
                               [a,b,c] -> Just $ Triangle a b c
@@ -201,14 +201,14 @@ _asDisk = _asCircle.from _DiskCircle
 
 
 polygonToPath :: SimplePolygon (Point 2 r) -> Path r
-polygonToPath = Path . fromSingleton . flip PolygonPath AsIs
+polygonToPath = Path . fromSingleton . PolygonPath AsIs
 
 
 -- polygonToPath (MultiPolygon vs hs) = Path . LSeq.fromNonEmpty . fmap PolygonPath
 --                                    $ vs :| hs
 
 pathToPolygon   :: Path r -> Maybe (SimplePolygon (Point 2 r))
-pathToPolygon p = case p^..pathSegments.traverse._PolygonPath._1 of
+pathToPolygon p = case p^..pathSegments.traverse._PolygonPath._2 of
                     [pg]  -> Just pg
                     _     -> Nothing
                     -- vs:hs -> Just . Right $ MultiPolygon vs hs

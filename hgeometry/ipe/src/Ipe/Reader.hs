@@ -241,11 +241,11 @@ instance (Coordinate r, Fractional r, Eq r) => IpeReadText (NonEmpty.NonEmpty (P
                                       pts  = s NonEmpty.:| q:mapMaybe (^?_LineTo) ls
                                       mPoly = Polygon.fromPoints pts
                                       pl    = polyLineFromPoints pts
-                                      or    = AsIs -- TODO: this may be wrong
+                                      or'   = AsIs -- TODO: this may be wrong
                                   in case xs of
                                        (ClosePath : xs') -> case mPoly of
                                          Nothing         -> Left "simple polygon failed"
-                                         Just poly       -> PolygonPath poly or  <<| xs'
+                                         Just poly       -> PolygonPath or' poly <<| xs'
                                        _                 -> PolyLineSegment pl <<| xs
 
       fromOps' s [Spline [a, b]]  = Right [QuadraticBezierSegment $ Bezier2 s a b]
