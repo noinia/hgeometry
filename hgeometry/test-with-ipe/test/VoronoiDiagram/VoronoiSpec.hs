@@ -86,6 +86,15 @@ spec = describe "Voronoi diagram tests" $ do
     testIpe [osp|buggy.ipe|]
             [osp|buggy_out|]
 
+
+    goldenWith [osp|data/test-with-ipe/VoronoiDiagram/|]
+               (ipeContentGolden { name = [osp|possibleBugPoints|] })
+                 [ iO' possibleBugPoints
+                 , iO' $ voronoiDiagram possibleBugPoints
+                 ]
+
+
+
 degenerateTests :: Spec
 degenerateTests = describe "degnereate inputs" $ do
   it "single point diagram" $
@@ -241,3 +250,16 @@ testIpe inFp outFp = do
     goldenWith [osp|data/test-with-ipe/VoronoiDiagram/|]
                (ipeFileGolden { name = outFp })
                (addStyleSheet opacitiesStyle $ singlePageFromContent out)
+
+
+
+possibleBugPoints :: NonEmpty (Point 2 R)
+possibleBugPoints = NonEmpty.fromList $
+           [ Point2 16 80
+           , Point2 64 48
+           , Point2 208 128
+           , Point2 176 48
+           , Point2 96 112
+           , Point2 128 80
+           , Point2 48 144
+           ]
