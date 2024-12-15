@@ -303,7 +303,7 @@ instance ToMisoString r => Drawable (Ipe.Path r) where
 instance ToMisoString r => Drawable (Ipe.PathSegment r) where
   draw = \case
     Ipe.PolyLineSegment pl -> dPolyLine pl
-    Ipe.PolygonPath  pg    -> dSimplePolygon pg
+    Ipe.PolygonPath _ pg   -> dSimplePolygon pg -- TODO: maybe don't ignore the orientation
     _                      -> error "toValue: not implemented yet"
 
 --------------------------------------------------------------------------------
