@@ -108,7 +108,10 @@ myRect = let m = 100 in Box (Point2 (negate m) (negate m)) (Point2 m m)
 
 type Vtx r = (Int, Point 3 r :+ VertexAttributes 'Coloured)
 
-
+-- | Triangulate the faces.
+--
+-- maybe actually move this into the ply-writer, since both blender and the weird online
+-- viewer apparently could not deal well with non-triangular faces to begin with.
 triangulate'        :: (ConvexPolygon_ convexPolygon point r, Ord r, Num r)
                     => (plane, convexPolygon)
                     -> NonEmpty (plane, ConvexPolygon point)

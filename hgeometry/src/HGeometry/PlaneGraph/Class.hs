@@ -203,7 +203,6 @@ edgeSegments = theFold
         draw ei _ = let seg = uncurry ClosedLineSegment $ g^.endPointsOf (getPositiveDart g ei)
                     in seg >$ indexed pSegFSeg ei seg
 
--- TODO: Make this into a IndexedFold1
 
 -- | Renders all interior faces as simple polygons.
 interiorFacePolygons :: forall planeGraph vertex r.
