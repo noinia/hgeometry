@@ -17,6 +17,7 @@ module HGeometry.Polygon.Simple.Class
 import           Control.Lens
 import           Data.Default.Class
 import qualified Data.Foldable as F
+import           Data.Foldable1
 import           Data.Kind (Constraint)
 import           HGeometry.Ext
 import           HGeometry.Point.Class
@@ -39,7 +40,7 @@ class ( Polygon_ simplePolygon point r
   --      - at least 3 vertices, not all colinear
   --      - no repeated vertices
   --      - no self-inttersections
-  uncheckedFromCCWPoints :: Foldable f => f point -> simplePolygon
+  uncheckedFromCCWPoints :: Foldable1 f => f point -> simplePolygon
 
   -- | Constraints that allow us to construct a simple polygon
   type ConstructableSimplePolygon simplePolygon point r :: Constraint

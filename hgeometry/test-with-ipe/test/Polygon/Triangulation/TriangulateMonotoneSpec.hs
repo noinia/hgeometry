@@ -3,14 +3,14 @@
 module Polygon.Triangulation.TriangulateMonotoneSpec (spec) where
 
 import           Control.Lens
+import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe
 import           Golden
 import           HGeometry
 import           HGeometry.Ext
 import           HGeometry.Number.Real.Rational
-import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Simple
 import           HGeometry.PlaneGraph
+import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Triangulation
 import           Ipe
 import           System.OsPath
@@ -28,7 +28,7 @@ type R = RealNumber 5
 spec :: Spec
 spec = do it "triangulate triangle"   $ do
             let tri :: SimplePolygon (Point 2 R)
-                tri = uncheckedFromCCWPoints $ [origin, Point2 10 0, Point2 10 10]
+                tri = uncheckedFromCCWPoints $ origin :| [ Point2 10 0, Point2 10 10]
                 gr  = TM.triangulate @() tri
             extractDiagonals gr `shouldBe` []
           testCases toMonotoneSpec [osp|test-with-ipe/Polygon/Triangulation/monotone.ipe|]

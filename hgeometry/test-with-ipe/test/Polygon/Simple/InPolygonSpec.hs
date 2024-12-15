@@ -2,17 +2,18 @@
 {-# LANGUAGE QuasiQuotes #-}
 module Polygon.Simple.InPolygonSpec (spec) where
 
-import Control.Lens
-import Data.Proxy
-import Golden
-import HGeometry.Boundary
-import HGeometry.Ext
-import HGeometry.Point
-import HGeometry.Polygon.Simple
-import Ipe
-import System.OsPath
-import Test.Hspec
-import Test.QuickCheck.Instances ()
+import           Control.Lens
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Proxy
+import           Golden
+import           HGeometry.Boundary
+import           HGeometry.Ext
+import           HGeometry.Point
+import           HGeometry.Polygon.Simple
+import           Ipe
+import           System.OsPath
+import           Test.Hspec
+import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
 
@@ -97,7 +98,7 @@ readInputFromFile fp = fmap f <$> readSinglePageFile fp
 
 -- Test case found by Kamil Figiela @kfigiela.
 polygon :: (Eq r, Fractional r) => SimplePolygon (Point 2 r)
-polygon = uncheckedFromCCWPoints $
+polygon = uncheckedFromCCWPoints . NonEmpty.fromList $
   [ Point2 5584390.945938013 2284567.4635945037
   , Point2 5562410.061516319 2285869.7979417136
   , Point2 5563196.65161862  2250738.663576637

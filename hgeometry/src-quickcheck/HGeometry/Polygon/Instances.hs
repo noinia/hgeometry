@@ -100,7 +100,8 @@ allMultiPolygonsWith f = unsafePerformIO $ do
 
 -- | Shifts the polygon to the left by n.
 rotateLeft      :: SimplePolygon_ simplePolygon point r => Int -> simplePolygon -> simplePolygon
-rotateLeft n pg = uncheckedFromCCWPoints $ pg^..ccwOuterBoundaryFrom (n `mod` numVertices pg)
+rotateLeft n pg = uncheckedFromCCWPoints
+                $ toNonEmptyOf (ccwOuterBoundaryFrom (n `mod` numVertices pg)) pg
 
 instance Arbitrary (SimplePolygon (Point 2 Rational)) where
   arbitrary = do
@@ -161,7 +162,7 @@ simplifyP pg
     | minX /= 0 || minY /= 0 = [ pg' | pg' <- fromPoints' $ align <$> pg^..vertices ]
     | otherwise =
       let pg' = pg&vertices %~ _div2
-      in [ pg' | hasNoSelfIntersections $ pg'^..vertices ]
+      in [ pg' | hasNoSelfIntersections $ toNonEmptyOf vertices pg' ]
     -- otherwise = []
   where
     fromPoints' = maybeToList . fromPoints
@@ -217,7 +218,7 @@ cutEarAt pg i = fromPoints vs
 cutEars :: (Ord r, Fractional r)
   => SimplePolygon (Point 2 r) -> [SimplePolygon (Point 2 r)]
 cutEars pg | isTriangle pg = []
-           | otherwise     = [ pg' | i <- [0 .. (n -1)], isEar i, Just pg' <- [cutEarAt pg i] ]
+           | otherwise     = [ pg' | i <- [0 .. (n -1)], isEar i, pg' <- maybeToList (cutEarAt pg i) ]
   where
     n = numVertices pg
     isEar i = let prev = pg^.outerBoundaryVertexAt ((i-1) `mod` n)

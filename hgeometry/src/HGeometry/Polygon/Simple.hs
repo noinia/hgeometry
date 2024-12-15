@@ -26,6 +26,7 @@ module HGeometry.Polygon.Simple
 
 import           Control.Lens
 import qualified Data.Foldable as F
+import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
@@ -109,7 +110,6 @@ instance ( Point_ point 2 r
          , HasFromFoldable1 f
          ) => SimplePolygon_ (SimplePolygonF f point) point r where
   uncheckedFromCCWPoints = MkSimplePolygon . fromFoldable1
-                         . NonEmpty.fromList . F.toList
 
   fromPoints rawPts = toCounterClockwiseOrder . uncheckedFromCCWPoints
                    <$> requireThree (removeRepeated rawPts)
@@ -148,7 +148,7 @@ instance (SimplePolygon_ (SimplePolygonF f) point r, Fractional r, Ord r)
 --------------------------------------------------------------------------------
 
 _testPoly :: SimplePolygon (Point 2 Int)
-_testPoly = uncheckedFromCCWPoints [Point2 10 20, origin, Point2 0 100]
+_testPoly = uncheckedFromCCWPoints $ NonEmpty.fromList [Point2 10 20, origin, Point2 0 100]
 
 
 --------------------------------------------------------------------------------
@@ -175,7 +175,7 @@ instance ( SimplePolygon_ (SimplePolygonF f point) point r
 
 -- | verify that some sequence of points has no self intersecting edges.
 hasNoSelfIntersections    :: forall f point r.
-                             (Foldable f, Functor f, Point_ point 2 r, Ord r, Real r)
+                             (Foldable1 f, Functor f, Point_ point 2 r, Ord r, Real r)
                           => f point -> Bool
 hasNoSelfIntersections vs = let vs' = (\p -> (p^.asPoint)&coordinates %~ toRational) <$> vs
                                 pg :: SimplePolygon (Point 2 Rational)

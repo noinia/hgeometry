@@ -12,7 +12,7 @@
 module HGeometry.Polygon.Convex.Implementation
   ( ConvexPolygon
   , ConvexPolygonF(..)
-  , fromSimplePolygon, toSimplePolygon
+  , fromSimplePolygon
   , _ConvexPolygon
   , _UncheckedConvexPolygon
   , isStrictlyConvex, isConvex

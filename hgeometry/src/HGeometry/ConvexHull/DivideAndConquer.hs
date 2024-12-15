@@ -34,7 +34,8 @@ convexHull            :: (Ord r, Num r, Point_ point 2 r)
 -- convexHull (p :| []) = ConvexPolygon . unsafeFromPoints $ [p]
 convexHull pts       = combine . (upperHull' &&& lowerHull') . NonEmpty.sortBy incXdecY $ pts
   where
-    combine (NonEmpty.reverse -> _:|uh, _:|lh) = uncheckedFromCCWPoints $ lh <> uh
+    combine (NonEmpty.reverse -> _:|uh, _:|lh) =
+      uncheckedFromCCWPoints . NonEmpty.fromList $ lh <> uh
 
 
 

@@ -55,7 +55,8 @@ import           Ipe.Reader
 import           Ipe.Types
 import           System.OsPath
 
-
+import           Debug.Trace
+import           HGeometry.Polygon
 --------------------------------------------------------------------------------
 
 -- import qualified Data.List.NonEmpty as NonEmpty
@@ -132,8 +133,8 @@ _asConvexPolygon = _asSimplePolygon._ConvexPolygon
 _asRectangle :: forall r. (Num r, Ord r) => Prism' (Path r) (Rectangle (Point 2 r))
 _asRectangle = prism' rectToPath pathToRect
   where
-    rectToPath (Box.corners -> Corners a b c d) =
-      review _asSimplePolygon . uncheckedFromCCWPoints $ [a,b,c,d]
+    rectToPath = review _asSimplePolygon . uncheckedFromCCWPoints . Box.corners
+    -- shoudln't I reverse these corners
     pathToRect p = p^?_asSimplePolygon >>= asRect
 
     asRect    :: SimplePolygon (Point 2  r) -> Maybe (Rectangle (Point 2 r))
@@ -157,7 +158,7 @@ _asRectangle = prism' rectToPath pathToRect
 _asTriangle :: Prism' (Path r) (Triangle (Point 2 r))
 _asTriangle = prism' triToPath path2tri
   where
-    triToPath (Triangle p q r) = polygonToPath $ uncheckedFromCCWPoints [p,q,r]
+    triToPath = polygonToPath . uncheckedFromCCWPoints
     path2tri p = case p^..pathSegments.traverse._PolygonPath._2 of
                     []   -> Nothing
                     [pg] -> case pg^..vertices of

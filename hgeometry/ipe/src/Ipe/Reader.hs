@@ -74,6 +74,9 @@ import           System.OsPath
 import           Text.XML.Expat.Tree
 
 
+import           Debug.Trace
+import           HGeometry.Polygon (signedArea2X)
+
 --------------------------------------------------------------------------------
 
 type ConversionError = Text
@@ -248,7 +251,9 @@ instance (Coordinate r, Fractional r, Eq r) => IpeReadText (NonEmpty.NonEmpty (P
                                   in case xs of
                                        (ClosePath : xs') -> case mPoly of
                                          Nothing         -> Left "simple polygon failed"
-                                         Just poly       -> PolygonPath or' poly <<| xs'
+                                         Just poly       ->
+                                           traceShow (or', isCCW poly) $
+                                           PolygonPath or' poly <<| xs'
                                        _                 -> PolyLineSegment pl <<| xs
 
       fromOps' s [Spline [a, b]]  = Right [QuadraticBezierSegment $ Bezier2 s a b]
@@ -262,6 +267,8 @@ instance (Coordinate r, Fractional r, Eq r) => IpeReadText (NonEmpty.NonEmpty (P
       span' pr = L.span (not . isn't pr)
 
       x <<| xs = (x:) <$> fromOps xs
+
+      isCCW = (\x -> x == abs x) . signedArea2X
 
 -- | test if the sequence of points, forming a simple polygon, is in CCW order
 isCounterClockwise :: (Eq r, Num r) => NonEmpty.NonEmpty (Point 2 r) -> Bool
