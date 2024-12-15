@@ -11,9 +11,10 @@
 --------------------------------------------------------------------------------
 module HGeometry.Polygon.Convex.Implementation
   ( ConvexPolygon
-  , ConvexPolygonF
+  , ConvexPolygonF(..)
   , fromSimplePolygon, toSimplePolygon
   , _ConvexPolygon
+  , _UncheckedConvexPolygon
   , isStrictlyConvex, isConvex
   , verifyConvex
   , maxInDirection

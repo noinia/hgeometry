@@ -19,6 +19,7 @@ module HGeometry.Polygon.Convex
   , verifyConvex
   , minkowskiSum
   , maxInDirection
+  , _UncheckedConvexPolygon
   ) where
 
 import HGeometry.Polygon.Convex.Class

@@ -25,6 +25,7 @@ import           HGeometry.Point
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple.Class
+import           HGeometry.Polygon.Triangulation
 import           HGeometry.Transformation
 import           HGeometry.Vector
 import           HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane, voronoiDiagram)
@@ -33,7 +34,7 @@ import           PLY.Writer
 import           System.OsPath
 -- import           Test.QuickCheck
 
-import Debug.Trace
+import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -107,6 +108,18 @@ myRect = let m = 100 in Box (Point2 (negate m) (negate m)) (Point2 m m)
 
 type Vtx r = (Int, Point 3 r :+ VertexAttributes 'Coloured)
 
+
+triangulate'        :: (ConvexPolygon_ convexPolygon point r, Ord r, Num r)
+                    => (plane, convexPolygon)
+                    -> NonEmpty (plane, ConvexPolygon point)
+triangulate' (h,pg) = fmap (\simple -> (h, review _UncheckedConvexPolygon $
+                                           simple&vertices %~ view core
+                                       )
+                           )
+                    . NonEmpty.fromList
+                    . toListOf interiorFacePolygons . triangulate $ pg
+
+
 -- | Render a minimization diagram
 renderMinimizationDiagram     :: (Plane_ plane r, Ord r, Fractional r, HasColour plane)
                               => MinimizationDiagram r plane
@@ -117,11 +130,12 @@ renderMinimizationDiagram env = (NonEmpty.fromList vs, NonEmpty.fromList fs)
   where
     (_,vs,fs) = foldr render (0,[],[])
               -- . NonEmpty.fromList . NonEmpty.take 1
+              . foldMap1 triangulate'
               . toPolygons $ env
 
     render                            :: HasColour plane
                                       => ( plane
-                                         , ConvexPolygonF NonEmpty (Point 2 r :+ r))
+                                         , ConvexPolygon (Point 2 r :+ r))
                                       -> (Int, [Vtx r], [NonEmpty Int])
                                       -> (Int, [Vtx r], [NonEmpty Int])
     render (h,pg) acc@(i,vsAcc,fsAcc) =

@@ -137,7 +137,9 @@ extraPoints            :: ( Rectangle_ rectangle corner, Point_ corner 2 r
                           )
                        => HalfLine point -> HalfLine point -> rectangle
                        -> NonEmpty (Point 2 r)
-extraPoints hp hq rect = q :| cornersInBetween qSide pSide rect <> [p]
+extraPoints hp hq rect = noDuplicates $ q :| cornersInBetween qSide pSide rect <> [p]
+    -- if the intersection point coincides with a corner then the current code includes
+    -- the corner. We use the noDuplicates to get rid of those.
   where
     (q,qSide) = intersectionPoint hq
     (p,pSide) = intersectionPoint hp
@@ -149,6 +151,9 @@ extraPoints hp hq rect = q :| cornersInBetween qSide pSide rect <> [p]
       case h `intersect` seg of
         Just (HalfLine_x_LineSegment_Point x) -> First $ Just (x, side)
         _                                     -> First   Nothing
+
+    noDuplicates = fmap NonEmpty.head . NonEmpty.group1
+
 
 -- | Computes the corners in between the two given sides (in CCW order)
 cornersInBetween          :: (Rectangle_ rectangle point, Point_ point 2 r, Num r)
