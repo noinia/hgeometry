@@ -38,6 +38,7 @@ import           Data.Bifunctor
 import qualified Data.ByteString as B
 import           Data.Colour.SRGB (RGB(..))
 import           Data.Either (rights)
+import qualified Data.Foldable as F
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromMaybe, mapMaybe)
@@ -241,7 +242,9 @@ instance (Coordinate r, Fractional r, Eq r) => IpeReadText (NonEmpty.NonEmpty (P
                                       pts  = s NonEmpty.:| q:mapMaybe (^?_LineTo) ls
                                       mPoly = Polygon.fromPoints pts
                                       pl    = polyLineFromPoints pts
-                                      or'   = AsIs -- TODO: this may be wrong
+                                      or'   = if isCounterClockwise pts
+                                              then Ipe.Path.AsIs
+                                              else Ipe.Path.Reversed
                                   in case xs of
                                        (ClosePath : xs') -> case mPoly of
                                          Nothing         -> Left "simple polygon failed"
@@ -259,6 +262,15 @@ instance (Coordinate r, Fractional r, Eq r) => IpeReadText (NonEmpty.NonEmpty (P
       span' pr = L.span (not . isn't pr)
 
       x <<| xs = (x:) <$> fromOps xs
+
+-- | test if the sequence of points, forming a simple polygon, is in CCW order
+isCounterClockwise :: (Eq r, Num r) => NonEmpty.NonEmpty (Point 2 r) -> Bool
+isCounterClockwise = (\x -> x == abs x) . signedArea2X'
+  where
+    signedArea2X' poly = sum [ p^.xCoord * q^.yCoord - q^.xCoord * p^.yCoord
+                             | (p,q) <- edges poly
+                             ]
+    edges poly = let poly' = F.toList poly in zip poly' (NonEmpty.tail poly <> poly')
 
 
 -- | Read a list of control points of a uniform cubic B-spline and conver it

@@ -11,6 +11,7 @@
 module HGeometry.Polygon.Instances
   ( allSimplePolygons
   , shrinkPolygon
+  -- , runConvert
   ) where
 
 import Control.Lens hiding (elements)
@@ -52,6 +53,24 @@ allSimplePolygonsWith f = unsafePerformIO $ do
     Right pgs -> pure [ pg&allPoints %~ \p -> p&coordinates %~ f
                       | (pg :: SimplePolygon (Point 2 Double)) <- pgs
                       ]
+
+-- runConvert :: IO ()
+-- runConvert = do
+--   fp <- getDataFileName "polygons.simple.json"
+--   eitherDecodeFileStrict fp >>= \case
+--     Left msg  -> error msg
+--     Right pgs -> encodeFile "polygons.simple.out" $
+--                    [ (pg  :: SimplePolygon (Point 2 Double))
+--                    | (pg' :: SimplePolygon (Point 2 Double)) <- pgs
+--                    , Just pg <- [fromPoints $ toNonEmptyOf outerBoundary pg']
+--                    ]
+
+      -- pure [ pg&allPoints %~ \p -> p&coordinates %~ f
+      --                 | (pg :: SimplePolygon (Point 2 Double)) <- pgs
+      --                 ]
+
+
+
 
 -- tojson = encodeFile "out.json" $ allSimplePolygons
 
@@ -188,15 +207,15 @@ gcdPoint p = realToFrac t
 
 -- remove vertex i, thereby dropping a vertex
 cutEarAt      :: (Ord r, Fractional r)
-              => SimplePolygon (Point 2 r) -> Int -> SimplePolygon (Point 2 r)
-cutEarAt pg i = uncheckedFromCCWPoints vs
+              => SimplePolygon (Point 2 r) -> Int -> Maybe (SimplePolygon (Point 2 r))
+cutEarAt pg i = fromPoints vs
   where
     vs = ifoldrOf outerBoundary (\j v vs' -> if i == j then vs' else v:vs') [] pg
 
 cutEars :: (Ord r, Fractional r)
   => SimplePolygon (Point 2 r) -> [SimplePolygon (Point 2 r)]
 cutEars pg | isTriangle pg = []
-           | otherwise     = [ cutEarAt pg i | i <- [0 .. (n -1)], isEar i ]
+           | otherwise     = [ pg' | i <- [0 .. (n -1)], isEar i, Just pg' <- [cutEarAt pg i] ]
   where
     n = numVertices pg
     isEar i = let prev = pg^.outerBoundaryVertexAt ((i-1) `mod` n)
