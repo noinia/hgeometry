@@ -4,6 +4,7 @@ module Main(main) where
 import           Control.Lens
 import           Data.Colour
 import           Data.Colour.Names
+import           Data.Colour.Palette.ColorSet
 import           Data.Colour.SRGB (RGB(..),toSRGB24)
 import qualified Data.Foldable as F
 import           Data.Foldable1
@@ -58,23 +59,28 @@ myPlanes :: NonEmpty (Plane R :+ (Int, Point 2 R, Colour Double))
 myPlanes = NonEmpty.zipWith (\i (p :+ c) -> pointToPlane' p :+ (i,p,c)) (NonEmpty.fromList [0..])
          $ myPoints
 
+-- myPoints :: NonEmpty (Point 2 R :+ Colour Double)
+-- myPoints = NonEmpty.fromList $
+--            [ Point2 10 0   :+ red
+--            , Point2 0  10  :+ green
+--            , Point2 30 10  :+ blue
+--            , Point2 10 30  :+ (yellow :: Colour Double)
+--            ]
+
+myColors :: NonEmpty (Colour Double)
+myColors = NonEmpty.fromList infiniteWebColors
+
 myPoints :: NonEmpty (Point 2 R :+ Colour Double)
-myPoints = NonEmpty.fromList $
-           [ Point2 10 0   :+ red
-           , Point2 0  10  :+ green
-           , Point2 30 10  :+ blue
-           , Point2 10 30  :+ (yellow :: Colour Double)
+myPoints = NonEmpty.zipWith (flip (:+)) myColors $
+           NonEmpty.fromList $
+           [ Point2 16 80
+           , Point2 64 48
+           , Point2 208 128
+           , Point2 176 48
+           , Point2 96 112
+           , Point2 128 80
+           , Point2 48 144
            ]
-
-
-           -- [ Point2 16 80
-           -- , Point2 64 48
-           -- , Point2 208 128
-           -- , Point2 176 48
-           -- , Point2 96 112
-           -- , Point2 128 80
-           -- , Point2 48 144
-           -- ]
 
 -- verticesOf    = NonEmpty.fromList . foldMap F.toList . trianglesOf
 -- trianglesOf _ = [ Triangle (origin :+ 0) (Point3 10 0 1  :+ 1) (Point3 0 10 2  :+ 2) ]
@@ -103,7 +109,7 @@ toPolygons = fmap render . NEMap.toAscList . asMap
 
 
 myRect :: Num r => Rectangle (Point 2 r)
-myRect = let m = 100 in Box (Point2 (negate m) (negate m)) (Point2 m m)
+myRect = let m = 1000 in Box (Point2 (negate m) (negate m)) (Point2 m m)
 
 
 type Vtx r = (Int, Point 3 r :+ VertexAttributes 'Coloured)
