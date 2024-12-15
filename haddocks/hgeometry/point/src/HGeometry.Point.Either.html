@@ -1,0 +1,275 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  HGeometry.Point.Either</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- A type that is isomorphic to Either pointA pointB, and its isPoint instance</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- provided that pointA and pointB are actually points as well.</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Point.Either.html"><span class="hs-identifier">HGeometry.Point.Either</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Point.Either.html#OriginalOrExtra"><span class="hs-identifier">OriginalOrExtra</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-2c225bc76acc8fc1e6dce12ee325f5b0d01c05bbb9d72de01b3c6c240d1fc294/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html"><span class="hs-identifier">HGeometry.Point.Class</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="annot"><span class="hs-comment">-- | Helper type for distinguishing original vertices from extra ones.</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">data</span><span> </span><span id="OriginalOrExtra"><span class="annot"><a href="HGeometry.Point.Either.html#OriginalOrExtra"><span class="hs-identifier hs-var">OriginalOrExtra</span></a></span></span><span> </span><span id="local-6989586621679215348"><span class="annot"><a href="#local-6989586621679215348"><span class="hs-identifier hs-type">orig</span></a></span></span><span> </span><span id="local-6989586621679215349"><span class="annot"><a href="#local-6989586621679215349"><span class="hs-identifier hs-type">extra</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Original"><span class="annot"><a href="HGeometry.Point.Either.html#Original"><span class="hs-identifier hs-var">Original</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679215348"><span class="hs-identifier hs-type">orig</span></a></span><span>
+</span><span id="line-25"></span><span>                                </span><span class="hs-glyph">|</span><span> </span><span id="Extra"><span class="annot"><a href="HGeometry.Point.Either.html#Extra"><span class="hs-identifier hs-var">Extra</span></a></span></span><span>    </span><span class="annot"><a href="#local-6989586621679215349"><span class="hs-identifier hs-type">extra</span></a></span><span>
+</span><span id="line-26"></span><span>                                </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679215408"><span id="local-6989586621679215415"><span id="local-6989586621679215419"><span class="annot"><span class="annottext">Int -&gt; OriginalOrExtra orig extra -&gt; ShowS
+[OriginalOrExtra orig extra] -&gt; ShowS
+OriginalOrExtra orig extra -&gt; String
+(Int -&gt; OriginalOrExtra orig extra -&gt; ShowS)
+-&gt; (OriginalOrExtra orig extra -&gt; String)
+-&gt; ([OriginalOrExtra orig extra] -&gt; ShowS)
+-&gt; Show (OriginalOrExtra orig extra)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall orig extra.
+(Show orig, Show extra) =&gt;
+Int -&gt; OriginalOrExtra orig extra -&gt; ShowS
+forall orig extra.
+(Show orig, Show extra) =&gt;
+[OriginalOrExtra orig extra] -&gt; ShowS
+forall orig extra.
+(Show orig, Show extra) =&gt;
+OriginalOrExtra orig extra -&gt; String
+$cshowsPrec :: forall orig extra.
+(Show orig, Show extra) =&gt;
+Int -&gt; OriginalOrExtra orig extra -&gt; ShowS
+showsPrec :: Int -&gt; OriginalOrExtra orig extra -&gt; ShowS
+$cshow :: forall orig extra.
+(Show orig, Show extra) =&gt;
+OriginalOrExtra orig extra -&gt; String
+show :: OriginalOrExtra orig extra -&gt; String
+$cshowList :: forall orig extra.
+(Show orig, Show extra) =&gt;
+[OriginalOrExtra orig extra] -&gt; ShowS
+showList :: [OriginalOrExtra orig extra] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679215426"><span id="local-6989586621679215433"><span class="annot"><span class="annottext">OriginalOrExtra orig extra -&gt; OriginalOrExtra orig extra -&gt; Bool
+(OriginalOrExtra orig extra -&gt; OriginalOrExtra orig extra -&gt; Bool)
+-&gt; (OriginalOrExtra orig extra
+    -&gt; OriginalOrExtra orig extra -&gt; Bool)
+-&gt; Eq (OriginalOrExtra orig extra)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall orig extra.
+(Eq orig, Eq extra) =&gt;
+OriginalOrExtra orig extra -&gt; OriginalOrExtra orig extra -&gt; Bool
+$c== :: forall orig extra.
+(Eq orig, Eq extra) =&gt;
+OriginalOrExtra orig extra -&gt; OriginalOrExtra orig extra -&gt; Bool
+== :: OriginalOrExtra orig extra -&gt; OriginalOrExtra orig extra -&gt; Bool
+$c/= :: forall orig extra.
+(Eq orig, Eq extra) =&gt;
+OriginalOrExtra orig extra -&gt; OriginalOrExtra orig extra -&gt; Bool
+/= :: OriginalOrExtra orig extra -&gt; OriginalOrExtra orig extra -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679215438"><span id="local-6989586621679215440"><span class="annot"><span class="annottext">(forall a b.
+ (a -&gt; b) -&gt; OriginalOrExtra orig a -&gt; OriginalOrExtra orig b)
+-&gt; (forall a b.
+    a -&gt; OriginalOrExtra orig b -&gt; OriginalOrExtra orig a)
+-&gt; Functor (OriginalOrExtra orig)
+forall a b. a -&gt; OriginalOrExtra orig b -&gt; OriginalOrExtra orig a
+forall a b.
+(a -&gt; b) -&gt; OriginalOrExtra orig a -&gt; OriginalOrExtra orig b
+forall orig a b.
+a -&gt; OriginalOrExtra orig b -&gt; OriginalOrExtra orig a
+forall orig a b.
+(a -&gt; b) -&gt; OriginalOrExtra orig a -&gt; OriginalOrExtra orig b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall orig a b.
+(a -&gt; b) -&gt; OriginalOrExtra orig a -&gt; OriginalOrExtra orig b
+fmap :: forall a b.
+(a -&gt; b) -&gt; OriginalOrExtra orig a -&gt; OriginalOrExtra orig b
+$c&lt;$ :: forall orig a b.
+a -&gt; OriginalOrExtra orig b -&gt; OriginalOrExtra orig a
+&lt;$ :: forall a b. a -&gt; OriginalOrExtra orig b -&gt; OriginalOrExtra orig a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679215444"><span id="local-6989586621679215445"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Point.Either.html#OriginalOrExtra"><span class="hs-identifier hs-type">OriginalOrExtra</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215444"><span class="hs-identifier hs-type">orig</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215445"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679215444"><span class="hs-identifier hs-type">orig</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679215446"><span id="local-6989586621679215447"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Point.Either.html#OriginalOrExtra"><span class="hs-identifier hs-type">OriginalOrExtra</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215446"><span class="hs-identifier hs-type">orig</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215447"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679215446"><span class="hs-identifier hs-type">orig</span></a></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679215320"><span id="local-6989586621679215321"><span id="local-6989586621679215322"><span id="local-6989586621679215323"><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#HasVector"><span class="hs-identifier hs-type">HasVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215320"><span class="hs-identifier hs-type">orig</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215320"><span class="hs-identifier hs-type">orig</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#HasVector"><span class="hs-identifier hs-type">HasVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215321"><span class="hs-identifier hs-type">extra</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215321"><span class="hs-identifier hs-type">extra</span></a></span><span>
+</span><span id="line-32"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#HasVector"><span class="hs-identifier hs-type">HasVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215320"><span class="hs-identifier hs-type">orig</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215322"><span class="hs-identifier hs-type">orig'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#HasVector"><span class="hs-identifier hs-type">HasVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215321"><span class="hs-identifier hs-type">extra</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215323"><span class="hs-identifier hs-type">extra'</span></a></span><span>
+</span><span id="line-33"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679215321"><span class="hs-identifier hs-type">extra</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679215320"><span class="hs-identifier hs-type">orig</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679215321"><span class="hs-identifier hs-type">extra</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679215320"><span class="hs-identifier hs-type">orig</span></a></span><span>
+</span><span id="line-34"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679215323"><span class="hs-identifier hs-type">extra'</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679215322"><span class="hs-identifier hs-type">orig'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679215323"><span class="hs-identifier hs-type">extra'</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679215322"><span class="hs-identifier hs-type">orig'</span></a></span><span>
+</span><span id="line-35"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#HasVector"><span class="hs-identifier hs-type">HasVector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Point.Either.html#OriginalOrExtra"><span class="hs-identifier hs-type">OriginalOrExtra</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215320"><span class="hs-identifier hs-type">orig</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215321"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Point.Either.html#OriginalOrExtra"><span class="hs-identifier hs-type">OriginalOrExtra</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215322"><span class="hs-identifier hs-type">orig'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215323"><span class="hs-identifier hs-type">extra'</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-36"></span><span>  </span><span id="local-6989586621679215491"><span class="annot"><span class="annottext">vector :: forall (d :: Nat) r s.
+(Dimension (OriginalOrExtra orig extra) ~ d,
+ NumType (OriginalOrExtra orig extra) ~ r,
+ Dimension (OriginalOrExtra orig' extra') ~ d,
+ NumType (OriginalOrExtra orig' extra') ~ s) =&gt;
+Lens
+  (OriginalOrExtra orig extra)
+  (OriginalOrExtra orig' extra')
+  (Vector d r)
+  (Vector d s)
+</span><a href="#local-6989586621679215491"><span class="hs-identifier hs-var hs-var hs-var">vector</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(OriginalOrExtra orig extra -&gt; Vector d r)
+-&gt; (OriginalOrExtra orig extra
+    -&gt; Vector d s -&gt; OriginalOrExtra orig' extra')
+-&gt; Lens
+     (OriginalOrExtra orig extra)
+     (OriginalOrExtra orig' extra')
+     (Vector d r)
+     (Vector d s)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-2c225bc76acc8fc1e6dce12ee325f5b0d01c05bbb9d72de01b3c6c240d1fc294/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">OriginalOrExtra orig extra -&gt; Vector d r
+OriginalOrExtra orig extra
+-&gt; Vector (Dimension orig) (NumType orig)
+</span><a href="#local-6989586621679215494"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Vector d s
+ -&gt; OriginalOrExtra orig extra -&gt; OriginalOrExtra orig' extra')
+-&gt; OriginalOrExtra orig extra
+-&gt; Vector d s
+-&gt; OriginalOrExtra orig' extra'
+forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
+</span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">Vector d s
+-&gt; OriginalOrExtra orig extra -&gt; OriginalOrExtra orig' extra'
+Vector (Dimension orig) (NumType orig')
+-&gt; OriginalOrExtra orig extra -&gt; OriginalOrExtra orig' extra'
+forall {orig} {a} {extra} {a}.
+(Dimension orig ~ Dimension a, Dimension extra ~ Dimension a,
+ Dimension a ~ Dimension a, NumType extra ~ NumType orig,
+ HasVector a orig, HasVector a extra) =&gt;
+Vector (Dimension a) (NumType orig)
+-&gt; OriginalOrExtra a a -&gt; OriginalOrExtra orig extra
+</span><a href="#local-6989586621679215496"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-38"></span><span>      </span><span id="local-6989586621679215494"><span class="annot"><span class="annottext">g :: OriginalOrExtra orig extra
+-&gt; Vector (Dimension orig) (NumType orig)
+</span><a href="#local-6989586621679215494"><span class="hs-identifier hs-var hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-39"></span><span>        </span><span class="annot"><a href="HGeometry.Point.Either.html#Original"><span class="hs-identifier hs-type">Original</span></a></span><span> </span><span id="local-6989586621679215512"><span class="annot"><span class="annottext">orig
+</span><a href="#local-6989586621679215512"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">orig
+</span><a href="#local-6989586621679215512"><span class="hs-identifier hs-var">o</span></a></span><span class="annot"><span class="annottext">orig
+-&gt; Getting
+     (Vector (Dimension orig) (NumType orig))
+     orig
+     (Vector (Dimension orig) (NumType orig))
+-&gt; Vector (Dimension orig) (NumType orig)
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-2c225bc76acc8fc1e6dce12ee325f5b0d01c05bbb9d72de01b3c6c240d1fc294/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+  (Vector (Dimension orig) (NumType orig))
+  orig
+  (Vector (Dimension orig) (NumType orig))
+forall (d :: Nat) r s.
+(Dimension orig ~ d, NumType orig ~ r, Dimension orig ~ d,
+ NumType orig ~ s) =&gt;
+Lens orig orig (Vector d r) (Vector d s)
+forall point point' (d :: Nat) r s.
+(HasVector point point', Dimension point ~ d, NumType point ~ r,
+ Dimension point' ~ d, NumType point' ~ s) =&gt;
+Lens point point' (Vector d r) (Vector d s)
+Lens
+  orig
+  orig
+  (Vector (Dimension orig) (NumType orig))
+  (Vector (Dimension orig) (NumType orig))
+</span><a href="HGeometry.Point.Class.html#vector"><span class="hs-identifier hs-var">vector</span></a></span><span>
+</span><span id="line-40"></span><span>        </span><span class="annot"><a href="HGeometry.Point.Either.html#Extra"><span class="hs-identifier hs-type">Extra</span></a></span><span>    </span><span id="local-6989586621679215514"><span class="annot"><span class="annottext">extra
+</span><a href="#local-6989586621679215514"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">extra
+</span><a href="#local-6989586621679215514"><span class="hs-identifier hs-var">e</span></a></span><span class="annot"><span class="annottext">extra
+-&gt; Getting
+     (Vector (Dimension orig) (NumType orig))
+     extra
+     (Vector (Dimension orig) (NumType orig))
+-&gt; Vector (Dimension orig) (NumType orig)
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-2c225bc76acc8fc1e6dce12ee325f5b0d01c05bbb9d72de01b3c6c240d1fc294/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+  (Vector (Dimension orig) (NumType orig))
+  extra
+  (Vector (Dimension orig) (NumType orig))
+forall (d :: Nat) r s.
+(Dimension extra ~ d, NumType extra ~ r, Dimension extra ~ d,
+ NumType extra ~ s) =&gt;
+Lens extra extra (Vector d r) (Vector d s)
+forall point point' (d :: Nat) r s.
+(HasVector point point', Dimension point ~ d, NumType point ~ r,
+ Dimension point' ~ d, NumType point' ~ s) =&gt;
+Lens point point' (Vector d r) (Vector d s)
+Lens
+  extra
+  extra
+  (Vector (Dimension orig) (NumType orig))
+  (Vector (Dimension orig) (NumType orig))
+</span><a href="HGeometry.Point.Class.html#vector"><span class="hs-identifier hs-var">vector</span></a></span><span>
+</span><span id="line-41"></span><span>      </span><span id="local-6989586621679215496"><span class="annot"><span class="annottext">s :: Vector (Dimension a) (NumType orig)
+-&gt; OriginalOrExtra a a -&gt; OriginalOrExtra orig extra
+</span><a href="#local-6989586621679215496"><span class="hs-identifier hs-var hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679215538"><span class="annot"><span class="annottext">Vector (Dimension a) (NumType orig)
+</span><a href="#local-6989586621679215538"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-42"></span><span>        </span><span class="annot"><a href="HGeometry.Point.Either.html#Original"><span class="hs-identifier hs-type">Original</span></a></span><span> </span><span id="local-6989586621679215539"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679215539"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">orig -&gt; OriginalOrExtra orig extra
+forall orig extra. orig -&gt; OriginalOrExtra orig extra
+</span><a href="HGeometry.Point.Either.html#Original"><span class="hs-identifier hs-var">Original</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679215539"><span class="hs-identifier hs-var">o</span></a></span><span class="annot"><span class="annottext">a -&gt; (a -&gt; orig) -&gt; orig
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Vector (Dimension a) (NumType a)
+ -&gt; Identity (Vector (Dimension a) (NumType orig)))
+-&gt; a -&gt; Identity orig
+forall (d :: Nat) r s.
+(Dimension a ~ d, NumType a ~ r, Dimension orig ~ d,
+ NumType orig ~ s) =&gt;
+Lens a orig (Vector d r) (Vector d s)
+forall point point' (d :: Nat) r s.
+(HasVector point point', Dimension point ~ d, NumType point ~ r,
+ Dimension point' ~ d, NumType point' ~ s) =&gt;
+Lens point point' (Vector d r) (Vector d s)
+Lens
+  a
+  orig
+  (Vector (Dimension a) (NumType a))
+  (Vector (Dimension a) (NumType orig))
+</span><a href="HGeometry.Point.Class.html#vector"><span class="hs-identifier hs-var">vector</span></a></span><span> </span><span class="annot"><span class="annottext">((Vector (Dimension a) (NumType a)
+  -&gt; Identity (Vector (Dimension a) (NumType orig)))
+ -&gt; a -&gt; Identity orig)
+-&gt; Vector (Dimension a) (NumType orig) -&gt; a -&gt; orig
+forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-2c225bc76acc8fc1e6dce12ee325f5b0d01c05bbb9d72de01b3c6c240d1fc294/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (Dimension a) (NumType orig)
+</span><a href="#local-6989586621679215538"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span>        </span><span class="annot"><a href="HGeometry.Point.Either.html#Extra"><span class="hs-identifier hs-type">Extra</span></a></span><span>    </span><span id="local-6989586621679215542"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679215542"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">extra -&gt; OriginalOrExtra orig extra
+forall orig extra. extra -&gt; OriginalOrExtra orig extra
+</span><a href="HGeometry.Point.Either.html#Extra"><span class="hs-identifier hs-var">Extra</span></a></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679215542"><span class="hs-identifier hs-var">e</span></a></span><span class="annot"><span class="annottext">a -&gt; (a -&gt; extra) -&gt; extra
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Vector (Dimension a) (NumType a)
+ -&gt; Identity (Vector (Dimension a) (NumType orig)))
+-&gt; a -&gt; Identity extra
+forall (d :: Nat) r s.
+(Dimension a ~ d, NumType a ~ r, Dimension extra ~ d,
+ NumType extra ~ s) =&gt;
+Lens a extra (Vector d r) (Vector d s)
+forall point point' (d :: Nat) r s.
+(HasVector point point', Dimension point ~ d, NumType point ~ r,
+ Dimension point' ~ d, NumType point' ~ s) =&gt;
+Lens point point' (Vector d r) (Vector d s)
+Lens
+  a
+  extra
+  (Vector (Dimension a) (NumType a))
+  (Vector (Dimension a) (NumType orig))
+</span><a href="HGeometry.Point.Class.html#vector"><span class="hs-identifier hs-var">vector</span></a></span><span> </span><span class="annot"><span class="annottext">((Vector (Dimension a) (NumType a)
+  -&gt; Identity (Vector (Dimension a) (NumType orig)))
+ -&gt; a -&gt; Identity extra)
+-&gt; Vector (Dimension a) (NumType orig) -&gt; a -&gt; extra
+forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-2c225bc76acc8fc1e6dce12ee325f5b0d01c05bbb9d72de01b3c6c240d1fc294/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="annot"><span class="annottext">Vector (Dimension a) (NumType orig)
+</span><a href="#local-6989586621679215538"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679215373"><span id="local-6989586621679215374"><span id="local-6989586621679215375"><span id="local-6989586621679215376"><span id="local-6989586621679215573"><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#HasCoordinates"><span class="hs-identifier hs-type">HasCoordinates</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215373"><span class="hs-identifier hs-type">orig</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215374"><span class="hs-identifier hs-type">orig'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#HasCoordinates"><span class="hs-identifier hs-type">HasCoordinates</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215375"><span class="hs-identifier hs-type">extra</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215376"><span class="hs-identifier hs-type">extra'</span></a></span><span>
+</span><span id="line-47"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#HasVector"><span class="hs-identifier hs-type">HasVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215373"><span class="hs-identifier hs-type">orig</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215373"><span class="hs-identifier hs-type">orig</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#HasVector"><span class="hs-identifier hs-type">HasVector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215375"><span class="hs-identifier hs-type">extra</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215375"><span class="hs-identifier hs-type">extra</span></a></span><span>
+</span><span id="line-48"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679215375"><span class="hs-identifier hs-type">extra</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679215373"><span class="hs-identifier hs-type">orig</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679215375"><span class="hs-identifier hs-type">extra</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679215373"><span class="hs-identifier hs-type">orig</span></a></span><span>
+</span><span id="line-49"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679215376"><span class="hs-identifier hs-type">extra'</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679215374"><span class="hs-identifier hs-type">orig'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679215376"><span class="hs-identifier hs-type">extra'</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679215374"><span class="hs-identifier hs-type">orig'</span></a></span><span>
+</span><span id="line-50"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#HasCoordinates"><span class="hs-identifier hs-type">HasCoordinates</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Point.Either.html#OriginalOrExtra"><span class="hs-identifier hs-type">OriginalOrExtra</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215373"><span class="hs-identifier hs-type">orig</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215375"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Point.Either.html#OriginalOrExtra"><span class="hs-identifier hs-type">OriginalOrExtra</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215374"><span class="hs-identifier hs-type">orig'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215376"><span class="hs-identifier hs-type">extra'</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679215386"><span id="local-6989586621679215387"><span id="local-6989586621679215388"><span id="local-6989586621679215389"><span id="local-6989586621679215629"><span id="local-6989586621679215640"><span id="local-6989586621679215650"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Point.Class.html#Affine_"><span class="hs-identifier hs-type">Affine_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215386"><span class="hs-identifier hs-type">orig</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215387"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215388"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#Affine_"><span class="hs-identifier hs-type">Affine_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215389"><span class="hs-identifier hs-type">extra</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215387"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215388"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#Affine_"><span class="hs-identifier hs-type">Affine_</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Point.Either.html#OriginalOrExtra"><span class="hs-identifier hs-type">OriginalOrExtra</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215386"><span class="hs-identifier hs-type">orig</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215389"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679215387"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215388"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span></span></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679215399"><span id="local-6989586621679215400"><span id="local-6989586621679215401"><span id="local-6989586621679215402"><span id="local-6989586621679215696"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215399"><span class="hs-identifier hs-type">orig</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215400"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215401"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215402"><span class="hs-identifier hs-type">extra</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215400"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215401"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Point.Either.html#OriginalOrExtra"><span class="hs-identifier hs-type">OriginalOrExtra</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215399"><span class="hs-identifier hs-type">orig</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215402"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679215400"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679215401"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span><span>
+</span><span id="line-55"></span></pre></body></html>
