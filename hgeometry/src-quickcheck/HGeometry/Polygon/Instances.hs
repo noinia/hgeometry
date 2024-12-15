@@ -114,7 +114,8 @@ shrinkPolygon      :: (Ord r, Fractional r, Real r)
                    => SimplePolygon (Point 2 r) -> [SimplePolygon (Point 2 r)]
 shrinkPolygon p
     | isTriangle p = simplifyP p
-    | otherwise    = cutEars p ++ simplifyP p
+    | otherwise    = let pgs = cutEars p ++ simplifyP p
+                     in [ pg&vertices %~ alignZero pg | pg <- pgs ] <> pgs
 
 instance Arbitrary (SimplePolygon (Point 2 Double)) where
   arbitrary = do
@@ -164,27 +165,28 @@ simplifyP pg
     -- otherwise = []
   where
     fromPoints' = maybeToList . fromPoints
-
-
-    minX = first1Of (minimumVertexBy (comparing (^.xCoord)).xCoord) pg
-    minY = first1Of (minimumVertexBy (comparing (^.yCoord)).yCoord) pg
-
-      -- F.minimumBy (comparing (view (core.xCoord))) vs ^. core.xCoord
-    -- minY = F.minimumBy (comparing (view (core.yCoord))) vs ^. core.yCoord
-
-    -- vs = p ^. outerBoundaryVector
-
+    align = alignZero pg
 
     lcmP = lcmPoint pg
     gcdP = gcdPoint pg
-    align   :: Point 2 r -> Point 2 r
-    align v = Point (v .-. Point2 minX minY)
+
+    minX = first1Of (minimumVertexBy (comparing (^.xCoord)).xCoord) pg
+    minY = first1Of (minimumVertexBy (comparing (^.yCoord)).yCoord) pg
 
     multP v (Point2 c d) = Point2 (c*v) (d*v)
     divP v (Point2 c d) = Point2 (c/v) (d/v)
     _div2 p = let (Point2 a b) = p&coordinates %~ toRational
               in Point2 (fromRational $ numerator a `div` 2 % 1)
                         (fromRational $ numerator b `div` 2 % 1)
+
+-- | Aligns the polygon so that at least one point has x and y- coordinate zero
+alignZero      :: (Polygon_ polygon (Point 2 r) r, Num r, Ord r)
+               => polygon -> Point 2 r -> Point 2 r
+alignZero pg v = Point (v .-. Point2 minX minY)
+  where
+    minX = first1Of (minimumVertexBy (comparing (^.xCoord)).xCoord) pg
+    minY = first1Of (minimumVertexBy (comparing (^.yCoord)).yCoord) pg
+
 
 
 lcmPoint :: (Ord r, Fractional r, Real r) => SimplePolygon (Point 2 r) -> r
