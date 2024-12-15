@@ -26,6 +26,7 @@ data-files:
     -- polygons.multi
     ipe/basic.isy
     ipe/opacities.isy
+    ipe/test/*.ipe
     test-with-ipe/**/*.ipe
 
 tested-with:
@@ -790,6 +791,9 @@ test-suite ipe-hspec
   other-modules:
       Spec
       Ipe.ReaderSpec
+      Paths_hgeometry
+  autogen-modules:
+      Paths_hgeometry
   hs-source-dirs:   ipe/test
 
 test-suite ipe-doctest
