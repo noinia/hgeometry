@@ -76,6 +76,16 @@ instance Ixed (Sides a) where
     South -> south
     West  -> west
 
+instance FunctorWithIndex CardinalDirection Sides where
+  imap f (Sides n e s w) = Sides (f North n) (f East e) (f South s) (f West w)
+
+instance FoldableWithIndex CardinalDirection Sides where
+  ifoldMap f (Sides n e s w) = f North n <> f East e <> f South s <> f West w
+
+instance TraversableWithIndex CardinalDirection Sides where
+  itraverse f (Sides n e s w) = Sides <$> f North n <*> f East e <*> f South s <*> f West w
+
+
 -- | Constructs a Sides value that indicates the appropriate
 -- direction.
 sideDirections :: Sides CardinalDirection

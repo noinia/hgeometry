@@ -29,14 +29,16 @@ import           HGeometry.Point
 -- | Computes the lower envelope in O(n^4) time.
 bruteForceLowerEnvelope :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                            , Foldable set
-                           -- , Show r, Show plane
+                           , Show r, Show plane
                            ) => set plane -> MinimizationDiagram r plane
 bruteForceLowerEnvelope = fromVertexForm . computeVertexForm
 
 -- | Computes the vertices of the lower envelope
 --
 -- O(n^4) time.
-computeVertexForm        :: (Plane_ plane r, Ord plane, Ord r, Fractional r, Foldable set)
+computeVertexForm        :: (Plane_ plane r, Ord plane, Ord r, Fractional r, Foldable set
+                            , Show plane, Show r
+                            )
                          => set plane -> VertexForm r plane
 computeVertexForm planes = unionsWithKey mergeDefiners
                          . map (asVertex planes) $ uniqueTriplets planes

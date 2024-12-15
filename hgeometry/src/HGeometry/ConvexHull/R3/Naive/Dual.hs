@@ -13,8 +13,10 @@ import           Data.Foldable1
 import           Data.List (find)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Map (Map)
-import qualified Data.Map as Map
+-- import           Data.Map (Map)
+-- import qualified Data.Map as Map
+import           Data.Map.NonEmpty (NEMap)
+import qualified Data.Map.NonEmpty as NEMap
 import           Data.Maybe (isNothing)
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Duality
@@ -24,7 +26,7 @@ import           HGeometry.HyperPlane
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Intersection (intersects)
 import           HGeometry.Plane.LowerEnvelope
-import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap (mapWithKeyMerge)
+import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap (mapWithKeyMerge1)
 import           HGeometry.Plane.LowerEnvelope.Naive
 import           HGeometry.Point
 import           HGeometry.Properties
@@ -56,14 +58,14 @@ type Facet point = NonEmpty point
 facets :: (Ord (NumType point)) => UpperHull point -> [Facet point]
 facets = \case
     ParallelStrips _      -> [] -- error "facets: parallel strips; no bounded facets"
-    ConnectedEnvelope env -> toFacet <$> Map.elems theVertices
+    ConnectedEnvelope env -> toList $ toFacet <$> NEMap.elems theVertices
       where
-        theVertices = mapWithKeyMerge (\h reg -> Map.fromList [ (v,NonEmpty.singleton h)
-                                                              | v <- verticesOf reg ]
-                                      ) (asMap env)
+        theVertices = mapWithKeyMerge1 (\h reg -> NEMap.fromList $
+                                                  (,NonEmpty.singleton h) <$> verticesOf reg
+                                       ) (asMap env)
         verticesOf = \case
-          Bounded vertices       -> vertices
-          Unbounded _ vertices _ -> NonEmpty.toList vertices
+          Bounded vertices       -> toNonEmpty vertices
+          Unbounded _ vertices _ -> vertices
 
         toFacet hv = (^.extra) <$> hv
   -- We want all vertices v of the lower envelope; let H_v denote all planes that

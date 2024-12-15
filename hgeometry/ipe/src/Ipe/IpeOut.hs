@@ -173,19 +173,23 @@ instance (Fractional r, Ord r, Point_ point 2 r,Show r, Show point) => HasDefaul
   type DefaultIpeOut (HalfLine point) = Path
   defIO = ipeHalfLine
 
-instance HasDefaultIpeOut (SimplePolygon (Point 2 r)) where
-  type DefaultIpeOut (SimplePolygon (Point 2 r)) = Path
+instance ( VertexContainer f (Point 2 r)
+         , HasFromFoldable1 f
+         ) => HasDefaultIpeOut (SimplePolygonF f (Point 2 r)) where
+  type DefaultIpeOut (SimplePolygonF f (Point 2 r)) = Path
   defIO = ipePolygon
 
-instance (HoleContainer h f (Point 2 r)
+instance ( HoleContainer h f (Point 2 r)
          , HasFromFoldable1 f
          )
        => HasDefaultIpeOut (PolygonalDomainF h f (Point 2 r)) where
   type DefaultIpeOut (PolygonalDomainF h f (Point 2 r)) = Path
   defIO = ipePolygon
 
-instance HasDefaultIpeOut (ConvexPolygon (Point 2 r)) where
-  type DefaultIpeOut (ConvexPolygon (Point 2 r)) = Path
+instance ( VertexContainer f (Point 2 r)
+         , HasFromFoldable1 f
+         ) => HasDefaultIpeOut (ConvexPolygonF f (Point 2 r)) where
+  type DefaultIpeOut (ConvexPolygonF f (Point 2 r)) = Path
   defIO = defIO . toSimplePolygon
 
 instance HasDefaultIpeOut (Ellipse r) where

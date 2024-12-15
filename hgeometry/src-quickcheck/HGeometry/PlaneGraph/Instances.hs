@@ -80,10 +80,14 @@ arbitraryPlaneGraph proxy = do
     -- need at least a few vertices so that we generate at least a triangle in the planar graph
     case voronoiDiagram pts of
       AllColinear _  -> arbitraryPlaneGraph proxy -- retry
-      ConnectedVD vd -> do gr <- markWitherableEdges (toTriangulatedPlaneGraph' . asMD $ vd)
+      ConnectedVD vd -> do let triGr = toTriangulatedPlaneGraph' . asMD $ vd
+                           gr <- markWitherableEdges (mapNeighbourOrder NEMap.toMap triGr)
                            case traverseNeighbourOrder NEMap.nonEmptyMap $ largestComponent gr of
                              Nothing  -> arbitraryPlaneGraph proxy -- retry
                              Just gr' -> pure $ toPlaneGraph proxy gr'
+
+
+mapNeighbourOrder f = runIdentity . traverseNeighbourOrder (Identity . f)
 
 --------------------------------------------------------------------------------
 
@@ -100,7 +104,7 @@ largestComponent gr = witherGraphTo tr gr
 asMD :: ( Point_ point 2 r
         , Num r, Ord r
         ) => VoronoiDiagram' point -> MinimizationDiagram r (Plane r)
-asMD = MinimizationDiagram . Map.mapKeys pointToPlane . coerce
+asMD = MinimizationDiagram . NEMap.mapKeys pointToPlane . coerce
 
 
 -- | select a random subset of edges. I.e. it marks the edges we want to retain.

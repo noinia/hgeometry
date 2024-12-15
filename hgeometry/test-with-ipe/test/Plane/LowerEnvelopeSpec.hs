@@ -12,11 +12,12 @@ import           Data.Foldable
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
+import qualified Data.Map.NonEmpty as NEMap
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 import           Golden
+import           HGeometry.Box
 import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
@@ -33,6 +34,7 @@ import           HGeometry.Sequence.Alternating (separators)
 import           HGeometry.Vector
 import           HGeometry.VoronoiDiagram
 import qualified HGeometry.VoronoiDiagram as VD
+import           Hiraffe.Graph.Class
 import           Ipe
 import           Ipe.Color
 import           System.OsPath
@@ -43,26 +45,44 @@ import           Test.QuickCheck.Instances ()
 
 type R = RealNumber 5
 
-instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r
-         , Show point, Show r
+instance ( Point_ point 2 r, Fractional r, Ord r
+         , Show point, Show r, IsBoxable point
          )
          => HasDefaultIpeOut (Region r point) where
   type DefaultIpeOut (Region r point) = Path
-  defIO region = defIO $ ((uncheckedFromCCWPoints $ map (^.asPoint) vertices)
-                         :: ConvexPolygon (Point 2 r)
-                         )
+  defIO region = defIO $ case toConvexPolygonIn rect' region of
+                   Left pg  -> (pg&vertices %~ view asPoint :: ConvexPolygonF NonEmpty (Point 2 r))
+                   Right pg -> pg&vertices %~ view asPoint
+    where
+      rect' = grow 1000 $ boundingBox region
+
+instance (Point_ point 2 r, Ord r, Num r, IsBoxable point
+         ) => IsBoxable (Region r point) where
+  boundingBox = \case
+    Bounded pts       -> boundingBox $ toNonEmpty pts
+    Unbounded _ pts _ -> boundingBox pts
+
+grow             :: (Num r, Point_ point d r) => r -> Box point -> Box point
+grow d (Box p q) = Box (p&coordinates %~ subtract d)
+                       (q&coordinates %~ (+d))
+
+
+
+    -- $ ((uncheckedFromCCWPoints $ map (^.asPoint) vertices)
+    --                      :: ConvexPolygon (Point 2 r)
+    --                      )
 
     -- case fromPoints $ map (^.asPoint) vertices of
     --   Nothing -> error $ "could not create convex polygon?" <> show vertices
     --   Just pg -> defIO (pg :: ConvexPolygon (Point 2 r))
-    where
-      vertices = case region of
-        Bounded vs        -> vs
-        Unbounded v pts u -> let p  = NonEmpty.head pts
-                                 q  = NonEmpty.last pts
-                                 p' = p .-^ (1000 *^ v) -- TODO: clip this somewhere
-                                 q' = q .+^ (1000 *^ u) -- TODO: clip this somewhere
-                             in q' : p' : toList pts
+    -- where
+    --   vertices = case region of
+    --     Bounded vs        -> vs
+    --     Unbounded v pts u -> let p  = NonEmpty.head pts
+    --                              q  = NonEmpty.last pts
+    --                              p' = p .-^ (1000 *^ v) -- TODO: clip this somewhere
+    --                              q' = q .+^ (1000 *^ u) -- TODO: clip this somewhere
+    --                          in q' : p' : toList pts
 
 
 -- colors =
@@ -99,7 +119,8 @@ instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
          )
          => HasDefaultIpeOut (VoronoiDiagram' point) where
   type DefaultIpeOut (VoronoiDiagram' point) = Group
-  defIO = ipeGroup . zipWith render (cycle $ drop 3 basicNamedColors) . Map.assocs . VD.asMap
+  defIO = ipeGroup . zipWith render (cycle $ drop 3 basicNamedColors)
+        . toList . NEMap.assocs . VD.asMap
     where
       render color (site, voronoiRegion) = iO' $ ipeGroup
                  [ iO $ defIO (site^.asPoint) ! attr SStroke  color
@@ -127,10 +148,6 @@ spec = describe "lower envelope tests" $ do
                  [osp|degenerate1_out|]
          testIpe [osp|degenerate2.ipe|]
                  [osp|degenerate2_out|]
-
-         -- testIpeGraph [osp|foo.ipe|]
-         --              [osp|foo_graph_out|]
-
 
 
 -- | Build voronoi diagrams on the input points
@@ -230,9 +247,6 @@ degenerateTests = describe "degnereate inputs" $ do
 
 
 
-grow             :: (Num r, Point_ point d r) => r -> Box point -> Box point
-grow d (Box p q) = Box (p&coordinates %~ subtract d)
-                       (q&coordinates %~ (+d))
 
 
 instance (HasDefaultIpeOut point, Point_ point 2 r, Fractional r, Ord r

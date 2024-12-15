@@ -24,12 +24,15 @@ import           Control.Lens
 import           Control.Subcategory.Functor
 import           Data.Foldable1
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
+-- import qualified Data.Map as Map
+import           Data.Map.NonEmpty (NEMap)
+import qualified Data.Map.NonEmpty as NEMap
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Vector as Vector
 import           HGeometry.Duality
 import           HGeometry.Ext
+import           HGeometry.Foldable.Util
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line.General
@@ -74,7 +77,7 @@ _VoronoiDiagramLowerEnvelope = coerced
 
 -- | Get, for each point, its Voronoi region
 asMap :: (Point_ point 2 r, Ord point)
-      => VoronoiDiagram' point -> Map.Map point (Region r (Point 2 r))
+      => VoronoiDiagram' point -> NEMap.NEMap point (Region r (Point 2 r))
 asMap = LowerEnvelope.asMap . view _VoronoiDiagramLowerEnvelope
 
 --------------------------------------------------------------------------------
@@ -124,7 +127,7 @@ voronoiVertices    :: ( Point_ point 2 r, Functor f, Ord point
 voronoiVertices pts = case voronoiDiagram pts of
     AllColinear _  -> mempty
     ConnectedVD vd -> foldMap (\case
-                                  Bounded vs       -> Set.fromList vs
+                                  Bounded vs       -> foldMap Set.singleton vs
                                   Unbounded _ vs _ -> Set.fromList (NonEmpty.toList vs)
                               ) (asMap vd)
 

@@ -64,6 +64,17 @@ instance Foldable1 Corners where
 instance Traversable1 Corners where
   traverse1 f (Corners a b c d) = Corners <$> f a <.> f b <.> f c <.> f d
 
+instance FunctorWithIndex InterCardinalDirection Corners where
+  imap f (Corners n e s w) =
+    Corners (f NorthWest n) (f NorthEast e) (f SouthEast s) (f SouthWest w)
+
+instance FoldableWithIndex InterCardinalDirection Corners where
+  ifoldMap f (Corners n e s w) = f NorthWest n <> f NorthEast e <> f SouthEast s <> f SouthWest w
+
+instance TraversableWithIndex InterCardinalDirection Corners where
+  itraverse f (Corners n e s w) =
+    Corners <$> f NorthWest n <*> f NorthEast e <*> f SouthEast s <*> f SouthWest w
+
 instance Applicative Corners where
   pure x = Corners x x x x
   (Corners f g h i) <*> (Corners a b c d) = Corners (f a) (g b) (h c) (i d)

@@ -15,9 +15,12 @@ module HGeometry.Plane.LowerEnvelope.Connected.Graph
   , toPlaneGraph'
   ) where
 
+import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map (Map)
 import qualified Data.Map as Map
+import           Data.Map.NonEmpty (NEMap)
 import qualified Data.Map.NonEmpty as NEMap
 import           Data.Semigroup (First(..))
 import           HGeometry.HyperPlane.Class
@@ -32,13 +35,11 @@ import           Hiraffe.AdjacencyListRep.Map
 
 -- | A Plane graph storing vertices of type v that are identified by keys of type k, and
 -- some ordered sequence of edges (which are ordered using e).
-type PlaneGraph' k v e = GGraph (Map e) k v e
-
-
+type PlaneGraph' k v e = GGraph (NEMap e) k v e
 
 -- | A Plane graph storing vertices of type v that are identified by keys of type k, and
 -- some ordered sequence of edges (which are ordered using e).
-type PlaneGraphMap k v e = Map k (Map e k, v)
+type PlaneGraphMap k v e = NEMap k (NEMap e k, v)
 
 
 -- | Produce a triangulated plane graph on the bounded vertices.  every vertex is
@@ -58,10 +59,10 @@ toPlaneGraph' = toPlaneGraph'' . toPlaneGraphMap
 toPlaneGraph'' :: (Ord r)
                => PlaneGraphMap (Point 2 r) (First r) (E r)
                -> PlaneGraph' (Point 2 r) (First r) (E r)
-toPlaneGraph'' = Graph . NEMap.unsafeFromMap
+toPlaneGraph'' = Graph
                . fmap (\(neighOrder, x) -> VertexData x (mkNeighMap neighOrder) neighOrder)
   where
-    mkNeighMap = Map.foldMapWithKey (\e i -> Map.singleton i e)
+    mkNeighMap = NEMap.foldMapWithKey (\e i -> Map.singleton i e)
 
 --------------------------------------------------------------------------------
 
@@ -70,29 +71,30 @@ toPlaneGraph'' = Graph . NEMap.unsafeFromMap
 toTriangulatedPlaneGraphMap :: (Plane_ plane r, Num r, Ord r)
                             => MinimizationDiagram r plane
                             -> PlaneGraphMap (Point 2 r) (First r) (E r)
-toTriangulatedPlaneGraphMap = mapWithKeyMerge toTriangulatedGr . asMap
+toTriangulatedPlaneGraphMap = mapWithKeyMerge1 toTriangulatedGr . asMap
 
 
 -- | Helper function to construct a triangulated plane graph
 toTriangulatedGr   :: (Plane_ plane r, Num r, Ord r)
                    => plane -> Region r (Point 2 r)
                    -> PlaneGraphMap (Point 2 r) (First r) (E r)
-toTriangulatedGr h = Map.mapWithKey (\v adjs -> (adjs, First $ evalAt v h)) . \case
-  Bounded vertices       -> case vertices of
-    (v0:v1:vs) -> triangulate v0 v1 vs
-    _          -> error "triangulate: absurd, <2 vertices"
+toTriangulatedGr h = NEMap.unsafeFromMap
+                   . Map.mapWithKey (\v adjs -> (adjs, First $ evalAt v h)) . \case
+  Bounded vertices       -> case toNonEmpty vertices of
+    (v0:|v1:vs) -> triangulate v0 v1 vs
+    _           -> error "triangulate: absurd, <2 vertices"
   Unbounded _ vertices _ -> case vertices of
     _  :| []     -> Map.empty
-    u  :| [v]    -> Map.fromList [ (u, (uncurry Map.singleton $ edge u v))
-                                 , (v, (uncurry Map.singleton $ edge v u))
+    u  :| [v]    -> Map.fromList [ (u, (uncurry NEMap.singleton $ edge u v))
+                                 , (v, (uncurry NEMap.singleton $ edge v u))
                                  ]
     v0 :|(v1:vs) -> triangulate v0 v1 vs
   where
     triangulate v0 v1 vs = Map.unionsWith (<>) $ zipWith (triangle v0) (v1:vs) vs
 
-    triangle u v w = Map.fromList [ (u, Map.fromList [ edge u v, edge u w])
-                                  , (v, Map.fromList [ edge v u, edge v w])
-                                  , (w, Map.fromList [ edge w u, edge w v])
+    triangle u v w = Map.fromList [ (u, mkNEMap [ edge u v, edge u w])
+                                  , (v, mkNEMap [ edge v u, edge v w])
+                                  , (w, mkNEMap [ edge w u, edge w v])
                                   ]
     edge u v = ((E $ v .-. u), v)
 
@@ -103,22 +105,29 @@ toTriangulatedGr h = Map.mapWithKey (\v adjs -> (adjs, First $ evalAt v h)) . \c
 -- data.
 toPlaneGraphMap :: (Plane_ plane r, Num r, Ord r)
                 => MinimizationDiagram r plane -> PlaneGraphMap (Point 2 r) (First r) (E r)
-toPlaneGraphMap = mapWithKeyMerge toGr . asMap
+toPlaneGraphMap = mapWithKeyMerge1 toGr . asMap
 
 
 -- | Helper function to construct a plane graph
 toGr   :: (Plane_ plane r, Num r, Ord r)
        => plane -> Region r (Point 2 r)
        -> PlaneGraphMap (Point 2 r) (First r) (E r)
-toGr h = Map.mapWithKey (\v adjs -> (adjs, First $ evalAt v h)) . \case
-  Bounded vertices       -> case vertices of
-    (_:v1:vs) -> Map.unionsWith (<>) $ zipWith mkEdge vertices (v1:vs)
-    _         -> error "toGR: absurd, <2 vertices"
+toGr h = NEMap.unsafeFromMap
+       . Map.mapWithKey (\v adjs -> (adjs, First $ evalAt v h)) . \case
+  Bounded vertices       -> case toNonEmpty vertices of
+    verts@(_:|v1:vs) -> Map.unionsWith (<>) $ NonEmpty.zipWith mkEdge verts (v1:|vs)
+    _                -> error "toGR: absurd, <2 vertices"
   Unbounded _ vertices _ -> case vertices of
     _  :| []  -> Map.empty
     u  :| vs  -> Map.unionsWith (<>) $ zipWith mkEdge (u:vs) vs
   where
-    mkEdge u v = Map.fromList [ (u, (uncurry Map.singleton $ edge u v))
-                              , (v, (uncurry Map.singleton $ edge v u))
+    mkEdge u v = Map.fromList [ (u, (uncurry NEMap.singleton $ edge u v))
+                              , (v, (uncurry NEMap.singleton $ edge v u))
                               ]
     edge u v = ((E $ v .-. u), v)
+
+--------------------------------------------------------------------------------
+
+-- | Helper to construct a NEMap from an explicit list of key value pairs
+mkNEMap :: Ord k => [(k,v)] -> NEMap k v
+mkNEMap = NEMap.fromList . NonEmpty.fromList

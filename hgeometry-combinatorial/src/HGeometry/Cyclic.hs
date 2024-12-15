@@ -26,6 +26,7 @@ import           Data.Aeson
 import qualified Data.Foldable as F
 import           Data.Functor.Apply (Apply, (<.*>), MaybeApply(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (isJust)
 import           Data.Semigroup.Foldable
 import qualified Data.Vector as V
@@ -42,7 +43,7 @@ import           HGeometry.Vector.NonEmpty.Util ()
 -- | A cyclic sequence type
 newtype Cyclic v a = Cyclic (v a)
  deriving newtype (Functor,Foldable,Foldable1,NFData,Eq,ToJSON,FromJSON)
- deriving stock (Generic)
+ deriving stock (Generic,Show)
 -- not sure if we want this Eq instance or not .
 
 
@@ -80,12 +81,14 @@ instance Reversing (v a) => Reversing (Cyclic v a) where
 -- | Class that models that some type has a cyclic traversal starting
 -- from a particular index.
 class HasDirectedTraversals v where
-  -- | A rightward-traversal over all elements starting from the given one.
+  -- | A rightward-traversal over all elements starting from the given one. Indices are
+  -- taken modulo the length.
   --
   -- running time : \(O(n)\)
   traverseRightFrom          :: Index (v a) -> IndexedTraversal1' (Index (v a)) (v a) a
 
-  -- | A rightward-traversal over all elements starting from the given one.
+  -- | A rightward-traversal over all elements starting from the given one. Indices are
+  -- taken modulo the length.
   --
   -- running time : \(O(n)\)
   traverseLeftFrom          :: Index (v a) -> IndexedTraversal1' (Index (v a)) (v a) a
@@ -93,6 +96,39 @@ class HasDirectedTraversals v where
 instance HasDirectedTraversals v => HasDirectedTraversals (Cyclic v) where
   traverseRightFrom s paFa (Cyclic v) = Cyclic <$> traverseRightFrom s paFa v
   traverseLeftFrom  s paFa (Cyclic v) = Cyclic <$> traverseLeftFrom  s paFa v
+
+instance HasDirectedTraversals NonEmpty where
+  traverseRightFrom i = \paFb xs -> let ((pref,x,suff),i')   = splitNonEmptyAt i xs
+                                        paFb'                = wrapMaybeApply paFb
+                                        combine (y :| sa) sb = y :| (sa <> sb)
+                                    in combine <$>  reindexed (+i') traversed1 paFb (x :| suff)
+                                               <.*> itraversed paFb' pref
+
+  traverseLeftFrom i = \paFb xs -> let ((pref,x,suff),i') = splitNonEmptyAt i xs
+                                       paFb'              = wrapMaybeApply paFb
+                                       combine y sa sb    = foldr NonEmpty.cons (y:|sb) sa
+                                   in
+    combine <$>  indexed paFb i' x
+            <.*> backwards itraversed paFb' pref
+            <.*> backwards (reindexed (\j -> 1 + i' +j) itraversed) paFb' suff
+
+-- | Given an index i, and a NonEmpty xs splits xs at index i `mod` n.
+-- returns the splitted list at index i, also returns the index i `mod` n.
+splitNonEmptyAt       :: Int -> NonEmpty a -> (([a],a,[a]),Int)
+splitNonEmptyAt i xs0 = case go 0 xs0 of
+                          Left n    -> let i' = (i+n) `mod` n in (go1 i' xs0, i')
+                          Right res -> (res,i)
+  where
+    go l (x :| xs) | i == l    = Right ([],x,xs)
+                   | otherwise = case go (l+1) <$> NonEmpty.nonEmpty xs of
+                                   Nothing                    -> Left (l+1)
+                                   Just (Right (pref,y,suff)) -> Right (x:pref,y,suff)
+                                   Just left                  -> left
+    go1 j (x :| xs) | j == 0    = ([],x,xs)
+                    | otherwise = case go1 (j-1) <$> NonEmpty.nonEmpty xs of
+                                    Nothing            -> error "splitNonEmptyAt. absurd"
+                                    Just (pref,y,suff) -> (x:pref,y,suff)
+
 
 instance HasDirectedTraversals NV.NonEmptyVector where
   traverseRightFrom s paFa v = traverseByOrder indices' paFa v

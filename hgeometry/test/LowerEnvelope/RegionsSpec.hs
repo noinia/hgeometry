@@ -1,7 +1,10 @@
 module LowerEnvelope.RegionsSpec where
 
+import           Data.Foldable
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
+import qualified Data.Map.NonEmpty as NEMap
 import           HGeometry.Combinatorial.Util
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
@@ -39,14 +42,15 @@ spec = describe "lowerEnvelope tests" $ do
 
          it "singleton diagram" $ do
            let v = Point2 10 10 :: Point 2 R
-           [h1,h2,h3] <- pure inputs
+           [h1,h2,h3] <- pure $ toList inputs
            (asMap $ bruteForceLowerEnvelope inputs) `shouldBe`
-             Map.fromList
+             mkNEMap
                [ (h1, Unbounded (Vector2 1 1)    (NonEmpty.singleton v) (Vector2 0 1))
                , (h2, Unbounded (Vector2 (-1) 0) (NonEmpty.singleton v) (Vector2 (-1) (-1)))
                , (h3, Unbounded (Vector2 0 (-1)) (NonEmpty.singleton v) (Vector2 1 0))
                ]
 
+mkNEMap = NEMap.fromList . NonEmpty.fromList
 
 -- | verify that the intersection point indeed lis on all three planes
 verifyOnPlane          :: (Fractional r, Ord r)
@@ -65,8 +69,8 @@ belowAll v = all (\h -> verticalSideTest v h /= GT)
 myEnv = bruteForceLowerEnvelope inputs
 -- myTriEnv = triangulatedLowerEnvelope inputs
 
-inputs :: [Plane R]
-inputs = [ Plane 1 0 0
-         , Plane 0 1 0
-         , Plane 0 0 10
-         ]
+inputs :: NonEmpty (Plane R)
+inputs = NonEmpty.fromList [ Plane 1 0 0
+                           , Plane 0 1 0
+                           , Plane 0 0 10
+                           ]
