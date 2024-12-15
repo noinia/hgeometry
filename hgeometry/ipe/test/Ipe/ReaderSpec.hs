@@ -5,8 +5,10 @@ module Ipe.ReaderSpec where
 import           Control.Lens
 import           Control.Monad ((>=>))
 import           Data.ByteString (ByteString)
+import           Data.Maybe
 import           Data.Proxy
 import           HGeometry.Ext
+import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Simple
@@ -18,6 +20,8 @@ import           System.OsPath
 import           Test.Hspec
 
 --------------------------------------------------------------------------------
+
+type R = RealNumber 5
 
 -- | specializes to use Double as Numtype
 fromIpeXML' :: IpeRead (t Double) => ByteString -> Either ConversionError (t Double)
@@ -50,13 +54,19 @@ spec = do
     describe "parse simplepolygon in CCW order" $ do
       let act fName = do
                    fp   <- getDataFileName fName
-                   (pgs :: [SimplePolygon (Point 2 Rational)]) <- fmap (^.core)
+                   (pgs :: [SimplePolygon (Point 2 R)]) <- fmap (^.core)
                                                                   <$> readAllFrom fp
-                   pure $ all isCounterClockwise pgs
+                   pure . listToMaybe $ filter (not . isCounterClockwise) pgs
       it "simple" $
-        act [osp|ipe/test/clockwisepg.ipe|] `shouldReturn` True
+        act [osp|ipe/test/clockwisepg.ipe|] `shouldReturn` Nothing
+      it "simple ccw" $
+        act [osp|ipe/test/ccw.ipe|] `shouldReturn` Nothing
+      it "multipolygon?" $
+        act [osp|ipe/test/multipolygon.ipe|] `shouldReturn` Nothing
+      it "minimized" $
+        act [osp|ipe/test/minimized.ipe|] `shouldReturn` Nothing
       it "world" $
-        act [osp|test-with-ipe/Polygon/Triangulation/world.ipe|] `shouldReturn` True
+        act [osp|test-with-ipe/Polygon/Triangulation/world.ipe|] `shouldReturn` Nothing
 
   where
     useTxt = "<use name=\"mark/disk(sx)\" pos=\"320 736\" size=\"normal\" stroke=\"black\"/>"
