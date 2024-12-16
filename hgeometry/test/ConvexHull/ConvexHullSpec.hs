@@ -62,7 +62,7 @@ spec = do
         it "JarvisMarch Manual test1" $
           (PG $ JarvisMarch.convexHull testPoints)
           `shouldBe`
-          (PG $ uncheckedFromCCWPoints (reverse
+          (PG $ uncheckedFromCCWPoints . NonEmpty.fromList $ (reverse
                                  [mPoint2 [0,10],mPoint2 [2,20],mPoint2 [6,20]
                                  ,mPoint2 [8,11],mPoint2 [8,6],mPoint2 [7,4]
                                  ,mPoint2 [5,3],mPoint2 [1,4],mPoint2 [0,5]]))
@@ -70,7 +70,7 @@ spec = do
         it "JarvisMarch Manual test2" $
           (PG $ JarvisMarch.convexHull testPoints2)
           `shouldBe`
-          (PG $ uncheckedFromCCWPoints (reverse
+          (PG $ uncheckedFromCCWPoints . NonEmpty.fromList $  (reverse
                                  [ mPoint2 [0,10], mPoint2 [2,20]
                                  , mPoint2 [6,20], mPoint2 [8,11]
                                  , mPoint2 [7,4],  mPoint2 [5,3] , mPoint2 [1,4] ]))
