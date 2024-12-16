@@ -80,20 +80,20 @@ spec = describe "triangulate World" $ do
                  (addStyleSheet opacitiesStyle $ singlePageFromContent out)
 
 
-         describe "debugging myPoly Prime" $ do
-           let subdivision = triangulate myPoly'
-               triangs = subdivision^..interiorFacePolygons
-               out = [iO' myPoly']
+         -- describe "debugging myPoly Prime" $ do
+         --   let subdivision = triangulate myPoly'
+         --       triangs = subdivision^..interiorFacePolygons
+         --       out = [iO' myPoly']
                  -- <> map (\triang ->
                  --                            iO' $ (triang&vertices %~ view core
                  --                                  :: SimplePolygon (Point 2 R)
                  --                                  )
                  --                         ) triangs
-           goldenWith [osp|data/test-with-ipe/Polygon/Triangulation/|]
-                 (ipeFileGolden { name = [osp|myPolyPrime|] })
-                 (addStyleSheet opacitiesStyle $ singlePageFromContent out)
-           it "myPolyPrime is CCW" $
-             isCounterClockwise myPoly' `shouldBe` True
+           -- goldenWith [osp|data/test-with-ipe/Polygon/Triangulation/|]
+           --       (ipeFileGolden { name = [osp|myPolyPrime|] })
+           --       (addStyleSheet opacitiesStyle $ singlePageFromContent out)
+           -- it "myPolyPrime is CCW" $
+           --   isCounterClockwise myPoly' `shouldBe` True
 
 
 isTriangle'    :: SimplePolygon_ simplePolygon point r => simplePolygon  -> Bool

@@ -93,7 +93,7 @@ instance Traversable PathSegment where
       ClosedSplineSegment      -> pure ClosedSplineSegment
 
 
-instance Fractional r => IsTransformable (PathSegment r) where
+instance (Fractional r, Eq r) => IsTransformable (PathSegment r) where
   transformBy t = \case
     PolyLineSegment p        -> PolyLineSegment $ transformBy t p
     PolygonPath o p          -> PolygonPath o (transformBy t p)
@@ -118,7 +118,7 @@ pathSegments = coerced
 type instance NumType   (Path r) = r
 type instance Dimension (Path r) = 2
 
-instance Fractional r => IsTransformable (Path r) where
+instance (Fractional r, Eq r) => IsTransformable (Path r) where
   transformBy t (Path s) = Path $ fmap (transformBy t) s
 
 --------------------------------------------------------------------------------

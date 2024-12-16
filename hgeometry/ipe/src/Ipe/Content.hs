@@ -269,7 +269,7 @@ newtype Group r = Group [IpeObject r]
 type instance NumType   (Group r) = r
 type instance Dimension (Group r) = 2
 
-instance Fractional r => IsTransformable (IpeObject r) where
+instance (Fractional r, Eq r) => IsTransformable (IpeObject r) where
   transformBy t (IpeGroup i)     = IpeGroup     $ i&core %~ transformBy t
   transformBy t (IpeImage i)     = IpeImage     $ i&core %~ transformBy t
   transformBy t (IpeTextLabel i) = IpeTextLabel $ i&core %~ transformBy t
@@ -277,7 +277,7 @@ instance Fractional r => IsTransformable (IpeObject r) where
   transformBy t (IpeUse i)       = IpeUse       $ i&core %~ transformBy t
   transformBy t (IpePath i)      = IpePath      $ i&core %~ transformBy t
 
-instance Fractional r => IsTransformable (Group r) where
+instance (Fractional r, Eq r) => IsTransformable (Group r) where
   transformBy t (Group s) = Group $ fmap (transformBy t) s
 
 

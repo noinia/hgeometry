@@ -30,6 +30,7 @@ import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
+import           Data.Maybe (fromMaybe)
 import           HGeometry.Boundary
 import           HGeometry.Cyclic
 import           HGeometry.Foldable.Util
@@ -41,6 +42,7 @@ import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Simple.Implementation
 import           HGeometry.Polygon.Simple.InPolygon
 import           HGeometry.Polygon.Simple.Type
+import           HGeometry.Transformation
 import           HGeometry.Vector.NonEmpty.Util ()
 
 --------------------------------------------------------------------------------
@@ -170,6 +172,18 @@ instance ( SimplePolygon_ (SimplePolygonF f point) point r
                    | otherwise         = Nothing
   -- this implementation is a bit silly but ok
 
+instance ( VertexContainer f point
+         , DefaultTransformByConstraints (SimplePolygonF f point) 2 r
+         , Point_ point 2 r
+         , IsTransformable point
+         , HasFromFoldable1 f, Eq r
+         ) => IsTransformable (SimplePolygonF f point) where
+  transformBy t = fromMaybe err . fromPoints . fmap (transformBy t) . view _SimplePolygonF
+    where
+      err = error "SimplePolygonF; transformBy: no longer a simple polygon!"
+  -- Note that we use fromPoints again, since the transformation may
+  -- e.g. reorient the vertices; e.g. when they were given CCW before, they may now
+  -- end up CW. This was actually an issue before when reading the worled file.
 
 --------------------------------------------------------------------------------
 
