@@ -53,6 +53,7 @@ import           SkiaCanvas ( mouseCoordinates, dimensions, canvasKitRefs, surfa
                             )
 
 import           HGeometry.GeoJSON
+import           HGeometry.Transformation
 import           SkiaCanvas.CanvasKit hiding (Style(..))
 import           SkiaCanvas.CanvasKit.GeomPrims (ltrbRect)
 import           SkiaCanvas.CanvasKit.Image
@@ -822,6 +823,7 @@ renderPoly canvas' (pl :+ ats) =
 
 renderPolygon                     :: ( SkCanvas_ skCanvas
                                      , Point_ point 2 R
+                                     , IsTransformable point
                                      )
                                   => Canvas R
                                   -> (SimplePolygon point :+ Attributes (SimplePolygon' R))
