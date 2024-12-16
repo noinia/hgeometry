@@ -30,7 +30,7 @@ module Ipe.FromIpe(
   , HasDefaultFromIpe(..)
 
   -- * Reading all elements of a particular type
-  , readAll, readAllFrom
+  , readAll, readAllDeep, readAllFrom
   ) where
 
 import           Control.Lens hiding (Simple)
@@ -294,11 +294,23 @@ readAll   :: forall g r. (HasDefaultFromIpe g, r ~ NumType g)
           => IpePage r -> [g :+ IpeAttributes (DefaultFromIpe g) r]
 readAll p = p^..content.traverse.defaultFromIpe
 
+-- | Read all 'a's looking into groups
+readAllDeep   :: forall g r. (HasDefaultFromIpe g, r ~ NumType g)
+              => IpePage r -> [g :+ IpeAttributes (DefaultFromIpe g) r]
+readAllDeep p = p^..content.to flattenContent.traverse.defaultFromIpe
+
 -- | Convenience function from reading all g's from an ipe file. If there
 -- is an error reading or parsing the file the error is "thrown away".
 readAllFrom    :: forall g r. (HasDefaultFromIpe g, r ~ NumType g, Coordinate r, Eq r)
                => OsPath -> IO [g :+ IpeAttributes (DefaultFromIpe g) r]
 readAllFrom fp = foldMap readAll <$> readSinglePageFile fp
 
+-- | Helper to produce a singleton sequence
 fromSingleton :: a -> Seq.Seq a
 fromSingleton = Seq.singleton
+
+-- | recursively flatten all groups into one big list
+flattenContent :: [IpeObject r] -> [IpeObject r]
+flattenContent = concatMap $ \case
+                      IpeGroup (Group gr :+ _) -> flattenContent gr
+                      obj                      -> [obj]

@@ -57,18 +57,6 @@ computeIntersections :: SimplePolygon (Point 2 R) :+ extra -> Set.Set (Point 2 R
 computeIntersections =
   intersectionPoints . interiorIntersections . toListOf outerBoundaryEdgeSegments
 
-
--- | Read all 'a's looking into groups
-readAllDeep   :: forall g r. (HasDefaultFromIpe g, r ~ NumType g)
-              => IpePage r -> [g :+ IpeAttributes (DefaultFromIpe g) r]
-readAllDeep p = p^..content.to flattenContent.traverse.defaultFromIpe
-
--- | recursively flatten all groups into one big list
-flattenContent :: [IpeObject r] -> [IpeObject r]
-flattenContent = concatMap $ \case
-                      IpeGroup (Group gr :+ _) -> flattenContent gr
-                      obj                      -> [obj]
-
 mainWith                         :: Options -> IO ()
 mainWith (Options inFile outFile) = do
     inFile' <- encodeUtf inFile
@@ -84,6 +72,7 @@ mainWith (Options inFile outFile) = do
           polies  = readAllDeep page
           -- TODO: I guess I want to flatten the page first; unpacking any groups
           polies' = filter (hasNoSelfIntersections . (^.core)) polies
+          nonPolies = filter (not . hasNoSelfIntersections . (^.core)) polies
 
 
 
@@ -105,7 +94,7 @@ mainWith (Options inFile outFile) = do
 
           out     = mconcat [ [ iO $ ipePolygon pg ! ats  | (pg :+ ats) <- polies ]
                             -- , [ iO' s  | s  <- segs ]
-                            -- , [ iO $ ipePolygon pg | pg <- triangles' ]
+                            , [ iO $ ipePolygon pg | pg <- triangles' ]
                             ]
       putStrLn $ "#polygons found: " <> show (length polies)
 
@@ -119,7 +108,7 @@ mainWith (Options inFile outFile) = do
       print (length $ triangles')
       writeIpeFile outFile' . singlePageFromContent $ out
 
-      -- forM_ (zip [0..] polies') $ \(i,poly :+ ats) -> do
+      -- forM_ (zip [0..] nonPolies) $ \(i,poly :+ ats) -> do
       --   is <- encodeFS (show i)
       --   let outFileI = [osp|/tmp/self_intersection|] <> is <> [osp|.ipe|]
       --   writeIpeFile outFileI . singlePageFromContent $ [iO $ ipePolygon poly ! ats ]

@@ -14,7 +14,9 @@ import           HGeometry.Polygon
 import           HGeometry.Polygon.Instances (shrinkPolygon)
 import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Triangulation
+import           HGeometry.Properties
 import           Ipe
+import           Ipe.Reader
 import           System.IO.Unsafe
 import           System.OsPath
 import           Test.Hspec
@@ -35,10 +37,13 @@ worldPath = [osp|test-with-ipe/Polygon/Triangulation/world.ipe|]
 allCountries :: [Country]
 allCountries = unsafePerformIO $
                 do worldFile <- getDataFileName worldPath
-                   polies <- readAllFrom @(SimplePolygon (Point 2 R)) worldFile
+                   polies <- readAllDeepFrom @(SimplePolygon (Point 2 R)) worldFile
                    let polies' = filter (hasNoSelfIntersections . (^.core)) polies
                    return $ (Country . (^.core)) <$> polies'
 
+readAllDeepFrom    :: forall g r. (HasDefaultFromIpe g, r ~ NumType g, Coordinate r, Eq r)
+                   => OsPath -> IO [g :+ IpeAttributes (DefaultFromIpe g) r]
+readAllDeepFrom fp = foldMap readAllDeep <$> readSinglePageFile fp
 
 newtype Country = Country (SimplePolygon (Point 2 R))
              deriving (Show,Eq)
