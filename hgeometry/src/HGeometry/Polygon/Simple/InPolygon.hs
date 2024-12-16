@@ -28,9 +28,10 @@ import HGeometry.Intersection
 
 {- $setup
 >>> import HGeometry.Polygon.Simple
+>>> import qualified Data.List.NonEmpty as NonEmpty
 >>> :{
 let simplePoly :: SimplePolygon (Point 2 Int)
-    simplePoly = uncheckedFromCCWPoints $
+    simplePoly = uncheckedFromCCWPoints . NonEmpty.fromList $
                  [ Point2 0 0
                  , Point2 10 0
                  , Point2 10 10
@@ -41,7 +42,7 @@ let simplePoly :: SimplePolygon (Point 2 Int)
 -}
 
 -- simpleTriangle :: SimplePolygon (Point 2 Int)
--- simpleTriangle = uncheckedFromCCWPoints $ [ Point2 0 0, Point2 2 0, Point2 1 1]
+-- simpleTriangle = uncheckedFromCCWPoints . NonEmpty.fromList $ [ Point2 0 0, Point2 2 0, Point2 1 1]
 -- test = Point2 1 1 `inPolygon` simplePoly
 
 data AboveCount seg = OnEdge !seg
