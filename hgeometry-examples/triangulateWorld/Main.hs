@@ -5,6 +5,7 @@
 module Main(main) where
 
 import           Control.Lens
+import           Control.Monad
 import           Data.Data
 import qualified Data.Foldable as F
 import           Data.Maybe (mapMaybe)
@@ -20,10 +21,10 @@ import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Triangulation (triangulate)
 import           HGeometry.Polygon.Triangulation.MakeMonotone (makeMonotone)
+import           HGeometry.Properties
 import           Ipe
 import           Options.Applicative
 import           System.OsPath
-
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -56,6 +57,18 @@ computeIntersections :: SimplePolygon (Point 2 R) :+ extra -> Set.Set (Point 2 R
 computeIntersections =
   intersectionPoints . interiorIntersections . toListOf outerBoundaryEdgeSegments
 
+
+-- | Read all 'a's looking into groups
+readAllDeep   :: forall g r. (HasDefaultFromIpe g, r ~ NumType g)
+              => IpePage r -> [g :+ IpeAttributes (DefaultFromIpe g) r]
+readAllDeep p = p^..content.to flattenContent.traverse.defaultFromIpe
+
+-- | recursively flatten all groups into one big list
+flattenContent :: [IpeObject r] -> [IpeObject r]
+flattenContent = concatMap $ \case
+                      IpeGroup (Group gr :+ _) -> flattenContent gr
+                      obj                      -> [obj]
+
 mainWith                         :: Options -> IO ()
 mainWith (Options inFile outFile) = do
     inFile' <- encodeUtf inFile
@@ -68,7 +81,8 @@ mainWith (Options inFile outFile) = do
 
     runPage outFile' page = do
       let polies  :: [SimplePolygon (Point 2 R) :+ IpeAttributes Path R]
-          polies  = readAll page
+          polies  = readAllDeep page
+          -- TODO: I guess I want to flatten the page first; unpacking any groups
           polies' = filter (hasNoSelfIntersections . (^.core)) polies
 
 
@@ -80,7 +94,9 @@ mainWith (Options inFile outFile) = do
           subdivs = map (\(pg :+ _) -> triangulate pg) polies'
 
           triangles' :: [SimplePolygon (Point 2 R :+ _)]
-          triangles' = subdivs^..traverse.interiorFacePolygons
+          triangles' = -- concatMap (^..interiorFacePolygons) subdivs
+                       subdivs^..traverse.interiorFacePolygons
+
             -- mapMaybe (^?_2.core._Left)
             --          . concatMap (F.toList. internalFacePolygons) $ subdivs
 
@@ -88,8 +104,8 @@ mainWith (Options inFile outFile) = do
           segs = subdivs^..traverse.edgeSegments
 
           out     = mconcat [ [ iO $ ipePolygon pg ! ats  | (pg :+ ats) <- polies ]
-                            , [ iO' s  | s  <- segs ]
-                            , [ iO $ ipePolygon pg | pg <- triangles' ]
+                            -- , [ iO' s  | s  <- segs ]
+                            -- , [ iO $ ipePolygon pg | pg <- triangles' ]
                             ]
       putStrLn $ "#polygons found: " <> show (length polies)
 
@@ -102,3 +118,8 @@ mainWith (Options inFile outFile) = do
       putStrLn "# triangles: "
       print (length $ triangles')
       writeIpeFile outFile' . singlePageFromContent $ out
+
+      -- forM_ (zip [0..] polies') $ \(i,poly :+ ats) -> do
+      --   is <- encodeFS (show i)
+      --   let outFileI = [osp|/tmp/self_intersection|] <> is <> [osp|.ipe|]
+      --   writeIpeFile outFileI . singlePageFromContent $ [iO $ ipePolygon poly ! ats ]
