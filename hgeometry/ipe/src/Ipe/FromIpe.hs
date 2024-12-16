@@ -55,8 +55,6 @@ import           Ipe.Reader
 import           Ipe.Types
 import           System.OsPath
 
-import           Debug.Trace
-import           HGeometry.Polygon
 --------------------------------------------------------------------------------
 
 -- import qualified Data.List.NonEmpty as NonEmpty

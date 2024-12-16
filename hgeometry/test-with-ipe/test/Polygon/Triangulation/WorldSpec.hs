@@ -36,8 +36,6 @@ allCountries :: [Country]
 allCountries = unsafePerformIO $
                 do worldFile <- getDataFileName worldPath
                    polies <- readAllFrom @(SimplePolygon (Point 2 R)) worldFile
-                   mapM_ (\(pg' :+ _) -> print (isCounterClockwise pg', pg')
-                         ) polies
                    let polies' = filter (hasNoSelfIntersections . (^.core)) polies
                    return $ (Country . (^.core)) <$> polies'
 
