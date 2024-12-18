@@ -18,6 +18,7 @@ import           Control.Monad.ST
 import           Control.Monad.State
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as Mut
+import qualified Data.Vector.NonEmpty as NonEmptyV
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
@@ -73,7 +74,8 @@ dequeTop idx = do
 --   For algorithmic details see: <https://en.wikipedia.org/wiki/Convex_hull_of_a_simple_polygon>
 convexHull   :: forall polygon point r. (Polygon_ polygon point r, Ord r, Num r)
              => polygon -> ConvexPolygon point
-convexHull pg = uncheckedFromCCWPoints $ V.create $ runM (length vs) $ findStartingPoint 2
+convexHull pg = uncheckedFromCCWPoints . NonEmptyV.unsafeFromVector
+              $ V.create $ runM (length vs) $ findStartingPoint 2
   where
     -- Find the first spot where 0,n-1,n is not colinear.
     findStartingPoint     :: Int -> M s point ()

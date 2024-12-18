@@ -32,7 +32,7 @@ applyMatrix' o@(i :+ ats) = maybe o (\m -> transformBy (Transformation m) i :+ a
     (mm,ats') = takeAttr (Proxy :: Proxy AT.Matrix) ats
 
 -- | Applies the matrix to an ipe object if it has one.
-applyMatrix                  :: Fractional r => IpeObject r -> IpeObject r
+applyMatrix                  :: (Fractional r, Eq r) => IpeObject r -> IpeObject r
 applyMatrix (IpeGroup i)     = IpeGroup . applyMatrix'
                              $ i&core.groupItems.traverse %~ applyMatrix
                              -- note that for a group we first (recursively)
@@ -45,9 +45,9 @@ applyMatrix (IpeUse i)       = IpeUse       $ applyMatrix' i
 applyMatrix (IpePath i)      = IpePath      $ applyMatrix' i
 
 -- | Applies all matrices in the file.
-applyMatrices   :: Fractional r => IpeFile r -> IpeFile r
+applyMatrices   :: (Fractional r, Eq r) => IpeFile r -> IpeFile r
 applyMatrices f = f&pages.traverse %~ applyMatricesPage
 
 -- | Applies all Matrices on a given page.
-applyMatricesPage   :: Fractional r => IpePage r -> IpePage r
+applyMatricesPage   :: (Fractional r, Eq r) => IpePage r -> IpePage r
 applyMatricesPage p = p&content.traverse %~ applyMatrix

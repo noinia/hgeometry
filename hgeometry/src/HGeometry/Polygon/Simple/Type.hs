@@ -40,7 +40,6 @@ import qualified HGeometry.Foldable.Util as F
 import           HGeometry.Intersection
 import           HGeometry.Point
 import           HGeometry.Properties
-import           HGeometry.Transformation
 import           HGeometry.Vector.NonEmpty.Util ()
 
 --------------------------------------------------------------------------------
@@ -98,11 +97,6 @@ type VertexContainer f point = ( IxValue (f point) ~ point
 instance ( VertexContainer f point
          ) => HasPoints (SimplePolygonF f point) (SimplePolygonF f point') point point' where
   allPoints = _SimplePolygonF . traversed1
-
-instance ( VertexContainer f point
-         , DefaultTransformByConstraints (SimplePolygonF f point) 2 r
-         , Point_ point 2 r
-         ) => IsTransformable (SimplePolygonF f point)
 
 instance ( VertexContainer f point
          , Point_ point 2 r

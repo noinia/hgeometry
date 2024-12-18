@@ -30,7 +30,7 @@ module Ipe.FromIpe(
   , HasDefaultFromIpe(..)
 
   -- * Reading all elements of a particular type
-  , readAll, readAllFrom
+  , readAll, readAllDeep, readAllFrom
   ) where
 
 import           Control.Lens hiding (Simple)
@@ -54,7 +54,6 @@ import           Ipe.Path
 import           Ipe.Reader
 import           Ipe.Types
 import           System.OsPath
-
 
 --------------------------------------------------------------------------------
 
@@ -132,8 +131,8 @@ _asConvexPolygon = _asSimplePolygon._ConvexPolygon
 _asRectangle :: forall r. (Num r, Ord r) => Prism' (Path r) (Rectangle (Point 2 r))
 _asRectangle = prism' rectToPath pathToRect
   where
-    rectToPath (Box.corners -> Corners a b c d) =
-      review _asSimplePolygon . uncheckedFromCCWPoints $ [a,b,c,d]
+    rectToPath = review _asSimplePolygon . uncheckedFromCCWPoints . Box.corners
+    -- shoudln't I reverse these corners
     pathToRect p = p^?_asSimplePolygon >>= asRect
 
     asRect    :: SimplePolygon (Point 2  r) -> Maybe (Rectangle (Point 2 r))
@@ -157,8 +156,8 @@ _asRectangle = prism' rectToPath pathToRect
 _asTriangle :: Prism' (Path r) (Triangle (Point 2 r))
 _asTriangle = prism' triToPath path2tri
   where
-    triToPath (Triangle p q r) = polygonToPath $ uncheckedFromCCWPoints [p,q,r]
-    path2tri p = case p^..pathSegments.traverse._PolygonPath of
+    triToPath = polygonToPath . uncheckedFromCCWPoints
+    path2tri p = case p^..pathSegments.traverse._PolygonPath._2 of
                     []   -> Nothing
                     [pg] -> case pg^..vertices of
                               [a,b,c] -> Just $ Triangle a b c
@@ -201,14 +200,14 @@ _asDisk = _asCircle.from _DiskCircle
 
 
 polygonToPath :: SimplePolygon (Point 2 r) -> Path r
-polygonToPath = Path . fromSingleton . PolygonPath
+polygonToPath = Path . fromSingleton . PolygonPath AsIs
 
 
 -- polygonToPath (MultiPolygon vs hs) = Path . LSeq.fromNonEmpty . fmap PolygonPath
 --                                    $ vs :| hs
 
 pathToPolygon   :: Path r -> Maybe (SimplePolygon (Point 2 r))
-pathToPolygon p = case p^..pathSegments.traverse._PolygonPath of
+pathToPolygon p = case p^..pathSegments.traverse._PolygonPath._2 of
                     [pg]  -> Just pg
                     _     -> Nothing
                     -- vs:hs -> Just . Right $ MultiPolygon vs hs
@@ -295,11 +294,23 @@ readAll   :: forall g r. (HasDefaultFromIpe g, r ~ NumType g)
           => IpePage r -> [g :+ IpeAttributes (DefaultFromIpe g) r]
 readAll p = p^..content.traverse.defaultFromIpe
 
+-- | Read all 'a's looking into groups
+readAllDeep   :: forall g r. (HasDefaultFromIpe g, r ~ NumType g)
+              => IpePage r -> [g :+ IpeAttributes (DefaultFromIpe g) r]
+readAllDeep p = p^..content.to flattenContent.traverse.defaultFromIpe
+
 -- | Convenience function from reading all g's from an ipe file. If there
 -- is an error reading or parsing the file the error is "thrown away".
 readAllFrom    :: forall g r. (HasDefaultFromIpe g, r ~ NumType g, Coordinate r, Eq r)
                => OsPath -> IO [g :+ IpeAttributes (DefaultFromIpe g) r]
 readAllFrom fp = foldMap readAll <$> readSinglePageFile fp
 
+-- | Helper to produce a singleton sequence
 fromSingleton :: a -> Seq.Seq a
 fromSingleton = Seq.singleton
+
+-- | recursively flatten all groups into one big list
+flattenContent :: [IpeObject r] -> [IpeObject r]
+flattenContent = concatMap $ \case
+                      IpeGroup (Group gr :+ _) -> flattenContent gr
+                      obj                      -> [obj]

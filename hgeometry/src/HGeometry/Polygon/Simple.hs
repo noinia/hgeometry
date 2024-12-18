@@ -26,8 +26,11 @@ module HGeometry.Polygon.Simple
 
 import           Control.Lens
 import qualified Data.Foldable as F
+import           Data.Foldable1
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
+import           Data.Maybe (fromMaybe)
 import           HGeometry.Boundary
 import           HGeometry.Cyclic
 import           HGeometry.Foldable.Util
@@ -39,6 +42,7 @@ import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Simple.Implementation
 import           HGeometry.Polygon.Simple.InPolygon
 import           HGeometry.Polygon.Simple.Type
+import           HGeometry.Transformation
 import           HGeometry.Vector.NonEmpty.Util ()
 
 --------------------------------------------------------------------------------
@@ -108,15 +112,49 @@ instance ( Point_ point 2 r
          , HasFromFoldable1 f
          ) => SimplePolygon_ (SimplePolygonF f point) point r where
   uncheckedFromCCWPoints = MkSimplePolygon . fromFoldable1
-                         . NonEmpty.fromList . F.toList
 
-  fromPoints pts = case F.toList pts of
-    pts'@(_ : _ : _ : _ ) -> Just . toCounterClockwiseOrder . uncheckedFromCCWPoints $ pts'
-                             -- TODO: verify that:
-                              --      we have no repeated vertices,
-                             --      no self intersections, and
-                             --      not all vertices are colinear
-    _                     -> Nothing -- we need at least three vertices
+  fromPoints rawPts = do pts@(_:|_:_:_) <- removeRepeated <$> toNonEmpty' rawPts
+                         -- note that the pattern match makes sure there are at least 3 pts
+                         let pg    = uncheckedFromCCWPoints pts
+                             area' = signedArea2X pg
+                             pg'   = uncheckedFromCCWPoints $ NonEmpty.reverse pts
+                         case area' of
+                           0                      -> Nothing -- the points are all colinear
+                           _ | area' == abs area' -> Just pg -- the points are given in CCW order
+                             | otherwise          -> Just pg'
+                             -- pts were in CW order, so we reversed them.
+    where
+      toNonEmpty' = NonEmpty.nonEmpty . F.toList
+
+  -- TODO: verify that:
+  --      no self intersections, and
+
+-- -- | Make sure that we have at least three points
+-- requireThree     :: NonEmpty point -> Maybe (NonEmpty point)
+-- requireThree pts = case pts of
+--     (_ :| (_ : _ : _)) -> Just pts
+--     _                  -> Nothing
+
+
+-- | Makes sure there are no repeated vertices.
+--
+-- note that we treat f as a cyclic sequence
+removeRepeated    :: (Point_ point 2 r, Eq r)
+                  => NonEmpty point -> NonEmpty point
+removeRepeated = checkFirst
+               . foldrMap1 (\(l :| _)         -> (l, NonEmpty.singleton l))
+                           (\(x :| _) (l,acc) -> (l, x NonEmpty.<| acc))
+               . NonEmpty.groupWith1 (^.asPoint)
+  where
+    -- make sure that the first and last element are also distinct
+    checkFirst (last', acc@(first' :| rest')) = case NonEmpty.nonEmpty rest' of
+      Nothing                                           -> acc
+        -- Apparently there is only one element, (first' == last')
+      Just rest | (first'^.asPoint) == (last'^.asPoint) -> rest
+                  -- in this case the first elem of rest is distinct from first' (due to
+                  -- the groupwith), and and thus distinct from the last of the rest
+                | otherwise                             -> acc
+
 
 instance ( Show point
          , SimplePolygon_ (SimplePolygonF f point) point r
@@ -138,7 +176,7 @@ instance (SimplePolygon_ (SimplePolygonF f) point r, Fractional r, Ord r)
 --------------------------------------------------------------------------------
 
 _testPoly :: SimplePolygon (Point 2 Int)
-_testPoly = uncheckedFromCCWPoints [Point2 10 20, origin, Point2 0 100]
+_testPoly = uncheckedFromCCWPoints $ NonEmpty.fromList [Point2 10 20, origin, Point2 0 100]
 
 
 --------------------------------------------------------------------------------
@@ -160,12 +198,24 @@ instance ( SimplePolygon_ (SimplePolygonF f point) point r
                    | otherwise         = Nothing
   -- this implementation is a bit silly but ok
 
+instance ( VertexContainer f point
+         , DefaultTransformByConstraints (SimplePolygonF f point) 2 r
+         , Point_ point 2 r
+         , IsTransformable point
+         , HasFromFoldable1 f, Eq r
+         ) => IsTransformable (SimplePolygonF f point) where
+  transformBy t = fromMaybe err . fromPoints . fmap (transformBy t) . view _SimplePolygonF
+    where
+      err = error "SimplePolygonF; transformBy: no longer a simple polygon!"
+  -- Note that we use fromPoints again, since the transformation may
+  -- e.g. reorient the vertices; e.g. when they were given CCW before, they may now
+  -- end up CW. This was actually an issue before when reading the worled file.
 
 --------------------------------------------------------------------------------
 
 -- | verify that some sequence of points has no self intersecting edges.
 hasNoSelfIntersections    :: forall f point r.
-                             (Foldable f, Functor f, Point_ point 2 r, Ord r, Real r)
+                             (Foldable1 f, Functor f, Point_ point 2 r, Ord r, Real r)
                           => f point -> Bool
 hasNoSelfIntersections vs = let vs' = (\p -> (p^.asPoint)&coordinates %~ toRational) <$> vs
                                 pg :: SimplePolygon (Point 2 Rational)

@@ -19,7 +19,7 @@ module Ipe(
   , readRawIpeFile
   , ConversionError
   -- *** Reading all Geometries from a single page ipe file
-  , readAll, readAllFrom
+  , readAll, readAllDeep, readAllFrom
   -- ** Writing ipe files
   , writeIpeFile, writeIpeFile', writeIpePage
   , toIpeXML

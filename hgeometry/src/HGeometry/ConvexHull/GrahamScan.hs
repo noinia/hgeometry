@@ -34,7 +34,7 @@ convexHull            :: (Ord r, Num r, Point_ point 2 r)
 convexHull ps        = let ps' = Vector.toList . sortBy incXdecY $ ps
                            uh  = NonEmpty.tail . hull' $         ps'
                            lh  = NonEmpty.tail . hull' $ reverse ps'
-                       in uncheckedFromCCWPoints $ lh ++ uh
+                       in uncheckedFromCCWPoints . NonEmpty.fromList $ lh <> uh
 
 -- | Computes the upper hull. The upper hull is given from left to right.
 --

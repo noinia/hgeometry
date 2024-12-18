@@ -14,15 +14,16 @@ module HGeometry.Polygon.Convex.MinkowskiSum
   ( minkowskiSum
   ) where
 
-import Control.Lens
-import Data.List.NonEmpty (NonEmpty(..))
-import Data.Ord (comparing)
-import HGeometry.Ext
-import HGeometry.Point
-import HGeometry.Polygon.Class
-import HGeometry.Polygon.Convex.Class
-import HGeometry.Polygon.Convex.Implementation
-import HGeometry.Polygon.Simple.Class
+import           Control.Lens
+import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Ord (comparing)
+import           HGeometry.Ext
+import           HGeometry.Point
+import           HGeometry.Polygon.Class
+import           HGeometry.Polygon.Convex.Class
+import           HGeometry.Polygon.Convex.Implementation
+import           HGeometry.Polygon.Simple.Class
 
 --------------------------------------------------------------------------------
 
@@ -40,7 +41,8 @@ minkowskiSum     :: ( Ord r, Num r
                     )
                  => convexPolygon -> convexPolygon'
                  -> ConvexPolygon (point :+ point')
-minkowskiSum p q = uncheckedFromCCWPoints $ merge' (theVertices p) (theVertices q)
+minkowskiSum p q = uncheckedFromCCWPoints . NonEmpty.fromList
+                 $ merge' (theVertices p) (theVertices q)
   where
     theVertices p' = case toNonEmptyOf (ccwOuterBoundaryFrom $ bottomMost p') p' of
                        v :| xs -> v:| (xs++[v])

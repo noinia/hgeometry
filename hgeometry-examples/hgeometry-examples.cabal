@@ -282,6 +282,16 @@ executable hgeometry-draw
   -- other-modules:
   --       Options
 
+--------------------------------------------------------------------------------
+-- * Triangulate World
+
+executable hgeometry-triangulateWorld
+  import:         setup
+  hs-source-dirs: triangulateWorld
+  main-is:        Main.hs
+  build-depends:
+      optparse-applicative >= 0.18
+    , filepath             >= 1.4.100
 
 --------------------------------------------------------------------------------
 

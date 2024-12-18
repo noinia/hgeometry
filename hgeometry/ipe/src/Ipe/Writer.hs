@@ -28,6 +28,7 @@ import           Data.Colour.SRGB (RGB (..))
 import           Data.Fixed
 import qualified Data.Foldable as F
 import           Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (catMaybes, fromMaybe, mapMaybe)
 import           Data.Ratio
 import           Data.Semigroup.Foldable
@@ -308,9 +309,11 @@ instance (IpeWriteText r, Point_ point 2 r) => IpeWriteText (PolyLine point) whe
     -- the polyline type guarantees that there is at least one point
 
 instance (IpeWriteText r, Point_ point 2 r) => IpeWriteText (SimplePolygon point) where
-  ipeWriteText pg = case toNonEmptyOf (outerBoundary.asPoint) pg of
-        (p :| rest) -> unlines' . map ipeWriteText
-                     $ MoveTo p : map LineTo rest ++ [ClosePath]
+  ipeWriteText pg = ipeWriteTextPolygonVertices $ toNonEmptyOf (outerBoundary.asPoint) pg
+
+ipeWriteTextPolygonVertices :: IpeWriteText r => NonEmpty (Point 2 r) -> Maybe Text
+ipeWriteTextPolygonVertices = \case 
+    (p :| rest) -> unlines' . map ipeWriteText $ MoveTo p : map LineTo rest ++ [ClosePath]
 
 instance (IpeWriteText r, Point_ point 2 r) => IpeWriteText (CubicBezier point) where
   ipeWriteText (fmap (^.asPoint) -> Bezier3 p q r s) =
@@ -318,7 +321,10 @@ instance (IpeWriteText r, Point_ point 2 r) => IpeWriteText (CubicBezier point) 
 
 instance IpeWriteText r => IpeWriteText (PathSegment r) where
   ipeWriteText (PolyLineSegment    p) = ipeWriteText p
-  ipeWriteText (PolygonPath        p) = ipeWriteText p
+  ipeWriteText (PolygonPath orient p) = case orient of
+    AsIs     -> ipeWriteText p
+    Reversed -> ipeWriteTextPolygonVertices . NonEmpty.reverse
+              $ toNonEmptyOf (outerBoundary.asPoint) p
   ipeWriteText (EllipseSegment     e) = ipeWriteText $ Ellipse (e^.ellipseMatrix)
   ipeWriteText (CubicBezierSegment b) = ipeWriteText b 
   ipeWriteText _                      = error "ipeWriteText: PathSegment, not implemented yet."

@@ -28,7 +28,7 @@ import           Control.Lens
 import           Data.Aeson
 import qualified Data.Aeson as Aeson
 import           Data.Aeson.Types (Parser)
-import qualified Data.List as List
+import qualified Data.List.NonEmpty as NonEmpty
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple.Class
 
@@ -59,7 +59,8 @@ toCounterClockwiseOrder   :: (Num r, Eq r, SimplePolygon_ simplePolygon point r)
                           => simplePolygon -> simplePolygon
 toCounterClockwiseOrder pg
   | isCounterClockwise pg = pg
-  | otherwise             = uncheckedFromCCWPoints . List.reverse $ pg^..outerBoundary
+  | otherwise             = uncheckedFromCCWPoints . NonEmpty.reverse
+                          . toNonEmptyOf outerBoundary $ pg
 
 --------------------------------------------------------------------------------
 -- * Show
@@ -89,7 +90,7 @@ readsPrecSimplePolygon        :: forall simplePolygon point r.
                               => String -- ^ constructor name
                               -> Int -> ReadS simplePolygon
 readsPrecSimplePolygon name d = readParen (d > app_prec) $ \r ->
-      [ (uncheckedFromCCWPoints @simplePolygon @point @r @[] vs, t)
+      [ (uncheckedFromCCWPoints @simplePolygon @point @r $ NonEmpty.fromList vs, t)
       | (name', s) <- lex r
       , name == name'
       , (vs, t) <- reads s
@@ -116,7 +117,8 @@ parseJSONSimplePolygon = withObject "Polygon" $ \o -> o .: "tag" >>= \case
                            "SimplePolygon" -> pSimple o
                            (_ :: String)   -> fail "Not a SimplePolygon"
   where
-    pSimple o = uncheckedFromCCWPoints @simplePolygon @point @r @[]  <$> o .: "vertices"
+    pSimple o = uncheckedFromCCWPoints @simplePolygon @point @r . NonEmpty.fromList
+             <$> o .: "vertices"
 
 
 

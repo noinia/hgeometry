@@ -31,7 +31,7 @@ import           HGeometry.Intersection
 convexHull            :: (Ord r, Fractional r, Show r, Point_ point 2 r)
                       => NonEmpty point -> ConvexPolygon point
 convexHull ps        = uncheckedFromCCWPoints
-                     $ [l] <> hull l r below' <> [r] <> reverse (hull l r above)
+                     $ l :| hull l r below' <> [r] <> reverse (hull l r above)
   where
     Extremes l r mids = findExtremes ps
     m                 = lineThrough l r
