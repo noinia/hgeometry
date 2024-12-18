@@ -102,11 +102,27 @@ mainWith (Options inFile outFile) = do
       mapM_ print $ take 100 $ F.toList $ intersections'
       putStrLn $ "number of non-self intersecting polygons: " <> show (length polies')
 
-      mapM_ (print . numVertices) polies'
+      -- mapM_ (print . numVertices) polies'
 
       putStrLn "# triangles: "
       print (length $ triangles')
       writeIpeFile outFile' . singlePageFromContent $ out
+
+
+      -- let preFile = [osp|/tmp/out.ipe|]
+      -- forM_ (zip [0..] polies') $ \(i,poly :+ ats) -> do
+      --   is <- encodeFS (show i)
+      --   let outFileI = [osp|/tmp/triangulatedpolies|] <> is <> [osp|.ipe|]
+      --       subdiv   = triangulate poly :: PlaneGraph PX (Point 2 R) _ _
+      --   writeIpeFile preFile . singlePageFromContent $
+      --         mconcat [ [ iO $ ipePolygon poly ! ats ]
+      --                 ]
+      --   -- print poly
+      --   writeIpeFile outFileI . singlePageFromContent $
+      --         mconcat [ [ iO $ ipePolygon poly ! ats ]
+      --                 , [ iO $ ipePolygon tri | tri <- subdiv^..interiorFacePolygons ]
+      --                 ]
+
 
       -- forM_ (zip [0..] nonPolies) $ \(i,poly :+ ats) -> do
       --   is <- encodeFS (show i)
