@@ -113,22 +113,48 @@ instance ( Point_ point 2 r
          ) => SimplePolygon_ (SimplePolygonF f point) point r where
   uncheckedFromCCWPoints = MkSimplePolygon . fromFoldable1
 
-  fromPoints rawPts = toCounterClockwiseOrder . uncheckedFromCCWPoints
-                   <$> requireThree (removeRepeated rawPts)
+  fromPoints rawPts = do pts@(_:|_:_:_) <- removeRepeated <$> toNonEmpty' rawPts
+                         -- note that the pattern match makes sure there are at least 3 pts
+                         let pg    = uncheckedFromCCWPoints pts
+                             area' = signedArea2X pg
+                             pg'   = uncheckedFromCCWPoints $ NonEmpty.reverse pts
+                         case area' of
+                           0                      -> Nothing -- the points are all colinear
+                           _ | area' == abs area' -> Just pg -- the points are given in CCW order
+                             | otherwise          -> Just pg'
+                             -- pts were in CW order, so we reversed them.
+    where
+      toNonEmpty' = NonEmpty.nonEmpty . F.toList
+
   -- TODO: verify that:
   --      no self intersections, and
-  --      not all vertices are colinear
 
--- | Makes sure there are no repeated vertices
-removeRepeated :: (Point_ point 2 r, Eq r, Foldable f)
-               => f point -> [point]
-removeRepeated = fmap NonEmpty.head . NonEmpty.groupWith (^.asPoint)
+-- -- | Make sure that we have at least three points
+-- requireThree     :: NonEmpty point -> Maybe (NonEmpty point)
+-- requireThree pts = case pts of
+--     (_ :| (_ : _ : _)) -> Just pts
+--     _                  -> Nothing
 
--- | Make sure that we have at least three points
-requireThree     :: Foldable f => f point -> Maybe (NonEmpty point)
-requireThree pts = case F.toList pts of
-    (h : tl@(_ : _ : _)) -> Just $ h :| tl
-    _                    -> Nothing
+
+-- | Makes sure there are no repeated vertices.
+--
+-- note that we treat f as a cyclic sequence
+removeRepeated    :: (Point_ point 2 r, Eq r)
+                  => NonEmpty point -> NonEmpty point
+removeRepeated = checkFirst
+               . foldrMap1 (\(l :| _)         -> (l, NonEmpty.singleton l))
+                           (\(x :| _) (l,acc) -> (l, x NonEmpty.<| acc))
+               . NonEmpty.groupWith1 (^.asPoint)
+  where
+    -- make sure that the first and last element are also distinct
+    checkFirst (last', acc@(first' :| rest')) = case NonEmpty.nonEmpty rest' of
+      Nothing                                           -> acc
+        -- Apparently there is only one element, (first' == last')
+      Just rest | (first'^.asPoint) == (last'^.asPoint) -> rest
+                  -- in this case the first elem of rest is distinct from first' (due to
+                  -- the groupwith), and and thus distinct from the last of the rest
+                | otherwise                             -> acc
+
 
 instance ( Show point
          , SimplePolygon_ (SimplePolygonF f point) point r

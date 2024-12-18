@@ -14,24 +14,26 @@ module HGeometry.Polygon.Instances
   -- , runConvert
   ) where
 
-import Control.Lens hiding (elements)
-import Control.Monad.State
-import Data.Aeson (eitherDecodeFileStrict)
-import Data.Maybe (maybeToList)
-import Data.Ord
-import Data.Ratio
-import HGeometry
-import HGeometry.Intersection
-import HGeometry.Number.Real.Rational
-import HGeometry.Polygon.Class
-import HGeometry.Polygon.Monotone
-import HGeometry.Polygon.Simple
-import HGeometry.Triangle
-import Paths_hgeometry
-import System.IO.Unsafe
-import System.Random.Stateful
-import Test.QuickCheck
-import Test.QuickCheck.Instances ()
+import           Control.Lens hiding (elements)
+import           Control.Monad.State
+import           Data.Aeson (eitherDecodeFileStrict)
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.List.NonEmpty (NonEmpty(..))
+import           Data.Maybe (maybeToList, mapMaybe)
+import           Data.Ord
+import           Data.Ratio
+import           HGeometry
+import           HGeometry.Intersection
+import           HGeometry.Number.Real.Rational
+import           HGeometry.Polygon.Class
+import           HGeometry.Polygon.Monotone
+import           HGeometry.Polygon.Simple
+import           HGeometry.Triangle
+import           Paths_hgeometry
+import           System.IO.Unsafe
+import           System.Random.Stateful
+import           Test.QuickCheck hiding (vector)
+import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
 
@@ -98,25 +100,17 @@ allMultiPolygonsWith f = unsafePerformIO $ do
 
 -}
 
--- | Shifts the polygon to the left by n.
-rotateLeft      :: SimplePolygon_ simplePolygon point r => Int -> simplePolygon -> simplePolygon
-rotateLeft n pg = uncheckedFromCCWPoints
-                $ toNonEmptyOf (ccwOuterBoundaryFrom (n `mod` numVertices pg)) pg
+--------------------------------------------------------------------------------
+
 
 instance Arbitrary (SimplePolygon (Point 2 Rational)) where
   arbitrary = do
     p <- elements allSimplePolygons'
     n <- chooseInt (0, numVertices p-1)
-    pure $ rotateLeft n p
+    pure $ rotateLeft n p -- rotates the indices of the polygon so
+      -- that we get a somewhat random starting coordinate as well.
   shrink = shrinkPolygon
 
--- | Shrink a simple polygon
-shrinkPolygon      :: (Ord r, Fractional r, Real r)
-                   => SimplePolygon (Point 2 r) -> [SimplePolygon (Point 2 r)]
-shrinkPolygon p
-    | isTriangle p = simplifyP p
-    | otherwise    = let pgs = cutEars p ++ simplifyP p
-                     in [ pg&vertices %~ alignZero pg | pg <- pgs ] <> pgs
 
 instance Arbitrary (SimplePolygon (Point 2 Double)) where
   arbitrary = do
@@ -148,37 +142,68 @@ instance (Uniform r, Ord r, Num r) => Arbitrary (MonotonePolygon (Point 2 r)) wh
                 pure $ evalState (randomMonotoneDirected n v) g'
 
 
+--------------------------------------------------------------------------------
 
+-- | Shifts the indices of the polygon to the left by n.
+rotateLeft      :: SimplePolygon_ simplePolygon point r => Int -> simplePolygon -> simplePolygon
+rotateLeft n pg = uncheckedFromCCWPoints
+                $ toNonEmptyOf (ccwOuterBoundaryFrom (n `mod` numVertices pg)) pg
 
+--------------------------------------------------------------------------------
+-- * Polygon Shrinking
 
-simplifyP     :: forall r. (Ord r, Fractional r, Real r)
-              => SimplePolygon (Point 2 r) -> [SimplePolygon (Point 2 r)]
-simplifyP pg
-      -- Scale up polygon such that each coordinate is a whole number.
-    | lcmP /= 1 = [ pg' | pg' <- fromPoints' $ multP lcmP <$> pg^..vertices ]
-                 -- we use fromPoints to make sure that we don't create repeated vertices.
-      -- Scale down polygon maintaining each coordinate as a whole number
-    | gcdP /= 1 = [ pg' | pg' <- fromPoints' $ divP gcdP <$> pg^..vertices ]
-    | minX /= 0 || minY /= 0 = [ pg' | pg' <- fromPoints' $ align <$> pg^..vertices ]
-    | otherwise =
-      let pg' = pg&vertices %~ _div2
-      in [ pg' | hasNoSelfIntersections $ toNonEmptyOf vertices pg' ]
-    -- otherwise = []
+-- | Shrink a simple polygon.
+--
+-- The main idea is to try and remove every vertex (making sure that we still get a valid
+-- polygon). At the end, we try to simplify the coordinates of the points involved as well.
+shrinkPolygon      :: (Ord r, Fractional r, Real r)
+                   => SimplePolygon (Point 2 r) -> [SimplePolygon (Point 2 r)]
+shrinkPolygon pg
+  | isTriangle pg = simplifyCoords pg
+  | otherwise     = cutEars pg -- dropVertices <> simplifyCoords pg
   where
-    fromPoints' = maybeToList . fromPoints
-    align = alignZero pg
+    dropVertices = mapMaybe (dropVertex pg) (pg^..vertices.asIndex)
 
-    lcmP = lcmPoint pg
-    gcdP = gcdPoint pg
 
-    minX = first1Of (minimumVertexBy (comparing (^.xCoord)).xCoord) pg
-    minY = first1Of (minimumVertexBy (comparing (^.yCoord)).yCoord) pg
+dropVertex      :: (Ord r, Fractional r, Real r)
+                => SimplePolygon (Point 2 r) -> Int
+                -> Maybe (SimplePolygon (Point 2 r))
+dropVertex pg i = fromPoints' . NonEmpty.tail $ toNonEmptyOf (ccwOuterBoundaryFrom i) pg
+  where
+    fromPoints' pts = do pg' <- fromPoints pts
+                         if hasNoSelfIntersections pg' then pure pg' else Nothing
 
-    multP v (Point2 c d) = Point2 (c*v) (d*v)
-    divP v (Point2 c d) = Point2 (c/v) (d/v)
-    _div2 p = let (Point2 a b) = p&coordinates %~ toRational
-              in Point2 (fromRational $ numerator a `div` 2 % 1)
-                        (fromRational $ numerator b `div` 2 % 1)
+-- | Try to simplify the coordinates of the points in hte polygon
+simplifyCoords     :: forall r. (Ord r, Fractional r, Real r)
+                   => SimplePolygon (Point 2 r) -> [SimplePolygon (Point 2 r)]
+simplifyCoords pg = let (v :| _) = toNonEmptyOf (vertices.vector) pg
+                    in [pg&vertices %~ (.-^ v)]
+
+  --     -- Scale up polygon such that each coordinate is a whole number.
+  --   | lcmP /= 1 = [ pg' | pg' <- fromPoints' $ multP lcmP <$> pg^..vertices ]
+  --                -- we use fromPoints to make sure that we don't create repeated vertices.
+  --     -- Scale down polygon maintaining each coordinate as a whole number
+  --   | gcdP /= 1 = [ pg' | pg' <- fromPoints' $ divP gcdP <$> pg^..vertices ]
+  --   | minX /= 0 || minY /= 0 = [ pg' | pg' <- fromPoints' $ align <$> pg^..vertices ]
+  --   | otherwise =
+  --     let pg' = pg&vertices %~ _div2
+  --     in [ pg' | hasNoSelfIntersections $ toNonEmptyOf vertices pg' ]
+  --   -- otherwise = []
+  -- where
+  --   fromPoints' = maybeToList . fromPoints
+  --   align = alignZero pg
+
+  --   lcmP = lcmPoint pg
+  --   gcdP = gcdPoint pg
+
+  --   minX = first1Of (minimumVertexBy (comparing (^.xCoord)).xCoord) pg
+  --   minY = first1Of (minimumVertexBy (comparing (^.yCoord)).yCoord) pg
+
+  --   multP v (Point2 c d) = Point2 (c*v) (d*v)
+  --   divP v (Point2 c d) = Point2 (c/v) (d/v)
+  --   _div2 p = let (Point2 a b) = p&coordinates %~ toRational
+  --             in Point2 (fromRational $ numerator a `div` 2 % 1)
+  --                       (fromRational $ numerator b `div` 2 % 1)
 
 -- | Aligns the polygon so that at least one point has x and y- coordinate zero
 alignZero      :: (Polygon_ polygon (Point 2 r) r, Num r, Ord r)
@@ -208,6 +233,14 @@ gcdPoint p = realToFrac t
                     vs
     t = foldl1 gcd lst
 
+
+
+
+isTriangle pg = numVertices pg == 3
+
+--------------------------------------------------------------------------------
+
+
 -- remove vertex i, thereby dropping a vertex
 cutEarAt      :: (Ord r, Fractional r)
               => SimplePolygon (Point 2 r) -> Int -> Maybe (SimplePolygon (Point 2 r))
@@ -229,5 +262,3 @@ cutEars pg | isTriangle pg = []
                  &&
                  allOf outerBoundary
                        (\pt -> pt `elem` [prev,cur,nxt] || not (pt `intersects` triangle)) pg
-
-isTriangle pg = numVertices pg == 3
