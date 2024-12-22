@@ -126,13 +126,30 @@ initial run that actually triangulates the whole world:
 
 cabal run hgeometry-examples:hgeometry-triangulateworld -- -i  -o   130.82s user 0.50s system 99% cpu 2:12.23 total
 
+
+
+
+** DONE verify fromPoints
+
+i.e. add a test that makes sure that the cyclic zero's are correct,
+i.e. that
+
+myPoly :: SimplePolygon (Point 2 R)
+myPoly = fromJust . fromPoints $
+  read  @[Point 2 R] "[Point2 0 0,Point2 26 37.1,Point2 7.1 45.2,Point2 (-6.6) 39,Point2 (-1.9) 15.1,Point2 (-1.4) 12.7,Point2 0 0]"
+
+sanitizes the two Point2 0 0's at the end and the start
+
+
+
 ** TODO polygons with holes
 *** DONE represent polygons with holes
 *** TODO inpolygon test
 make sure we can report in which hole we are as well
 *** TODO some tests
-*** TODO render them to ipe
+*** DONE render them to ipe
 *** TODO intersect with a line or with a segment
+
 * DONE avoid binary files in the tests ; replace them with json files or so
 (in particular, the arbitrary instances for polygon)
 
@@ -148,7 +165,7 @@ make sure we can report in which hole we are as well
 * TODO arrangement
 ** TODO line-segment-intersection sweep
 ** TODO planar subdivision
-*** TODO plane graph
+*** DONE plane graph
 
 * TODO 3d-lower-envelope
 ** TODO naive
@@ -193,8 +210,8 @@ guaranteed to appear: )
 
 ** TODO 3d convex hull
 
-** TODO render faces as polygons
-** TODO 3d export of the lower envelope
+** DONE render faces as polygons
+** DONE 3d export of the lower envelope
 
 * DONE Convex polygons
 ** DONE binary search extremal direction
@@ -226,8 +243,8 @@ guaranteed to appear: )
 ** TODO linear programming (RIC)
 
 * TODO delaunay triangulation
-* TODO voronoi diagram
-** TODO all colinear points
+* DONE voronoi diagram
+** DONE all colinear points
 * DONE closest pair
 * DONE minkowski-sum
 ** DONE fix testcases

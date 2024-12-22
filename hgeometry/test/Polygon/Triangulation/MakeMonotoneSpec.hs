@@ -4,8 +4,8 @@ import           Control.Lens
 import           Data.Maybe (fromJust)
 import qualified Data.Set as Set
 import           HGeometry.Ext
-import           HGeometry.Point
 import           HGeometry.LineSegment
+import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Triangulation.MakeMonotone

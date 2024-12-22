@@ -71,7 +71,8 @@ module Ipe(
   , _asPolyLine
   , _asSimplePolygon
   , _asConvexPolygon
-  -- , _asSomePolygon, _asSimplePolygon, _asMultiPolygon
+  , _asPolygonalDomain
+
   -- *** Dealing with Attributes
   , _withAttrs
   -- ** Default readers

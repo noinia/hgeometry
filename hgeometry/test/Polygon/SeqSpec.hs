@@ -7,6 +7,7 @@ import           Data.Maybe
 import qualified Data.Sequence as Seq
 import qualified Data.Vector.NonEmpty as NV
 import           HGeometry.Cyclic
+import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Instances ()
@@ -101,3 +102,9 @@ spec = describe "Polygon with Seq1 spec" $ do
     prop "cw traversals consistent" $
       \(pg :: SimplePolygon (Point 2 Rational)) (i :: Int) ->
         itoListOf (cwOuterBoundaryFrom i) pg === itoListOf (cwOuterBoundaryFrom i) (toSeqPoly pg)
+
+    it "gets rid of duplicate points at the beginning and end" $
+      let myPoly :: SimplePolygon (Point 2 (RealNumber 5))
+          myPoly = fromJust . fromPoints $
+            read  @[Point 2 (RealNumber 5)] "[Point2 0 0,Point2 26 37.1,Point2 7.1 45.2,Point2 (-6.6) 39,Point2 (-1.9) 15.1,Point2 (-1.4) 12.7,Point2 0 0]"
+      in myPoly^..vertices `shouldBe` [Point2 26 37.1,Point2 7.1 45.2,Point2 (-6.6) 39,Point2 (-1.9) 15.1,Point2 (-1.4) 12.7,Point2 0 0]

@@ -13,11 +13,11 @@
 --------------------------------------------------------------------------------
 module HGeometry.PlaneGraph.Type
   ( PlaneGraph(..)
-  , fromAdjacencyRep
-  , fromConnectedSegments
+  -- , fromAdjacencyRep
+  -- , fromConnectedSegments
   -- , VertexData(VertexData), location
 
-  , E(..)
+  -- , E(..)
   ) where
 
 import           Control.Lens hiding (holes, holesOf, (.=))
@@ -55,7 +55,7 @@ import qualified Hiraffe.PlanarGraph.Dart as Dart
 
 -- | An Embedded, *connected*, planar graph
 newtype PlaneGraph s v e f = PlaneGraph (PlanarGraph Primal s v e f)
-      deriving stock (Show,Eq,Generic)
+      -- deriving stock (Show,Eq,Generic)
       -- deriving newtype (ToYAML,FromYAML)
 
 type instance NumType   (PlaneGraph s v e f) = NumType v
@@ -114,36 +114,18 @@ instance DiGraph_ (PlaneGraph s v e f) where
   twinDartOf d = twinOf d . to Just
   outgoingDartsOf v = _PlanarGraph.outgoingDartsOf v
 
+{-
 instance ConstructableDiGraph_ (PlaneGraph s v e f) where
   type DiGraphFromAdjListExtraConstraints (PlaneGraph s v e f) h = (f ~ (), Foldable1 h)
 
   -- | The vertices are expected to have their adjacencies in CCW order.
   diGraphFromAdjacencyLists = PlaneGraph . diGraphFromAdjacencyLists
   -- TODO: we should probably use some toEmbedding here as well I think
-
+-}
 
 instance BidirGraph_ (PlaneGraph s v e f) where
   twinOf d = to $ const (PG.twin d)
   getPositiveDart (PlaneGraph g) e = getPositiveDart g e
-
-
--- | Computes the cyclic order of adjacencies around each vertex.
---
--- \(O(n \log n)\)
-toEmbedding :: ( Foldable1 g, Functor g, Foldable h, Functor h
-               , vi ~ VertexIx (PlaneGraph s v e f)
-               , v ~ Vertex (PlaneGraph s v e f)
-               , e ~ Edge (PlaneGraph s v e f)
-               , GraphFromAdjListExtraConstraints (PlaneGraph s v e f) h
-               , Point_ v 2 r, Ord r, Num r
-               ) => g (vi, v, h (vi, e)) -> g (vi, v, Vector.NonEmptyVector (vi, e))
-toEmbedding vs = fmap sortAround' vs
-  where
-    vertexLocs             = foldMap (\(vi,v,_) -> Map.singleton vi v) vs
-    sortAround' (vi,v,adjs) = (vi,v, Vector.unsafeFromVector $ sortBy (ccwCmpAround' v) adjs)
-    ccwCmpAround' v (ui,_) (wi,_) = ccwCmpAround v (vertexLocs Map.! ui) (vertexLocs Map.! wi)
-
-
 
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
@@ -151,12 +133,15 @@ instance ( Point_ v 2 (NumType v)
   neighboursOf u = _PlanarGraph.neighboursOf u
   incidentEdgesOf u = _PlanarGraph.incidentEdgesOf u
 
+{-
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
          ) => ConstructableGraph_ (PlaneGraph s v e f) where
   type GraphFromAdjListExtraConstraints (PlaneGraph s v e f) h = (f ~ (), Foldable1 h)
   fromAdjacencyLists = fromEmbedding . toEmbedding
+-}
 
+{-
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
 
@@ -262,3 +247,5 @@ instance (Ord r, Num r) => Eq (E r) where
   a == b = a `compare` b == EQ
 instance (Ord r, Num r) => Ord (E r) where
   (E v) `compare` (E u) = ccwCmpAroundWith (Vector2 0 1) (origin :: Point 2 r) (Point v) (Point u)
+
+-}
