@@ -39,7 +39,7 @@ data Geom = G_Point      (Point 2 R :+ Attributes (Point 2 R))
 
 data MyWorld
 
-type PlaneGraph' r = PlaneGraph MyWorld (Point 2 r) PolygonEdgeType PolygonFaceData
+type PlaneGraph' r = CPlaneGraph MyWorld (Point 2 r) PolygonEdgeType PolygonFaceData
 
 --------------------------------------------------------------------------------
 

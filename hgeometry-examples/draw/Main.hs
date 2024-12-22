@@ -16,7 +16,7 @@ import           Test.QuickCheck
 
 type R = RealNumber 5
 
-renderGraph    :: PlaneGraph QuickCheckWorld (Point 2 R) () () -> IpePage R
+renderGraph    :: CPlaneGraph QuickCheckWorld (Point 2 R) () () -> IpePage R
 renderGraph gr = fromContent $
                  concat [ [ iO $ defIO p   | p <- gr^..vertices ]
                         , [ iO $ defIO seg | seg <- gr^..edgeSegments ]
