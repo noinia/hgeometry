@@ -13,11 +13,11 @@
 --------------------------------------------------------------------------------
 module HGeometry.PlaneGraph.Type
   ( PlaneGraph(..)
-  , fromAdjacencyRep
-  , fromConnectedSegments
+  -- , fromAdjacencyRep
+  -- , fromConnectedSegments
   -- , VertexData(VertexData), location
 
-  , E(..)
+  -- , E(..)
   ) where
 
 import           Control.Lens hiding (holes, holesOf, (.=))
@@ -160,6 +160,7 @@ instance ( Point_ v 2 (NumType v)
   fromAdjacencyLists = fromEmbedding . toEmbedding
 -}
 
+{-
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
 
@@ -265,3 +266,5 @@ instance (Ord r, Num r) => Eq (E r) where
   a == b = a `compare` b == EQ
 instance (Ord r, Num r) => Ord (E r) where
   (E v) `compare` (E u) = ccwCmpAroundWith (Vector2 0 1) (origin :: Point 2 r) (Point v) (Point u)
+
+-}
