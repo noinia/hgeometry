@@ -89,7 +89,8 @@ graphPolygons    :: (Ord r, Num r, Point_ point 2 r)
 graphPolygons gr = map (&vertices %~ view (core.asPoint)) $ gr^..interiorFacePolygons
 
 buggyPolygon2 :: SimplePolygon (Point 2 R)
-buggyPolygon2 = read "SimplePolygon [Point2 2589.22 470.87,Point2 2588.68 470.97,Point2 2587.88 471.15,Point2 2587.5 471.28,Point2 2586.96 471.57,Point2 2586.46 471.9,Point2 2586.4 472.02,Point2 2586.87 472.14,Point2 2587.24 472.17,Point2 2588.02 472.06,Point2 2588.79 471.9,Point2 2589.55 471.71,Point2 2590.7 471.38,Point2 2591.07 471.26,Point2 2591.17 471.12,Point2 2591.09 470.96,Point2 2590.87 470.84,Point2 2590.42 470.81,Point2 2589.98 470.8]"
+buggyPolygon2 = fromJust . fromPoints $
+  read @[Point 2 R] "[Point2 2589.22 470.87,Point2 2588.68 470.97,Point2 2587.88 471.15,Point2 2587.5 471.28,Point2 2586.96 471.57,Point2 2586.46 471.9,Point2 2586.4 472.02,Point2 2586.87 472.14,Point2 2587.24 472.17,Point2 2588.02 472.06,Point2 2588.79 471.9,Point2 2589.55 471.71,Point2 2590.7 471.38,Point2 2591.07 471.26,Point2 2591.17 471.12,Point2 2591.09 470.96,Point2 2590.87 470.84,Point2 2590.42 470.81,Point2 2589.98 470.8]"
 
 buggySimplified :: SimplePolygon (Point 2 R)
 buggySimplified = fromJust . fromPoints $
