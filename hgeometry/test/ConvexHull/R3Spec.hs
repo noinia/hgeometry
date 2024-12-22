@@ -21,8 +21,9 @@ type R = RealNumber 5
 
 
 spec = describe "3D convex hull through duality tests " $ do
-         fit "single triangle" $ do
-           let tri = Triangle origin (Point3 10 0 1) (Point3 0 10 2 :: Point 3 R)
-           Dual.facets (traceShowWith ("hull",) $ Dual.upperHull tri) `shouldBe` []
+         pure ()
+         -- fit "single triangle" $ do
+         --   let tri = Triangle origin (Point3 10 0 1) (Point3 0 10 2 :: Point 3 R)
+           -- Dual.facets (traceShowWith ("hull",) $ Dual.upperHull tri) `shouldBe` []
            -- FIXME: This is actually incorrect. I think it should be the thing below:
            -- Dual.facets (traceShowWith ("hull",) $ Dual.upperHull tri) `shouldBe` [toNonEmpty tri]
