@@ -48,12 +48,15 @@ import qualified Hiraffe.PlanarGraph as PG
 import qualified Hiraffe.PlanarGraph.Dart as Dart
 
 
+-- import           Data.YAML
+
 --------------------------------------------------------------------------------
 -- * The PlaneGraph type
 
 -- | An Embedded, *connected*, planar graph
 newtype PlaneGraph s v e f = PlaneGraph (PlanarGraph Primal s v e f)
       deriving stock (Show,Eq,Generic)
+      -- deriving newtype (ToYAML,FromYAML)
 
 type instance NumType   (PlaneGraph s v e f) = NumType v
 type instance Dimension (PlaneGraph s v e f) = 2

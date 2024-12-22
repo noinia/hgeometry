@@ -7,7 +7,7 @@ import           Control.Lens
 import           HGeometry
 import           HGeometry.Ext
 import           HGeometry.Number.Real.Rational
-import           HGeometry.PlaneGraph
+import           HGeometry.PlaneGraph.Connected
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Triangulation
@@ -70,7 +70,7 @@ _drawGraph gr = theVertices <> theEdges <> theFaces
     theFaces    = [] -- ifoldMapOf interiorFacePolygons (drawFace gr) gr
 
 graphPolygons    :: (Ord r, Num r, Point_ point 2 r)
-                 => PlaneGraph s point PolygonEdgeType PolygonFaceData
+                 => CPlaneGraph s point PolygonEdgeType PolygonFaceData
                  -> [SimplePolygon (Point 2 r)]
 graphPolygons gr = map (&vertices %~ view (core.asPoint)) $ gr^..interiorFacePolygons
 

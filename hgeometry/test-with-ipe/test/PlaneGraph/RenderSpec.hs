@@ -80,7 +80,7 @@ spec = describe "render planegraph tests" $ do
          goldenWith [osp|data/test-with-ipe/golden/PlaneGraph|]
                     (ipeContentGolden { name = [osp|smallPlaneGraph|]})
                     (drawGraph smallGraph)
-         -- eg <- runIO $ decodeYAMLFile [osp|myPlaneGraph.yaml|]
+         -- eg <- runIO $ decodeYAMLFile [osp|myPlaneGraph.json|]
          -- let myPlaneGraph = case eg of
          --       Left err -> error (show err)
          --       Right (g :: PlaneGraph MyWorld (Point 2 R) Text.Text Text.Text) -> g
@@ -165,8 +165,8 @@ tshow = Text.pack . show
 
 data SmallWorld
 
-smallGraph :: PlaneGraph SmallWorld (Point 2 R :+ Int) Text.Text Text.Text
-smallGraph = PlaneGraph $ AdjRep.fromAdjRep @SmallWorld small
+smallGraph :: CPlaneGraph SmallWorld (Point 2 R :+ Int) Text.Text Text.Text
+smallGraph = CPlaneGraph $ AdjRep.fromAdjRep @SmallWorld small
   where
     small :: AdjRep.Gr (AdjRep.Vtx (Point 2 R :+ Int) Text.Text) (AdjRep.Face Text.Text)
     small = AdjRep.Gr
