@@ -55,7 +55,7 @@ import qualified Hiraffe.PlanarGraph.Dart as Dart
 
 -- | An Embedded, *connected*, planar graph
 newtype PlaneGraph s v e f = PlaneGraph (PlanarGraph Primal s v e f)
-      deriving stock (Show,Eq,Generic)
+      -- deriving stock (Show,Eq,Generic)
       -- deriving newtype (ToYAML,FromYAML)
 
 type instance NumType   (PlaneGraph s v e f) = NumType v
@@ -126,25 +126,6 @@ instance ConstructableDiGraph_ (PlaneGraph s v e f) where
 instance BidirGraph_ (PlaneGraph s v e f) where
   twinOf d = to $ const (PG.twin d)
   getPositiveDart (PlaneGraph g) e = getPositiveDart g e
-
-
--- | Computes the cyclic order of adjacencies around each vertex.
---
--- \(O(n \log n)\)
-toEmbedding :: ( Foldable1 g, Functor g, Foldable h, Functor h
-               , vi ~ VertexIx (PlaneGraph s v e f)
-               , v ~ Vertex (PlaneGraph s v e f)
-               , e ~ Edge (PlaneGraph s v e f)
-               , GraphFromAdjListExtraConstraints (PlaneGraph s v e f) h
-               , Point_ v 2 r, Ord r, Num r
-               ) => g (vi, v, h (vi, e)) -> g (vi, v, Vector.NonEmptyVector (vi, e))
-toEmbedding vs = fmap sortAround' vs
-  where
-    vertexLocs             = foldMap (\(vi,v,_) -> Map.singleton vi v) vs
-    sortAround' (vi,v,adjs) = (vi,v, Vector.unsafeFromVector $ sortBy (ccwCmpAround' v) adjs)
-    ccwCmpAround' v (ui,_) (wi,_) = ccwCmpAround v (vertexLocs Map.! ui) (vertexLocs Map.! wi)
-
-
 
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
