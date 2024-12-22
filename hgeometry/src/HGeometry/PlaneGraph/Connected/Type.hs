@@ -28,7 +28,6 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Data.Map.NonEmpty as NEMap
 import qualified Data.Vector.NonEmpty as Vector
-import           Data.YAML
 import           GHC.Generics (Generic)
 import           HGeometry.Box
 import           HGeometry.Foldable.Sort (sortBy )
@@ -54,16 +53,15 @@ import qualified Hiraffe.PlanarGraph.Dart as Dart
 
 -- | An Embedded, *connected*, planar graph
 newtype CPlaneGraph s v e f =
-    CPlaneGraph (CPlanarGraph s Primal v e f)
+    CPlaneGraph (CPlanarGraph Primal s v e f)
       deriving stock (Show,Eq,Generic)
-      deriving newtype (ToYAML,FromYAML)
 
 type instance NumType   (CPlaneGraph s v e f) = NumType v
 type instance Dimension (CPlaneGraph s v e f) = 2
 
 -- | Iso to access the graph
 _CPlanarGraph :: Iso (CPlaneGraph s v e f)         (CPlaneGraph s v' e' f')
-                     (CPlanarGraph s Primal v e f) (CPlanarGraph s Primal v' e' f')
+                     (CPlanarGraph Primal s v e f) (CPlanarGraph Primal s v' e' f')
 _CPlanarGraph = coerced
 {-# INLINE _CPlanarGraph #-}
 
@@ -110,15 +108,17 @@ instance HasFaces (CPlaneGraph s v e f) (CPlaneGraph s v e f') where
 
 ----------------------------------------
 instance DiGraph_ (CPlaneGraph s v e f) where
+  endPoints (CPlaneGraph g) = endPoints g
+  twinDartOf d = twinOf d . to Just
+  outgoingDartsOf v = _CPlanarGraph.outgoingDartsOf v
+
+instance ConstructableDiGraph_ (CPlaneGraph s v e f) where
   type DiGraphFromAdjListExtraConstraints (CPlaneGraph s v e f) h = (f ~ (), Foldable1 h)
 
   -- | The vertices are expected to have their adjacencies in CCW order.
   diGraphFromAdjacencyLists = CPlaneGraph . diGraphFromAdjacencyLists
   -- TODO: we should probably use some toEmbedding here as well I think
 
-  endPoints (CPlaneGraph g) = endPoints g
-  twinDartOf d = twinOf d . to Just
-  outgoingDartsOf v = _CPlanarGraph.outgoingDartsOf v
 
 instance BidirGraph_ (CPlaneGraph s v e f) where
   twinOf d = to $ const (PG.twin d)
@@ -146,19 +146,23 @@ toEmbedding vs = fmap sortAround' vs
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
          ) => Graph_ (CPlaneGraph s v e f) where
-  type GraphFromAdjListExtraConstraints (CPlaneGraph s v e f) h = (f ~ (), Foldable1 h)
-
-  fromAdjacencyLists = fromEmbedding . toEmbedding
-
   neighboursOf u = _CPlanarGraph.neighboursOf u
   incidentEdgesOf u = _CPlanarGraph.incidentEdgesOf u
 
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
-         ) => CPlanarGraph_ (CPlaneGraph s v e f) where
-  type DualGraphOf (CPlaneGraph s v e f) = CPlanarGraph s Dual f e v
+         ) => ConstructableGraph_ (CPlaneGraph s v e f) where
+  type GraphFromAdjListExtraConstraints (CPlaneGraph s v e f) h = (f ~ (), Foldable1 h)
 
-  dualGraph = dualGraph . coerce @_ @(CPlanarGraph s Primal v e f)
+  fromAdjacencyLists = fromEmbedding . toEmbedding
+
+
+instance ( Point_ v 2 (NumType v)
+         , Ord (NumType v), Num (NumType v)
+         ) => PlanarGraph_ (CPlaneGraph s v e f) where
+  type DualGraphOf (CPlaneGraph s v e f) = CPlanarGraph Dual s f e v
+
+  dualGraph = dualGraph . coerce @_ @(CPlanarGraph Primal s v e f)
 
   leftFaceOf  d = _CPlanarGraph.leftFaceOf d
   rightFaceOf d = _CPlanarGraph.rightFaceOf d
@@ -167,12 +171,12 @@ instance ( Point_ v 2 (NumType v)
   prevDartOf d = _CPlanarGraph.prevDartOf d
 
   boundaryDartOf f = _CPlanarGraph.boundaryDartOf f
-  boundaryDarts f = boundaryDarts f . coerce @_ @(CPlanarGraph s Primal v e f)
+  boundaryDarts f = boundaryDarts f . coerce @_ @(CPlanarGraph Primal s v e f)
 
 
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
-         ) => CPlaneGraph_ (CPlaneGraph s v e f) v where
+         ) => PlaneGraph_ (CPlaneGraph s v e f) v where
   fromEmbedding = CPlaneGraph . fromAdjacencyLists
 
 instance ( Point_ v 2 r, Point_ v' 2 r'

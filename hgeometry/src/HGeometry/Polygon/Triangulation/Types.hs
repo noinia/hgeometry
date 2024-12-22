@@ -135,12 +135,12 @@ constructGraph          :: forall s polygon point r f.
                            )
                         => polygon
                         -> f (Diagonal polygon)
-                        -> PlaneGraph s point PolygonEdgeType PolygonFaceData
+                        -> CPlaneGraph s point PolygonEdgeType PolygonFaceData
 constructGraph pg diags = gr&faces %@~ computeFaceLabel
 -- constructGraph pg diags = gr&faces %@~ computeFaceLabel
   where
     -- | Note that we use fromAdjacencyLists
-    gr = fromAdjacencyLists adjLists :: PlaneGraph s point PolygonEdgeType ()
+    gr = fromAdjacencyLists adjLists :: CPlaneGraph s point PolygonEdgeType ()
 
     adjLists = uncurry collectDiags <$> itoNonEmptyOf outerBoundaryWithNeighbours pg
 

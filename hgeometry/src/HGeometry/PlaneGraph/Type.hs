@@ -28,7 +28,6 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Data.Map.NonEmpty as NEMap
 import qualified Data.Vector.NonEmpty as Vector
-import           Data.YAML
 import           GHC.Generics (Generic)
 import           HGeometry.Box
 import           HGeometry.Foldable.Sort (sortBy )
@@ -53,16 +52,15 @@ import qualified Hiraffe.PlanarGraph.Dart as Dart
 -- * The PlaneGraph type
 
 -- | An Embedded, *connected*, planar graph
-newtype PlaneGraph s v e f = PlaneGraph (PlanarGraph s Primal v e f)
+newtype PlaneGraph s v e f = PlaneGraph (PlanarGraph Primal s v e f)
       deriving stock (Show,Eq,Generic)
-      deriving newtype (ToYAML,FromYAML)
 
 type instance NumType   (PlaneGraph s v e f) = NumType v
 type instance Dimension (PlaneGraph s v e f) = 2
 
 -- | Iso to access the graph
 _PlanarGraph :: Iso (PlaneGraph s v e f)         (PlaneGraph s v' e' f')
-                    (PlanarGraph s Primal v e f) (PlanarGraph s Primal v' e' f')
+                    (PlanarGraph Primal s v e f) (PlanarGraph Primal s v' e' f')
 _PlanarGraph = coerced
 {-# INLINE _PlanarGraph #-}
 
@@ -109,15 +107,17 @@ instance HasFaces (PlaneGraph s v e f) (PlaneGraph s v e f') where
 
 ----------------------------------------
 instance DiGraph_ (PlaneGraph s v e f) where
+  endPoints (PlaneGraph g) = endPoints g
+  twinDartOf d = twinOf d . to Just
+  outgoingDartsOf v = _PlanarGraph.outgoingDartsOf v
+
+instance ConstructableDiGraph_ (PlaneGraph s v e f) where
   type DiGraphFromAdjListExtraConstraints (PlaneGraph s v e f) h = (f ~ (), Foldable1 h)
 
   -- | The vertices are expected to have their adjacencies in CCW order.
   diGraphFromAdjacencyLists = PlaneGraph . diGraphFromAdjacencyLists
   -- TODO: we should probably use some toEmbedding here as well I think
 
-  endPoints (PlaneGraph g) = endPoints g
-  twinDartOf d = twinOf d . to Just
-  outgoingDartsOf v = _PlanarGraph.outgoingDartsOf v
 
 instance BidirGraph_ (PlaneGraph s v e f) where
   twinOf d = to $ const (PG.twin d)
@@ -145,19 +145,22 @@ toEmbedding vs = fmap sortAround' vs
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
          ) => Graph_ (PlaneGraph s v e f) where
-  type GraphFromAdjListExtraConstraints (PlaneGraph s v e f) h = (f ~ (), Foldable1 h)
-
-  fromAdjacencyLists = fromEmbedding . toEmbedding
-
   neighboursOf u = _PlanarGraph.neighboursOf u
   incidentEdgesOf u = _PlanarGraph.incidentEdgesOf u
 
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
-         ) => PlanarGraph_ (PlaneGraph s v e f) where
-  type DualGraphOf (PlaneGraph s v e f) = PlanarGraph s Dual f e v
+         ) => ConstructableGraph_ (PlaneGraph s v e f) where
+  type GraphFromAdjListExtraConstraints (PlaneGraph s v e f) h = (f ~ (), Foldable1 h)
+  fromAdjacencyLists = fromEmbedding . toEmbedding
 
-  dualGraph = dualGraph . coerce @_ @(PlanarGraph s Primal v e f)
+instance ( Point_ v 2 (NumType v)
+         , Ord (NumType v), Num (NumType v)
+
+         ) => PlanarGraph_ (PlaneGraph s v e f) where
+  type DualGraphOf (PlaneGraph s v e f) = PlanarGraph Dual s f e v
+
+  dualGraph = dualGraph . coerce @_ @(PlanarGraph Primal s v e f)
 
   leftFaceOf  d = _PlanarGraph.leftFaceOf d
   rightFaceOf d = _PlanarGraph.rightFaceOf d
@@ -166,7 +169,7 @@ instance ( Point_ v 2 (NumType v)
   prevDartOf d = _PlanarGraph.prevDartOf d
 
   boundaryDartOf f = _PlanarGraph.boundaryDartOf f
-  boundaryDarts f = boundaryDarts f . coerce @_ @(PlanarGraph s Primal v e f)
+  boundaryDarts f = boundaryDarts f . coerce @_ @(PlanarGraph Primal s v e f)
 
 
 instance ( Point_ v 2 (NumType v)

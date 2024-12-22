@@ -31,7 +31,7 @@ import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
 import           HGeometry.Vector (Vector(Vector2))
 -- import           HGeometry.PlanarSubdivision.Basic (PlanarSubdivision, PolygonFaceData)
-import           HGeometry.PlaneGraph (PlaneGraph)
+import           HGeometry.PlaneGraph.Connected (CPlaneGraph)
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple.Class
@@ -55,7 +55,7 @@ triangulate    :: forall s yMonotonePolygon point r.
                   (YMonotonePolygon_ yMonotonePolygon point r, Ord r, Num r
                   )
                => yMonotonePolygon
-               -> PlaneGraph s point PolygonEdgeType PolygonFaceData
+               -> CPlaneGraph s point PolygonEdgeType PolygonFaceData
 triangulate pg = constructGraph pg (computeDiagonals pg)
   -- TODO: Find a way to construct the graph in O(n) time.
 

@@ -57,7 +57,7 @@ data QuickCheckWorld
 instance ( Arbitrary r
          , Ord r, Fractional r
          , Show r
-         ) => Arbitrary (PlaneGraph QuickCheckWorld (Point 2 r) () ()) where
+         ) => Arbitrary (CPlaneGraph QuickCheckWorld (Point 2 r) () ()) where
   arbitrary = arbitraryPlaneGraph Proxy
 
 -- general strategy:
@@ -73,7 +73,7 @@ arbitraryPlaneGraph       :: forall proxy s r.
                              ( Ord r, Fractional r, Arbitrary r
                              , Show r
                              )
-                          => proxy s -> Gen (PlaneGraph s (Point 2 r) () ())
+                          => proxy s -> Gen (CPlaneGraph s (Point 2 r) () ())
 arbitraryPlaneGraph proxy = do
     n                             <- scale (*2) arbitrary
     (pts :: NonEmpty (Point 2 r)) <- genNDistinct (max 10 n) arbitrary
@@ -137,8 +137,8 @@ witherGraphTo vs (Graph gr) = Graph $ fmap removeEdges m
 -- \(O(n\log n)\)
 toPlaneGraph             :: (Ord r, Foldable1 f)
                          => proxy s
-                         -> GGraph f (Point 2 r) v e -> PlaneGraph s (Point 2 r) () ()
-toPlaneGraph _ (Graph m) = PlaneGraph $ (planarGraph theDarts)&vertexData .~ vtxData
+                         -> GGraph f (Point 2 r) v e -> CPlaneGraph s (Point 2 r) () ()
+toPlaneGraph _ (Graph m) = CPlaneGraph $ (planarGraph theDarts)&vertexData .~ vtxData
   where
     vtxData = Vector.fromNonEmptyN1 (length m) (NEMap.keys m)
 
