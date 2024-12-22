@@ -31,102 +31,102 @@
 </span><span id="line-31"></span><span class="hs-comment">-- | Triangulates a polygon of \(n\) vertices</span><span>
 </span><span id="line-32"></span><span class="hs-comment">--</span><span>
 </span><span id="line-33"></span><span class="hs-comment">-- running time: \(O(n \log n)\)</span><span>
-</span><span id="line-34"></span><span class="annot"><a href="HGeometry.Polygon.Triangulation.html#triangulate"><span class="hs-identifier hs-type">triangulate</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679516305"><span class="annot"><a href="#local-6989586621679516305"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679516301"><span class="annot"><a href="#local-6989586621679516301"><span class="hs-identifier hs-type">polygon</span></a></span></span><span> </span><span id="local-6989586621679516302"><span class="annot"><a href="#local-6989586621679516302"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span id="local-6989586621679516303"><span class="annot"><a href="#local-6989586621679516303"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span>
-</span><span id="line-35"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#SimplePolygon_"><span class="hs-identifier hs-type">SimplePolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516301"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516302"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516303"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679516303"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679516303"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-36"></span><span>               </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679516301"><span class="hs-identifier hs-type">polygon</span></a></span><span>
-</span><span id="line-37"></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.PlaneGraph.Type.html#PlaneGraph"><span class="hs-identifier hs-type">PlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516305"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516302"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#PolygonEdgeType"><span class="hs-identifier hs-type">PolygonEdgeType</span></a></span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#PolygonFaceData"><span class="hs-identifier hs-type">PolygonFaceData</span></a></span><span>
+</span><span id="line-34"></span><span class="annot"><a href="HGeometry.Polygon.Triangulation.html#triangulate"><span class="hs-identifier hs-type">triangulate</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679516784"><span class="annot"><a href="#local-6989586621679516784"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679516780"><span class="annot"><a href="#local-6989586621679516780"><span class="hs-identifier hs-type">polygon</span></a></span></span><span> </span><span id="local-6989586621679516781"><span class="annot"><a href="#local-6989586621679516781"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span id="local-6989586621679516782"><span class="annot"><a href="#local-6989586621679516782"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-35"></span><span>                  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#SimplePolygon_"><span class="hs-identifier hs-type">SimplePolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516780"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516781"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516782"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679516782"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679516782"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span>               </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679516780"><span class="hs-identifier hs-type">polygon</span></a></span><span>
+</span><span id="line-37"></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.Type.html#CPlaneGraph"><span class="hs-identifier hs-type">CPlaneGraph</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516784"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516781"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#PolygonEdgeType"><span class="hs-identifier hs-type">PolygonEdgeType</span></a></span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#PolygonFaceData"><span class="hs-identifier hs-type">PolygonFaceData</span></a></span><span>
 </span><span id="line-38"></span><span id="triangulate"><span class="annot"><span class="annottext">triangulate :: forall {k} (s :: k) polygon point r.
 (SimplePolygon_ polygon point r, Ord r, Num r) =&gt;
-polygon -&gt; PlaneGraph s point PolygonEdgeType PolygonFaceData
-</span><a href="HGeometry.Polygon.Triangulation.html#triangulate"><span class="hs-identifier hs-var hs-var">triangulate</span></a></span></span><span> </span><span id="local-6989586621679516972"><span class="annot"><span class="annottext">polygon
-</span><a href="#local-6989586621679516972"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">polygon
+polygon -&gt; CPlaneGraph s point PolygonEdgeType PolygonFaceData
+</span><a href="HGeometry.Polygon.Triangulation.html#triangulate"><span class="hs-identifier hs-var hs-var">triangulate</span></a></span></span><span> </span><span id="local-6989586621679517451"><span class="annot"><span class="annottext">polygon
+</span><a href="#local-6989586621679517451"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">polygon
 -&gt; [Diagonal polygon]
--&gt; PlaneGraph s point PolygonEdgeType PolygonFaceData
+-&gt; CPlaneGraph s point PolygonEdgeType PolygonFaceData
 forall {k} (s :: k) polygon point r (f :: * -&gt; *).
 (SimplePolygon_ polygon point r, Point_ point 2 r, Foldable f,
  Ord r, Num r) =&gt;
 polygon
 -&gt; f (Diagonal polygon)
--&gt; PlaneGraph s point PolygonEdgeType PolygonFaceData
+-&gt; CPlaneGraph s point PolygonEdgeType PolygonFaceData
 </span><a href="HGeometry.Polygon.Triangulation.Types.html#constructGraph"><span class="hs-identifier hs-var">constructGraph</span></a></span><span> </span><span class="annot"><span class="annottext">polygon
-</span><a href="#local-6989586621679516972"><span class="hs-identifier hs-var">pg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">polygon -&gt; [Diagonal polygon]
+</span><a href="#local-6989586621679517451"><span class="hs-identifier hs-var">pg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">polygon -&gt; [Diagonal polygon]
 forall polygon point r.
 (SimplePolygon_ polygon point r, Ord r, Num r) =&gt;
 polygon -&gt; [Diagonal polygon]
 </span><a href="HGeometry.Polygon.Triangulation.html#computeDiagonals"><span class="hs-identifier hs-var">computeDiagonals</span></a></span><span> </span><span class="annot"><span class="annottext">polygon
-</span><a href="#local-6989586621679516972"><span class="hs-identifier hs-var">pg</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679517451"><span class="hs-identifier hs-var">pg</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-39"></span><span>
 </span><span id="line-40"></span><span class="hs-comment">-- | Computes a set of diagaonals that together triangulate the input polygon</span><span>
 </span><span id="line-41"></span><span class="hs-comment">-- of \(n\) vertices.</span><span>
 </span><span id="line-42"></span><span class="hs-comment">--</span><span>
 </span><span id="line-43"></span><span class="hs-comment">-- running time: \(O(n \log n)\)</span><span>
-</span><span id="line-44"></span><span class="annot"><a href="HGeometry.Polygon.Triangulation.html#computeDiagonals"><span class="hs-identifier hs-type">computeDiagonals</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679516391"><span class="annot"><a href="#local-6989586621679516391"><span class="hs-identifier hs-type">polygon</span></a></span></span><span> </span><span id="local-6989586621679516392"><span class="annot"><a href="#local-6989586621679516392"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span id="local-6989586621679516393"><span class="annot"><a href="#local-6989586621679516393"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span>
-</span><span id="line-45"></span><span>                       </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#SimplePolygon_"><span class="hs-identifier hs-type">SimplePolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516391"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516392"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516393"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679516393"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679516393"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-46"></span><span>                    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679516391"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#Diagonal"><span class="hs-identifier hs-type">Diagonal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516391"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-44"></span><span class="annot"><a href="HGeometry.Polygon.Triangulation.html#computeDiagonals"><span class="hs-identifier hs-type">computeDiagonals</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679516870"><span class="annot"><a href="#local-6989586621679516870"><span class="hs-identifier hs-type">polygon</span></a></span></span><span> </span><span id="local-6989586621679516871"><span class="annot"><a href="#local-6989586621679516871"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span id="local-6989586621679516872"><span class="annot"><a href="#local-6989586621679516872"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-45"></span><span>                       </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#SimplePolygon_"><span class="hs-identifier hs-type">SimplePolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516870"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516871"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516872"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679516872"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679516872"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span>                    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679516870"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#Diagonal"><span class="hs-identifier hs-type">Diagonal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516870"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-47"></span><span id="computeDiagonals"><span class="annot"><span class="annottext">computeDiagonals :: forall polygon point r.
 (SimplePolygon_ polygon point r, Ord r, Num r) =&gt;
 polygon -&gt; [Diagonal polygon]
-</span><a href="HGeometry.Polygon.Triangulation.html#computeDiagonals"><span class="hs-identifier hs-var hs-var">computeDiagonals</span></a></span></span><span> </span><span id="local-6989586621679517559"><span class="annot"><span class="annottext">polygon
-</span><a href="#local-6989586621679517559"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Vector 2 Int]
+</span><a href="HGeometry.Polygon.Triangulation.html#computeDiagonals"><span class="hs-identifier hs-var hs-var">computeDiagonals</span></a></span></span><span> </span><span id="local-6989586621679518038"><span class="annot"><span class="annottext">polygon
+</span><a href="#local-6989586621679518038"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Vector 2 Int]
 [Diagonal polygon]
-</span><a href="#local-6989586621679517560"><span class="hs-identifier hs-var">monotoneDiags</span></a></span><span> </span><span class="annot"><span class="annottext">[Vector 2 Int] -&gt; [Vector 2 Int] -&gt; [Vector 2 Int]
+</span><a href="#local-6989586621679518039"><span class="hs-identifier hs-var">monotoneDiags</span></a></span><span> </span><span class="annot"><span class="annottext">[Vector 2 Int] -&gt; [Vector 2 Int] -&gt; [Vector 2 Int]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[Vector 2 Int]
 [Diagonal polygon]
-</span><a href="#local-6989586621679517561"><span class="hs-identifier hs-var">extraDiags</span></a></span><span>
+</span><a href="#local-6989586621679518040"><span class="hs-identifier hs-var">extraDiags</span></a></span><span>
 </span><span id="line-48"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-49"></span><span>    </span><span class="annot"><a href="#local-6989586621679517562"><span class="hs-identifier hs-type">monotoneSubdiv</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.PlaneGraph.Type.html#PlaneGraph"><span class="hs-identifier hs-type">PlaneGraph</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679516392"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#PolygonEdgeType"><span class="hs-identifier hs-type">PolygonEdgeType</span></a></span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#PolygonFaceData"><span class="hs-identifier hs-type">PolygonFaceData</span></a></span><span>
-</span><span id="line-50"></span><span>    </span><span id="local-6989586621679517562"><span class="annot"><span class="annottext">monotoneSubdiv :: PlaneGraph () point PolygonEdgeType PolygonFaceData
-</span><a href="#local-6989586621679517562"><span class="hs-identifier hs-var hs-var">monotoneSubdiv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall {k} (s :: k) polygon point r.
+</span><span id="line-49"></span><span>    </span><span class="annot"><a href="#local-6989586621679518041"><span class="hs-identifier hs-type">monotoneSubdiv</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.PlaneGraph.Connected.Type.html#CPlaneGraph"><span class="hs-identifier hs-type">CPlaneGraph</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679516871"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#PolygonEdgeType"><span class="hs-identifier hs-type">PolygonEdgeType</span></a></span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#PolygonFaceData"><span class="hs-identifier hs-type">PolygonFaceData</span></a></span><span>
+</span><span id="line-50"></span><span>    </span><span id="local-6989586621679518041"><span class="annot"><span class="annottext">monotoneSubdiv :: CPlaneGraph () point PolygonEdgeType PolygonFaceData
+</span><a href="#local-6989586621679518041"><span class="hs-identifier hs-var hs-var">monotoneSubdiv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall {k} (s :: k) polygon point r.
 (SimplePolygon_ polygon point r, Ord r, Num r) =&gt;
-polygon -&gt; PlaneGraph s point PolygonEdgeType PolygonFaceData
+polygon -&gt; CPlaneGraph s point PolygonEdgeType PolygonFaceData
 forall s polygon point r.
 (SimplePolygon_ polygon point r, Ord r, Num r) =&gt;
-polygon -&gt; PlaneGraph s point PolygonEdgeType PolygonFaceData
+polygon -&gt; CPlaneGraph s point PolygonEdgeType PolygonFaceData
 </span><a href="HGeometry.Polygon.Triangulation.MakeMonotone.html#makeMonotone"><span class="hs-identifier hs-var">MM.makeMonotone</span></a></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">polygon
-</span><a href="#local-6989586621679517559"><span class="hs-identifier hs-var">pg</span></a></span><span>
+</span><a href="#local-6989586621679518038"><span class="hs-identifier hs-var">pg</span></a></span><span>
 </span><span id="line-51"></span><span>    </span><span class="hs-comment">-- use some arbitrary proxy type</span><span>
 </span><span id="line-52"></span><span>
 </span><span id="line-53"></span><span>    </span><span class="hs-comment">-- get the existing diagonals</span><span>
-</span><span id="line-54"></span><span>    </span><span class="annot"><a href="#local-6989586621679517560"><span class="hs-identifier hs-type">monotoneDiags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#Diagonal"><span class="hs-identifier hs-type">Diagonal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516391"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-55"></span><span>    </span><span id="local-6989586621679517560"><span class="annot"><span class="annottext">monotoneDiags :: [Diagonal polygon]
-</span><a href="#local-6989586621679517560"><span class="hs-identifier hs-var hs-var">monotoneDiags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((DartId (), PolygonEdgeType) -&gt; Vector 2 Int)
+</span><span id="line-54"></span><span>    </span><span class="annot"><a href="#local-6989586621679518039"><span class="hs-identifier hs-type">monotoneDiags</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#Diagonal"><span class="hs-identifier hs-type">Diagonal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516870"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-55"></span><span>    </span><span id="local-6989586621679518039"><span class="annot"><span class="annottext">monotoneDiags :: [Diagonal polygon]
+</span><a href="#local-6989586621679518039"><span class="hs-identifier hs-var hs-var">monotoneDiags</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((DartId (), PolygonEdgeType) -&gt; Vector 2 Int)
 -&gt; [(DartId (), PolygonEdgeType)] -&gt; [Vector 2 Int]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679517564"><span class="annot"><span class="annottext">DartId ()
-</span><a href="#local-6989586621679517564"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">PolygonEdgeType
-</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679517565"><span class="annot"><span class="annottext">VertexId ()
-</span><a href="#local-6989586621679517565"><span class="hs-identifier hs-var">u</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679517566"><span class="annot"><span class="annottext">VertexId ()
-</span><a href="#local-6989586621679517566"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlaneGraph () point PolygonEdgeType PolygonFaceData
-</span><a href="#local-6989586621679517562"><span class="hs-identifier hs-var">monotoneSubdiv</span></a></span><span> </span><span class="annot"><span class="annottext">PlaneGraph () point PolygonEdgeType PolygonFaceData
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679518043"><span class="annot"><span class="annottext">DartId ()
+</span><a href="#local-6989586621679518043"><span class="hs-identifier hs-var">d</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">PolygonEdgeType
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679518044"><span class="annot"><span class="annottext">VertexId ()
+</span><a href="#local-6989586621679518044"><span class="hs-identifier hs-var">u</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679518045"><span class="annot"><span class="annottext">VertexId ()
+</span><a href="#local-6989586621679518045"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CPlaneGraph () point PolygonEdgeType PolygonFaceData
+</span><a href="#local-6989586621679518041"><span class="hs-identifier hs-var">monotoneSubdiv</span></a></span><span> </span><span class="annot"><span class="annottext">CPlaneGraph () point PolygonEdgeType PolygonFaceData
 -&gt; Getting
      (VertexId (), VertexId ())
-     (PlaneGraph () point PolygonEdgeType PolygonFaceData)
+     (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
      (VertexId (), VertexId ())
 -&gt; (VertexId (), VertexId ())
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-2c225bc76acc8fc1e6dce12ee325f5b0d01c05bbb9d72de01b3c6c240d1fc294/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span> </span><span class="annot"><span class="annottext">DartIx (PlaneGraph () point PolygonEdgeType PolygonFaceData)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-2c225bc76acc8fc1e6dce12ee325f5b0d01c05bbb9d72de01b3c6c240d1fc294/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span> </span><span class="annot"><span class="annottext">DartIx (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
 -&gt; IndexedGetter
-     (VertexIx (PlaneGraph () point PolygonEdgeType PolygonFaceData),
-      VertexIx (PlaneGraph () point PolygonEdgeType PolygonFaceData))
-     (PlaneGraph () point PolygonEdgeType PolygonFaceData)
-     (Vertex (PlaneGraph () point PolygonEdgeType PolygonFaceData),
-      Vertex (PlaneGraph () point PolygonEdgeType PolygonFaceData))
+     (VertexIx (CPlaneGraph () point PolygonEdgeType PolygonFaceData),
+      VertexIx (CPlaneGraph () point PolygonEdgeType PolygonFaceData))
+     (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
+     (Vertex (CPlaneGraph () point PolygonEdgeType PolygonFaceData),
+      Vertex (CPlaneGraph () point PolygonEdgeType PolygonFaceData))
 forall graph.
 DiGraph_ graph =&gt;
 DartIx graph
 -&gt; IndexedGetter
      (VertexIx graph, VertexIx graph) graph (Vertex graph, Vertex graph)
-</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#endPointsOf"><span class="hs-identifier hs-var">endPointsOf</span></a></span><span> </span><span class="annot"><span class="annottext">DartIx (PlaneGraph () point PolygonEdgeType PolygonFaceData)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#endPointsOf"><span class="hs-identifier hs-var">endPointsOf</span></a></span><span> </span><span class="annot"><span class="annottext">DartIx (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
 DartId ()
-</span><a href="#local-6989586621679517564"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">(Indexed
+</span><a href="#local-6989586621679518043"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">(Indexed
    (VertexId (), VertexId ())
    (point, point)
    (Const (VertexId (), VertexId ()) (point, point))
- -&gt; PlaneGraph () point PolygonEdgeType PolygonFaceData
+ -&gt; CPlaneGraph () point PolygonEdgeType PolygonFaceData
  -&gt; Const
       (VertexId (), VertexId ())
-      (PlaneGraph () point PolygonEdgeType PolygonFaceData))
+      (CPlaneGraph () point PolygonEdgeType PolygonFaceData))
 -&gt; (((VertexId (), VertexId ())
      -&gt; Const (VertexId (), VertexId ()) (VertexId (), VertexId ()))
     -&gt; Indexed
@@ -135,7 +135,7 @@ DartId ()
          (Const (VertexId (), VertexId ()) (point, point)))
 -&gt; Getting
      (VertexId (), VertexId ())
-     (PlaneGraph () point PolygonEdgeType PolygonFaceData)
+     (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
      (VertexId (), VertexId ())
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">((VertexId (), VertexId ())
@@ -156,8 +156,8 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">VertexId () -&gt; VertexId () -&gt; Vector 2 (VertexId ())
 forall r. r -&gt; r -&gt; Vector 2 r
 </span><span class="hs-identifier hs-var">Vector2</span></span><span> </span><span class="annot"><span class="annottext">VertexId ()
-</span><a href="#local-6989586621679517565"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">VertexId ()
-</span><a href="#local-6989586621679517566"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><a href="#local-6989586621679518044"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">VertexId ()
+</span><a href="#local-6989586621679518045"><span class="hs-identifier hs-var">v</span></a></span><span>
 </span><span id="line-57"></span><span>                        </span><span class="hs-special">)</span><span>
 </span><span id="line-58"></span><span>                  </span><span class="annot"><span class="annottext">([(DartId (), PolygonEdgeType)] -&gt; [Diagonal polygon])
 -&gt; ([(DartId (), PolygonEdgeType)]
@@ -182,50 +182,50 @@ forall a b. (a, b) -&gt; b
 </span><span id="line-59"></span><span>                  </span><span class="annot"><span class="annottext">([(DartId (), PolygonEdgeType)] -&gt; [Diagonal polygon])
 -&gt; [(DartId (), PolygonEdgeType)] -&gt; [Diagonal polygon]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph () point PolygonEdgeType PolygonFaceData
-</span><a href="#local-6989586621679517562"><span class="hs-identifier hs-var">monotoneSubdiv</span></a></span><span> </span><span class="annot"><span class="annottext">PlaneGraph () point PolygonEdgeType PolygonFaceData
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CPlaneGraph () point PolygonEdgeType PolygonFaceData
+</span><a href="#local-6989586621679518041"><span class="hs-identifier hs-var">monotoneSubdiv</span></a></span><span> </span><span class="annot"><span class="annottext">CPlaneGraph () point PolygonEdgeType PolygonFaceData
 -&gt; Getting
      (Endo [(DartId (), PolygonEdgeType)])
-     (PlaneGraph () point PolygonEdgeType PolygonFaceData)
+     (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
      (DartId (), PolygonEdgeType)
 -&gt; [(DartId (), PolygonEdgeType)]
 forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-2c225bc76acc8fc1e6dce12ee325f5b0d01c05bbb9d72de01b3c6c240d1fc294/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#%5E.."><span class="hs-operator hs-var">^..</span></a></span><span> </span><span class="annot"><span class="annottext">Indexed
   (DartId ())
-  (Edge (PlaneGraph () point PolygonEdgeType PolygonFaceData))
+  (Edge (CPlaneGraph () point PolygonEdgeType PolygonFaceData))
   (Const
      (Endo [(DartId (), PolygonEdgeType)])
-     (Edge (PlaneGraph () point PolygonEdgeType PolygonFaceData)))
--&gt; PlaneGraph () point PolygonEdgeType PolygonFaceData
+     (Edge (CPlaneGraph () point PolygonEdgeType PolygonFaceData)))
+-&gt; CPlaneGraph () point PolygonEdgeType PolygonFaceData
 -&gt; Const
      (Endo [(DartId (), PolygonEdgeType)])
-     (PlaneGraph () point PolygonEdgeType PolygonFaceData)
+     (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
 Indexed
   (DartId ())
   PolygonEdgeType
   (Const (Endo [(DartId (), PolygonEdgeType)]) PolygonEdgeType)
--&gt; PlaneGraph () point PolygonEdgeType PolygonFaceData
+-&gt; CPlaneGraph () point PolygonEdgeType PolygonFaceData
 -&gt; Const
      (Endo [(DartId (), PolygonEdgeType)])
-     (PlaneGraph () point PolygonEdgeType PolygonFaceData)
+     (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
 forall graph graph'.
 HasEdges graph graph' =&gt;
 IndexedTraversal
   (EdgeIx graph) graph graph' (Edge graph) (Edge graph')
 IndexedTraversal
-  (EdgeIx (PlaneGraph () point PolygonEdgeType PolygonFaceData))
-  (PlaneGraph () point PolygonEdgeType PolygonFaceData)
-  (PlaneGraph () point PolygonEdgeType PolygonFaceData)
-  (Edge (PlaneGraph () point PolygonEdgeType PolygonFaceData))
-  (Edge (PlaneGraph () point PolygonEdgeType PolygonFaceData))
+  (EdgeIx (CPlaneGraph () point PolygonEdgeType PolygonFaceData))
+  (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
+  (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
+  (Edge (CPlaneGraph () point PolygonEdgeType PolygonFaceData))
+  (Edge (CPlaneGraph () point PolygonEdgeType PolygonFaceData))
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#edges"><span class="hs-identifier hs-var">edges</span></a></span><span class="annot"><span class="annottext">(Indexed
    (DartId ())
    PolygonEdgeType
    (Const (Endo [(DartId (), PolygonEdgeType)]) PolygonEdgeType)
- -&gt; PlaneGraph () point PolygonEdgeType PolygonFaceData
+ -&gt; CPlaneGraph () point PolygonEdgeType PolygonFaceData
  -&gt; Const
       (Endo [(DartId (), PolygonEdgeType)])
-      (PlaneGraph () point PolygonEdgeType PolygonFaceData))
+      (CPlaneGraph () point PolygonEdgeType PolygonFaceData))
 -&gt; (((DartId (), PolygonEdgeType)
      -&gt; Const
           (Endo [(DartId (), PolygonEdgeType)]) (DartId (), PolygonEdgeType))
@@ -235,7 +235,7 @@ IndexedTraversal
          (Const (Endo [(DartId (), PolygonEdgeType)]) PolygonEdgeType))
 -&gt; Getting
      (Endo [(DartId (), PolygonEdgeType)])
-     (PlaneGraph () point PolygonEdgeType PolygonFaceData)
+     (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
      (DartId (), PolygonEdgeType)
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">((DartId (), PolygonEdgeType)
@@ -251,16 +251,16 @@ p (i, s) (f (j, t)) -&gt; Indexed i s (f t)
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-2c225bc76acc8fc1e6dce12ee325f5b0d01c05bbb9d72de01b3c6c240d1fc294/share/doc/html/src/Control.Lens.Internal.Indexed.html/Control.Lens.Internal.Indexed.html#withIndex"><span class="hs-identifier hs-var">withIndex</span></a></span><span>
 </span><span id="line-60"></span><span>
 </span><span id="line-61"></span><span>    </span><span class="hs-comment">-- and compute the diagonals in each interior y-monotone polygon</span><span>
-</span><span id="line-62"></span><span>    </span><span class="annot"><a href="#local-6989586621679517561"><span class="hs-identifier hs-type">extraDiags</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#Diagonal"><span class="hs-identifier hs-type">Diagonal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516391"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-63"></span><span>    </span><span id="local-6989586621679517561"><span class="annot"><span class="annottext">extraDiags :: [Diagonal polygon]
-</span><a href="#local-6989586621679517561"><span class="hs-identifier hs-var hs-var">extraDiags</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((FaceId (), PolygonFaceData) -&gt; [Diagonal polygon])
+</span><span id="line-62"></span><span>    </span><span class="annot"><a href="#local-6989586621679518040"><span class="hs-identifier hs-type">extraDiags</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#Diagonal"><span class="hs-identifier hs-type">Diagonal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516870"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-63"></span><span>    </span><span id="local-6989586621679518040"><span class="annot"><span class="annottext">extraDiags :: [Diagonal polygon]
+</span><a href="#local-6989586621679518040"><span class="hs-identifier hs-var hs-var">extraDiags</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((FaceId (), PolygonFaceData) -&gt; [Diagonal polygon])
 -&gt; [(FaceId (), PolygonFaceData)] -&gt; [Diagonal polygon]
 forall m a. Monoid m =&gt; (a -&gt; m) -&gt; [a] -&gt; m
 forall (t :: * -&gt; *) m a.
 (Foldable t, Monoid m) =&gt;
 (a -&gt; m) -&gt; t a -&gt; m
 </span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">FaceId () -&gt; [Vector 2 Int]
-</span><a href="#local-6989586621679517578"><span class="hs-identifier hs-var">collectDiags</span></a></span><span> </span><span class="annot"><span class="annottext">(FaceId () -&gt; [Vector 2 Int])
+</span><a href="#local-6989586621679518057"><span class="hs-identifier hs-var">collectDiags</span></a></span><span> </span><span class="annot"><span class="annottext">(FaceId () -&gt; [Vector 2 Int])
 -&gt; ((FaceId (), PolygonFaceData) -&gt; FaceId ())
 -&gt; (FaceId (), PolygonFaceData)
 -&gt; [Vector 2 Int]
@@ -288,47 +288,47 @@ forall a b. (a, b) -&gt; b
 </span><span id="line-65"></span><span>                  </span><span class="annot"><span class="annottext">([(FaceId (), PolygonFaceData)] -&gt; [(FaceId (), PolygonFaceData)])
 -&gt; [(FaceId (), PolygonFaceData)] -&gt; [(FaceId (), PolygonFaceData)]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">PlaneGraph () point PolygonEdgeType PolygonFaceData
-</span><a href="#local-6989586621679517562"><span class="hs-identifier hs-var">monotoneSubdiv</span></a></span><span class="annot"><span class="annottext">PlaneGraph () point PolygonEdgeType PolygonFaceData
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">CPlaneGraph () point PolygonEdgeType PolygonFaceData
+</span><a href="#local-6989586621679518041"><span class="hs-identifier hs-var">monotoneSubdiv</span></a></span><span class="annot"><span class="annottext">CPlaneGraph () point PolygonEdgeType PolygonFaceData
 -&gt; Getting
      (Endo [(FaceId (), PolygonFaceData)])
-     (PlaneGraph () point PolygonEdgeType PolygonFaceData)
+     (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
      (FaceId (), PolygonFaceData)
 -&gt; [(FaceId (), PolygonFaceData)]
 forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-2c225bc76acc8fc1e6dce12ee325f5b0d01c05bbb9d72de01b3c6c240d1fc294/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#%5E.."><span class="hs-operator hs-var">^..</span></a></span><span class="annot"><span class="annottext">Indexed
   (FaceId ())
-  (Face (PlaneGraph () point PolygonEdgeType PolygonFaceData))
+  (Face (CPlaneGraph () point PolygonEdgeType PolygonFaceData))
   (Const
      (Endo [(FaceId (), PolygonFaceData)])
-     (Face (PlaneGraph () point PolygonEdgeType PolygonFaceData)))
--&gt; PlaneGraph () point PolygonEdgeType PolygonFaceData
+     (Face (CPlaneGraph () point PolygonEdgeType PolygonFaceData)))
+-&gt; CPlaneGraph () point PolygonEdgeType PolygonFaceData
 -&gt; Const
      (Endo [(FaceId (), PolygonFaceData)])
-     (PlaneGraph () point PolygonEdgeType PolygonFaceData)
+     (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
 Indexed
   (FaceId ())
   PolygonFaceData
   (Const (Endo [(FaceId (), PolygonFaceData)]) PolygonFaceData)
--&gt; PlaneGraph () point PolygonEdgeType PolygonFaceData
+-&gt; CPlaneGraph () point PolygonEdgeType PolygonFaceData
 -&gt; Const
      (Endo [(FaceId (), PolygonFaceData)])
-     (PlaneGraph () point PolygonEdgeType PolygonFaceData)
+     (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
 forall planeGraph vertex.
 (PlaneGraph_ planeGraph vertex, Eq (FaceIx planeGraph)) =&gt;
 IndexedTraversal' (FaceIx planeGraph) planeGraph (Face planeGraph)
 IndexedTraversal'
-  (FaceIx (PlaneGraph () point PolygonEdgeType PolygonFaceData))
-  (PlaneGraph () point PolygonEdgeType PolygonFaceData)
-  (Face (PlaneGraph () point PolygonEdgeType PolygonFaceData))
+  (FaceIx (CPlaneGraph () point PolygonEdgeType PolygonFaceData))
+  (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
+  (Face (CPlaneGraph () point PolygonEdgeType PolygonFaceData))
 </span><a href="HGeometry.PlaneGraph.Class.html#interiorFaces"><span class="hs-identifier hs-var">interiorFaces</span></a></span><span class="annot"><span class="annottext">(Indexed
    (FaceId ())
    PolygonFaceData
    (Const (Endo [(FaceId (), PolygonFaceData)]) PolygonFaceData)
- -&gt; PlaneGraph () point PolygonEdgeType PolygonFaceData
+ -&gt; CPlaneGraph () point PolygonEdgeType PolygonFaceData
  -&gt; Const
       (Endo [(FaceId (), PolygonFaceData)])
-      (PlaneGraph () point PolygonEdgeType PolygonFaceData))
+      (CPlaneGraph () point PolygonEdgeType PolygonFaceData))
 -&gt; (((FaceId (), PolygonFaceData)
      -&gt; Const
           (Endo [(FaceId (), PolygonFaceData)]) (FaceId (), PolygonFaceData))
@@ -338,7 +338,7 @@ IndexedTraversal'
          (Const (Endo [(FaceId (), PolygonFaceData)]) PolygonFaceData))
 -&gt; Getting
      (Endo [(FaceId (), PolygonFaceData)])
-     (PlaneGraph () point PolygonEdgeType PolygonFaceData)
+     (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
      (FaceId (), PolygonFaceData)
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">((FaceId (), PolygonFaceData)
@@ -354,24 +354,25 @@ p (i, s) (f (j, t)) -&gt; Indexed i s (f t)
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-2c225bc76acc8fc1e6dce12ee325f5b0d01c05bbb9d72de01b3c6c240d1fc294/share/doc/html/src/Control.Lens.Internal.Indexed.html/Control.Lens.Internal.Indexed.html#withIndex"><span class="hs-identifier hs-var">withIndex</span></a></span><span>
 </span><span id="line-66"></span><span>
 </span><span id="line-67"></span><span>    </span><span class="hs-comment">-- collectDiags   :: FaceIx planeGraph -&gt; [Diagonal polygon]</span><span>
-</span><span id="line-68"></span><span>    </span><span id="local-6989586621679517578"><span class="annot"><span class="annottext">collectDiags :: FaceId () -&gt; [Vector 2 Int]
-</span><a href="#local-6989586621679517578"><span class="hs-identifier hs-var hs-var">collectDiags</span></a></span></span><span> </span><span id="local-6989586621679517582"><span class="annot"><span class="annottext">FaceId ()
-</span><a href="#local-6989586621679517582"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679517583"><span class="annot"><span class="annottext">yMonotonePoly :: SimplePolygon (point :+ VertexId ())
-</span><a href="#local-6989586621679517583"><span class="hs-identifier hs-var hs-var">yMonotonePoly</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlaneGraph () point PolygonEdgeType PolygonFaceData
-</span><a href="#local-6989586621679517562"><span class="hs-identifier hs-var">monotoneSubdiv</span></a></span><span> </span><span class="annot"><span class="annottext">PlaneGraph () point PolygonEdgeType PolygonFaceData
+</span><span id="line-68"></span><span>    </span><span id="local-6989586621679518057"><span class="annot"><span class="annottext">collectDiags :: FaceId () -&gt; [Vector 2 Int]
+</span><a href="#local-6989586621679518057"><span class="hs-identifier hs-var hs-var">collectDiags</span></a></span></span><span> </span><span id="local-6989586621679518061"><span class="annot"><span class="annottext">FaceId ()
+</span><a href="#local-6989586621679518061"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679518062"><span class="annot"><span class="annottext">yMonotonePoly :: SimplePolygon (point :+ VertexId ())
+</span><a href="#local-6989586621679518062"><span class="hs-identifier hs-var hs-var">yMonotonePoly</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">CPlaneGraph () point PolygonEdgeType PolygonFaceData
+</span><a href="#local-6989586621679518041"><span class="hs-identifier hs-var">monotoneSubdiv</span></a></span><span> </span><span class="annot"><span class="annottext">CPlaneGraph () point PolygonEdgeType PolygonFaceData
 -&gt; Getting
      (Endo (SimplePolygon (point :+ VertexId ())))
-     (PlaneGraph () point PolygonEdgeType PolygonFaceData)
+     (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
      (SimplePolygon (point :+ VertexId ()))
 -&gt; SimplePolygon (point :+ VertexId ())
 forall s a. HasCallStack =&gt; s -&gt; Getting (Endo a) s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-2c225bc76acc8fc1e6dce12ee325f5b0d01c05bbb9d72de01b3c6c240d1fc294/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#%5E%3F%21"><span class="hs-operator hs-var">^?!</span></a></span><span> </span><span class="annot"><span class="annottext">FaceIx (PlaneGraph () point PolygonEdgeType PolygonFaceData)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-2c225bc76acc8fc1e6dce12ee325f5b0d01c05bbb9d72de01b3c6c240d1fc294/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#%5E%3F%21"><span class="hs-operator hs-var">^?!</span></a></span><span> </span><span class="annot"><span class="annottext">FaceIx (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
 -&gt; IndexedFold
-     (FaceIx (PlaneGraph () point PolygonEdgeType PolygonFaceData))
-     (PlaneGraph () point PolygonEdgeType PolygonFaceData)
+     (FaceIx (CPlaneGraph () point PolygonEdgeType PolygonFaceData))
+     (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
      (SimplePolygon
         (point
-         :+ VertexIx (PlaneGraph () point PolygonEdgeType PolygonFaceData)))
+         :+ VertexIx
+              (CPlaneGraph () point PolygonEdgeType PolygonFaceData)))
 forall planeGraph vertex.
 (PlaneGraph_ planeGraph vertex,
  Point_ vertex 2 (NumType vertex)) =&gt;
@@ -380,9 +381,9 @@ FaceIx planeGraph
      (FaceIx planeGraph)
      planeGraph
      (SimplePolygon (vertex :+ VertexIx planeGraph))
-</span><a href="HGeometry.PlaneGraph.Class.html#interiorFacePolygonAt"><span class="hs-identifier hs-var">interiorFacePolygonAt</span></a></span><span> </span><span class="annot"><span class="annottext">FaceIx (PlaneGraph () point PolygonEdgeType PolygonFaceData)
-FaceId ()
-</span><a href="#local-6989586621679517582"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><a href="HGeometry.PlaneGraph.Class.html#interiorFacePolygonAt"><span class="hs-identifier hs-var">interiorFacePolygonAt</span></a></span><span> </span><span class="annot"><span class="annottext">FaceId ()
+FaceIx (CPlaneGraph () point PolygonEdgeType PolygonFaceData)
+</span><a href="#local-6989586621679518061"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-69"></span><span>                     </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">(Vector 2 Int -&gt; Vector 2 Int) -&gt; [Vector 2 Int] -&gt; [Vector 2 Int]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector 2 (VertexId ()) -&gt; Vector 2 Int
@@ -399,7 +400,7 @@ forall yMonotonePolygon point i r.
 YMonotonePolygon_ yMonotonePolygon (point :+ i) r =&gt;
 yMonotonePolygon -&gt; Diagonal yMonotonePolygon -&gt; Vector 2 i
 </span><a href="HGeometry.Polygon.Triangulation.html#withOriginalId"><span class="hs-identifier hs-var">withOriginalId</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (point :+ VertexId ())
-</span><a href="#local-6989586621679517583"><span class="hs-identifier hs-var">yMonotonePoly</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Vector 2 Int] -&gt; [Vector 2 Int])
+</span><a href="#local-6989586621679518062"><span class="hs-identifier hs-var">yMonotonePoly</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Vector 2 Int] -&gt; [Vector 2 Int])
 -&gt; [Vector 2 Int] -&gt; [Vector 2 Int]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
@@ -409,20 +410,20 @@ forall polygon point r.
 (SimplePolygon_ polygon point r, Ord r, Num r) =&gt;
 polygon -&gt; [Diagonal polygon]
 </span><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#computeDiagonals"><span class="hs-identifier hs-var">TM.computeDiagonals</span></a></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (point :+ VertexId ())
-</span><a href="#local-6989586621679517583"><span class="hs-identifier hs-var">yMonotonePoly</span></a></span><span>
+</span><a href="#local-6989586621679518062"><span class="hs-identifier hs-var">yMonotonePoly</span></a></span><span>
 </span><span id="line-71"></span><span>
-</span><span id="line-72"></span><span id="local-6989586621679516548"><span id="local-6989586621679516549"><span id="local-6989586621679516550"><span id="local-6989586621679516551"><span class="annot"><a href="HGeometry.Polygon.Triangulation.html#withOriginalId"><span class="hs-identifier hs-type">withOriginalId</span></a></span><span>               </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#YMonotonePolygon_"><span class="hs-identifier hs-type">TM.YMonotonePolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516548"><span class="hs-identifier hs-type">yMonotonePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679516549"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516550"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679516551"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-73"></span><span>                                </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679516548"><span class="hs-identifier hs-type">yMonotonePolygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#Diagonal"><span class="hs-identifier hs-type">Diagonal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679516548"><span class="hs-identifier hs-type">yMonotonePolygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679516550"><span class="hs-identifier hs-type">i</span></a></span></span></span></span></span><span>
+</span><span id="line-72"></span><span id="local-6989586621679517027"><span id="local-6989586621679517028"><span id="local-6989586621679517029"><span id="local-6989586621679517030"><span class="annot"><a href="HGeometry.Polygon.Triangulation.html#withOriginalId"><span class="hs-identifier hs-type">withOriginalId</span></a></span><span>               </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.TriangulateMonotone.html#YMonotonePolygon_"><span class="hs-identifier hs-type">TM.YMonotonePolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679517027"><span class="hs-identifier hs-type">yMonotonePolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679517028"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679517029"><span class="hs-identifier hs-type">i</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679517030"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-73"></span><span>                                </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679517027"><span class="hs-identifier hs-type">yMonotonePolygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Triangulation.Types.html#Diagonal"><span class="hs-identifier hs-type">Diagonal</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679517027"><span class="hs-identifier hs-type">yMonotonePolygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679517029"><span class="hs-identifier hs-type">i</span></a></span></span></span></span></span><span>
 </span><span id="line-74"></span><span id="withOriginalId"><span class="annot"><span class="annottext">withOriginalId :: forall yMonotonePolygon point i r.
 YMonotonePolygon_ yMonotonePolygon (point :+ i) r =&gt;
 yMonotonePolygon -&gt; Diagonal yMonotonePolygon -&gt; Vector 2 i
-</span><a href="HGeometry.Polygon.Triangulation.html#withOriginalId"><span class="hs-identifier hs-var hs-var">withOriginalId</span></a></span></span><span> </span><span id="local-6989586621679517607"><span class="annot"><span class="annottext">yMonotonePolygon
-</span><a href="#local-6989586621679517607"><span class="hs-identifier hs-var">yMonotonePoly</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; i) -&gt; Vector 2 Int -&gt; Vector 2 i
+</span><a href="HGeometry.Polygon.Triangulation.html#withOriginalId"><span class="hs-identifier hs-var hs-var">withOriginalId</span></a></span></span><span> </span><span id="local-6989586621679518086"><span class="annot"><span class="annottext">yMonotonePolygon
+</span><a href="#local-6989586621679518086"><span class="hs-identifier hs-var">yMonotonePoly</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Int -&gt; i) -&gt; Vector 2 Int -&gt; Vector 2 i
 forall a b. (a -&gt; b) -&gt; Vector 2 a -&gt; Vector 2 b
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679517608"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679517608"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">yMonotonePolygon
-</span><a href="#local-6989586621679517607"><span class="hs-identifier hs-var">yMonotonePoly</span></a></span><span class="annot"><span class="annottext">yMonotonePolygon -&gt; Getting (Endo i) yMonotonePolygon i -&gt; i
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679518087"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679518087"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">yMonotonePolygon
+</span><a href="#local-6989586621679518086"><span class="hs-identifier hs-var">yMonotonePoly</span></a></span><span class="annot"><span class="annottext">yMonotonePolygon -&gt; Getting (Endo i) yMonotonePolygon i -&gt; i
 forall s a. HasCallStack =&gt; s -&gt; Getting (Endo a) s a -&gt; a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-2c225bc76acc8fc1e6dce12ee325f5b0d01c05bbb9d72de01b3c6c240d1fc294/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#%5E%3F%21"><span class="hs-operator hs-var">^?!</span></a></span><span class="annot"><span class="annottext">VertexIx yMonotonePolygon
 -&gt; IndexedTraversal'
@@ -435,7 +436,7 @@ VertexIx graph
 -&gt; IndexedTraversal' (VertexIx graph) graph (Vertex graph)
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#vertexAt"><span class="hs-identifier hs-var">vertexAt</span></a></span><span> </span><span class="annot"><span class="annottext">Int
 VertexIx yMonotonePolygon
-</span><a href="#local-6989586621679517608"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">(((point :+ i) -&gt; Const (Endo i) (point :+ i))
+</span><a href="#local-6989586621679518087"><span class="hs-identifier hs-var">j</span></a></span><span class="annot"><span class="annottext">(((point :+ i) -&gt; Const (Endo i) (point :+ i))
  -&gt; yMonotonePolygon -&gt; Const (Endo i) yMonotonePolygon)
 -&gt; ((i -&gt; Const (Endo i) i)
     -&gt; (point :+ i) -&gt; Const (Endo i) (point :+ i))
