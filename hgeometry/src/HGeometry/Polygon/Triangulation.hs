@@ -34,7 +34,7 @@ import           Hiraffe.PlanarGraph
 triangulate    :: forall s polygon point r.
                   (SimplePolygon_ polygon point r, Ord r, Num r)
                => polygon
-               -> PlaneGraph s point PolygonEdgeType PolygonFaceData
+               -> CPlaneGraph s point PolygonEdgeType PolygonFaceData
 triangulate pg = constructGraph pg (computeDiagonals pg)
 
 -- | Computes a set of diagaonals that together triangulate the input polygon
@@ -46,7 +46,7 @@ computeDiagonals    :: forall polygon point r.
                     => polygon -> [Diagonal polygon]
 computeDiagonals pg = monotoneDiags <> extraDiags
   where
-    monotoneSubdiv :: PlaneGraph () point PolygonEdgeType PolygonFaceData
+    monotoneSubdiv :: CPlaneGraph () point PolygonEdgeType PolygonFaceData
     monotoneSubdiv = MM.makeMonotone @() pg
     -- use some arbitrary proxy type
 

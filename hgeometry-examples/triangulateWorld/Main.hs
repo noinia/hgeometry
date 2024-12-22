@@ -79,7 +79,7 @@ mainWith (Options inFile outFile) = do
           intersections' :: Set.Set (Point 2 R)
           intersections' = foldMap computeIntersections polies
 
-          subdivs :: [PlaneGraph PX (Point 2 R) _ _]
+          subdivs :: [CPlaneGraph PX (Point 2 R) _ _]
           subdivs = map (\(pg :+ _) -> triangulate pg) polies'
 
           triangles' :: [SimplePolygon (Point 2 R :+ _)]

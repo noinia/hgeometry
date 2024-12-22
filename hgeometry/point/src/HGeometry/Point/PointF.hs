@@ -24,7 +24,7 @@ import           Data.Proxy
 import qualified Data.Vector.Generic as G
 import qualified Data.Vector.Generic.Mutable as GM
 import qualified Data.Vector.Unboxed as U
-import           Data.YAML
+-- import           Data.YAML
 import           GHC.Generics (Generic)
 import           GHC.TypeLits
 import           HGeometry.Point.Class
@@ -38,7 +38,8 @@ import           Text.Read (Read (..), readListPrecDefault)
 -- | A Point wraps a vector
 newtype PointF v = Point { toVec :: v }
                  deriving stock   (Generic)
-                 deriving newtype ( Eq, Ord, Random, NFData, Bounded, Enum, FromYAML, ToYAML
+                 deriving newtype ( Eq, Ord, Random, NFData, Bounded, Enum
+                                  -- , FromYAML, ToYAML
                                   , ToJSON, FromJSON
                                   )
 -- don't derive functor, or so here. since that will be confusing.

@@ -8,7 +8,7 @@
 -- Plane Graphs, i.e. embedded planar graphs.
 --
 --------------------------------------------------------------------------------
-module HGeometry.PlaneGraph
+module HGeometry.PlaneGraph.Connected
   ( module Hiraffe.Graph.Class
   , module HGeometry.PlaneGraph.Class
   , module Hiraffe.PlanarGraph.Class
@@ -18,7 +18,7 @@ module HGeometry.PlaneGraph
   ) where
 
 import HGeometry.PlaneGraph.Class
-import HGeometry.PlaneGraph.Connected
+import HGeometry.PlaneGraph.Connected.Type
 import Hiraffe.Graph.Class
 import Hiraffe.PlanarGraph.Class
 

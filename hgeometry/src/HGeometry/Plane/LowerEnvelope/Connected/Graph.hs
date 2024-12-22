@@ -27,7 +27,7 @@ import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
-import           HGeometry.PlaneGraph.Type (E(..))
+import           HGeometry.PlaneGraph.Connected.Type (E(..))
 import           HGeometry.Point
 import           HGeometry.Vector
 import           Hiraffe.AdjacencyListRep.Map

@@ -22,7 +22,7 @@ import qualified Data.Vector as Vector
 import           HGeometry.Ext
 import           HGeometry.Foldable.Sort
 import           HGeometry.LineSegment
-import           HGeometry.PlaneGraph
+import           HGeometry.PlaneGraph.Connected
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple.Class
@@ -41,7 +41,7 @@ import qualified VectorBuilder.Vector as Builder
 makeMonotone    :: forall s polygon point r.
                    (SimplePolygon_ polygon point r, Ord r, Num r)
                 => polygon
-                -> PlaneGraph s point PolygonEdgeType PolygonFaceData
+                -> CPlaneGraph s point PolygonEdgeType PolygonFaceData
 makeMonotone pg = constructGraph pg (computeDiagonals pg)
 
 

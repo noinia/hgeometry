@@ -50,6 +50,8 @@ class ( PlanarGraph_ planeGraph
       , vertex ~ Vertex planeGraph
       , Point_ vertex 2 (NumType vertex)
       , NumType vertex ~ NumType planeGraph
+      -- , HasVertices graph graph
+      , HasEdges planeGraph planeGraph
       ) => PlaneGraph_ planeGraph vertex | planeGraph -> vertex where
 
   {-# MINIMAL fromEmbedding #-}

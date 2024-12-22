@@ -78,7 +78,7 @@ currentStatus m1 m2
 -- in planeGraphs
 data MyWorld
 
-type PlaneGraph' r = PlaneGraph MyWorld (Point 2 r) PolygonEdgeType PolygonFaceData
+type PlaneGraph' r = CPlaneGraph MyWorld (Point 2 r) PolygonEdgeType PolygonFaceData
 
 --------------------------------------------------------------------------------
 -- * Data Type representing all our modal data
