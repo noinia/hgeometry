@@ -114,13 +114,14 @@ instance DiGraph_ (PlaneGraph s v e f) where
   twinDartOf d = twinOf d . to Just
   outgoingDartsOf v = _PlanarGraph.outgoingDartsOf v
 
+{-
 instance ConstructableDiGraph_ (PlaneGraph s v e f) where
   type DiGraphFromAdjListExtraConstraints (PlaneGraph s v e f) h = (f ~ (), Foldable1 h)
 
   -- | The vertices are expected to have their adjacencies in CCW order.
   diGraphFromAdjacencyLists = PlaneGraph . diGraphFromAdjacencyLists
   -- TODO: we should probably use some toEmbedding here as well I think
-
+-}
 
 instance BidirGraph_ (PlaneGraph s v e f) where
   twinOf d = to $ const (PG.twin d)
@@ -151,11 +152,13 @@ instance ( Point_ v 2 (NumType v)
   neighboursOf u = _PlanarGraph.neighboursOf u
   incidentEdgesOf u = _PlanarGraph.incidentEdgesOf u
 
+{-
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
          ) => ConstructableGraph_ (PlaneGraph s v e f) where
   type GraphFromAdjListExtraConstraints (PlaneGraph s v e f) h = (f ~ (), Foldable1 h)
   fromAdjacencyLists = fromEmbedding . toEmbedding
+-}
 
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)

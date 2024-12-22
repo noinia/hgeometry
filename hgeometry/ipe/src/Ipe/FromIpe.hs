@@ -21,7 +21,9 @@ module Ipe.FromIpe(
   , _asPolyLine
   , _asSimplePolygon
   , _asConvexPolygon
-  -- , _asSomePolygon, _asSimplePolygon, _asMultiPolygon
+  , _asPolygonalDomain
+
+  , toPolygonalDomain
 
   -- * Dealing with Attributes
   , _withAttrs
@@ -36,11 +38,14 @@ module Ipe.FromIpe(
 import           Control.Lens hiding (Simple)
 import           Data.Kind (Type)
 import qualified Data.Sequence as Seq
+import           Data.Vector.NonEmpty (NonEmptyVector)
 import           HGeometry.Ball
 import           HGeometry.Box
 import qualified HGeometry.Box as Box
+import           HGeometry.Cyclic
 import           HGeometry.Ellipse (Ellipse, _EllipseCircle)
 import           HGeometry.Ext
+import           HGeometry.Foldable.Util
 import           HGeometry.LineSegment
 import           HGeometry.Number.Radical
 import           HGeometry.Point
@@ -48,12 +53,14 @@ import qualified HGeometry.PolyLine as PolyLine
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
+import           HGeometry.Polygon.WithHoles
 import           HGeometry.Properties
 import           HGeometry.Triangle
 import           Ipe.Path
 import           Ipe.Reader
 import           Ipe.Types
 import           System.OsPath
+import           Witherable
 
 --------------------------------------------------------------------------------
 
@@ -126,6 +133,23 @@ _asSimplePolygon = prism' polygonToPath pathToPolygon
 -- | Convert to a convex polygon
 _asConvexPolygon :: (Num r, Ord r) => Prism' (Path r) (ConvexPolygon (Point 2 r))
 _asConvexPolygon = _asSimplePolygon._ConvexPolygon
+
+-- | Convert to a polygonal domain
+_asPolygonalDomain :: Prism' (Path r) (PolygonalDomain (Point 2 r))
+_asPolygonalDomain = prism' toPath toDomain
+  where
+    toPath (PolygonalDomain outer' holes') =
+        Path $ (pathPiece outer' Seq.<| fromFoldable (fmap pathPiece holes'))
+    pathPiece = PolygonPath AsIs
+
+    toDomain path = over theHoles fromFoldable <$> toPolygonalDomain path
+
+-- | Convert to a path to a Polygonal Domain
+toPolygonalDomain      :: Path r
+                       -> Maybe (PolygonalDomainF Seq.Seq  (Cyclic NonEmptyVector) (Point 2 r))
+toPolygonalDomain path = case mapMaybe (preview (_PolygonPath._2)) (path^.pathSegments) of
+                           outer' Seq.:<| holes' -> Just $ PolygonalDomain outer' holes'
+                           _                     -> Nothing
 
 -- | Tries to convert a path into a rectangle.
 _asRectangle :: forall r. (Num r, Ord r) => Prism' (Path r) (Rectangle (Point 2 r))
