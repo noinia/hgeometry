@@ -23,6 +23,7 @@ module HGeometry.Tree.Binary.Static
   , access
   , foldBinaryUp
   , toRoseTree'
+  , fromRoseTree'
   , drawTree'
   ) where
 
@@ -188,3 +189,12 @@ toRoseTree' (Internal l v r) = Just $ Tree.Node v $ mapMaybe toRoseTree' [l,r]
 -- | Draw a binary tree.
 drawTree' :: Show a => BinaryTree a -> String
 drawTree' = maybe "Nil" (Tree.drawTree . fmap show) . toRoseTree'
+
+
+-- | Tries to convert a rose Tree into a binary tree.
+fromRoseTree'                   :: Tree.Tree a -> Maybe (BinaryTree a)
+fromRoseTree' (Tree.Node x chs) = case traverse fromRoseTree' chs of
+                                    Just []    -> Just $ Internal Nil x Nil
+                                    Just [l]   -> Just $ Internal l   x Nil
+                                    Just [l,r] -> Just $ Internal l   x r
+                                    _          -> Nothing

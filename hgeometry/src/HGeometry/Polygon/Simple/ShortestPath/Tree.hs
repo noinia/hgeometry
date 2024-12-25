@@ -77,6 +77,13 @@ computeShortestPaths s poly = computeShortestPaths' s poly (triangulate poly)
 --     dualTree <- toBinaryTree $ dfs (dualGraph poly) root
 --     let toDualTreesFrom
 
+-- | A dualTree of a polygon; essentially a binary tree (with the exception) that the root
+-- may actually have three children.
+data DualTree a b = OneNode   a (BinaryTree b)
+                  | TwoNode   a (BinaryTree b) (BinaryTree b)
+                  | ThreeNode a (BinaryTree b) (BinaryTree b) (BinaryTree b)
+                  deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+
 
 -- | Computes the dual tree of the polygon, starting with the triangle containing
 -- the source point.
@@ -89,13 +96,16 @@ dualTreeFrom             :: ( Point_ source 2 r
                          => source
                          -> CPlaneGraph s point e f
                          --  ^ the triangulated polygon
-                         -> Maybe (BinaryTree (FaceIx (CPlaneGraph s point e f)))
+                         -> Maybe (DualTree (FaceIx (CPlaneGraph s point e f))
+                                            (FaceIx (CPlaneGraph s point e f))
+                                  )
 dualTreeFrom source poly = do
     let inTriangle (_, pg) = case source `inPolygon` pg of
                                Boundary.StrictlyOutside -> True
                                _                        -> False
-    (root,_) <- findOf (interiorFacePolygons.withIndex) inTriangle poly
-    fromRoseTree $ toFaceIds $ dfs (dualGraph poly) (toDualVertexIx root)
+    (root',_) <- findOf (interiorFacePolygons.withIndex) inTriangle poly
+    toDualTree $ toFaceIds $ dfs (dualGraph poly) (toDualVertexIx root')
+
 
 -- | Coerce into the right type
 toFaceIds    :: Tree.Tree (VertexIx (DualGraphOf (CPlaneGraph s point e f)))
@@ -106,21 +116,47 @@ toDualVertexIx :: FaceIx (CPlaneGraph s point e f)
                -> VertexIx (DualGraphOf (CPlaneGraph s point e f))
 toDualVertexIx = coerce
 
+-- | Tries to convert the RoseTree into a DualTree
+toDualTree                       :: Tree.Tree a -> Maybe (DualTree a a)
+toDualTree (Tree.Node root' chs)  = traverse fromRoseTree' chs <&> \case
+  []      -> OneNode   root' Nil
+  [c]     -> OneNode   root' c
+  [l,r]   -> TwoNode   root' l r
+  [a,b,c] -> ThreeNode root' a b c
 
 --------------------------------------------------------------------------------
 
 toDualTreesFrom    :: gr
-                   -> BinaryTree (FaceIx gr)
-                   -> Vector 3 (DualTree (VertexIx gr, Vertex gr))
-toDualTreesFrom gr = undefined
+                   -> DualTree (FaceIx gr) (FaceIx gr)
+                   -> DualTree (Vector 3 (Vector 2 (VertexIx gr, Vertex gr)))
+                               (VertexIx gr, Vertex gr)
+toDualTreesFrom gr = \case
+    OneNode root' a   -> OneNode undefined undefined -- go root' a
+    TwoNode root' a b -> let a' = go root' a
+                             b' = go root' b
+                         in TwoNode undefined a' b'
+    ThreeNode root' a b c -> let a' = go root' a
+                                 b' = go root' b
+                                 c' = go root' c
+                             in ThreeNode undefined a' b' c'
+  where
+    go0 parent = undefined
+
+
+    go l r = \case
+      Nil              -> Nil
+      Internal l' t r' -> let otherVertex (i,_) = i /= fst l && i /= fst r
+                          in case findOf (boundaryVerticesOf t.withIndex) otherVertex gr of
+        Nothing -> error "toDualTreesFrom: absurd"
+        Just w  -> Internal (go l w l') w (go r w r')
 
 
 
-data DualTree v = DualTree { _leftVtx  :: v
-                           , _tree     :: BinaryTree v
-                           , _rightVtx :: v
-                           }
-                  deriving (Show)
+-- data DualTree v = DualTree { _leftVtx  :: v
+--                            , _tree     :: BinaryTree v
+--                            , _rightVtx :: v
+--                            }
+--                   deriving (Show)
 
 
 
@@ -149,13 +185,6 @@ type Vertex' poly point = VertexIx poly :+ point
       -- Node i
 
 
--- | Tries to covnert an arbitrary Tree into a binary tree
-fromRoseTree                   :: Tree.Tree a -> Maybe (BinaryTree a)
-fromRoseTree (Tree.Node x chs) = case traverse fromRoseTree chs of
-                                   Just []    -> Just $ Internal Nil x Nil
-                                   Just [l]   -> Just $ Internal l   x Nil
-                                   Just [l,r] -> Just $ Internal l   x r
-                                   _          -> Nothing
 
 
 
@@ -281,7 +310,7 @@ type R = RealNumber 5
 test = dualTreeFrom mySource $ triangulate myPolygon
 
 mySource :: Point 2 R
-mySource = Point2 240 64
+mySource = Point2 224 112
 myPolygon :: SimplePolygon (Point 2 R)
 myPolygon = maybe (error "absurd") id $ fromPoints
             [ Point2 80 160
