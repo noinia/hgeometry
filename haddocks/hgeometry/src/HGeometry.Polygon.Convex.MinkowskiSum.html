@@ -35,19 +35,19 @@
 </span><span id="line-35"></span><span class="hs-comment">-- te oriin first.</span><span>
 </span><span id="line-36"></span><span>  </span><span class="hs-comment">--</span><span>
 </span><span id="line-37"></span><span class="hs-comment">-- running time: \(O(n+m)\).</span><span>
-</span><span id="line-38"></span><span id="local-6989586621679497626"><span id="local-6989586621679497627"><span id="local-6989586621679497628"><span id="local-6989586621679497630"><span id="local-6989586621679497631"><span class="annot"><a href="HGeometry.Polygon.Convex.MinkowskiSum.html#minkowskiSum"><span class="hs-identifier hs-type">minkowskiSum</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679497626"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679497626"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-39"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Class.html#ConvexPolygon_"><span class="hs-identifier hs-type">ConvexPolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497627"><span class="hs-identifier hs-type">convexPolygon</span></a></span><span>  </span><span class="annot"><a href="#local-6989586621679497628"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497626"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-40"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Class.html#ConvexPolygon_"><span class="hs-identifier hs-type">ConvexPolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497630"><span class="hs-identifier hs-type">convexPolygon'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497631"><span class="hs-identifier hs-type">point'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497626"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-38"></span><span id="local-6989586621679497985"><span id="local-6989586621679497986"><span id="local-6989586621679497987"><span id="local-6989586621679497989"><span id="local-6989586621679497990"><span class="annot"><a href="HGeometry.Polygon.Convex.MinkowskiSum.html#minkowskiSum"><span class="hs-identifier hs-type">minkowskiSum</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679497985"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679497985"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-39"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Class.html#ConvexPolygon_"><span class="hs-identifier hs-type">ConvexPolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497986"><span class="hs-identifier hs-type">convexPolygon</span></a></span><span>  </span><span class="annot"><a href="#local-6989586621679497987"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497985"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-40"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Class.html#ConvexPolygon_"><span class="hs-identifier hs-type">ConvexPolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497989"><span class="hs-identifier hs-type">convexPolygon'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497990"><span class="hs-identifier hs-type">point'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497985"><span class="hs-identifier hs-type">r</span></a></span><span>
 </span><span id="line-41"></span><span>                    </span><span class="hs-special">)</span><span>
-</span><span id="line-42"></span><span>                 </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679497627"><span class="hs-identifier hs-type">convexPolygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679497630"><span class="hs-identifier hs-type">convexPolygon'</span></a></span><span>
-</span><span id="line-43"></span><span>                 </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Implementation.html#ConvexPolygon"><span class="hs-identifier hs-type">ConvexPolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679497628"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497631"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-42"></span><span>                 </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679497986"><span class="hs-identifier hs-type">convexPolygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679497989"><span class="hs-identifier hs-type">convexPolygon'</span></a></span><span>
+</span><span id="line-43"></span><span>                 </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Implementation.html#ConvexPolygon"><span class="hs-identifier hs-type">ConvexPolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679497987"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497990"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
 </span><span id="line-44"></span><span id="minkowskiSum"><span class="annot"><span class="annottext">minkowskiSum :: forall r convexPolygon point convexPolygon' point'.
 (Ord r, Num r, ConvexPolygon_ convexPolygon point r,
  ConvexPolygon_ convexPolygon' point' r) =&gt;
 convexPolygon -&gt; convexPolygon' -&gt; ConvexPolygon (point :+ point')
-</span><a href="HGeometry.Polygon.Convex.MinkowskiSum.html#minkowskiSum"><span class="hs-identifier hs-var hs-var">minkowskiSum</span></a></span></span><span> </span><span id="local-6989586621679498012"><span class="annot"><span class="annottext">convexPolygon
-</span><a href="#local-6989586621679498012"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679498013"><span class="annot"><span class="annottext">convexPolygon'
-</span><a href="#local-6989586621679498013"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (point :+ point') -&gt; ConvexPolygon (point :+ point')
+</span><a href="HGeometry.Polygon.Convex.MinkowskiSum.html#minkowskiSum"><span class="hs-identifier hs-var hs-var">minkowskiSum</span></a></span></span><span> </span><span id="local-6989586621679498371"><span class="annot"><span class="annottext">convexPolygon
+</span><a href="#local-6989586621679498371"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679498372"><span class="annot"><span class="annottext">convexPolygon'
+</span><a href="#local-6989586621679498372"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (point :+ point') -&gt; ConvexPolygon (point :+ point')
 forall simplePolygon point r (f :: * -&gt; *).
 (SimplePolygon_ simplePolygon point r, Foldable1 f) =&gt;
 f point -&gt; simplePolygon
@@ -71,23 +71,23 @@ forall {point} {point}.
  Dimension point ~ 2, Num (NumType point), Ord (NumType point),
  Point_ point 2 (NumType point), Affine_ point 2 (NumType point)) =&gt;
 NonEmpty point -&gt; NonEmpty point -&gt; [point :+ point]
-</span><a href="#local-6989586621679498017"><span class="hs-identifier hs-var">merge'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">convexPolygon -&gt; NonEmpty (Vertex convexPolygon)
+</span><a href="#local-6989586621679498376"><span class="hs-identifier hs-var">merge'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">convexPolygon -&gt; NonEmpty (Vertex convexPolygon)
 forall {s}.
 (Dimension (Vertex s) ~ 2, NumType (Vertex s) ~ NumType s,
  Polygon_ s (Vertex s) (NumType s), Ord (NumType s)) =&gt;
 s -&gt; NonEmpty (Vertex s)
-</span><a href="#local-6989586621679498018"><span class="hs-identifier hs-var">theVertices</span></a></span><span> </span><span class="annot"><span class="annottext">convexPolygon
-</span><a href="#local-6989586621679498012"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">convexPolygon' -&gt; NonEmpty (Vertex convexPolygon')
+</span><a href="#local-6989586621679498377"><span class="hs-identifier hs-var">theVertices</span></a></span><span> </span><span class="annot"><span class="annottext">convexPolygon
+</span><a href="#local-6989586621679498371"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">convexPolygon' -&gt; NonEmpty (Vertex convexPolygon')
 forall {s}.
 (Dimension (Vertex s) ~ 2, NumType (Vertex s) ~ NumType s,
  Polygon_ s (Vertex s) (NumType s), Ord (NumType s)) =&gt;
 s -&gt; NonEmpty (Vertex s)
-</span><a href="#local-6989586621679498018"><span class="hs-identifier hs-var">theVertices</span></a></span><span> </span><span class="annot"><span class="annottext">convexPolygon'
-</span><a href="#local-6989586621679498013"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679498377"><span class="hs-identifier hs-var">theVertices</span></a></span><span> </span><span class="annot"><span class="annottext">convexPolygon'
+</span><a href="#local-6989586621679498372"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-46"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-47"></span><span>    </span><span id="local-6989586621679498018"><span class="annot"><span class="annottext">theVertices :: s -&gt; NonEmpty (Vertex s)
-</span><a href="#local-6989586621679498018"><span class="hs-identifier hs-var hs-var">theVertices</span></a></span></span><span> </span><span id="local-6989586621679498168"><span class="annot"><span class="annottext">s
-</span><a href="#local-6989586621679498168"><span class="hs-identifier hs-var">p'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Getting (NonEmptyDList (Vertex s)) s (Vertex s)
+</span><span id="line-47"></span><span>    </span><span id="local-6989586621679498377"><span class="annot"><span class="annottext">theVertices :: s -&gt; NonEmpty (Vertex s)
+</span><a href="#local-6989586621679498377"><span class="hs-identifier hs-var hs-var">theVertices</span></a></span></span><span> </span><span id="local-6989586621679498527"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679498527"><span class="hs-identifier hs-var">p'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Getting (NonEmptyDList (Vertex s)) s (Vertex s)
 -&gt; s -&gt; NonEmpty (Vertex s)
 forall a s. Getting (NonEmptyDList a) s a -&gt; s -&gt; NonEmpty a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-2c225bc76acc8fc1e6dce12ee325f5b0d01c05bbb9d72de01b3c6c240d1fc294/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#toNonEmptyOf"><span class="hs-identifier hs-var">toNonEmptyOf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">VertexIx s -&gt; IndexedTraversal1' (VertexIx s) s (Vertex s)
@@ -103,29 +103,29 @@ forall polygon point r.
 (Polygon_ polygon point r, Ord r) =&gt;
 polygon -&gt; VertexIx polygon
 </span><a href="HGeometry.Polygon.Convex.MinkowskiSum.html#bottomMost"><span class="hs-identifier hs-var">bottomMost</span></a></span><span> </span><span class="annot"><span class="annottext">s
-</span><a href="#local-6989586621679498168"><span class="hs-identifier hs-var">p'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">s
-</span><a href="#local-6989586621679498168"><span class="hs-identifier hs-var">p'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-48"></span><span>                       </span><span id="local-6989586621679498172"><span class="annot"><span class="annottext">Vertex s
-</span><a href="#local-6989586621679498172"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span> </span><span id="local-6989586621679498174"><span class="annot"><span class="annottext">[Vertex s]
-</span><a href="#local-6989586621679498174"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Vertex s
-</span><a href="#local-6989586621679498172"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">Vertex s -&gt; [Vertex s] -&gt; NonEmpty (Vertex s)
+</span><a href="#local-6989586621679498527"><span class="hs-identifier hs-var">p'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679498527"><span class="hs-identifier hs-var">p'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-48"></span><span>                       </span><span id="local-6989586621679498531"><span class="annot"><span class="annottext">Vertex s
+</span><a href="#local-6989586621679498531"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span> </span><span id="local-6989586621679498533"><span class="annot"><span class="annottext">[Vertex s]
+</span><a href="#local-6989586621679498533"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Vertex s
+</span><a href="#local-6989586621679498531"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">Vertex s -&gt; [Vertex s] -&gt; NonEmpty (Vertex s)
 forall a. a -&gt; [a] -&gt; NonEmpty a
 </span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Vertex s]
-</span><a href="#local-6989586621679498174"><span class="hs-identifier hs-var">xs</span></a></span><span class="annot"><span class="annottext">[Vertex s] -&gt; [Vertex s] -&gt; [Vertex s]
+</span><a href="#local-6989586621679498533"><span class="hs-identifier hs-var">xs</span></a></span><span class="annot"><span class="annottext">[Vertex s] -&gt; [Vertex s] -&gt; [Vertex s]
 forall a. [a] -&gt; [a] -&gt; [a]
 </span><span class="hs-operator hs-var">++</span></span><span class="hs-special">[</span><span class="annot"><span class="annottext">Vertex s
-</span><a href="#local-6989586621679498172"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679498531"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span>
 </span><span id="line-49"></span><span>
-</span><span id="line-50"></span><span>    </span><span id="local-6989586621679498248"><span class="annot"><span class="annottext">core
-</span><a href="#local-6989586621679498248"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679498249"><span class="annot"><span class="annottext">.+. :: core -&gt; extra -&gt; core :+ extra
-</span><a href="#local-6989586621679498249"><span class="hs-operator hs-var hs-var">.+.</span></a></span></span><span> </span><span id="local-6989586621679498250"><span class="annot"><span class="annottext">extra
-</span><a href="#local-6989586621679498250"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">core
-</span><a href="#local-6989586621679498248"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">core -&gt; Vector (Dimension extra) (NumType extra) -&gt; core
+</span><span id="line-50"></span><span>    </span><span id="local-6989586621679498607"><span class="annot"><span class="annottext">core
+</span><a href="#local-6989586621679498607"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679498608"><span class="annot"><span class="annottext">.+. :: core -&gt; extra -&gt; core :+ extra
+</span><a href="#local-6989586621679498608"><span class="hs-operator hs-var hs-var">.+.</span></a></span></span><span> </span><span id="local-6989586621679498609"><span class="annot"><span class="annottext">extra
+</span><a href="#local-6989586621679498609"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">core
+</span><a href="#local-6989586621679498607"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">core -&gt; Vector (Dimension extra) (NumType extra) -&gt; core
 forall point (d :: Nat) r.
 (Affine_ point d r, Num r) =&gt;
 point -&gt; Vector d r -&gt; point
 </span><span class="hs-operator hs-var">.+^</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">extra
-</span><a href="#local-6989586621679498250"><span class="hs-identifier hs-var">w</span></a></span><span class="annot"><span class="annottext">extra
+</span><a href="#local-6989586621679498609"><span class="hs-identifier hs-var">w</span></a></span><span class="annot"><span class="annottext">extra
 -&gt; Getting
      (Vector (Dimension extra) (NumType extra))
      extra
@@ -152,14 +152,14 @@ Lens
 </span><span class="hs-identifier hs-var">vector</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">core -&gt; extra -&gt; core :+ extra
 forall core extra. core -&gt; extra -&gt; core :+ extra
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">extra
-</span><a href="#local-6989586621679498250"><span class="hs-identifier hs-var">w</span></a></span><span>
+</span><a href="#local-6989586621679498609"><span class="hs-identifier hs-var">w</span></a></span><span>
 </span><span id="line-51"></span><span>
-</span><span id="line-52"></span><span>    </span><span id="local-6989586621679498448"><span class="annot"><span class="annottext">cmpAngle :: point -&gt; point -&gt; point -&gt; point -&gt; Ordering
-</span><a href="#local-6989586621679498448"><span class="hs-identifier hs-var hs-var">cmpAngle</span></a></span></span><span> </span><span id="local-6989586621679498449"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498449"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679498450"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498450"><span class="hs-identifier hs-var">v'</span></a></span></span><span> </span><span id="local-6989586621679498451"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498451"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span id="local-6989586621679498452"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498452"><span class="hs-identifier hs-var">w'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-52"></span><span>    </span><span id="local-6989586621679498807"><span class="annot"><span class="annottext">cmpAngle :: point -&gt; point -&gt; point -&gt; point -&gt; Ordering
+</span><a href="#local-6989586621679498807"><span class="hs-identifier hs-var hs-var">cmpAngle</span></a></span></span><span> </span><span id="local-6989586621679498808"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679498808"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679498809"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679498809"><span class="hs-identifier hs-var">v'</span></a></span></span><span> </span><span id="local-6989586621679498810"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679498810"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span id="local-6989586621679498811"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679498811"><span class="hs-identifier hs-var">w'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-53"></span><span>      </span><span class="annot"><span class="annottext">Point 2 (NumType point)
 -&gt; PointF (Vector (Dimension point) (NumType point))
 -&gt; PointF (Vector (Dimension point) (NumType point))
@@ -169,8 +169,8 @@ forall center r point.
 center -&gt; point -&gt; point -&gt; Ordering
 </span><span class="hs-identifier hs-var">ccwCmpAround</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point -&gt; Point 2 (NumType point)
 forall point r. (Point_ point 2 r, Num r) =&gt; point -&gt; Point 2 r
-</span><a href="#local-6989586621679498454"><span class="hs-identifier hs-var">origin'</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498450"><span class="hs-identifier hs-var">v'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector (Dimension point) (NumType point)
+</span><a href="#local-6989586621679498813"><span class="hs-identifier hs-var">origin'</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679498809"><span class="hs-identifier hs-var">v'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector (Dimension point) (NumType point)
 -&gt; PointF (Vector (Dimension point) (NumType point))
 forall v. v -&gt; PointF v
 </span><span class="hs-identifier hs-var">Point</span></span><span> </span><span class="annot"><span class="annottext">(Vector (Dimension point) (NumType point)
@@ -179,12 +179,12 @@ forall v. v -&gt; PointF v
 -&gt; PointF (Vector (Dimension point) (NumType point))
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498450"><span class="hs-identifier hs-var">v'</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; Vector (Dimension point) (NumType point)
+</span><a href="#local-6989586621679498809"><span class="hs-identifier hs-var">v'</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; Vector (Dimension point) (NumType point)
 forall point (d :: Nat) r.
 (Affine_ point d r, Num r) =&gt;
 point -&gt; point -&gt; Vector d r
 </span><span class="hs-operator hs-var">.-.</span></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498449"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector (Dimension point) (NumType point)
+</span><a href="#local-6989586621679498808"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector (Dimension point) (NumType point)
 -&gt; PointF (Vector (Dimension point) (NumType point))
 forall v. v -&gt; PointF v
 </span><span class="hs-identifier hs-var">Point</span></span><span> </span><span class="annot"><span class="annottext">(Vector (Dimension point) (NumType point)
@@ -193,88 +193,88 @@ forall v. v -&gt; PointF v
 -&gt; PointF (Vector (Dimension point) (NumType point))
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498452"><span class="hs-identifier hs-var">w'</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; Vector (Dimension point) (NumType point)
+</span><a href="#local-6989586621679498811"><span class="hs-identifier hs-var">w'</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; Vector (Dimension point) (NumType point)
 forall point (d :: Nat) r.
 (Affine_ point d r, Num r) =&gt;
 point -&gt; point -&gt; Vector d r
 </span><span class="hs-operator hs-var">.-.</span></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498451"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679498810"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-54"></span><span>
 </span><span id="line-55"></span><span>    </span><span class="hs-comment">-- hack to satisfy GHC 9.8; shouldn't be necessary with 9.10 and on ; just use origin as is</span><span>
-</span><span id="line-56"></span><span>    </span><span id="local-6989586621679497795"><span id="local-6989586621679497796"><span class="annot"><a href="#local-6989586621679498454"><span class="hs-identifier hs-type">origin'</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679497795"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679497796"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679497796"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679497795"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679497796"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
-</span><span id="line-57"></span><span>    </span><span id="local-6989586621679498454"><span class="annot"><span class="annottext">origin' :: forall point r. (Point_ point 2 r, Num r) =&gt; point -&gt; Point 2 r
-</span><a href="#local-6989586621679498454"><span class="hs-identifier hs-var hs-var">origin'</span></a></span></span><span> </span><span class="annot"><span class="annottext">point
+</span><span id="line-56"></span><span>    </span><span id="local-6989586621679498154"><span id="local-6989586621679498155"><span class="annot"><a href="#local-6989586621679498813"><span class="hs-identifier hs-type">origin'</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679498154"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679498155"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679498155"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679498154"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679498155"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-57"></span><span>    </span><span id="local-6989586621679498813"><span class="annot"><span class="annottext">origin' :: forall point r. (Point_ point 2 r, Num r) =&gt; point -&gt; Point 2 r
+</span><a href="#local-6989586621679498813"><span class="hs-identifier hs-var hs-var">origin'</span></a></span></span><span> </span><span class="annot"><span class="annottext">point
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
 forall point (d :: Nat) r.
 (Num r, ConstructablePoint_ point d r) =&gt;
 point
 </span><span class="hs-identifier hs-var">origin</span></span><span>
 </span><span id="line-58"></span><span>
-</span><span id="line-59"></span><span>    </span><span id="local-6989586621679498017"><span class="annot"><span class="annottext">merge' :: NonEmpty point -&gt; NonEmpty point -&gt; [point :+ point]
-</span><a href="#local-6989586621679498017"><span class="hs-identifier hs-var hs-var">merge'</span></a></span></span><span> </span><span id="local-6989586621679498686"><span class="annot"><span class="annottext">vs0 :: NonEmpty point
-</span><a href="#local-6989586621679498686"><span class="hs-identifier hs-var">vs0</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679498687"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498687"><span class="hs-identifier hs-var">v</span></a></span></span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span id="local-6989586621679498688"><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679498688"><span class="hs-identifier hs-var">vs1</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679498689"><span class="annot"><span class="annottext">ws0 :: NonEmpty point
-</span><a href="#local-6989586621679498689"><span class="hs-identifier hs-var">ws0</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679498690"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498690"><span class="hs-identifier hs-var">w</span></a></span></span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span id="local-6989586621679498691"><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679498691"><span class="hs-identifier hs-var">ws1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[point] -&gt; [point] -&gt; [point :+ point]
-</span><a href="#local-6989586621679498692"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679498688"><span class="hs-identifier hs-var">vs1</span></a></span><span> </span><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679498691"><span class="hs-identifier hs-var">ws1</span></a></span><span>
+</span><span id="line-59"></span><span>    </span><span id="local-6989586621679498376"><span class="annot"><span class="annottext">merge' :: NonEmpty point -&gt; NonEmpty point -&gt; [point :+ point]
+</span><a href="#local-6989586621679498376"><span class="hs-identifier hs-var hs-var">merge'</span></a></span></span><span> </span><span id="local-6989586621679499045"><span class="annot"><span class="annottext">vs0 :: NonEmpty point
+</span><a href="#local-6989586621679499045"><span class="hs-identifier hs-var">vs0</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679499046"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499046"><span class="hs-identifier hs-var">v</span></a></span></span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span id="local-6989586621679499047"><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679499047"><span class="hs-identifier hs-var">vs1</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679499048"><span class="annot"><span class="annottext">ws0 :: NonEmpty point
+</span><a href="#local-6989586621679499048"><span class="hs-identifier hs-var">ws0</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span id="local-6989586621679499049"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499049"><span class="hs-identifier hs-var">w</span></a></span></span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span id="local-6989586621679499050"><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679499050"><span class="hs-identifier hs-var">ws1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[point] -&gt; [point] -&gt; [point :+ point]
+</span><a href="#local-6989586621679499051"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679499047"><span class="hs-identifier hs-var">vs1</span></a></span><span> </span><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679499050"><span class="hs-identifier hs-var">ws1</span></a></span><span>
 </span><span id="line-60"></span><span>      </span><span class="hs-keyword">where</span><span>
-</span><span id="line-61"></span><span>        </span><span id="local-6989586621679498692"><span class="annot"><span class="annottext">go :: [point] -&gt; [point] -&gt; [point :+ point]
-</span><a href="#local-6989586621679498692"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>      </span><span class="hs-special">[</span><span class="hs-special">]</span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-62"></span><span>        </span><span class="annot"><a href="#local-6989586621679498692"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>      </span><span class="hs-special">(</span><span id="local-6989586621679498693"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498693"><span class="hs-identifier hs-var">w'</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679498694"><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679498694"><span class="hs-identifier hs-var">ws</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498687"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; point :+ point
+</span><span id="line-61"></span><span>        </span><span id="local-6989586621679499051"><span class="annot"><span class="annottext">go :: [point] -&gt; [point] -&gt; [point :+ point]
+</span><a href="#local-6989586621679499051"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>      </span><span class="hs-special">[</span><span class="hs-special">]</span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-62"></span><span>        </span><span class="annot"><a href="#local-6989586621679499051"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>      </span><span class="hs-special">(</span><span id="local-6989586621679499052"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499052"><span class="hs-identifier hs-var">w'</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679499053"><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679499053"><span class="hs-identifier hs-var">ws</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499046"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; point :+ point
 forall {extra} {core}.
 (Dimension extra ~ Dimension core, NumType extra ~ NumType core,
  Affine_ core (Dimension core) (NumType core), Num (NumType core),
  HasVector extra extra) =&gt;
 core -&gt; extra -&gt; core :+ extra
-</span><a href="#local-6989586621679498249"><span class="hs-operator hs-var">.+.</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498690"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">(point :+ point) -&gt; [point :+ point] -&gt; [point :+ point]
+</span><a href="#local-6989586621679498608"><span class="hs-operator hs-var">.+.</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499049"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">(point :+ point) -&gt; [point :+ point] -&gt; [point :+ point]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty point -&gt; NonEmpty point -&gt; [point :+ point]
-</span><a href="#local-6989586621679498017"><span class="hs-identifier hs-var">merge'</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty point
-</span><a href="#local-6989586621679498686"><span class="hs-identifier hs-var">vs0</span></a></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498693"><span class="hs-identifier hs-var">w'</span></a></span><span class="annot"><span class="annottext">point -&gt; [point] -&gt; NonEmpty point
+</span><a href="#local-6989586621679498376"><span class="hs-identifier hs-var">merge'</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty point
+</span><a href="#local-6989586621679499045"><span class="hs-identifier hs-var">vs0</span></a></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499052"><span class="hs-identifier hs-var">w'</span></a></span><span class="annot"><span class="annottext">point -&gt; [point] -&gt; NonEmpty point
 forall a. a -&gt; [a] -&gt; NonEmpty a
 </span><span class="hs-operator hs-var">:|</span></span><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679498694"><span class="hs-identifier hs-var">ws</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-63"></span><span>        </span><span class="annot"><a href="#local-6989586621679498692"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679498695"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498695"><span class="hs-identifier hs-var">v'</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679498696"><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679498696"><span class="hs-identifier hs-var">vs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498687"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; point :+ point
+</span><a href="#local-6989586621679499053"><span class="hs-identifier hs-var">ws</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span>        </span><span class="annot"><a href="#local-6989586621679499051"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679499054"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499054"><span class="hs-identifier hs-var">v'</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679499055"><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679499055"><span class="hs-identifier hs-var">vs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499046"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; point :+ point
 forall {extra} {core}.
 (Dimension extra ~ Dimension core, NumType extra ~ NumType core,
  Affine_ core (Dimension core) (NumType core), Num (NumType core),
  HasVector extra extra) =&gt;
 core -&gt; extra -&gt; core :+ extra
-</span><a href="#local-6989586621679498249"><span class="hs-operator hs-var">.+.</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498690"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">(point :+ point) -&gt; [point :+ point] -&gt; [point :+ point]
+</span><a href="#local-6989586621679498608"><span class="hs-operator hs-var">.+.</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499049"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">(point :+ point) -&gt; [point :+ point] -&gt; [point :+ point]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty point -&gt; NonEmpty point -&gt; [point :+ point]
-</span><a href="#local-6989586621679498017"><span class="hs-identifier hs-var">merge'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498695"><span class="hs-identifier hs-var">v'</span></a></span><span class="annot"><span class="annottext">point -&gt; [point] -&gt; NonEmpty point
+</span><a href="#local-6989586621679498376"><span class="hs-identifier hs-var">merge'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499054"><span class="hs-identifier hs-var">v'</span></a></span><span class="annot"><span class="annottext">point -&gt; [point] -&gt; NonEmpty point
 forall a. a -&gt; [a] -&gt; NonEmpty a
 </span><span class="hs-operator hs-var">:|</span></span><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679498696"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NonEmpty point
-</span><a href="#local-6989586621679498689"><span class="hs-identifier hs-var">ws0</span></a></span><span>
-</span><span id="line-64"></span><span>        </span><span class="annot"><a href="#local-6989586621679498692"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679498697"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498697"><span class="hs-identifier hs-var">v'</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679498698"><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679498698"><span class="hs-identifier hs-var">vs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679498699"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498699"><span class="hs-identifier hs-var">w'</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679498700"><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679498700"><span class="hs-identifier hs-var">ws</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498687"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; point :+ point
+</span><a href="#local-6989586621679499055"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NonEmpty point
+</span><a href="#local-6989586621679499048"><span class="hs-identifier hs-var">ws0</span></a></span><span>
+</span><span id="line-64"></span><span>        </span><span class="annot"><a href="#local-6989586621679499051"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679499056"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499056"><span class="hs-identifier hs-var">v'</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679499057"><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679499057"><span class="hs-identifier hs-var">vs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679499058"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499058"><span class="hs-identifier hs-var">w'</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679499059"><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679499059"><span class="hs-identifier hs-var">ws</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499046"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; point :+ point
 forall {extra} {core}.
 (Dimension extra ~ Dimension core, NumType extra ~ NumType core,
  Affine_ core (Dimension core) (NumType core), Num (NumType core),
  HasVector extra extra) =&gt;
 core -&gt; extra -&gt; core :+ extra
-</span><a href="#local-6989586621679498249"><span class="hs-operator hs-var">.+.</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498690"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">(point :+ point) -&gt; [point :+ point] -&gt; [point :+ point]
+</span><a href="#local-6989586621679498608"><span class="hs-operator hs-var">.+.</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499049"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">(point :+ point) -&gt; [point :+ point] -&gt; [point :+ point]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; point -&gt; point -&gt; Ordering
 forall {point} {point}.
@@ -283,40 +283,40 @@ forall {point} {point}.
  Point_ point 2 (NumType point), Num (NumType point),
  Affine_ point 2 (NumType point)) =&gt;
 point -&gt; point -&gt; point -&gt; point -&gt; Ordering
-</span><a href="#local-6989586621679498448"><span class="hs-identifier hs-var">cmpAngle</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498687"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498697"><span class="hs-identifier hs-var">v'</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498690"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498699"><span class="hs-identifier hs-var">w'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679498807"><span class="hs-identifier hs-var">cmpAngle</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499046"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499056"><span class="hs-identifier hs-var">v'</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499049"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499058"><span class="hs-identifier hs-var">w'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-65"></span><span>          </span><span class="annot"><span class="annottext">Ordering
 </span><span class="hs-identifier hs-var">LT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NonEmpty point -&gt; NonEmpty point -&gt; [point :+ point]
-</span><a href="#local-6989586621679498017"><span class="hs-identifier hs-var">merge'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498697"><span class="hs-identifier hs-var">v'</span></a></span><span class="annot"><span class="annottext">point -&gt; [point] -&gt; NonEmpty point
+</span><a href="#local-6989586621679498376"><span class="hs-identifier hs-var">merge'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499056"><span class="hs-identifier hs-var">v'</span></a></span><span class="annot"><span class="annottext">point -&gt; [point] -&gt; NonEmpty point
 forall a. a -&gt; [a] -&gt; NonEmpty a
 </span><span class="hs-operator hs-var">:|</span></span><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679498698"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NonEmpty point
-</span><a href="#local-6989586621679498689"><span class="hs-identifier hs-var">ws0</span></a></span><span>
+</span><a href="#local-6989586621679499057"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NonEmpty point
+</span><a href="#local-6989586621679499048"><span class="hs-identifier hs-var">ws0</span></a></span><span>
 </span><span id="line-66"></span><span>          </span><span class="annot"><span class="annottext">Ordering
 </span><span class="hs-identifier hs-var">GT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NonEmpty point -&gt; NonEmpty point -&gt; [point :+ point]
-</span><a href="#local-6989586621679498017"><span class="hs-identifier hs-var">merge'</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty point
-</span><a href="#local-6989586621679498686"><span class="hs-identifier hs-var">vs0</span></a></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498699"><span class="hs-identifier hs-var">w'</span></a></span><span class="annot"><span class="annottext">point -&gt; [point] -&gt; NonEmpty point
+</span><a href="#local-6989586621679498376"><span class="hs-identifier hs-var">merge'</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty point
+</span><a href="#local-6989586621679499045"><span class="hs-identifier hs-var">vs0</span></a></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499058"><span class="hs-identifier hs-var">w'</span></a></span><span class="annot"><span class="annottext">point -&gt; [point] -&gt; NonEmpty point
 forall a. a -&gt; [a] -&gt; NonEmpty a
 </span><span class="hs-operator hs-var">:|</span></span><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679498700"><span class="hs-identifier hs-var">ws</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679499059"><span class="hs-identifier hs-var">ws</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-67"></span><span>          </span><span class="annot"><span class="annottext">Ordering
 </span><span class="hs-identifier hs-var">EQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NonEmpty point -&gt; NonEmpty point -&gt; [point :+ point]
-</span><a href="#local-6989586621679498017"><span class="hs-identifier hs-var">merge'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498697"><span class="hs-identifier hs-var">v'</span></a></span><span class="annot"><span class="annottext">point -&gt; [point] -&gt; NonEmpty point
+</span><a href="#local-6989586621679498376"><span class="hs-identifier hs-var">merge'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499056"><span class="hs-identifier hs-var">v'</span></a></span><span class="annot"><span class="annottext">point -&gt; [point] -&gt; NonEmpty point
 forall a. a -&gt; [a] -&gt; NonEmpty a
 </span><span class="hs-operator hs-var">:|</span></span><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679498698"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679498699"><span class="hs-identifier hs-var">w'</span></a></span><span class="annot"><span class="annottext">point -&gt; [point] -&gt; NonEmpty point
+</span><a href="#local-6989586621679499057"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679499058"><span class="hs-identifier hs-var">w'</span></a></span><span class="annot"><span class="annottext">point -&gt; [point] -&gt; NonEmpty point
 forall a. a -&gt; [a] -&gt; NonEmpty a
 </span><span class="hs-operator hs-var">:|</span></span><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679498700"><span class="hs-identifier hs-var">ws</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679499059"><span class="hs-identifier hs-var">ws</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-68"></span><span>
-</span><span id="line-69"></span><span id="local-6989586621679497767"><span id="local-6989586621679497768"><span id="local-6989586621679497769"><span class="annot"><a href="HGeometry.Polygon.Convex.MinkowskiSum.html#bottomMost"><span class="hs-identifier hs-type">bottomMost</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Class.html#Polygon_"><span class="hs-identifier hs-type">Polygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497767"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497768"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497769"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679497769"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679497767"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497767"><span class="hs-identifier hs-type">polygon</span></a></span></span></span></span><span>
+</span><span id="line-69"></span><span id="local-6989586621679498126"><span id="local-6989586621679498127"><span id="local-6989586621679498128"><span class="annot"><a href="HGeometry.Polygon.Convex.MinkowskiSum.html#bottomMost"><span class="hs-identifier hs-type">bottomMost</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Class.html#Polygon_"><span class="hs-identifier hs-type">Polygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498126"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498127"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498128"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679498128"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679498126"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498126"><span class="hs-identifier hs-type">polygon</span></a></span></span></span></span><span>
 </span><span id="line-70"></span><span id="bottomMost"><span class="annot"><span class="annottext">bottomMost :: forall polygon point r.
 (Polygon_ polygon point r, Ord r) =&gt;
 polygon -&gt; VertexIx polygon
@@ -348,7 +348,7 @@ forall {b}.
    (TypeError ...),
  Ord (NumType b), Point_ b (Dimension b) (NumType b)) =&gt;
 b -&gt; b -&gt; Ordering
-</span><a href="#local-6989586621679498733"><span class="hs-identifier hs-var">cmp</span></a></span><span> </span><span class="annot"><span class="annottext">(Indexed
+</span><a href="#local-6989586621679499092"><span class="hs-identifier hs-var">cmp</span></a></span><span> </span><span class="annot"><span class="annottext">(Indexed
    (VertexIx polygon)
    point
    (Const (First (VertexIx polygon, point)) point)
@@ -375,10 +375,10 @@ forall i (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s j t.
 p (i, s) (f (j, t)) -&gt; Indexed i s (f t)
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.2-2c225bc76acc8fc1e6dce12ee325f5b0d01c05bbb9d72de01b3c6c240d1fc294/share/doc/html/src/Control.Lens.Internal.Indexed.html/Control.Lens.Internal.Indexed.html#withIndex"><span class="hs-identifier hs-var">withIndex</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-71"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-72"></span><span>    </span><span id="local-6989586621679498733"><span class="annot"><span class="annottext">cmp :: b -&gt; b -&gt; Ordering
-</span><a href="#local-6989586621679498733"><span class="hs-identifier hs-var hs-var">cmp</span></a></span></span><span> </span><span id="local-6989586621679498853"><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679498853"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679498854"><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679498854"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(b -&gt; NumType b) -&gt; b -&gt; b -&gt; Ordering
+</span><span id="line-72"></span><span>    </span><span id="local-6989586621679499092"><span class="annot"><span class="annottext">cmp :: b -&gt; b -&gt; Ordering
+</span><a href="#local-6989586621679499092"><span class="hs-identifier hs-var hs-var">cmp</span></a></span></span><span> </span><span id="local-6989586621679499212"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679499212"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679499213"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679499213"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(b -&gt; NumType b) -&gt; b -&gt; b -&gt; Ordering
 forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
 </span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b -&gt; Getting (NumType b) b (NumType b) -&gt; NumType b
 forall s a. s -&gt; Getting a s a -&gt; a
@@ -388,8 +388,8 @@ forall (d :: Nat) point r.
 IndexedLens' Int point r
 IndexedLens' Int b (NumType b)
 </span><span class="hs-identifier hs-var">yCoord</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679498853"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679498854"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Ordering -&gt; Ordering -&gt; Ordering
+</span><a href="#local-6989586621679499212"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679499213"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Ordering -&gt; Ordering -&gt; Ordering
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">(b -&gt; NumType b) -&gt; b -&gt; b -&gt; Ordering
 forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
@@ -401,8 +401,8 @@ forall (d :: Nat) point r.
 IndexedLens' Int point r
 IndexedLens' Int b (NumType b)
 </span><span class="hs-identifier hs-var">xCoord</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679498853"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679498854"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><a href="#local-6989586621679499212"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679499213"><span class="hs-identifier hs-var">q</span></a></span><span>
 </span><span id="line-73"></span><span>
 </span><span id="line-74"></span><span>
 </span><span id="line-75"></span><span class="hs-comment">-- newtype UnsafeExtra extra = UnsafeExtra extra</span><span>
