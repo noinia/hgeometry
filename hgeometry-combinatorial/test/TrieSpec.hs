@@ -1,6 +1,6 @@
 module TrieSpec(spec) where
 
-import           Control.Lens
+-- import           Control.Lens
 import           Data.Foldable1
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
@@ -13,14 +13,14 @@ import           Test.Hspec
 spec :: Spec
 spec = describe "Trie tests" $ do
          it "fold1 Map" $
-           fold1 myTrie `shouldBe` "rootbarfoograndchild"
+           fold1 myTrie `shouldBe` "rootfoograndchildbar"
          it "foldable1 to list Map" $
-           toNonEmpty myTrie `shouldBe` NonEmpty.fromList ["root","bar","foo","grandchild"]
+           toNonEmpty myTrie `shouldBe` NonEmpty.fromList ["root","foo","grandchild","bar"]
 
          it "fold1 KV" $
-           fold1 myTrie `shouldBe` "rootbarfoograndchild"
+           fold1 myTrie2 `shouldBe` "rootfoograndchildbar"
          it "foldable1 to list KV" $
-           toNonEmpty myTrie `shouldBe` NonEmpty.fromList ["root","bar","foo","grandchild"]
+           toNonEmpty myTrie2 `shouldBe` NonEmpty.fromList ["root","foo","grandchild","bar"]
 
 
 

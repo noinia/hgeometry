@@ -19,7 +19,6 @@ import Data.Bitraversable
 import Data.Foldable1
 import Data.Functor.Apply ((<.*>))
 import Data.Functor.Classes
-import Data.Monoid (Endo(..))
 import Data.Semigroup.Traversable
 
 --------------------------------------------------------------------------------
@@ -35,9 +34,20 @@ deriving instance (Functor (f e))     => Functor (TrieF f e)
 deriving instance (Foldable (f e))    => Foldable (TrieF f e)
 deriving instance (Traversable (f e)) => Traversable (TrieF f e)
 
+-- instance Foldable (f e) => Foldable1 (TrieF f e) where
+--   foldMap1 f (Node v chs) = let Endo g = foldMap (\x -> Endo $ \x0 -> x0 <> foldMap1 f x) chs
+--                             in g (f v)
+-- somehow the order is wrong here...
+
 instance Foldable (f e) => Foldable1 (TrieF f e) where
-  foldMap1 f (Node v chs) = let Endo g = foldMap (\x -> Endo $ \x0 -> x0 <> foldMap1 f x) chs
-                            in g (f v)
+  foldMap1 f (Node v chs) = case foldMap (Just . foldMap1 f) chs of
+                              Nothing -> f v
+                              Just s  -> f v <> s
+  -- foldMap1 = foldMap1Default
+
+  -- f (Node v chs) = let Endo g = foldMap (\x -> Endo $ \x0 -> x0 <> foldMap1 f x) chs
+  --                           in g (f v)
+
 
 instance Traversable (f e) => Traversable1 (TrieF f e) where
   traverse1 f (Node v chs) =
