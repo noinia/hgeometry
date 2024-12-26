@@ -16,10 +16,11 @@ module HGeometry.Polygon.Simple.ShortestPath.Tree
   where
 
 import           Control.Lens
+import           Data.Bifunctor (first)
 import           Data.Coerce
 import qualified Data.FingerTree as FT
+import qualified Data.Foldable as F
 import qualified Data.Sequence as Seq
-import qualified Data.Tree as Tree
 import           HGeometry.Boundary
 import qualified HGeometry.Boundary as Boundary
 import           HGeometry.Ext
@@ -32,10 +33,11 @@ import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Simple.InPolygon
 import           HGeometry.Polygon.Triangulation
+import           HGeometry.Sequence.KV
 import           HGeometry.Sequence.NonEmpty (ViewR1(..))
 import qualified HGeometry.Sequence.NonEmpty as NESeq
-import           HGeometry.Tree.Binary.Static
 import           HGeometry.Tree.Util
+import           HGeometry.Trie
 import           HGeometry.Unbounded
 import           HGeometry.Vector
 import           Hiraffe.DFS
@@ -77,12 +79,31 @@ computeShortestPaths s poly = computeShortestPaths' s poly (triangulate poly)
 --     dualTree <- toBinaryTree $ dfs (dualGraph poly) root
 --     let toDualTreesFrom
 
+
+
+-- data AtMostThree a b = One   a b
+--                      | Two   a b b
+--                      | Three a b b b
+
+
+
+
+
+
 -- | A dualTree of a polygon; essentially a binary tree (with the exception) that the root
 -- may actually have three children.
-data DualTree a b = OneNode   a (BinaryTree b)
-                  | TwoNode   a (BinaryTree b) (BinaryTree b)
-                  | ThreeNode a (BinaryTree b) (BinaryTree b) (BinaryTree b)
-                  deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+data DualTree a e b = RootZero  a
+                    | RootOne   a (e, BinaryTrie e b)
+                    | RootTwo   a (e, BinaryTrie e b) (e, BinaryTrie e b)
+                    | RootThree a (e, BinaryTrie e b) (e, BinaryTrie e b) (e, BinaryTrie e b)
+                    deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
+
+instance Bifunctor (DualTree a) where
+  bimap f g = let go = bimap f g in \case
+    RootZero r                     -> RootZero r
+    RootOne r (e, t)               -> RootOne r (f e, go t)
+    RootTwo r (e, a) (e',b)        -> RootTwo r (f e, go a) (f e', go  b)
+    RootThree r (d, a) (e,b) (h,c) -> RootThree r (f d, go a) (f e, go  b) (f h, go c)
 
 
 -- | Computes the dual tree of the polygon, starting with the triangle containing
@@ -97,6 +118,7 @@ dualTreeFrom             :: ( Point_ source 2 r
                          -> CPlaneGraph s point e f
                          --  ^ the triangulated polygon
                          -> Maybe (DualTree (FaceIx (CPlaneGraph s point e f))
+                                            (DartIx (CPlaneGraph s point e f))
                                             (FaceIx (CPlaneGraph s point e f))
                                   )
 dualTreeFrom source poly = do
@@ -108,47 +130,99 @@ dualTreeFrom source poly = do
 
 
 -- | Coerce into the right type
-toFaceIds    :: Tree.Tree (VertexIx (DualGraphOf (CPlaneGraph s point e f)))
-             -> Tree.Tree (FaceIx (CPlaneGraph s point e f))
-toFaceIds    = coerce
+toFaceIds    :: TrieF (KV []) d (VertexIx (DualGraphOf (CPlaneGraph s point e f)))
+             -> TrieF (KV []) d (FaceIx   (CPlaneGraph s point e f))
+toFaceIds    = fmap coerce
+  -- TODO: figure out why this can't just be coerce?
 
 toDualVertexIx :: FaceIx (CPlaneGraph s point e f)
                -> VertexIx (DualGraphOf (CPlaneGraph s point e f))
 toDualVertexIx = coerce
 
 -- | Tries to convert the RoseTree into a DualTree
-toDualTree                       :: Tree.Tree a -> Maybe (DualTree a a)
-toDualTree (Tree.Node root' chs)  = traverse fromRoseTree' chs <&> \case
-  []      -> OneNode   root' Nil
-  [c]     -> OneNode   root' c
-  [l,r]   -> TwoNode   root' l r
-  [a,b,c] -> ThreeNode root' a b c
+toDualTree                   :: TrieF (KV []) e v -> Maybe (DualTree v e v)
+toDualTree (Node root' chs)  = traverse asBinaryTrie chs >>= \res -> case F.toList (assocs res) of
+  []      -> Just $ RootZero  root'
+  [c]     -> Just $ RootOne   root' c
+  [l,r]   -> Just $ RootTwo   root' l r
+  [a,b,c] -> Just $ RootThree root' a b c
+  _       -> Nothing
+
+
+-- | Transform the dual tree into a format we can use to run the shortest path procedure on
+toDualTreeFrom      :: ( PlanarGraph_ gr
+                       , Eq (VertexIx gr)
+                       )
+                    => gr
+                    -> source
+                    -> DualTree (FaceIx gr) (DartIx gr) (FaceIx gr)
+                    -> DualTree source
+                                (Vector 2 (VertexIx gr, Vertex gr))
+                                (VertexIx gr, Vertex gr)
+toDualTreeFrom gr s dt = case first endPoints' dt of
+    RootZero _        -> RootZero s
+    RootOne _ a       -> RootOne s (mapEdge a)
+    RootTwo _ a b     -> RootTwo s (mapEdge a) (mapEdge b)
+    RootThree _ a b c -> RootThree s (mapEdge a) (mapEdge b) (mapEdge c)
+  where
+    mapEdge (e,a) = (e, mapWithEdgeLabels (thirdVertex e) thirdVertex a)
+
+    endPoints' d = let ((u,v),(ux,vx)) = gr^.endPointsOf d.withIndex in Vector2 (u,ux) (v,vx)
+    -- TODO: make sure the oreitnation is indeed right
+
+    thirdVertex (Vector2 (l,_) (r,_)) f =
+      case ifindOf (boundaryVerticesOf f.withIndex) (\v _ -> v /= l && v /= r) gr of
+        Nothing -> error "absurd, third vertex not found"
+        Just v  -> v
+
+
+-- toDualTreeFrom'     :: gr
+--                     -> Vector 2 (VertexIx gr, Vertex gr)
+--                     -> BinaryTrie (DartIx gr) (FaceIx gr)
+--                     -> BinaryTrie (Vector 2 (VertexIx gr, Vertex gr)) (VertexIx gr, Vertex gr)
+-- toDualTreeFrom' gr = mapWithEdgeLabels _ thirdVertex
+--   -- go
+--   -- where
+--   --   go diag = \case
+--   --     Leaf f          -> Leaf $ thirdVertex diag f
+--   --     OneNode f (d,c) -> OneNode (thirdVertex diag f) (d, go )
+
+
 
 --------------------------------------------------------------------------------
 
-toDualTreesFrom    :: gr
-                   -> DualTree (FaceIx gr) (FaceIx gr)
-                   -> DualTree (Vector 3 (Vector 2 (VertexIx gr, Vertex gr)))
-                               (VertexIx gr, Vertex gr)
-toDualTreesFrom gr = \case
-    OneNode root' a   -> OneNode undefined undefined -- go root' a
-    TwoNode root' a b -> let a' = go root' a
-                             b' = go root' b
-                         in TwoNode undefined a' b'
-    ThreeNode root' a b c -> let a' = go root' a
-                                 b' = go root' b
-                                 c' = go root' c
-                             in ThreeNode undefined a' b' c'
-  where
-    go0 parent = undefined
+-- toDualTreesFrom    :: gr
+--                    -> DualTree d (FaceIx gr) (FaceIx gr)
+
+--                    -> DualTree d (Vector 3 (Vector 2 (VertexIx gr, Vertex gr)))
+--                                  (VertexIx gr, Vertex gr)
+-- toDualTreesFrom gr = \case
+--     RootZero root'    -> RootZero undefined
+--     RootOne root' a   -> RootOne
+
+--     undefined undefined -- go root' a
+--     RootTwo root' a b -> let a' = go root' a
+--                              b' = go root' b
+--                          in RootTwo undefined a' b'
+--     RootThree root' a b c -> let a' = go root' a
+--                                  b' = go root' b
+--                                  c' = go root' c
+--                              in RootThree undefined a' b' c'
+--   where
+--
 
 
-    go l r = \case
-      Nil              -> Nil
-      Internal l' t r' -> let otherVertex (i,_) = i /= fst l && i /= fst r
-                          in case findOf (boundaryVerticesOf t.withIndex) otherVertex gr of
-        Nothing -> error "toDualTreesFrom: absurd"
-        Just w  -> Internal (go l w l') w (go r w r')
+
+
+--     go0 parent = undefined
+
+--     go = undefined
+    -- go l r = \case
+    --   Nil              -> Nil
+    --   Internal l' t r' -> let otherVertex (i,_) = i /= fst l && i /= fst r
+    --                       in case findOf (boundaryVerticesOf t.withIndex) otherVertex gr of
+    --     Nothing -> error "toDualTreesFrom: absurd"
+    --     Just w  -> Internal (go l w l') w (go r w r')
 
 
 
@@ -307,7 +381,8 @@ compute s poly = go
 
 
 type R = RealNumber 5
-test = dualTreeFrom mySource $ triangulate myPolygon
+test = let g = triangulate myPolygon
+       in toDualTreeFrom g mySource <$> dualTreeFrom mySource g
 
 mySource :: Point 2 R
 mySource = Point2 224 112
