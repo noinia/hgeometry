@@ -29,6 +29,7 @@ import           Data.Functor.Classes
 import           Data.Semigroup.Traversable
 import           HGeometry.Sequence.KV
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | The Trie data type, parameterized by the data structure storing the children.
@@ -154,9 +155,10 @@ pattern TwoNode v l r = Node v (KV (Two l r))
 
 
 -- | Trie to convert the trie into a binary trie.
-asBinaryTrie              :: Traversable f => TrieF (KV f) e v -> Maybe (BinaryTrie e v)
+-- asBinaryTrie              :: Traversable f => TrieF (KV f) e v -> Maybe (BinaryTrie e v)
+asBinaryTrie              :: (Traversable f, Show e, Show v) => TrieF (KV f) e v -> Maybe (BinaryTrie e v)
 asBinaryTrie (Node x chs) = traverse asBinaryTrie chs >>= \res -> case F.toList (assocs res) of
                               []    -> pure $ Leaf x
                               [c]   -> pure $ OneNode x c
                               [l,r] -> pure $ TwoNode x l r
-                              _     -> Nothing
+                              _     -> traceShow (x, length chs) Nothing

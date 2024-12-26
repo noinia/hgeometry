@@ -16,6 +16,7 @@ module HGeometry.Polygon.Simple.ShortestPath.Tree
   where
 
 import           Control.Lens
+import           Data.Bifoldable
 import           Data.Bifunctor (first)
 import           Data.Coerce
 import qualified Data.FingerTree as FT
@@ -46,6 +47,7 @@ import           Hiraffe.PlanarGraph.Connected
 
 import           HGeometry.Number.Real.Rational
 
+import           Debug.Trace
 --------------------------------------------------------------------------------
 
 -- class TriangulatedSimplePolygon_ polygon point r where
@@ -122,6 +124,12 @@ instance Bifunctor (DualTree a) where
     RootTwo r (e, a) (e',b)        -> RootTwo r (f e, go a) (f e', go  b)
     RootThree r (d, a) (e,b) (h,c) -> RootThree r (f d, go a) (f e, go  b) (f h, go c)
 
+instance Bifoldable (DualTree a) where
+  bifoldMap f g = let go = bifoldMap f g in \case
+    RootZero _                     -> mempty
+    RootOne _ (e, t)               -> f e <> go t
+    RootTwo _ (e, a) (e',b)        -> f e <> go a <> f e' <> go  b
+    RootThree _ (d, a) (e,b) (h,c) -> f d <> go a <> f e  <> go  b <> f h <> go c
 
 -- | Computes the dual tree of the polygon, starting with the triangle containing
 -- the source point.
@@ -130,20 +138,25 @@ instance Bifunctor (DualTree a) where
 dualTreeFrom             :: ( Point_ source 2 r
                             , Point_ point 2 r
                             , Ord r, Num r
+
+                            , Show r, Show point, Show source
                             )
                          => source
-                         -> CPlaneGraph s point e f
+                         -> CPlaneGraph s point PolygonEdgeType  f
                          --  ^ the triangulated polygon
-                         -> Maybe (DualTree (FaceIx (CPlaneGraph s point e f))
-                                            (DartIx (CPlaneGraph s point e f))
-                                            (FaceIx (CPlaneGraph s point e f))
+                         -> Maybe (DualTree (FaceIx (CPlaneGraph s point PolygonEdgeType f))
+                                            (DartIx (CPlaneGraph s point PolygonEdgeType f))
+                                            (FaceIx (CPlaneGraph s point PolygonEdgeType f))
                                   )
 dualTreeFrom source poly = do
-    let inTriangle (_, pg) = case source `inPolygon` pg of
-                               Boundary.StrictlyOutside -> True
-                               _                        -> False
-    (root',_) <- findOf (interiorFacePolygons.withIndex) inTriangle poly
-    toDualTree $ toFaceIds $ dfs (dualGraph poly) (toDualVertexIx root')
+    let gr                 = dualGraph poly
+        inTriangle (i, pg) = case traceShowWith (source,pg,i,) $ source `inPolygon` pg of
+                               Boundary.StrictlyOutside -> False
+                               _                        -> True
+    (root',_) <- traceShowWith ("root",) $ findOf (interiorFacePolygons.withIndex) inTriangle poly
+    toDualTree $ toFaceIds $ dfs' (\u -> filter (\(e,_) -> gr^?!edgeAt e == Diagonal)
+                                                (gr^..neighboursOfByEdge u.asIndex)
+                                  ) (numVertices gr) (toDualVertexIx root')
 
 
 -- | Coerce into the right type
@@ -157,8 +170,13 @@ toDualVertexIx :: FaceIx (CPlaneGraph s point e f)
 toDualVertexIx = coerce
 
 -- | Tries to convert the RoseTree into a DualTree
-toDualTree                   :: TrieF (KV []) e v -> Maybe (DualTree v e v)
-toDualTree (Node root' chs)  = traverse asBinaryTrie chs >>= \res -> case F.toList (assocs res) of
+toDualTree                   :: (Show e, Show v) =>
+  TrieF (KV []) e v -> Maybe (DualTree v e v)
+toDualTree (Node root' chs) | traceShow ("toDualTree",root',fmap asBinaryTrie chs
+
+                                        ) False = undefined
+
+toDualTree (Node root' chs)  = traverse asBinaryTrie chs >>= \res -> case traceShowWith ("chs",) $ F.toList (assocs res) of
   []      -> Just $ RootZero  root'
   [c]     -> Just $ RootOne   root' c
   [l,r]   -> Just $ RootTwo   root' l r

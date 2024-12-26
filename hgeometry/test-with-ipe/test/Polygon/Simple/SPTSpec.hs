@@ -3,6 +3,7 @@
 module Polygon.Simple.SPTSpec(spec) where
 
 import           Control.Lens
+import           Data.Bifoldable
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Golden
@@ -11,9 +12,11 @@ import           HGeometry.Number.Real.Rational
 import           HGeometry.PlaneGraph
 import           HGeometry.Point
 import           HGeometry.Polygon.Simple
-import           HGeometry.Polygon.Triangulation
 import           HGeometry.Polygon.Simple.ShortestPath.Tree
+import           HGeometry.Polygon.Triangulation
+import           HGeometry.Vector
 import           Ipe
+import           Ipe.Color
 import           System.OsPath
 import           Test.Hspec
 import           Test.Hspec.WithTempFile
@@ -39,9 +42,20 @@ testIpe inFp outFp = do
     let triang    = triangulate (poly^.core)
         (mySource :+ _)  = NonEmpty.head sources
         Just tree  = dualTreeFrom mySource triang
-        -- tree' = toDualTreeFrom triang mySource tree'
+        tree' = toDualTreeFrom triang mySource tree
+
+        diags = [ iO $ defIO  (triang^?!edgeSegmentAt e) ! attr SStroke gray
+                | (e, Diagonal) <- triang^..edges.withIndex
+                ]
+
+        lefts = [ iO $ defIO p ! attr SStroke blue
+                | p <- bifoldMap (\(Vector2 (_,l) (_,l')) -> [l,l']) (const []) tree'
+                ]
+
         out = [ iO' sources
               , iO' poly
+              , iO $ ipeGroup lefts
+              , iO $ ipeGroup diags
               , drawDualTree triang tree
               ]
     goldenWith [osp|data/test-with-ipe/Polygon/Simple/ShortestPath/|]
@@ -61,8 +75,8 @@ drawDualTree gr dt = iO . ipeGroup . concat $ [ verts
                                               , treeEdges
                                               ]
   where
-    verts     = drawRoot : foldMap ((:[]) . drawVertex) dt
+    verts     = drawRoot : foldMap ((:[]) . iO . drawVertex) dt
     treeEdges = []
 
-    drawRoot     = drawVertex $ dt^.rootVertex
-    drawVertex f = iO $ ipeDiskMark $ gr^?!interiorFacePolygonAt f.to centroid
+    drawRoot     = iO $ drawVertex (dt^.rootVertex) ! attr SStroke red
+    drawVertex f = ipeDiskMark $ gr^?!interiorFacePolygonAt f.to centroid
