@@ -98,6 +98,23 @@ data DualTree a e b = RootZero  a
                     | RootThree a (e, BinaryTrie e b) (e, BinaryTrie e b) (e, BinaryTrie e b)
                     deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
 
+-- | Access the root of the dual tree
+rootVertex :: Lens (DualTree a e b) (DualTree a' e b) a a'
+rootVertex = lens g (flip s)
+  where
+    g = \case
+      RootZero r        -> r
+      RootOne r _       -> r
+      RootTwo r _ _     -> r
+      RootThree r _ _ _ -> r
+    s r = \case
+      RootZero _         -> RootZero r
+      RootOne _ a        -> RootOne r a
+      RootTwo _ a b      -> RootTwo r a b
+      RootThree _ a b c  -> RootThree r a b c
+
+
+
 instance Bifunctor (DualTree a) where
   bimap f g = let go = bimap f g in \case
     RootZero r                     -> RootZero r
