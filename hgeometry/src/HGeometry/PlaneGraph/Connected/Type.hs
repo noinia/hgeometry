@@ -147,6 +147,7 @@ instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
          ) => Graph_ (CPlaneGraph s v e f) where
   neighboursOf u = _CPlanarGraph.neighboursOf u
+  neighboursOfByEdge u = _CPlanarGraph.neighboursOfByEdge u
   incidentEdgesOf u = _CPlanarGraph.incidentEdgesOf u
 
 instance ( Point_ v 2 (NumType v)
@@ -161,6 +162,9 @@ instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
          ) => PlanarGraph_ (CPlaneGraph s v e f) where
   type DualGraphOf (CPlaneGraph s v e f) = CPlanarGraph Dual s f e v
+
+  _DualFaceIx _ = coerced
+  _DualVertexIx _ = coerced
 
   dualGraph = dualGraph . coerce @_ @(CPlanarGraph Primal s v e f)
 

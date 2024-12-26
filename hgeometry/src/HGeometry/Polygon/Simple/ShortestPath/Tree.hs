@@ -88,9 +88,7 @@ computeShortestPaths s poly = computeShortestPaths' s poly (triangulate poly)
 --                      | Three a b b b
 
 
-
-
-
+--------------------------------------------------------------------------------
 
 -- | A dualTree of a polygon; essentially a binary tree (with the exception) that the root
 -- may actually have three children.
@@ -175,7 +173,6 @@ toDualTree                   :: (Show e, Show v) =>
 toDualTree (Node root' chs) | traceShow ("toDualTree",root',fmap asBinaryTrie chs
 
                                         ) False = undefined
-
 toDualTree (Node root' chs)  = traverse asBinaryTrie chs >>= \res -> case traceShowWith ("chs",) $ F.toList (assocs res) of
   []      -> Just $ RootZero  root'
   [c]     -> Just $ RootOne   root' c
@@ -210,100 +207,16 @@ toDualTreeFrom gr s dt = case first endPoints' dt of
         Nothing -> error "absurd, third vertex not found"
         Just v  -> v
 
-
--- toDualTreeFrom'     :: gr
---                     -> Vector 2 (VertexIx gr, Vertex gr)
---                     -> BinaryTrie (DartIx gr) (FaceIx gr)
---                     -> BinaryTrie (Vector 2 (VertexIx gr, Vertex gr)) (VertexIx gr, Vertex gr)
--- toDualTreeFrom' gr = mapWithEdgeLabels _ thirdVertex
---   -- go
---   -- where
---   --   go diag = \case
---   --     Leaf f          -> Leaf $ thirdVertex diag f
---   --     OneNode f (d,c) -> OneNode (thirdVertex diag f) (d, go )
-
-
-
 --------------------------------------------------------------------------------
-
--- toDualTreesFrom    :: gr
---                    -> DualTree d (FaceIx gr) (FaceIx gr)
-
---                    -> DualTree d (Vector 3 (Vector 2 (VertexIx gr, Vertex gr)))
---                                  (VertexIx gr, Vertex gr)
--- toDualTreesFrom gr = \case
---     RootZero root'    -> RootZero undefined
---     RootOne root' a   -> RootOne
-
---     undefined undefined -- go root' a
---     RootTwo root' a b -> let a' = go root' a
---                              b' = go root' b
---                          in RootTwo undefined a' b'
---     RootThree root' a b c -> let a' = go root' a
---                                  b' = go root' b
---                                  c' = go root' c
---                              in RootThree undefined a' b' c'
---   where
---
-
-
-
-
---     go0 parent = undefined
-
---     go = undefined
-    -- go l r = \case
-    --   Nil              -> Nil
-    --   Internal l' t r' -> let otherVertex (i,_) = i /= fst l && i /= fst r
-    --                       in case findOf (boundaryVerticesOf t.withIndex) otherVertex gr of
-    --     Nothing -> error "toDualTreesFrom: absurd"
-    --     Just w  -> Internal (go l w l') w (go r w r')
-
-
-
--- data DualTree v = DualTree { _leftVtx  :: v
---                            , _tree     :: BinaryTree v
---                            , _rightVtx :: v
---                            }
---                   deriving (Show)
-
-
-
---------------------------------------------------------------------------------
-
--- (Tree.Node root chs) = undefined
-
-
 
 type Vertex' poly point = VertexIx poly :+ point
 
 
--- toDualTree      :: CPlaneGraph s point e f
---                 -> Tree (FaceIx (CPlaneGraph s point e f))
---                 -> BinaryTree (VertexIx (CPlaneGraph s point e f) :+ point)
--- toDualTree poly = fmap toTriangle
-
-
--- toDualTree'     :: CPlaneGraph s point e f
---                 -> Tree (FaceIx (CPlaneGraph s point e f))
---                 -> BinaryTree (FaceIx (CPlaneGraph s point e f))
--- toDualTree' poly = fmap toTriangle
-
-
-      -- \case
-      -- Node i
-
-
-
-
-
 --------------------------------------------------------------------------------
 
-{-
-
 data Range r = EmptyR
-             | Range { _min :: !r
-                     , _max :: !r
+             | Range { _min :: !(Bottom r)
+                     , _max :: !(Top    r)
                      }
              deriving (Show,Eq)
 
@@ -322,7 +235,7 @@ newtype Elem a = Elem a
 
 type OrdSeq a = FT.FingerTree (Range a) (Elem a)
 
-instance Measured (Range a) (Elem a) where
+instance FT.Measured (Range a) (Elem a) where
   measure (Elem x) = Range (ValB x) (ValT x)
 
 
@@ -337,12 +250,12 @@ data Cusp a v = Cusp { _leftMost   :: v
 
 -- | Lens to access the apex of the Cusp
 apex :: Lens (Cusp a v) (Cusp a' v) a a'
-apex = lens _apex { \(Cusp l _ r) a -> Cusp l a r}
+apex = lens _apex (\(Cusp l ls _ rs r) a -> Cusp l ls a rs r)
 
 
+--------------------------------------------------------------------------------
 
-
-
+-- | The result of splitting a Cusp
 data Split a v = ApexLeft  (Cusp a v) (Cusp v v)
                | AtApex    (Cusp a v) (Cusp a v)
                | ApexRight (Cusp v v) (Cusp a v)
@@ -365,11 +278,7 @@ data Split a v = ApexLeft  (Cusp a v) (Cusp v v)
 -- this is just FT.search
 
 
-
-
-
-
-
+{-
 splitAtParent                      :: v -> Cusp a v -> Split a v
 splitAtParent w (Cusp l ls a rs r) = case ( isLeftTurn  w l' a
                                                                 , isRightTurn w r' a
@@ -388,31 +297,35 @@ splitAtParent w (Cusp l ls a rs r) = case ( isLeftTurn  w l' a
 compute             :: forall source vertex.
                        source
                     -> Cusp source vertex
-                    -> BinaryTree vertex
+                    -> (e, BinaryTrie e vertex)
                     -> [(vertex :+ Either source vertex)]
 compute s poly = go
   where
-    go      Cusp source vertex -> BinaryTree vertex -> [(vertex :+ Either source vertex)]
-    go cusp = \case
-      Nil            -> [] -- we are done in this branch
-      Internal l w r -> case splitAtParent w cusp of
+    go             :: Cusp source vertex -> (e, BinaryTrie vertex)
+                   -> [(vertex :+ Either source vertex)]
+    go cusp (e,tr) = case tr of
+      Leaf w        -> undefined --
+      OneNode w t   -> undefined -- are we going left or right?
+      TwoNode w l r -> case splitAtParent w cusp of
         ApexLeft cl cr -> (w :+ Right $ cl^.apex)   : go cl l        <> goVertex' cr r
         AtApex   cl cr -> (w :+ Left  $ cusp^.apex) : go cl l        <> go cr r
         ApexLeft cl cr -> (w :+ Right $ cr^.apex)   : goVertex' cl l <> go cr r
 
     goVertex' cusp = fmap (over extra %~ Right) . goVertex cusp
 
-    goVertex      :: Cusp vertex vertex -> BinaryTree vertex -> [(vertex :+ vertex)]
-    goVertex cusp = \case
-      Nil            -> [] -- we are done in this branch
-      Internal l w r -> case splitAtParent w cusp of
-        ApexLeft cl cr -> (w :+ cl^.apex)   : goVertex cl l <> goVertex cr r
-        AtApex   cl cr -> (w :+ cusp^.apex) : goVertex cl l <> goVertex cr r
-        ApexLeft cl cr -> (w :+ cr^.apex)   : goVertex cl l <> goVertex cr r
+    goVertex      :: Cusp vertex vertex -> (e, BinaryTrie vertex) -> [(vertex :+ vertex)]
+    goVertex cusp = undefined
+
+
+      -- \case
+      -- Nil            -> [] -- we are done in this branch
+      -- Internal l w r -> case splitAtParent w cusp of
+      --   ApexLeft cl cr -> (w :+ cl^.apex)   : goVertex cl l <> goVertex cr r
+      --   AtApex   cl cr -> (w :+ cusp^.apex) : goVertex cl l <> goVertex cr r
+      --   ApexLeft cl cr -> (w :+ cr^.apex)   : goVertex cl l <> goVertex cr r
 
 
 -}
-
 
 
 type R = RealNumber 5

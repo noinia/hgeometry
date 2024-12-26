@@ -49,7 +49,7 @@ testIpe inFp outFp = do
                 ]
 
         lefts = [ iO $ defIO p ! attr SStroke blue
-                | p <- bifoldMap (\(Vector2 (_,l) (_,l')) -> [l,l']) (const []) tree'
+                | p <- bifoldMap (\(Vector2 (_,l) (_,_)) -> [l]) (const []) tree'
                 ]
 
         out = [ iO' sources
