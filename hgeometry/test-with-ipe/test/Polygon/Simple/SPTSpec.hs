@@ -11,6 +11,7 @@ import           HGeometry.Ext
 import           HGeometry.Number.Real.Rational
 import           HGeometry.PlaneGraph
 import           HGeometry.Point
+import           HGeometry.LineSegment
 import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Simple.ShortestPath.Tree
 import           HGeometry.Polygon.Triangulation
@@ -42,7 +43,15 @@ testIpe inFp outFp = do
     let triang    = triangulate (poly^.core)
         (mySource :+ _)  = NonEmpty.head sources
         Just tree  = dualTreeFrom mySource triang
-        tree' = toDualTreeFrom triang mySource tree
+        tree' = toTreeRep triang mySource tree
+
+        mkEdge u = \case
+          Left s      -> ClosedLineSegment u s
+          Right (_,p) -> ClosedLineSegment u p
+
+        sptEdges = [ iO $ defIO (mkEdge v p) ! attr SStroke green
+                   | (_,v) :+ p <- computeShortestPaths' mySource triang
+                   ]
 
         diags = [ iO $ defIO  (triang^?!edgeSegmentAt e) ! attr SStroke gray
                 | (e, Diagonal) <- triang^..edges.withIndex
@@ -56,6 +65,7 @@ testIpe inFp outFp = do
               , iO' poly
               , iO $ ipeGroup lefts
               , iO $ ipeGroup diags
+              , iO $ ipeGroup sptEdges
               , drawDualTree triang tree
               ]
     goldenWith [osp|data/test-with-ipe/Polygon/Simple/ShortestPath/|]

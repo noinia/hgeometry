@@ -21,6 +21,7 @@ import           Data.Bifunctor (first)
 import           Data.Coerce
 import qualified Data.FingerTree as FT
 import qualified Data.Foldable as F
+import           Data.Function (on)
 import qualified Data.Sequence as Seq
 import           HGeometry.Boundary
 import qualified HGeometry.Boundary as Boundary
@@ -37,7 +38,6 @@ import           HGeometry.Polygon.Triangulation
 import           HGeometry.Sequence.KV
 import           HGeometry.Sequence.NonEmpty (ViewR1(..))
 import qualified HGeometry.Sequence.NonEmpty as NESeq
-import           HGeometry.Tree.Util
 import           HGeometry.Trie
 import           HGeometry.Unbounded
 import           HGeometry.Vector
@@ -67,25 +67,25 @@ computeShortestPaths s poly = computeShortestPaths' s poly (triangulate poly)
 -}
 
 
-
-
--- computeShortestPaths'        :: ()
---                              => source
---                              -> CPlaneGraph s point e f
---                              --  ^ the triangulated polygon
---                              -> Maybe ()
--- computeShortestPaths' s poly =
-
---   do
---     (root,_) <- findOf (interiorFacePolygons.withIndex) sourceTriang poly
---     dualTree <- toBinaryTree $ dfs (dualGraph poly) root
---     let toDualTreesFrom
-
-
-
--- data AtMostThree a b = One   a b
---                      | Two   a b b
---                      | Three a b b b
+computeShortestPaths'        :: ( Point_ source 2 r
+                                , Point_ vertex 2 r
+                                , Num r, Ord r
+                                , Show r, Show source, Show vertex
+                                )
+                             => source
+                             -> CPlaneGraph s vertex PolygonEdgeType f
+                             --  ^ the triangulated polygon
+                             -> [(VertexId s, vertex) :+ Either source (VertexId s, vertex)]
+computeShortestPaths' s poly = case dualTreeFrom s poly of
+    Nothing -> []
+    Just tr -> triang <> case toTreeRep poly s tr of
+                           RootZero  _       -> []
+                           RootOne   _ a     -> compute' a
+                           RootTwo   _ a b   -> compute' a <> compute' b
+                           RootThree _ a b c -> compute' a <> compute' b <> compute' c
+      where
+        triang = (\u -> u :+ Left s) <$> poly^..boundaryVerticesOf (tr^.rootVertex).withIndex
+        compute' = compute ((==) `on` fst) s
 
 
 --------------------------------------------------------------------------------
@@ -182,7 +182,7 @@ toDualTree (Node root' chs)  = traverse asBinaryTrie chs >>= \res -> case traceS
 
 
 -- | Transform the dual tree into a format we can use to run the shortest path procedure on
-toDualTreeFrom      :: ( PlanarGraph_ gr
+toTreeRep      :: ( PlanarGraph_ gr
                        , Eq (VertexIx gr)
                        )
                     => gr
@@ -191,7 +191,7 @@ toDualTreeFrom      :: ( PlanarGraph_ gr
                     -> DualTree source
                                 (Vector 2 (VertexIx gr, Vertex gr))
                                 (VertexIx gr, Vertex gr)
-toDualTreeFrom gr s dt = case first endPoints' dt of
+toTreeRep gr s dt = case first endPoints' dt of
     RootZero _        -> RootZero s
     RootOne _ a       -> RootOne s (mapEdge a)
     RootTwo _ a b     -> RootTwo s (mapEdge a) (mapEdge b)
@@ -215,8 +215,8 @@ type Vertex' poly point = VertexIx poly :+ point
 --------------------------------------------------------------------------------
 
 data Range r = EmptyR
-             | Range { _min :: !(Bottom r)
-                     , _max :: !(Top    r)
+             | Range { _min :: !r
+                     , _max :: !r
                      }
              deriving (Show,Eq)
 
@@ -236,7 +236,7 @@ newtype Elem a = Elem a
 type OrdSeq a = FT.FingerTree (Range a) (Elem a)
 
 instance FT.Measured (Range a) (Elem a) where
-  measure (Elem x) = Range (ValB x) (ValT x)
+  measure (Elem x) = Range x x
 
 
 -- | The cusp of the funnel
@@ -278,59 +278,103 @@ data Split a v = ApexLeft  (Cusp a v) (Cusp v v)
 -- this is just FT.search
 
 
-{-
+
 splitAtParent                      :: v -> Cusp a v -> Split a v
-splitAtParent w (Cusp l ls a rs r) = case ( isLeftTurn  w l' a
-                                                                , isRightTurn w r' a
-                                                                ) of
-    (False,False) -> AtApex (Cusp l a (single w)) (Cusp (single w) a r)
-    (False,True)  -> undefined
+splitAtParent w (Cusp l ls a rs r) = undefined
 
+  -- case ( isLeftTurn  w l' a
+  --                                         , isRightTurn w r' a
+  --                                                               ) of
+  --   (False,False) -> AtApex (Cusp l a (single w)) (Cusp (single w) a r)
+  --   (False,True)  -> undefined
+
+  -- where
+  --   (l :<< _) = viewl1 ls
+  --   (r :<< _) = viewl1 rs
+
+
+  --   single x = Seq.Empty :>> x
+
+
+-- (Vector 2 (VertexIx gr, Vertex gr))
+
+compute   :: forall source vertex.
+             (vertex -> vertex -> Bool)
+          -- ^ equality test between vertices.
+          -> source
+          -> (Vector 2 vertex , BinaryTrie (Vector 2 vertex) vertex)
+          -> [(vertex :+ Either source vertex)]
+compute (=.=) s poly@(Vector2 l r,_) = go (Cusp l FT.empty s FT.empty r) poly
   where
-    (l :<< _) = viewl1 ls
-    (r :<< _) = viewl1 rs
 
-
-    single x = Seq.Empty :>> x
-
-
-compute             :: forall source vertex.
-                       source
-                    -> Cusp source vertex
-                    -> (e, BinaryTrie e vertex)
-                    -> [(vertex :+ Either source vertex)]
-compute s poly = go
-  where
-    go             :: Cusp source vertex -> (e, BinaryTrie vertex)
+    go             :: Cusp source vertex -> (Vector 2 vertex, BinaryTrie (Vector 2 vertex) vertex)
                    -> [(vertex :+ Either source vertex)]
-    go cusp (e,tr) = case tr of
-      Leaf w        -> undefined --
-      OneNode w t   -> undefined -- are we going left or right?
-      TwoNode w l r -> case splitAtParent w cusp of
-        ApexLeft cl cr -> (w :+ Right $ cl^.apex)   : go cl l        <> goVertex' cr r
-        AtApex   cl cr -> (w :+ Left  $ cusp^.apex) : go cl l        <> go cr r
-        ApexLeft cl cr -> (w :+ Right $ cr^.apex)   : goVertex' cl l <> go cr r
+    go cusp (e,tr) = (w :+ p) : rest
+      where
+        w      = tr^.root
+        split' = splitAtParent w cusp
+        p      = case split' of
+                   ApexLeft  _  cr -> Right (cr^.apex)
+                   AtApex    _  _  -> Left  (cusp^.apex)
+                   ApexRight cl _  -> Right (cl^.apex)
+        rest   = case tr of
+          Leaf _                      -> []
+          OneNode _ c@(Vector2 l r,_)
+            | w =.= l -> case split' of
+                ApexLeft  _ cr -> goVertex' cr c
+                AtApex    _ cr -> go        cr c
+                ApexRight _ cr -> go        cr c
+            | w =.= r -> case split' of
+                ApexLeft  cl _ -> go        cl c
+                AtApex    cl _ -> go        cl c
+                ApexRight cl _ -> goVertex' cl c
+          TwoNode _ l r -> case split' of
+            ApexLeft  cl cr -> go cl l        <> goVertex' cr r
+            AtApex    cl cr -> go cl l        <> go cr r
+            ApexRight cl cr -> goVertex' cl l <> go cr r
 
-    goVertex' cusp = fmap (over extra %~ Right) . goVertex cusp
-
-    goVertex      :: Cusp vertex vertex -> (e, BinaryTrie vertex) -> [(vertex :+ vertex)]
-    goVertex cusp = undefined
+    goVertex' cusp = fmap (over extra Right) . goVertex cusp
 
 
-      -- \case
-      -- Nil            -> [] -- we are done in this branch
-      -- Internal l w r -> case splitAtParent w cusp of
-      --   ApexLeft cl cr -> (w :+ cl^.apex)   : goVertex cl l <> goVertex cr r
-      --   AtApex   cl cr -> (w :+ cusp^.apex) : goVertex cl l <> goVertex cr r
-      --   ApexLeft cl cr -> (w :+ cr^.apex)   : goVertex cl l <> goVertex cr r
 
 
--}
+
+    goVertex             :: Cusp vertex vertex
+                         -> (Vector 2 vertex, BinaryTrie (Vector 2 vertex) vertex)
+                         -> [vertex :+ vertex]
+    goVertex cusp (e,tr) = (w :+ p) : rest
+      where
+        w      = tr^.root
+        split' = splitAtParent w cusp
+        p      = case split' of
+                   ApexLeft  _  cr -> cr^.apex
+                   AtApex    _  _  -> cusp^.apex
+                   ApexRight cl _  -> cl^.apex
+        rest   = case tr of
+          Leaf _                      -> []
+          OneNode _ c@(Vector2 l r,_)
+            | w =.= l -> case split' of
+                ApexLeft  _ cr -> goVertex cr c
+                AtApex    _ cr -> goVertex cr c
+                ApexRight _ cr -> goVertex cr c
+            | w =.= r -> case split' of
+                ApexLeft  cl _ -> goVertex cl c
+                AtApex    cl _ -> goVertex cl c
+                ApexRight cl _ -> goVertex cl c
+          TwoNode _ l r -> case split' of
+            ApexLeft  cl cr -> goVertex cl l <> goVertex cr r
+            AtApex    cl cr -> goVertex cl l <> goVertex cr r
+            ApexRight cl cr -> goVertex cl l <> goVertex cr r
+
+
+
+
+
 
 
 type R = RealNumber 5
 test = let g = triangulate myPolygon
-       in toDualTreeFrom g mySource <$> dualTreeFrom mySource g
+       in toTreeRep g mySource <$> dualTreeFrom mySource g
 
 mySource :: Point 2 R
 mySource = Point2 224 112

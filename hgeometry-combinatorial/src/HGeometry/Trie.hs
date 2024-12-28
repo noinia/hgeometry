@@ -10,6 +10,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Trie
   ( TrieF(..)
+  , root
   , mapWithEdgeLabels
 
   , BinaryTrie
@@ -29,11 +30,17 @@ import           Data.Functor.Classes
 import           Data.Semigroup.Traversable
 import           HGeometry.Sequence.KV
 
-import Debug.Trace
+-- import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | The Trie data type, parameterized by the data structure storing the children.
 data TrieF f e v = Node v (f e (TrieF f e v))
+
+--  | Access the root of the trie
+root :: Lens' (TrieF f e v) v
+root = lens (\(Node x _) -> x) (\(Node _ chs) x -> Node x chs)
+{-# INLINE root #-}
+
 
 deriving instance (Show v, Show e, Show2 f) => Show (TrieF f e v)
 deriving instance (Eq v, Eq e, Eq2 f)       => Eq (TrieF f e v)
@@ -155,10 +162,9 @@ pattern TwoNode v l r = Node v (KV (Two l r))
 
 
 -- | Trie to convert the trie into a binary trie.
--- asBinaryTrie              :: Traversable f => TrieF (KV f) e v -> Maybe (BinaryTrie e v)
-asBinaryTrie              :: (Traversable f, Show e, Show v) => TrieF (KV f) e v -> Maybe (BinaryTrie e v)
+asBinaryTrie              :: Traversable f => TrieF (KV f) e v -> Maybe (BinaryTrie e v)
 asBinaryTrie (Node x chs) = traverse asBinaryTrie chs >>= \res -> case F.toList (assocs res) of
                               []    -> pure $ Leaf x
                               [c]   -> pure $ OneNode x c
                               [l,r] -> pure $ TwoNode x l r
-                              _     -> traceShow (x, length chs) Nothing
+                              _     -> Nothing
