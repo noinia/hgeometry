@@ -46,11 +46,11 @@ testIpe inFp outFp = do
         tree' = toTreeRep triang mySource tree
 
         mkEdge u = \case
-          Left s      -> ClosedLineSegment u s
-          Right (_,p) -> ClosedLineSegment u p
+          Left s        -> ClosedLineSegment u s
+          Right (p :+ _) -> ClosedLineSegment u p
 
         sptEdges = [ iO $ defIO (mkEdge v p) ! attr SStroke green
-                   | (_,v) :+ p <- computeShortestPaths' mySource triang
+                   | (v :+ _) :+ p <- computeShortestPaths' mySource triang
                    ]
 
         diags = [ iO $ defIO  (triang^?!edgeSegmentAt e) ! attr SStroke gray
@@ -58,7 +58,7 @@ testIpe inFp outFp = do
                 ]
 
         lefts = [ iO $ defIO p ! attr SStroke blue
-                | p <- bifoldMap (\(Vector2 (_,l) (_,_)) -> [l]) (const []) tree'
+                | p <- bifoldMap (\(Vector2 (l :+ _) _) -> [l]) (const []) tree'
                 ]
 
         out = [ iO' sources

@@ -131,6 +131,7 @@ instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
          ) => Graph_ (PlaneGraph s v e f) where
   neighboursOf u = _PlanarGraph.neighboursOf u
+  neighboursOfByEdge u = _PlanarGraph.neighboursOfByEdge u
   incidentEdgesOf u = _PlanarGraph.incidentEdgesOf u
 
 {-

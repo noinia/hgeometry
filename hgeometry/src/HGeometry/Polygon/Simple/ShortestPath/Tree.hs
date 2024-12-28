@@ -19,6 +19,7 @@ import           Control.Lens
 import           Data.Bifoldable
 import           Data.Bifunctor (first)
 import           Data.Coerce
+import           Data.FingerTree (Measured, FingerTree, ViewR(..), SearchResult(..))
 import qualified Data.FingerTree as FT
 import qualified Data.Foldable as F
 import           Data.Function (on)
@@ -75,7 +76,7 @@ computeShortestPaths'        :: ( Point_ source 2 r
                              => source
                              -> CPlaneGraph s vertex PolygonEdgeType f
                              --  ^ the triangulated polygon
-                             -> [(VertexId s, vertex) :+ Either source (VertexId s, vertex)]
+                             -> [(vertex :+ VertexId s) :+ Either source (vertex :+ VertexId s)]
 computeShortestPaths' s poly = case dualTreeFrom s poly of
     Nothing -> []
     Just tr -> triang <> case toTreeRep poly s tr of
@@ -84,8 +85,8 @@ computeShortestPaths' s poly = case dualTreeFrom s poly of
                            RootTwo   _ a b   -> compute' a <> compute' b
                            RootThree _ a b c -> compute' a <> compute' b <> compute' c
       where
-        triang = (\u -> u :+ Left s) <$> poly^..boundaryVerticesOf (tr^.rootVertex).withIndex
-        compute' = compute ((==) `on` fst) s
+        triang = (\u -> u :+ Left s) <$> poly^..boundaryVerticesOf (tr^.rootVertex).asIndexedExt
+        compute' = compute ((==) `on` (view extra)) s
 
 
 --------------------------------------------------------------------------------
@@ -182,15 +183,15 @@ toDualTree (Node root' chs)  = traverse asBinaryTrie chs >>= \res -> case traceS
 
 
 -- | Transform the dual tree into a format we can use to run the shortest path procedure on
-toTreeRep      :: ( PlanarGraph_ gr
-                       , Eq (VertexIx gr)
-                       )
-                    => gr
-                    -> source
-                    -> DualTree (FaceIx gr) (DartIx gr) (FaceIx gr)
-                    -> DualTree source
-                                (Vector 2 (VertexIx gr, Vertex gr))
-                                (VertexIx gr, Vertex gr)
+toTreeRep         :: ( PlanarGraph_ gr
+                     , Eq (VertexIx gr)
+                     )
+                  => gr
+                  -> source
+                  -> DualTree (FaceIx gr) (DartIx gr) (FaceIx gr)
+                  -> DualTree source
+                              (Vector 2 (Vertex gr :+ VertexIx gr))
+                              (Vertex gr :+ VertexIx gr)
 toTreeRep gr s dt = case first endPoints' dt of
     RootZero _        -> RootZero s
     RootOne _ a       -> RootOne s (mapEdge a)
@@ -199,11 +200,11 @@ toTreeRep gr s dt = case first endPoints' dt of
   where
     mapEdge (e,a) = (e, mapWithEdgeLabels (thirdVertex e) thirdVertex a)
 
-    endPoints' d = let ((u,v),(ux,vx)) = gr^.endPointsOf d.withIndex in Vector2 (u,ux) (v,vx)
+    endPoints' d = let ((u,v),(ux,vx)) = gr^.endPointsOf d.withIndex in Vector2 (ux :+ u) (vx :+ v)
     -- TODO: make sure the oreitnation is indeed right
 
-    thirdVertex (Vector2 (l,_) (r,_)) f =
-      case ifindOf (boundaryVerticesOf f.withIndex) (\v _ -> v /= l && v /= r) gr of
+    thirdVertex (Vector2 (_ :+ l) (_ :+ r)) f =
+      case ifindOf (boundaryVerticesOf f.asIndexedExt) (\v _ -> v /= l && v /= r) gr of
         Nothing -> error "absurd, third vertex not found"
         Just v  -> v
 
@@ -214,29 +215,36 @@ type Vertex' poly point = VertexIx poly :+ point
 
 --------------------------------------------------------------------------------
 
-data Range r = EmptyR
+data Range r = EmptyRange
              | Range { _min :: !r
                      , _max :: !r
                      }
              deriving (Show,Eq)
 
 instance Semigroup (Range r) where
-  EmptyR      <> r            = r
-  l           <> EmptyR       = l
+  EmptyRange  <> r            = r
+  l           <> EmptyRange   = l
   (Range l _) <> (Range _ u') = Range l u'
 
 instance Monoid (Range r) where
-  mempty = EmptyR
-
+  mempty = EmptyRange
 
 newtype Elem a = Elem a
   deriving newtype (Show,Eq,Ord)
 
+type OrdSeq a = FingerTree (Range a) (Elem a)
 
-type OrdSeq a = FT.FingerTree (Range a) (Elem a)
-
-instance FT.Measured (Range a) (Elem a) where
+instance Measured (Range a) (Elem a) where
   measure (Elem x) = Range x x
+
+
+testSeq :: OrdSeq Int
+testSeq = FT.fromList $ map Elem [2,4..16]
+
+testSplit = FT.search (isRightSplit 5) testSeq
+
+
+
 
 
 -- | The cusp of the funnel
@@ -261,50 +269,59 @@ data Split a v = ApexLeft  (Cusp a v) (Cusp v v)
                | ApexRight (Cusp v v) (Cusp a v)
                deriving (Show,Eq)
 
-
--- -- | Given a predicate p x y, find the first element x_i so that p x_i x_{i+1} is true
--- -- i.e. returns the tuple (x_1,..,x_{i-1}, x_i, x_{i+1},..,x_n)
--- --
--- -- Returns
--- breakMonotonoic   :: (a -> a -> Bool) -> Seq.Seq a
---                   -> Break a
--- breakMonotonoic p = go
---   where
---     go = \case
---       Empty                        -> None
---       (x :< Empty)                 -> MaybeLast Empty x
---       (x :< y :< rest) | p x y     -> Break Empty x (y :< rest)
---                        | otherwise -> undefined
--- this is just FT.search
+isRightSplit q pref = \case
+  EmptyRange -> True
+  Range y _  -> case pref of
+    EmptyRange -> False
+    Range _ x  -> x >= q && q <= y
 
 
 
-splitAtParent                      :: v -> Cusp a v -> Split a v
-splitAtParent w (Cusp l ls a rs r) = undefined
+-- |
+-- Given a vertex w, the range \ell_1,..,\ell_i = p, and the range q=\ell_{i+1},..,\ell_n.
+-- returns whether or not we make a right turn when going from w to p and then to q.
+--
+-- i.e. this procedure is for searching on the left sequence of the cusp
+--
+isRightTurn        :: (Point_ vertex 2 r, Ord r, Num r)
+                   => vertex -> Range vertex -> Range vertex -> Bool
+isRightTurn w pref = \case
+  EmptyRange -> True
+  Range q _  -> case pref of
+    EmptyRange -> False
+    Range _ p  -> ccw w p q /= CCW
 
-  -- case ( isLeftTurn  w l' a
-  --                                         , isRightTurn w r' a
-  --                                                               ) of
-  --   (False,False) -> AtApex (Cusp l a (single w)) (Cusp (single w) a r)
-  --   (False,True)  -> undefined
-
-  -- where
-  --   (l :<< _) = viewl1 ls
-  --   (r :<< _) = viewl1 rs
+-- | for searching on the right sequence of the cusp
+isLeftTurn w pref = \case
+  EmptyRange -> True
+  Range y _  -> case pref of
+    EmptyRange -> False
+    Range _ x  -> ccw w x y /= CW
 
 
-  --   single x = Seq.Empty :>> x
+splitAtParent                      :: (Point_ vertex 2 r, Ord r, Num r)
+                                   => vertex -> Cusp a vertex -> Split a vertex
+splitAtParent w (Cusp l ls a rs r) = case FT.search (isRightTurn w) ls of
+    Nowhere            -> error "splitAtParent; absurd: precondition on left chain failed"
+    Position lsL p lsR -> ApexRight (Cusp l lsL (coerce p) mempty w) (Cusp w lsR a rs r)
+    OnLeft             -> ApexRight undefined undefined -- TODO
+
+    OnRight            -> case FT.search (isLeftTurn w) rs of
+      Nowhere            -> error "splitAtParent; absurd: precondition on right chain failed"
+      Position rsR p rsL -> ApexLeft (Cusp w ls a rsL r) (Cusp l mempty (coerce p) rsR w)
+    OnLeft               -> ApexLeft undefined undefined -- TODO
+    OnRight            -> AtApex    (Cusp l ls a mempty w)    (Cusp w mempty a rs r)
 
 
--- (Vector 2 (VertexIx gr, Vertex gr))
 
-compute   :: forall source vertex.
-             (vertex -> vertex -> Bool)
+compute   :: forall source vertex r.
+             (Point_ vertex 2 r, Ord r, Num r)
+          => (vertex -> vertex -> Bool)
           -- ^ equality test between vertices.
           -> source
           -> (Vector 2 vertex , BinaryTrie (Vector 2 vertex) vertex)
           -> [(vertex :+ Either source vertex)]
-compute (=.=) s poly@(Vector2 l r,_) = go (Cusp l FT.empty s FT.empty r) poly
+compute (=.=) s poly@(Vector2 l r,_) = go (Cusp l mempty s mempty r) poly
   where
 
     go             :: Cusp source vertex -> (Vector 2 vertex, BinaryTrie (Vector 2 vertex) vertex)
@@ -352,12 +369,12 @@ compute (=.=) s poly@(Vector2 l r,_) = go (Cusp l FT.empty s FT.empty r) poly
                    ApexRight cl _  -> cl^.apex
         rest   = case tr of
           Leaf _                      -> []
-          OneNode _ c@(Vector2 l r,_)
-            | w =.= l -> case split' of
+          OneNode _ c@(Vector2 l' r',_)
+            | w =.= l' -> case split' of
                 ApexLeft  _ cr -> goVertex cr c
                 AtApex    _ cr -> goVertex cr c
                 ApexRight _ cr -> goVertex cr c
-            | w =.= r -> case split' of
+            | w =.= r' -> case split' of
                 ApexLeft  cl _ -> goVertex cl c
                 AtApex    cl _ -> goVertex cl c
                 ApexRight cl _ -> goVertex cl c
