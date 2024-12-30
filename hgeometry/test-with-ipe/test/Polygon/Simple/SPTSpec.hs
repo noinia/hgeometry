@@ -28,6 +28,10 @@ import           Test.Hspec.WithTempFile
 
 spec :: Spec
 spec = describe "shortest path tree tests" $ do
+         testIpe [osp|simpler.ipe|]
+                 [osp|simpler_out.ipe|]
+         testIpe [osp|simpler1.ipe|]
+                 [osp|simpler1_out.ipe|]
          testIpe [osp|simple.ipe|]
                  [osp|simple_out.ipe|]
 

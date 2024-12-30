@@ -15,11 +15,13 @@ module HGeometry.Polygon.Simple.ShortestPath.Tree
   -- )
   where
 
-import           Control.Lens
+import           Control.Lens hiding ((:<), (<|))
 import           Data.Bifoldable
 import           Data.Bifunctor (first)
 import           Data.Coerce
-import           Data.FingerTree (Measured, FingerTree, ViewR(..), SearchResult(..))
+import           Data.FingerTree ( Measured, FingerTree, ViewR(..), ViewL(..), SearchResult(..)
+                                 , (<|)
+                                 )
 import qualified Data.FingerTree as FT
 import qualified Data.Foldable as F
 import           Data.Function (on)
@@ -299,29 +301,119 @@ isLeftTurn w pref = \case
     Range _ x  -> ccw w x y /= CW
 
 
-splitAtParent                      :: (Point_ vertex 2 r, Ord r, Num r)
-                                   => vertex -> Cusp a vertex -> Split a vertex
-splitAtParent w (Cusp l ls a rs r) = case FT.search (isRightTurn w) ls of
-    Nowhere            -> error "splitAtParent; absurd: precondition on left chain failed"
-    Position lsL p lsR -> ApexRight (Cusp l lsL (coerce p) mempty w) (Cusp w lsR a rs r)
-    OnLeft             -> ApexRight undefined undefined -- TODO
+data ConeCompare = InCone | LeftOfCone | RightOfCone deriving (Show,Eq)
 
-    OnRight            -> case FT.search (isLeftTurn w) rs of
-      Nowhere            -> error "splitAtParent; absurd: precondition on right chain failed"
-      Position rsR p rsL -> ApexLeft (Cusp w ls a rsL r) (Cusp l mempty (coerce p) rsR w)
-    OnLeft               -> ApexLeft undefined undefined -- TODO
-    OnRight            -> AtApex    (Cusp l ls a mempty w)    (Cusp w mempty a rs r)
+-- | test if w lies in the cone defined by apex a and vertices l and r.
+inApexCone         :: (Point_ vertex 2 r, Point_ apex 2 r, Ord r, Num r)
+                   => vertex -> apex -> vertex -> vertex -> ConeCompare
+inApexCone w a l r = case ccw a l w of
+                       CCW -> LeftOfCone
+                       _   -> case ccw a r w of
+                                CW -> RightOfCone
+                                _  -> InCone
+
+firstWith      :: OrdSeq a -> a -> a
+firstWith s d = case FT.viewl s of
+                  EmptyL -> d
+                  x :< _ -> coerce x
+
+lastWith     :: OrdSeq a -> a -> a
+lastWith s d = case FT.viewr s of
+                 FT.EmptyR -> d
+                 _ FT.:> x -> coerce x
+
+singleton :: a -> OrdSeq a
+singleton = FT.singleton . Elem
+
+-- | Given a vertex w, splits the cusp into two cusps corresponding to the two
+-- sides incident to w.
+splitAtParent                         :: ( Point_ vertex 2 r, Ord r, Num r
+                                         , Point_ apex 2 r
+                                         , Show vertex, Show r, Show apex
+                                         )
+                                      => vertex -> Cusp apex vertex -> Split apex vertex
+splitAtParent w cu@(Cusp l ls a rs r) = traceShowWith ("splitAtParent",w,cu,)  $
+                                        case inApexCone w a (lastWith ls l) (lastWith rs r) of
+    InCone      -> AtApex (Cusp l ls a mempty w)    (Cusp w mempty a rs r)
+    LeftOfCone  -> searchLeft
+    RightOfCone -> searchRight
+  where
+    searchLeft = case FT.search (isRightTurn w) ls of
+      Nowhere            -> error "splitAtParent: absurd: precondition on left chain failed"
+      Position lsL p lsR -> ApexRight (Cusp l lsL (coerce p) mempty w)    (Cusp w lsR a rs r)
+      OnLeft             -> case FT.viewl ls of
+        EmptyL   -> ApexRight (Cusp l mempty l mempty w) (Cusp w (coerce l <| ls) a rs r)
+                    -- we necessarily make a right turn at l since we are left of the
+                    -- visible cone
+        p :< lsR | isRightTurn' w l p ->
+                    ApexRight (Cusp l mempty l mempty w) (Cusp w (coerce l <| ls) a rs r)
+                   -- we actually allready make a right turn at l
+                   -- so this is actually the same as the emptyL case
+                 | otherwise          ->
+                    ApexRight (Cusp l mempty (coerce p) mempty w) (Cusp w ls a rs r)
+
+      OnRight            -> case FT.viewr ls of
+          FT.EmptyR   -> error "splitAtParent. searchLeft: absurd. emptyR"
+          lsL FT.:> p -> ApexRight (Cusp l lsL (coerce p) mempty w) (Cusp w mempty a rs r)
+
+    searchRight = case FT.search (isLeftTurn w) rs of
+      Nowhere            -> error "splitAtParent: absurd: precondition on right chain failed"
+      Position rsL p rsR -> ApexLeft (Cusp l ls a rsL w) (Cusp w mempty (coerce p) rsR r)
+      OnLeft             -> case FT.viewl rs of
+        EmptyL   -> ApexLeft (Cusp l ls a (coerce r <| rs) w) (Cusp w mempty r mempty r)
+                    -- we necessarily make a left turn at r since we are right of the
+                    -- visible cone
+        p :< lsR | isLeftTurn' w r p ->
+                    ApexLeft (Cusp l ls a (coerce r <| rs) w) (Cusp w mempty r mempty r)
+                   -- we actually allready make a left turn at r
+                   -- so this is actually the same as the emptyL case
+                 | otherwise          ->
+                    ApexLeft (Cusp l ls a rs w) (Cusp w mempty (coerce p) mempty r)
+
+      OnRight            -> case FT.viewr rs of
+          FT.EmptyR -> error "splitAtParent. searchRight: absurd. emptyR"
+          rsR FT.:> p -> ApexLeft (Cusp l ls a mempty w) (Cusp w mempty (coerce p) rsR r)
+
+    isRightTurn' a' b (Elem c) = ccw a' b c /= CCW
+    isLeftTurn'  a' b (Elem c) = ccw a' b c /= CW
+
+  -- case FT.search (isLeftTurn w) ls of
+  --   Nowhere            -> error "splitAtParent: absurd: precondition on left chain failed"
+  --   Position lsL p lsR -> ApexRight (Cusp l lsL (coerce p) mempty w)    (Cusp w lsR a rs r)
+  --   OnLeft             ->
+  --     EmptyL
+  --        | isLeftTurn' w l a -> searchRight
+  --        | otherwise         ->
+  --           ApexRight (Cusp l mempty l mempty w) (Cusp w (singleton l) a rs r)
 
 
+  --      p :< lsR -> -- not sure this is right  yet
+  --           ApexRight (Cusp l mempty (coerce p) mempty w) (Cusp w lsR a rs r)
+  --   OnRight            -> searchRight
+  -- where
+  --   searchRight = case FT.search (isRightTurn w) rs of
+  --     Nowhere            -> error "splitAtParent; absurd: precondition on right chain failed"
+  --     Position rsR p rsL -> ApexLeft (Cusp l ls a rsL w) (Cusp w mempty (coerce p) rsR r)
+  --     OnLeft             -> case FT.viewl rs of
+  --       EmptyL
+  --         | isRightTurn' w r a -> AtApex   (Cusp l ls a mempty w) (Cusp w mempty a rs r)
+  --         | otherwise          -> ApexLeft (Cusp l ls a (singleton r) w) (Cusp r memtpy r rs w)
+  --       p :< rsL -> ApexLeft (Cusp l ls a rsL w)    (Cusp w mempty (coerce p) mempty r)
+  --     OnRight            ->
 
+
+-- | Run the actual shortest path computation.
 compute   :: forall source vertex r.
-             (Point_ vertex 2 r, Ord r, Num r)
+             ( Point_ vertex 2 r, Ord r, Num r
+             , Point_ source 2 r
+             , Show vertex, Show source, Show r
+             )
           => (vertex -> vertex -> Bool)
           -- ^ equality test between vertices.
           -> source
           -> (Vector 2 vertex , BinaryTrie (Vector 2 vertex) vertex)
           -> [(vertex :+ Either source vertex)]
-compute (=.=) s poly@(Vector2 l r,_) = go (Cusp l mempty s mempty r) poly
+compute (=.=) s poly@(Vector2 l0 r0,_) = go (Cusp l0 mempty s mempty r0) poly
   where
 
     go             :: Cusp source vertex -> (Vector 2 vertex, BinaryTrie (Vector 2 vertex) vertex)
@@ -359,7 +451,7 @@ compute (=.=) s poly@(Vector2 l r,_) = go (Cusp l mempty s mempty r) poly
     goVertex             :: Cusp vertex vertex
                          -> (Vector 2 vertex, BinaryTrie (Vector 2 vertex) vertex)
                          -> [vertex :+ vertex]
-    goVertex cusp (e,tr) = (w :+ p) : rest
+    goVertex cusp (_,tr) = (w :+ p) : rest
       where
         w      = tr^.root
         split' = splitAtParent w cusp
