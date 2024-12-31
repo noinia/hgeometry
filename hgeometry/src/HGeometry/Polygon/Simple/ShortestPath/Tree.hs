@@ -224,25 +224,37 @@ splitAtParent w cu@(Cusp l ls a rs r) = traceShowWith ("splitAtParent",w,cu,)  $
   where
     searchLeft = case FT.search (isRightTurn w) ls of
       Nowhere            -> error "splitAtParent: absurd: precondition on left chain failed"
-      Position lsL p lsR -> ApexRight (Cusp l lsL (coerce p) mempty w)    (Cusp w lsR a rs r)
+
+      Position lsL p lsR -> case FT.viewl lsL of
+        EmptyL | isRightTurn' w l p ->  traceShow ("Position,isRightTurn",w,l,p) $
+                            ApexRight (Cusp l mempty l mempty w) (Cusp w (coerce l <| ls) a rs r)
+                            -- we are really in the OnLeft case
+        _                           ->
+          traceShowWith ("Position",w,cu,p,) $         ApexRight (Cusp l lsL (coerce p) mempty w)    (Cusp w lsR a rs r)
       OnLeft             -> case FT.viewl ls of
         EmptyL   -> ApexRight (Cusp l mempty l mempty w) (Cusp w (coerce l <| ls) a rs r)
                     -- we necessarily make a right turn at l since we are left of the
                     -- visible cone
-        p :< _ | isRightTurn' w l p ->
+        p :< _ | isRightTurn' w l p ->  traceShow ("isRightTurn",w,l,p) $
                     ApexRight (Cusp l mempty l mempty w) (Cusp w (coerce l <| ls) a rs r)
                    -- we actually allready make a right turn at l
                    -- so this is actually the same as the emptyL case
-                 | otherwise          ->
+                 | otherwise          -> traceShow ("otherwise",w,l,p) $
                     ApexRight (Cusp l mempty (coerce p) mempty w) (Cusp w ls a rs r)
 
       OnRight            -> case FT.viewr ls of
           FT.EmptyR   -> error "splitAtParent. searchLeft: absurd. emptyR"
-          lsL FT.:> p -> ApexRight (Cusp l lsL (coerce p) mempty w) (Cusp w mempty a rs r)
+          lsL FT.:> p -> traceShowWith ("OnRight",w,) $
+
+            ApexRight (Cusp l lsL (coerce p) mempty w) (Cusp w mempty a rs r)
 
     searchRight = case FT.search (isLeftTurn w) rs of
       Nowhere            -> error "splitAtParent: absurd: precondition on right chain failed"
-      Position rsL p rsR -> ApexLeft (Cusp l ls a rsL w) (Cusp w mempty (coerce p) rsR r)
+      Position rsR p rsL -> case FT.viewl rsR of
+        EmptyL | isLeftTurn' w r p ->
+                   ApexLeft (Cusp l ls a (coerce r <| rs) w) (Cusp w mempty r mempty r)
+        _                          ->
+                    ApexLeft (Cusp l ls a rsL w) (Cusp w mempty (coerce p) rsR r)
       OnLeft             -> case FT.viewl rs of
         EmptyL   -> ApexLeft (Cusp l ls a (coerce r <| rs) w) (Cusp w mempty r mempty r)
                     -- we necessarily make a left turn at r since we are right of the
@@ -313,11 +325,11 @@ compute (=.=) s poly@(Vector2 l0 r0,_) = go (Cusp l0 mempty s mempty r0) poly
         rest   = case tr of
           Leaf _                      -> []
           OneNode _ c@(Vector2 l r,_)
-            | w =.= l -> case split' of
+            | w =.= l   -> case split' of
                 ApexLeft  _ cr -> goVertex' cr c
                 AtApex    _ cr -> go        cr c
                 ApexRight _ cr -> go        cr c
-            | w =.= r -> case split' of
+            | otherwise -> case split' of
                 ApexLeft  cl _ -> go        cl c
                 AtApex    cl _ -> go        cl c
                 ApexRight cl _ -> goVertex' cl c
@@ -353,7 +365,7 @@ compute (=.=) s poly@(Vector2 l0 r0,_) = go (Cusp l0 mempty s mempty r0) poly
                 ApexLeft  _ cr -> goVertex cr c
                 AtApex    _ cr -> goVertex cr c
                 ApexRight _ cr -> goVertex cr c
-            | w =.= r' -> case split' of
+            | otherwise -> case split' of
                 ApexLeft  cl _ -> goVertex cl c
                 AtApex    cl _ -> goVertex cl c
                 ApexRight cl _ -> goVertex cl c

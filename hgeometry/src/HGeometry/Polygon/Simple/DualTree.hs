@@ -9,11 +9,14 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Polygon.Simple.DualTree
-  -- ( computeShortestPaths
-  -- , Parent
-  -- -- , shortestPathTree
-  -- )
-  where
+  ( DualTree(..), rootVertex
+  , trimap
+  --
+  , dualTreeFrom
+  , toTreeRep
+  --
+  , orientDualTree, toDualTree
+  ) where
 
 import           Control.Lens hiding ((:<), (<|))
 import           Data.Bifoldable
@@ -42,9 +45,6 @@ import           HGeometry.Unbounded
 import           HGeometry.Vector
 import           Hiraffe.DFS
 import           Hiraffe.PlanarGraph.Connected
-
--- import           HGeometry.Number.Real.Rational
-
 import           Debug.Trace
 
 --------------------------------------------------------------------------------
@@ -102,10 +102,7 @@ instance Bifoldable (DualTree a) where
 
 
 
-
-
-
-
+--------------------------------------------------------------------------------
 
 
 -- | Computes the dual tree of the polygon, starting with the triangle containing
