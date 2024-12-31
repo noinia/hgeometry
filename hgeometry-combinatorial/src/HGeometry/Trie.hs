@@ -12,6 +12,7 @@ module HGeometry.Trie
   ( TrieF(..)
   , root
   , mapWithEdgeLabels
+  , foldWithEdgeLabels
 
   , BinaryTrie
   , pattern Leaf, pattern OneNode, pattern TwoNode
@@ -100,8 +101,15 @@ mapWithEdgeLabels fRoot f (Node root' chs) = Node (fRoot root') (imap go chs)
   where
     go e (Node x chs') = Node (f e x) (imap go chs')
 
-
-
+-- | fold with the edge labels
+foldWithEdgeLabels :: (FoldableWithIndex e (f e), Monoid m)
+                   => (v -> m) -- ^ function by which to transform the root
+                   -> (e -> v -> m)
+                   -> TrieF f e v
+                   -> m
+foldWithEdgeLabels fRoot f (Node root' chs) = fRoot root' <> ifoldMap go chs
+  where
+    go e (Node x chs') = f e x <> ifoldMap go chs'
 
 -- instance Functor f => FunctorWithIndex e (TrieF f e) where
 --   imap f = go

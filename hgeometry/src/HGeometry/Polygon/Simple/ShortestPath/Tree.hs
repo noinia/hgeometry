@@ -81,7 +81,7 @@ computeShortestPaths'        :: ( Point_ source 2 r
                              -> [(vertex :+ VertexId s) :+ Either source (vertex :+ VertexId s)]
 computeShortestPaths' s poly = case dualTreeFrom s poly of
     Nothing -> []
-    Just tr -> triang <> case toTreeRep poly s tr of
+    Just tr -> triang <> case orientDualTree $ toTreeRep poly s tr of
                            RootZero  _       -> []
                            RootOne   _ a     -> compute' a
                            RootTwo   _ a b   -> compute' a <> compute' b
@@ -125,12 +125,32 @@ instance Bifunctor (DualTree a) where
     RootTwo r (e, a) (e',b)        -> RootTwo r (f e, go a) (f e', go  b)
     RootThree r (d, a) (e,b) (h,c) -> RootThree r (f d, go a) (f e, go  b) (f h, go c)
 
+-- | Map over the dual tree
+trimap       :: (a -> a') -> (e -> e') -> (b -> b') -> DualTree a e b -> DualTree a' e' b'
+trimap f g h = let go = bimap g (bimap g h) in \case
+  RootZero  r       -> RootZero  (f r)
+  RootOne   r a     -> RootOne   (f r) (go a)
+  RootTwo   r a b   -> RootTwo   (f r) (go a) (go b)
+  RootThree r a b c -> RootThree (f r) (go a) (go b) (go c)
+
+
 instance Bifoldable (DualTree a) where
   bifoldMap f g = let go = bifoldMap f g in \case
     RootZero _                     -> mempty
     RootOne _ (e, t)               -> f e <> go t
     RootTwo _ (e, a) (e',b)        -> f e <> go a <> f e' <> go  b
     RootThree _ (d, a) (e,b) (h,c) -> f d <> go a <> f e  <> go  b <> f h <> go c
+
+
+-- foldDualTreeWithEdge :: a -> (b,r) ->
+
+
+
+
+
+
+
+
 
 -- | Computes the dual tree of the polygon, starting with the triangle containing
 -- the source point.
@@ -173,15 +193,69 @@ toDualVertexIx = coerce
 -- | Tries to convert the RoseTree into a DualTree
 toDualTree                   :: (Show e, Show v) =>
   TrieF (KV []) e v -> Maybe (DualTree v e v)
-toDualTree (Node root' chs) | traceShow ("toDualTree",root',fmap asBinaryTrie chs
+-- toDualTree (Node root' chs) | traceShow ("toDualTree",root',fmap asBinaryTrie chs
 
-                                        ) False = undefined
-toDualTree (Node root' chs)  = traverse asBinaryTrie chs >>= \res -> case traceShowWith ("chs",) $ F.toList (assocs res) of
-  []      -> Just $ RootZero  root'
-  [c]     -> Just $ RootOne   root' c
-  [l,r]   -> Just $ RootTwo   root' l r
-  [a,b,c] -> Just $ RootThree root' a b c
-  _       -> Nothing
+--                                         ) False = undefined
+toDualTree (Node root' chs)  = traverse asBinaryTrie chs >>= \res ->
+                               case F.toList (assocs res) of
+                                 []      -> Just $ RootZero  root'
+                                 [c]     -> Just $ RootOne   root' c
+                                 [l,r]   -> Just $ RootTwo   root' l r
+                                 [a,b,c] -> Just $ RootThree root' a b c
+                                 _       -> Nothing
+
+
+
+-- orientDualTree    :: forall graph vertex dart r.
+--                      (PlaneGraph_ graph vertex, Point_ vertex 2 r, Fractional r, Ord r)
+--                   => graph
+--                   -> DualTree (FaceIx graph) dart (FaceIx graph)
+--                   -> DualTree (FaceIx graph) dart (FaceIx graph)
+-- orientDualTree gr = unTag . go . tagWithPoint
+--   where
+--     tagWithPoint = trimap tag id tag
+--     tag fi       = pt :+ fi
+--     unTag'       = view extra
+--     unTag        = trimap unTag id unTag
+
+
+--     go = \case
+--       RootZero r        -> RootZero s
+--       RootOne r a       -> RootOne s (mapEdge a)
+--       RootTwo r a b     -> RootTwo s (mapEdge a) (mapEdge b)
+--       RootThree r a b c -> RootThree s (mapEdge a) (mapEdge b) (mapEdge c)
+
+
+-- | Orient the dual tree so that the left child is actually on the left as seen when
+-- traversing from parent to children.
+orientDualTree    :: forall source vertex dart r.
+                     ( Point_ source 2 r
+                     , Point_ vertex 2 r
+                     , Num r, Ord r)
+                  => DualTree source dart vertex -> DualTree source dart vertex
+orientDualTree = \case
+    RootZero r        -> RootZero r
+    RootOne r a       -> RootOne r   (mapEdge r a)
+    RootTwo r a b     -> RootTwo r   (mapEdge r a) (mapEdge r b)
+    RootThree r a b c -> RootThree r (mapEdge r a) (mapEdge r b) (mapEdge r c)
+  where
+    mapEdge r (e,t) = (e,asOrientedBinaryTrie r t)
+
+
+-- | Mkae sure that the oreintation, i.e. left child and right child are consistent
+asOrientedBinaryTrie      :: (Point_ parent 2 r, Point_ point 2 r, Ord r, Num r)
+                          => parent -> BinaryTrie e point -> BinaryTrie e point
+asOrientedBinaryTrie p tr = case tr of
+  Leaf _                -> tr
+  OneNode v (e,t)       -> OneNode v (e, asOrientedBinaryTrie v t)
+  TwoNode v (d,l) (e,r) -> let l' = asOrientedBinaryTrie v l
+                               r' = asOrientedBinaryTrie v r
+                               vec = (v^.asPoint) .-. (p^.asPoint)
+                           in case ccwCmpAroundWith vec v (l^.root) (r^.root) of
+                                GT -> TwoNode v (e,r') (d,l')  -- note that we switch l and r here
+                                _  -> TwoNode v (d,l') (e,r')
+
+
 
 
 -- | Transform the dual tree into a format we can use to run the shortest path procedure on
@@ -294,6 +368,8 @@ isRightTurn w pref = \case
     Range _ p  -> ccw w p q /= CCW
 
 -- | for searching on the right sequence of the cusp
+isLeftTurn        :: (Point_ vertex 2 r, Ord r, Num r)
+                  => vertex -> Range vertex -> Range vertex -> Bool
 isLeftTurn w pref = \case
   EmptyRange -> True
   Range y _  -> case pref of
@@ -345,7 +421,7 @@ splitAtParent w cu@(Cusp l ls a rs r) = traceShowWith ("splitAtParent",w,cu,)  $
         EmptyL   -> ApexRight (Cusp l mempty l mempty w) (Cusp w (coerce l <| ls) a rs r)
                     -- we necessarily make a right turn at l since we are left of the
                     -- visible cone
-        p :< lsR | isRightTurn' w l p ->
+        p :< _ | isRightTurn' w l p ->
                     ApexRight (Cusp l mempty l mempty w) (Cusp w (coerce l <| ls) a rs r)
                    -- we actually allready make a right turn at l
                    -- so this is actually the same as the emptyL case
@@ -418,7 +494,7 @@ compute (=.=) s poly@(Vector2 l0 r0,_) = go (Cusp l0 mempty s mempty r0) poly
 
     go             :: Cusp source vertex -> (Vector 2 vertex, BinaryTrie (Vector 2 vertex) vertex)
                    -> [(vertex :+ Either source vertex)]
-    go cusp (e,tr) = (w :+ p) : rest
+    go cusp (_,tr) = (w :+ p) : rest
       where
         w      = tr^.root
         split' = splitAtParent w cusp
@@ -437,10 +513,13 @@ compute (=.=) s poly@(Vector2 l0 r0,_) = go (Cusp l0 mempty s mempty r0) poly
                 ApexLeft  cl _ -> go        cl c
                 AtApex    cl _ -> go        cl c
                 ApexRight cl _ -> goVertex' cl c
-          TwoNode _ l r -> case split' of
+          TwoNode f l r             ->  traceShowWith ("go,TwoNode",f,l,r,split',) $
+            case split' of
             ApexLeft  cl cr -> go cl l        <> goVertex' cr r
             AtApex    cl cr -> go cl l        <> go cr r
             ApexRight cl cr -> goVertex' cl l <> go cr r
+      -- seems we are indeed matching up the wrong tree with the wrong cusp
+
 
     goVertex' cusp = fmap (over extra Right) . goVertex cusp
 
@@ -470,7 +549,9 @@ compute (=.=) s poly@(Vector2 l0 r0,_) = go (Cusp l0 mempty s mempty r0) poly
                 ApexLeft  cl _ -> goVertex cl c
                 AtApex    cl _ -> goVertex cl c
                 ApexRight cl _ -> goVertex cl c
-          TwoNode _ l r -> case split' of
+          TwoNode f l r
+            ->  traceShowWith ("goVertex,TwoNode",f,l,r,) $
+            case split' of
             ApexLeft  cl cr -> goVertex cl l <> goVertex cr r
             AtApex    cl cr -> goVertex cl l <> goVertex cr r
             ApexRight cl cr -> goVertex cl l <> goVertex cr r
