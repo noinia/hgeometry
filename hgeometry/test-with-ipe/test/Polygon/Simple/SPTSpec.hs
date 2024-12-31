@@ -54,6 +54,8 @@ spec = describe "shortest path tree tests" $ do
                  [osp|simple2_out|]
          testIpe [osp|simple3.ipe|]
                  [osp|simple3_out|]
+         testIpe [osp|funnel.ipe|]
+                 [osp|funnel_out|]
 
 testIpe            :: OsPath -> OsPath -> Spec
 testIpe inFp outFp = describe (show inFp) $ do
