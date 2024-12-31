@@ -311,14 +311,14 @@ compute   :: forall source vertex r.
           -> source
           -> (Vector 2 vertex , BinaryTrie (Vector 2 vertex) vertex)
           -> [(vertex :+ Either source vertex)]
-compute (=.=) s poly@(Vector2 l0 r0,_) = go (Cusp l0 mempty s mempty r0) poly
+compute (=.=) s poly@(Vector2 l0 r0,_) = go Left (Cusp l0 mempty s mempty r0) poly
   where
-
-    go             :: Cusp source vertex -> (Vector 2 vertex, BinaryTrie (Vector 2 vertex) vertex)
-                   -> [(vertex :+ Either source vertex)]
-    go cusp (_,tr) = (w :+ p) : rest
+    go             :: forall f source'. (Applicative f, Point_ source' 2 r, Show source')
+                   => (source' -> f vertex)
+                   -> Cusp source' vertex -> (Vector 2 vertex, BinaryTrie (Vector 2 vertex) vertex)
+                   -> [(vertex :+ f vertex)]
+    go left cusp (_,tr) = (w :+ p) : rest
       where
-        left   = Left
         right  = pure
         w      = tr^.root
         split' = splitAtParent w cusp
@@ -331,22 +331,25 @@ compute (=.=) s poly@(Vector2 l0 r0,_) = go (Cusp l0 mempty s mempty r0) poly
           OneNode _ c@(Vector2 l r,_)
             | w =.= l   -> case split' of
                 ApexLeft  _ cr -> goVertex' cr c
-                AtApex    _ cr -> go        cr c
-                ApexRight _ cr -> go        cr c
+                AtApex    _ cr -> go left cr c
+                ApexRight _ cr -> go left cr c
             | otherwise -> case split' of
-                ApexLeft  cl _ -> go        cl c
-                AtApex    cl _ -> go        cl c
+                ApexLeft  cl _ -> go left cl c
+                AtApex    cl _ -> go left cl c
                 ApexRight cl _ -> goVertex' cl c
           TwoNode f l r             -> case split' of
-            ApexLeft  cl cr -> go cl l        <> goVertex' cr r
-            AtApex    cl cr -> go cl l        <> go cr r
-            ApexRight cl cr -> goVertex' cl l <> go cr r
+            ApexLeft  cl cr -> go left cl l   <> goVertex' cr r
+            AtApex    cl cr -> go left cl l   <> go left cr r
+            ApexRight cl cr -> goVertex' cl l <> go left cr r
 
         goVertex' cusp' = fmap (over extra right) . goVertex cusp'
 
-    goVertex             :: Cusp vertex vertex
-                         -> (Vector 2 vertex, BinaryTrie (Vector 2 vertex) vertex)
-                         -> [vertex :+ vertex]
+    goVertex  :: Cusp vertex vertex
+              -> (Vector 2 vertex, BinaryTrie (Vector 2 vertex) vertex)
+              -> [vertex :+ vertex]
+    goVertex cusp x = coerce $ go Identity cusp x
+
+{-
     goVertex cusp (_,tr) = (w :+ p) : rest
       where
         w      = tr^.root
@@ -372,7 +375,7 @@ compute (=.=) s poly@(Vector2 l0 r0,_) = go (Cusp l0 mempty s mempty r0) poly
             ApexLeft  cl cr -> goVertex cl l <> goVertex cr r
             AtApex    cl cr -> goVertex cl l <> goVertex cr r
             ApexRight cl cr -> goVertex cl l <> goVertex cr r
-
+-}
 
 
 
