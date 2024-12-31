@@ -71,7 +71,7 @@ testIpe inFp outFp = describe (show inFp) $ do
     let triang    = triangulate (poly^.core)
         (mySource :+ _)  = NonEmpty.head sources
         Just tree  = dualTreeFrom mySource triang
-        tree' = orientDualTree $ toTreeRep triang mySource tree
+        tree' = orientDualTree (==) $ toTreeRep triang mySource tree
 
         mkEdge u = \case
           Left s        -> ClosedLineSegment u s

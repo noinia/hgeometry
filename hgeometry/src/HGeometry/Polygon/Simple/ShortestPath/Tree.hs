@@ -83,15 +83,15 @@ computeShortestPaths'        :: ( Point_ source 2 r
                              -> [(vertex :+ VertexId s) :+ Either source (vertex :+ VertexId s)]
 computeShortestPaths' s poly = case dualTreeFrom s poly of
     Nothing -> []
-    Just tr -> triang <> case orientDualTree $ toTreeRep poly s tr of
+    Just tr -> triang <> case orientDualTree (=.=) $ toTreeRep poly s tr of
                            RootZero  _       -> []
                            RootOne   _ a     -> compute' a
                            RootTwo   _ a b   -> compute' a <> compute' b
                            RootThree _ a b c -> compute' a <> compute' b <> compute' c
       where
         triang = (\u -> u :+ Left s) <$> poly^..boundaryVerticesOf (tr^.rootVertex).asIndexedExt
-        compute' = compute ((==) `on` (view extra)) s
-
+        compute' = compute (=.=) s
+        (=.=) = (==) `on` (view extra)
 
 
 --------------------------------------------------------------------------------

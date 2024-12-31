@@ -185,42 +185,44 @@ orientDualTree    :: forall source vertex r.
                      ( Point_ source 2 r
                      , Point_ vertex 2 r
                      , Show source, Show vertex, Show r
-                     , Eq vertex
-
                      , Num r, Ord r)
-                  => DualTree source (Vector 2 vertex) vertex
+                  => (vertex -> vertex -> Bool)
                   -> DualTree source (Vector 2 vertex) vertex
-orientDualTree = \case
+                  -> DualTree source (Vector 2 vertex) vertex
+orientDualTree (=.=) = \case
     RootZero r        -> RootZero r
     RootOne r a       -> RootOne r   (mapEdge r a)
     RootTwo r a b     -> RootTwo r   (mapEdge r a) (mapEdge r b)
     RootThree r a b c -> RootThree r (mapEdge r a) (mapEdge r b) (mapEdge r c)
   where
-    mapEdge r (e,t) = (e,asOrientedBinaryTrie r t)
+    mapEdge r (e,t) = (e,asOrientedBinaryTrie (=.=) r t)
 
 -- | Mkae sure that the oreintation, i.e. left child and right child are consistent
-asOrientedBinaryTrie      :: (Point_ parent 2 r, Point_ point 2 r, Ord r, Num r
+asOrientedBinaryTrie      :: forall parent point r.
+                             (Point_ parent 2 r, Point_ point 2 r, Ord r, Num r
                              , Show parent, Show point, Show r
-                             , Eq point
                              )
-                          => parent
+                          => (point -> point -> Bool)
+                          -> parent
                           -> BinaryTrie (Vector 2 point) point -> BinaryTrie (Vector 2 point) point
-asOrientedBinaryTrie p tr = case tr of
-  Leaf _                              -> tr
-  OneNode v (e,t)                     -> OneNode v (e, asOrientedBinaryTrie v t)
-  TwoNode v (d@(Vector2 q _),l) (e,r) -> let l' = asOrientedBinaryTrie v l
-                                             r' = asOrientedBinaryTrie v r
-                                         in case traceShowWith ("oBST",p,v,d,e,"is ",) $
-                                                 ccw p v q of
-                                              CCW      -> TwoNode v (d,l') (e,r')
-                                              CW       -> TwoNode v (e,r') (d,l')
-                                                          -- note that we switch l and r here
-                                              CoLinear
-                                                | v == q    -> TwoNode v (e,r') (d,l')
-                                                | otherwise -> TwoNode v (d,l') (e,r')
-                                              -- TBH, there should be a better way for this..
-
-
+asOrientedBinaryTrie (=.=) = go
+  where
+    go      :: forall p. (Point_ p 2 r, Show p)
+            => p -> BinaryTrie (Vector 2 point) point -> BinaryTrie (Vector 2 point) point
+    go p tr = case tr of
+      Leaf _                              -> tr
+      OneNode v (e,t)                     -> OneNode v (e, go v t)
+      TwoNode v (d@(Vector2 q _),l) (e,r) -> let l' = go v l
+                                                 r' = go v r
+                                             in case traceShowWith ("oBST",p,v,d,e,"is ",) $
+                                                     ccw p v q of
+                                                  CCW      -> TwoNode v (d,l') (e,r')
+                                                  CW       -> TwoNode v (e,r') (d,l')
+                                                              -- note that we switch l and r here
+                                                  CoLinear
+                                                    | v =.= q   -> TwoNode v (e,r') (d,l')
+                                                    | otherwise -> TwoNode v (d,l') (e,r')
+                                                  -- TBH, there should be a better way for this..
 
 -- | Transform the dual tree into a format we can use to run the shortest path procedure on
 toTreeRep         :: ( PlanarGraph_ gr
