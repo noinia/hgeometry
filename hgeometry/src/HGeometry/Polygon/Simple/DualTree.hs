@@ -185,6 +185,7 @@ orientDualTree    :: forall source vertex r.
                      ( Point_ source 2 r
                      , Point_ vertex 2 r
                      , Show source, Show vertex, Show r
+                     , Eq vertex
 
                      , Num r, Ord r)
                   => DualTree source (Vector 2 vertex) vertex
@@ -199,7 +200,8 @@ orientDualTree = \case
 
 -- | Mkae sure that the oreintation, i.e. left child and right child are consistent
 asOrientedBinaryTrie      :: (Point_ parent 2 r, Point_ point 2 r, Ord r, Num r
-                             -- , Show parent, Show point, Show r
+                             , Show parent, Show point, Show r
+                             , Eq point
                              )
                           => parent
                           -> BinaryTrie (Vector 2 point) point -> BinaryTrie (Vector 2 point) point
@@ -208,10 +210,16 @@ asOrientedBinaryTrie p tr = case tr of
   OneNode v (e,t)                     -> OneNode v (e, asOrientedBinaryTrie v t)
   TwoNode v (d@(Vector2 q _),l) (e,r) -> let l' = asOrientedBinaryTrie v l
                                              r' = asOrientedBinaryTrie v r
-                                         in case ccw p v q of
+                                         in case traceShowWith ("oBST",p,v,d,e,"is ",) $
+                                                 ccw p v q of
                                               CCW      -> TwoNode v (d,l') (e,r')
-                                              _        -> TwoNode v (e,r') (d,l')
+                                              CW       -> TwoNode v (e,r') (d,l')
                                                           -- note that we switch l and r here
+                                              CoLinear
+                                                | v == q    -> TwoNode v (e,r') (d,l')
+                                                | otherwise -> TwoNode v (d,l') (e,r')
+                                              -- TBH, there should be a better way for this..
+
 
 
 -- | Transform the dual tree into a format we can use to run the shortest path procedure on

@@ -74,6 +74,8 @@ computeShortestPaths'        :: ( Point_ source 2 r
                                 , Point_ vertex 2 r
                                 , Num r, Ord r
                                 , Show r, Show source, Show vertex
+
+                                , Eq vertex
                                 )
                              => source
                              -> CPlaneGraph s vertex PolygonEdgeType f
