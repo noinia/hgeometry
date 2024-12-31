@@ -45,6 +45,7 @@ common all-setup
                  -fno-warn-unticked-promoted-constructors
                  -fno-warn-type-defaults
                  -fno-warn-partial-type-signatures
+                 -Werror=missing-methods
 
     build-depends:
         base                      >= 4.16.1.0      && < 5
@@ -52,6 +53,7 @@ common all-setup
       , hiraffe                   >= 0.1           && < 1
       , containers                >= 0.6           && < 1
       , nonempty-containers       >= 0.3.4.5       && < 0.4
+      , fingertree                >= 0.1.5.0       && < 0.2
       , dlist                     >= 0.7           && < 1.1
       , bytestring                >= 0.11          && < 1
       , vector:vector             >= 0.13          && < 1
@@ -364,6 +366,9 @@ library
         HGeometry.Polygon.Simple
         HGeometry.Polygon.Simple.Class
         HGeometry.Polygon.Simple.Sample
+        HGeometry.Polygon.Simple.ShortestPath.Tree
+        HGeometry.Polygon.Simple.DualTree
+
 --
         HGeometry.Polygon.Convex
         HGeometry.Polygon.Convex.Class
@@ -764,6 +769,7 @@ test-suite with-ipe-hspec
       Plane.LowerEnvelopeSpec
       LineSegmentSpec
       HalfLineSpec
+      Polygon.Simple.SPTSpec
       Polygon.Triangulation.TriangulateMonotoneSpec
       Polygon.Triangulation.TriangulateSpec
       Polygon.Triangulation.WorldSpec

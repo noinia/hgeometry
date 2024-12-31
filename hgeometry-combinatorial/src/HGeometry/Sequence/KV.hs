@@ -11,6 +11,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Sequence.KV
   ( KV(..)
+  , assocs
   , empty
   ) where
 
@@ -25,6 +26,11 @@ import Data.Functor.Classes
 -- | An 'f' of key value pairs
 newtype KV f k v = KV (f (k,v))
 
+-- | Get the data as an 'f' of (k,v) pairs.
+assocs          :: Foldable f => KV f k v -> f (k,v)
+assocs (KV xs) = xs
+
+
 deriving instance (Show k, Show v, Show1 f) => Show (KV f k v)
 deriving instance (Eq k, Eq v, Eq1 f)       => Eq (KV f k v)
 deriving instance (Ord k, Ord v, Ord1 f)    => Ord (KV f k v)
@@ -32,6 +38,35 @@ deriving instance (Ord k, Ord v, Ord1 f)    => Ord (KV f k v)
 deriving instance Functor f     => Functor (KV f k)
 deriving instance Foldable f    => Foldable (KV f k)
 deriving instance Traversable f => Traversable (KV f k)
+
+-- instance (Show1 f, Show k) => Show1 (KV f k)
+-- instance Show1 f           => Show2 (KV f) where
+--   liftShowsPrec2
+
+instance (Eq1 f, Eq k) => Eq1 (KV f k)
+instance Eq1 f         => Eq2 (KV f) where
+  liftEq2 eqK eqV (KV xs) (KV ys) = liftEq (\(k,v) (k',v') -> eqK k k' && eqV v v') xs ys
+
+instance (Ord1 f, Ord k) => Ord1 (KV f k)
+instance Ord1 f         => Ord2 (KV f) where
+  liftCompare2 cmpK cmpV (KV xs) (KV ys) =
+    liftCompare (\(k,v) (k',v') -> cmpK k k' <> cmpV v v') xs ys
+
+
+instance (Show1 f, Show k) => Show1 (KV f k)
+instance Show1 f => Show2 (KV f) where
+  liftShowsPrec2 sp1 sl1 sp2 sl2 d (KV xs) = showsUnaryWith (liftShowsPrec sp sl) "KV" d xs
+    where
+      sp = liftShowsPrec2 sp1 sl1 sp2 sl2
+      sl = undefined
+
+
+--   liftShowsPrec2 sp1 _ sp2 _ _ (x, y) =
+--         showChar '(' . sp1 0 x . showChar ',' . sp2 0 y . showChar ')'
+
+-- instance Eq1 f   => Eq2   (KV f)
+-- instance Ord1 f  => Ord2  (KV f)
+
 
 instance Foldable1 f    => Foldable1 (KV f e) where
   foldMap1 f (KV xs) = foldMap1 (foldMap1 f) xs
