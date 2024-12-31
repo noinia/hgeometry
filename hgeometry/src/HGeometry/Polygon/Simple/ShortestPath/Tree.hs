@@ -318,12 +318,14 @@ compute (=.=) s poly@(Vector2 l0 r0,_) = go (Cusp l0 mempty s mempty r0) poly
                    -> [(vertex :+ Either source vertex)]
     go cusp (_,tr) = (w :+ p) : rest
       where
+        left   = Left
+        right  = pure
         w      = tr^.root
         split' = splitAtParent w cusp
         p      = case split' of
-                   ApexLeft  _  cr -> Right (cr^.apex)
-                   AtApex    _  _  -> Left  (cusp^.apex)
-                   ApexRight cl _  -> Right (cl^.apex)
+                   ApexLeft  _  cr -> right (cr^.apex)
+                   AtApex    _  _  -> left  (cusp^.apex)
+                   ApexRight cl _  -> right (cl^.apex)
         rest   = case tr of
           Leaf _                      -> []
           OneNode _ c@(Vector2 l r,_)
@@ -335,19 +337,12 @@ compute (=.=) s poly@(Vector2 l0 r0,_) = go (Cusp l0 mempty s mempty r0) poly
                 ApexLeft  cl _ -> go        cl c
                 AtApex    cl _ -> go        cl c
                 ApexRight cl _ -> goVertex' cl c
-          TwoNode f l r             ->  traceShowWith ("go,TwoNode",f,l,r,split',) $
-            case split' of
+          TwoNode f l r             -> case split' of
             ApexLeft  cl cr -> go cl l        <> goVertex' cr r
             AtApex    cl cr -> go cl l        <> go cr r
             ApexRight cl cr -> goVertex' cl l <> go cr r
-      -- seems we are indeed matching up the wrong tree with the wrong cusp
 
-
-    goVertex' cusp = fmap (over extra Right) . goVertex cusp
-
-
-
-
+        goVertex' cusp' = fmap (over extra right) . goVertex cusp'
 
     goVertex             :: Cusp vertex vertex
                          -> (Vector 2 vertex, BinaryTrie (Vector 2 vertex) vertex)
