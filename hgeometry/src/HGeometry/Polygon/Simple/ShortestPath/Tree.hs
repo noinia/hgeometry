@@ -228,11 +228,14 @@ toDualTree (Node root' chs)  = traverse asBinaryTrie chs >>= \res ->
 
 -- | Orient the dual tree so that the left child is actually on the left as seen when
 -- traversing from parent to children.
-orientDualTree    :: forall source vertex dart r.
+orientDualTree    :: forall source vertex r.
                      ( Point_ source 2 r
                      , Point_ vertex 2 r
+                     , Show source, Show vertex, Show r
+
                      , Num r, Ord r)
-                  => DualTree source dart vertex -> DualTree source dart vertex
+                  => DualTree source (Vector 2 vertex) vertex
+                  -> DualTree source (Vector 2 vertex) vertex
 orientDualTree = \case
     RootZero r        -> RootZero r
     RootOne r a       -> RootOne r   (mapEdge r a)
@@ -243,17 +246,29 @@ orientDualTree = \case
 
 
 -- | Mkae sure that the oreintation, i.e. left child and right child are consistent
-asOrientedBinaryTrie      :: (Point_ parent 2 r, Point_ point 2 r, Ord r, Num r)
-                          => parent -> BinaryTrie e point -> BinaryTrie e point
+asOrientedBinaryTrie      :: (Point_ parent 2 r, Point_ point 2 r, Ord r, Num r
+                             , Show parent, Show point, Show r
+                             )
+                          => parent
+                          -> BinaryTrie (Vector 2 point) point -> BinaryTrie (Vector 2 point) point
 asOrientedBinaryTrie p tr = case tr of
-  Leaf _                -> tr
-  OneNode v (e,t)       -> OneNode v (e, asOrientedBinaryTrie v t)
-  TwoNode v (d,l) (e,r) -> let l' = asOrientedBinaryTrie v l
-                               r' = asOrientedBinaryTrie v r
-                               vec = (v^.asPoint) .-. (p^.asPoint)
-                           in case ccwCmpAroundWith vec v (l^.root) (r^.root) of
-                                GT -> TwoNode v (e,r') (d,l')  -- note that we switch l and r here
-                                _  -> TwoNode v (d,l') (e,r')
+  Leaf _                              -> tr
+  OneNode v (e,t)                     -> OneNode v (e, asOrientedBinaryTrie v t)
+  TwoNode v (d@(Vector2 q _),l) (e,r) ->
+    let l' = asOrientedBinaryTrie v l
+        r' = asOrientedBinaryTrie v r
+        vec = (v^.asPoint) .-. (p^.asPoint)
+    in case ccw p v q of
+         CCW      -> TwoNode v (d,l') (e,r')
+         _        -> TwoNode v (e,r') (d,l')  -- note that we switch l and r here
+         -- CoLinear -> error $ "s.t. must be wrong " <> show (p,v,q,l^.root,r^.root)
+
+                           -- in case traceShowWith ("asOBST",p,v,"L:",l^.root,"R:",r^.root,)
+                           --         $ ccwCmpAroundWith vec v ()
+
+                           --         (l^.root) (r^.root) of
+                           --      GT -> TwoNode v (e,r') (d,l')  -- note that we switch l and r here
+                           --      _  -> TwoNode v (d,l') (e,r')
 
 
 

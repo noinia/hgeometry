@@ -32,6 +32,14 @@ import           Test.Hspec.WithTempFile
 
 spec :: Spec
 spec = describe "shortest path tree tests" $ do
+         it "inConeTest" $
+           let a, l, r, w :: Point 2 R
+               a = Point2 81.766 130.9508
+               l = Point2 80 160
+               r = Point2 96 112
+               w = Point2 128 80
+           in inApexCone w a l r `shouldBe` InCone
+
          testIpe [osp|simpler.ipe|]
                  [osp|simpler_out|]
          testIpe [osp|simpler1.ipe|]
@@ -48,7 +56,7 @@ spec = describe "shortest path tree tests" $ do
                  [osp|simple3_out|]
 
 testIpe            :: OsPath -> OsPath -> Spec
-testIpe inFp outFp = describe ("ipe testss for" <> show inFp) $ do
+testIpe inFp outFp = describe (show inFp) $ do
     (sources, poly) <-  runIO $ do
         inFp'      <- getDataFileName ([osp|test-with-ipe/Polygon/Simple/ShortestPath/|] <> inFp)
         Right page <- readSinglePageFile inFp'
