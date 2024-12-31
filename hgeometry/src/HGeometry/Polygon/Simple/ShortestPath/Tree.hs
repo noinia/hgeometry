@@ -275,31 +275,6 @@ splitAtParent w cu@(Cusp l ls a rs r) = traceShowWith ("splitAtParent",w,cu,)  $
     isRightTurn' a' b (Elem c) = ccw a' b c /= CCW
     isLeftTurn'  a' b (Elem c) = ccw a' b c /= CW
 
-  -- case FT.search (isLeftTurn w) ls of
-  --   Nowhere            -> error "splitAtParent: absurd: precondition on left chain failed"
-  --   Position lsL p lsR -> ApexRight (Cusp l lsL (coerce p) mempty w)    (Cusp w lsR a rs r)
-  --   OnLeft             ->
-  --     EmptyL
-  --        | isLeftTurn' w l a -> searchRight
-  --        | otherwise         ->
-  --           ApexRight (Cusp l mempty l mempty w) (Cusp w (singleton l) a rs r)
-
-
-  --      p :< lsR -> -- not sure this is right  yet
-  --           ApexRight (Cusp l mempty (coerce p) mempty w) (Cusp w lsR a rs r)
-  --   OnRight            -> searchRight
-  -- where
-  --   searchRight = case FT.search (isRightTurn w) rs of
-  --     Nowhere            -> error "splitAtParent; absurd: precondition on right chain failed"
-  --     Position rsR p rsL -> ApexLeft (Cusp l ls a rsL w) (Cusp w mempty (coerce p) rsR r)
-  --     OnLeft             -> case FT.viewl rs of
-  --       EmptyL
-  --         | isRightTurn' w r a -> AtApex   (Cusp l ls a mempty w) (Cusp w mempty a rs r)
-  --         | otherwise          -> ApexLeft (Cusp l ls a (singleton r) w) (Cusp r memtpy r rs w)
-  --       p :< rsL -> ApexLeft (Cusp l ls a rsL w)    (Cusp w mempty (coerce p) mempty r)
-  --     OnRight            ->
-
-
 -- | Run the actual shortest path computation.
 compute   :: forall source vertex r.
              ( Point_ vertex 2 r, Ord r, Num r
@@ -313,69 +288,60 @@ compute   :: forall source vertex r.
           -> [(vertex :+ Either source vertex)]
 compute (=.=) s poly@(Vector2 l0 r0,_) = go Left (Cusp l0 mempty s mempty r0) poly
   where
-    go             :: forall f source'. (Applicative f, Point_ source' 2 r, Show source')
-                   => (source' -> f vertex)
-                   -> Cusp source' vertex -> (Vector 2 vertex, BinaryTrie (Vector 2 vertex) vertex)
-                   -> [(vertex :+ f vertex)]
-    go left cusp (_,tr) = (w :+ p) : rest
+
+    -- ^ The shortest path computation; the apex of the cusp may be the arbitrary source
+    -- point initially. Afterwards it may swtich to always being a vertex.
+    go      :: forall f apex. (Applicative f, Point_ apex 2 r, Show apex)
+            => (apex -> f vertex)
+            -- ^ action to lift the apex into an f vertex.
+            -> Cusp apex vertex
+            -- ^ current cusp
+            -> (Vector 2 vertex, BinaryTrie (Vector 2 vertex) vertex)
+            -- ^ the edge, and the
+            -> [(vertex :+ f vertex)]
+    go left = worker
       where
         right  = pure
-        w      = tr^.root
-        split' = splitAtParent w cusp
-        p      = case split' of
-                   ApexLeft  _  cr -> right (cr^.apex)
-                   AtApex    _  _  -> left  (cusp^.apex)
-                   ApexRight cl _  -> right (cl^.apex)
-        rest   = case tr of
-          Leaf _                      -> []
-          OneNode _ c@(Vector2 l r,_)
-            | w =.= l   -> case split' of
-                ApexLeft  _ cr -> goVertex' cr c
-                AtApex    _ cr -> go left cr c
-                ApexRight _ cr -> go left cr c
-            | otherwise -> case split' of
-                ApexLeft  cl _ -> go left cl c
-                AtApex    cl _ -> go left cl c
-                ApexRight cl _ -> goVertex' cl c
-          TwoNode f l r             -> case split' of
-            ApexLeft  cl cr -> go left cl l   <> goVertex' cr r
-            AtApex    cl cr -> go left cl l   <> go left cr r
-            ApexRight cl cr -> goVertex' cl l <> go left cr r
-
+        -- | run the computation, guarenteeing that the apex is a vertex
         goVertex' cusp' = fmap (over extra right) . goVertex cusp'
+        -- | the actual worker; we create a closure for the 'left'.
+        worker cusp (_,tr) = (w :+ p) : rest
+           where
+             w      = tr^.root -- ^ the vertex we are currently processing
 
-    goVertex  :: Cusp vertex vertex
-              -> (Vector 2 vertex, BinaryTrie (Vector 2 vertex) vertex)
-              -> [vertex :+ vertex]
-    goVertex cusp x = coerce $ go Identity cusp x
+             -- | the result of splitting the cusp into two cusps corresponding to the
+             -- 'outgoing' diagonals.
+             split' = splitAtParent w cusp
 
-{-
-    goVertex cusp (_,tr) = (w :+ p) : rest
-      where
-        w      = tr^.root
-        split' = splitAtParent w cusp
-        p      = case split' of
-                   ApexLeft  _  cr -> cr^.apex
-                   AtApex    _  _  -> cusp^.apex
-                   ApexRight cl _  -> cl^.apex
-        rest   = case tr of
-          Leaf _                      -> []
-          OneNode _ c@(Vector2 l' r',_)
-            | w =.= l' -> case split' of
-                ApexLeft  _ cr -> goVertex cr c
-                AtApex    _ cr -> goVertex cr c
-                ApexRight _ cr -> goVertex cr c
-            | otherwise -> case split' of
-                ApexLeft  cl _ -> goVertex cl c
-                AtApex    cl _ -> goVertex cl c
-                ApexRight cl _ -> goVertex cl c
-          TwoNode f l r
-            ->  traceShowWith ("goVertex,TwoNode",f,l,r,) $
-            case split' of
-            ApexLeft  cl cr -> goVertex cl l <> goVertex cr r
-            AtApex    cl cr -> goVertex cl l <> goVertex cr r
-            ApexRight cl cr -> goVertex cl l <> goVertex cr r
--}
+             -- | the parent we assign to w, i.e. predecessor of w on the shortest path to s
+             p      = case split' of
+                        ApexLeft  _  cr -> right (cr^.apex)
+                        AtApex    _  _  -> left  (cusp^.apex)
+                        ApexRight cl _  -> right (cl^.apex)
+
+             -- | compute the rest of the shortest path tree; i.e.
+             rest   = case tr of
+               Leaf _                      -> []
+               OneNode _ e@(Vector2 l _,_)
+                 | w =.= l   -> case split' of
+                     ApexLeft  _ cr -> goVertex' cr e
+                     AtApex    _ cr -> worker    cr e
+                     ApexRight _ cr -> worker    cr e
+                 | otherwise -> case split' of
+                     ApexLeft  cl _ -> worker    cl e
+                     AtApex    cl _ -> worker    cl e
+                     ApexRight cl _ -> goVertex' cl e
+               TwoNode _ l r             -> case split' of
+                 ApexLeft  cl cr -> worker cl l    <> goVertex' cr r
+                 AtApex    cl cr -> worker cl l    <> worker cr r
+                 ApexRight cl cr -> goVertex' cl l <> worker cr r
+
+
+    -- | run the worker 'go' where the apex is now guaranteed to be a vertex as well.
+    goVertex      :: Cusp vertex vertex
+                  -> (Vector 2 vertex, BinaryTrie (Vector 2 vertex) vertex) -> [vertex :+ vertex]
+    goVertex cusp = coerce . go Identity cusp
+
 
 
 
