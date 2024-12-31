@@ -16,6 +16,7 @@ import           HGeometry.PlaneGraph
 import           HGeometry.Point
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Simple
+import           HGeometry.Polygon.Simple.DualTree
 import           HGeometry.Polygon.Simple.ShortestPath.Tree
 import           HGeometry.Polygon.Triangulation
 import           HGeometry.Trie
@@ -25,7 +26,6 @@ import           Ipe.Color
 import           System.OsPath
 import           Test.Hspec
 import           Test.Hspec.WithTempFile
-
 --------------------------------------------------------------------------------
 
 -- type R = RealNumber 5
