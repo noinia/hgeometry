@@ -10,35 +10,64 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Golden
 import           HGeometry.Ext
+import           HGeometry.Intersection
 import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
 import           HGeometry.PlaneGraph
 import           HGeometry.Point
 import           HGeometry.Polygon
+import           HGeometry.Polygon.Instances ()
 import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Simple.DualTree
+import           HGeometry.Polygon.Simple.Sample
 import           HGeometry.Polygon.Simple.ShortestPath.Tree
 import           HGeometry.Polygon.Triangulation
+import           HGeometry.Properties
 import           HGeometry.Trie
 import           HGeometry.Vector
 import           Ipe
 import           Ipe.Color
 import           System.OsPath
+import           System.Random
+import           System.Random.Stateful
 import           Test.Hspec
+import           Test.Hspec.QuickCheck
 import           Test.Hspec.WithTempFile
+import           Test.QuickCheck
+
 --------------------------------------------------------------------------------
 
 -- type R = RealNumber 5
 
+data PointInPoly = PointInPoly (SimplePolygon (Point 2 R)) (Point 2 R)
+  deriving (Show,Eq)
+
+instance Arbitrary PointInPoly where
+  -- general idea: generate a random polygon with Double coordiantes, then generate
+  -- a point inside a random triangle, and finally convert them into type R
+  arbitrary = do (poly :: SimplePolygon (Point 2 Double)) <- arbitrary
+                 seed <- arbitrary
+                 let pureGen = mkStdGen seed
+                     s       = runStateGen_ pureGen $ samplePolygon poly
+                     doubleToR = realToFrac :: Double -> R
+                 pure $ PointInPoly (poly&vertices %~ over coordinates doubleToR)
+                                    (s&coordinates %~ doubleToR)
+
 spec :: Spec
 spec = describe "shortest path tree tests" $ do
-         it "inConeTest" $
-           let a, l, r, w :: Point 2 R
-               a = Point2 81.766 130.9508
-               l = Point2 80 160
-               r = Point2 96 112
-               w = Point2 128 80
-           in inApexCone w a l r `shouldBe` InCone
+         prop "edges contained in polygon" $
+           \(PointInPoly poly s) ->
+             let triang = triangulate poly
+                 sptEdges  = [ mkEdge v p | (v :+ _) :+ p <- computeShortestPaths' s triang ]
+             in filter (not . (`containedIn` poly)) sptEdges === []
+
+         -- it "inConeTest" $
+         --   let a, l, r, w :: Point 2 R
+         --       a = Point2 81.766 130.9508
+         --       l = Point2 80 160
+         --       r = Point2 96 112
+         --       w = Point2 128 80
+         --   in inApexCone w a l r `shouldBe` InCone
 
          testIpe [osp|simpler.ipe|]
                  [osp|simpler_out|]
@@ -59,6 +88,11 @@ spec = describe "shortest path tree tests" $ do
          testIpe [osp|funnel1.ipe|]
                  [osp|funnel1_out|]
 
+
+mkEdge u = \case
+  Left s        -> ClosedLineSegment u s
+  Right (p :+ _) -> ClosedLineSegment u p
+
 testIpe            :: OsPath -> OsPath -> Spec
 testIpe inFp outFp = describe (show inFp) $ do
     (sources, poly) <-  runIO $ do
@@ -73,13 +107,13 @@ testIpe inFp outFp = describe (show inFp) $ do
         Just tree  = dualTreeFrom mySource triang
         tree' = orientDualTree (==) $ toTreeRep triang mySource tree
 
-        mkEdge u = \case
-          Left s        -> ClosedLineSegment u s
-          Right (p :+ _) -> ClosedLineSegment u p
 
-        sptEdges = [ iO $ defIO (mkEdge v p) ! attr SStroke green
-                   | (v :+ _) :+ p <- computeShortestPaths' mySource triang
-                   ]
+
+
+        sptEdges  = [ mkEdge v p | (v :+ _) :+ p <- computeShortestPaths' mySource triang ]
+        sptEdges' = [ iO $ defIO e ! attr SStroke green
+                    | e <- sptEdges
+                    ]
 
         diags = [ iO $ defIO  (triang^?!edgeSegmentAt e) ! attr SStroke gray
                 | (e, Diagonal) <- triang^..edges.withIndex
@@ -93,13 +127,9 @@ testIpe inFp outFp = describe (show inFp) $ do
               , iO' poly
               , iO $ ipeGroup lefts
               , iO $ ipeGroup diags
-              , iO $ ipeGroup sptEdges
+              , iO $ ipeGroup sptEdges'
               , drawDualTree triang tree
               ]
-
-    runIO $ print tree'
-
-
 
 
     -- it "dual tree correct orientations" $
@@ -110,12 +140,36 @@ testIpe inFp outFp = describe (show inFp) $ do
     it "dual tree correct edge orientations" $
       inCorrectOrientations tree' `shouldBe` []
 
+    it "edges contained in polygon" $
+      filter (not . (`containedIn` (poly^.core))) sptEdges `shouldBe` []
 
     goldenWith [osp|data/test-with-ipe/Polygon/Simple/ShortestPath/|]
                (ipeFileGolden { name = outFp })
                (addStyleSheet opacitiesStyle $ singlePageFromContent out)
 
 
+-- | test if the given segment is contained in the polygon. It is also ok if the segment
+-- lies partially on the boundary
+containedIn :: ( ClosedLineSegment_ lineSegment point
+               , SimplePolygon_ simplePolygon vertex r
+               , Intersection (ClosedLineSegment vertex) lineSegment
+                 ~ Maybe (LineSegmentLineSegmentIntersection lineSegment')
+               , IsIntersectableWith (ClosedLineSegment vertex) lineSegment
+               , NumType lineSegment' ~ r
+               , HasIntersectionWith point simplePolygon
+               , Point_ point 2 r, Point_ vertex 2 r, Ord r, Fractional r
+               ) => lineSegment -> simplePolygon -> Bool
+containedIn seg poly = (seg^.start) `intersects` poly
+                    && (seg^.end) `intersects` poly
+                    && not properIntersection
+  where
+    properIntersection = anyOf outerBoundaryEdgeSegments (\edgeSeg ->
+                           case edgeSeg `intersect` seg of
+                             Just (LineSegment_x_LineSegment_Point p) -> not $
+                               p /= (edgeSeg^.start.asPoint) || p /= (edgeSeg^.end.asPoint)
+                             _                                        -> False
+                                                         ) poly
+    -- asOpen (ClosedLineSegment a b) = OpenLineSegment a b
 
 -- | computes the faces (represented by their face Id and a list of vertices)
 --  that have the "wrong" orientation.
