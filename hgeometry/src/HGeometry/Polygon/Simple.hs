@@ -20,6 +20,7 @@ module HGeometry.Polygon.Simple
   , VertexContainer
   , HasInPolygon(..)
   , inSimplePolygon
+  , containedIn
   , hasNoSelfIntersections
   , module HGeometry.Polygon.Simple.Class
   ) where

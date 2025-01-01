@@ -23,6 +23,7 @@ spec :: Spec
 spec = do
   testCases [osp|test-with-ipe/Polygon/Simple/pointInPolygon.ipe|]
   numericalSpec
+  lineSegmentContainsSpec
 
 testCases    :: OsPath -> Spec
 testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
@@ -121,3 +122,33 @@ numericalSpec =
     -- it "describes possible regression" $ do
     --   ((insidePoint::Point 2 SafeDouble) `inPolygon` polygon) `shouldBe` Inside
     --   ((outsidePoint::Point 2 SafeDouble) `inPolygon` polygon) `shouldBe` Outside
+
+
+--------------------------------------------------------------------------------
+-- * Line segment inside polygon tests
+
+
+
+lineSegmentContainsSpec :: Spec
+lineSegmentContainsSpec = describe "containedIn tests" $ do
+      (segs, polies) <-  runIO $ do
+        inFp'      <- getDataFileName
+                          ([osp|test-with-ipe/Polygon/Simple/segmentContainedInPolygon.ipe|])
+        Right page <- readSinglePageFile inFp'
+        let (segs' :: NonEmpty (ClosedLineSegment (Point 2 R) :+ _))
+                     = NonEmpty.fromList $ readAll page
+            (pgs'  :: NonEmpty (SimplePolygon (Point 2 R) :+ _))
+                     = NonEmpty.fromList $ readAll page
+        pure (segs',pgs')
+      forM_ polies $ \(poly :+ ats) -> do
+        let (inSegs,outSegs) = NonEmpty.partition (sameColor ats) segs
+        it "segments inside" $ do
+          forM_ inSegs $ \inSeg ->
+            inSeg `shouldSatisfy` (`containedIn` poly)
+        it "segments ouutside" $ do
+          forM_ outSegs $ \seg ->
+            seg `shouldSatisfy` (not . (`containedIn` poly))
+
+
+  where
+    sameColor ats (_ :+ ats') = lookupAttr SStroke ats == lookupAttr SStroke ats'

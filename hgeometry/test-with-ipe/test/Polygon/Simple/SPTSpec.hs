@@ -8,7 +8,9 @@ import           Data.Bifoldable
 import           Data.Function (on)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (maybeToList)
 import           Golden
+import           HGeometry.Boundary
 import           HGeometry.Ext
 import           HGeometry.Intersection
 import           HGeometry.LineSegment
@@ -35,6 +37,7 @@ import           Test.Hspec.QuickCheck
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck
 
+import           System.IO.Unsafe (unsafePerformIO)
 --------------------------------------------------------------------------------
 
 -- type R = RealNumber 5
@@ -61,6 +64,25 @@ spec = describe "shortest path tree tests" $ do
                  sptEdges  = [ mkEdge v p | (v :+ _) :+ p <- computeShortestPaths' s triang ]
              in filter (not . (`containedIn` poly)) sptEdges === []
 
+  {-
+         prop "render" $
+           \(PointInPoly poly s) (i :: Int) -> unsafePerformIO $ do
+             is <- encodeFS (show i)
+             let triang = triangulate poly
+                 sptEdges = [ mkEdge v p | (v :+ _) :+ p <- computeShortestPaths' s triang ]
+                 sptEdges' = [ iO $ defIO e ! attr SStroke green | e <- sptEdges ]
+                 diags = [ iO $ defIO  (triang^?!edgeSegmentAt e) ! attr SStroke gray
+                         | (e, Diagonal) <- triang^..edges.withIndex
+                         ]
+                 out = [ iO' s
+                       , iO' poly
+                       , iO $ ipeGroup diags
+                       , iO $ ipeGroup sptEdges'
+                       ]
+                 outF = [osp|/tmp/out_|] <> is <> [osp|.ipe|]
+             writeIpeFile outF $ singlePageFromContent out
+             pure True
+-}
          -- it "inConeTest" $
          --   let a, l, r, w :: Point 2 R
          --       a = Point2 81.766 130.9508
@@ -87,6 +109,8 @@ spec = describe "shortest path tree tests" $ do
                  [osp|funnel_out|]
          testIpe [osp|funnel1.ipe|]
                  [osp|funnel1_out|]
+         testIpe [osp|bug.ipe|]
+                 [osp|bug.out|]
 
 
 mkEdge u = \case
@@ -106,9 +130,6 @@ testIpe inFp outFp = describe (show inFp) $ do
         (mySource :+ _)  = NonEmpty.head sources
         Just tree  = dualTreeFrom mySource triang
         tree' = orientDualTree (==) $ toTreeRep triang mySource tree
-
-
-
 
         sptEdges  = [ mkEdge v p | (v :+ _) :+ p <- computeShortestPaths' mySource triang ]
         sptEdges' = [ iO $ defIO e ! attr SStroke green
@@ -147,28 +168,6 @@ testIpe inFp outFp = describe (show inFp) $ do
                (ipeFileGolden { name = outFp })
                (addStyleSheet opacitiesStyle $ singlePageFromContent out)
 
-
--- | test if the given segment is contained in the polygon. It is also ok if the segment
--- lies partially on the boundary
-containedIn :: ( ClosedLineSegment_ lineSegment point
-               , SimplePolygon_ simplePolygon vertex r
-               , Intersection (ClosedLineSegment vertex) lineSegment
-                 ~ Maybe (LineSegmentLineSegmentIntersection lineSegment')
-               , IsIntersectableWith (ClosedLineSegment vertex) lineSegment
-               , NumType lineSegment' ~ r
-               , HasIntersectionWith point simplePolygon
-               , Point_ point 2 r, Point_ vertex 2 r, Ord r, Fractional r
-               ) => lineSegment -> simplePolygon -> Bool
-containedIn seg poly = (seg^.start) `intersects` poly
-                    && (seg^.end) `intersects` poly
-                    && not properIntersection
-  where
-    properIntersection = anyOf outerBoundaryEdgeSegments (\edgeSeg ->
-                           case edgeSeg `intersect` seg of
-                             Just (LineSegment_x_LineSegment_Point p) -> not $
-                               p /= (edgeSeg^.start.asPoint) || p /= (edgeSeg^.end.asPoint)
-                             _                                        -> False
-                                                         ) poly
     -- asOpen (ClosedLineSegment a b) = OpenLineSegment a b
 
 -- | computes the faces (represented by their face Id and a list of vertices)

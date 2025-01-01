@@ -14,15 +14,18 @@ module HGeometry.Polygon.Simple.InPolygon
   , inSimplePolygon
   -- , insidePolygon
   -- , onBoundary
+  , containedIn
   ) where
 
 import Control.Lens
 import HGeometry.Boundary
-import HGeometry.Interval
-import HGeometry.Point
-import HGeometry.Polygon.Simple.Class
-import HGeometry.Polygon.Class
 import HGeometry.Intersection
+import HGeometry.Interval
+import HGeometry.LineSegment
+import HGeometry.Point
+import HGeometry.Polygon.Class
+import HGeometry.Polygon.Simple.Class
+import HGeometry.Properties
 
 --------------------------------------------------------------------------------
 
@@ -141,3 +144,50 @@ q `inSimplePolygon` pg = case ifoldMapOf outerBoundaryEdges countAbove pg of
 
 
 --------------------------------------------------------------------------------
+-- * Test if a segment is contained in a polygon
+
+-- | test if the given line segment is contained in the polygon. It is also ok if the
+-- segment lies partially on the boundary
+containedIn :: ( ClosedLineSegment_ lineSegment point
+               , SimplePolygon_ simplePolygon vertex r
+               , Intersection (ClosedLineSegment vertex) lineSegment
+                 ~ Maybe (LineSegmentLineSegmentIntersection lineSegment')
+               , IsIntersectableWith (ClosedLineSegment vertex) lineSegment
+               , NumType lineSegment' ~ r
+               , HasInPolygon simplePolygon vertex r
+               , Point_ point 2 r, Point_ vertex 2 r, Ord r, Fractional r
+               ) => lineSegment -> simplePolygon -> Bool
+containedIn seg poly = case (seg^.start) `inPolygon` poly of
+    StrictlyInside    -> case (seg^.end) `inPolygon` poly of
+                           StrictlyInside    -> not properIntersection
+                           StrictlyOutside   -> False
+                           OnBoundaryEdge vj -> not properIntersection && inCone' vj (seg^.start)
+    StrictlyOutside   -> False
+    OnBoundaryEdge vi -> case (seg^.end) `inPolygon` poly of
+                           StrictlyInside    -> not properIntersection
+                           StrictlyOutside   -> False
+                           OnBoundaryEdge vj -> not properIntersection
+                                                && inCone' vi (seg^.end)
+                                                && inCone' vj (seg^.start)
+  where
+    properIntersection = anyOf outerBoundaryEdgeSegments (\edgeSeg ->
+                           case edgeSeg `intersect` seg of
+                             Just (LineSegment_x_LineSegment_Point p) -> not $
+                               p /= (edgeSeg^.start.asPoint) || p /= (edgeSeg^.end.asPoint)
+                             _                                        -> False
+                                                         ) poly
+    inCone' i q = let a = poly^?!vertexAt i
+                      p = poly^?!vertexAt (i-1)
+                      n = poly^?!vertexAt (i+1)
+                  in inCone q a p n
+
+-- | Test if a point lies inside a cone.
+inCone           :: ( Point_ queryPoint 2 r, Point_ apex 2 r, Point_ point 2 r, Point_ point' 2 r
+                    , Ord r, Num r
+                    ) =>
+                    queryPoint -> apex -> point -> point' -> Bool
+inCone q a l r = case ccw a l q of
+                   CCW -> False
+                   _   -> case ccw a r q of
+                            CW -> False
+                            _  -> True
