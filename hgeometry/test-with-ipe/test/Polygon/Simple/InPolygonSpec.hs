@@ -62,7 +62,7 @@ toSingleSpec          :: (Fractional r, Ord r, Show r)
                       -> PointLocationResult
                       -> Point 2 r
                       -> Spec
-toSingleSpec poly r q = it name $ (asPointLocationResult $ q `inPolygon` poly) `shouldBe` r
+toSingleSpec poly r q = it name $ (asPointLocationResult $ q `inSimplePolygonX` poly) `shouldBe` r
   where
     name = unwords ["query:", show q, "in", take 70 $ show poly ]
 
@@ -74,7 +74,7 @@ toSpec (TestCase poly is bs os) = do
                                     describe "outside tests" $
                                       mapM_ (toSingleSpec poly Outside) os
 
-readInputFromFile    :: OsPath -> IO (Either ConversionError [TestCase Rational])
+readInputFromFile    :: OsPath -> IO (Either ConversionError [TestCase R])
 readInputFromFile fp = fmap f <$> readSinglePageFile fp
   where
     f page = [ TestCase poly
@@ -202,7 +202,8 @@ inSimplePolygonX        :: forall queryPoint simplePolygon point r.
                           )
                        => queryPoint -> simplePolygon
                        -> PointLocationResultWith (VertexIx simplePolygon)
-q `inSimplePolygonX` pg = case ifoldMapOf outerBoundaryWithNeighbours countAbove pg of
+q `inSimplePolygonX` pg = case traceShowWith ("inPoly",) $
+  ifoldMapOf outerBoundaryWithNeighbours countAbove pg of
                             OnEdge s                       -> OnBoundaryEdge s
                             NumStrictlyAbove m | odd m     -> StrictlyInside
                                                | otherwise -> StrictlyOutside
@@ -217,7 +218,7 @@ q `inSimplePolygonX` pg = case ifoldMapOf outerBoundaryWithNeighbours countAbove
     --
     -- we have to take special care of vertical edges, and when the ray goes through a
     -- vertex u.
-    countAbove (i,_) (u,(p,v)) = case (u^.xCoord) `compare` (q^.xCoord) of
+    countAbove (i,_) (u,(p,v)) = traceShowWith ("countAbove",u,v,"res",) $ case (u^.xCoord) `compare` (q^.xCoord) of
       LT | (q^.xCoord) < (v^.xCoord) -> belowLineSeg i u v
          -- for q to lie below the edge, v has to lie right of q and q has to actually lie
          -- below the line segment.
@@ -232,7 +233,7 @@ q `inSimplePolygonX` pg = case ifoldMapOf outerBoundaryWithNeighbours countAbove
          | otherwise                 -> mempty
 
 
-      EQ -> case (u^.yCoord) `compare` (q^.yCoord) of
+      EQ -> case traceShowWith ("ux=qx","cmp uy and qy",u,q,v,) $ (u^.yCoord) `compare` (q^.yCoord) of
               EQ                             -> OnEdge i
                 -- q == u, so it lies on edge i
 
@@ -243,19 +244,19 @@ q `inSimplePolygonX` pg = case ifoldMapOf outerBoundaryWithNeighbours countAbove
                  | otherwise                 -> mempty
                  -- q lies above u, so otherwise it does not lie on the edge starting at u.
 
-              GT -> case (q^.xCoord) `compare` (v^.xCoord) of
+              GT -> case traceShowWith ("cmpqx,vx",q,v,) $ (q^.xCoord) `compare` (v^.xCoord) of
                 EQ | (q^.yCoord) > (v^.yCoord) -> OnEdge i
                    | otherwise                 -> mempty
                    -- the edge uv is vertical. We already established that u lies above
                    -- q, so it lies on the edge only if v lies strictly below q.
 
-                LT | q^.xCoord <= p^.xCoord -> mempty
+                LT | q^.xCoord <= p^.xCoord -> traceShowWith ("here?",u,v,p,) mempty
                    -- the predecessor vertex p and v lie on the same side of the vertical line
                    -- through u. So we don't count this vertex/edge
                    -- TODO: not sure if this should be <= or <
-                   | otherwise              -> belowLineSeg i v u
-                GT | q^.xCoord >= p^.xCoord -> mempty -- same as before v and p on the same side.
                    | otherwise              -> belowLineSeg i u v
+                GT | q^.xCoord >= p^.xCoord -> mempty -- same as before v and p on the same side.
+                   | otherwise              -> belowLineSeg i v u
 
 
     -- | count the edge if q is below the line through l and r,
