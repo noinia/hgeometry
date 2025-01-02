@@ -15,6 +15,7 @@ module HGeometry.Polygon.Simple.InPolygon
   -- , insidePolygon
   -- , onBoundary
   , containedIn
+  -- , AboveCount(..)
   ) where
 
 import Control.Lens
@@ -27,6 +28,7 @@ import HGeometry.Polygon.Class
 import HGeometry.Polygon.Simple.Class
 import HGeometry.Properties
 
+-- import Debug.Trace
 --------------------------------------------------------------------------------
 
 {- $setup
@@ -109,38 +111,69 @@ inSimplePolygon        :: forall queryPoint simplePolygon point r.
                           )
                        => queryPoint -> simplePolygon
                        -> PointLocationResultWith (VertexIx simplePolygon)
-q `inSimplePolygon` pg = case ifoldMapOf outerBoundaryEdges countAbove pg of
-                     OnEdge s                       -> OnBoundaryEdge s
-                     NumStrictlyAbove m | odd m     -> StrictlyInside
-                                        | otherwise -> StrictlyOutside
-  -- we count the number m of non-vertical edges half-open [ell,r) that lie
-  -- strictly above q. The idea is that q lies inside the polygon iff m is odd.
-  --
-  -- we have to be a bit careful in the case q lies on an edge
-  -- (e.g. the <=> does not hold in that case). If we discover q lies
-  -- on an edge e, we actually report that.
+q `inSimplePolygon` pg = case ifoldMapOf outerBoundaryWithNeighbours countAbove pg of
+                            OnEdge s                       -> OnBoundaryEdge s
+                            NumStrictlyAbove m | odd m     -> StrictlyInside
+                                               | otherwise -> StrictlyOutside
   where
-    countAbove (i,_) (u,v) = case (u^.xCoord) `compare` (v^.xCoord) of
-                               EQ | onVerticalEdge u v -> OnEdge i
-                                  | otherwise          -> mempty
-                               LT                      -> countAbove' i (AnClosedE u) (AnOpenE v)
-                               GT                      -> countAbove' i (AnOpenE v)   (AnClosedE u)
-    -- count the edge if q
-    countAbove' i l r
-      | (Point1 $ q^.xCoord) `intersects` (view xCoord <$> Interval l r)
-                  = case ccw (l^._endPoint.asPoint) (q^.asPoint) (r^._endPoint.asPoint) of
-                      CW       -> NumStrictlyAbove 1  -- q lies strictly below the segment lr
-                      CoLinear -> OnEdge i
-                      CCW      -> mempty -- q lies strictly above the segment lr
-      | otherwise = mempty
+    -- we count the number of by the vertical upward ray from q intersects the boundary of
+    -- the polygon. If the number of times we intersect the boundary is odd we are inside,
+    -- and outside othwerise.
+    --
+    --
+    -- Generally, countAbove will compute the contribution of the edge uv (which is edge i).
+    --
+    --
+    -- we have to take special care of vertical edges, and when the ray goes through a
+    -- vertex u.
+    countAbove (i,_) (u,(p,v)) = case (u^.xCoord) `compare` (q^.xCoord) of
+      LT | (q^.xCoord) < (v^.xCoord) -> belowLineSeg i u v
+         -- for q to lie below the edge, v has to lie right of q and q has to actually lie
+         -- below the line segment.
+         --
+         -- Note that if q lies strictly below v we don't count it here. We handle it
+         -- when handing vertex v
+         | otherwise                 -> mempty
 
-    --- fixme, assign open and closed before; the issue seems to be that a rightmost vertex (local max) is assigned the open endpoint on both times. That essentialy treats is as lying outsie the pg.
+      GT | (q^.xCoord) > (v^.xCoord) -> belowLineSeg i v u
+            -- for q to lie below the edge, v has to lie left of q and
+            -- q has to actually lie below the line through u and v.
+         | otherwise                 -> mempty
 
 
-    -- test if q lies on the vertical edge defined by u and v
-    onVerticalEdge u v = let yr = buildClosedInterval @(ClosedInterval r) (u^.yCoord) (v^.yCoord)
-                         in q^.xCoord == u^.xCoord && (Point1 $ q^.yCoord) `intersects` yr
+      EQ -> case (u^.yCoord) `compare` (q^.yCoord) of
+              EQ                             -> OnEdge i
+                -- q == u, so it lies on edge i
 
+              LT | (q^.xCoord) == (v^.xCoord) &&
+                   (q^.yCoord) < (v^.yCoord) -> OnEdge i
+                 -- q lies above u. So the only case in which q does lie on the edge uv
+                 -- is if it is vertical, and q lies on it.
+                 | otherwise                 -> mempty
+                 -- q lies above u, so otherwise it does not lie on the edge starting at u.
+
+              GT -> case (q^.xCoord) `compare` (v^.xCoord) of
+                EQ | (q^.yCoord) > (v^.yCoord) -> OnEdge i
+                   | otherwise                 -> mempty
+                   -- the edge uv is vertical. We already established that u lies above
+                   -- q, so it lies on the edge only if v lies strictly below q.
+
+                LT | q^.xCoord <= p^.xCoord -> mempty
+                   -- the predecessor vertex p and v lie on the same side of the vertical line
+                   -- through u. So we don't count this vertex/edge
+                   -- TODO: not sure if this should be <= or <
+                   | otherwise              -> belowLineSeg i u v
+                GT | q^.xCoord >= p^.xCoord -> mempty -- same as before v and p on the same side.
+                   | otherwise              -> belowLineSeg i v u
+
+    -- | count the edge if q is below the line through l and r,
+    --
+    -- pre: l is left of r.
+    -- pre: q-x lies in the interval [lx,rx]
+    belowLineSeg i l r = case ccw l q r of
+      CW       -> mempty -- q lies strictly above the segment lr
+      CoLinear -> OnEdge i
+      CCW      -> NumStrictlyAbove 1  -- q lies strictly below the segment lr
 
 
 --------------------------------------------------------------------------------
@@ -156,6 +189,7 @@ containedIn :: ( ClosedLineSegment_ lineSegment point
                , NumType lineSegment' ~ r
                , HasInPolygon simplePolygon vertex r
                , Point_ point 2 r, Point_ vertex 2 r, Ord r, Fractional r
+               -- , Show lineSegment
                ) => lineSegment -> simplePolygon -> Bool
 containedIn seg poly = case (seg^.start) `inPolygon` poly of
     StrictlyInside    -> case (seg^.end) `inPolygon` poly of
@@ -174,7 +208,8 @@ containedIn seg poly = case (seg^.start) `inPolygon` poly of
                            case edgeSeg `intersect` seg of
                              Just (LineSegment_x_LineSegment_Point p) -> not $
                                p /= (edgeSeg^.start.asPoint) || p /= (edgeSeg^.end.asPoint)
-                             _                                        -> False
+                             Just _                                   -> False
+                             Nothing                                  -> False
                                                          ) poly
     inCone' i q = let a = poly^?!vertexAt i
                       p = poly^?!vertexAt (i-1)
