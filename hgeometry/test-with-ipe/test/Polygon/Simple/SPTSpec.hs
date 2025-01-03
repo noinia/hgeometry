@@ -8,7 +8,7 @@ import           Data.Bifoldable
 import           Data.Function (on)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (maybeToList)
+import           Data.Maybe (maybeToList, fromJust)
 import           Golden
 import           HGeometry.Boundary
 import           HGeometry.Ext
@@ -55,9 +55,35 @@ instance Arbitrary PointInPoly where
                      doubleToR = realToFrac :: Double -> R
                  pure $ PointInPoly (poly&vertices %~ over coordinates doubleToR)
                                     (s&coordinates %~ doubleToR)
+  shrink (PointInPoly poly s) = [ PointInPoly poly' s
+                                | poly' <- shrink poly
+                                , s `intersects` poly'
+                                ]
+
+
 
 spec :: Spec
 spec = describe "shortest path tree tests" $ do
+         it "manual test" $
+           let triang = triangulate myBuggyPoly
+               sptEdges = [ mkEdge v p | (v :+ _) :+ p <- computeShortestPaths' myBuggySource triang ]
+               sptEdges' = [ iO $ defIO e ! attr SStroke green | e <- sptEdges ]
+               diags = [ iO $ defIO  (triang^?!edgeSegmentAt e) ! attr SStroke gray
+                       | (e, Diagonal) <- triang^..edges.withIndex
+                       ]
+               out = [ iO' myBuggySource
+                     , iO' myBuggyPoly
+                     , iO $ ipeGroup diags
+                     , iO $ ipeGroup sptEdges'
+                     ]
+               res = unsafePerformIO $ do
+                                         let  outF = [osp|/tmp/manual.ipe|]
+                                         writeIpeFile outF $ singlePageFromContent out
+                                         pure res'
+               res' = filter (not . (`containedIn` myBuggyPoly)) sptEdges
+           in res `shouldBe` []
+
+
          prop "edges contained in polygon" $
            \(PointInPoly poly s) ->
              let triang = triangulate poly
@@ -111,6 +137,8 @@ spec = describe "shortest path tree tests" $ do
                  [osp|funnel1_out|]
          testIpe [osp|bug.ipe|]
                  [osp|bug.out|]
+         testIpe [osp|bug1.ipe|]
+                 [osp|bug1.out|]
 
 
 mkEdge u = \case
@@ -234,3 +262,45 @@ drawDualTree gr dt = iO . ipeGroup . concat $ [ verts
 
     drawRoot     = iO $ drawVertex (dt^.rootVertex) ! attr SStroke red
     drawVertex f = ipeDiskMark $ gr^?!interiorFacePolygonAt f.to centroid
+
+
+
+
+
+-- myBuggyPoly :: SimplePolygon (Point 2 R)
+-- myBuggyPoly = fromJust . fromPoints . NonEmpty.fromList $
+--               [Point2 16.93000 43.20999
+--               ,Point2 18.45001 42.47999
+--               ,Point2 18.45001 42.47999
+--               ,Point2 18.55999 42.64999
+--               ,Point2 17.67492 43.02856
+--               ,Point2 16.45644 44.04123
+--               ,Point2 15.75002 44.81871
+--               ,Point2 16.56480 46.50375
+--               ,Point2 15.76873 46.23810
+--               ,Point2 15.37625 44.31791
+--               ]
+-- myBuggySource :: Point 2 R
+-- myBuggySource = Point2 16.14882 46.35839
+
+myBuggyPoly :: SimplePolygon (Point 2 R)
+myBuggyPoly = fromJust . fromPoints . NonEmpty.fromList $
+  [Point2 (-71.43846) (-32.41890)
+  ,Point2 (-72.71781) (-42.38336)
+  ,Point2 (-73.24036) (-44.45497)
+  ,Point2 (-74.12659) (-46.93926)
+  ,Point2 (-75.60802) (-48.67378)
+  ,Point2 (-73.41544) (-49.31844)
+  ,Point2 (-69.10025) (-18.26013)
+  ,Point2 (-70.09125) (-21.39332)
+  ,Point2 (-70.40397) (-23.62900)
+  ,Point2 (-70.90513) (-27.64038)
+  ]
+
+myBuggySource :: Point 2 R
+myBuggySource = Point2 (-74.95283) (-48.73334)
+
+
+
+
+         -- [ClosedLineSegment (Point2 (-70.09125~) (-21.39332~)) (Point2 (-72.71781~) (-42.38336~))] /

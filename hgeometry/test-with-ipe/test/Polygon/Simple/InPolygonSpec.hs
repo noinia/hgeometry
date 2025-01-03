@@ -21,10 +21,10 @@ import           System.OsPath
 import           Test.Hspec
 import           Test.QuickCheck.Instances ()
 
-import           Debug.Trace
-import           HGeometry.Intersection
-import           HGeometry.Interval
-import           HGeometry.Polygon.Simple.InPolygon
+-- import           Debug.Trace
+-- import           HGeometry.Intersection
+-- import           HGeometry.Interval
+-- import           HGeometry.Polygon.Simple.InPolygon
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -149,6 +149,9 @@ numericalSpec =
 
 lineSegmentContainsSpec :: Spec
 lineSegmentContainsSpec = describe "containedIn tests" $ do
+      it "manual segment" $
+        (testSegment `containedIn` testPoly) `shouldBe` True
+
       (segs, polies) <-  runIO $ do
         inFp'      <- getDataFileName
                           ([osp|test-with-ipe/Polygon/Simple/segmentContainedInPolygon.ipe|])
@@ -189,3 +192,26 @@ darkOrangePoly = fromJust . fromPoints . NonEmpty.fromList $
   , Point2 336 240
   , Point2 400 256
   ]
+
+
+testSegment :: ClosedLineSegment (Point 2 R)
+testSegment = ClosedLineSegment (Point2 288 176) (Point2 224 160)
+testPoly :: SimplePolygon (Point 2 R)
+testPoly = fromJust . fromPoints . NonEmpty.fromList $
+  [ Point2 128 160
+  , Point2 176 64
+  , Point2 224 160
+  , Point2 288 176
+  , Point2 272 224
+  , Point2 80 192
+  ]
+
+
+
+-- ,2,
+
+-- q = Point2 288 176,
+-- a = Point2 224 160
+-- p = Point2 176 64    = l
+-- n = Point2 288 176   = r
+--   ,False)

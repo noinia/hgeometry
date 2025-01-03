@@ -28,7 +28,6 @@ import HGeometry.Polygon.Class
 import HGeometry.Polygon.Simple.Class
 import HGeometry.Properties
 
--- import Debug.Trace
 --------------------------------------------------------------------------------
 
 {- $setup
@@ -189,7 +188,6 @@ containedIn :: ( ClosedLineSegment_ lineSegment point
                , NumType lineSegment' ~ r
                , HasInPolygon simplePolygon vertex r
                , Point_ point 2 r, Point_ vertex 2 r, Ord r, Fractional r
-               -- , Show lineSegment
                ) => lineSegment -> simplePolygon -> Bool
 containedIn seg poly = case (seg^.start) `inPolygon` poly of
     StrictlyInside    -> case (seg^.end) `inPolygon` poly of
@@ -221,8 +219,14 @@ inCone           :: ( Point_ queryPoint 2 r, Point_ apex 2 r, Point_ point 2 r, 
                     , Ord r, Num r
                     ) =>
                     queryPoint -> apex -> point -> point' -> Bool
-inCone q a l r = case ccw a l q of
-                   CCW -> False
-                   _   -> case ccw a r q of
-                            CW -> False
-                            _  -> True
+inCone q a l r = case cwCmpAroundWith ((l^.asPoint) .-. (a^.asPoint)) a (q^.asPoint) (r^.asPoint) of
+                   GT -> False
+                   _  -> True
+
+  -- case ccw a l q of
+  --                  CCW -> False
+  --                  _   -> case ccw a r q of
+  --                           CW -> False
+  --                           _  -> True
+
+-- it seems we cannot define the cmpCCwAroundwith with flip; since now the zero vector is actually treated last. i.e. they are not inverses.
