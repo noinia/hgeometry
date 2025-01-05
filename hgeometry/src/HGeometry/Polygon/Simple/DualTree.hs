@@ -210,19 +210,38 @@ asOrientedBinaryTrie (=.=) = go
     go      :: forall p. (Point_ p 2 r, Show p)
             => p -> BinaryTrie (Vector 2 point) point -> BinaryTrie (Vector 2 point) point
     go p tr = case tr of
-      Leaf _                              -> tr
-      OneNode v (e,t)                     -> OneNode v (e, go v t)
-      TwoNode v (d@(Vector2 q _),l) (e,r) -> let l' = go v l
-                                                 r' = go v r
-                                             in case traceShowWith ("oBST",p,v,d,e,"is ",) $
-                                                     ccw p v q of
-                                                  CCW      -> TwoNode v (d,l') (e,r')
-                                                  CW       -> TwoNode v (e,r') (d,l')
-                                                              -- note that we switch l and r here
-                                                  CoLinear
-                                                    | v =.= q   -> TwoNode v (e,r') (d,l')
-                                                    | otherwise -> TwoNode v (d,l') (e,r')
-                                                  -- TBH, there should be a better way for this..
+        Leaf _                              -> tr
+        LeftNode v (d@(Vector2 q _),t)      -> let t' = go v t
+                                               in decideSide v q (LeftNode  v (d,t'))
+                                                                 (RightNode v (d,t'))
+        RightNode v (d@(Vector2 q _),t)     -> let t' = go v t
+                                               in decideSide v q (LeftNode  v (d,t'))
+                                                                 (RightNode v (d,t'))
+           -- this case should not occur atually. Maybe make it so in the type
+        TwoNode v (d@(Vector2 q _),l) (e,r) -> let l' = go v l
+                                                   r' = go v r
+                                               in decideSide v q (TwoNode v (d,l') (e,r'))
+                                                                 (TwoNode v (e,r') (d,l'))
+                                                  -- note that we switch l and r here
+
+                                                 -- case traceShowWith ("oBST",p,v,d,e,"is ",) $
+                                                 --       ccw p v q of
+                                                 --    CCW      ->
+                                                 --    CW       ->
+                                                 --    CoLinear
+                                                 --      | v =.= q   -> TwoNode v (e,r') (d,l')
+                                                 --      | otherwise -> TwoNode v (d,l') (e,r')
+                                                 --    -- TBH, there should be a better way for this..
+
+      where
+        -- we want to whether the left subtree (whose left endpoint is q) is tLeft or tRight.
+        decideSide v q tLeft tRight = case ccw p v q of
+                                        CCW                  -> tLeft
+                                        CW                   -> tRight
+                                        CoLinear | v =.= q   -> tRight
+                                                 | otherwise -> tLeft
+                                        -- TBH, there should be a better way for this..
+
 
 -- | Transform the dual tree into a format we can use to run the shortest path procedure on
 toTreeRep         :: ( PlanarGraph_ gr

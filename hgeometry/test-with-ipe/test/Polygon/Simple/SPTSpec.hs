@@ -64,13 +64,18 @@ instance Arbitrary PointInPoly where
 
 spec :: Spec
 spec = describe "shortest path tree tests" $ do
-         it "manual test" $
+{-         it "manual test" $
            let triang = triangulate myBuggyPoly
                sptEdges = [ mkEdge v p | (v :+ _) :+ p <- computeShortestPaths' myBuggySource triang ]
                sptEdges' = [ iO $ defIO e ! attr SStroke green | e <- sptEdges ]
                diags = [ iO $ defIO  (triang^?!edgeSegmentAt e) ! attr SStroke gray
                        | (e, Diagonal) <- triang^..edges.withIndex
                        ]
+               wrong = [ iO $ defIO wr ! attr SStroke red
+                                       ! attr SPen (IpePen (Named "fat"))
+                       | wr <- res'
+                       ]
+
                out = [ iO' myBuggySource
                      , iO' myBuggyPoly
                      , iO $ ipeGroup diags
@@ -82,7 +87,7 @@ spec = describe "shortest path tree tests" $ do
                                          pure res'
                res' = filter (not . (`containedIn` myBuggyPoly)) sptEdges
            in res `shouldBe` []
-
+-}
 
          prop "edges contained in polygon" $
            \(PointInPoly poly s) ->
@@ -137,6 +142,8 @@ spec = describe "shortest path tree tests" $ do
                  [osp|funnel1_out|]
          testIpe [osp|bug.ipe|]
                  [osp|bug.out|]
+         testIpe [osp|bugSym.ipe|]
+                 [osp|bugSym.out|]
          testIpe [osp|bug1.ipe|]
                  [osp|bug1.out|]
 
@@ -221,7 +228,8 @@ incorrectDualTreeNodes triang = go0 . trimap centroid' id centroid'
 
     go p (_, tr) = case tr of
       Leaf _         -> []
-      OneNode _ _    -> []
+      LeftNode _ _  -> [] -- these could also be wrong I guess. So maybe also test for that.?
+      RightNode _ _  -> []
       TwoNode v l r -> let loc = case ccwCmpAroundWith (v .-. p) v (l^._2.root) (r^._2.root) of
                                    GT -> [ (v^.extra._1
                                            , v^.core, "L:", l^._2.root.core, "R:",r^._2.root.core)]

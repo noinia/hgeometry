@@ -15,12 +15,12 @@ module HGeometry.Polygon.Simple.ShortestPath.Tree
   -- )
   where
 
-import           Control.Lens hiding ((:<), (<|))
+import           Control.Lens hiding ((:<), (<|), (|>))
 import           Data.Bifoldable
 import           Data.Bifunctor (first)
 import           Data.Coerce
 import           Data.FingerTree ( Measured, FingerTree, ViewR(..), ViewL(..), SearchResult(..)
-                                 , (<|)
+                                 , (<|), (|>)
                                  )
 import qualified Data.FingerTree as FT
 import qualified Data.Foldable as F
@@ -232,7 +232,7 @@ splitAtParent w cu@(Cusp l ls a rs r) = traceShowWith ("splitAtParent",w,cu,)  $
                             ApexRight (Cusp l mempty l mempty w) (Cusp w (coerce l <| ls) a rs r)
                             -- we are really in the OnLeft case
         _                           ->
-          traceShowWith ("Position",w,cu,p,) $         ApexRight (Cusp l lsL (coerce p) mempty w)    (Cusp w lsR a rs r)
+          traceShowWith ("Position",w,cu,p,) $         ApexRight (Cusp l lsL (coerce p) mempty w)    (Cusp w (p <| lsR) a rs r)
       OnLeft             -> case FT.viewl ls of
         EmptyL   -> ApexRight (Cusp l mempty l mempty w) (Cusp w (coerce l <| ls) a rs r)
                     -- we necessarily make a right turn at l since we are left of the
@@ -255,8 +255,8 @@ splitAtParent w cu@(Cusp l ls a rs r) = traceShowWith ("splitAtParent",w,cu,)  $
       Position rsR p rsL -> case FT.viewl rsR of
         EmptyL | isLeftTurn' w r p ->
                    ApexLeft (Cusp l ls a (coerce r <| rs) w) (Cusp w mempty r mempty r)
-        _                          ->
-                    ApexLeft (Cusp l ls a rsL w) (Cusp w mempty (coerce p) rsR r)
+        _                          -> traceShowWith ("there",w,) $
+                   ApexLeft (Cusp l ls a (p <| rsL) w) (Cusp w mempty (coerce p) rsR r)
       OnLeft             -> case FT.viewl rs of
         EmptyL   -> ApexLeft (Cusp l ls a (coerce r <| rs) w) (Cusp w mempty r mempty r)
                     -- we necessarily make a left turn at r since we are right of the
@@ -265,7 +265,7 @@ splitAtParent w cu@(Cusp l ls a rs r) = traceShowWith ("splitAtParent",w,cu,)  $
                     ApexLeft (Cusp l ls a (coerce r <| rs) w) (Cusp w mempty r mempty r)
                    -- we actually allready make a left turn at r
                    -- so this is actually the same as the emptyL case
-                 | otherwise          ->
+                 | otherwise          -> traceShowWith ("here",w,) $
                     ApexLeft (Cusp l ls a rs w) (Cusp w mempty (coerce p) mempty r)
 
       OnRight            -> case FT.viewr rs of
@@ -321,16 +321,15 @@ compute (=.=) s poly@(Vector2 l0 r0,_) = go Left (Cusp l0 mempty s mempty r0) po
 
              -- | compute the rest of the shortest path tree; i.e.
              rest   = case tr of
-               Leaf _                      -> []
-               OneNode _ e@(Vector2 l _,_)
-                 | w =.= l   -> case split' of
-                     ApexLeft  _ cr -> goVertex' cr e
-                     AtApex    _ cr -> worker    cr e
-                     ApexRight _ cr -> worker    cr e
-                 | otherwise -> case split' of
+               Leaf _           -> []
+               LeftNode _ e -> case split' of
                      ApexLeft  cl _ -> worker    cl e
                      AtApex    cl _ -> worker    cl e
                      ApexRight cl _ -> goVertex' cl e
+               RightNode _ e -> case split' of
+                     ApexLeft  _ cr -> goVertex' cr e
+                     AtApex    _ cr -> worker    cr e
+                     ApexRight _ cr -> worker    cr e
                TwoNode _ l r             -> case split' of
                  ApexLeft  cl cr -> worker cl l    <> goVertex' cr r
                  AtApex    cl cr -> worker cl l    <> worker cr r
