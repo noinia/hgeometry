@@ -64,7 +64,7 @@ instance Arbitrary PointInPoly where
 
 spec :: Spec
 spec = describe "shortest path tree tests" $ do
-{-         it "manual test" $
+         it "manual test" $
            let triang = triangulate myBuggyPoly
                sptEdges = [ mkEdge v p | (v :+ _) :+ p <- computeShortestPaths' myBuggySource triang ]
                sptEdges' = [ iO $ defIO e ! attr SStroke green | e <- sptEdges ]
@@ -80,6 +80,7 @@ spec = describe "shortest path tree tests" $ do
                      , iO' myBuggyPoly
                      , iO $ ipeGroup diags
                      , iO $ ipeGroup sptEdges'
+                     , iO $ defIO myIssueSeg ! attr SStroke orange
                      ]
                res = unsafePerformIO $ do
                                          let  outF = [osp|/tmp/manual.ipe|]
@@ -87,7 +88,7 @@ spec = describe "shortest path tree tests" $ do
                                          pure res'
                res' = filter (not . (`containedIn` myBuggyPoly)) sptEdges
            in res `shouldBe` []
--}
+
 
          prop "edges contained in polygon" $
            \(PointInPoly poly s) ->
@@ -146,6 +147,8 @@ spec = describe "shortest path tree tests" $ do
                  [osp|bugSym.out|]
          testIpe [osp|bug1.ipe|]
                  [osp|bug1.out|]
+         testIpe [osp|bug2.ipe|]
+                 [osp|bug2.out|]
 
 
 mkEdge u = \case
@@ -291,24 +294,39 @@ drawDualTree gr dt = iO . ipeGroup . concat $ [ verts
 -- myBuggySource :: Point 2 R
 -- myBuggySource = Point2 16.14882 46.35839
 
+-- myBuggyPoly :: SimplePolygon (Point 2 R)
+-- myBuggyPoly = fromJust . fromPoints . NonEmpty.fromList $
+--   [Point2 (-71.43846) (-32.41890)
+--   ,Point2 (-72.71781) (-42.38336)
+--   ,Point2 (-73.24036) (-44.45497)
+--   ,Point2 (-74.12659) (-46.93926)
+--   ,Point2 (-75.60802) (-48.67378)
+--   ,Point2 (-73.41544) (-49.31844)
+--   ,Point2 (-69.10025) (-18.26013)
+--   ,Point2 (-70.09125) (-21.39332)
+--   ,Point2 (-70.40397) (-23.62900)
+--   ,Point2 (-70.90513) (-27.64038)
+--   ]
+
+-- myBuggySource :: Point 2 R
+-- myBuggySource = Point2 (-74.95283) (-48.73334)
+
+
 myBuggyPoly :: SimplePolygon (Point 2 R)
 myBuggyPoly = fromJust . fromPoints . NonEmpty.fromList $
-  [Point2 (-71.43846) (-32.41890)
-  ,Point2 (-72.71781) (-42.38336)
-  ,Point2 (-73.24036) (-44.45497)
-  ,Point2 (-74.12659) (-46.93926)
-  ,Point2 (-75.60802) (-48.67378)
-  ,Point2 (-73.41544) (-49.31844)
-  ,Point2 (-69.10025) (-18.26013)
-  ,Point2 (-70.09125) (-21.39332)
-  ,Point2 (-70.40397) (-23.62900)
-  ,Point2 (-70.90513) (-27.64038)
+  [Point2 (-103.00162) 36.49932
+  ,Point2 (-103.00162) 33.87994
+  ,Point2 (-99.18741) 34.23555
+  ,Point2 (-99.59909) 34.37629
+  ,Point2 (-99.76153) 34.45779
+  ,Point2 (-100.00020) 34.56522
   ]
 
 myBuggySource :: Point 2 R
-myBuggySource = Point2 (-74.95283) (-48.73334)
+myBuggySource = Point2 (-102.52133) 36.00806
 
-
+myIssueSeg :: ClosedLineSegment (Point 2 R)
+myIssueSeg = ClosedLineSegment (Point2 (-99.18741) 34.23555) (Point2 (-100.00020) 34.56522)
 
 
          -- [ClosedLineSegment (Point2 (-70.09125~) (-21.39332~)) (Point2 (-72.71781~) (-42.38336~))] /
