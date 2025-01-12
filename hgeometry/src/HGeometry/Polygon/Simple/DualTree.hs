@@ -11,11 +11,8 @@
 module HGeometry.Polygon.Simple.DualTree
   ( DualTree(..), rootVertex
   , trimap
-  --
   , dualTreeFrom
-  -- , toTreeRep
-  --
-  -- , orientDualTree, toDualTree
+  , dualTreeFromTriangle
   ) where
 
 import           Control.Lens hiding ((:<), (<|))
@@ -133,32 +130,29 @@ dualTreeFrom source poly = do
                                Boundary.StrictlyOutside -> False
                                _                        -> True
     (root',_) <- traceShowWith ("root",) $ findOf (interiorFacePolygons.withIndex) inTriangle poly
-    toDualTree' root' poly
-
-      -- $ toFaceIds $ dfs' (\u -> filter (\(e,_) -> gr^?!edgeAt e == Diagonal)
-      --                                           (gr^..neighboursOfByEdge u.asIndex)
-      --                             ) (numVertices gr) (toDualVertexIx root')
-
+    dualTreeFromTriangle root' poly
 
 -- | Construct the dual tree from a given triangle
-toDualTree'           :: forall triangulatedPolygon vertex.
-                         ( PlaneGraph_ triangulatedPolygon vertex
-                         , Dart triangulatedPolygon ~ PolygonEdgeType
-                         )
-                      => FaceIx triangulatedPolygon
-                      -> triangulatedPolygon
-                         --  ^ the triangulated polygon
-                       -> Maybe (DualTree (FaceIx triangulatedPolygon)
-                                          (DartIx triangulatedPolygon)
-                                          (FaceIx triangulatedPolygon,
-                                            (VertexIx triangulatedPolygon, vertex)
-                                          )
-                                )
-toDualTree' root' poly = case mapMaybe' buildTree $ poly^..boundaryDartsOf root'.withIndex of
-    []           -> Just $ RootZero  root'
-    [a]          -> Just $ RootOne   root' a
-    [a,b]        -> Just $ RootTwo   root' a b
-    [a,b,c]      -> Just $ RootThree root' a b c
+dualTreeFromTriangle            :: forall triangulatedPolygon vertex.
+                                   ( PlaneGraph_ triangulatedPolygon vertex
+                                   , Dart triangulatedPolygon ~ PolygonEdgeType
+                                   )
+                                => FaceIx triangulatedPolygon
+                                   -- ^ the (index of the) triangle from which to produce
+                                   -- the dual tree.
+                                -> triangulatedPolygon
+                                --  ^ the triangulated polygon
+                                -> Maybe (DualTree (FaceIx triangulatedPolygon)
+                                                   (DartIx triangulatedPolygon)
+                                                   ( FaceIx triangulatedPolygon
+                                                   , (VertexIx triangulatedPolygon, vertex)
+                                                   )
+                                         )
+dualTreeFromTriangle rt poly = case mapMaybe' buildTree $ poly^..boundaryDartsOf rt.withIndex of
+    []           -> Just $ RootZero  rt
+    [a]          -> Just $ RootOne   rt a
+    [a,b]        -> Just $ RootTwo   rt a b
+    [a,b,c]      -> Just $ RootThree rt a b c
     _            -> Nothing
   where
     buildTree             :: (DartIx triangulatedPolygon, PolygonEdgeType)
@@ -184,149 +178,3 @@ toDualTree' root' poly = case mapMaybe' buildTree $ poly^..boundaryDartsOf root'
 
     mapMaybe'   :: (a -> (b,Maybe c)) -> [a] -> [(b,c)]
     mapMaybe' f = mapMaybe (sequence . f)
-
-{-
-
-
-
-
-
-
--- | Coerce into the right type
-toFaceIds    :: TrieF (KV []) d (VertexIx (DualGraphOf (CPlaneGraph s point e f)))
-             -> TrieF (KV []) d (FaceIx   (CPlaneGraph s point e f))
-toFaceIds    = fmap coerce
-  -- TODO: figure out why this can't just be coerce?
-
-toDualVertexIx :: FaceIx (CPlaneGraph s point e f)
-               -> VertexIx (DualGraphOf (CPlaneGraph s point e f))
-toDualVertexIx = coerce
-
--- | Tries to convert the RoseTree into a DualTree
-toDualTree                   :: (Show e, Show v) =>
-  TrieF (KV []) e v -> Maybe (DualTree v e v)
--- toDualTree (Node root' chs) | traceShow ("toDualTree",root',fmap asBinaryTrie chs
-
---                                         ) False = undefined
-toDualTree (Node root' chs)  = traverse asBinaryTrie chs >>= \res ->
-                               case F.toList (assocs res) of
-                                 []      -> Just $ RootZero  root'
-                                 [c]     -> Just $ RootOne   root' c
-                                 [l,r]   -> Just $ RootTwo   root' l r
-                                 [a,b,c] -> Just $ RootThree root' a b c
-                                 _       -> Nothing
-
-
-
--- orientDualTree    :: forall graph vertex dart r.
---                      (PlaneGraph_ graph vertex, Point_ vertex 2 r, Fractional r, Ord r)
---                   => graph
---                   -> DualTree (FaceIx graph) dart (FaceIx graph)
---                   -> DualTree (FaceIx graph) dart (FaceIx graph)
--- orientDualTree gr = unTag . go . tagWithPoint
---   where
---     tagWithPoint = trimap tag id tag
---     tag fi       = pt :+ fi
---     unTag'       = view extra
---     unTag        = trimap unTag id unTag
-
-
---     go = \case
---       RootZero r        -> RootZero s
---       RootOne r a       -> RootOne s (mapEdge a)
---       RootTwo r a b     -> RootTwo s (mapEdge a) (mapEdge b)
---       RootThree r a b c -> RootThree s (mapEdge a) (mapEdge b) (mapEdge c)
-
-
--- | Orient the dual tree so that the left child is actually on the left as seen when
--- traversing from parent to children.
-orientDualTree    :: forall source vertex r.
-                     ( Point_ source 2 r
-                     , Point_ vertex 2 r
-                     , Show source, Show vertex, Show r
-                     , Num r, Ord r)
-                  => (vertex -> vertex -> Bool)
-                  -> DualTree source (Vector 2 vertex) vertex
-                  -> DualTree source (Vector 2 vertex) vertex
-orientDualTree (=.=) = \case
-    RootZero r        -> RootZero r
-    RootOne r a       -> RootOne r   (mapEdge r a)
-    RootTwo r a b     -> RootTwo r   (mapEdge r a) (mapEdge r b)
-    RootThree r a b c -> RootThree r (mapEdge r a) (mapEdge r b) (mapEdge r c)
-  where
-    mapEdge r (e,t) = (e,asOrientedBinaryTrie (=.=) r t)
-
--- | Mkae sure that the orientation, i.e. left child and right child are consistent
-asOrientedBinaryTrie      :: forall parent point r.
-                             (Point_ parent 2 r, Point_ point 2 r, Ord r, Num r
-                             , Show parent, Show point, Show r
-                             )
-                          => (point -> point -> Bool)
-                          -> parent
-                          -> BinaryTrie (Vector 2 point) point -> BinaryTrie (Vector 2 point) point
-asOrientedBinaryTrie (=.=) = go
-  where
-    go      :: forall p. (Point_ p 2 r, Show p)
-            => p -> BinaryTrie (Vector 2 point) point -> BinaryTrie (Vector 2 point) point
-    go p tr = case tr of
-        Leaf _                              -> tr
-        LeftNode v (d@(Vector2 q _),t)      -> let t' = go v t
-                                               in decideSide v q (LeftNode  v (d,t'))
-                                                                 (RightNode v (d,t'))
-        RightNode v (d@(Vector2 q _),t)     -> let t' = go v t
-                                               in decideSide v q (LeftNode  v (d,t'))
-                                                                 (RightNode v (d,t'))
-           -- this case should not occur atually. Maybe make it so in the type
-        TwoNode v (d@(Vector2 q _),l) (e,r) -> let l' = go v l
-                                                   r' = go v r
-                                               in decideSide v q (TwoNode v (d,l') (e,r'))
-                                                                 (TwoNode v (e,r') (d,l'))
-                                                  -- note that we switch l and r here
-
-                                                 -- case traceShowWith ("oBST",p,v,d,e,"is ",) $
-                                                 --       ccw p v q of
-                                                 --    CCW      ->
-                                                 --    CW       ->
-                                                 --    CoLinear
-                                                 --      | v =.= q   -> TwoNode v (e,r') (d,l')
-                                                 --      | otherwise -> TwoNode v (d,l') (e,r')
-                                                 --    -- TBH, there should be a better way for this..
-
-      where
-        -- we want to whether the left subtree (whose left endpoint is q) is tLeft or tRight.
-        decideSide v q tLeft tRight = case ccw p v q of
-                                        CCW                  -> tLeft
-                                        CW                   -> tRight
-                                        CoLinear | v =.= q   -> tRight
-                                                 | otherwise -> tLeft
-                                        -- TBH, there should be a better way for this..
-
-
--- | Transform the dual tree into a format we can use to run the shortest path procedure on
-toTreeRep         :: ( PlanarGraph_ gr
-                     , Eq (VertexIx gr)
-                     )
-                  => gr
-                  -> source
-                  -> DualTree (FaceIx gr) (DartIx gr) (FaceIx gr)
-                  -> DualTree source
-                              (Vector 2 (Vertex gr :+ VertexIx gr))
-                              (Vertex gr :+ VertexIx gr)
-toTreeRep gr s dt = case first endPoints' dt of
-    RootZero _        -> RootZero s
-    RootOne _ a       -> RootOne s (mapEdge a)
-    RootTwo _ a b     -> RootTwo s (mapEdge a) (mapEdge b)
-    RootThree _ a b c -> RootThree s (mapEdge a) (mapEdge b) (mapEdge c)
-  where
-    mapEdge (e,a) = (e, mapWithEdgeLabels (thirdVertex e) thirdVertex a)
-
-    endPoints' d = let ((u,v),(ux,vx)) = gr^.endPointsOf d.withIndex in Vector2 (ux :+ u) (vx :+ v)
-    -- TODO: make sure the oreitnation is indeed right
-
-    thirdVertex (Vector2 (_ :+ l) (_ :+ r)) f =
-      case ifindOf (boundaryVerticesOf f.asIndexedExt) (\v _ -> v /= l && v /= r) gr of
-        Nothing -> error "absurd, third vertex not found"
-        Just v  -> v
-
-
--}
