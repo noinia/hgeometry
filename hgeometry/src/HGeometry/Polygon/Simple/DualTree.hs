@@ -13,9 +13,9 @@ module HGeometry.Polygon.Simple.DualTree
   , trimap
   --
   , dualTreeFrom
-  , toTreeRep
+  -- , toTreeRep
   --
-  , orientDualTree, toDualTree
+  -- , orientDualTree, toDualTree
   ) where
 
 import           Control.Lens hiding ((:<), (<|))
@@ -24,7 +24,9 @@ import           Data.Bifunctor (first)
 import           Data.Coerce
 import qualified Data.Foldable as F
 import           Data.Function (on)
+import           Data.Maybe (mapMaybe)
 import qualified Data.Sequence as Seq
+import           Debug.Trace
 import           HGeometry.Boundary
 import qualified HGeometry.Boundary as Boundary
 import           HGeometry.Ext
@@ -45,7 +47,6 @@ import           HGeometry.Unbounded
 import           HGeometry.Vector
 import           Hiraffe.DFS
 import           Hiraffe.PlanarGraph.Connected
-import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -120,7 +121,11 @@ dualTreeFrom             :: ( Point_ source 2 r
                          --  ^ the triangulated polygon
                          -> Maybe (DualTree (FaceIx (CPlaneGraph s point PolygonEdgeType f))
                                             (DartIx (CPlaneGraph s point PolygonEdgeType f))
-                                            (FaceIx (CPlaneGraph s point PolygonEdgeType f))
+                                            (FaceIx (CPlaneGraph s point PolygonEdgeType f)
+                                            , ( VertexIx (CPlaneGraph s point PolygonEdgeType f)
+                                              , point
+                                              )
+                                            )
                                   )
 dualTreeFrom source poly = do
     let gr                 = dualGraph poly
@@ -128,9 +133,63 @@ dualTreeFrom source poly = do
                                Boundary.StrictlyOutside -> False
                                _                        -> True
     (root',_) <- traceShowWith ("root",) $ findOf (interiorFacePolygons.withIndex) inTriangle poly
-    toDualTree $ toFaceIds $ dfs' (\u -> filter (\(e,_) -> gr^?!edgeAt e == Diagonal)
-                                                (gr^..neighboursOfByEdge u.asIndex)
-                                  ) (numVertices gr) (toDualVertexIx root')
+    toDualTree' root' poly
+
+      -- $ toFaceIds $ dfs' (\u -> filter (\(e,_) -> gr^?!edgeAt e == Diagonal)
+      --                                           (gr^..neighboursOfByEdge u.asIndex)
+      --                             ) (numVertices gr) (toDualVertexIx root')
+
+
+-- | Construct the dual tree from a given triangle
+toDualTree'           :: forall triangulatedPolygon vertex.
+                         ( PlaneGraph_ triangulatedPolygon vertex
+                         , Dart triangulatedPolygon ~ PolygonEdgeType
+                         )
+                      => FaceIx triangulatedPolygon
+                      -> triangulatedPolygon
+                         --  ^ the triangulated polygon
+                       -> Maybe (DualTree (FaceIx triangulatedPolygon)
+                                          (DartIx triangulatedPolygon)
+                                          (FaceIx triangulatedPolygon,
+                                            (VertexIx triangulatedPolygon, vertex)
+                                          )
+                                )
+toDualTree' root' poly = case mapMaybe' buildTree $ poly^..boundaryDartsOf root'.withIndex of
+    []           -> Just $ RootZero  root'
+    [a]          -> Just $ RootOne   root' a
+    [a,b]        -> Just $ RootTwo   root' a b
+    [a,b,c]      -> Just $ RootThree root' a b c
+    _            -> Nothing
+  where
+    buildTree             :: (DartIx triangulatedPolygon, PolygonEdgeType)
+                          -> ( DartIx triangulatedPolygon
+                             , Maybe (BinaryTrie (DartIx triangulatedPolygon)
+                                                 ( FaceIx triangulatedPolygon
+                                                 , (VertexIx triangulatedPolygon, vertex)
+                                                 )
+                                     )
+                             )
+    buildTree (e,x) = (e,) $ case x of
+      Original -> Nothing -- ^ we've reached the outer face
+      Diagonal -> let e' = poly^.twinOf e
+                      f        = poly^.incidentFaceOf e'.asIndex
+                      (l,mlT)  = buildTree $ poly^.prevDartOf e'.withIndex
+                      (r,mrT)  = buildTree $ poly^.nextDartOf e'.withIndex
+                      w        = poly^.headOf r.withIndex
+                  in Just $ case (mlT,mrT) of
+                              (Nothing, Nothing) -> Leaf      (f,w)
+                              (Nothing, Just rT) -> RightNode (f,w) (r,rT)
+                              (Just lT, Nothing) -> LeftNode  (f,w) (l,lT)
+                              (Just lT, Just rT) -> TwoNode   (f,w) (l,lT) (r,rT)
+
+    mapMaybe'   :: (a -> (b,Maybe c)) -> [a] -> [(b,c)]
+    mapMaybe' f = mapMaybe (sequence . f)
+
+{-
+
+
+
+
 
 
 -- | Coerce into the right type
@@ -197,7 +256,7 @@ orientDualTree (=.=) = \case
   where
     mapEdge r (e,t) = (e,asOrientedBinaryTrie (=.=) r t)
 
--- | Mkae sure that the oreintation, i.e. left child and right child are consistent
+-- | Mkae sure that the orientation, i.e. left child and right child are consistent
 asOrientedBinaryTrie      :: forall parent point r.
                              (Point_ parent 2 r, Point_ point 2 r, Ord r, Num r
                              , Show parent, Show point, Show r
@@ -268,3 +327,6 @@ toTreeRep gr s dt = case first endPoints' dt of
       case ifindOf (boundaryVerticesOf f.asIndexedExt) (\v _ -> v /= l && v /= r) gr of
         Nothing -> error "absurd, third vertex not found"
         Just v  -> v
+
+
+-}

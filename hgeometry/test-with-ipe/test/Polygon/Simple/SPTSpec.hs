@@ -124,23 +124,23 @@ spec = describe "shortest path tree tests" $ do
          --   in inApexCone w a l r `shouldBe` InCone
 
          testIpe [osp|simpler.ipe|]
-                 [osp|simpler_out|]
+                 [osp|simpler.out|]
          testIpe [osp|simpler1.ipe|]
-                 [osp|simpler1_out|]
+                 [osp|simpler1.out|]
          testIpe [osp|simpler2.ipe|]
-                 [osp|simpler2_out|]
+                 [osp|simpler2.out|]
          testIpe [osp|simpler3.ipe|]
-                 [osp|simpler3_out|]
+                 [osp|simpler3.out|]
          testIpe [osp|simple.ipe|]
-                 [osp|simple_out|]
+                 [osp|simple.out|]
          testIpe [osp|simple2.ipe|]
-                 [osp|simple2_out|]
+                 [osp|simple2.out|]
          testIpe [osp|simple3.ipe|]
-                 [osp|simple3_out|]
+                 [osp|simple3.out|]
          testIpe [osp|funnel.ipe|]
-                 [osp|funnel_out|]
+                 [osp|funnel.out|]
          testIpe [osp|funnel1.ipe|]
-                 [osp|funnel1_out|]
+                 [osp|funnel1.out|]
          testIpe [osp|bug.ipe|]
                  [osp|bug.out|]
          testIpe [osp|bugSym.ipe|]
@@ -167,7 +167,10 @@ testIpe inFp outFp = describe (show inFp) $ do
     let triang    = triangulate (poly^.core)
         (mySource :+ _)  = NonEmpty.head sources
         Just tree  = dualTreeFrom mySource triang
-        tree' = orientDualTree (==) $ toTreeRep triang mySource tree
+        tree' = bimap (\d -> let ((ri,li),(r,l)) = triang^.endPointsOf d.withIndex
+                             in Vector2 (l :+ li) (r :+ ri))
+                      (\(_,(i,v)) -> v :+ i) tree
+          -- orientDualTree (==) $ toTreeRep triang mySource tree
 
         sptEdges  = [ mkEdge v p | (v :+ _) :+ p <- computeShortestPaths' mySource triang ]
         sptEdges' = [ iO $ defIO e ! attr SStroke green
@@ -187,7 +190,7 @@ testIpe inFp outFp = describe (show inFp) $ do
               , iO $ ipeGroup lefts
               , iO $ ipeGroup diags
               , iO $ ipeGroup sptEdges'
-              , drawDualTree triang tree
+              , drawDualTree triang (fst <$> tree)
               ]
 
 

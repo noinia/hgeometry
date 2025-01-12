@@ -83,11 +83,14 @@ computeShortestPaths'        :: ( Point_ source 2 r
                              -> [(vertex :+ VertexId s) :+ Either source (vertex :+ VertexId s)]
 computeShortestPaths' s poly = case dualTreeFrom s poly of
     Nothing -> []
-    Just tr -> triang <> case orientDualTree (=.=) $ toTreeRep poly s tr of
-                           RootZero  _       -> []
-                           RootOne   _ a     -> compute' a
-                           RootTwo   _ a b   -> compute' a <> compute' b
-                           RootThree _ a b c -> compute' a <> compute' b <> compute' c
+    Just tr -> triang <>
+               case bimap (\d -> let ((ri,li),(r,l)) = poly^.endPointsOf d.withIndex
+                                 in Vector2 (l :+ li) (r :+ ri))
+                          (\(_,(i,v)) -> v :+ i) tr of
+                 RootZero  _       -> []
+                 RootOne   _ a     -> compute' a
+                 RootTwo   _ a b   -> compute' a <> compute' b
+                 RootThree _ a b c -> compute' a <> compute' b <> compute' c
       where
         triang = (\u -> u :+ Left s) <$> poly^..boundaryVerticesOf (tr^.rootVertex).asIndexedExt
         compute' = compute (=.=) s
@@ -349,7 +352,7 @@ compute (=.=) s poly@(Vector2 l0 r0,_) = go Left (Cusp l0 mempty s mempty r0) po
 
 type R = RealNumber 5
 test = let g = triangulate myPolygon
-       in toTreeRep g mySource <$> dualTreeFrom mySource g
+       in dualTreeFrom mySource g
 
 mySource :: Point 2 R
 mySource = Point2 224 112
