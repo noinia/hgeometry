@@ -18,7 +18,8 @@ ccwCmpAroundByQuadrant c q r = case (quadrantWith c q `compare` quadrantWith c r
                               -- specified by the quadrant.
 
 
-
+-- | This implementation does not properly work when q or r lies *on* the zero vector
+--
 cwCmpAroundByQuadrant :: (Num r, Ord r)
             => Point 2 r :+ p -> Point 2 r :+ p -> Point 2 r :+ p -> Ordering
 cwCmpAroundByQuadrant c q r = case (quadrantWith c q `compare` quadrantWith c r) of

@@ -1,28 +1,47 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
-module Polygon.Simple.InPolygonSpec (spec) where
+module Polygon.Simple.InPolygonSpec where -- (spec) where
 
 import           Control.Lens
+import           Control.Monad
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (fromJust)
 import           Data.Proxy
 import           Golden
 import           HGeometry.Boundary
 import           HGeometry.Ext
+import           HGeometry.LineSegment
+import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
+import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple
 import           Ipe
 import           System.OsPath
 import           Test.Hspec
 import           Test.QuickCheck.Instances ()
 
+-- import           Debug.Trace
+-- import           HGeometry.Intersection
+-- import           HGeometry.Interval
+-- import           HGeometry.Polygon.Simple.InPolygon
 --------------------------------------------------------------------------------
 
--- type R = RealNumber 5
+type R = RealNumber 5
 
 spec :: Spec
 spec = do
   testCases [osp|test-with-ipe/Polygon/Simple/pointInPolygon.ipe|]
   numericalSpec
+  lineSegmentContainsSpec
+
+  it "darkOrangePolygonBug" $
+    ((Point2 400 288) `inPolygon` darkOrangePoly) `shouldBe` StrictlyInside
+  it "darkOrangePolygonBug2" $
+    ((Point2 400 288) `inSimplePolygon` darkOrangePoly) `shouldBe` StrictlyInside
+  it "darkOrangePolygonBug3" $
+    ((Point2 400 240) `inSimplePolygon` darkOrangePoly) `shouldBe` StrictlyInside
+
 
 testCases    :: OsPath -> Spec
 testCases fp = runIO (readInputFromFile =<< getDataFileName fp) >>= \case
@@ -43,7 +62,7 @@ toSingleSpec          :: (Fractional r, Ord r, Show r)
                       -> PointLocationResult
                       -> Point 2 r
                       -> Spec
-toSingleSpec poly r q = it name $ (asPointLocationResult $ q `inPolygon` poly) `shouldBe` r
+toSingleSpec poly r q = it name $ (asPointLocationResult $ q `inSimplePolygon` poly) `shouldBe` r
   where
     name = unwords ["query:", show q, "in", take 70 $ show poly ]
 
@@ -55,7 +74,7 @@ toSpec (TestCase poly is bs os) = do
                                     describe "outside tests" $
                                       mapM_ (toSingleSpec poly Outside) os
 
-readInputFromFile    :: OsPath -> IO (Either ConversionError [TestCase Rational])
+readInputFromFile    :: OsPath -> IO (Either ConversionError [TestCase R])
 readInputFromFile fp = fmap f <$> readSinglePageFile fp
   where
     f page = [ TestCase poly
@@ -121,3 +140,78 @@ numericalSpec =
     -- it "describes possible regression" $ do
     --   ((insidePoint::Point 2 SafeDouble) `inPolygon` polygon) `shouldBe` Inside
     --   ((outsidePoint::Point 2 SafeDouble) `inPolygon` polygon) `shouldBe` Outside
+
+
+--------------------------------------------------------------------------------
+-- * Line segment inside polygon tests
+
+
+
+lineSegmentContainsSpec :: Spec
+lineSegmentContainsSpec = describe "containedIn tests" $ do
+      it "manual segment" $
+        (testSegment `containedIn` testPoly) `shouldBe` True
+
+      (segs, polies) <-  runIO $ do
+        inFp'      <- getDataFileName
+                          ([osp|test-with-ipe/Polygon/Simple/segmentContainedInPolygon.ipe|])
+        Right page <- readSinglePageFile inFp'
+        let (segs' :: NonEmpty (ClosedLineSegment (Point 2 R) :+ _))
+                     = NonEmpty.fromList $ readAll page
+            (pgs'  :: NonEmpty (SimplePolygon (Point 2 R) :+ _))
+                     = NonEmpty.fromList $ readAll page
+        pure (segs',pgs')
+      forM_ polies $ \(poly :+ ats) -> do
+        describe ("containedIn polygon of color" <> show (fromJust $ lookupAttr SStroke ats)) $ do
+          let (inSegs,outSegs) = NonEmpty.partition (sameColor ats) segs
+            -- ClosedLineSegment (Point2 368 288) (Point2 400 288)
+
+          describe "segments inside" $ do
+            forM_ inSegs $ \(seg :+ _) -> do
+              describe (show seg) $ do
+                it "segment stats inside" $
+                  ((seg^.start) `inPolygon` poly) `shouldNotBe` StrictlyOutside
+                it "segment ends inside" $
+                  ((seg^.end) `inPolygon` poly) `shouldNotBe` StrictlyOutside
+                it "segments contained" $
+                  seg `shouldSatisfy` (`containedIn` poly)
+          it "segments ouutside" $ do
+            forM_ outSegs $ \(seg :+ _) ->
+              seg `shouldSatisfy` (not . (`containedIn` poly))
+
+  where
+    sameColor ats (_ :+ ats') = lookupAttr SStroke ats == lookupAttr SStroke ats'
+
+
+darkOrangePoly :: SimplePolygon (Point 2 R)
+darkOrangePoly = fromJust . fromPoints . NonEmpty.fromList $
+  [ Point2 336 272
+  , Point2 384 320
+  , Point2 480 224
+  , Point2 448 192
+  , Point2 336 240
+  , Point2 400 256
+  ]
+
+
+testSegment :: ClosedLineSegment (Point 2 R)
+testSegment = ClosedLineSegment (Point2 288 176) (Point2 224 160)
+testPoly :: SimplePolygon (Point 2 R)
+testPoly = fromJust . fromPoints . NonEmpty.fromList $
+  [ Point2 128 160
+  , Point2 176 64
+  , Point2 224 160
+  , Point2 288 176
+  , Point2 272 224
+  , Point2 80 192
+  ]
+
+
+
+-- ,2,
+
+-- q = Point2 288 176,
+-- a = Point2 224 160
+-- p = Point2 176 64    = l
+-- n = Point2 288 176   = r
+--   ,False)

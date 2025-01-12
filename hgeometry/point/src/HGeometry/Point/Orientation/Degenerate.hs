@@ -164,8 +164,43 @@ cwCmpAroundWith     :: ( Point_ center 2 r, Point_ point 2 r
                     -> center
                     -> point -> point
                     -> Ordering
-cwCmpAroundWith z c = flip (ccwCmpAroundWith z c)
+cwCmpAroundWith z@(Vector2 zx zy) c q r =
+    case (ccw c a q, ccw c a r) of
+      (CCW,CCW)      -> cmp
+      (CCW,CW)       -> GT
+      (CCW,CoLinear) -> GT
+
+      (CW, CCW)      -> LT   ---
+      (CW, CW)       -> cmp
+      (CW, CoLinear) | onZero r  -> GT
+                     | otherwise -> LT
+
+      (CoLinear, CW) | onZero q  -> LT --
+                     | otherwise -> GT --
+
+      (CoLinear, CCW)     -> LT
+      (CoLinear,CoLinear) -> case (onZero q, onZero r) of
+                               (True, True)   -> EQ
+                               (False, False) -> EQ
+                               (True, False)  -> LT
+                               (False, True)  -> GT
+  where
+    a = c .+^ z
+    b = c .+^ Vector2 (-zy) zx
+    -- b is on a perpendicular vector to z
+
+    -- test if the point lies on the ray defined by z, starting in c
+    onZero d = case ccw c b d of
+                 CCW      -> False
+                 CW       -> True
+                 CoLinear -> True -- this shouldh appen only when you ask for c itself
+
+    cmp = case ccw c q r of
+            CCW      -> GT --
+            CW       -> LT --
+            CoLinear -> EQ
 {-# INLINE cwCmpAroundWith #-}
+--   flip (ccwCmpAroundWith z c)
 
 -- | Counter clockwise ordering of the points around c. Points are ordered with
 -- respect to the positive x-axis.

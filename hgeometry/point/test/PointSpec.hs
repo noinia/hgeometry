@@ -1,13 +1,15 @@
 module PointSpec (spec) where
 
+import           Control.Lens
 import qualified Data.CircularList as C
--- import           Data.Coerce
+import qualified Data.Set as Set
 import           HGeometry.Ext
-import           HGeometry.Point.Instances ()
-import           Point.CmpAround
 import           HGeometry.Point
+import           HGeometry.Point.Instances ()
 import           HGeometry.Vector
+import           Point.CmpAround
 import           Test.Hspec
+import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 -- import           Test.Util
@@ -37,13 +39,38 @@ spec = do
         (p /= c && q /= c) ==> ccwCmpAround c p q == ccwCmpAroundByQuadrant (ext c) (ext p) (ext q)
     it "cw same as by quarant " $
       property $ \(c :: Point 2 Int) (p :: Point 2 Int) (q :: Point 2 Int) ->
-        (p /= c && q /= c) ==> cwCmpAround c p q == cwCmpAroundByQuadrant (ext c) (ext p) (ext q)
+        (p /= c && q /= c && notOnRightVector c [p,q])
+        ==> cwCmpAround c p q == cwCmpAroundByQuadrant (ext c) (ext p) (ext q)
+
+    prop "cw starts with colinear" $
+      \(l :: Point 2 Int) (a :: Point 2 Int) (r :: Point 2 Int) ->
+        (length (Set.fromList [a,l,r]) == 3 -- all three are unique
+         && ccw a l r /= CoLinear)
+        ==>
+        cwCmpAroundWith (l .-. a) a l r `shouldBe` LT
+    prop "ccw starts with colinear" $
+      \(l :: Point 2 Int) (a :: Point 2 Int) (r :: Point 2 Int) ->
+        (length (Set.fromList [a,l,r]) == 3 -- all three are unique
+        && ccw a l r /= CoLinear)
+        ==>
+      ccwCmpAroundWith (l .-. a) a l r `shouldBe` LT
+
+    it "cw starts with colinear manual" $
+      let l = Point2 224 160
+          a = Point2 288 176
+          r = Point2 272 224
+      in cwCmpAroundWith (l .-. a) a l r `shouldBe` LT
+    it "ccw starts with colinear manual" $
+      let l = Point2 224 160
+          a = Point2 288 176
+          r = Point2 272 224
+      in ccwCmpAroundWith (l .-. a) a l r `shouldBe` LT
 
     it "cw same as by quarant with distance " $ do
       let cwCmpAroundWithDist c p q = cwCmpAround c p q <> cmpByDistanceTo c p q
       property $ \(c :: Point 2 Int) (p :: Point 2 Int) (q :: Point 2 Int) ->
-        (p /= c && q /= c) ==>
-        cwCmpAroundWithDist c p q == cwCmpAroundByQuadrantWithDist (ext c) (ext p) (ext q)
+        (p /= c && q /= c && notOnRightVector c [p,q]) ==>
+        cwCmpAroundWithDist c p q === cwCmpAroundByQuadrantWithDist (ext c) (ext p) (ext q)
 
   describe "numerical robustness" $ do
     it "1e0" $
@@ -168,3 +195,27 @@ spec = do
   --   property $ qcReadShow1 @(Point 3) Proxy
   -- specify "Read/Show properties for Point4" $
   --   property $ qcReadShow1 @(Point 4) Proxy
+
+
+notOnRightVector c = not . any (\p -> p^.yCoord == c^.yCoord && p^.xCoord >= c^.xCoord)
+
+
+  -- point/test/PointSpec.hs:48:41:
+  -- 2) Point, cmpAroundWith tests, cw starts with colinear
+  --      Falsifiable (after 1 test):
+  --        Point2 1 (-1)
+  --        Point2 (-1) (-1)
+  --        Point2 0 (-1)
+  --      expected: LT
+  --       but got: EQ
+
+  -- To rerun use: --match "/Point/cmpAroundWith tests/cw starts with colinear/" --seed 1733729935
+
+  -- point/test/PointSpec.hs:53:40:
+  -- 3) Point, cmpAroundWith tests, ccw starts with colinear
+  --      Falsifiable (after 1 test):
+  --        Point2 1 (-1)
+  --        Point2 (-1) (-1)
+  --        Point2 0 (-1)
+  --      expected: LT
+  --       but got: EQ
