@@ -40,7 +40,7 @@ import           Test.QuickCheck
 import           System.IO.Unsafe (unsafePerformIO)
 --------------------------------------------------------------------------------
 
--- type R = RealNumber 5
+type R = RealNumber 5
 
 data PointInPoly = PointInPoly (SimplePolygon (Point 2 R)) (Point 2 R)
   deriving (Show,Eq)
@@ -64,32 +64,7 @@ instance Arbitrary PointInPoly where
 
 spec :: Spec
 spec = describe "shortest path tree tests" $ do
-         it "manual test" $
-           let triang = triangulate myBuggyPoly
-               sptEdges = [ mkEdge v p | (v :+ _) :+ p <- computeShortestPaths' myBuggySource triang ]
-               sptEdges' = [ iO $ defIO e ! attr SStroke green | e <- sptEdges ]
-               diags = [ iO $ defIO  (triang^?!edgeSegmentAt e) ! attr SStroke gray
-                       | (e, Diagonal) <- triang^..edges.withIndex
-                       ]
-               wrong = [ iO $ defIO wr ! attr SStroke red
-                                       ! attr SPen (IpePen (Named "fat"))
-                       | wr <- res'
-                       ]
-
-               out = [ iO' myBuggySource
-                     , iO' myBuggyPoly
-                     , iO $ ipeGroup diags
-                     , iO $ ipeGroup sptEdges'
-                     , iO $ defIO myIssueSeg ! attr SStroke orange
-                     ]
-               res = unsafePerformIO $ do
-                                         let  outF = [osp|/tmp/manual.ipe|]
-                                         writeIpeFile outF $ singlePageFromContent out
-                                         pure res'
-               res' = filter (not . (`containedIn` myBuggyPoly)) sptEdges
-           in res `shouldBe` []
-
-
+         -- manualTest -- for debugging
          prop "edges contained in polygon" $
            \(PointInPoly poly s) ->
              let triang = triangulate poly
@@ -149,6 +124,33 @@ spec = describe "shortest path tree tests" $ do
                  [osp|bug1.out|]
          testIpe [osp|bug2.ipe|]
                  [osp|bug2.out|]
+
+
+manualTest = it "manual test" $
+    let triang = triangulate myBuggyPoly
+        sptEdges = [ mkEdge v p | (v :+ _) :+ p <- computeShortestPaths' myBuggySource triang ]
+        sptEdges' = [ iO $ defIO e ! attr SStroke green | e <- sptEdges ]
+        diags = [ iO $ defIO  (triang^?!edgeSegmentAt e) ! attr SStroke gray
+                | (e, Diagonal) <- triang^..edges.withIndex
+                ]
+        wrong = [ iO $ defIO wr ! attr SStroke red
+                                ! attr SPen (IpePen (Named "fat"))
+                | wr <- res'
+                ]
+
+        out = [ iO' myBuggySource
+              , iO' myBuggyPoly
+              , iO $ ipeGroup diags
+              , iO $ ipeGroup sptEdges'
+              , iO $ defIO myIssueSeg ! attr SStroke orange
+              ]
+        res = unsafePerformIO $ do
+                                  let  outF = [osp|/tmp/manual.ipe|]
+                                  writeIpeFile outF $ singlePageFromContent out
+                                  pure res'
+        res' = filter (not . (`containedIn` myBuggyPoly)) sptEdges
+    in res `shouldBe` []
+
 
 
 mkEdge u = \case

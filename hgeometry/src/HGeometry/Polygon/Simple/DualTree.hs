@@ -17,33 +17,13 @@ module HGeometry.Polygon.Simple.DualTree
 
 import           Control.Lens hiding ((:<), (<|))
 import           Data.Bifoldable
-import           Data.Bifunctor (first)
-import           Data.Coerce
-import qualified Data.Foldable as F
-import           Data.Function (on)
 import           Data.Maybe (mapMaybe)
-import qualified Data.Sequence as Seq
-import           Debug.Trace
-import           HGeometry.Boundary
 import qualified HGeometry.Boundary as Boundary
-import           HGeometry.Ext
-import           HGeometry.Intersection
-import           HGeometry.Interval
 import           HGeometry.PlaneGraph.Connected
 import           HGeometry.Point
-import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple
-import           HGeometry.Polygon.Simple.Class
-import           HGeometry.Polygon.Simple.InPolygon
 import           HGeometry.Polygon.Triangulation
-import           HGeometry.Sequence.KV
-import           HGeometry.Sequence.NonEmpty (ViewR1(..))
-import qualified HGeometry.Sequence.NonEmpty as NESeq
 import           HGeometry.Trie
-import           HGeometry.Unbounded
-import           HGeometry.Vector
-import           Hiraffe.DFS
-import           Hiraffe.PlanarGraph.Connected
 
 --------------------------------------------------------------------------------
 
@@ -110,8 +90,6 @@ instance Bifoldable (DualTree a) where
 dualTreeFrom             :: ( Point_ source 2 r
                             , Point_ point 2 r
                             , Ord r, Num r
-
-                            , Show r, Show point, Show source
                             )
                          => source
                          -> CPlaneGraph s point PolygonEdgeType  f
@@ -125,11 +103,10 @@ dualTreeFrom             :: ( Point_ source 2 r
                                             )
                                   )
 dualTreeFrom source poly = do
-    let gr                 = dualGraph poly
-        inTriangle (i, pg) = case traceShowWith (source,pg,i,) $ source `inPolygon` pg of
+    let inTriangle (_, pg) = case source `inPolygon` pg of
                                Boundary.StrictlyOutside -> False
                                _                        -> True
-    (root',_) <- traceShowWith ("root",) $ findOf (interiorFacePolygons.withIndex) inTriangle poly
+    (root',_) <- findOf (interiorFacePolygons.withIndex) inTriangle poly
     dualTreeFromTriangle root' poly
 
 -- | Construct the dual tree from a given triangle
