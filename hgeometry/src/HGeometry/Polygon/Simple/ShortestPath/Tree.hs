@@ -9,20 +9,25 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Polygon.Simple.ShortestPath.Tree
-  ( computeShortestPaths'
+  ( labelWithShortestPaths
+  , computeShortestPaths'
   -- , Parent
   -- , shortestPathTree
   )
   where
 
 import           Control.Lens hiding ((:<), (<|), (|>))
+import           Control.Monad (forM_)
 import           Data.Coerce
 import           Data.FingerTree ( Measured, FingerTree, ViewL(..), SearchResult(..)
                                  , (<|)
                                  )
 import qualified Data.FingerTree as FT
+import qualified Data.Vector.Mutable as MV
+import qualified Data.Vector.NonEmpty as V
 import           HGeometry.Ext
 import           HGeometry.PlaneGraph.Connected
+import           HGeometry.PlaneGraph.Connected.Type
 import           HGeometry.Point
 import           HGeometry.Polygon.Simple.DualTree
 import           HGeometry.Polygon.Triangulation
@@ -38,24 +43,44 @@ import           Hiraffe.PlanarGraph.Connected
 
 {-
 
-
--- | Labels each vertex ith its parent (if it has one).
-computeShortestPaths        :: ( SimplePolygon_ simplePolygon  point r
-                               , SimplePolygon_ poly (point :+ Either source (VertexIx poly)) r
-                               , Point_ source 2 r
-                               , Ord r, Num r
-                               ) => source -> simplePolygon -> poly
-computeShortestPaths s poly = computeShortestPaths' s poly (triangulate poly)
 -}
+-- | Labels each vertex ith its parent (if it has one).
+-- computeShortestPaths        :: ( SimplePolygon_ simplePolygon  point r
+--                                , SimplePolygon_ poly (point :+ Either source (VertexIx poly)) r
+--                                , Point_ source 2 r
+--                                , Ord r, Num r
+--                                ) => source -> simplePolygon -> poly
+-- computeShortestPaths s poly = computeShortestPaths' s poly (triangulate poly)
 
+-- type Parent source s vertex = Either source (vertex :+ vertexId s)
+
+-- | Labels each vertex ith its parent.
+labelWithShortestPaths        :: ( Point_ source 2 r
+                                 , Point_ vertex 2 r
+                                 , Num r, Ord r
+                                 )
+                              => source
+                                 -- ^ the source point.
+                              -> CPlaneGraph s vertex PolygonEdgeType f
+                                    --  ^ the triangulated polygon
+                              -> CPlaneGraph s (vertex :+ Either source (VertexId s))
+                                               PolygonEdgeType
+                                               f
+labelWithShortestPaths s poly = poly&_CPlanarGraph.vertexData %~ assignParents
+  where
+    parents         = computeShortestPaths' s poly
+    assignParents v = V.unsafeCreate $ do
+                        vertexVec <- MV.new (V.length v)
+                        forM_ parents $ \((_ :+ i') :+ p') ->
+                          let i = coerce i'
+                              p = view extra <$> p'
+                          in MV.write vertexVec i $ (v V.! i :+ p)
+                        pure vertexVec
 
 -- | Computes the shortest paths form the source point to all vertices of the polygon.
 computeShortestPaths'        :: ( Point_ source 2 r
                                 , Point_ vertex 2 r
                                 , Num r, Ord r
-                                , Show r, Show source, Show vertex
-
-                                , Eq vertex
                                 )
                              => source
                              -> CPlaneGraph s vertex PolygonEdgeType f
@@ -267,7 +292,6 @@ splitAtParent w (Cusp l ls a rs r) = case inApexCone w a (lastWith ls l) (lastWi
 compute   :: forall source vertex r.
              ( Point_ vertex 2 r, Ord r, Num r
              , Point_ source 2 r
-             , Show vertex, Show source, Show r
              )
           => source
           -> (Vector 2 vertex , BinaryTrie (Vector 2 vertex) vertex)
@@ -277,7 +301,7 @@ compute s poly@(Vector2 l0 r0,_) = go Left (Cusp l0 mempty s mempty r0) poly
 
     -- ^ The shortest path computation; the apex of the cusp may be the arbitrary source
     -- point initially. Afterwards it may swtich to always being a vertex.
-    go      :: forall f apex. (Applicative f, Point_ apex 2 r, Show apex)
+    go      :: forall f apex. (Applicative f, Point_ apex 2 r)
             => (apex -> f vertex)
             -- ^ action to lift the apex into an f vertex.
             -> Cusp apex vertex

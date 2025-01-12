@@ -13,6 +13,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.PlaneGraph.Connected.Type
   ( CPlaneGraph(..)
+  , _CPlanarGraph
   , fromAdjacencyRep
   , fromConnectedSegments
   -- , VertexData(VertexData), location
@@ -59,7 +60,8 @@ newtype CPlaneGraph s v e f =
 type instance NumType   (CPlaneGraph s v e f) = NumType v
 type instance Dimension (CPlaneGraph s v e f) = 2
 
--- | Iso to access the graph
+-- | Iso to access the underlying planar graph.
+--
 _CPlanarGraph :: Iso (CPlaneGraph s v e f)         (CPlaneGraph s v' e' f')
                      (CPlanarGraph Primal s v e f) (CPlanarGraph Primal s v' e' f')
 _CPlanarGraph = coerced

@@ -67,8 +67,10 @@ spec = describe "shortest path tree tests" $ do
          -- manualTest -- for debugging
          prop "edges contained in polygon" $
            \(PointInPoly poly s) ->
-             let triang = triangulate poly
-                 sptEdges  = [ mkEdge v p | (v :+ _) :+ p <- computeShortestPaths' s triang ]
+             let triang    = triangulate poly
+                 triang'   = labelWithShortestPaths s triang
+                 sptEdges  = [ mkEdge v ((\p -> triang'^?!vertexAt p) <$> ep)
+                             | (v :+ ep) <- triang'^..vertices ]
              in filter (not . (`containedIn` poly)) sptEdges === []
 
   {-
@@ -151,8 +153,6 @@ manualTest = it "manual test" $
         res' = filter (not . (`containedIn` myBuggyPoly)) sptEdges
     in res `shouldBe` []
 
-
-
 mkEdge u = \case
   Left s        -> ClosedLineSegment u s
   Right (p :+ _) -> ClosedLineSegment u p
@@ -168,6 +168,7 @@ testIpe inFp outFp = describe (show inFp) $ do
 
     let triang    = triangulate (poly^.core)
         (mySource :+ _)  = NonEmpty.head sources
+
         Just tree  = dualTreeFrom mySource triang
         tree' = bimap (\d -> let ((ri,li),(r,l)) = triang^.endPointsOf d.withIndex
                              in Vector2 (l :+ li) (r :+ ri))
@@ -194,7 +195,6 @@ testIpe inFp outFp = describe (show inFp) $ do
               , iO $ ipeGroup sptEdges'
               , drawDualTree triang (fst <$> tree)
               ]
-
 
     -- it "dual tree correct orientations" $
     --   incorrectDualTreeNodes triang tree `shouldBe` []
