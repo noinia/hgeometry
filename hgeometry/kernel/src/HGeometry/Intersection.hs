@@ -35,7 +35,7 @@ data family IntersectionOf g h
 class HasIntersectionWith g h where
   -- | g `intersects` h  <=> The intersection of g and h is non-empty.
   intersects :: g -> h -> Bool
-  default intersects :: ( Intersection g h ~ Maybe (IntersectionOf g h)
+  default intersects :: ( Intersection g h ~ Maybe intersection
                         , IsIntersectableWith g h
                         ) => g -> h -> Bool
   g `intersects` h = isJust $ g `intersect` h

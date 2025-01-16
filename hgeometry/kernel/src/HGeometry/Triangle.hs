@@ -15,10 +15,15 @@ module HGeometry.Triangle
   ) where
 
 import Control.Lens
+import Data.Bifunctor
 import Data.Foldable1
+-- import Data.Maybe (isJust)
 import GHC.Generics (Generic)
 import HGeometry.Box.Boxable
+import HGeometry.HalfLine
 import HGeometry.Intersection
+import HGeometry.Line.PointAndVector
+import HGeometry.LineSegment
 import HGeometry.Point
 import HGeometry.Properties
 import HGeometry.Transformation
@@ -107,3 +112,97 @@ instance ( Point_ point 2 r
          , Num r, Ord r
          ) => HasIntersectionWith (Point 2 r) (Triangle point) where
   q `intersects` t = allOf components (q `intersects`) $ intersectingHalfPlanes t
+
+
+--------------------------------------------------------------------------------
+
+
+-- | Data type desciribn the intersection between an oriented line in R^3 and a triangle
+data LineTriangleIntersection point seg =
+    Line_x_Triangle_Point point
+  | Line_x_Triangle_LineSegment seg
+  deriving (Show,Eq,Ord,Functor)
+
+instance Bifunctor LineTriangleIntersection where
+  bimap f g = \case
+    Line_x_Triangle_Point p       -> Line_x_Triangle_Point (f p)
+    Line_x_Triangle_LineSegment s -> Line_x_Triangle_LineSegment (g s)
+
+type instance Intersection (LinePV 3 r) (Triangle point') =
+    Maybe (LineTriangleIntersection (Point 3 r) (ClosedLineSegment (Point 3 r)))
+
+type instance Intersection (HalfLine point) (Triangle point') =
+    Maybe (LineTriangleIntersection (Point 3 (NumType point))
+                                    (ClosedLineSegment (Point 3 (NumType point)))
+          )
+
+instance ( Point_ point  3 r
+         , Fractional r, Ord r
+         ) => HasIntersectionWith (LinePV 3 r) (Triangle point)
+
+instance ( Point_ point  3 r
+         , Fractional r, Ord r
+         ) => IsIntersectableWith (LinePV 3 r) (Triangle point) where
+  l `intersect` tri = first snd <$> intersectImpl l (view asPoint <$> tri)
+
+
+-- | Computes the intersection between an oriented line and a triangle.
+-- If the result is an intersection point; also returns the parameter t
+-- describing the intersection point along the line.
+--
+-- see https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
+-- for the implementation details.
+-- as well as
+-- https://www.tandfonline.com/doi/abs/10.1080/10867651.1997.10487468
+intersectImpl :: (Ord r, Fractional r)
+              => LinePV 3 r -> Triangle (Point 3 r)
+              -> Maybe (LineTriangleIntersection (r, Point 3 r)
+                                                 (ClosedLineSegment (Point 3 r))
+                       )
+intersectImpl (LinePV o vec) (Triangle a b c)
+    | lineAndTriangleParallel = error "(Half)Line x Triangle colinear not implemented yet"
+        -- FIXME might we not intersect in a line segment here?
+    | lineIntersectsTriangle  = Just $ Line_x_Triangle_Point (t, o .+^ (t *^ vec))
+    | otherwise               = Nothing
+  where
+    lineAndTriangleParallel = det == 0
+
+    e1 = b .-. a
+    e2 = c .-. a
+
+    rayCrossE2 = vec `cross` e2
+
+    det = e1 `dot` rayCrossE2
+    invDet = 1 / det
+
+    s = o .-. a
+    u = invDet * (s `dot` rayCrossE2)
+
+    sCrossE1 = s `cross` e1
+    v = invDet * (vec `dot` sCrossE1)
+
+    lineIntersectsTriangle = 0 <= u && u       <= 1
+                          && 0 <= v && (u + v) <= 1
+    -- the u <= 1 is slightly suplurfous, but may speed up the equation.
+
+    -- the parameter along the line at which the line intersects the triangle
+    t = invDet * (e2 `dot` sCrossE1)
+
+
+instance ( Point_ point  3 r
+         , Point_ point' 3 r
+         , Fractional r, Ord r
+         ) => HasIntersectionWith (HalfLine point) (Triangle point')
+
+instance ( Point_ point  3 r
+         , Point_ point' 3 r
+         , Fractional r, Ord r
+         ) => IsIntersectableWith (HalfLine point) (Triangle point') where
+  ray `intersect` tri = case intersectImpl (toLine ray) (view asPoint <$> tri) of
+      Just (Line_x_Triangle_Point (t,p)) | t >= 0 -> Just $ Line_x_Triangle_Point p
+      Just (Line_x_Triangle_LineSegment _)        ->
+        error "HalfLine x LineSegment not fully implmeneted yet"
+        -- possibly clip the segment here!
+      _                                           -> Nothing
+    where
+      toLine (HalfLine o v) = LinePV (o^.asPoint) v
