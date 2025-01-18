@@ -1,8 +1,10 @@
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE TemplateHaskell #-}
 module Main(main) where
 
 import           Codec.Picture
 import           Control.Lens
+import           Data.Coerce
 import           Data.Default.Class
 import           Data.Maybe
 import           Data.Monoid
@@ -14,7 +16,10 @@ import           HGeometry.Ext
 import           HGeometry.Graphics.Camera
 import           HGeometry.HalfLine
 import           HGeometry.Intersection
+import           HGeometry.Line.PointAndVector
 import           HGeometry.Point
+import           HGeometry.Triangle
+import           HGeometry.Unbounded
 import           HGeometry.Vector
 import           Prelude hiding (zipWith)
 import qualified System.File.OsPath as File
@@ -24,11 +29,24 @@ import           System.ProgressBar
 
 type Color = PixelRGBA8
 
-type Scene = [Ball (Point 3 R) :+ Color]
-
 type R = Double
 
 type Ray = HalfLine (Point 3 R)
+
+
+data SceneGeom = ABall     (Ball (Point 3 R))
+               | ATriangle (Triangle (Point 3 R))
+               deriving (Show,Eq)
+
+data SceneObject = SceneObject { _geom       :: SceneGeom
+                               , _objectColor :: Color
+                               }
+                 deriving (Show,Eq)
+makeLenses ''SceneObject
+
+type Scene = [SceneObject]
+
+
 
 
 --------------------------------------------------------------------------------
@@ -59,17 +77,52 @@ testSubdivide = subdivide (Rectangle (Point2 10 4) (Point2 20 20)) (Vector2 2 4)
 -- * The Ray shooting stuff
 
 
--- | Intersect to try and get the color
-ballColor            :: Ray -> Ball (Point 3 R) :+ Color -> Maybe Color
-ballColor r (b :+ c)
-  | r `intersects` b = Just c
-  | otherwise        = Nothing
+-- -- | Intersect to try and get the color
+-- ballColor            :: Ray -> Ball (Point 3 R) :+ Color -> Maybe Color
+-- ballColor r (b :+ c)
+--   | r `intersects` b = Just c
+--   | otherwise        = Nothing
 
 
--- | Determine the color of the first object hit by the ray
+newtype Closest r a = Closest (Top (r :+ a))
+                    deriving (Show)
+
+instance Eq r => Eq (Closest r a) where
+  (Closest x) == (Closest y) = (view core <$> x) == (view core <$> y)
+instance Ord r => Ord (Closest r a) where
+  (Closest x) `compare` (Closest y) = (view core <$> x) `compare` (view core <$> y)
+
+instance Ord r => Semigroup (Closest r a) where
+  x <> y = min x y
+instance Ord r => Monoid (Closest r a) where
+  mempty = Closest Top
+
+closest :: Maybe (r :+ a) -> Closest r a
+closest = Closest . view (from _TopMaybe)
+
+getClosest :: Closest r a -> Maybe (r :+ a)
+getClosest = view (coerced._TopMaybe)
+
+-- | Determine the color of the closest object hit by the ray
 shootRay   :: Ray -> Scene -> Color
-shootRay r = fromMaybe backgroundColor . getFirst . foldMap (First . ballColor r)
+shootRay r = maybe backgroundColor (view extra)
+           . getClosest . foldMap (closest . intersectObject r)
 
+-- | Compute whether the ray hits the object, and if so, what the first parameter value is at
+-- which it does so. (In addition it returns the color of the object)
+intersectObject         :: Ray -> SceneObject -> Maybe (R :+ Color)
+intersectObject ray obj = intersectWithRay ray (obj^.geom) <&> (:+ (obj^.objectColor))
+
+-- | Compute the time of intersection between the ray and the scene, if it exists.
+intersectWithRay     :: Ray -> SceneGeom -> Maybe R
+intersectWithRay ray = \case
+  ABall b    | ray `intersects` b -> Just 0 -- TODO, ifx this ...
+             | otherwise -> Nothing
+  ATriangle tri -> case directedLineTriangleIntersect (toLine ray) tri of
+    Just (Line_x_Triangle_Point (t,_)) | t >= 0 -> Just t
+    _                                           -> Nothing
+
+toLine (HalfLine p v) = LinePV p v
 
 -- | Renders a given pixel.
 renderPixel                         :: Point 2 Int
@@ -186,11 +239,21 @@ fromDesiredHeight desiredHeight = let Vector2 w h = fromIntegral <$> outputDimen
 ----------------------------------------
 -- * The scene
 
-
 theScene :: Scene
-theScene = [ Ball (Point3 0 3 0)     1     :+ PixelRGBA8 200 0 0 255
-           , Ball (Point3 2 5 3)     (1.5) :+ PixelRGBA8 10 0 200 255
-           , Ball (Point3 (-3) 20 6) 3     :+ PixelRGBA8 10 0 0 255
+theScene = [ SceneObject (ABall $ Ball (Point3 0 3 0)     1    ) (PixelRGBA8 200 0 0 255)
+           , SceneObject (ABall $ Ball (Point3 2 5 3)     (1.5)) (PixelRGBA8 10 0 200 255)
+           , SceneObject (ABall $ Ball (Point3 (-3) 20 6) 3    ) (PixelRGBA8 10 0 0 255)
+
+           , SceneObject (ATriangle $ Triangle (Point3 (-6) 10 8)
+                                               (Point3 (-3) 12 6)
+                                               (Point3 (-5) 15 7)
+                         ) (PixelRGBA8 100 10 100 255)
+
+
+           , SceneObject (ATriangle $ Triangle (Point3 (-10) 22 16)
+                                               (Point3 (-6) 20 19)
+                                               (Point3 (-5) 25 7.5)
+                         ) (PixelRGBA8 200 10 100 255)
            ]
 
 ----------------------------------------
