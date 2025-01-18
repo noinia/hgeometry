@@ -5,6 +5,9 @@ module Main(main) where
 import           Codec.Picture
 import           Control.Lens
 import           Data.Coerce
+import           Data.Colour as Colour
+import           Data.Colour.Names
+import           Data.Colour.SRGB (toSRGB24, RGB(..))
 import           Data.Default.Class
 import           Data.Maybe
 import           Data.Monoid
@@ -25,9 +28,10 @@ import           Prelude hiding (zipWith)
 import qualified System.File.OsPath as File
 import           System.OsPath
 import           System.ProgressBar
+
 --------------------------------------------------------------------------------
 
-type Color = PixelRGBA8
+type Color = AlphaColour Double
 
 type R = Double
 
@@ -104,9 +108,8 @@ getClosest :: Closest r a -> Maybe (r :+ a)
 getClosest = view (coerced._TopMaybe)
 
 -- | Determine the color of the closest object hit by the ray
-shootRay   :: Ray -> Scene -> Color
-shootRay r = maybe backgroundColor (view extra)
-           . getClosest . foldMap (closest . intersectObject r)
+shootRay   :: Ray -> Scene -> Maybe Color
+shootRay r = fmap (view extra) . getClosest . foldMap (closest . intersectObject r)
 
 -- | Compute whether the ray hits the object, and if so, what the first parameter value is at
 -- which it does so. (In addition it returns the color of the object)
@@ -134,11 +137,16 @@ renderPixel                         :: Point 2 Int
                                     -> Camera R
                                     -> Scene
                                     -> PixelRGBA8
-renderPixel _ (Vector2 topLeft bottomRight) _ camera scene = shootRay ray scene
+renderPixel _ (Vector2 topLeft bottomRight) _ camera scene = toPixelRGBA $ shootRay ray scene
   where
     cameraPos = camera^.cameraPosition
     ray       = HalfLine cameraPos (midPoint .-. cameraPos)
     midPoint  = topLeft .+^ ((bottomRight .-. topLeft) ^/ 2)
+
+toPixelRGBA    :: Maybe Color -> PixelRGBA8
+toPixelRGBA mc = let c = fromMaybe backgroundColor mc
+                 in case toSRGB24 $ c `Colour.over` black of
+                      RGB r g b -> PixelRGBA8 r g b (round $ 255 * alphaChannel c)
 
 -- | Computes the part of the viewport (i.e. some rectangle floating in world space)
 -- corresponding to the pixel x,y
@@ -150,10 +158,10 @@ pixelViewPort topLeft (Vector2 xVec yVec) x' y' =
              (topLeft .+^ (((x +1) *^ xVec) ^+^ ((y+1)*^ yVec)))
 
 
-containsMid (Point3 qx _ qz) (Vector2 (Point3 tlx _ tlz)
-                                      (Point3 brx _ brz)
-                             ) = tlx <= qx && qx <= brx &&
-                                 tlz >= qz && qz >= brz
+-- containsMid (Point3 qx _ qz) (Vector2 (Point3 tlx _ tlz)
+--                                       (Point3 brx _ brz)
+--                              ) = tlx <= qx && qx <= brx &&
+--                                  tlz >= qz && qz >= brz
 
 -- | Render the Scene, while reporting progress
 renderWithProgress :: IO () -> Vector 2 Int -> Camera R -> Scene -> IO (Image PixelRGBA8)
@@ -172,11 +180,7 @@ renderWithProgress reportProgress screenDims@(Vector2 w h) camera scene = do
                                                    (pixelViewPort topLeft pixelDims x y)
                                                    pixelDims
                                                    camera scene
-                                pixVp = pixelViewPort topLeft pixelDims x y
-                            in do if containsMid midPoint pixVp
-                                    then print (x,y,pixVp)
-                                    else pure ()
-                                  pix <$ reportProgress
+                            in pix <$ reportProgress
   where
     -- midpoint of the viewport (in 3D posiiton)
     midPoint = (camera^.cameraPosition) .+^ ((camera^.focalDepth) *^ camera^.rawCameraNormal)
@@ -208,8 +212,10 @@ type ViewPort = Vector 2 (Point 3 R)
 
 -- * For the picture
 
-backgroundColor :: PixelRGBA8
-backgroundColor = PixelRGBA8 0 100 0 255
+-- backgroundColor :: PixelRGBA8
+backgroundColor :: Color
+backgroundColor = green `withOpacity` 0.8
+  -- transparent -- transparent
 
 outputWidth :: Int
 outputWidth = 640
@@ -240,20 +246,20 @@ fromDesiredHeight desiredHeight = let Vector2 w h = fromIntegral <$> outputDimen
 -- * The scene
 
 theScene :: Scene
-theScene = [ SceneObject (ABall $ Ball (Point3 0 3 0)     1    ) (PixelRGBA8 200 0 0 255)
-           , SceneObject (ABall $ Ball (Point3 2 5 3)     (1.5)) (PixelRGBA8 10 0 200 255)
-           , SceneObject (ABall $ Ball (Point3 (-3) 20 6) 3    ) (PixelRGBA8 10 0 0 255)
+theScene = [ SceneObject (ABall $ Ball (Point3 0 3 0)     1    ) (opaque red)
+           , SceneObject (ABall $ Ball (Point3 2 5 3)     (1.5)) (opaque blue)
+           , SceneObject (ABall $ Ball (Point3 (-3) 20 6) 3    ) (opaque black)
 
            , SceneObject (ATriangle $ Triangle (Point3 (-6) 10 8)
                                                (Point3 (-3) 12 6)
                                                (Point3 (-5) 15 7)
-                         ) (PixelRGBA8 100 10 100 255)
+                         ) (opaque purple)
 
 
            , SceneObject (ATriangle $ Triangle (Point3 (-10) 22 16)
                                                (Point3 (-6) 20 19)
                                                (Point3 (-5) 25 7.5)
-                         ) (PixelRGBA8 200 10 100 255)
+                         ) (opaque pink)
            ]
 
 ----------------------------------------
