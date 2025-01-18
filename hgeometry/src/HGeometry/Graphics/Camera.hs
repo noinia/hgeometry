@@ -41,15 +41,21 @@ import HGeometry.Vector
 -- * the viewport dimensions; i.e. the viewport (on the view plane) on which we draw
 --
 data Camera r = Camera { _cameraPosition     :: !(Point 3 r)
+                         -- ^ position of the camera
                        , _rawCameraNormal    :: !(Vector 3 r)
                          -- ^ unit vector from camera into center of the screen
                        , _rawViewUp          :: !(Vector 3 r)
                        -- ^ viewUp; assumed to be unit vector
                        , _focalDepth         :: !r
+                       -- ^ Distnace from the camera position to the viewport/viewplane
                        , _nearDist           :: !r
+                       -- ^ Near distance; everything closer than this distance is ignored
                        , _farDist            :: !r
+                       -- ^ Far distance; everything beond this is ignored
                        , _viewportDimensions :: !(Vector 2 r)
                        -- ^ Dimensions of the camera viewport; in world coordinates
+                       -- (i.e. the size of the screen on which we draw, in terms of world
+                       -- coordinates)
                        } deriving (Show,Eq,Ord)
 
 --------------------------------------------------------------------------------
@@ -76,7 +82,7 @@ instance Num r => Default (Camera r) where
 cameraPosition :: Lens' (Camera r) (Point 3 r)
 cameraPosition = lens _cameraPosition (\cam p -> cam {_cameraPosition=p})
 
--- | Raw camera normal, i.e. a unit vector into the center of the screen.
+-- | Raw camera normal, i.e. a vector into the center of the screen.
 rawCameraNormal :: Lens' (Camera r) (Vector 3 r)
 rawCameraNormal = lens _rawCameraNormal (\cam r -> cam {_rawCameraNormal=r})
 
