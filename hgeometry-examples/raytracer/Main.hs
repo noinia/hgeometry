@@ -214,7 +214,7 @@ type ViewPort = Vector 2 (Point 3 R)
 
 -- backgroundColor :: PixelRGBA8
 backgroundColor :: Color
-backgroundColor = green `withOpacity` 0.8
+backgroundColor = blue `withOpacity` 0.1
   -- transparent -- transparent
 
 outputWidth :: Int
@@ -235,6 +235,7 @@ outputDimensions = Vector2 outputWidth (ceiling $ fromIntegral outputWidth / asp
 
 theCamera :: Camera R
 theCamera = def&viewportDimensions .~ fromDesiredHeight 2
+               -- &cameraPosition     .~ Point3 0 0 1
 
 -- | Computes the viewportDimensions from a given desired height.
 fromDesiredHeight               :: Fractional r => r -> Vector 2 r
@@ -261,6 +262,31 @@ theScene = [ SceneObject (ABall $ Ball (Point3 0 3 0)     1    ) (opaque red)
                                                (Point3 (-5) 25 7.5)
                          ) (opaque pink)
            ]
+           <>
+           mkPlane (Rectangle (Point2 3 3) (Point2 8 11)) (-0.1) (opaque blue)
+           <>
+           ground
+
+ground = mkPlane (Rectangle (Point2 minX minY) (Point2 maxX maxY)) z groundColor
+  where
+    groundColor = opaque green
+    z    = -1
+    minX = -100
+    maxX = 100
+    minY = -100
+    maxY = 10
+
+mkPlane (Rectangle (Point2 minX minY) (Point2 maxX maxY)) z color =
+  [ SceneObject (ATriangle $ Triangle (Point3 minX minY z)
+                                      (Point3 maxX minY z)
+                                      (Point3 maxX maxY z)
+                ) color
+  , SceneObject (ATriangle $ Triangle (Point3 maxX maxY z)
+                                      (Point3 minX maxY z)
+                                      (Point3 minX minY z)
+                ) color
+  ]
+
 
 ----------------------------------------
 -- * Settings for the progress bar
