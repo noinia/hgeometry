@@ -10,24 +10,24 @@
 module HGeometry.Graphics.Camera
   ( Camera(Camera)
   , cameraPosition, rawCameraNormal, rawViewUp
-  , viewPlaneDepth, nearDist, farDist, screenDimensions
+  , focalDepth, nearDist, farDist, viewportDimensions
 
   , cameraNormal, viewUp
 
   , cameraTransform, worldToView
 
-  , toViewPort, perspectiveProjection, rotateCoordSystem
+  , toViewPortTransform, perspectiveProjection, rotateCoordSystem
   , flipAxes
 
   ) where
 
 import Control.Lens
+import Data.Default.Class
 import HGeometry.Matrix
+import HGeometry.Number.Radical
 import HGeometry.Point
 import HGeometry.Transformation
 import HGeometry.Vector
-import HGeometry.Number.Radical
-
 --------------------------------------------------------------------------------
 
 -- | A basic camera data type. The fields stored are:
@@ -35,21 +35,36 @@ import HGeometry.Number.Radical
 -- * the camera position,
 -- * the raw camera normal, i.e. a unit vector into the center of the screen,
 -- * the raw view up vector indicating which side points "upwards" in the scene,
--- * the viewplane depth (i.e. the distance from the camera position to the plane on which we project),
+-- * the focal depth (i.e. the distance from the camera position to the plane on which we project),
 -- * the near distance (everything closer than this is clipped),
 -- * the far distance (everything further away than this is clipped), and
--- * the screen dimensions.
+-- * the viewport dimensions; i.e. the viewport (on the view plane) on which we draw
 --
-data Camera r = Camera { _cameraPosition   :: !(Point 3 r)
-                       , _rawCameraNormal  :: !(Vector 3 r)
+data Camera r = Camera { _cameraPosition     :: !(Point 3 r)
+                       , _rawCameraNormal    :: !(Vector 3 r)
                          -- ^ unit vector from camera into center of the screen
-                       , _rawViewUp        :: !(Vector 3 r)
+                       , _rawViewUp          :: !(Vector 3 r)
                        -- ^ viewUp; assumed to be unit vector
-                       , _viewPlaneDepth   :: !r
-                       , _nearDist         :: !r
-                       , _farDist          :: !r
-                       , _screenDimensions :: !(Vector 2 r)
+                       , _focalDepth         :: !r
+                       , _nearDist           :: !r
+                       , _farDist            :: !r
+                       , _viewportDimensions :: !(Vector 2 r)
+                       -- ^ Dimensions of the camera viewport; in world coordinates
                        } deriving (Show,Eq,Ord)
+
+--------------------------------------------------------------------------------
+
+instance Num r => Default (Camera r) where
+  -- ^ A default camera, placed at the origin, looking along the y-axis. The view-up
+  -- vector is the z-axis. The focalDepth is 1.
+  def = Camera { _cameraPosition     = origin
+               , _rawCameraNormal    = Vector3 0 1 0 -- We are looking itnto the y-direction
+               , _rawViewUp          = Vector3 0 0 1 -- up in the z-direction
+               , _focalDepth         = 1
+               , _nearDist           = 0
+               , _farDist            = 100
+               , _viewportDimensions = Vector2 4 3
+               }
 
 ----------------------------------------
 -- * Field Accessor Lenses
@@ -59,32 +74,32 @@ data Camera r = Camera { _cameraPosition   :: !(Point 3 r)
 
 -- | Camera position.
 cameraPosition :: Lens' (Camera r) (Point 3 r)
-cameraPosition = lens _cameraPosition (\cam p -> cam{_cameraPosition=p})
+cameraPosition = lens _cameraPosition (\cam p -> cam {_cameraPosition=p})
 
 -- | Raw camera normal, i.e. a unit vector into the center of the screen.
 rawCameraNormal :: Lens' (Camera r) (Vector 3 r)
-rawCameraNormal = lens _rawCameraNormal (\cam r -> cam{_rawCameraNormal=r})
+rawCameraNormal = lens _rawCameraNormal (\cam r -> cam {_rawCameraNormal=r})
 
 -- | Raw view up vector indicating which side points "upwards" in the scene.
 rawViewUp :: Lens' (Camera r) (Vector 3 r)
-rawViewUp = lens _rawViewUp (\cam r -> cam{_rawViewUp=r})
+rawViewUp = lens _rawViewUp (\cam r -> cam {_rawViewUp=r})
 
--- | Viewplane depth (i.e. the distance from the camera position to the plane on which we project).
-viewPlaneDepth :: Lens' (Camera r) r
-viewPlaneDepth = lens _viewPlaneDepth (\cam v -> cam{_viewPlaneDepth=v})
+-- | The focal length (i.e. distance from the camera position to the plane on which we
+-- project.) Also known as viewplane depth.
+focalDepth :: Lens' (Camera r) r
+focalDepth = lens _focalDepth (\cam v -> cam {_focalDepth=v})
 
 -- | Near distance (everything closer than this is clipped).
 nearDist :: Lens' (Camera r) r
-nearDist = lens _nearDist (\cam n -> cam{_nearDist=n})
+nearDist = lens _nearDist (\cam n -> cam {_nearDist=n})
 
 -- | Far distance (everything further away than this is clipped).
 farDist :: Lens' (Camera r) r
-farDist = lens _farDist (\cam f -> cam{_farDist=f})
+farDist = lens _farDist (\cam f -> cam {_farDist=f})
 
--- | Screen dimensions.
-screenDimensions :: Lens' (Camera r) (Vector 2 r)
-screenDimensions = lens _screenDimensions (\cam d -> cam{_screenDimensions=d})
-
+-- | The viewport dimensions.
+viewportDimensions :: Lens' (Camera r) (Vector 2 r)
+viewportDimensions = lens _viewportDimensions (\cam d -> cam {_viewportDimensions=d})
 
 --------------------------------------------------------------------------------
 -- * Accessor Lenses
@@ -107,7 +122,7 @@ viewUp = lens _rawViewUp (\c n -> c { _rawViewUp = signorm n})
 
 -- | Full transformation that renders the figure
 cameraTransform   :: Fractional r => Camera r -> Transformation 3 r
-cameraTransform c =  toViewPort c
+cameraTransform c =  toViewPortTransform c
                  |.| perspectiveProjection c
                  |.| worldToView c
 
@@ -116,15 +131,14 @@ worldToView   :: Fractional r => Camera r -> Transformation 3 r
 worldToView c = rotateCoordSystem c |.| translation ((-1) *^ c^.cameraPosition.vector)
 
 -- | Transformation into viewport coordinates
-toViewPort   :: Fractional r => Camera r -> Transformation 3 r
-toViewPort c = Transformation . Matrix
-             $ Vector4 (Vector4 (w/2) 0     0     0)
-                       (Vector4 0     (h/2) 0     0)
-                       (Vector4 0     0     (1/2) (1/2))
-                       (Vector4 0     0     0     1)
+toViewPortTransform   :: Fractional r => Camera r -> Transformation 3 r
+toViewPortTransform c = Transformation . Matrix
+                      $ Vector4 (Vector4 (w/2) 0     0     0)
+                                (Vector4 0     (h/2) 0     0)
+                                (Vector4 0     0     (1/2) (1/2))
+                                (Vector4 0     0     0     1)
   where
-    Vector2 w h = c^.screenDimensions
-
+    Vector2 w h = c^.viewportDimensions
 
 -- | constructs a perspective projection
 perspectiveProjection   :: Fractional r => Camera r -> Transformation 3 r
@@ -136,7 +150,7 @@ perspectiveProjection c = Transformation . Matrix $
   where
     n = c^.nearDist
     f = c^.farDist
-    Vector2 rx ry = (/2) <$> c^.screenDimensions
+    Vector2 rx ry = (/2) <$> c^.viewportDimensions
 
 -- | Rotates coordinate system around the camera, such that we look in the negative z
 -- direction

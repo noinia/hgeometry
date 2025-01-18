@@ -3,21 +3,23 @@ module Main(main) where
 
 import           Codec.Picture
 import           Control.Lens
-import           Data.Foldable as F
+import           Data.Default.Class
 import           Data.Maybe
 import           Data.Monoid
-import           Data.Word
+import           Data.Semialign
+import           Debug.Trace
 import           HGeometry.Ball
+import           HGeometry.Box
 import           HGeometry.Ext
+import           HGeometry.Graphics.Camera
 import           HGeometry.HalfLine
 import           HGeometry.Intersection
 import           HGeometry.Point
 import           HGeometry.Vector
-import           Paths_hgeometry_examples
+import           Prelude hiding (zipWith)
 import qualified System.File.OsPath as File
 import           System.OsPath
 import           System.ProgressBar
-
 --------------------------------------------------------------------------------
 
 type Color = PixelRGBA8
@@ -28,9 +30,34 @@ type R = Double
 
 type Ray = HalfLine (Point 3 R)
 
-rayThrough     :: Int -> Int -> Ray
-rayThrough x y = let q = Point3 x y 0 &coordinates %~ fromIntegral
-                 in HalfLine cameraPos (q .-. cameraPos)
+
+--------------------------------------------------------------------------------
+{-
+-- | Given a rectangle, and a vector specifying the number of columns and the number of
+-- rows, returns a bunch of equal size subdivided rectangles. The result is given as
+-- list of *rows* (from top to bottom). Each row from left to right.
+subdivide                                                :: (Point_ point 2 r, Fractional r)
+                                                          => Rectangle point -> Vector 2 Int
+                                                          -> [[Rectangle (Point 2 r)]]
+subdivide rect@(Rectangle bl _) (Vector2 numCols numRows) =
+    [ [ mkRect c r | c <- [0..(numCols - 1)] ] | r <- [0..(numRows - 1)] ]
+  where
+    Point2 x y = bl^.asPoint
+    Vector2 w h = size rect
+    w' = w / fromIntegral numCols
+    h' = h / fromIntegral numRows
+    mkRect c r = let i = fromIntegral c
+                     j = fromIntegral (numRows-r)
+                 in Rectangle (Point2 (x + (i*w'))   (y + (j-1)*h'))
+                              (Point2 (x + (i+1)*w') (y + j    *h'))
+
+
+testSubdivide = subdivide (Rectangle (Point2 10 4) (Point2 20 20)) (Vector2 2 4)
+-}
+
+--------------------------------------------------------------------------------
+-- * The Ray shooting stuff
+
 
 -- | Intersect to try and get the color
 ballColor            :: Ray -> Ball (Point 3 R) :+ Color -> Maybe Color
@@ -38,65 +65,150 @@ ballColor r (b :+ c)
   | r `intersects` b = Just c
   | otherwise        = Nothing
 
+
+-- | Determine the color of the first object hit by the ray
 shootRay   :: Ray -> Scene -> Color
 shootRay r = fromMaybe backgroundColor . getFirst . foldMap (First . ballColor r)
 
-renderPixel                         :: Vector 2 Int -> Scene -> Int -> Int -> PixelRGBA8
-renderPixel (Vector2 w h) scene x y = shootRay ray scene
+
+-- | Renders a given pixel.
+renderPixel                         :: Point 2 Int
+                                    -- ^ The pixel coordinates
+                                    -> ViewPort
+                                    -- ^ The part of the viewport corresponding to this pixel.
+                                    -> Vector 2 (Vector 3 R)
+                                    -- ^ pixel dimensions
+                                    -> Camera R
+                                    -> Scene
+                                    -> PixelRGBA8
+renderPixel _ (Vector2 topLeft bottomRight) _ camera scene = shootRay ray scene
   where
-    ray = rayThrough x y
+    cameraPos = camera^.cameraPosition
+    ray       = HalfLine cameraPos (midPoint .-. cameraPos)
+    midPoint  = topLeft .+^ ((bottomRight .-. topLeft) ^/ 2)
 
-    -- clamped     :: Int -> Int -> Word8
-    -- clamped x m = fromIntegral $ (255 * x) `div` m
+-- | Computes the part of the viewport (i.e. some rectangle floating in world space)
+-- corresponding to the pixel x,y
+pixelViewPort :: Point 3 R -> Vector 2 (Vector 3 R) -> Int -> Int -> ViewPort
+pixelViewPort topLeft (Vector2 xVec yVec) x' y' =
+  let x = fromIntegral x'
+      y = fromIntegral y'
+  in Vector2 (topLeft .+^ ((x      *^ xVec) ^+^ (y    *^ yVec)))
+             (topLeft .+^ (((x +1) *^ xVec) ^+^ ((y+1)*^ yVec)))
 
-renderWithProgress :: IO () -> Vector 2 Int -> Scene -> IO (Image PixelRGBA8)
-renderWithProgress reportProgress dims@(Vector2 w h) scene =
-    withImage w h $ \x y -> let !pix = renderPixel dims scene x y
-                            in pix <$ reportProgress
+
+containsMid (Point3 qx _ qz) (Vector2 (Point3 tlx _ tlz)
+                                      (Point3 brx _ brz)
+                             ) = tlx <= qx && qx <= brx &&
+                                 tlz >= qz && qz >= brz
+
+-- | Render the Scene, while reporting progress
+renderWithProgress :: IO () -> Vector 2 Int -> Camera R -> Scene -> IO (Image PixelRGBA8)
+renderWithProgress reportProgress screenDims@(Vector2 w h) camera scene = do
+    -- print ("ratio screen", fromIntegral w/ fromIntegral h)
+    -- print ("ratio dims", camera^.viewportDimensions.xComponent
+    --       , camera^.viewportDimensions.yComponent)
+    print ("screenDims",screenDims)
+    print ("VP size",camera^.viewportDimensions)
+    print ("VP dims",viewportDims)
+    print ("midPoint",midPoint)
+    print ("topLeft",topLeft)
+    print ("viewPort",theViewport)
+    print ("pixelDims",pixelDims)
+    withImage w h $ \x y -> let !pix = renderPixel (Point2 x y)
+                                                   (pixelViewPort topLeft pixelDims x y)
+                                                   pixelDims
+                                                   camera scene
+                                pixVp = pixelViewPort topLeft pixelDims x y
+                            in do if containsMid midPoint pixVp
+                                    then print (x,y,pixVp)
+                                    else pure ()
+                                  pix <$ reportProgress
+  where
+    -- midpoint of the viewport (in 3D posiiton)
+    midPoint = (camera^.cameraPosition) .+^ ((camera^.focalDepth) *^ camera^.rawCameraNormal)
+
+    -- xVec is a vector (in R^3) that corresponds to the x-axis in the viewPlane.
+    -- the magnitude of the vector is so that it corresponds to the width of the viewPort
+    -- Same for the yVec. Note that in the viewPlane the y-axis runs "downward", so
+    --
+    -- it directly corresponds to the the pixel coordinates.
+    viewportDims@(Vector2 xVec yVec) =
+      zipWith (*^) (camera^.viewportDimensions)
+                   (Vector2 ((camera^.cameraNormal) `cross` (camera^.viewUp))
+                            (negated $ camera^.viewUp))
+
+    -- the topleft point of the viewport
+    topLeft = midPoint .-^ ((xVec ^+^ yVec) ^/ 2)
+
+    -- the dimensions of a single pixel in viewPort
+    pixelDims = zipWith (\axis numPixels -> axis ^/ fromIntegral numPixels)
+                        viewportDims
+                        screenDims
+
+    theViewport = Vector2 topLeft (topLeft .+^ (xVec ^+^ yVec))
+
+type ViewPort = Vector 2 (Point 3 R)
 
 --------------------------------------------------------------------------------
 -- * Settings
 
+-- * For the picture
+
 backgroundColor :: PixelRGBA8
-backgroundColor = PixelRGBA8 maxBound maxBound maxBound 0
+backgroundColor = PixelRGBA8 0 100 0 255
 
-theScene :: Scene
-theScene = [ Ball (Point3 128 128 128) 50 :+ PixelRGBA8 200 0 0 255
-           ]
-
-
-cameraPos = Point3 0 0 10000
-
+outputWidth :: Int
+outputWidth = 640
 
 aspectRatio :: Rational
 aspectRatio = 16 / 9
 
-outputWidth :: Int
-outputWidth = 400
-
+-- | Size of the output picture
 outputDimensions :: Vector 2 Int
 outputDimensions = Vector2 outputWidth (ceiling $ fromIntegral outputWidth / aspectRatio)
+
+
+
+
+----------------------------------------
+-- * Settings related to the Camera
+
+theCamera :: Camera R
+theCamera = def&viewportDimensions .~ fromDesiredHeight 2
+
+-- | Computes the viewportDimensions from a given desired height.
+fromDesiredHeight               :: Fractional r => r -> Vector 2 r
+fromDesiredHeight desiredHeight = let Vector2 w h = fromIntegral <$> outputDimensions
+                                  in Vector2 (desiredHeight * (w/h)) desiredHeight
+
+
+----------------------------------------
+-- * The scene
+
+
+theScene :: Scene
+theScene = [ Ball (Point3 0 3 0)     1     :+ PixelRGBA8 200 0 0 255
+           , Ball (Point3 2 5 3)     (1.5) :+ PixelRGBA8 10 0 200 255
+           , Ball (Point3 (-3) 20 6) 3     :+ PixelRGBA8 10 0 0 255
+           ]
+
+----------------------------------------
+-- * Settings for the progress bar
 
 refreshRate :: Double
 refreshRate = 10
 
-
-viewportDims :: Vector 2 Double
-viewportDims = let Vector2 w h = fromIntegral <$> outputDimensions
-                   desiredHeight = 2
-               in Vector2 desiredHeight (desiredHeight * (h/w))
-
 --------------------------------------------------------------------------------
-
-amountOfWork (Vector2 w h) = w * h
 
 main :: IO ()
 main = do
-  let initialProgress = Progress 0 (amountOfWork outputDimensions) ()
+  let amountOfWork (Vector2 w h) = w * h
+      initialProgress = Progress 0 (amountOfWork outputDimensions) ()
   progressBar <- newProgressBar defStyle refreshRate initialProgress
 
   imageData <- renderWithProgress (incProgress progressBar 1)
-                                  outputDimensions theScene
+                                  outputDimensions theCamera theScene
 
   let bs = encodePng imageData
   File.writeFile [osp|foo.png|] bs

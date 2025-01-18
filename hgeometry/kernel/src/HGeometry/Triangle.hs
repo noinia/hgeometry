@@ -12,6 +12,10 @@
 module HGeometry.Triangle
   ( Triangle(Triangle)
   , module HGeometry.Triangle.Class
+
+
+  , LineTriangleIntersection(..)
+  , directedLineTriangleIntersect
   ) where
 
 import Control.Lens
@@ -143,23 +147,24 @@ instance ( Point_ point  3 r
 instance ( Point_ point  3 r
          , Fractional r, Ord r
          ) => IsIntersectableWith (LinePV 3 r) (Triangle point) where
-  l `intersect` tri = first snd <$> intersectImpl l (view asPoint <$> tri)
+  l `intersect` tri = first snd <$> directedLineTriangleIntersect l (view asPoint <$> tri)
 
 
 -- | Computes the intersection between an oriented line and a triangle.
--- If the result is an intersection point; also returns the parameter t
--- describing the intersection point along the line.
+-- If the result is an intersection point p; it also returns the parameter t
+-- describing the intersection point along the line. I.e. so that p = o + t*v
+-- where o is the anchorPoint of the line, and v is its direciton vector.
 --
 -- see https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
 -- for the implementation details.
 -- as well as
 -- https://www.tandfonline.com/doi/abs/10.1080/10867651.1997.10487468
-intersectImpl :: (Ord r, Fractional r)
-              => LinePV 3 r -> Triangle (Point 3 r)
-              -> Maybe (LineTriangleIntersection (r, Point 3 r)
-                                                 (ClosedLineSegment (Point 3 r))
-                       )
-intersectImpl (LinePV o vec) (Triangle a b c)
+directedLineTriangleIntersect :: (Ord r, Fractional r)
+                              => LinePV 3 r -> Triangle (Point 3 r)
+                              -> Maybe (LineTriangleIntersection (r, Point 3 r)
+                                                                 (ClosedLineSegment (Point 3 r))
+                                       )
+directedLineTriangleIntersect (LinePV o vec) (Triangle a b c)
     | lineAndTriangleParallel = error "(Half)Line x Triangle colinear not implemented yet"
         -- FIXME might we not intersect in a line segment here?
     | lineIntersectsTriangle  = Just $ Line_x_Triangle_Point (t, o .+^ (t *^ vec))
@@ -198,7 +203,7 @@ instance ( Point_ point  3 r
          , Point_ point' 3 r
          , Fractional r, Ord r
          ) => IsIntersectableWith (HalfLine point) (Triangle point') where
-  ray `intersect` tri = case intersectImpl (toLine ray) (view asPoint <$> tri) of
+  ray `intersect` tri = case directedLineTriangleIntersect (toLine ray) (view asPoint <$> tri) of
       Just (Line_x_Triangle_Point (t,p)) | t >= 0 -> Just $ Line_x_Triangle_Point p
       Just (Line_x_Triangle_LineSegment _)        ->
         error "HalfLine x LineSegment not fully implmeneted yet"
