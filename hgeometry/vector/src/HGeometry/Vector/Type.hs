@@ -70,7 +70,7 @@ class HasComponents vector vector' where
 --------------------------------------------------------------------------------
 
 newtype instance Vector 1 r = MkVector1 (Linear.V1 r)
-  deriving newtype (Eq,Ord,NFData,Foldable1)
+  deriving newtype (Eq,Ord,NFData,Foldable1,Applicative)
   deriving (Semialign,Zip) via Identity
   deriving stock (Generic,Functor,Foldable,Traversable)
 
@@ -121,7 +121,7 @@ instance FromJSON r => FromJSON (Vector 1 r) where
 --------------------------------------------------------------------------------
 
 newtype instance Vector 2 r = MkVector2 (Linear.V2 r)
-  deriving newtype (Eq,Ord,NFData,Foldable1)
+  deriving newtype (Eq,Ord,NFData,Foldable1,Applicative)
   deriving stock (Generic,Functor,Foldable,Traversable)
 
 -- | Construct a vector2
@@ -177,7 +177,7 @@ instance FromJSON r => FromJSON (Vector 2 r) where
 --------------------------------------------------------------------------------
 
 newtype instance Vector 3 r = MkVector3 (Linear.V3 r)
-  deriving newtype (Eq,Ord,NFData,Foldable1)
+  deriving newtype (Eq,Ord,NFData,Foldable1,Applicative)
   deriving stock (Generic,Functor,Foldable,Traversable)
 
 -- | Construct a vector3
@@ -242,7 +242,7 @@ cross (MkVector3 u) (MkVector3 v) = MkVector3 $ Linear.cross u v
 --------------------------------------------------------------------------------
 
 newtype instance Vector 4 r = MkVector4 (Linear.V4 r)
-  deriving newtype (Eq,Ord,NFData,Foldable1)
+  deriving newtype (Eq,Ord,NFData,Foldable1,Applicative)
   deriving stock (Generic,Functor,Foldable,Traversable)
 
 -- | Construct a vector4
