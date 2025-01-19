@@ -53,11 +53,6 @@ numSamplesPerPixel = 10 -- 100
 maxRayComplexity :: Int
 maxRayComplexity = 10 -- 50
 
--- | epsilon value; round things whose absolute value is smaller than this to zero.
-epsilon :: Double
-epsilon = 0.000000001
-
-
 
 ----------------------------------------
 -- * Settings for the progress bar

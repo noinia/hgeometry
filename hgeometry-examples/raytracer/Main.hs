@@ -309,3 +309,8 @@ main = do
 
   let bs = encodePng imageData
   File.writeFile [osp|foo.png|] bs
+
+
+
+
+--------------------------------------------------------------------------------

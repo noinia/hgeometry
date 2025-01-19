@@ -1,12 +1,15 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Types where
 
+
 import           Control.Lens
 import           Control.Monad (replicateM, (<=<), (=<<))
+import           Data.Coerce
 import           Data.Colour as Colour
 import           Data.Colour.Names
 import           Data.Colour.SRGB (toSRGB24, RGB(..), sRGB)
 import           Data.Default.Class
+import           Data.Eq.Approximate
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
@@ -26,20 +29,34 @@ import           HGeometry.Properties
 import           HGeometry.Triangle
 import           HGeometry.Unbounded
 import           HGeometry.Vector
-import           Prelude hiding (zipWith)
+import           Prelude hiding (zipWith, sqrt)
 import qualified System.File.OsPath as File
 import           System.OsPath
 import           System.ProgressBar
 import           System.Random.Stateful
+import           TypeLevel.NaturalNumber
 
 --------------------------------------------------------------------------------
 
+-- type ApproximateDouble = AbsolutelyApproximateValue (Digits Five) Double
+
+instance (Radical r, Ord r, Fractional r, AbsoluteTolerance tol)
+         => Radical (AbsolutelyApproximateValue tol r) where
+  sqrt = AbsolutelyApproximateValue . sqrt . coerce
+
+instance (UniformRange r) => UniformRange (AbsolutelyApproximateValue tol r) where
+  uniformRM (AbsolutelyApproximateValue low, AbsolutelyApproximateValue high) =
+    fmap AbsolutelyApproximateValue . uniformRM (low,high)
+
+
+--------------------------------------------------------------------------------
 
 -- | The color type we use
 type Color = AlphaColour Double
 
 -- | The type of Real numbers
 type R = Double
+--  AbsolutelyApproximateValue (Digits Five) Double
 
 -- | A ray; i.e. a halfline
 type Ray = HalfLine (Point 3 R)
@@ -98,3 +115,8 @@ data PixelInfo = PixelInfo { _coords :: Point 2 Int
                            } deriving (Show,Eq)
 
 makeLenses ''PixelInfo
+
+
+
+
+--------------------------------------------------------------------------------
