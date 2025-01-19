@@ -52,6 +52,10 @@ data SceneGeom = ABall     (Ball (Point 3 R))
                | ATriangle (Triangle (Point 3 R))
                deriving (Show,Eq)
 
+aBall c r = ABall $ Ball c r
+
+aTriangle u v w = ATriangle $ Triangle u v w
+
 type instance NumType   SceneGeom = R
 type instance Dimension SceneGeom = 3
 
