@@ -125,9 +125,10 @@ rayColor gen = rayColor'
           Nothing      -> pure backgroundColor
           Just (obj,q) -> do
                              let normal = normalUnitVectorAt q (obj^.geom)
-                             v <- uniformUpwardDirectionWrt normal gen
+                             v <- (normal ^+^) <$>
+                                  uniformUpwardDirectionWrt normal gen
                              -- shoot a new ray
-                             (blend 0.5 (opaque black))
+                             (blend 0.1 (opaque black))
                                <$> rayColor' (HalfLine (q^.core) v) (depth-1) scene
 
 -- -- | Compute the color of the object at the intersection point with the ray
@@ -229,7 +230,7 @@ renderWithProgress reportProgress screenDims@(Vector2 w h) camera scene = do
                         viewportDims
                         screenDims
 
-    theViewport = Vector2 topLeft (topLeft .+^ (xVec ^+^ yVec))
+    -- theViewport = Vector2 topLeft (topLeft .+^ (xVec ^+^ yVec))
 
 
 --------------------------------------------------------------------------------

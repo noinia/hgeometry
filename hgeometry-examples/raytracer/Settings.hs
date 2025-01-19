@@ -47,7 +47,7 @@ fromDesiredHeight desiredHeight = let Vector2 w h = fromIntegral <$> outputDimen
 
 -- | The number of samples we take for each pixel
 numSamplesPerPixel :: Int
-numSamplesPerPixel = 10 -- 100
+numSamplesPerPixel = 20 -- 100
 
 -- | Maximum complexity of a single ray; (in number of segments)
 maxRayComplexity :: Int
