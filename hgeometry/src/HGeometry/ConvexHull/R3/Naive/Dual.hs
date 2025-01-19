@@ -10,28 +10,16 @@ module HGeometry.ConvexHull.R3.Naive.Dual
 import           Control.Lens
 import           Data.Foldable (toList)
 import           Data.Foldable1
-import           Data.List (find)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
--- import           Data.Map (Map)
--- import qualified Data.Map as Map
-import           Data.Map.NonEmpty (NEMap)
 import qualified Data.Map.NonEmpty as NEMap
-import           Data.Maybe (isNothing)
-import           HGeometry.Combinatorial.Util
 import           HGeometry.Duality
 import           HGeometry.Ext
-import           HGeometry.HalfSpace
 import           HGeometry.HyperPlane
-import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Intersection (intersects)
 import           HGeometry.Plane.LowerEnvelope
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap (mapWithKeyMerge1)
-import           HGeometry.Plane.LowerEnvelope.Naive
 import           HGeometry.Point
 import           HGeometry.Properties
-import           HGeometry.Triangle
-import           HGeometry.Vector
 
 --------------------------------------------------------------------------------
 

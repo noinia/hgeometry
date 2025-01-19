@@ -13,6 +13,7 @@ module HGeometry.HalfLine
   ( HalfLine(..)
   , halfLineThrough
   , LineHalfLineIntersection(..)
+  , HasDirection(..)
   ) where
 
 import Control.Lens

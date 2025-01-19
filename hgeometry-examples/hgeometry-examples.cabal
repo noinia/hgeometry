@@ -79,6 +79,7 @@ common setup
       , filepath
       , geojson                   >= 4.1.1
       , QuickCheck                >= 2.15.0
+      , semialign                 >= 1.3.1
 
       -- , dependent-map             >= 0.4
       -- , dependent-sum             >= 0.7.1
@@ -224,11 +225,16 @@ executable hgeometry-sampler
 executable hgeometry-raytracer
   import:         setup, miso-setup
   build-depends:
-          JuicyPixels               >= 3.3.9  && < 4
-        , terminal-progress-bar     >= 0.4.2  && < 0.5
+          JuicyPixels               >= 3.3.9   && < 4
+        , terminal-progress-bar     >= 0.4.2   && < 0.5
+        , approximate-equality      >= 1.1.0.2 && < 1.2
+        , type-level-natural-number >= 2.0     && < 3
+
   hs-source-dirs: raytracer
   main-is:        Main.hs
   other-modules:
+          Types
+          Settings
           Paths_hgeometry_examples
   --      Miso.Event.Extra
 

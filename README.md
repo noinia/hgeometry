@@ -124,6 +124,9 @@ algorithms for computing
   - the Imai-Iri algorithm, and
   - the well-known Douglas Peucker algorithm.
 
+* Computing the shortest path tree of a point in a triangulated simple
+  polygon in $O(n)$ time.
+
 HGeometry also contains an implementation of some geometric data
 structures. In particular,
 

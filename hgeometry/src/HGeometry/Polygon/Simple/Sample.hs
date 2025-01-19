@@ -68,7 +68,7 @@ sample (Sampler total m) g = (maybe err snd . flip Map.lookupLE m) <$> uniformRM
 -- | Build a triangle sampler; i.e. samples a triagnle from the polygons
 -- with probability proportional to its area.
 --
--- \(O(N\log N\), where \(N\) is the total size of all polygons.
+-- \(O(N\log N)\), where \(N\) is the total size of all polygons.
 triangleSampler :: (SimplePolygon_ polygon point r, Num r, Ord r, Foldable1 nonEmpty)
                 => nonEmpty polygon -> Sampler r (Triangle point)
 triangleSampler = buildSampler . fmap (\tri -> (triangleSignedArea2X tri, tri))
@@ -82,7 +82,7 @@ samplePoint sampler g = sample sampler g >>= flip sampleTriangle g
 -- | Unfiormly samples a point from a set of polygons. You may want to build a
 -- pointSampler if the goal is to sample multiple points.
 --
--- \(O(N\log N\), where \(N\) is the total size of all polygons.
+-- \(O(N\log N)\), where \(N\) is the total size of all polygons.
 samplePolygons       :: ( SimplePolygon_ polygon point r, StatefulGen g m
                         , Foldable1 nonEmpty, Real r, Ord r, UniformRange r
                         )
@@ -91,7 +91,7 @@ samplePolygons pgs g = flip samplePoint g $ triangleSampler pgs
 
 -- | Uniformly samples a point in a polygon.
 --
--- \(O(n\log n )\)
+-- \(O(n\log n)\)
 samplePolygon   :: ( SimplePolygon_ polygon point r, Ord r, Real r, UniformRange r
                    , StatefulGen g m)
                 => polygon -> g -> m (Point 2 Double)

@@ -25,14 +25,12 @@ import           Control.Subcategory.Functor
 import           Data.Foldable1
 import qualified Data.List.NonEmpty as NonEmpty
 -- import qualified Data.Map as Map
-import           Data.Map.NonEmpty (NEMap)
 import qualified Data.Map.NonEmpty as NEMap
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Vector as Vector
 import           HGeometry.Duality
 import           HGeometry.Ext
-import           HGeometry.Foldable.Util
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line.General

@@ -22,30 +22,19 @@ module HGeometry.Polygon.WithHoles
 
 import           Control.DeepSeq (NFData)
 import           Control.Lens hiding (holes)
-import qualified Data.Foldable as F
 import           Data.Foldable1
-import           Data.Functor.Apply (Apply, (<.*>), MaybeApply(..))
-import           Data.Functor.Classes
+import           Data.Functor.Apply ((<.*>), MaybeApply(..))
 import           Data.Kind (Type)
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
-import           Data.Semigroup.Foldable
 import           Data.Semigroup.Traversable
 import           Data.Vector (Vector)
-import qualified Data.Vector as Vector
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
 import           GHC.Generics (Generic)
-import           HGeometry.Boundary
 import           HGeometry.Box
 import           HGeometry.Cyclic
 import           HGeometry.Foldable.Util
-import           HGeometry.Intersection
-import           HGeometry.LineSegment.Intersection.BentleyOttmann
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple
-import           HGeometry.Polygon.Simple.Implementation
-import           HGeometry.Polygon.Simple.InPolygon
 import           HGeometry.Properties
 import           HGeometry.Transformation
 import           HGeometry.Vector.NonEmpty.Util ()
