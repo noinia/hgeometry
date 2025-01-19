@@ -2,9 +2,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 module BallSpec where
 
+import Control.Lens
 import Data.Maybe
 import Golden
 import HGeometry.Ball
+import HGeometry.Ext
 import HGeometry.HalfLine
 import HGeometry.Intersection
 import HGeometry.Line
@@ -34,14 +36,18 @@ spec = describe "ball intersection with line" $ do
              , map (\b -> iO'' b $ attr SLayer "balls"
                    ) balls
              , map (\case
-                   Line_x_Ball_Point q     -> iO'' q $ attr SLayer "LineXBall"
-                   Line_x_Ball_Segment seg -> iO'' seg $ attr SPen (IpePen "fat")
-                                                      <> attr SLayer "LineXBall"
+                   Line_x_Ball_Point q     -> iO'' (q^.core)
+                                              $ attr SLayer "LineXBall"
+                   Line_x_Ball_Segment seg -> iO'' (view core <$> seg)
+                                              $ attr SPen (IpePen "fat")
+                                              <> attr SLayer "LineXBall"
               ) intersections
              , map (\case
-                   Line_x_Ball_Point q     -> iO'' q $ attr SLayer "HalfLineXBall"
-                   Line_x_Ball_Segment seg -> iO'' seg $ attr SPen (IpePen "fat")
-                                                      <> attr SLayer "HalfLineXBall"
+                   Line_x_Ball_Point q     -> iO'' (q^.core)
+                                              $ attr SLayer "HalfLineXBall"
+                   Line_x_Ball_Segment seg -> iO'' (view core <$> seg)
+                                              $ attr SPen (IpePen "fat")
+                                              <> attr SLayer "HalfLineXBall"
               ) hlIntersections
              ])
 
