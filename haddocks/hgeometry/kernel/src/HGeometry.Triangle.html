@@ -12,26 +12,33 @@
 </span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Triangle.html"><span class="hs-identifier">HGeometry.Triangle</span></a></span><span>
 </span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier">Triangle</span></a></span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier">Triangle</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Triangle.Class.html"><span class="hs-identifier">HGeometry.Triangle.Class</span></a></span><span>
-</span><span id="line-15"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>
 </span><span id="line-16"></span><span>
-</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
-</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
-</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
-</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Box.Boxable.html"><span class="hs-identifier">HGeometry.Box.Boxable</span></a></span><span>
-</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html"><span class="hs-identifier">HGeometry.Intersection</span></a></span><span>
-</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
-</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span>
-</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Transformation.html"><span class="hs-identifier">HGeometry.Transformation</span></a></span><span>
-</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Triangle.Class.html"><span class="hs-identifier">HGeometry.Triangle.Class</span></a></span><span>
-</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span>
-</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.html/Hiraffe.Graph.html"><span class="hs-identifier">Hiraffe.Graph</span></a></span><span>
-</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Read</span></span><span>
-</span><span id="line-29"></span><span>
-</span><span id="line-30"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-31"></span><span>
-</span><span id="line-32"></span><span class="annot"><span class="hs-comment">-- | Triangles in d-dimensional space</span></span><span>
-</span><span id="line-33"></span><span class="hs-keyword">newtype</span><span> </span><span id="Triangle"><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-var">Triangle</span></a></span></span><span> </span><span id="local-6989586621679387194"><span class="annot"><a href="#local-6989586621679387194"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="MkTriangle"><span class="annot"><a href="HGeometry.Triangle.html#MkTriangle"><span class="hs-identifier hs-var">MkTriangle</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679387194"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-34"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679387442"><span id="local-6989586621679387444"><span class="annot"><span class="annottext">(forall x. Triangle point -&gt; Rep (Triangle point) x)
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#LineTriangleIntersection"><span class="hs-identifier">LineTriangleIntersection</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Box.Boxable.html"><span class="hs-identifier">HGeometry.Box.Boxable</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html"><span class="hs-identifier">HGeometry.Ext</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HalfLine.html"><span class="hs-identifier">HGeometry.HalfLine</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html"><span class="hs-identifier">HGeometry.Intersection</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Line.PointAndVector.html"><span class="hs-identifier">HGeometry.Line.PointAndVector</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.LineSegment.html"><span class="hs-identifier">HGeometry.LineSegment</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Transformation.html"><span class="hs-identifier">HGeometry.Transformation</span></a></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Triangle.Class.html"><span class="hs-identifier">HGeometry.Triangle.Class</span></a></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.html/Hiraffe.Graph.html"><span class="hs-identifier">Hiraffe.Graph</span></a></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Text.Read</span></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="annot"><span class="hs-comment">-- | Triangles in d-dimensional space</span></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">newtype</span><span> </span><span id="Triangle"><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-var">Triangle</span></a></span></span><span> </span><span id="local-6989586621679384758"><span class="annot"><a href="#local-6989586621679384758"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="MkTriangle"><span class="annot"><a href="HGeometry.Triangle.html#MkTriangle"><span class="hs-identifier hs-var">MkTriangle</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679384758"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679385113"><span id="local-6989586621679385115"><span class="annot"><span class="annottext">(forall x. Triangle point -&gt; Rep (Triangle point) x)
 -&gt; (forall x. Rep (Triangle point) x -&gt; Triangle point)
 -&gt; Generic (Triangle point)
 forall x. Rep (Triangle point) x -&gt; Triangle point
@@ -45,7 +52,7 @@ from :: forall x. Triangle point -&gt; Rep (Triangle point) x
 $cto :: forall point x. Rep (Triangle point) x -&gt; Triangle point
 to :: forall x. Rep (Triangle point) x -&gt; Triangle point
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-35"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">newtype</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679387450"><span id="local-6989586621679387455"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; Triangle a -&gt; Triangle b)
+</span><span id="line-42"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">newtype</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679385121"><span id="local-6989586621679385126"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; Triangle a -&gt; Triangle b)
 -&gt; (forall a b. a -&gt; Triangle b -&gt; Triangle a) -&gt; Functor Triangle
 forall a b. a -&gt; Triangle b -&gt; Triangle a
 forall a b. (a -&gt; b) -&gt; Triangle a -&gt; Triangle b
@@ -56,7 +63,7 @@ $cfmap :: forall a b. (a -&gt; b) -&gt; Triangle a -&gt; Triangle b
 fmap :: forall a b. (a -&gt; b) -&gt; Triangle a -&gt; Triangle b
 $c&lt;$ :: forall a b. a -&gt; Triangle b -&gt; Triangle a
 &lt;$ :: forall a b. a -&gt; Triangle b -&gt; Triangle a
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679387464"><span id="local-6989586621679387473"><span id="local-6989586621679387481"><span id="local-6989586621679387487"><span id="local-6989586621679387491"><span id="local-6989586621679387495"><span id="local-6989586621679387499"><span id="local-6989586621679387503"><span id="local-6989586621679387507"><span id="local-6989586621679387511"><span id="local-6989586621679387515"><span id="local-6989586621679387519"><span id="local-6989586621679387525"><span id="local-6989586621679387533"><span id="local-6989586621679387541"><span id="local-6989586621679387549"><span id="local-6989586621679387557"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; Triangle m -&gt; m)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679385135"><span id="local-6989586621679385144"><span id="local-6989586621679385152"><span id="local-6989586621679385158"><span id="local-6989586621679385162"><span id="local-6989586621679385166"><span id="local-6989586621679385170"><span id="local-6989586621679385174"><span id="local-6989586621679385178"><span id="local-6989586621679385182"><span id="local-6989586621679385186"><span id="local-6989586621679385190"><span id="local-6989586621679385196"><span id="local-6989586621679385204"><span id="local-6989586621679385212"><span id="local-6989586621679385220"><span id="local-6989586621679385228"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; Triangle m -&gt; m)
 -&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Triangle a -&gt; m)
 -&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Triangle a -&gt; m)
 -&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Triangle a -&gt; b)
@@ -139,23 +146,23 @@ sum :: forall a. Num a =&gt; Triangle a -&gt; a
 $cproduct :: forall a. Num a =&gt; Triangle a -&gt; a
 product :: forall a. Num a =&gt; Triangle a -&gt; a
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-36"></span><span>
-</span><span id="line-37"></span><span class="annot"><span class="hs-comment">-- | Construct a triangle from its three points</span></span><span>
-</span><span id="line-38"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679387191"><span class="annot"><a href="#local-6989586621679387191"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679387191"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679387191"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387191"><span class="hs-identifier hs-type">point</span></a></span></span><span>
-</span><span id="line-39"></span><span class="hs-keyword">pattern</span><span> </span><span id="Triangle"><span id="%24mTriangle"><span id="%24bTriangle"><span class="annot"><span class="annottext">$mTriangle :: forall {r} {point}.
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="annot"><span class="hs-comment">-- | Construct a triangle from its three points</span></span><span>
+</span><span id="line-45"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679384755"><span class="annot"><a href="#local-6989586621679384755"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679384755"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679384755"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384755"><span class="hs-identifier hs-type">point</span></a></span></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">pattern</span><span> </span><span id="Triangle"><span id="%24mTriangle"><span id="%24bTriangle"><span class="annot"><span class="annottext">$mTriangle :: forall {r} {point}.
 Triangle point
 -&gt; (point -&gt; point -&gt; point -&gt; r) -&gt; ((# #) -&gt; r) -&gt; r
 $bTriangle :: forall point. point -&gt; point -&gt; point -&gt; Triangle point
-</span><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-var hs-var hs-var">Triangle</span></a></span></span></span></span><span> </span><span class="annot"><a href="#local-6989586621679387583"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387584"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387585"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#MkTriangle"><span class="hs-identifier hs-type">MkTriangle</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector3</span></span><span> </span><span id="local-6989586621679387583"><span class="annot"><a href="#local-6989586621679387583"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679387584"><span class="annot"><a href="#local-6989586621679387584"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679387585"><span class="annot"><a href="#local-6989586621679387585"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span>
-</span><span id="line-40"></span><span class="hs-pragma">{-# COMPLETE</span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-pragma hs-type">Triangle</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
-</span><span id="line-41"></span><span>
-</span><span id="line-42"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679387593"><span id="local-6989586621679387599"><span id="local-6989586621679387604"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-43"></span><span>  </span><span id="local-6989586621679387616"><span class="annot"><span class="annottext">traverse :: forall (f :: * -&gt; *) a b.
+</span><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-var hs-var hs-var">Triangle</span></a></span></span></span></span><span> </span><span class="annot"><a href="#local-6989586621679385254"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385255"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385256"><span class="hs-identifier hs-type">c</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#MkTriangle"><span class="hs-identifier hs-type">MkTriangle</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector3</span></span><span> </span><span id="local-6989586621679385254"><span class="annot"><a href="#local-6989586621679385254"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679385255"><span class="annot"><a href="#local-6989586621679385255"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679385256"><span class="annot"><a href="#local-6989586621679385256"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span class="hs-pragma">{-# COMPLETE</span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-pragma hs-type">Triangle</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679385264"><span id="local-6989586621679385270"><span id="local-6989586621679385275"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-50"></span><span>  </span><span id="local-6989586621679385287"><span class="annot"><span class="annottext">traverse :: forall (f :: * -&gt; *) a b.
 Applicative f =&gt;
 (a -&gt; f b) -&gt; Triangle a -&gt; f (Triangle b)
-</span><a href="#local-6989586621679387616"><span class="hs-identifier hs-var hs-var hs-var">traverse</span></a></span></span><span> </span><span id="local-6989586621679387618"><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679387618"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#MkTriangle"><span class="hs-identifier hs-type">MkTriangle</span></a></span><span> </span><span id="local-6989586621679387619"><span class="annot"><span class="annottext">Vector 3 a
-</span><a href="#local-6989586621679387619"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 3 b -&gt; Triangle b
+</span><a href="#local-6989586621679385287"><span class="hs-identifier hs-var hs-var hs-var">traverse</span></a></span></span><span> </span><span id="local-6989586621679385289"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679385289"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#MkTriangle"><span class="hs-identifier hs-type">MkTriangle</span></a></span><span> </span><span id="local-6989586621679385290"><span class="annot"><span class="annottext">Vector 3 a
+</span><a href="#local-6989586621679385290"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 3 b -&gt; Triangle b
 forall point. Vector 3 point -&gt; Triangle point
 </span><a href="HGeometry.Triangle.html#MkTriangle"><span class="hs-identifier hs-var">MkTriangle</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector 3 b -&gt; Triangle b) -&gt; f (Vector 3 b) -&gt; f (Triangle b)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
@@ -167,29 +174,29 @@ forall (f :: * -&gt; *) a b.
 Applicative f =&gt;
 (a -&gt; f b) -&gt; Vector 3 a -&gt; f (Vector 3 b)
 </span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679387618"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 a
-</span><a href="#local-6989586621679387619"><span class="hs-identifier hs-var">v</span></a></span><span>
-</span><span id="line-44"></span><span>
-</span><span id="line-45"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679387624"><span id="local-6989586621679387631"><span id="local-6989586621679387636"><span id="local-6989586621679387639"><span id="local-6989586621679387644"><span id="local-6989586621679387649"><span id="local-6989586621679387652"><span id="local-6989586621679387655"><span id="local-6989586621679387658"><span id="local-6989586621679387661"><span id="local-6989586621679387664"><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-46"></span><span>  </span><span id="local-6989586621679387671"><span class="annot"><span class="annottext">foldMap1 :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; Triangle a -&gt; m
-</span><a href="#local-6989586621679387671"><span class="hs-identifier hs-var hs-var hs-var">foldMap1</span></a></span></span><span> </span><span id="local-6989586621679387673"><span class="annot"><span class="annottext">a -&gt; m
-</span><a href="#local-6989586621679387673"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#MkTriangle"><span class="hs-identifier hs-type">MkTriangle</span></a></span><span> </span><span id="local-6989586621679387674"><span class="annot"><span class="annottext">Vector 3 a
-</span><a href="#local-6989586621679387674"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; Vector 3 a -&gt; m
+</span><a href="#local-6989586621679385289"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 a
+</span><a href="#local-6989586621679385290"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679385295"><span id="local-6989586621679385302"><span id="local-6989586621679385307"><span id="local-6989586621679385310"><span id="local-6989586621679385315"><span id="local-6989586621679385320"><span id="local-6989586621679385323"><span id="local-6989586621679385326"><span id="local-6989586621679385329"><span id="local-6989586621679385332"><span id="local-6989586621679385335"><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-53"></span><span>  </span><span id="local-6989586621679385342"><span class="annot"><span class="annottext">foldMap1 :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; Triangle a -&gt; m
+</span><a href="#local-6989586621679385342"><span class="hs-identifier hs-var hs-var hs-var">foldMap1</span></a></span></span><span> </span><span id="local-6989586621679385344"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679385344"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#MkTriangle"><span class="hs-identifier hs-type">MkTriangle</span></a></span><span> </span><span id="local-6989586621679385345"><span class="annot"><span class="annottext">Vector 3 a
+</span><a href="#local-6989586621679385345"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; Vector 3 a -&gt; m
 forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; Vector 3 a -&gt; m
 forall (t :: * -&gt; *) m a.
 (Foldable1 t, Semigroup m) =&gt;
 (a -&gt; m) -&gt; t a -&gt; m
 </span><span class="hs-identifier hs-var">foldMap1</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
-</span><a href="#local-6989586621679387673"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 a
-</span><a href="#local-6989586621679387674"><span class="hs-identifier hs-var">v</span></a></span><span>
-</span><span id="line-47"></span><span>
-</span><span id="line-48"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679387681"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/semigroupoids-6.0.1-a8bbfdf809d26cf53d1649155d1175ff37b07769640f0e81bd2ce91845990ef7/share/doc/html/src/Data.Semigroup.Traversable.Class.html/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-49"></span><span>  </span><span id="local-6989586621679387694"><span class="annot"><span class="annottext">traverse1 :: forall (f :: * -&gt; *) a b.
+</span><a href="#local-6989586621679385344"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 a
+</span><a href="#local-6989586621679385345"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679385352"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/semigroupoids-6.0.1-a8bbfdf809d26cf53d1649155d1175ff37b07769640f0e81bd2ce91845990ef7/share/doc/html/src/Data.Semigroup.Traversable.Class.html/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-56"></span><span>  </span><span id="local-6989586621679385365"><span class="annot"><span class="annottext">traverse1 :: forall (f :: * -&gt; *) a b.
 Apply f =&gt;
 (a -&gt; f b) -&gt; Triangle a -&gt; f (Triangle b)
-</span><a href="#local-6989586621679387694"><span class="hs-identifier hs-var hs-var hs-var">traverse1</span></a></span></span><span> </span><span id="local-6989586621679387696"><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679387696"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#MkTriangle"><span class="hs-identifier hs-type">MkTriangle</span></a></span><span> </span><span id="local-6989586621679387697"><span class="annot"><span class="annottext">Vector 3 a
-</span><a href="#local-6989586621679387697"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 3 b -&gt; Triangle b
+</span><a href="#local-6989586621679385365"><span class="hs-identifier hs-var hs-var hs-var">traverse1</span></a></span></span><span> </span><span id="local-6989586621679385367"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679385367"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#MkTriangle"><span class="hs-identifier hs-type">MkTriangle</span></a></span><span> </span><span id="local-6989586621679385368"><span class="annot"><span class="annottext">Vector 3 a
+</span><a href="#local-6989586621679385368"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 3 b -&gt; Triangle b
 forall point. Vector 3 point -&gt; Triangle point
 </span><a href="HGeometry.Triangle.html#MkTriangle"><span class="hs-identifier hs-var">MkTriangle</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector 3 b -&gt; Triangle b) -&gt; f (Vector 3 b) -&gt; f (Triangle b)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
@@ -201,19 +208,19 @@ forall (f :: * -&gt; *) a b.
 Apply f =&gt;
 (a -&gt; f b) -&gt; Vector 3 a -&gt; f (Vector 3 b)
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/semigroupoids-6.0.1-a8bbfdf809d26cf53d1649155d1175ff37b07769640f0e81bd2ce91845990ef7/share/doc/html/src/Data.Semigroup.Traversable.Class.html/Data.Semigroup.Traversable.Class.html#traverse1"><span class="hs-identifier hs-var">traverse1</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679387696"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 a
-</span><a href="#local-6989586621679387697"><span class="hs-identifier hs-var">v</span></a></span><span>
-</span><span id="line-50"></span><span>
-</span><span id="line-51"></span><span>
-</span><span id="line-52"></span><span id="local-6989586621679387250"><span id="local-6989586621679387700"><span id="local-6989586621679387704"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679387250"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387250"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span><span>
-</span><span id="line-53"></span><span id="local-6989586621679387253"><span id="local-6989586621679387715"><span id="local-6989586621679387719"><span id="local-6989586621679387723"><span id="local-6989586621679387727"><span id="local-6989586621679387731"><span id="local-6989586621679387735"><span id="local-6989586621679387739"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679387253"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387253"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span></span><span>
-</span><span id="line-54"></span><span>
-</span><span id="line-55"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679387751"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387751"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679387751"><span class="hs-identifier hs-type">point</span></a></span><span>
-</span><span id="line-56"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679387752"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387752"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679387752"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><a href="#local-6989586621679385367"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 a
+</span><a href="#local-6989586621679385368"><span class="hs-identifier hs-var">v</span></a></span><span>
 </span><span id="line-57"></span><span>
-</span><span id="line-58"></span><span class="annot"><span class="hs-comment">-- | Iso between a triangle and a vector of three points</span></span><span>
-</span><span id="line-59"></span><span id="local-6989586621679387257"><span id="local-6989586621679387258"><span class="annot"><a href="HGeometry.Triangle.html#_TriangleVector"><span class="hs-identifier hs-type">_TriangleVector</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Iso"><span class="hs-identifier hs-type">Iso</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387257"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387258"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679387257"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679387258"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span></span></span><span>
-</span><span id="line-60"></span><span id="_TriangleVector"><span class="annot"><span class="annottext">_TriangleVector :: forall point point' (p :: * -&gt; * -&gt; *) (f :: * -&gt; *).
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span id="local-6989586621679384814"><span id="local-6989586621679385371"><span id="local-6989586621679385375"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679384814"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384814"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-60"></span><span id="local-6989586621679384817"><span id="local-6989586621679385386"><span id="local-6989586621679385390"><span id="local-6989586621679385394"><span id="local-6989586621679385398"><span id="local-6989586621679385402"><span id="local-6989586621679385406"><span id="local-6989586621679385410"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679384817"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384817"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679385422"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385422"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679385422"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-63"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679385423"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385423"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679385423"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="annot"><span class="hs-comment">-- | Iso between a triangle and a vector of three points</span></span><span>
+</span><span id="line-66"></span><span id="local-6989586621679384821"><span id="local-6989586621679384822"><span class="annot"><a href="HGeometry.Triangle.html#_TriangleVector"><span class="hs-identifier hs-type">_TriangleVector</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Iso"><span class="hs-identifier hs-type">Iso</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384821"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384822"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679384821"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679384822"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-67"></span><span id="_TriangleVector"><span class="annot"><span class="annottext">_TriangleVector :: forall point point' (p :: * -&gt; * -&gt; *) (f :: * -&gt; *).
 (Profunctor p, Functor f) =&gt;
 p (Vector 3 point) (f (Vector 3 point'))
 -&gt; p (Triangle point) (f (Triangle point'))
@@ -225,37 +232,37 @@ p (Vector 3 point) (f (Vector 3 point'))
      (Vector 3 point)
      (Vector 3 point')
 forall s a b t. (s -&gt; a) -&gt; (b -&gt; t) -&gt; Iso s t a b
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Iso.html/Control.Lens.Iso.html#iso"><span class="hs-identifier hs-var">iso</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#MkTriangle"><span class="hs-identifier hs-type">MkTriangle</span></a></span><span> </span><span id="local-6989586621679387759"><span class="annot"><span class="annottext">Vector 3 point
-</span><a href="#local-6989586621679387759"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Vector 3 point
-</span><a href="#local-6989586621679387759"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector 3 point' -&gt; Triangle point'
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Iso.html/Control.Lens.Iso.html#iso"><span class="hs-identifier hs-var">iso</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#MkTriangle"><span class="hs-identifier hs-type">MkTriangle</span></a></span><span> </span><span id="local-6989586621679385430"><span class="annot"><span class="annottext">Vector 3 point
+</span><a href="#local-6989586621679385430"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Vector 3 point
+</span><a href="#local-6989586621679385430"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector 3 point' -&gt; Triangle point'
 forall point. Vector 3 point -&gt; Triangle point
 </span><a href="HGeometry.Triangle.html#MkTriangle"><span class="hs-identifier hs-var">MkTriangle</span></a></span><span>
-</span><span id="line-61"></span><span>
-</span><span id="line-62"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679387276"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679387276"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679387276"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679387276"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-63"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Triangle.Class.html#Triangle_"><span class="hs-identifier hs-type">Triangle_</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387276"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679387276"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-64"></span><span>  </span><span id="local-6989586621679387767"><span class="annot"><span class="annottext">mkTriangle :: point -&gt; point -&gt; point -&gt; Triangle point
-</span><a href="#local-6989586621679387767"><span class="hs-identifier hs-var hs-var hs-var">mkTriangle</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; point -&gt; Triangle point
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679384840"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679384840"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679384840"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679384840"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Triangle.Class.html#Triangle_"><span class="hs-identifier hs-type">Triangle_</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384840"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679384840"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-71"></span><span>  </span><span id="local-6989586621679385438"><span class="annot"><span class="annottext">mkTriangle :: point -&gt; point -&gt; point -&gt; Triangle point
+</span><a href="#local-6989586621679385438"><span class="hs-identifier hs-var hs-var hs-var">mkTriangle</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; point -&gt; Triangle point
 forall point. point -&gt; point -&gt; point -&gt; Triangle point
 </span><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-var">Triangle</span></a></span><span>
-</span><span id="line-65"></span><span>  </span><span id="local-6989586621679387773"><span class="annot"><span class="annottext">corners :: Lens' (Triangle point) (Vector 3 point)
-</span><a href="#local-6989586621679387773"><span class="hs-identifier hs-var hs-var hs-var">corners</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Vector 3 point -&gt; f (Vector 3 point))
+</span><span id="line-72"></span><span>  </span><span id="local-6989586621679385444"><span class="annot"><span class="annottext">corners :: Lens' (Triangle point) (Vector 3 point)
+</span><a href="#local-6989586621679385444"><span class="hs-identifier hs-var hs-var hs-var">corners</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Vector 3 point -&gt; f (Vector 3 point))
 -&gt; Triangle point -&gt; f (Triangle point)
 forall point point' (p :: * -&gt; * -&gt; *) (f :: * -&gt; *).
 (Profunctor p, Functor f) =&gt;
 p (Vector 3 point) (f (Vector 3 point'))
 -&gt; p (Triangle point) (f (Triangle point'))
 </span><a href="HGeometry.Triangle.html#_TriangleVector"><span class="hs-identifier hs-var">_TriangleVector</span></a></span><span>
-</span><span id="line-66"></span><span>
-</span><span id="line-67"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679387287"><span id="local-6989586621679387777"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#HasVertices%27"><span class="hs-identifier hs-type">HasVertices'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387287"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-68"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="Vertex"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#Vertex"><span class="hs-identifier hs-var">Vertex</span></a></span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387287"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679387287"><span class="hs-identifier hs-type">point</span></a></span><span>
-</span><span id="line-69"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="VertexIx"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-var">VertexIx</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387287"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
-</span><span id="line-70"></span><span>  </span><span id="local-6989586621679387793"><span class="annot"><span class="annottext">vertexAt :: VertexIx (Triangle point)
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679384851"><span id="local-6989586621679385448"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#HasVertices%27"><span class="hs-identifier hs-type">HasVertices'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384851"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="Vertex"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#Vertex"><span class="hs-identifier hs-var">Vertex</span></a></span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384851"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679384851"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="VertexIx"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-var">VertexIx</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384851"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-77"></span><span>  </span><span id="local-6989586621679385464"><span class="annot"><span class="annottext">vertexAt :: VertexIx (Triangle point)
 -&gt; IndexedTraversal'
      (VertexIx (Triangle point))
      (Triangle point)
      (Vertex (Triangle point))
-</span><a href="#local-6989586621679387793"><span class="hs-identifier hs-var hs-var hs-var">vertexAt</span></a></span></span><span> </span><span id="local-6989586621679387795"><span class="annot"><span class="annottext">VertexIx (Triangle point)
-</span><a href="#local-6989586621679387795"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Vector 3 point -&gt; f (Vector 3 point))
+</span><a href="#local-6989586621679385464"><span class="hs-identifier hs-var hs-var hs-var">vertexAt</span></a></span></span><span> </span><span id="local-6989586621679385466"><span class="annot"><span class="annottext">VertexIx (Triangle point)
+</span><a href="#local-6989586621679385466"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Vector 3 point -&gt; f (Vector 3 point))
 -&gt; Triangle point -&gt; f (Triangle point)
 forall point point' (p :: * -&gt; * -&gt; *) (f :: * -&gt; *).
 (Profunctor p, Functor f) =&gt;
@@ -278,16 +285,16 @@ Ixed m =&gt;
 Index m -&gt; IndexedTraversal' (Index m) m (IxValue m)
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.At.html/Control.Lens.At.html#iix"><span class="hs-identifier hs-var">iix</span></a></span><span> </span><span class="annot"><span class="annottext">VertexIx (Triangle point)
 Index (Vector 3 point)
-</span><a href="#local-6989586621679387795"><span class="hs-identifier hs-var">i</span></a></span><span>
-</span><span id="line-71"></span><span>
-</span><span id="line-72"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679387285"><span id="local-6989586621679387286"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#HasVertices"><span class="hs-identifier hs-type">HasVertices</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387285"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387286"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-73"></span><span>  </span><span id="local-6989586621679387817"><span class="annot"><span class="annottext">vertices :: IndexedTraversal1
+</span><a href="#local-6989586621679385466"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679384849"><span id="local-6989586621679384850"><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#HasVertices"><span class="hs-identifier hs-type">HasVertices</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384849"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384850"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-80"></span><span>  </span><span id="local-6989586621679385488"><span class="annot"><span class="annottext">vertices :: IndexedTraversal1
   (VertexIx (Triangle point))
   (Triangle point)
   (Triangle point')
   (Vertex (Triangle point))
   (Vertex (Triangle point'))
-</span><a href="#local-6989586621679387817"><span class="hs-identifier hs-var hs-var hs-var">vertices</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AnIndexedTraversal1
+</span><a href="#local-6989586621679385488"><span class="hs-identifier hs-var hs-var hs-var">vertices</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AnIndexedTraversal1
   Int (Triangle point) (Triangle point') point point'
 -&gt; IndexedTraversal1
      Int (Triangle point) (Triangle point') point point'
@@ -331,14 +338,14 @@ IndexedTraversal1
   (IxValue (Vector 3 point))
   (IxValue (Vector 3 point'))
 </span><span class="hs-identifier hs-var">components</span></span><span class="hs-special">)</span><span>
-</span><span id="line-74"></span><span>
-</span><span id="line-75"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679387339"><span id="local-6989586621679387340"><span class="annot"><span class="hs-identifier hs-type">HasPoints</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387339"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387340"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679387339"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387340"><span class="hs-identifier hs-type">point'</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-76"></span><span>  </span><span id="local-6989586621679387838"><span class="annot"><span class="annottext">allPoints :: forall (d :: Nat) r r'.
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679384903"><span id="local-6989586621679384904"><span class="annot"><span class="hs-identifier hs-type">HasPoints</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384903"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384904"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679384903"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384904"><span class="hs-identifier hs-type">point'</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-83"></span><span>  </span><span id="local-6989586621679385509"><span class="annot"><span class="annottext">allPoints :: forall (d :: Nat) r r'.
 (Point_ point d r, Point_ point' d r',
  NumType (Triangle point) ~ r, NumType (Triangle point') ~ r',
  Dimension (Triangle point) ~ d, Dimension (Triangle point') ~ d) =&gt;
 Traversal1 (Triangle point) (Triangle point') point point'
-</span><a href="#local-6989586621679387838"><span class="hs-identifier hs-var hs-var hs-var">allPoints</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Vector 3 point -&gt; f (Vector 3 point'))
+</span><a href="#local-6989586621679385509"><span class="hs-identifier hs-var hs-var hs-var">allPoints</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Vector 3 point -&gt; f (Vector 3 point'))
 -&gt; Triangle point -&gt; f (Triangle point')
 forall point point' (p :: * -&gt; * -&gt; *) (f :: * -&gt; *).
 (Profunctor p, Functor f) =&gt;
@@ -365,29 +372,29 @@ IndexedTraversal1
   (IxValue (Vector 3 point))
   (IxValue (Vector 3 point'))
 </span><span class="hs-identifier hs-var">components</span></span><span>
-</span><span id="line-77"></span><span>
-</span><span id="line-78"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679387360"><span id="local-6989586621679387361"><span id="local-6989586621679387362"><span id="local-6989586621679387843"><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Transformation.Internal.html#DefaultTransformByConstraints"><span class="hs-identifier hs-type">DefaultTransformByConstraints</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387360"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679387361"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387362"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-79"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679387360"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387361"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387362"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-80"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Transformation.Internal.html#IsTransformable"><span class="hs-identifier hs-type">IsTransformable</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387360"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
-</span><span id="line-81"></span><span>
-</span><span id="line-82"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679387366"><span id="local-6989586621679387880"><span id="local-6989586621679387884"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679387366"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387366"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-83"></span><span>  </span><span id="local-6989586621679387899"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; Triangle point -&gt; ShowS
-</span><a href="#local-6989586621679387899"><span class="hs-identifier hs-var hs-var hs-var">showsPrec</span></a></span></span><span> </span><span id="local-6989586621679387901"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679387901"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span id="local-6989586621679387902"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679387902"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679387903"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679387903"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679387904"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679387904"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ShowS -&gt; ShowS
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679384924"><span id="local-6989586621679384925"><span id="local-6989586621679384926"><span id="local-6989586621679385514"><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Transformation.Internal.html#DefaultTransformByConstraints"><span class="hs-identifier hs-type">DefaultTransformByConstraints</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384924"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679384925"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384926"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-86"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679384924"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384925"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384926"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-87"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Transformation.Internal.html#IsTransformable"><span class="hs-identifier hs-type">IsTransformable</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384924"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679384930"><span id="local-6989586621679385551"><span id="local-6989586621679385555"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679384930"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384930"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-90"></span><span>  </span><span id="local-6989586621679385570"><span class="annot"><span class="annottext">showsPrec :: Int -&gt; Triangle point -&gt; ShowS
+</span><a href="#local-6989586621679385570"><span class="hs-identifier hs-var hs-var hs-var">showsPrec</span></a></span></span><span> </span><span id="local-6989586621679385572"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679385572"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span id="local-6989586621679385573"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679385573"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679385574"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679385574"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679385575"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679385575"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; ShowS -&gt; ShowS
 </span><span class="hs-identifier hs-var">showParen</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679387901"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+</span><a href="#local-6989586621679385572"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
 </span><a href="HGeometry.Triangle.html#appPrec"><span class="hs-identifier hs-var">appPrec</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ShowS -&gt; ShowS) -&gt; ShowS -&gt; ShowS
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
-</span><span id="line-84"></span><span>                                    </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><span id="line-91"></span><span>                                    </span><span class="annot"><span class="annottext">String -&gt; ShowS
 </span><span class="hs-identifier hs-var">showString</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Triangle &quot;</span></span><span>
-</span><span id="line-85"></span><span>                                    </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+</span><span id="line-92"></span><span>                                    </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; point -&gt; ShowS
 forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
@@ -396,13 +403,13 @@ forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679387902"><span class="hs-identifier hs-var">a</span></a></span><span>
-</span><span id="line-86"></span><span>                                    </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+</span><a href="#local-6989586621679385573"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-93"></span><span>                                    </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
 </span><span class="hs-identifier hs-var">showChar</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">' '</span></span><span>
-</span><span id="line-87"></span><span>                                    </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+</span><span id="line-94"></span><span>                                    </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; point -&gt; ShowS
 forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
@@ -411,13 +418,13 @@ forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679387903"><span class="hs-identifier hs-var">b</span></a></span><span>
-</span><span id="line-88"></span><span>                                    </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+</span><a href="#local-6989586621679385574"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-95"></span><span>                                    </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; ShowS
 </span><span class="hs-identifier hs-var">showChar</span></span><span> </span><span class="annot"><span class="annottext">Char
 </span><span class="hs-char">' '</span></span><span>
-</span><span id="line-89"></span><span>                                    </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
+</span><span id="line-96"></span><span>                                    </span><span class="annot"><span class="annottext">ShowS -&gt; ShowS -&gt; ShowS
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; point -&gt; ShowS
 forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
@@ -426,16 +433,16 @@ forall a. Show a =&gt; Int -&gt; a -&gt; ShowS
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679387904"><span class="hs-identifier hs-var">c</span></a></span><span>
-</span><span id="line-90"></span><span>
-</span><span id="line-91"></span><span class="annot"><a href="HGeometry.Triangle.html#appPrec"><span class="hs-identifier hs-type">appPrec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
-</span><span id="line-92"></span><span id="appPrec"><span class="annot"><span class="annottext">appPrec :: Int
+</span><a href="#local-6989586621679385575"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><span id="line-97"></span><span>
+</span><span id="line-98"></span><span class="annot"><a href="HGeometry.Triangle.html#appPrec"><span class="hs-identifier hs-type">appPrec</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-99"></span><span id="appPrec"><span class="annot"><span class="annottext">appPrec :: Int
 </span><a href="HGeometry.Triangle.html#appPrec"><span class="hs-identifier hs-var hs-var">appPrec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
 </span><span class="hs-number">10</span></span><span>
-</span><span id="line-93"></span><span>
-</span><span id="line-94"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679387376"><span id="local-6989586621679387912"><span id="local-6989586621679387916"><span id="local-6989586621679387920"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="#local-6989586621679387376"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387376"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-95"></span><span>  </span><span id="local-6989586621679387934"><span class="annot"><span class="annottext">readPrec :: ReadPrec (Triangle point)
-</span><a href="#local-6989586621679387934"><span class="hs-identifier hs-var hs-var hs-var">readPrec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReadPrec (Triangle point) -&gt; ReadPrec (Triangle point)
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679384940"><span id="local-6989586621679385583"><span id="local-6989586621679385587"><span id="local-6989586621679385591"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="annot"><a href="#local-6989586621679384940"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Read</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384940"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-102"></span><span>  </span><span id="local-6989586621679385605"><span class="annot"><span class="annottext">readPrec :: ReadPrec (Triangle point)
+</span><a href="#local-6989586621679385605"><span class="hs-identifier hs-var hs-var hs-var">readPrec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ReadPrec (Triangle point) -&gt; ReadPrec (Triangle point)
 forall a. ReadPrec a -&gt; ReadPrec a
 </span><span class="hs-identifier hs-var">parens</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; ReadPrec (Triangle point) -&gt; ReadPrec (Triangle point)
 forall a. Int -&gt; ReadPrec a -&gt; ReadPrec a
@@ -444,24 +451,24 @@ forall a. Int -&gt; ReadPrec a -&gt; ReadPrec a
 -&gt; ReadPrec (Triangle point) -&gt; ReadPrec (Triangle point)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
-</span><span id="line-96"></span><span>                          </span><span class="annot"><span class="hs-identifier hs-type">Ident</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Triangle&quot;</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ReadPrec Lexeme
+</span><span id="line-103"></span><span>                          </span><span class="annot"><span class="hs-identifier hs-type">Ident</span></span><span> </span><span class="annot"><span class="hs-string">&quot;Triangle&quot;</span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">ReadPrec Lexeme
 </span><span class="hs-identifier hs-var">lexP</span></span><span>
-</span><span id="line-97"></span><span>                          </span><span id="local-6989586621679387940"><span class="annot"><a href="#local-6989586621679387940"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">step</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">readPrec</span></span><span>
-</span><span id="line-98"></span><span>                          </span><span id="local-6989586621679387942"><span class="annot"><a href="#local-6989586621679387942"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">step</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">readPrec</span></span><span>
-</span><span id="line-99"></span><span>                          </span><span id="local-6989586621679387943"><span class="annot"><a href="#local-6989586621679387943"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">step</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">readPrec</span></span><span>
-</span><span id="line-100"></span><span>                          </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387942"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387940"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387943"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-101"></span><span>
-</span><span id="line-102"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679387413"><span id="local-6989586621679387414"><span id="local-6989586621679387415"><span id="local-6989586621679387947"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679387413"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387414"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387415"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-103"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679387414"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387415"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-104"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Box.Boxable.html#IsBoxable"><span class="hs-identifier hs-type">IsBoxable</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387413"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
-</span><span id="line-105"></span><span>
-</span><span id="line-106"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679387421"><span id="local-6989586621679387422"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679387421"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679387422"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-107"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679387422"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679387422"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-108"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#HasIntersectionWith"><span class="hs-identifier hs-type">HasIntersectionWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679387422"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679387421"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-109"></span><span>  </span><span id="local-6989586621679388074"><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679388074"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679388075"><span class="annot"><span class="annottext">intersects :: Point 2 r -&gt; Triangle point -&gt; Bool
-</span><a href="#local-6989586621679388075"><span class="hs-operator hs-var hs-var hs-var">`intersects`</span></a></span></span><span> </span><span id="local-6989586621679388077"><span class="annot"><span class="annottext">Triangle point
-</span><a href="#local-6989586621679388077"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting
+</span><span id="line-104"></span><span>                          </span><span id="local-6989586621679385611"><span class="annot"><a href="#local-6989586621679385611"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">step</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">readPrec</span></span><span>
+</span><span id="line-105"></span><span>                          </span><span id="local-6989586621679385613"><span class="annot"><a href="#local-6989586621679385613"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">step</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">readPrec</span></span><span>
+</span><span id="line-106"></span><span>                          </span><span id="local-6989586621679385614"><span class="annot"><a href="#local-6989586621679385614"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="hs-identifier hs-type">step</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">readPrec</span></span><span>
+</span><span id="line-107"></span><span>                          </span><span class="annot"><span class="hs-identifier hs-type">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385613"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385611"><span class="hs-identifier hs-type">b</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385614"><span class="hs-identifier hs-type">c</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-108"></span><span>
+</span><span id="line-109"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679384977"><span id="local-6989586621679384978"><span id="local-6989586621679384979"><span id="local-6989586621679385618"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679384977"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384978"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384979"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-110"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679384978"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384979"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-111"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Box.Boxable.html#IsBoxable"><span class="hs-identifier hs-type">IsBoxable</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384977"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-112"></span><span>
+</span><span id="line-113"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679384985"><span id="local-6989586621679384986"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679384985"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679384986"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-114"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679384986"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679384986"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-115"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#HasIntersectionWith"><span class="hs-identifier hs-type">HasIntersectionWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679384986"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679384985"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-116"></span><span>  </span><span id="local-6989586621679385745"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679385745"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679385746"><span class="annot"><span class="annottext">intersects :: Point 2 r -&gt; Triangle point -&gt; Bool
+</span><a href="#local-6989586621679385746"><span class="hs-operator hs-var hs-var hs-var">`intersects`</span></a></span></span><span> </span><span id="local-6989586621679385748"><span class="annot"><span class="annottext">Triangle point
+</span><a href="#local-6989586621679385748"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting
   All (Vector 3 (HalfSpaceF (LinePV 2 r))) (HalfSpaceF (LinePV 2 r))
 -&gt; (HalfSpaceF (LinePV 2 r) -&gt; Bool)
 -&gt; Vector 3 (HalfSpaceF (LinePV 2 r))
@@ -484,7 +491,7 @@ IndexedTraversal1
   (IxValue (Vector 3 (HalfSpaceF (LinePV 2 r))))
   (IxValue (Vector 3 (HalfSpaceF (LinePV 2 r))))
 </span><span class="hs-identifier hs-var">components</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679388074"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; HalfSpaceF (LinePV 2 r) -&gt; Bool
+</span><a href="#local-6989586621679385745"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; HalfSpaceF (LinePV 2 r) -&gt; Bool
 forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
 </span><a href="HGeometry.Intersection.html#intersects"><span class="hs-operator hs-var">`intersects`</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Vector 3 (HalfSpaceF (LinePV 2 r)) -&gt; Bool)
 -&gt; Vector 3 (HalfSpaceF (LinePV 2 r)) -&gt; Bool
@@ -494,5 +501,620 @@ forall triangle point r.
 (Triangle_ triangle point, Point_ point 2 r, Num r, Ord r) =&gt;
 triangle -&gt; Vector 3 (HalfSpaceF (LinePV 2 r))
 </span><a href="HGeometry.Triangle.Class.html#intersectingHalfPlanes"><span class="hs-identifier hs-var">intersectingHalfPlanes</span></a></span><span> </span><span class="annot"><span class="annottext">Triangle point
-</span><a href="#local-6989586621679388077"><span class="hs-identifier hs-var">t</span></a></span><span>
-</span><span id="line-110"></span></pre></body></html>
+</span><a href="#local-6989586621679385748"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span>
+</span><span id="line-119"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-120"></span><span>
+</span><span id="line-121"></span><span>
+</span><span id="line-122"></span><span class="annot"><span class="hs-comment">-- | Data type desciribn the intersection between an oriented line in R^3 and a triangle</span></span><span>
+</span><span id="line-123"></span><span class="hs-keyword">data</span><span> </span><span id="LineTriangleIntersection"><span class="annot"><a href="HGeometry.Triangle.html#LineTriangleIntersection"><span class="hs-identifier hs-var">LineTriangleIntersection</span></a></span></span><span> </span><span id="local-6989586621679385037"><span class="annot"><a href="#local-6989586621679385037"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span id="local-6989586621679385038"><span class="annot"><a href="#local-6989586621679385038"><span class="hs-identifier hs-type">seg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-124"></span><span>    </span><span id="Line_x_Triangle_Point"><span class="annot"><a href="HGeometry.Triangle.html#Line_x_Triangle_Point"><span class="hs-identifier hs-var">Line_x_Triangle_Point</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679385037"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-125"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Line_x_Triangle_LineSegment"><span class="annot"><a href="HGeometry.Triangle.html#Line_x_Triangle_LineSegment"><span class="hs-identifier hs-var">Line_x_Triangle_LineSegment</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679385038"><span class="hs-identifier hs-type">seg</span></a></span><span>
+</span><span id="line-126"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679385756"><span id="local-6989586621679385762"><span id="local-6989586621679385766"><span class="annot"><span class="annottext">Int -&gt; LineTriangleIntersection point seg -&gt; ShowS
+[LineTriangleIntersection point seg] -&gt; ShowS
+LineTriangleIntersection point seg -&gt; String
+(Int -&gt; LineTriangleIntersection point seg -&gt; ShowS)
+-&gt; (LineTriangleIntersection point seg -&gt; String)
+-&gt; ([LineTriangleIntersection point seg] -&gt; ShowS)
+-&gt; Show (LineTriangleIntersection point seg)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall point seg.
+(Show point, Show seg) =&gt;
+Int -&gt; LineTriangleIntersection point seg -&gt; ShowS
+forall point seg.
+(Show point, Show seg) =&gt;
+[LineTriangleIntersection point seg] -&gt; ShowS
+forall point seg.
+(Show point, Show seg) =&gt;
+LineTriangleIntersection point seg -&gt; String
+$cshowsPrec :: forall point seg.
+(Show point, Show seg) =&gt;
+Int -&gt; LineTriangleIntersection point seg -&gt; ShowS
+showsPrec :: Int -&gt; LineTriangleIntersection point seg -&gt; ShowS
+$cshow :: forall point seg.
+(Show point, Show seg) =&gt;
+LineTriangleIntersection point seg -&gt; String
+show :: LineTriangleIntersection point seg -&gt; String
+$cshowList :: forall point seg.
+(Show point, Show seg) =&gt;
+[LineTriangleIntersection point seg] -&gt; ShowS
+showList :: [LineTriangleIntersection point seg] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679385771"><span id="local-6989586621679385778"><span class="annot"><span class="annottext">LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Bool
+(LineTriangleIntersection point seg
+ -&gt; LineTriangleIntersection point seg -&gt; Bool)
+-&gt; (LineTriangleIntersection point seg
+    -&gt; LineTriangleIntersection point seg -&gt; Bool)
+-&gt; Eq (LineTriangleIntersection point seg)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall point seg.
+(Eq point, Eq seg) =&gt;
+LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Bool
+$c== :: forall point seg.
+(Eq point, Eq seg) =&gt;
+LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Bool
+== :: LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Bool
+$c/= :: forall point seg.
+(Eq point, Eq seg) =&gt;
+LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Bool
+/= :: LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679385788"><span id="local-6989586621679385792"><span id="local-6989586621679385796"><span id="local-6989586621679385800"><span id="local-6989586621679385803"><span id="local-6989586621679385806"><span id="local-6989586621679385809"><span class="annot"><span class="annottext">Eq (LineTriangleIntersection point seg)
+Eq (LineTriangleIntersection point seg) =&gt;
+(LineTriangleIntersection point seg
+ -&gt; LineTriangleIntersection point seg -&gt; Ordering)
+-&gt; (LineTriangleIntersection point seg
+    -&gt; LineTriangleIntersection point seg -&gt; Bool)
+-&gt; (LineTriangleIntersection point seg
+    -&gt; LineTriangleIntersection point seg -&gt; Bool)
+-&gt; (LineTriangleIntersection point seg
+    -&gt; LineTriangleIntersection point seg -&gt; Bool)
+-&gt; (LineTriangleIntersection point seg
+    -&gt; LineTriangleIntersection point seg -&gt; Bool)
+-&gt; (LineTriangleIntersection point seg
+    -&gt; LineTriangleIntersection point seg
+    -&gt; LineTriangleIntersection point seg)
+-&gt; (LineTriangleIntersection point seg
+    -&gt; LineTriangleIntersection point seg
+    -&gt; LineTriangleIntersection point seg)
+-&gt; Ord (LineTriangleIntersection point seg)
+LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Bool
+LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Ordering
+LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall point seg.
+(Ord point, Ord seg) =&gt;
+Eq (LineTriangleIntersection point seg)
+forall point seg.
+(Ord point, Ord seg) =&gt;
+LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Bool
+forall point seg.
+(Ord point, Ord seg) =&gt;
+LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Ordering
+forall point seg.
+(Ord point, Ord seg) =&gt;
+LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg
+$ccompare :: forall point seg.
+(Ord point, Ord seg) =&gt;
+LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Ordering
+compare :: LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Ordering
+$c&lt; :: forall point seg.
+(Ord point, Ord seg) =&gt;
+LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Bool
+&lt; :: LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Bool
+$c&lt;= :: forall point seg.
+(Ord point, Ord seg) =&gt;
+LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Bool
+&lt;= :: LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Bool
+$c&gt; :: forall point seg.
+(Ord point, Ord seg) =&gt;
+LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Bool
+&gt; :: LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Bool
+$c&gt;= :: forall point seg.
+(Ord point, Ord seg) =&gt;
+LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Bool
+&gt;= :: LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg -&gt; Bool
+$cmax :: forall point seg.
+(Ord point, Ord seg) =&gt;
+LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg
+max :: LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg
+$cmin :: forall point seg.
+(Ord point, Ord seg) =&gt;
+LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg
+min :: LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg
+-&gt; LineTriangleIntersection point seg
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679385812"><span id="local-6989586621679385814"><span class="annot"><span class="annottext">(forall a b.
+ (a -&gt; b)
+ -&gt; LineTriangleIntersection point a
+ -&gt; LineTriangleIntersection point b)
+-&gt; (forall a b.
+    a
+    -&gt; LineTriangleIntersection point b
+    -&gt; LineTriangleIntersection point a)
+-&gt; Functor (LineTriangleIntersection point)
+forall a b.
+a
+-&gt; LineTriangleIntersection point b
+-&gt; LineTriangleIntersection point a
+forall a b.
+(a -&gt; b)
+-&gt; LineTriangleIntersection point a
+-&gt; LineTriangleIntersection point b
+forall point a b.
+a
+-&gt; LineTriangleIntersection point b
+-&gt; LineTriangleIntersection point a
+forall point a b.
+(a -&gt; b)
+-&gt; LineTriangleIntersection point a
+-&gt; LineTriangleIntersection point b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall point a b.
+(a -&gt; b)
+-&gt; LineTriangleIntersection point a
+-&gt; LineTriangleIntersection point b
+fmap :: forall a b.
+(a -&gt; b)
+-&gt; LineTriangleIntersection point a
+-&gt; LineTriangleIntersection point b
+$c&lt;$ :: forall point a b.
+a
+-&gt; LineTriangleIntersection point b
+-&gt; LineTriangleIntersection point a
+&lt;$ :: forall a b.
+a
+-&gt; LineTriangleIntersection point b
+-&gt; LineTriangleIntersection point a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-127"></span><span>
+</span><span id="line-128"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679385820"><span id="local-6989586621679385824"><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#LineTriangleIntersection"><span class="hs-identifier hs-type">LineTriangleIntersection</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-129"></span><span>  </span><span id="local-6989586621679385827"><span class="annot"><span class="annottext">bimap :: forall a b c d.
+(a -&gt; b)
+-&gt; (c -&gt; d)
+-&gt; LineTriangleIntersection a c
+-&gt; LineTriangleIntersection b d
+</span><a href="#local-6989586621679385827"><span class="hs-identifier hs-var hs-var hs-var">bimap</span></a></span></span><span> </span><span id="local-6989586621679385829"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679385829"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679385830"><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679385830"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-130"></span><span>    </span><span class="annot"><a href="HGeometry.Triangle.html#Line_x_Triangle_Point"><span class="hs-identifier hs-type">Line_x_Triangle_Point</span></a></span><span> </span><span id="local-6989586621679385831"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679385831"><span class="hs-identifier hs-var">p</span></a></span></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">b -&gt; LineTriangleIntersection b d
+forall point seg. point -&gt; LineTriangleIntersection point seg
+</span><a href="HGeometry.Triangle.html#Line_x_Triangle_Point"><span class="hs-identifier hs-var">Line_x_Triangle_Point</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679385829"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679385831"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-131"></span><span>    </span><span class="annot"><a href="HGeometry.Triangle.html#Line_x_Triangle_LineSegment"><span class="hs-identifier hs-type">Line_x_Triangle_LineSegment</span></a></span><span> </span><span id="local-6989586621679385832"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679385832"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">d -&gt; LineTriangleIntersection b d
+forall point seg. seg -&gt; LineTriangleIntersection point seg
+</span><a href="HGeometry.Triangle.html#Line_x_Triangle_LineSegment"><span class="hs-identifier hs-var">Line_x_Triangle_LineSegment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679385830"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679385832"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-132"></span><span>
+</span><span id="line-133"></span><span class="hs-comment">-- | The extra value is the parameter t so that the intersection point</span><span>
+</span><span id="line-134"></span><span class="hs-comment">-- is line^.anchor + t*line^.direction</span><span>
+</span><span id="line-135"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Intersection"><span class="annot"><a href="HGeometry.Intersection.html#Intersection"><span class="hs-identifier hs-var">Intersection</span></a></span></span><span> </span><span id="local-6989586621679385833"><span id="local-6989586621679385834"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-type">LinePV</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679385833"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385834"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-136"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#LineTriangleIntersection"><span class="hs-identifier hs-type">LineTriangleIntersection</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679385833"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385833"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-type">ClosedLineSegment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679385833"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385833"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>
+</span><span id="line-138"></span><span class="annot"><span class="hs-comment">-- | Same here, we also return the parameter at which the ray intersects the point</span></span><span>
+</span><span id="line-139"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Intersection"><span class="annot"><a href="HGeometry.Intersection.html#Intersection"><span class="hs-identifier hs-var">Intersection</span></a></span></span><span> </span><span id="local-6989586621679385835"><span id="local-6989586621679385836"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385835"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385836"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-140"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#LineTriangleIntersection"><span class="hs-identifier hs-type">LineTriangleIntersection</span></a></span><span>
+</span><span id="line-141"></span><span>            </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679385835"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679385835"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-142"></span><span>            </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-type">ClosedLineSegment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679385835"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679385835"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>          </span><span class="hs-special">)</span><span>
+</span><span id="line-144"></span><span>
+</span><span id="line-145"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679385047"><span id="local-6989586621679385048"><span id="local-6989586621679385841"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679385047"><span class="hs-identifier hs-type">point</span></a></span><span>  </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679385048"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-146"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679385048"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679385048"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-147"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#HasIntersectionWith"><span class="hs-identifier hs-type">HasIntersectionWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-type">LinePV</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679385048"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385047"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679385045"><span id="local-6989586621679385046"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679385045"><span class="hs-identifier hs-type">point</span></a></span><span>  </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679385046"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-150"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679385046"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679385046"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-151"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#IsIntersectableWith"><span class="hs-identifier hs-type">IsIntersectableWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-type">LinePV</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679385046"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385045"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-152"></span><span>  </span><span id="local-6989586621679385863"><span class="annot"><span class="annottext">LinePV 3 r
+</span><a href="#local-6989586621679385863"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679385864"><span class="annot"><span class="annottext">intersect :: LinePV 3 r
+-&gt; Triangle point -&gt; Intersection (LinePV 3 r) (Triangle point)
+</span><a href="#local-6989586621679385864"><span class="hs-operator hs-var hs-var hs-var">`intersect`</span></a></span></span><span> </span><span id="local-6989586621679385866"><span class="annot"><span class="annottext">Triangle point
+</span><a href="#local-6989586621679385866"><span class="hs-identifier hs-var">tri</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LinePV 3 r
+-&gt; Triangle (Point 3 r)
+-&gt; Maybe
+     (LineTriangleIntersection
+        (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r)))
+forall r.
+(Ord r, Fractional r) =&gt;
+LinePV 3 r
+-&gt; Triangle (Point 3 r)
+-&gt; Maybe
+     (LineTriangleIntersection
+        (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r)))
+</span><a href="HGeometry.Triangle.html#directedLineTriangleIntersect"><span class="hs-identifier hs-var">directedLineTriangleIntersect</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV 3 r
+</span><a href="#local-6989586621679385863"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Getting (Point 3 r) point (Point 3 r) -&gt; point -&gt; Point 3 r
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 3 r) point (Point 3 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' point (Point 3 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span> </span><span class="annot"><span class="annottext">(point -&gt; Point 3 r) -&gt; Triangle point -&gt; Triangle (Point 3 r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Triangle point
+</span><a href="#local-6989586621679385866"><span class="hs-identifier hs-var">tri</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-153"></span><span>
+</span><span id="line-154"></span><span class="hs-comment">-- | Computes the intersection between an oriented line and a triangle.</span><span>
+</span><span id="line-155"></span><span class="hs-comment">-- If the result is an intersection point p; it also returns the parameter t</span><span>
+</span><span id="line-156"></span><span class="hs-comment">-- describing the intersection point along the line. I.e. so that p = o + t*v</span><span>
+</span><span id="line-157"></span><span class="hs-comment">-- where o is the anchorPoint of the line, and v is its direciton vector.</span><span>
+</span><span id="line-158"></span><span class="hs-comment">--</span><span>
+</span><span id="line-159"></span><span class="hs-comment">-- see https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm</span><span>
+</span><span id="line-160"></span><span class="hs-comment">-- for the implementation details.</span><span>
+</span><span id="line-161"></span><span class="hs-comment">-- as well as</span><span>
+</span><span id="line-162"></span><span class="hs-comment">-- https://www.tandfonline.com/doi/abs/10.1080/10867651.1997.10487468</span><span>
+</span><span id="line-163"></span><span id="local-6989586621679385056"><span class="annot"><a href="HGeometry.Triangle.html#directedLineTriangleIntersect"><span class="hs-identifier hs-type">directedLineTriangleIntersect</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679385056"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679385056"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-164"></span><span>                              </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-type">LinePV</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679385056"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679385056"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-165"></span><span>                              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#LineTriangleIntersection"><span class="hs-identifier hs-type">LineTriangleIntersection</span></a></span><span>
+</span><span id="line-166"></span><span>                                            </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679385056"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385056"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-167"></span><span>                                            </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LineSegment.Internal.html#ClosedLineSegment"><span class="hs-identifier hs-type">ClosedLineSegment</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679385056"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385056"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-168"></span><span>                                       </span><span class="hs-special">)</span></span><span>
+</span><span id="line-169"></span><span id="directedLineTriangleIntersect"><span class="annot"><span class="annottext">directedLineTriangleIntersect :: forall r.
+(Ord r, Fractional r) =&gt;
+LinePV 3 r
+-&gt; Triangle (Point 3 r)
+-&gt; Maybe
+     (LineTriangleIntersection
+        (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r)))
+</span><a href="HGeometry.Triangle.html#directedLineTriangleIntersect"><span class="hs-identifier hs-var hs-var">directedLineTriangleIntersect</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-type">LinePV</span></a></span><span> </span><span id="local-6989586621679385984"><span class="annot"><span class="annottext">Point 3 r
+</span><a href="#local-6989586621679385984"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span id="local-6989586621679385985"><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679385985"><span class="hs-identifier hs-var">vec</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span id="local-6989586621679385986"><span class="annot"><span class="annottext">Point 3 r
+</span><a href="#local-6989586621679385986"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679385987"><span class="annot"><span class="annottext">Point 3 r
+</span><a href="#local-6989586621679385987"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679385988"><span class="annot"><span class="annottext">Point 3 r
+</span><a href="#local-6989586621679385988"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-170"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679385989"><span class="hs-identifier hs-var">lineAndTriangleParallel</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; Maybe
+     (LineTriangleIntersection
+        (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r)))
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;(Half)Line x Triangle colinear not implemented yet&quot;</span></span><span>
+</span><span id="line-171"></span><span>        </span><span class="hs-comment">-- FIXME might we not intersect in a line segment here?</span><span>
+</span><span id="line-172"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679385991"><span class="hs-identifier hs-var">lineIntersectsTriangle</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LineTriangleIntersection
+  (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r))
+-&gt; Maybe
+     (LineTriangleIntersection
+        (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r)))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(LineTriangleIntersection
+   (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r))
+ -&gt; Maybe
+      (LineTriangleIntersection
+         (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r))))
+-&gt; ((Point 3 r :+ r)
+    -&gt; LineTriangleIntersection
+         (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r)))
+-&gt; (Point 3 r :+ r)
+-&gt; Maybe
+     (LineTriangleIntersection
+        (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r)))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Point 3 r :+ r)
+-&gt; LineTriangleIntersection
+     (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r))
+forall point seg. point -&gt; LineTriangleIntersection point seg
+</span><a href="HGeometry.Triangle.html#Line_x_Triangle_Point"><span class="hs-identifier hs-var">Line_x_Triangle_Point</span></a></span><span> </span><span class="annot"><span class="annottext">((Point 3 r :+ r)
+ -&gt; Maybe
+      (LineTriangleIntersection
+         (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r))))
+-&gt; (Point 3 r :+ r)
+-&gt; Maybe
+     (LineTriangleIntersection
+        (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r)))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 3 r
+</span><a href="#local-6989586621679385984"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Point 3 r -&gt; Vector 3 r -&gt; Point 3 r
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; Vector d r -&gt; point
+</span><span class="hs-operator hs-var">.+^</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679385993"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; Vector 3 r -&gt; Vector 3 r
+forall r vector (d :: Nat).
+(Num r, Vector_ vector d r) =&gt;
+r -&gt; vector -&gt; vector
+</span><span class="hs-operator hs-var">*^</span></span><span> </span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679385985"><span class="hs-identifier hs-var">vec</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 3 r -&gt; r -&gt; Point 3 r :+ r
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679385993"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-173"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>               </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe
+  (LineTriangleIntersection
+     (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r)))
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-174"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-175"></span><span>    </span><span id="local-6989586621679385989"><span class="annot"><span class="annottext">lineAndTriangleParallel :: Bool
+</span><a href="#local-6989586621679385989"><span class="hs-identifier hs-var hs-var">lineAndTriangleParallel</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679385996"><span class="hs-identifier hs-var">det</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-176"></span><span>
+</span><span id="line-177"></span><span>    </span><span id="local-6989586621679385997"><span class="annot"><span class="annottext">e1 :: Vector 3 r
+</span><a href="#local-6989586621679385997"><span class="hs-identifier hs-var hs-var">e1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 3 r
+</span><a href="#local-6989586621679385987"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">Point 3 r -&gt; Point 3 r -&gt; Vector 3 r
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; point -&gt; Vector d r
+</span><span class="hs-operator hs-var">.-.</span></span><span> </span><span class="annot"><span class="annottext">Point 3 r
+</span><a href="#local-6989586621679385986"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-178"></span><span>    </span><span id="local-6989586621679385999"><span class="annot"><span class="annottext">e2 :: Vector 3 r
+</span><a href="#local-6989586621679385999"><span class="hs-identifier hs-var hs-var">e2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 3 r
+</span><a href="#local-6989586621679385988"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">Point 3 r -&gt; Point 3 r -&gt; Vector 3 r
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; point -&gt; Vector d r
+</span><span class="hs-operator hs-var">.-.</span></span><span> </span><span class="annot"><span class="annottext">Point 3 r
+</span><a href="#local-6989586621679385986"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-179"></span><span>
+</span><span id="line-180"></span><span>    </span><span id="local-6989586621679386000"><span class="annot"><span class="annottext">rayCrossE2 :: Vector 3 r
+</span><a href="#local-6989586621679386000"><span class="hs-identifier hs-var hs-var">rayCrossE2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679385985"><span class="hs-identifier hs-var">vec</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 r -&gt; Vector 3 r -&gt; Vector 3 r
+forall r. Num r =&gt; Vector 3 r -&gt; Vector 3 r -&gt; Vector 3 r
+</span><span class="hs-operator hs-var">`cross`</span></span><span> </span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679385999"><span class="hs-identifier hs-var">e2</span></a></span><span>
+</span><span id="line-181"></span><span>
+</span><span id="line-182"></span><span>    </span><span id="local-6989586621679385996"><span class="annot"><span class="annottext">det :: r
+</span><a href="#local-6989586621679385996"><span class="hs-identifier hs-var hs-var">det</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679385997"><span class="hs-identifier hs-var">e1</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 r -&gt; Vector 3 r -&gt; r
+forall vector (d :: Nat) r.
+(Metric_ vector d r, Num r) =&gt;
+vector -&gt; vector -&gt; r
+</span><span class="hs-operator hs-var">`dot`</span></span><span> </span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679386000"><span class="hs-identifier hs-var">rayCrossE2</span></a></span><span>
+</span><span id="line-183"></span><span>    </span><span id="local-6989586621679386003"><span class="annot"><span class="annottext">invDet :: r
+</span><a href="#local-6989586621679386003"><span class="hs-identifier hs-var hs-var">invDet</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679385996"><span class="hs-identifier hs-var">det</span></a></span><span>
+</span><span id="line-184"></span><span>
+</span><span id="line-185"></span><span>    </span><span id="local-6989586621679386005"><span class="annot"><span class="annottext">s :: Vector 3 r
+</span><a href="#local-6989586621679386005"><span class="hs-identifier hs-var hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 3 r
+</span><a href="#local-6989586621679385984"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Point 3 r -&gt; Point 3 r -&gt; Vector 3 r
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; point -&gt; Vector d r
+</span><span class="hs-operator hs-var">.-.</span></span><span> </span><span class="annot"><span class="annottext">Point 3 r
+</span><a href="#local-6989586621679385986"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-186"></span><span>    </span><span id="local-6989586621679386006"><span class="annot"><span class="annottext">u :: r
+</span><a href="#local-6989586621679386006"><span class="hs-identifier hs-var hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679386003"><span class="hs-identifier hs-var">invDet</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679386005"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 r -&gt; Vector 3 r -&gt; r
+forall vector (d :: Nat) r.
+(Metric_ vector d r, Num r) =&gt;
+vector -&gt; vector -&gt; r
+</span><span class="hs-operator hs-var">`dot`</span></span><span> </span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679386000"><span class="hs-identifier hs-var">rayCrossE2</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-187"></span><span>
+</span><span id="line-188"></span><span>    </span><span id="local-6989586621679386008"><span class="annot"><span class="annottext">sCrossE1 :: Vector 3 r
+</span><a href="#local-6989586621679386008"><span class="hs-identifier hs-var hs-var">sCrossE1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679386005"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 r -&gt; Vector 3 r -&gt; Vector 3 r
+forall r. Num r =&gt; Vector 3 r -&gt; Vector 3 r -&gt; Vector 3 r
+</span><span class="hs-operator hs-var">`cross`</span></span><span> </span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679385997"><span class="hs-identifier hs-var">e1</span></a></span><span>
+</span><span id="line-189"></span><span>    </span><span id="local-6989586621679386009"><span class="annot"><span class="annottext">v :: r
+</span><a href="#local-6989586621679386009"><span class="hs-identifier hs-var hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679386003"><span class="hs-identifier hs-var">invDet</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679385985"><span class="hs-identifier hs-var">vec</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 r -&gt; Vector 3 r -&gt; r
+forall vector (d :: Nat) r.
+(Metric_ vector d r, Num r) =&gt;
+vector -&gt; vector -&gt; r
+</span><span class="hs-operator hs-var">`dot`</span></span><span> </span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679386008"><span class="hs-identifier hs-var">sCrossE1</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-190"></span><span>
+</span><span id="line-191"></span><span>    </span><span id="local-6989586621679385991"><span class="annot"><span class="annottext">lineIntersectsTriangle :: Bool
+</span><a href="#local-6989586621679385991"><span class="hs-identifier hs-var hs-var">lineIntersectsTriangle</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679386006"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679386006"><span class="hs-identifier hs-var">u</span></a></span><span>       </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-192"></span><span>                          </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679386009"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679386006"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679386009"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-193"></span><span>    </span><span class="hs-comment">-- the u &lt;= 1 is slightly suplurfous, but may speed up the equation.</span><span>
+</span><span id="line-194"></span><span>
+</span><span id="line-195"></span><span>    </span><span class="hs-comment">-- the parameter along the line at which the line intersects the triangle</span><span>
+</span><span id="line-196"></span><span>    </span><span id="local-6989586621679385993"><span class="annot"><span class="annottext">t :: r
+</span><a href="#local-6989586621679385993"><span class="hs-identifier hs-var hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679386003"><span class="hs-identifier hs-var">invDet</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679385999"><span class="hs-identifier hs-var">e2</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 r -&gt; Vector 3 r -&gt; r
+forall vector (d :: Nat) r.
+(Metric_ vector d r, Num r) =&gt;
+vector -&gt; vector -&gt; r
+</span><span class="hs-operator hs-var">`dot`</span></span><span> </span><span class="annot"><span class="annottext">Vector 3 r
+</span><a href="#local-6989586621679386008"><span class="hs-identifier hs-var">sCrossE1</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-197"></span><span>
+</span><span id="line-198"></span><span>
+</span><span id="line-199"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679385092"><span id="local-6989586621679385093"><span id="local-6989586621679385094"><span id="local-6989586621679386016"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679385092"><span class="hs-identifier hs-type">point</span></a></span><span>  </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679385093"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-200"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679385094"><span class="hs-identifier hs-type">point'</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679385093"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-201"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679385093"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679385093"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-202"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#HasIntersectionWith"><span class="hs-identifier hs-type">HasIntersectionWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385092"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385094"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-203"></span><span>
+</span><span id="line-204"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679385095"><span id="local-6989586621679385096"><span id="local-6989586621679385097"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679385095"><span class="hs-identifier hs-type">point</span></a></span><span>  </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679385096"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-205"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679385097"><span class="hs-identifier hs-type">point'</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679385096"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-206"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679385096"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679385096"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-207"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#IsIntersectableWith"><span class="hs-identifier hs-type">IsIntersectableWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385095"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679385097"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-208"></span><span>  </span><span id="local-6989586621679386400"><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679386400"><span class="hs-identifier hs-var">ray</span></a></span></span><span> </span><span id="local-6989586621679386401"><span class="annot"><span class="annottext">intersect :: HalfLine point
+-&gt; Triangle point'
+-&gt; Intersection (HalfLine point) (Triangle point')
+</span><a href="HGeometry.Intersection.html#intersect"><span class="hs-operator hs-var hs-var hs-var">`intersect`</span></a></span></span><span> </span><span id="local-6989586621679386402"><span class="annot"><span class="annottext">Triangle point'
+</span><a href="#local-6989586621679386402"><span class="hs-identifier hs-var">tri</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">LinePV 3 r
+-&gt; Triangle (Point 3 r)
+-&gt; Maybe
+     (LineTriangleIntersection
+        (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r)))
+forall r.
+(Ord r, Fractional r) =&gt;
+LinePV 3 r
+-&gt; Triangle (Point 3 r)
+-&gt; Maybe
+     (LineTriangleIntersection
+        (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r)))
+</span><a href="HGeometry.Triangle.html#directedLineTriangleIntersect"><span class="hs-identifier hs-var">directedLineTriangleIntersect</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HalfLine point -&gt; LinePV (Dimension point) (NumType point)
+forall {s}.
+Point_ s (Dimension s) (NumType s) =&gt;
+HalfLine s -&gt; LinePV (Dimension s) (NumType s)
+</span><a href="#local-6989586621679386403"><span class="hs-identifier hs-var">toLine</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679386400"><span class="hs-identifier hs-var">ray</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Getting (Point 3 r) point' (Point 3 r) -&gt; point' -&gt; Point 3 r
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 3 r) point' (Point 3 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' point' (Point 3 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span> </span><span class="annot"><span class="annottext">(point' -&gt; Point 3 r) -&gt; Triangle point' -&gt; Triangle (Point 3 r)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Triangle point'
+</span><a href="#local-6989586621679386402"><span class="hs-identifier hs-var">tri</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-209"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Line_x_Triangle_Point"><span class="hs-identifier hs-type">Line_x_Triangle_Point</span></a></span><span> </span><span id="local-6989586621679386404"><span class="annot"><span class="annottext">Point 3 r :+ r
+</span><a href="#local-6989586621679386404"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Point 3 r :+ r
+</span><a href="#local-6989586621679386404"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 3 r :+ r) -&gt; Getting r (Point 3 r :+ r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Point 3 r :+ r) r
+forall core extra extra' (f :: * -&gt; *).
+Functor f =&gt;
+(extra -&gt; f extra') -&gt; (core :+ extra) -&gt; f (core :+ extra')
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#extra"><span class="hs-identifier hs-var">extra</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LineTriangleIntersection
+  (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r))
+-&gt; Maybe
+     (LineTriangleIntersection
+        (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r)))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(LineTriangleIntersection
+   (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r))
+ -&gt; Maybe
+      (LineTriangleIntersection
+         (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r))))
+-&gt; LineTriangleIntersection
+     (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r))
+-&gt; Maybe
+     (LineTriangleIntersection
+        (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r)))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Point 3 r :+ r)
+-&gt; LineTriangleIntersection
+     (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r))
+forall point seg. point -&gt; LineTriangleIntersection point seg
+</span><a href="HGeometry.Triangle.html#Line_x_Triangle_Point"><span class="hs-identifier hs-var">Line_x_Triangle_Point</span></a></span><span> </span><span class="annot"><span class="annottext">Point 3 r :+ r
+</span><a href="#local-6989586621679386404"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-210"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Line_x_Triangle_LineSegment"><span class="hs-identifier hs-type">Line_x_Triangle_LineSegment</span></a></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment (Point 3 r :+ r)
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>           </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-211"></span><span>        </span><span class="annot"><span class="annottext">String
+-&gt; Maybe
+     (LineTriangleIntersection
+        (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r)))
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;HalfLine x LineSegment not fully implmeneted yet&quot;</span></span><span>
+</span><span id="line-212"></span><span>        </span><span class="hs-comment">-- possibly clip the segment here!</span><span>
+</span><span id="line-213"></span><span>      </span><span class="annot"><span class="annottext">Maybe
+  (LineTriangleIntersection
+     (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r)))
+</span><span class="hs-identifier">_</span></span><span>                                              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe
+  (LineTriangleIntersection
+     (Point 3 r :+ r) (ClosedLineSegment (Point 3 r :+ r)))
+Intersection (HalfLine point) (Triangle point')
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-214"></span><span>    </span><span class="hs-keyword">where</span><span>
+</span><span id="line-215"></span><span>      </span><span id="local-6989586621679386403"><span class="annot"><span class="annottext">toLine :: HalfLine s -&gt; LinePV (Dimension s) (NumType s)
+</span><a href="#local-6989586621679386403"><span class="hs-identifier hs-var hs-var">toLine</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfLine.html#HalfLine"><span class="hs-identifier hs-type">HalfLine</span></a></span><span> </span><span id="local-6989586621679386463"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679386463"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span id="local-6989586621679386464"><span class="annot"><span class="annottext">Vector (Dimension s) (NumType s)
+</span><a href="#local-6989586621679386464"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point (Dimension s) (NumType s)
+-&gt; Vector (Dimension s) (NumType s)
+-&gt; LinePV (Dimension s) (NumType s)
+forall (d :: Nat) r. Point d r -&gt; Vector d r -&gt; LinePV d r
+</span><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-var">LinePV</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679386463"><span class="hs-identifier hs-var">o</span></a></span><span class="annot"><span class="annottext">s
+-&gt; Getting
+     (Point (Dimension s) (NumType s))
+     s
+     (Point (Dimension s) (NumType s))
+-&gt; Point (Dimension s) (NumType s)
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+  (Point (Dimension s) (NumType s))
+  s
+  (Point (Dimension s) (NumType s))
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' s (Point (Dimension s) (NumType s))
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector (Dimension s) (NumType s)
+</span><a href="#local-6989586621679386464"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-216"></span></pre></body></html>
