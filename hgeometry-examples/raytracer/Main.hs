@@ -1,6 +1,4 @@
 {-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE UndecidableInstances #-}
 module Main(main) where
 
 import           Codec.Picture
@@ -17,6 +15,7 @@ import           Data.Monoid
 import           Data.Semialign
 import           HGeometry.Ball
 import           HGeometry.Box
+import           HGeometry.Direction
 import           HGeometry.Ext
 import           HGeometry.Graphics.Camera
 import           HGeometry.HalfLine
@@ -29,91 +28,22 @@ import           HGeometry.Triangle
 import           HGeometry.Unbounded
 import           HGeometry.Vector
 import           Prelude hiding (zipWith)
+import           Settings
 import qualified System.File.OsPath as File
 import           System.OsPath
 import           System.ProgressBar
 import           System.Random.Stateful
+import           Types
 
 import           Debug.Trace
+
 --------------------------------------------------------------------------------
 -- * Move this into HGeometry proper
-
-class (r ~ NumType geom
-      ) => CanComputeNormalVector geom r | geom -> r where
-  {-# mINIMAL normalVectorAt #-}
-  -- | Given a point on the object, and the object. Compute the outward normal vector at
-  -- the given point. The normal is returned as a unit vector.
-  --
-  -- pre: the query point lies on (the surface of) the object. (This is not checked)
-  normalUnitVectorAt     :: ( Point_ point d r
-                            , Has_ Metric_ d r
-                            , d ~ Dimension geom
-                            , Radical r, Fractional r)
-                         => point -> geom -> Vector d r
-  normalUnitVectorAt q g = signorm $ normalVectorAt q g
-
-  -- | Given a point on the object, and the object. Compute the outward normal vector at
-  -- the given point. No Guarantees are given about the length of the resulting vector.
-  --
-  -- pre: the query point lies on (the surface of) the object. (This is not checked)
-  normalVectorAt :: ( Point_ point d r, d ~ Dimension geom, Num r)
-                 => point -> geom -> Vector d r
-
-instance Point_ center d r => CanComputeNormalVector (Ball center) r where
-  normalVectorAt q b = (q^.asPoint) .-. (b^.center.asPoint)
-
-instance Point_ vertex 3 r => CanComputeNormalVector (Triangle vertex) r where
-  normalVectorAt _ (Triangle u v w) = cross (v .-. u) (w .-. u)
-  -- FIXME: shoudn't we check the orientation of the triangle: I think it may point the
-  -- wrong way now
-
---------------------------------------------------------------------------------
-
--- | The color type we use
-type Color = AlphaColour Double
-
--- | The type of Real numbers
-type R = Double
-
--- | A ray; i.e. a halfline
-type Ray = HalfLine (Point 3 R)
-
--- | Supported geometry types
-data SceneGeom = ABall     (Ball (Point 3 R))
-               | ATriangle (Triangle (Point 3 R))
-               deriving (Show,Eq)
-
-type instance NumType   SceneGeom = R
-type instance Dimension SceneGeom = 3
+----------------------------------------
 
 
-type instance Intersection Ray SceneGeom = Maybe (Point 3 R :+ R)
--- we just compute the first intersection;
 
-instance Ray `HasIntersectionWith` SceneGeom
-instance Ray `IsIntersectableWith` SceneGeom where
-  intersect ray =  \case
-    ABall b      -> ray `intersect` b <&> \case
-      Line_x_Ball_Point p     -> p
-      Line_x_Ball_Segment seg -> seg^.start
-    ATriangle tri -> ray `intersect` tri <&> \case
-      Line_x_Triangle_Point p         -> p
-      Line_x_Triangle_LineSegment seg -> seg^.start
 
-instance CanComputeNormalVector SceneGeom R where
-  normalVectorAt q = \case
-    ABall b     -> normalVectorAt q b
-    ATriangle t -> normalVectorAt q t
-
--- | Every object is some geometric object and a color
-data SceneObject = SceneObject { _geom        :: SceneGeom
-                               , _objectColor :: Color
-                               }
-                 deriving (Show,Eq)
-makeLenses ''SceneObject
-
--- | A scene is just a list of objects
-type Scene = [SceneObject]
 
 
 
@@ -181,41 +111,59 @@ intersectWithRay ray obj = closest . fmap (\p -> p^.extra :+ (obj,p))
 --------------------------------------------------------------------------------
 
 -- | Determine the color of the closest object hit by the ray
-rayColor     :: Ray -> Scene -> Maybe Color
-rayColor ray = fmap (colorAt ray) . shootRay ray
+rayColor           :: StatefulGen gen m
+                   => gen
+                   -> Ray
+                   -> RayDepth
+                   -- ^ Number of remaining bounces
+                   -> Scene -> m Color
+rayColor gen = rayColor'
+  where
+    rayColor' ray depth scene
+      | depth == 0 = pure $ opaque black -- stop tracing the ray
+      | otherwise  = case shootRay ray scene of
+          Nothing      -> pure backgroundColor
+          Just (obj,q) -> do
+                             let normal = normalUnitVectorAt q (obj^.geom)
+                             v <- uniformUpwardDirectionWrt normal gen
+                             -- shoot a new ray
+                             (blend 0.5 (opaque black))
+                               <$> rayColor' (HalfLine (q^.core) v) (depth-1) scene
 
--- | Compute the color of the object at the intersection point with the ray
-colorAt             :: Ray -> (SceneObject, Point 3 R :+ R) -> Color
-colorAt ray (obj,q) = let normal = normalUnitVectorAt q (obj^.geom)
-                          Vector3 r g b = 0.5 *^ (normal ^+^ Vector3 1 1 1)
-                      in opaque $ sRGB r g b
-                         -- the values in the normal vec are in the range [-1,1]
-                         -- make them into range [0,1]; then interpret them as colors
+-- -- | Compute the color of the object at the intersection point with the ray
+-- colorAt             ::
+
+--   Ray -> (SceneObject, Point 3 R :+ R) -> Color
+-- colorAt ray (obj,q) = let normal = normalUnitVectorAt q (obj^.geom)
+--                          -- v <- uniformUpwardDirectionWrt normal
+--                           Vector3 r g b = 0.5 *^ (normal ^+^ Vector3 1 1 1)
+--                       in opaque $ sRGB r g b
+--                          -- the values in the normal vec are in the range [-1,1]
+--                          -- make them into range [0,1]; then interpret them as colors
 
 
 --------------------------------------------------------------------------------
 
 
 -- | Renders a given pixel.
-renderPixel                         :: Point 2 Int
-                                    -- ^ The pixel coordinates
-                                    -> ViewPort
-                                    -- ^ The part of the viewport corresponding to this pixel.
-                                    -> Vector 2 (Vector 3 R)
-                                    -- ^ the pixel axes
-                                    -> NonEmpty (Point 2 R)
-                                    -- ^ The points within the unit square at which to sample
+renderPixel                         :: StatefulGen gen m
+                                    => gen
+                                    -> PixelInfo
                                     -> Camera R
                                     -> Scene
-                                    -> PixelRGBA8
-renderPixel _ (Vector2 topLeft _) dims samples camera scene =
-    toPixelRGBA $ averageColor <$> rayColors
+                                    -> m PixelRGBA8
+renderPixel gen pixel camera scene = toPixelRGBA <$> pixelColor
   where
-    rayColors = NonEmpty.nonEmpty
-              . mapMaybe (\sample -> rayColor (ray sample) scene) $ NonEmpty.toList samples
+    pixelColor = do
+      samples <- sampleUnitSquare gen
+      averageColor <$> mapM (\sample ->
+                                rayColor gen (ray sample) maxRayComplexity scene
+                            ) samples
 
     cameraPos = camera^.cameraPosition
-    ray p = let Vector2 xOfset yOfset = zipWith (*^) (p^.vector) dims
+    topLeft = pixel^.pixelViewport.component @0
+
+    ray p = let Vector2 xOfset yOfset = zipWith (*^) (p^.vector) (pixel^.pixelDimensions)
                 p'    = topLeft .+^ (xOfset ^+^ yOfset)
             in HalfLine cameraPos (p' .-. cameraPos)
 
@@ -224,10 +172,9 @@ averageColor               :: (AffineSpace color, Fractional a) => NonEmpty (col
 averageColor (c :| colors) = let n = fromIntegral $ 1 + length colors
                              in affineCombo ((1/n,) <$> colors) c
 
-toPixelRGBA    :: Maybe Color -> PixelRGBA8
-toPixelRGBA mc = let c = fromMaybe backgroundColor mc
-                 in case toSRGB24 $ c `Colour.over` black of
-                      RGB r g b -> PixelRGBA8 r g b (round $ 255 * alphaChannel c)
+toPixelRGBA   :: Color -> PixelRGBA8
+toPixelRGBA c = case toSRGB24 $ c `Colour.over` black of
+                  RGB r g b -> PixelRGBA8 r g b (round $ 255 * alphaChannel c)
 
 -- | Computes the part of the viewport (i.e. some rectangle floating in world space)
 -- corresponding to the pixel x,y
@@ -247,21 +194,19 @@ pixelViewPort topLeft (Vector2 xVec yVec) x' y' =
 -- | Render the Scene, while reporting progress
 renderWithProgress :: IO () -> Vector 2 Int -> Camera R -> Scene -> IO (Image PixelRGBA8)
 renderWithProgress reportProgress screenDims@(Vector2 w h) camera scene = do
-    print ("screenDims",screenDims)
-    print ("VP size",camera^.viewportDimensions)
-    print ("VP dims",viewportDims)
-    print ("midPoint",midPoint)
-    print ("topLeft",topLeft)
-    print ("viewPort",theViewport)
-    print ("pixelDims",pixelDims)
+    -- print ("screenDims",screenDims)
+    -- print ("VP size",camera^.viewportDimensions)
+    -- print ("VP dims",viewportDims)
+    -- print ("midPoint",midPoint)
+    -- print ("topLeft",topLeft)
+    -- print ("viewPort",theViewport)
+    -- print ("pixelDims",pixelDims)
     gen <- newIOGenM =<< getStdGen
     withImage w h $ \x y -> do
-      samples <- sampleUnitSquare gen
-      let !pix = renderPixel (Point2 x y)
-                             (pixelViewPort topLeft pixelDims x y) pixelDims
-                             samples
-                             camera scene
-      pix <$ reportProgress
+      let pix       = PixelInfo (Point2 x y) (pixelViewPort topLeft pixelDims x y) pixelDims
+      !pixColor <- renderPixel gen pix camera scene
+      pixColor <$ reportProgress
+
   where
     -- midpoint of the viewport (in 3D posiiton)
     midPoint = (camera^.cameraPosition) .+^ ((camera^.focalDepth) *^ camera^.rawCameraNormal)
@@ -287,10 +232,6 @@ renderWithProgress reportProgress screenDims@(Vector2 w h) camera scene = do
     theViewport = Vector2 topLeft (topLeft .+^ (xVec ^+^ yVec))
 
 
--- | We describe the viewport by its topleft corner and its bottom right corner.
-type ViewPort = Vector 2 (Point 3 R)
-
-
 --------------------------------------------------------------------------------
 
 -- | Generate samples in a unit square.
@@ -300,82 +241,6 @@ sampleUnitSquare gen = NonEmpty.fromList
                                                                          , Point $ pure 1
                                                                          ) gen)
 
-
--- sampleUpperHemisphere
-
--- | Generates an upward direction (with respect to the given normal/up vector) uniformly
--- at random.
-uniformUpwardDirectionWrt            :: ( StatefulGen gen m
-                                        , Fractional r, Ord r, Radical r, UniformRange r
-                                        , Has_ Metric_ d r
-                                        ) => Vector d r -> gen -> m (Vector d r)
-uniformUpwardDirectionWrt normal gen = uniformDirection gen <&> \dir ->
-  if (normal `dot` dir) >= 0 then dir else negated dir
-
-
--- | Generates a unit vector corresponding to a direction.
---
--- The general idea is to generate a random vector in the [-1,1]^d, if it lies inside the
--- unit ball, scale it to be length 1, otherwise, retry.
-uniformDirection     :: ( StatefulGen gen m
-                        , Fractional r, Ord r, Radical r, UniformRange r
-                        , Has_ Metric_ d r
-                        ) => gen -> m (Vector d r)
-uniformDirection gen = go
-  where
-    generate' x = generate (const x)
-    go = do v <- uniformRM (generate' (-1), generate' 1) gen
-            if quadrance v <= 1 then pure $ signorm v
-                                else go
-
---------------------------------------------------------------------------------
--- * Settings
-
--- * For the picture
-
--- | Background  color
-backgroundColor :: Color
-backgroundColor = blue `withOpacity` 0.1
-  -- transparent -- transparent
-
--- | Number of pixels in the ouput image
-outputWidth :: Int
-outputWidth = 640
-
--- | Aspect ratio of the output image
-aspectRatio :: Rational
-aspectRatio = 16 / 9
-
--- | Size of the output picture; computed from outputWith and aspect ratio
-outputDimensions :: Vector 2 Int
-outputDimensions = Vector2 outputWidth (ceiling $ fromIntegral outputWidth / aspectRatio)
-
-----------------------------------------
--- * Settings related to the Camera
-
-theCamera :: Camera R
-theCamera = def&viewportDimensions .~ fromDesiredHeight 2
-               -- &cameraPosition     .~ Point3 0 0 1
-
--- | Computes the viewportDimensions from a given desired height.
-fromDesiredHeight               :: Fractional r => r -> Vector 2 r
-fromDesiredHeight desiredHeight = let Vector2 w h = fromIntegral <$> outputDimensions
-                                  in Vector2 (desiredHeight * (w/h)) desiredHeight
-
-
-----------------------------------------
-
--- | The number of samples we take for each pixel
-numSamplesPerPixel :: Int
-numSamplesPerPixel = 100
-
--- | Maximum complexity of a single ray; (in number of segments)
-maxRayComplexity :: Int
-maxRayComplexity = 50
-
--- | epsilon value; round things whose absolute value is smaller than this to zero.
-epsilon :: Double
-epsilon = 0.000000001
 
 ----------------------------------------
 -- * The scene
@@ -430,12 +295,6 @@ mkPlane (Rectangle (Point2 minX minY)
   ]
 
 
-----------------------------------------
--- * Settings for the progress bar
-
--- | how frequently we refresh; every 10 units of work.
-refreshRate :: Double
-refreshRate = 10
 
 --------------------------------------------------------------------------------
 
