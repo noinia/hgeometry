@@ -12,7 +12,6 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
 import           Data.Monoid
 import           Data.Semialign
-import           HGeometry.Ball
 import           HGeometry.Box
 import           HGeometry.Direction
 import           HGeometry.Ext
@@ -20,7 +19,6 @@ import           HGeometry.Graphics.Camera
 import           HGeometry.HalfLine
 import           HGeometry.Intersection
 import           HGeometry.Point
-import           HGeometry.Triangle
 import           HGeometry.Unbounded
 import           HGeometry.Vector
 import           Prelude hiding (zipWith)
@@ -246,12 +244,28 @@ theScene = [ SceneObject (aBall (Point3 0 3 0)     1    ) (opaque red)
            -- , SceneObject (ABall $ Ball (Point3 2 5 3)     (1.5)) (opaque blue)
            , SceneObject (aBall (Point3 3 3 0)     1) (opaque blue)
 
-           , SceneObject (aBall (Point3 (-3) 3 1)     1) (opaque orange)
+           -- , SceneObject (aBall (Point3 (-3) 3 1)     1) (opaque orange)
 
            , SceneObject (aBall (Point3 (-3) 20 6) 3    ) (opaque black)
 
 
-           , SceneObject (aBall (Point3 0 2 0)     0.1    ) (opaque brown)
+           -- , SceneObject (aBall (Point3 0 2 0)     0.1    ) (opaque brown)
+
+             -- parallel to x-axis
+           , SceneObject (aTriangle (Point3 (-4) 3 0)
+                                    (Point3 (-3) 3 0)
+                                    (Point3 (-4) 3 3)
+                         ) (opaque red)
+
+
+           -- towards y-axis
+           , SceneObject (aTriangle (Point3 (-3) 10 0)
+                                    (Point3 (-3) 2  0)
+                                    (Point3 (-3) 10 1)
+                         ) (opaque blue)
+
+
+
 
            , SceneObject (aTriangle (Point3 (-6) 10 8)
                                     (Point3 (-3) 12 6)
