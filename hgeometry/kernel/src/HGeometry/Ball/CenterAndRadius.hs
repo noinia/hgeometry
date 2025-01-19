@@ -26,8 +26,8 @@ module HGeometry.Ball.CenterAndRadius
 
 import Control.Lens
 import HGeometry.Ball.Class
+import HGeometry.Ext
 import HGeometry.HalfLine
-import HGeometry.HalfSpace
 import HGeometry.HyperPlane
 import HGeometry.Intersection
 import HGeometry.Line.PointAndVector
@@ -108,9 +108,13 @@ instance ( Point_ point d r, Point_ point' d r
 type instance Intersection (LinePV d r) (Ball point) =
   Maybe (IntersectionOf (LinePV d r) (Ball point))
 
+-- | The extra value is the parameter t, so that the intersection point
+-- is line^.anchroPoint + t*line^.direction
 data instance IntersectionOf (LinePV d r) (Ball point) =
-    Line_x_Ball_Point   (Point d r)
-  | Line_x_Ball_Segment (ClosedLineSegment (Point d r))
+    Line_x_Ball_Point   (Point d r :+ r)
+  | Line_x_Ball_Segment (ClosedLineSegment (Point d r :+ r))
+    -- ^ The line segement is oriented from the point closest to the anchor towards
+    -- the point further away
 
 deriving instance (Show r, Has_ Additive_ d r) => Show (IntersectionOf (LinePV d r) (Ball point))
 deriving instance (Eq r, Eq (Vector d r))      => Eq   (IntersectionOf (LinePV d r) (Ball point))
@@ -146,16 +150,22 @@ instance ( Point_ point d r
       discr' = sqrt discr
       da = 2*a
 
-      lambda1 = ((negate discr') - b) / da -- the two solutions
-      lambda2 = (discr'          - b) / da --
+      lambda1' = ((negate discr') - b) / da -- the two solutions
+      lambda2' = (discr'          - b) / da --
       -- note: v must have non-zero length; and thus a (and therefore da) are non-zero.
+      -- note2: if discr is nonzero then lambda1' and laambda2' are distinct
 
-      q1 = p .+^ (lambda1 *^ v)
-      q2 = p .+^ (lambda2 *^ v)
+      -- make sure lambda1 is the smaller one. (since they are distinct we can use <
+      -- rather than <=).
+      (lambda1,lambda2) = if lambda1' < lambda2' then (lambda1',lambda2')
+                                                 else (lambda2',lambda1')
 
-      -- if the discr is zer0 there is only one solution:
+      q1 = p .+^ (lambda1 *^ v) :+ lambda1
+      q2 = p .+^ (lambda2 *^ v) :+ lambda2
+
+      -- if the discr is zero there is only one solution:
       lambda0 = (negate b) / da
-      q0 = p .+^ (lambda0 *^ v)
+      q0 = p .+^ (lambda0 *^ v) :+ lambda0
 
 ----------------------------------------
 
@@ -170,18 +180,33 @@ instance ( Point_ point d r, Point_ point' d r
          ) => (HalfLine point') `IsIntersectableWith` (Ball point) where
   intersect (HalfLine p v) b = intersect (LinePV p' v) b >>= \case
       Line_x_Ball_Point q
-        | q `intersects` h    -> Just $ Line_x_Ball_Point q
-        | otherwise           -> Nothing
-      Line_x_Ball_Segment seg@(ClosedLineSegment a c) ->
-        case (a `intersects` h, c `intersects` h) of
-          (False,False) -> Nothing
-          (False,True)  -> Just $ Line_x_Ball_Segment (ClosedLineSegment p' c)
-          (True,False)  -> Just $ Line_x_Ball_Segment (ClosedLineSegment a  p')
-          (True,True)   -> Just $ Line_x_Ball_Segment seg
+        | q^.extra >= 0 -> Just $ Line_x_Ball_Point q
+        | otherwise     -> Nothing
+      Line_x_Ball_Segment seg@(ClosedLineSegment s t) -> case 0 `compare` (t^.extra) of
+        GT -> Nothing -- The oriented line intersects the ball before the ray starts
+        EQ -> Just $ Line_x_Ball_Point t
+                             -- we only intersect at the start of the ray
+        LT | s^.extra < 0 -> Just $ Line_x_Ball_Segment (ClosedLineSegment (p' :+ 0) t)
+           | otherwise    -> Just $ Line_x_Ball_Segment seg
     where
-      h :: HalfSpace d r
-      h  = HalfSpace Positive (fromPointAndNormal p' v)
-      p' = p^.asPoint
+      p'  = p^.asPoint
+
+    --       -> _
+
+
+    --     -> case (0 <= s^.extra, 0 <= t^.extra) of
+    --     (False,False) -> Nothing
+    --     ()
+
+    --     case (a `intersects` h, c `intersects` h) of
+    --       (False,False) -> Nothing
+    --       (False,True)  -> Just $ Line_x_Ball_Segment (ClosedLineSegment p'' c)
+    --       (True,False)  -> Just $ Line_x_Ball_Segment (ClosedLineSegment a  p'')
+    --       (True,True)   -> Just $ Line_x_Ball_Segment seg
+    -- where
+    --   h :: HalfSpace d r
+    --   h   = HalfSpace Positive (fromPointAndNormal p' v)
+      -- p'' = p' :+ 0
 
 type instance Intersection (ClosedLineSegment point') (Ball point) =
   Maybe (IntersectionOf (LinePV (Dimension point) (NumType point)) (Ball point))

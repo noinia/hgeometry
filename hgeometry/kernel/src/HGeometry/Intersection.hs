@@ -1,4 +1,5 @@
 {-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Intersection
@@ -21,6 +22,7 @@ import Control.Lens ((^.))
 import Data.Kind (Type)
 import Data.Maybe (isJust)
 import HGeometry.Ext
+import HGeometry.Point
 
 -------------------------------------------------------------------------------
 
@@ -51,6 +53,18 @@ class HasIntersectionWith g h => IsIntersectableWith g h where
 instance HasIntersectionWith geomA geomB
          => HasIntersectionWith (geomA :+ extra) (geomB :+ extra) where
   ga `intersects` gb = (ga^.core) `intersects` (gb^.core)
+
+type instance Intersection (Point d r :+ extra) geom =  Maybe (Point d r :+ extra)
+
+instance HasIntersectionWith (Point d r) geom
+         => HasIntersectionWith (Point d r :+ extra) geom where
+  q `intersects` g = (q^.core) `intersects` g
+
+instance ( IsIntersectableWith (Point d r) geom
+         , Intersection (Point d r) geom ~ Maybe (Point d r)
+         ) => IsIntersectableWith (Point d r :+ extra) geom where
+  q `intersect` g = q <$ (q^.core) `intersect` g
+
 
 -- instance IsIntersectableWith geomA geomB
 --          => IsIntersectableWith (geomA :+ extra) (geomB :+ extra) where
