@@ -1,25 +1,16 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 module Types where
 
 
 import           Control.Lens
-import           Control.Monad (replicateM, (<=<), (=<<))
 import           Data.Coerce
 import           Data.Colour as Colour
-import           Data.Colour.Names
-import           Data.Colour.SRGB (toSRGB24, RGB(..), sRGB)
-import           Data.Default.Class
 import           Data.Eq.Approximate
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
-import           Data.Monoid
-import           Data.Semialign
 import           HGeometry.Ball
-import           HGeometry.Box
 import           HGeometry.Direction
 import           HGeometry.Ext
-import           HGeometry.Graphics.Camera
 import           HGeometry.HalfLine
 import           HGeometry.Intersection
 import           HGeometry.LineSegment
@@ -27,14 +18,9 @@ import           HGeometry.Number.Radical
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Triangle
-import           HGeometry.Unbounded
 import           HGeometry.Vector
 import           Prelude hiding (zipWith, sqrt)
-import qualified System.File.OsPath as File
-import           System.OsPath
-import           System.ProgressBar
 import           System.Random.Stateful
-import           TypeLevel.NaturalNumber
 
 --------------------------------------------------------------------------------
 

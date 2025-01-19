@@ -3,11 +3,10 @@ module Main(main) where
 
 import           Codec.Picture
 import           Control.Lens
-import           Control.Monad (replicateM, (<=<), (=<<))
+import           Control.Monad (replicateM)
 import           Data.Colour as Colour
 import           Data.Colour.Names
-import           Data.Colour.SRGB (toSRGB24, RGB(..), sRGB)
-import           Data.Default.Class
+import           Data.Colour.SRGB (toSRGB24, RGB(..))
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
@@ -20,10 +19,7 @@ import           HGeometry.Ext
 import           HGeometry.Graphics.Camera
 import           HGeometry.HalfLine
 import           HGeometry.Intersection
-import           HGeometry.LineSegment
-import           HGeometry.Number.Radical
 import           HGeometry.Point
-import           HGeometry.Properties
 import           HGeometry.Triangle
 import           HGeometry.Unbounded
 import           HGeometry.Vector
@@ -35,7 +31,6 @@ import           System.ProgressBar
 import           System.Random.Stateful
 import           Types
 
-import           Debug.Trace
 
 --------------------------------------------------------------------------------
 -- * Move this into HGeometry proper
