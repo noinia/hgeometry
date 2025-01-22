@@ -12,7 +12,6 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
 import           Data.Monoid
 import           Data.Semialign
-import           HGeometry.Ball
 import           HGeometry.Box
 import           HGeometry.Direction
 import           HGeometry.Ext
@@ -20,7 +19,6 @@ import           HGeometry.Graphics.Camera
 import           HGeometry.HalfLine
 import           HGeometry.Intersection
 import           HGeometry.Point
-import           HGeometry.Triangle
 import           HGeometry.Unbounded
 import           HGeometry.Vector
 import           Prelude hiding (zipWith)
@@ -123,7 +121,7 @@ rayColor gen = rayColor'
                              v <- (normal ^+^) <$>
                                   uniformUpwardDirectionWrt normal gen
                              -- shoot a new ray
-                             (blend 0.1 (opaque black))
+                             (blend 0.1 (obj^.objectColor))
                                <$> rayColor' (HalfLine (q^.core) v) (depth-1) scene
 
 -- -- | Compute the color of the object at the intersection point with the ray
@@ -197,10 +195,10 @@ renderWithProgress reportProgress screenDims@(Vector2 w h) camera scene = do
     -- print ("topLeft",topLeft)
     -- print ("viewPort",theViewport)
     -- print ("pixelDims",pixelDims)
-    gen <- newIOGenM =<< getStdGen
+    -- gen <- newIOGenM =<< getStdGen
     withImage w h $ \x y -> do
       let pix       = PixelInfo (Point2 x y) (pixelViewPort topLeft pixelDims x y) pixelDims
-      !pixColor <- renderPixel gen pix camera scene
+      !pixColor <- renderPixel globalStdGen pix camera scene
       pixColor <$ reportProgress
 
   where
@@ -242,23 +240,43 @@ sampleUnitSquare gen = NonEmpty.fromList
 -- * The scene
 
 theScene :: Scene
-theScene = [ SceneObject (ABall $ Ball (Point3 0 3 0)     1    ) (opaque red)
+theScene = [ SceneObject (aBall (Point3 0 3 0)     1    ) (opaque red)
            -- , SceneObject (ABall $ Ball (Point3 2 5 3)     (1.5)) (opaque blue)
-           -- , SceneObject (ABall $ Ball (Point3 (-3) 20 6) 3    ) (opaque black)
+           , SceneObject (aBall (Point3 3 3 0)     1) (opaque blue)
+
+           -- , SceneObject (aBall (Point3 (-3) 3 1)     1) (opaque orange)
+
+           , SceneObject (aBall (Point3 (-3) 20 6) 3    ) (opaque black)
 
 
-           -- , SceneObject (ABall $ Ball (Point3 0 2 0)     0.1    ) (opaque brown)
+           -- , SceneObject (aBall (Point3 0 2 0)     0.1    ) (opaque brown)
 
-           -- , SceneObject (ATriangle $ Triangle (Point3 (-6) 10 8)
-           --                                     (Point3 (-3) 12 6)
-           --                                     (Point3 (-5) 15 7)
-           --               ) (opaque purple)
+             -- parallel to x-axis
+           , SceneObject (aTriangle (Point3 (-4) 3 0)
+                                    (Point3 (-3) 3 0)
+                                    (Point3 (-4) 3 3)
+                         ) (opaque red)
 
 
-           -- , SceneObject (ATriangle $ Triangle (Point3 (-10) 22 16)
-           --                                     (Point3 (-6) 20 19)
-           --                                     (Point3 (-5) 25 7.5)
-           --               ) (opaque pink)
+           -- towards y-axis
+           , SceneObject (aTriangle (Point3 (-3) 10 0)
+                                    (Point3 (-3) 2  0)
+                                    (Point3 (-3) 10 1)
+                         ) (opaque blue)
+
+
+
+
+           , SceneObject (aTriangle (Point3 (-6) 10 8)
+                                    (Point3 (-3) 12 6)
+                                    (Point3 (-5) 15 7)
+                         ) (opaque purple)
+
+
+           , SceneObject (aTriangle (Point3 (-10) 22 16)
+                                    (Point3 (-6) 20 19)
+                                    (Point3 (-5) 25 7.5)
+                         ) (opaque pink)
            ]
            <>
            ground
@@ -280,16 +298,15 @@ ground = mkPlane (Rectangle (Point2 minX minY) (Point2 maxX maxY)) z groundColor
 mkPlane                               :: Rectangle (Point 2 R) -> R -> Color -> [SceneObject]
 mkPlane (Rectangle (Point2 minX minY)
         (Point2 maxX maxY)) z color   =
-  [ SceneObject (ATriangle $ Triangle (Point3 minX minY z)
-                                      (Point3 maxX minY z)
-                                      (Point3 maxX maxY z)
+  [ SceneObject (aTriangle (Point3 minX minY z)
+                           (Point3 maxX minY z)
+                           (Point3 maxX maxY z)
                 ) color
-  , SceneObject (ATriangle $ Triangle (Point3 maxX maxY z)
-                                      (Point3 minX maxY z)
-                                      (Point3 minX minY z)
+  , SceneObject (aTriangle (Point3 maxX maxY z)
+                           (Point3 minX maxY z)
+                           (Point3 minX minY z)
                 ) color
   ]
-
 
 
 --------------------------------------------------------------------------------

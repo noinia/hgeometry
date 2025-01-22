@@ -3,6 +3,7 @@ module Settings where
 import Control.Lens
 import Data.Colour
 import Data.Colour.Names
+import Data.Colour.SRGB (sRGB)
 import Data.Default.Class
 import HGeometry.Graphics.Camera
 import HGeometry.Vector
@@ -15,12 +16,13 @@ import Types
 
 -- | Background  color
 backgroundColor :: Color
-backgroundColor = blue `withOpacity` 0.1
+backgroundColor = opaque $ sRGB 0.5 0.7 1
+  -- blue `withOpacity` 0.1
   -- transparent -- transparent
 
 -- | Number of pixels in the ouput image
 outputWidth :: Int
-outputWidth = 640
+outputWidth = 400 -- 640
 
 -- | Aspect ratio of the output image
 aspectRatio :: Rational
@@ -47,16 +49,16 @@ fromDesiredHeight desiredHeight = let Vector2 w h = fromIntegral <$> outputDimen
 
 -- | The number of samples we take for each pixel
 numSamplesPerPixel :: Int
-numSamplesPerPixel = 20 -- 100
+numSamplesPerPixel = 20 -- 100 --20 -- 100 -- 20 -- 100
 
 -- | Maximum complexity of a single ray; (in number of segments)
-maxRayComplexity :: Int
 maxRayComplexity = 10 -- 50
+maxRayComplexity :: Int
 
 
 ----------------------------------------
 -- * Settings for the progress bar
 
--- | how frequently we refresh; every 10 units of work.
+-- | how frequently we refresh; in Hertz.
 refreshRate :: Double
-refreshRate = 10
+refreshRate = 2
