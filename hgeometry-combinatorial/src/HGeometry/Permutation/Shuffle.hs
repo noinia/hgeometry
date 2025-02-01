@@ -16,8 +16,8 @@ module HGeometry.Permutation.Shuffle
 import           Control.Lens (singular,ix,(&),(%%~),bimap)
 import           Data.Foldable
 import qualified Data.List as List
-import qualified Data.Vector as V
-import qualified Data.Vector.Mutable as MV
+import qualified Data.Vector.Generic as V
+import qualified Data.Vector.Generic.Mutable as MV
 import           System.Random
 import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.MVector as Builder
@@ -30,7 +30,8 @@ import           HGeometry.Sequence.NonEmpty (ViewR1(..))
 -- | Fisher–Yates shuffle, which shuffles a list/foldable uniformly at random.
 --
 -- running time: \(O(n)\).
-shuffle      :: (Foldable f, RandomGen gen) => gen -> f a -> V.Vector a
+shuffle      :: forall vector gen a f.
+                (V.Vector vector a, Foldable f, RandomGen gen) => gen -> f a -> vector a
 shuffle gen0 = construct . Builder.foldable
   where
     construct b = V.create $ do

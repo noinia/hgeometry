@@ -4,20 +4,26 @@ module ShuffleSpec
 
 
 import qualified Data.Set as Set
+import           Data.Vector (Vector)
 import           HGeometry.Permutation.Shuffle
 import           System.Random
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
+import           Test.QuickCheck ((===))
 
 --------------------------------------------------------------------------------
 
 spec :: Spec
 spec = describe "shuffle tests" $ do
-         describe "mutable version"
+         describe "mutable version" $ do
            prop "is permutation" $
-             \(gen :: StdGen) (elems :: [Int]) ->
-               (Set.fromList elems) === (foldMap Set.singleton $ shuffle gen elems)
-         describe "pure version version"
+             \gen (elems :: [Int]) ->
+               (foldMap Set.singleton $ shuffle @Vector (mkStdGen gen) elems)
+               ===
+               (Set.fromList elems)
+         describe "pure version version" $ do
            prop "is permut" $
-             \(gen :: StdGen) (elems :: [Int]) ->
-               (Set.fromList elems) === (foldMap Set.singleton $ shuffleSeq gen elems)
+             \gen (elems :: [Int]) ->
+               (foldMap Set.singleton $ shuffleSeq (mkStdGen gen) elems)
+               ===
+               (Set.fromList elems)
