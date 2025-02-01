@@ -221,23 +221,18 @@ test-suite hgeometry-combinatorial-doctest
 --------------------------------------------------------------------------------
 -- * Benchmarks
 
--- common hgeometry-combinatorial-bench
---     import:           setup, test-setup
---     -- hs-source-dirs:   test
---     -- build-tool-depends: hspec-discover:hspec-discover
---     other-modules:
---     build-depends:
---        , hgeometry-combinatorial:numtypes
---        , hgeometry-combinatorial:unpacked
---        , hgeometry-combinatorial:shared
---        , tasty-bench              >= 0.3
---        , tasty                    >= 1.4
+common hgeometry-combinatorial-bench
+    import:           setup, test-setup
+    -- hs-source-dirs:   test
+    -- build-tool-depends: hspec-discover:hspec-discover
+    other-modules:
+    build-depends:
+       , hgeometry-combinatorial
+       , tasty-bench              >= 0.3
+       , tasty                    >= 1.4
 
--- benchmark hgeometry-combinatorial-bench-int
---     import: setup, hgeometry-combinatorial-bench
---     hs-source-dirs: bench
---     main-is: Benchmarks.hs
---     type: exitcode-stdio-1.0
---     -- other-modules:
---     mixins:
---            hgeometry-combinatorial:numtypes (Int as R)
+benchmark shufflebench
+    import: setup, hgeometry-combinatorial-bench
+    hs-source-dirs: bench
+    main-is: ShuffleBench.hs
+    type: exitcode-stdio-1.0

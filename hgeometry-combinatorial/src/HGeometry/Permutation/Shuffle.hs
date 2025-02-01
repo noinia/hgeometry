@@ -11,6 +11,8 @@
 module HGeometry.Permutation.Shuffle
   ( shuffle
   , shuffleSeq
+  , shuffleSeqInOut
+  , shuffleSeqInOutOrig
   ) where
 
 import           Control.Lens (singular,ix,(&),(%%~),bimap)
@@ -22,7 +24,7 @@ import           System.Random
 import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.MVector as Builder
 
-import           Data.Sequence ((|>))
+import           Data.Sequence ((|>),(<|),Seq(..))
 import qualified Data.Sequence as Seq
 import           HGeometry.Sequence.NonEmpty (ViewR1(..))
 --------------------------------------------------------------------------------
@@ -45,17 +47,35 @@ shuffle gen0 = construct . Builder.foldable
           | i < 1     = Nothing
           | otherwise = Just . bimap (i,) (pred i,) $ uniformR (0,i) gen
 
+-- | Version of Fissher-Yates shuffle that returns a Seq.
+--
+-- O(n\log n)
+shuffleSeq      :: (RandomGen gen, Foldable f) => gen -> f a -> Seq.Seq a
+shuffleSeq gen0 = build mempty gen0 . foldMap Seq.singleton
+  where
+    setAndRetrieve i x s = s&singular (ix i) %%~ (,x)
+    build s gen = \case
+      Empty             -> s
+      (remaining :|> x) -> let i              = length remaining
+                               (j,gen')       = uniformR (0,i) gen
+                               (y,remaining')
+                                 | i /= j     = setAndRetrieve j x remaining
+                                 | otherwise  = (x,remaining)
+                           in build (y <| s) gen' remaining'
+
+--------------------------------------------------------------------------------
+
+
 -- | "Inside-out" version of Fissher-Yates shuffle that returns a Seq.  see
 -- https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_%22inside-out%22_algorithm
 -- for details.
 --
 -- O(n\log n)
-shuffleSeq      :: (RandomGen gen, Foldable f) => gen -> f a -> Seq.Seq a
-shuffleSeq gen0 = (\(Acc _ _ s) -> s) . foldl' step (Acc 0 gen0 mempty)
+shuffleSeqInOut      :: (RandomGen gen, Foldable f) => gen -> f a -> Seq.Seq a
+shuffleSeqInOut gen0 = (\(Acc _ _ s) -> s) . foldl' step (Acc 0 gen0 mempty)
   where
+    -- | sets the value at position i to x, and retrieves its current value.
     setAndRetrieve i x s = s&singular (ix i) %%~ (,x)
-    -- sets the value at position i to x, and retrieves its current value.
-
     step (Acc i gen s) x = let (j,gen')     = uniformR (0,i) gen
                                (y,s' :>> _) = setAndRetrieve j x (s :>> x)
                            in Acc (succ i) gen' (s' |> y)
@@ -64,3 +84,30 @@ shuffleSeq gen0 = (\(Acc _ _ s) -> s) . foldl' step (Acc 0 gen0 mempty)
     -- new position i
 
 data Acc gen s = Acc {-#UNPACK#-}!Int gen s
+
+
+--------------------------------------------------------------------------------
+
+
+
+-- | "Inside-out" version of Fissher-Yates shuffle that returns a Seq.  see
+-- https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_%22inside-out%22_algorithm
+-- for details.
+--
+-- O(n\log n)
+shuffleSeqInOutOrig      :: (RandomGen gen, Foldable f) => gen -> f a -> Seq.Seq a
+shuffleSeqInOutOrig gen0 = (\(AccOrig _ _ s) -> s) . foldl' step (AccOrig 0 gen0 mempty)
+  where
+    -- | sets the value at position i to x, and retrieves its current value.
+    setAndRetrieve i x s = s&singular (ix i) %%~ (,x)
+    step (AccOrig i gen s) x = let (j,gen')     = uniformR (0,i) gen
+                                   (y,s' :>> _) = setAndRetrieve j x (s :>> x)
+                               in AccOrig (succ i) gen' (s' |> y)
+    -- main idea: for every next element x at position i, we generate a random index j <=
+    -- i and place x at position j, and store the element y that was at position j at the
+    -- new position i
+
+data AccOrig gen s = AccOrig {-#UNPACK#-}!Int gen s
+
+
+--------------------------------------------------------------------------------

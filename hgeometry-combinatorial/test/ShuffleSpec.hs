@@ -3,6 +3,7 @@ module ShuffleSpec
   )  where
 
 
+import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
 import           Data.Vector (Vector)
 import           HGeometry.Permutation.Shuffle
@@ -27,3 +28,20 @@ spec = describe "shuffle tests" $ do
                (foldMap Set.singleton $ shuffleSeq (mkStdGen gen) elems)
                ===
                (Set.fromList elems)
+           prop "identical to vec" $
+             \gen (elems :: [Int]) ->
+               (shuffleSeq (mkStdGen gen) elems)
+               ===
+               (foldMap Seq.singleton $ shuffle @Vector (mkStdGen gen) elems)
+
+         describe "pure version version (inout)" $ do
+           prop "is permut" $
+             \gen (elems :: [Int]) ->
+               (foldMap Set.singleton $ shuffleSeqInOut (mkStdGen gen) elems)
+               ===
+               (Set.fromList elems)
+           prop "identical to orig inout" $
+             \gen (elems :: [Int]) ->
+               (shuffleSeqInOut (mkStdGen gen) elems)
+               ===
+               (shuffleSeqInOutOrig (mkStdGen gen) elems)
