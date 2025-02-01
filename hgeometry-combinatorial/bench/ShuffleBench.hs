@@ -26,7 +26,7 @@ main = do
       [ bench "mutable shuffle"           $ nf (shuffle @V.Vector gen) myInts
       , bench "mutable shuffle unboxed"   $ nf (shuffle @U.Vector gen) myInts
       , bench "shuffle sequence"          $ nf (shuffleSeq gen)        myInts
-      -- , bench "shuffle sequence (in out orig)" $ nf (shuffleSeqInOutOrig gen)   myInts
+      , bench "shuffle sequence (in out orig)" $ nf (shuffleSeqInOutOrig gen)   myInts
       , bench "shuffle sequence (in out)" $ nf (shuffleSeqInOut gen)   myInts
       , bench "shuffle intmap"            $ nf (shuffleIntMap gen)     myInts
       ]

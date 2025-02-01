@@ -13,7 +13,7 @@ module HGeometry.Permutation.Shuffle
   , shuffleIntMap
   , shuffleSeq
   , shuffleSeqInOut
-  -- , shuffleSeqInOutOrig
+  , shuffleSeqInOutOrig
   ) where
 
 import           Control.Lens (singular,ix,(&),(%%~),bimap)
@@ -106,7 +106,7 @@ shuffleSeqInOut gen0 = (\(Acc _ s) -> s) . foldl' step (Acc gen0 mempty)
 
 data Acc gen s = Acc !gen !s
 
-{-
+
 
 --------------------------------------------------------------------------------
 
@@ -116,26 +116,26 @@ data Acc gen s = Acc !gen !s
 --
 -- O(n\log n)
 shuffleSeqInOutOrig      :: (RandomGen gen, Foldable f) => gen -> f a -> Seq.Seq a
-shuffleSeqInOutOrig gen0 = (\(AccOrig _ _ s) -> s) . foldl' step (AccOrig 0 gen0 mempty)
+shuffleSeqInOutOrig gen0 = (\(SP _ s) -> s) . foldl' step (SP gen0 mempty)
   where
     -- | sets the value at position i to x, and retrieves its current value.
     setAndRetrieve i x s = s&singular (ix i) %%~ \y -> SP y x
       -- the SP here is very important; if we use a lazy pair this about 4x lower
 
-    step (AccOrig i gen s) x = let (j,gen')     = uniformR (0,i) gen
-                                   (SP y (s' :>> _)) = setAndRetrieve j x (s :>> x)
-                               in AccOrig (succ i) gen' (s' |> y)
+    step (SP gen s) x = let i = length s
+                        in case uniformR (0,i) gen of
+      (j,gen') | j == i    -> SP gen' (s |> x)
+               | otherwise -> let SP y s' = setAndRetrieve j x s
+                              in SP gen' (s' |> y)
     -- main idea: for every next element x at position i, we generate a random index j <=
     -- i and place x at position j, and store the element y that was at position j at the
     -- new position i
 
-data AccOrig gen s = AccOrig {-#UNPACK#-}!Int gen s
-
-
+-- data AccOrig gen s = AccOrig {-#UNPACK#-}!Int gen s
 
 --------------------------------------------------------------------------------
 
--}
 
-data SP a b = SP !a b
+
+data SP a b = SP !a !b
   deriving Functor
