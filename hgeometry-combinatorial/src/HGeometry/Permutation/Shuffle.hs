@@ -75,9 +75,12 @@ shuffleSeqInOut      :: (RandomGen gen, Foldable f) => gen -> f a -> Seq.Seq a
 shuffleSeqInOut gen0 = (\(Acc _ _ s) -> s) . foldl' step (Acc 0 gen0 mempty)
   where
     -- | sets the value at position i to x, and retrieves its current value.
-    setAndRetrieve i x s = s&singular (ix i) %%~ (,x)
-    step (Acc i gen s) x = let (j,gen')     = uniformR (0,i) gen
-                               (y,s' :>> _) = setAndRetrieve j x (s :>> x)
+    setAndRetrieve i x s = case s Seq.!? i of
+      Nothing -> (x,s)
+      Just y  -> (y,Seq.update i x s)
+      -- s&singular (ix i) %%~ (,x)
+    step (Acc i gen s) x = let (j,gen') = uniformR (0,i) gen
+                               (y,s')   = setAndRetrieve j x s
                            in Acc (succ i) gen' (s' |> y)
     -- main idea: for every next element x at position i, we generate a random index j <=
     -- i and place x at position j, and store the element y that was at position j at the

@@ -18,6 +18,9 @@ main = do
   (myInts :: [Int]) <- force <$> replicateM n (uniformM globalStdGen)
   seed <- uniformM globalStdGen
   let gen = mkStdGen seed
+
+  -- print $ shuffleSeqInOut gen myInts
+
   defaultMain
     [ bgroup "shuffle tests"
       [ bench "mutable shuffle"           $ nf (shuffle @V.Vector gen) myInts
