@@ -74,14 +74,14 @@ shuffleIntMap gen0 = build . IntMap.fromList . zip [0..] . toList
 shuffleSeq      :: (RandomGen gen, Foldable f) => gen -> f a -> Seq.Seq a
 shuffleSeq gen0 = build mempty gen0 . foldMap Seq.singleton
   where
-    setAndRetrieve i x s = s&singular (ix i) %%~ \y -> SP y x
+    setAndRetrieve i x s = s&singular (ix i) %%~ \y -> Acc y x
     build s gen = \case
       Empty             -> s
       (remaining :|> x) -> let i              = length remaining
                                (j,gen')       = uniformR (0,i) gen
-                               (SP y remaining')
+                               (Acc y remaining')
                                  | i /= j     = setAndRetrieve j x remaining
-                                 | otherwise  = SP x remaining
+                                 | otherwise  = Acc x remaining
                            in build (y <| s) gen' remaining'
 
 --------------------------------------------------------------------------------
@@ -107,6 +107,7 @@ shuffleSeqInOut gen0 = (\(Acc _ s) -> s) . foldl' step (Acc gen0 mempty)
     -- new position i
 
 data Acc gen s = Acc !gen !s
+  deriving Functor
 
 
 
@@ -118,26 +119,26 @@ data Acc gen s = Acc !gen !s
 --
 -- O(n\log n)
 shuffleSeqInOutOrig      :: (RandomGen gen, Foldable f) => gen -> f a -> Seq.Seq a
-shuffleSeqInOutOrig gen0 = (\(SP _ s) -> s) . foldl' step (SP gen0 mempty)
+shuffleSeqInOutOrig gen0 = (\(Acc _ s) -> s) . foldl' step (Acc gen0 mempty)
   where
     -- | sets the value at position i to x, and retrieves its current value.
-    setAndRetrieve i x s = s&ix i %%~ \y -> SP (First $ Just y) x
+    setAndRetrieve i x s = s&ix i %%~ \y -> SP (Just y) x
       -- the SP here is very important; if we use a lazy pair this about 4x lower
       -- same for the ! on y below here.
 
-    step (SP gen s) x = let (j,gen') = uniformR (0,length s) gen
-                            SP my s' = setAndRetrieve j x s
-                            !y       = fromMaybe x $ getFirst my
-                        in SP gen' (s' |> y)
+    step (Acc gen s) x = let (j,gen') = uniformR (0,length s) gen
+                             SP my s' = setAndRetrieve j x s
+                             !y       = fromMaybe x my
+                         in Acc gen' (s' |> y)
     -- main idea: for every next element x at position i, we generate a random index j <=
     -- i and place x at position j, and store the element y that was at position j at the
     -- new position i
 
 --------------------------------------------------------------------------------
 
-data SP a b = SP !a !b
+data SP a b = SP !(Maybe a) !b
   deriving (Functor)
 
-instance Monoid a => Applicative (SP a) where
-  pure x             = SP mempty x
-  SP a f <*> SP a' x = SP (a <> a') (f x)
+instance Applicative (SP a) where
+  pure x            = SP Nothing x
+  SP a f <*> SP _ x = SP a (f x)
