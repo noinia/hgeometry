@@ -13,7 +13,7 @@ module HGeometry.Permutation.Shuffle
   , shuffleIntMap
   , shuffleSeq
   , shuffleSeqInOut
-  , shuffleSeqInOutOrig
+  -- , shuffleSeqInOutOrig
   ) where
 
 import           Control.Lens (singular,ix,(&),(%%~),bimap)
@@ -27,9 +27,9 @@ import qualified VectorBuilder.MVector as Builder
 
 import           Data.Sequence ((|>),(<|),Seq(..))
 import qualified Data.Sequence as Seq
-import           HGeometry.Sequence.NonEmpty (ViewR1(..))
+-- import           HGeometry.Sequence.NonEmpty (ViewR1(..))
 
-import qualified Data.IntMap as IntMap
+import qualified Data.IntMap.Strict as IntMap
 
 -- import qualified Data.Sequence.Internal as Internal
 
@@ -53,7 +53,7 @@ shuffle gen0 = construct . Builder.foldable
           | i < 1     = Nothing
           | otherwise = Just . bimap (i,) (pred i,) $ uniformR (0,i) gen
 
-
+-- | Returns a strict IntMap
 shuffleIntMap      :: (RandomGen gen, Foldable f) => gen -> f a -> IntMap.IntMap a
 shuffleIntMap gen0 = build . IntMap.fromList . zip [0..] . toList
   where
@@ -72,14 +72,14 @@ shuffleIntMap gen0 = build . IntMap.fromList . zip [0..] . toList
 shuffleSeq      :: (RandomGen gen, Foldable f) => gen -> f a -> Seq.Seq a
 shuffleSeq gen0 = build mempty gen0 . foldMap Seq.singleton
   where
-    setAndRetrieve i x s = s&singular (ix i) %%~ (,x)
+    setAndRetrieve i x s = s&singular (ix i) %%~ \y -> SP y x
     build s gen = \case
       Empty             -> s
       (remaining :|> x) -> let i              = length remaining
                                (j,gen')       = uniformR (0,i) gen
-                               (y,remaining')
+                               (SP y remaining')
                                  | i /= j     = setAndRetrieve j x remaining
-                                 | otherwise  = (x,remaining)
+                                 | otherwise  = SP x remaining
                            in build (y <| s) gen' remaining'
 
 --------------------------------------------------------------------------------
@@ -97,7 +97,6 @@ shuffleSeqInOut gen0 = (\(Acc _ s) -> s) . foldl' step (Acc gen0 mempty)
     setAndRetrieve i x s = case s Seq.!? i of
       Nothing -> (x,s)
       Just y  -> (y,Seq.update i x s)
-      -- s&singular (ix i) %%~ (,x)
     step (Acc gen s) x = let (j,gen') = uniformR (0,length s) gen
                              (y,s')   = setAndRetrieve j x s
                          in Acc gen' (s' |> y)
@@ -107,40 +106,9 @@ shuffleSeqInOut gen0 = (\(Acc _ s) -> s) . foldl' step (Acc gen0 mempty)
 
 data Acc gen s = Acc !gen !s
 
-
--- setAndRetrieve                       :: Int -> a -> Seq.Seq a -> (a, Seq.Seq a)
--- setAndRetrieve i0 x (Internal.Seq t) = Internal.Seq <$> go i0 t
---   where
---     go i = \case
---       Internal.EmptyT   -> error "empty"
---       Internal.Single y -> (y, Internal.Single x) -- i better be zero here ...
---       Internal.Deep n pr m sf
---         | i < spr   -> (\pr' -> Internal.Deep n pr' m sf) <$> goDigit i pr
---         | i < spm   -> (\m'  -> Internal.Deep n pr m' sf) <$> goDeep m
---         | otherwise -> (\sf' -> Internal.Deep n pr m sf') <$> goDigit (i - spm) sf
-
---     goDigit i = \case
---       Internal.One   a       -> (a, Internal.One x)
---       Internal.Two   a b     -> case i of
---                          0 -> (a, Internal.Two x b)
---                          _ -> (b, Internal.Two a x)
---       Internal.Three a b c   -> case i of
---                          0 -> (a, Internal.Three x b c)
---                          1 -> (b, Internal.Three a x c)
---                          _ -> (c, Internal.Three a b x)
---       Internal.Four  a b c d -> case i of
---                          0 -> (a, Internal.Four x b c d)
---                          1 -> (b, Internal.Four a x c d)
---                          2 -> (c, Internal.Four a c x d)
---                          _ -> (d, Internal.Four a b c x)
-
---     goDeep i =
-
-
+{-
 
 --------------------------------------------------------------------------------
-
-
 
 -- | "Inside-out" version of Fissher-Yates shuffle that returns a Seq.  see
 -- https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_%22inside-out%22_algorithm
@@ -151,9 +119,11 @@ shuffleSeqInOutOrig      :: (RandomGen gen, Foldable f) => gen -> f a -> Seq.Seq
 shuffleSeqInOutOrig gen0 = (\(AccOrig _ _ s) -> s) . foldl' step (AccOrig 0 gen0 mempty)
   where
     -- | sets the value at position i to x, and retrieves its current value.
-    setAndRetrieve i x s = s&singular (ix i) %%~ (,x)
+    setAndRetrieve i x s = s&singular (ix i) %%~ \y -> SP y x
+      -- the SP here is very important; if we use a lazy pair this about 4x lower
+
     step (AccOrig i gen s) x = let (j,gen')     = uniformR (0,i) gen
-                                   (y,s' :>> _) = setAndRetrieve j x (s :>> x)
+                                   (SP y (s' :>> _)) = setAndRetrieve j x (s :>> x)
                                in AccOrig (succ i) gen' (s' |> y)
     -- main idea: for every next element x at position i, we generate a random index j <=
     -- i and place x at position j, and store the element y that was at position j at the
@@ -162,4 +132,10 @@ shuffleSeqInOutOrig gen0 = (\(AccOrig _ _ s) -> s) . foldl' step (AccOrig 0 gen0
 data AccOrig gen s = AccOrig {-#UNPACK#-}!Int gen s
 
 
+
 --------------------------------------------------------------------------------
+
+-}
+
+data SP a b = SP !a b
+  deriving Functor
