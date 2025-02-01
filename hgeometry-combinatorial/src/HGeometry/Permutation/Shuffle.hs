@@ -19,6 +19,8 @@ module HGeometry.Permutation.Shuffle
 import           Control.Lens (singular,ix,(&),(%%~),bimap)
 import           Data.Foldable
 import qualified Data.List as List
+import           Data.Maybe (fromMaybe)
+import           Data.Monoid
 import qualified Data.Vector.Generic as V
 import qualified Data.Vector.Generic.Mutable as MV
 import           System.Random
@@ -119,23 +121,23 @@ shuffleSeqInOutOrig      :: (RandomGen gen, Foldable f) => gen -> f a -> Seq.Seq
 shuffleSeqInOutOrig gen0 = (\(SP _ s) -> s) . foldl' step (SP gen0 mempty)
   where
     -- | sets the value at position i to x, and retrieves its current value.
-    setAndRetrieve i x s = s&singular (ix i) %%~ \y -> SP y x
+    setAndRetrieve i x s = s&ix i %%~ \y -> SP (First $ Just y) x
       -- the SP here is very important; if we use a lazy pair this about 4x lower
+      -- same for the ! on y below here.
 
-    step (SP gen s) x = let i = length s
-                        in case uniformR (0,i) gen of
-      (j,gen') | j == i    -> SP gen' (s |> x)
-               | otherwise -> let SP y s' = setAndRetrieve j x s
-                              in SP gen' (s' |> y)
+    step (SP gen s) x = let (j,gen') = uniformR (0,length s) gen
+                            SP my s' = setAndRetrieve j x s
+                            !y       = fromMaybe x $ getFirst my
+                        in SP gen' (s' |> y)
     -- main idea: for every next element x at position i, we generate a random index j <=
     -- i and place x at position j, and store the element y that was at position j at the
     -- new position i
 
--- data AccOrig gen s = AccOrig {-#UNPACK#-}!Int gen s
-
 --------------------------------------------------------------------------------
 
-
-
 data SP a b = SP !a !b
-  deriving Functor
+  deriving (Functor)
+
+instance Monoid a => Applicative (SP a) where
+  pure x             = SP mempty x
+  SP a f <*> SP a' x = SP (a <> a') (f x)
