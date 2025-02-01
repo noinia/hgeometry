@@ -10,6 +10,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Permutation.Shuffle
   ( shuffle
+  , shuffleIntMap
   , shuffleSeq
   , shuffleSeqInOut
   , shuffleSeqInOutOrig
@@ -27,6 +28,11 @@ import qualified VectorBuilder.MVector as Builder
 import           Data.Sequence ((|>),(<|),Seq(..))
 import qualified Data.Sequence as Seq
 import           HGeometry.Sequence.NonEmpty (ViewR1(..))
+
+import qualified Data.IntMap as IntMap
+
+-- import qualified Data.Sequence.Internal as Internal
+
 --------------------------------------------------------------------------------
 
 -- | Fisher–Yates shuffle, which shuffles a list/foldable uniformly at random.
@@ -46,6 +52,19 @@ shuffle gen0 = construct . Builder.foldable
         f (i,gen)
           | i < 1     = Nothing
           | otherwise = Just . bimap (i,) (pred i,) $ uniformR (0,i) gen
+
+
+shuffleIntMap      :: (RandomGen gen, Foldable f) => gen -> f a -> IntMap.IntMap a
+shuffleIntMap gen0 = build . IntMap.fromList . zip [0..] . toList
+  where
+    build m = foldl' swap m $ List.unfoldr f (pred $ IntMap.size m, gen0)
+      where
+        f (i,gen)
+          | i < 1     = Nothing
+          | otherwise = Just . bimap (i,) (pred i,) $ uniformR (0,i) gen
+
+    swap m (i,j) = IntMap.insert i (m IntMap.! j) . IntMap.insert j (m IntMap.! i) $ m
+
 
 -- | Version of Fissher-Yates shuffle that returns a Seq.
 --
@@ -72,21 +91,51 @@ shuffleSeq gen0 = build mempty gen0 . foldMap Seq.singleton
 --
 -- O(n\log n)
 shuffleSeqInOut      :: (RandomGen gen, Foldable f) => gen -> f a -> Seq.Seq a
-shuffleSeqInOut gen0 = (\(Acc _ _ s) -> s) . foldl' step (Acc 0 gen0 mempty)
+shuffleSeqInOut gen0 = (\(Acc _ s) -> s) . foldl' step (Acc gen0 mempty)
   where
     -- | sets the value at position i to x, and retrieves its current value.
     setAndRetrieve i x s = case s Seq.!? i of
       Nothing -> (x,s)
       Just y  -> (y,Seq.update i x s)
       -- s&singular (ix i) %%~ (,x)
-    step (Acc i gen s) x = let (j,gen') = uniformR (0,i) gen
-                               (y,s')   = setAndRetrieve j x s
-                           in Acc (succ i) gen' (s' |> y)
+    step (Acc gen s) x = let (j,gen') = uniformR (0,length s) gen
+                             (y,s')   = setAndRetrieve j x s
+                         in Acc gen' (s' |> y)
     -- main idea: for every next element x at position i, we generate a random index j <=
     -- i and place x at position j, and store the element y that was at position j at the
     -- new position i
 
-data Acc gen s = Acc {-#UNPACK#-}!Int gen s
+data Acc gen s = Acc !gen !s
+
+
+-- setAndRetrieve                       :: Int -> a -> Seq.Seq a -> (a, Seq.Seq a)
+-- setAndRetrieve i0 x (Internal.Seq t) = Internal.Seq <$> go i0 t
+--   where
+--     go i = \case
+--       Internal.EmptyT   -> error "empty"
+--       Internal.Single y -> (y, Internal.Single x) -- i better be zero here ...
+--       Internal.Deep n pr m sf
+--         | i < spr   -> (\pr' -> Internal.Deep n pr' m sf) <$> goDigit i pr
+--         | i < spm   -> (\m'  -> Internal.Deep n pr m' sf) <$> goDeep m
+--         | otherwise -> (\sf' -> Internal.Deep n pr m sf') <$> goDigit (i - spm) sf
+
+--     goDigit i = \case
+--       Internal.One   a       -> (a, Internal.One x)
+--       Internal.Two   a b     -> case i of
+--                          0 -> (a, Internal.Two x b)
+--                          _ -> (b, Internal.Two a x)
+--       Internal.Three a b c   -> case i of
+--                          0 -> (a, Internal.Three x b c)
+--                          1 -> (b, Internal.Three a x c)
+--                          _ -> (c, Internal.Three a b x)
+--       Internal.Four  a b c d -> case i of
+--                          0 -> (a, Internal.Four x b c d)
+--                          1 -> (b, Internal.Four a x c d)
+--                          2 -> (c, Internal.Four a c x d)
+--                          _ -> (d, Internal.Four a b c x)
+
+--     goDeep i =
+
 
 
 --------------------------------------------------------------------------------

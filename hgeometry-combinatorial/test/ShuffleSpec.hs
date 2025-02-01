@@ -2,7 +2,7 @@ module ShuffleSpec
   ( spec
   )  where
 
-
+import           Data.Foldable (toList)
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
 import           Data.Vector (Vector)
@@ -22,6 +22,7 @@ spec = describe "shuffle tests" $ do
                (foldMap Set.singleton $ shuffle @Vector (mkStdGen gen) elems)
                ===
                (Set.fromList elems)
+
          describe "pure version version" $ do
            prop "is permut" $
              \gen (elems :: [Int]) ->
@@ -33,6 +34,22 @@ spec = describe "shuffle tests" $ do
                (shuffleSeq (mkStdGen gen) elems)
                ===
                (foldMap Seq.singleton $ shuffle @Vector (mkStdGen gen) elems)
+
+
+         describe "Intmap version version" $ do
+           prop "is permut" $
+             \gen (elems :: [Int]) ->
+               (foldMap Set.singleton $ shuffleIntMap (mkStdGen gen) elems)
+               ===
+               (Set.fromList elems)
+           prop "identical to vec" $
+             \gen (elems :: [Int]) ->
+               (toList $ shuffleIntMap (mkStdGen gen) elems)
+               ===
+               (toList $ shuffle @Vector (mkStdGen gen) elems)
+
+
+
 
          describe "pure version version (inout)" $ do
            prop "is permut" $
