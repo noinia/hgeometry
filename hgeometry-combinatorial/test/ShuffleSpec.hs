@@ -57,8 +57,8 @@ spec = describe "shuffle tests" $ do
                (foldMap Set.singleton $ shuffleSeqInOut (mkStdGen gen) elems)
                ===
                (Set.fromList elems)
-           -- prop "identical to orig inout" $
-           --   \gen (elems :: [Int]) ->
-           --     (shuffleSeqInOut (mkStdGen gen) elems)
-           --     ===
-           --     (shuffleSeqInOutOrig (mkStdGen gen) elems)
+           prop "identical to orig inout" $
+             \gen (elems :: [Int]) ->
+               (shuffleSeqInOut (mkStdGen gen) elems)
+               ===
+               (shuffleSeqInOutOrig (mkStdGen gen) elems)

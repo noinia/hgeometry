@@ -20,7 +20,6 @@ import           Control.Lens (singular,ix,(&),(%%~),bimap)
 import           Data.Foldable
 import qualified Data.List as List
 import           Data.Maybe (fromMaybe)
-import           Data.Monoid
 import qualified Data.Vector.Generic as V
 import qualified Data.Vector.Generic.Mutable as MV
 import           System.Random
@@ -126,9 +125,9 @@ shuffleSeqInOutOrig gen0 = (\(Acc _ s) -> s) . foldl' step (Acc gen0 mempty)
       -- the SP here is very important; if we use a lazy pair this about 4x lower
       -- same for the ! on y below here.
 
-    step (Acc gen s) x = let (j,gen') = uniformR (0,length s) gen
-                             SP my s' = setAndRetrieve j x s
-                             !y       = fromMaybe x my
+    step (Acc gen s) x = let (!j,gen') = uniformR (0,length s) gen
+                             SP my s'  = setAndRetrieve j x s
+                             !y        = fromMaybe x my
                          in Acc gen' (s' |> y)
     -- main idea: for every next element x at position i, we generate a random index j <=
     -- i and place x at position j, and store the element y that was at position j at the
