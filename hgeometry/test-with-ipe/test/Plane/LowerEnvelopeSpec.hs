@@ -115,10 +115,11 @@ instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
     ConnectedVD vd          -> defIO vd
 
 instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
-         , Show point, Show r
+         , Show point, Show r, Show vertex
+         , Point_ vertex 2 r, IsBoxable vertex
          )
-         => HasDefaultIpeOut (VoronoiDiagram' point) where
-  type DefaultIpeOut (VoronoiDiagram' point) = Group
+         => HasDefaultIpeOut (VoronoiDiagram' vertex point) where
+  type DefaultIpeOut (VoronoiDiagram' vertex point) = Group
   defIO = ipeGroup . zipWith render (cycle $ drop 3 basicNamedColors)
         . toList . NEMap.assocs . VD.asMap
     where
