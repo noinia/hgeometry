@@ -11,6 +11,7 @@
 module HGeometry.Plane.LowerEnvelope.Connected
   ( MinimizationDiagram(..)
   , asMap
+  , mapVertices
   , Region(..)
   , toConvexPolygonIn
   , module HGeometry.Plane.LowerEnvelope.Connected.Primitives

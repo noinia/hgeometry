@@ -16,6 +16,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.BruteForce
 import           Data.Map (Map)
 import qualified Data.Map as Map
 import           HGeometry.Combinatorial.Util
+import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
@@ -30,7 +31,9 @@ import           HGeometry.Point
 bruteForceLowerEnvelope :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                            , Foldable set
                            , Show r, Show plane
-                           ) => set plane -> MinimizationDiagram r (Point 2 r) plane
+                           )
+                        => set plane
+                        -> MinimizationDiagram r (Point 2 r :+ Definers plane) plane
 bruteForceLowerEnvelope = fromVertexForm . computeVertexForm
 
 -- | Computes the vertices of the lower envelope

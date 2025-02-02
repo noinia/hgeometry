@@ -7,6 +7,7 @@ module HGeometry.Plane.LowerEnvelope.Type
 import           Control.Lens
 import qualified Data.Vector as Vector
 import           HGeometry.Algorithms.BinarySearch
+import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line.General
@@ -15,14 +16,14 @@ import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Sequence.Alternating (Alternating(..))
 
-
 --------------------------------------------------------------------------------
 -- * Data type defining a lower envelope
 
 -- | The lower enevelope of planes in R^3. (Or rather, its minimization diagram)
 data LowerEnvelope plane =
     ParallelStrips    !(Alternating Vector.Vector (VerticalOrLineEQ (NumType plane)) plane)
-  | ConnectedEnvelope !(MinimizationDiagram (NumType plane) (Point 2 (NumType plane)) plane)
+  | ConnectedEnvelope
+    !(MinimizationDiagram (NumType plane) (Point 2 (NumType plane) :+ Definers plane) plane)
 
 deriving instance (Show plane, Show (NumType plane)) => Show (LowerEnvelope plane)
 deriving instance (Eq plane, Eq (NumType plane))     => Eq (LowerEnvelope plane)

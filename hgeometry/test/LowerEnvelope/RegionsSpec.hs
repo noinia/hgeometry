@@ -1,11 +1,13 @@
 module LowerEnvelope.RegionsSpec where
 
+import           Control.Lens
 import           Data.Foldable
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Data.Map.NonEmpty as NEMap
 import           HGeometry.Combinatorial.Util
+import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Instances ()
@@ -43,7 +45,7 @@ spec = describe "lowerEnvelope tests" $ do
          it "singleton diagram" $ do
            let v = Point2 10 10 :: Point 2 R
            [h1,h2,h3] <- pure $ toList inputs
-           (asMap $ bruteForceLowerEnvelope inputs) `shouldBe`
+           (asMap $ mapVertices (^.core) $ bruteForceLowerEnvelope inputs) `shouldBe`
              mkNEMap
                [ (h1, Unbounded (Vector2 1 1)    (NonEmpty.singleton v) (Vector2 0 1))
                , (h2, Unbounded (Vector2 (-1) 0) (NonEmpty.singleton v) (Vector2 (-1) (-1)))

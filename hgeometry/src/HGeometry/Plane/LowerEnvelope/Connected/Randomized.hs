@@ -32,8 +32,8 @@ import           Witherable
 
 --------------------------------------------------------------------------------
 
-n_0 :: Int
-n_0 = 2
+-- n_0 :: Int
+-- n_0 = 2
 
 --------------------------------------------------------------------------------
 
@@ -45,31 +45,30 @@ computeVertexForm        :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Fo
 computeVertexForm gen = computeVertexForm' . shuffle gen
 
 
-
 -- | pre: imput is already a random permutation
 computeVertexForm'  :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                        , Show plane, Show r
                        )
                     => V.Vector plane -> VertexForm r plane
-computeVertexForm' planes
-  | n <= n_0  = BruteForce.computeVertexForm planes
-  | otherwise = undefined
+computeVertexForm' planes = undefined
+  -- | n <= n_0  = BruteForce.computeVertexForm planes
+  -- -- no need to check this; I think; in this case the onflict lists will just be empty
+  -- | otherwise = undefined
   where
     n    = length planes
     r    = sqrt . sqrt @Double . fromIntegral $ n
     rNet = V.take (round $ r * logBase 2 r) planes
 
+
     -- res = bruteForceLowerEnvelope rNet
 
 
 -- | Computes conflict list
-computeConflictLists        :: (Witherable set, Plane_ plane r, Ord r, Num r)
-                            => set plane
-                            -> VertexForm r plane
-                            -> Map (Point 3 r) (Definers plane, set plane)
-computeConflictLists planes = Map.mapWithKey (\v defs -> (defs, filter (below v) planes))
+withConflictLists        :: (Witherable set, Plane_ plane r, Ord r, Num r)
+                         => set plane
+                         -> VertexForm r plane
+                         -> Map (Point 3 r) (Definers plane, set plane)
+withConflictLists planes = Map.mapWithKey (\v defs -> (defs, filter (below v) planes))
   where
     below v h = verticalSideTest v h == LT -- TODO: not sure if this should be LT or 'not GT'
-
-
 -- TODO: dummy implementation for now

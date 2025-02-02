@@ -53,11 +53,12 @@ lowerEnvelopeWith                        :: forall nonEmpty plane r.
                                             ( Plane_ plane r
                                             , Ord r, Fractional r, Foldable1 nonEmpty
                                           )
-                                         => (NonEmpty plane -> MinimizationDiagram r  (Point 2 r) plane)
+                                         => (NonEmpty plane -> MinimizationDiagram r  (Point 2 r :+ Definers plane) plane)
                                          -> nonEmpty plane -> LowerEnvelope plane
 lowerEnvelopeWith minimizationDiagram hs = case distinguish (toNonEmpty hs) of
     Left lines'                   -> ParallelStrips . fromLines $ lines'
-    Right (Vector3 h1 h2 h3, hs') -> ConnectedEnvelope $ minimizationDiagram (h1 :| h2 : h3 : hs')
+    Right (Vector3 h1 h2 h3, hs') -> ConnectedEnvelope
+                                     $ minimizationDiagram (h1 :| h2 : h3 : hs')
   where
     fromLines = firstWithNeighbors (\h _ h' -> fromMaybe err $ intersectionLine h h')
               . fmap (view extra) . view Line._Alternating

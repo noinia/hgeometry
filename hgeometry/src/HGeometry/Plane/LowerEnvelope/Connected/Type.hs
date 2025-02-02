@@ -16,6 +16,8 @@ module HGeometry.Plane.LowerEnvelope.Connected.Type
   , Region(..)
   , toConvexPolygonIn
 
+  , mapVertices
+
   --   LowerEnvelope'(LowerEnvelope)
   -- , theUnboundedVertex, boundedVertices
   -- , traverseLowerEnvelope
@@ -82,12 +84,26 @@ instance Constrained (MinimizationDiagram r vertex) where
 instance CFunctor (MinimizationDiagram r vertex) where
   cmap f (MinimizationDiagram m) = MinimizationDiagram $ NEMap.mapKeys f m
 
-
-
 -- | Get the underlying Map that relates every plane in the envelope to its projected region
 asMap                         :: MinimizationDiagram r vertex plane
                               -> NEMap plane (Region r vertex)
 asMap (MinimizationDiagram m) = m
+
+
+-- | Apply some mapping function to the vertex data of each vertex
+mapVertices                           :: (vertex -> vertex')
+                                      -> MinimizationDiagram r vertex plane
+                                      -> MinimizationDiagram r vertex' plane
+mapVertices f (MinimizationDiagram m) = MinimizationDiagram $ fmap (fmap f) m
+
+-- -- | Apply some mapping function to both the vertices and the planes.
+-- cbimap :: (Ord plane, Ord plane', NumType plane ~ r, NumType plane' ~ r)
+--        => (vertex -> vertex') -> (plane -> plane')
+--        -> MinimizationDiagram r vertex plane
+--        -> MinimizationDiagram r vertex' plane'
+-- cbimap f g (MinimizationDiagram m) = MinimizationDiagram . fmap (fmap f) $ NEMap.mapKeys g m
+
+
 
 
 

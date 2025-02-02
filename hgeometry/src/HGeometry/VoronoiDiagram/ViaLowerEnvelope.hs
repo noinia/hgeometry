@@ -36,6 +36,7 @@ import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line.General
 import           HGeometry.Plane.LowerEnvelope ( MinimizationDiagram, Region(..)
                                                , lowerEnvelope, LowerEnvelope(..)
+                                               , mapVertices
                                                )
 import qualified HGeometry.Plane.LowerEnvelope as LowerEnvelope
 import           HGeometry.Point
@@ -106,7 +107,8 @@ voronoiDiagramWith :: ( Point_ point 2 r, Functor nonEmpty, Ord point
                    -> VoronoiDiagram point
 voronoiDiagramWith lowerEnv pts = case lowerEnv . fmap (\p -> pointToPlane p :+ p) $ pts of
     ParallelStrips strips -> AllColinear $ fmap (^.extra) strips
-    ConnectedEnvelope env -> ConnectedVD . VoronoiDiagram . cmap (^.extra) $ env
+    ConnectedEnvelope env ->
+      ConnectedVD . VoronoiDiagram . mapVertices (^.core) . cmap (^.extra) $ env
 
 -- | lifts the point to a plane; so that the lower envelope corresponds to the VD
 pointToPlane :: (Point_ point 2 r, Num r) => point -> Plane r

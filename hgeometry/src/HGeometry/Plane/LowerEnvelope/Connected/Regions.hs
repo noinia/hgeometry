@@ -26,6 +26,7 @@ import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Map (Map)
 import qualified Data.Map.NonEmpty as NEMap
 import           Data.Maybe (fromMaybe, listToMaybe)
 import           Data.Ord (comparing)
@@ -122,13 +123,20 @@ mergeDefiners v defs0 defs1 = case extractH0 v (coerce defs0 <> coerce defs1) of
 -- | Given the vertices of the lower envelope; compute the minimization diagram.
 --
 -- \(O(h\log h)\) assuming that the input is degenerate.
-fromVertexForm :: (Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show plane)
-               => VertexForm r plane -> MinimizationDiagram r (Point 2 r) plane
+fromVertexForm :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show plane
+                  , HasDefiners vertex plane
+                  , Ord vertex -- figure out why we need this?
+                  )
+               => Map (Point 3 r) vertex
+               -> MinimizationDiagram r (Point 2 r :+ vertex) plane
 fromVertexForm = MinimizationDiagram
-               . NEMap.mapWithKey sortAroundBoundary . mapWithKeyMerge1 (\v defs ->
-                    NEMap.fromList . fmap (,Set.singleton (v,defs)) . toNonEmpty $ defs)
+               . NEMap.mapWithKey sortAroundBoundary . mapWithKeyMerge1 (\v vertexData ->
+                    NEMap.fromList . fmap (,Set.singleton (v,vertexData))
+                    $ toNonEmpty (definersOf vertexData)
+                                                                        )
                . f
   where
+
     f = NEMap.unsafeFromMap -- FIXME
 
 -- for each vertex v, we go through its definers defs; and for each such plane h, we
@@ -142,36 +150,40 @@ fromVertexForm = MinimizationDiagram
 
 -- | Given a plane h, and the set of vertices incident to h, compute the corresponding
 -- region in the minimization diagram.
-sortAroundBoundary            :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
-                              => plane -> Set (Point 3 r, Definers plane)
-                              -> Region r (Point 2 r)
+sortAroundBoundary            :: ( Plane_ plane r, Ord r, Fractional r, Ord plane
+                                 , HasDefiners vertex plane
+                                 )
+                              => plane -> Set (Point 3 r, vertex)
+                              -> Region r (Point 2 r :+ vertex)
 sortAroundBoundary h vertices = case inCCWOrder . map project . Set.toList $ vertices of
     []        -> error "absurd: every plane has a non-empty set of incident vertices"
     [v]       -> let (u,p,w) = singleVertex h v in Unbounded u (NonEmpty.singleton p) w
     vertices' -> let edges     = zip vertices' (drop 1 vertices' <> vertices')
                  in case List.break (isInvalid h) edges of
-                            (vs, (u,v) : ws) -> let chain = NonEmpty.fromList . map (fst . fst)
+                            (vs, (u,v) : ws) -> let chain = NonEmpty.fromList
+                                                          . map (uncurry (:+) . fst)
                                                           $ ws <> vs <> [(u,v)]
                                                 in unboundedRegion h chain v u
                             (_,  [])         -> let vertices'' = fromNonEmpty
                                                                . NonEmpty.fromList
-                                                               $ map fst vertices'
+                                                               $ map (uncurry (:+)) vertices'
                                                 in Bounded vertices''
-
 
 -- | Given a plane h, and the single vertex v incident to the region of h, computes the
 -- unbounded region for h.
 --
--- In particular, returns the pair (u,p,w). h is the region to the left of u, and also the
+-- In particular, returns the triple (u,p,w). h is the region to the left of u, and also the
 -- left of w.
-singleVertex           :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
-                       => plane -> (Point 2 r, Definers plane)
-                       -> (Vector 2 r, Point 2 r, Vector 2 r)
-singleVertex h (v,defs) = fromMaybe (error "singleVertex: absurd") $
-    do (hPred,hSucc) <- findNeighbours h defs
+singleVertex           :: ( Plane_ plane r, Ord r, Fractional r, Ord plane
+                          , HasDefiners vData plane
+                          )
+                       => plane -> (Point 2 r, vData)
+                       -> (Vector 2 r, Point 2 r :+ vData, Vector 2 r)
+singleVertex h (v,vData) = fromMaybe (error "singleVertex: absurd") $
+    do (hPred,hSucc) <- findNeighbours h (definersOf vData)
        u             <- intersectionVector h hPred
        w             <- intersectionVector h hSucc
-       pure (w, v, u)
+       pure (w, v :+ vData, u)
 
 -- | Given:
 --
@@ -182,11 +194,14 @@ singleVertex h (v,defs) = fromMaybe (error "singleVertex: absurd") $
 --
 -- computes the actual region R. In particular, we compute the direction that the
 -- unbounded edges have.
-unboundedRegion              :: forall plane r.(Plane_ plane r, Ord r, Fractional r, Ord plane)
+unboundedRegion              :: forall plane r vertexData.
+                                ( Plane_ plane r, Ord r, Fractional r, Ord plane
+                                , HasDefiners vertexData plane
+                                )
                              => plane
-                             -> NonEmpty (Point 2 r)
-                             -> (Point 2 r, Definers plane) -> (Point 2 r, Definers plane)
-                             -> Region r (Point 2 r)
+                             -> NonEmpty (Point 2 r :+ vertexData)
+                             -> (Point 2 r, vertexData) -> (Point 2 r, vertexData)
+                             -> Region r (Point 2 r :+ vertexData)
 unboundedRegion h chain v@(v',_) u@(u',_)  = Unbounded wv chain wu
   where
     (v1,_,v2) = singleVertex h v
@@ -224,14 +239,17 @@ unboundedRegion h chain v@(v',_) u@(u',_)  = Unbounded wv chain wu
 -- | Test if (u,v) is an invalid edge to be on the CCW boundary of h.  this can mean that
 -- either (u,v) is not an actual edge (i.e. u and v) are connected to the vertex at
 -- infinity. Or that the edge is in the wrong orientation
-isInvalid                          :: (Plane_ plane r, Eq plane, Ord r, Fractional r)
+isInvalid                          :: ( Plane_ plane r, Eq plane, Ord r, Fractional r
+                                      , HasDefiners vertexData plane
+                                      )
                                    => plane
-                                   -> ( (Point 2 r, Definers plane)
-                                      , (Point 2 r, Definers plane)) -> Bool
-isInvalid h ((_u,defsU), (_v,defsV)) =
+                                   -> ( (Point 2 r, vertexData)
+                                      , (Point 2 r, vertexData)
+                                      ) -> Bool
+isInvalid h ((_u,uData), (_v,vData)) =
   fromMaybe (error "isInvalid: h not found in the definers!?") $ do
-      (hPredU,_) <- findNeighbours h defsU
-      (_,hSuccV) <- findNeighbours h defsV
+      (hPredU,_) <- findNeighbours h (definersOf uData)
+      (_,hSuccV) <- findNeighbours h (definersOf vData)
       pure $ hPredU /= hSuccV
     -- if (u,v) is actually a valid edge, i.e. it has h to its left, then the CCW
     -- successor w.r.t to v, and the CCW predecessor w.r.t u must be the same plane.
