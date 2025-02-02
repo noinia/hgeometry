@@ -21,7 +21,8 @@ import           Control.Lens
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Map (Map)
+import           Data.Map.NonEmpty (NEMap)
+import qualified Data.Map.NonEmpty as NEMap
 import           Data.Maybe (fromMaybe)
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
@@ -38,7 +39,7 @@ import           HGeometry.Vector
 
 -- | The vertices of a lower envelope is just a Map with every vertex its definers,
 -- i.e. the planes that define the vertex in CCW order around it.
-type VertexForm r plane = Map (Point 3 r) (Definers plane)
+type VertexForm r plane = NEMap (Point 3 r) (Definers plane)
 
 -- type VertexForm' r plane = Map (Point 3 r) (Definers plane)
 

@@ -15,6 +15,8 @@ module HGeometry.Plane.LowerEnvelope.Connected.Randomized
 import           Data.Foldable
 import           Data.Map (Map)
 import qualified Data.Map as Map
+import qualified Data.Map.NonEmpty as NEMap
+import           Data.Map.NonEmpty (NEMap)
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Vector as V
@@ -67,8 +69,8 @@ computeVertexForm' planes = undefined
 withConflictLists        :: (Witherable set, Plane_ plane r, Ord r, Num r)
                          => set plane
                          -> VertexForm r plane
-                         -> Map (Point 3 r) (Definers plane, set plane)
-withConflictLists planes = Map.mapWithKey (\v defs -> (defs, filter (below v) planes))
+                         -> NEMap (Point 3 r) (Definers plane, set plane)
+withConflictLists planes = NEMap.mapWithKey (\v defs -> (defs, filter (below v) planes))
   where
     below v h = verticalSideTest v h == LT -- TODO: not sure if this should be LT or 'not GT'
 -- TODO: dummy implementation for now

@@ -26,8 +26,8 @@ import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Map (Map)
 import qualified Data.Map.NonEmpty as NEMap
+import           Data.Map.NonEmpty (NEMap)
 import           Data.Maybe (fromMaybe, listToMaybe)
 import           Data.Ord (comparing)
 import           Data.Set (Set)
@@ -127,17 +127,14 @@ fromVertexForm :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show
                   , HasDefiners vertex plane
                   , Ord vertex -- figure out why we need this?
                   )
-               => Map (Point 3 r) vertex
+               => NEMap (Point 3 r) vertex
                -> MinimizationDiagram r (Point 2 r :+ vertex) plane
 fromVertexForm = MinimizationDiagram
                . NEMap.mapWithKey sortAroundBoundary . mapWithKeyMerge1 (\v vertexData ->
                     NEMap.fromList . fmap (,Set.singleton (v,vertexData))
                     $ toNonEmpty (definersOf vertexData)
                                                                         )
-               . f
   where
-
-    f = NEMap.unsafeFromMap -- FIXME
 
 -- for each vertex v, we go through its definers defs; and for each such plane h, we
 -- associate it with with the set {(v,defs)}. the foldMapWithKey part thus collects all

@@ -13,8 +13,10 @@ module HGeometry.Plane.LowerEnvelope.Connected.BruteForce
   , computeVertexForm
   ) where
 
+import           Data.Foldable1
 import           Data.Map (Map)
 import qualified Data.Map as Map
+import qualified Data.Map.NonEmpty as NEMap
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
@@ -28,8 +30,11 @@ import           HGeometry.Point
 -- * The naive O(n^4) time algorithm.
 
 -- | Computes the lower envelope in O(n^4) time.
+--
+-- pre: there are vertices
+--
 bruteForceLowerEnvelope :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
-                           , Foldable set
+                           , Foldable1 set
                            , Show r, Show plane
                            )
                         => set plane
@@ -38,12 +43,15 @@ bruteForceLowerEnvelope = fromVertexForm . computeVertexForm
 
 -- | Computes the vertices of the lower envelope
 --
+-- pre: there are vertices
+--
 -- O(n^4) time.
-computeVertexForm        :: (Plane_ plane r, Ord plane, Ord r, Fractional r, Foldable set
+computeVertexForm        :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Foldable1 set
                             , Show plane, Show r
                             )
                          => set plane -> VertexForm r plane
-computeVertexForm planes = unionsWithKey mergeDefiners
+computeVertexForm planes = NEMap.unsafeFromMap
+                         . unionsWithKey mergeDefiners
                          . map (asVertex planes) $ uniqueTriplets planes
 
 asVertex             :: (Plane_ plane r, Foldable f, Ord plane, Ord r, Fractional r)
