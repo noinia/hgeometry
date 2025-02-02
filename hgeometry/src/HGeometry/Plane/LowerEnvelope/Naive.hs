@@ -53,7 +53,7 @@ lowerEnvelopeWith                        :: forall nonEmpty plane r.
                                             ( Plane_ plane r
                                             , Ord r, Fractional r, Foldable1 nonEmpty
                                           )
-                                         => (NonEmpty plane -> MinimizationDiagram r plane)
+                                         => (NonEmpty plane -> MinimizationDiagram r  (Point 2 r) plane)
                                          -> nonEmpty plane -> LowerEnvelope plane
 lowerEnvelopeWith minimizationDiagram hs = case distinguish (toNonEmpty hs) of
     Left lines'                   -> ParallelStrips . fromLines $ lines'

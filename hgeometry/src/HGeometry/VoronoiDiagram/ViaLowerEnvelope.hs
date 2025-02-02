@@ -47,7 +47,7 @@ import           HGeometry.Sequence.Alternating (Alternating(..))
 -- | A Voronoi diagram
 data VoronoiDiagram point =
     AllColinear !(Alternating Vector.Vector (VerticalOrLineEQ (NumType point)) point)
-  | ConnectedVD !(VoronoiDiagram' point)
+  | ConnectedVD !(VoronoiDiagram' (Point 2 (NumType point)) point)
 
 deriving instance (Show point, Show (NumType point)) => Show (VoronoiDiagram point)
 deriving instance (Eq point, Eq (NumType point))     => Eq   (VoronoiDiagram point)
@@ -59,23 +59,24 @@ type instance Dimension (VoronoiDiagram point) = 2 -- Dimension point
 --------------------------------------------------------------------------------
 
 -- | A connected VoronoiDiagram
-newtype VoronoiDiagram' point = VoronoiDiagram (MinimizationDiagram (NumType point) point)
+newtype VoronoiDiagram' vertex point =
+  VoronoiDiagram (MinimizationDiagram (NumType point) vertex point)
 
-deriving instance (Show point, Show (NumType point)) => Show (VoronoiDiagram' point)
-deriving instance (Eq point, Eq (NumType point))     => Eq   (VoronoiDiagram' point)
+deriving instance (Show point, Show vertex, Show (NumType point)) => Show (VoronoiDiagram' vertex point)
+deriving instance (Eq point, Eq vertex, Eq (NumType point))     => Eq   (VoronoiDiagram' vertex point)
 
-type instance NumType   (VoronoiDiagram' point) = NumType point
-type instance Dimension (VoronoiDiagram' point) = 2 -- Dimension point
+type instance NumType   (VoronoiDiagram' vertex point) = NumType point
+type instance Dimension (VoronoiDiagram' vertex point) = 2 -- Dimension point
 
 -- | Iso to Access the underlying LowerEnvelope
-_VoronoiDiagramLowerEnvelope :: Iso (VoronoiDiagram' point) (VoronoiDiagram' point')
-                                    (MinimizationDiagram (NumType point) point)
-                                    (MinimizationDiagram (NumType point') point')
+_VoronoiDiagramLowerEnvelope :: Iso (VoronoiDiagram' vertex point) (VoronoiDiagram' vertex point')
+                                    (MinimizationDiagram (NumType point) vertex point)
+                                    (MinimizationDiagram (NumType point') vertex point')
 _VoronoiDiagramLowerEnvelope = coerced
 
 -- | Get, for each point, its Voronoi region
 asMap :: (Point_ point 2 r, Ord point)
-      => VoronoiDiagram' point -> NEMap.NEMap point (Region r (Point 2 r))
+      => VoronoiDiagram' vertex point -> NEMap.NEMap point (Region r vertex)
 asMap = LowerEnvelope.asMap . view _VoronoiDiagramLowerEnvelope
 
 --------------------------------------------------------------------------------
@@ -106,7 +107,6 @@ voronoiDiagramWith :: ( Point_ point 2 r, Functor nonEmpty, Ord point
 voronoiDiagramWith lowerEnv pts = case lowerEnv . fmap (\p -> pointToPlane p :+ p) $ pts of
     ParallelStrips strips -> AllColinear $ fmap (^.extra) strips
     ConnectedEnvelope env -> ConnectedVD . VoronoiDiagram . cmap (^.extra) $ env
-
 
 -- | lifts the point to a plane; so that the lower envelope corresponds to the VD
 pointToPlane :: (Point_ point 2 r, Num r) => point -> Plane r

@@ -30,7 +30,7 @@ import           HGeometry.Point
 bruteForceLowerEnvelope :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                            , Foldable set
                            , Show r, Show plane
-                           ) => set plane -> MinimizationDiagram r plane
+                           ) => set plane -> MinimizationDiagram r (Point 2 r) plane
 bruteForceLowerEnvelope = fromVertexForm . computeVertexForm
 
 -- | Computes the vertices of the lower envelope

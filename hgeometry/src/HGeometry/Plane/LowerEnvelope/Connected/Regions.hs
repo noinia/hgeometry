@@ -123,7 +123,7 @@ mergeDefiners v defs0 defs1 = case extractH0 v (coerce defs0 <> coerce defs1) of
 --
 -- \(O(h\log h)\) assuming that the input is degenerate.
 fromVertexForm :: (Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show plane)
-               => VertexForm r plane -> MinimizationDiagram r plane
+               => VertexForm r plane -> MinimizationDiagram r (Point 2 r) plane
 fromVertexForm = MinimizationDiagram
                . NEMap.mapWithKey sortAroundBoundary . mapWithKeyMerge1 (\v defs ->
                     NEMap.fromList . fmap (,Set.singleton (v,defs)) . toNonEmpty $ defs)
