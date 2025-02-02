@@ -26,12 +26,12 @@ import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map.NonEmpty as NEMap
 import           Data.Map.NonEmpty (NEMap)
+import qualified Data.Map.NonEmpty as NEMap
 import           Data.Maybe (fromMaybe, listToMaybe)
 import           Data.Ord (comparing)
-import           Data.Set (Set)
-import qualified Data.Set as Set
+import           Data.Set.NonEmpty (NESet)
+import qualified Data.Set.NonEmpty as NESet
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
@@ -122,7 +122,7 @@ mergeDefiners v defs0 defs1 = case extractH0 v (coerce defs0 <> coerce defs1) of
 
 -- | Given the vertices of the lower envelope; compute the minimization diagram.
 --
--- \(O(h\log h)\) assuming that the input is degenerate.
+-- \(O(h\log h)\) assuming that the input is non-degenerate.
 fromVertexForm :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show plane
                   , HasDefiners vertex plane
                   , Ord vertex -- figure out why we need this?
@@ -131,11 +131,9 @@ fromVertexForm :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show
                -> MinimizationDiagram r (Point 2 r :+ vertex) plane
 fromVertexForm = MinimizationDiagram
                . NEMap.mapWithKey sortAroundBoundary . mapWithKeyMerge1 (\v vertexData ->
-                    NEMap.fromList . fmap (,Set.singleton (v,vertexData))
+                    NEMap.fromList . fmap (,NESet.singleton (v,vertexData))
                     $ toNonEmpty (definersOf vertexData)
                                                                         )
-  where
-
 -- for each vertex v, we go through its definers defs; and for each such plane h, we
 -- associate it with with the set {(v,defs)}. the foldMapWithKey part thus collects all
 -- vertices (together with their definers) incident to h. i.e. it combines these sets {(v,
@@ -150,13 +148,12 @@ fromVertexForm = MinimizationDiagram
 sortAroundBoundary            :: ( Plane_ plane r, Ord r, Fractional r, Ord plane
                                  , HasDefiners vertex plane
                                  )
-                              => plane -> Set (Point 3 r, vertex)
+                              => plane -> NESet (Point 3 r, vertex)
                               -> Region r (Point 2 r :+ vertex)
-sortAroundBoundary h vertices = case inCCWOrder . map project . Set.toList $ vertices of
-    []        -> error "absurd: every plane has a non-empty set of incident vertices"
-    [v]       -> let (u,p,w) = singleVertex h v in Unbounded u (NonEmpty.singleton p) w
-    vertices' -> let edges     = zip vertices' (drop 1 vertices' <> vertices')
-                 in case List.break (isInvalid h) edges of
+sortAroundBoundary h vertices = case discr . inCCWOrder . fmap project . NESet.toList $ vertices of
+    Left v          -> let (u,p,w) = singleVertex h v in Unbounded u (NonEmpty.singleton p) w
+    Right vertices' -> let edges     = zip vertices' (drop 1 vertices' <> vertices')
+                       in case List.break (isInvalid h) edges of
                             (vs, (u,v) : ws) -> let chain = NonEmpty.fromList
                                                           . map (uncurry (:+) . fst)
                                                           $ ws <> vs <> [(u,v)]
@@ -165,6 +162,10 @@ sortAroundBoundary h vertices = case inCCWOrder . map project . Set.toList $ ver
                                                                . NonEmpty.fromList
                                                                $ map (uncurry (:+)) vertices'
                                                 in Bounded vertices''
+  where
+    discr = \case
+      v :| [] -> Left  v
+      vs      -> Right (F.toList vs)
 
 -- | Given a plane h, and the single vertex v incident to the region of h, computes the
 -- unbounded region for h.
@@ -258,9 +259,9 @@ project (Point3 x y _, loc) = (Point2 x y, loc)
 
 -- | Given a list of vertices of a (possibly unbounded) convex polygonal region (in
 -- arbitrary orientation), sort the vertices so that they are listed in CCW order.
-inCCWOrder     :: (Ord r, Fractional r) => [(Point 2 r, a)] -> [(Point 2 r, a)]
+inCCWOrder     :: (Ord r, Fractional r) => NonEmpty (Point 2 r, a) -> NonEmpty (Point 2 r, a)
 inCCWOrder pts = case pts of
-  ((p,_):(q,_):_) -> let c               = p .+^ ((q .-. p) ^/ 2)
-                         cmp (a,_) (b,_) = ccwCmpAround c a b <> cmpByDistanceTo c a b
-                     in List.sortBy cmp pts
-  _               -> pts -- already sorted.
+  ((p,_):|(q,_):_) -> let c               = p .+^ ((q .-. p) ^/ 2)
+                          cmp (a,_) (b,_) = ccwCmpAround c a b <> cmpByDistanceTo c a b
+                      in NonEmpty.sortBy cmp pts
+  _                -> pts -- already sorted.

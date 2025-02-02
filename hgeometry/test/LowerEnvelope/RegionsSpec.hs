@@ -4,7 +4,6 @@ import           Control.Lens
 import           Data.Foldable
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
 import qualified Data.Map.NonEmpty as NEMap
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
@@ -37,9 +36,9 @@ spec = describe "lowerEnvelope tests" $ do
            verifyOnPlane h1 h2 h3
          it "asVertex" $ do
            computeVertexForm inputs `shouldBe`
-             Map.singleton (Point3 10 10 10) (fromCCWList inputs)
+             NEMap.singleton (Point3 10 10 10) (fromCCWList inputs)
          prop "belowall" $ \h1 h2 (h3 :: Plane R) ->
-           let vertices = Map.toAscList $ computeVertexForm [h1,h2,h3]
+           let vertices = NEMap.toAscList $ computeVertexForm $ NonEmpty.fromList [h1,h2,h3]
            in all (\(v, _) -> v `belowAll` [h1,h2,h3]) vertices
 
          it "singleton diagram" $ do
