@@ -428,6 +428,11 @@ library
         HGeometry.Plane.LowerEnvelope.Connected.Graph
 
 
+        HGeometry.Plane.LowerEnvelope.Connected.BruteForce
+        HGeometry.Plane.LowerEnvelope.Connected.Randomized
+
+
+
         HGeometry.VoronoiDiagram
         HGeometry.VoronoiDiagram.ViaLowerEnvelope
 
@@ -465,7 +470,6 @@ library
         HGeometry.Plane.LowerEnvelope.Connected.VertexForm
         HGeometry.Plane.LowerEnvelope.Connected.Regions
         HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
-        HGeometry.Plane.LowerEnvelope.Connected.BruteForce
         HGeometry.Plane.LowerEnvelope.Connected.Separator
 
         -- HGeometry.Plane.LowerEnvelope.DivideAndConquer
@@ -740,6 +744,7 @@ test-suite hspec
       VerticalRayShootingSpec
       LineSegment.BentheyOttmanNeighbourSpec
       Graphics.CameraSpec
+      Plane.LowerEnvSpec
 
   hs-source-dirs: test
   build-depends:
