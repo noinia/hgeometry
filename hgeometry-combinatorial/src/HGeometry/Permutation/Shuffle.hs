@@ -54,6 +54,8 @@ shuffle gen0 = construct . Builder.foldable
           | i < 1     = Nothing
           | otherwise = Just . bimap (i,) (pred i,) $ uniformR (0,i) gen
 
+
+
 -- | Returns a strict IntMap
 shuffleIntMap      :: (RandomGen gen, Foldable f) => gen -> f a -> IntMap.IntMap a
 shuffleIntMap gen0 = build . IntMap.fromList . zip [0..] . toList
