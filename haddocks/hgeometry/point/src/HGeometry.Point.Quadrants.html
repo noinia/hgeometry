@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679218196"><span id="local-6989586621679218197"></span></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679218333"><span id="local-6989586621679218334"></span></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
 </span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Point.Quadrants</span><span>
 </span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
@@ -15,7 +15,7 @@
 </span><span id="line-15"></span><span>
 </span><span id="line-16"></span><span class="annot"><span class="hs-comment">-- | Quadrants of two dimensional points. in CCW order</span></span><span>
 </span><span id="line-17"></span><span class="hs-keyword">data</span><span> </span><span id="Quadrant"><span class="annot"><a href="HGeometry.Point.Quadrants.html#Quadrant"><span class="hs-identifier hs-var">Quadrant</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="TopRight"><span class="annot"><a href="HGeometry.Point.Quadrants.html#TopRight"><span class="hs-identifier hs-var">TopRight</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="TopLeft"><span class="annot"><a href="HGeometry.Point.Quadrants.html#TopLeft"><span class="hs-identifier hs-var">TopLeft</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="BottomLeft"><span class="annot"><a href="HGeometry.Point.Quadrants.html#BottomLeft"><span class="hs-identifier hs-var">BottomLeft</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="BottomRight"><span class="annot"><a href="HGeometry.Point.Quadrants.html#BottomRight"><span class="hs-identifier hs-var">BottomRight</span></a></span></span><span>
-</span><span id="line-18"></span><span>              </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679218203"><span id="local-6989586621679218205"><span id="local-6989586621679218209"><span class="annot"><span class="annottext">Int -&gt; Quadrant -&gt; ShowS
+</span><span id="line-18"></span><span>              </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679218340"><span id="local-6989586621679218342"><span id="local-6989586621679218346"><span class="annot"><span class="annottext">Int -&gt; Quadrant -&gt; ShowS
 [Quadrant] -&gt; ShowS
 Quadrant -&gt; String
 (Int -&gt; Quadrant -&gt; ShowS)
@@ -28,7 +28,7 @@ $cshow :: Quadrant -&gt; String
 show :: Quadrant -&gt; String
 $cshowList :: [Quadrant] -&gt; ShowS
 showList :: [Quadrant] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679218214"><span id="local-6989586621679218218"><span id="local-6989586621679218221"><span id="local-6989586621679218228"><span class="annot"><span class="annottext">ReadPrec [Quadrant]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679218351"><span id="local-6989586621679218355"><span id="local-6989586621679218358"><span id="local-6989586621679218365"><span class="annot"><span class="annottext">ReadPrec [Quadrant]
 ReadPrec Quadrant
 Int -&gt; ReadS Quadrant
 ReadS [Quadrant]
@@ -48,7 +48,7 @@ $creadPrec :: ReadPrec Quadrant
 readPrec :: ReadPrec Quadrant
 $creadListPrec :: ReadPrec [Quadrant]
 readListPrec :: ReadPrec [Quadrant]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679218235"><span id="local-6989586621679218240"><span class="annot"><span class="annottext">Quadrant -&gt; Quadrant -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679218372"><span id="local-6989586621679218377"><span class="annot"><span class="annottext">Quadrant -&gt; Quadrant -&gt; Bool
 (Quadrant -&gt; Quadrant -&gt; Bool)
 -&gt; (Quadrant -&gt; Quadrant -&gt; Bool) -&gt; Eq Quadrant
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -56,7 +56,7 @@ $c== :: Quadrant -&gt; Quadrant -&gt; Bool
 == :: Quadrant -&gt; Quadrant -&gt; Bool
 $c/= :: Quadrant -&gt; Quadrant -&gt; Bool
 /= :: Quadrant -&gt; Quadrant -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679218247"><span id="local-6989586621679218251"><span id="local-6989586621679218255"><span id="local-6989586621679218259"><span id="local-6989586621679218262"><span id="local-6989586621679218265"><span id="local-6989586621679218268"><span class="annot"><span class="annottext">Eq Quadrant
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679218384"><span id="local-6989586621679218388"><span id="local-6989586621679218392"><span id="local-6989586621679218396"><span id="local-6989586621679218399"><span id="local-6989586621679218402"><span id="local-6989586621679218405"><span class="annot"><span class="annottext">Eq Quadrant
 Eq Quadrant =&gt;
 (Quadrant -&gt; Quadrant -&gt; Ordering)
 -&gt; (Quadrant -&gt; Quadrant -&gt; Bool)
@@ -93,7 +93,7 @@ $cmax :: Quadrant -&gt; Quadrant -&gt; Quadrant
 max :: Quadrant -&gt; Quadrant -&gt; Quadrant
 $cmin :: Quadrant -&gt; Quadrant -&gt; Quadrant
 min :: Quadrant -&gt; Quadrant -&gt; Quadrant
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679218276"><span id="local-6989586621679218285"><span id="local-6989586621679218292"><span id="local-6989586621679218302"><span id="local-6989586621679218305"><span id="local-6989586621679218310"><span id="local-6989586621679218316"><span id="local-6989586621679218320"><span class="annot"><span class="annottext">Int -&gt; Quadrant
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679218413"><span id="local-6989586621679218422"><span id="local-6989586621679218429"><span id="local-6989586621679218439"><span id="local-6989586621679218442"><span id="local-6989586621679218447"><span id="local-6989586621679218453"><span id="local-6989586621679218457"><span class="annot"><span class="annottext">Int -&gt; Quadrant
 Quadrant -&gt; Int
 Quadrant -&gt; [Quadrant]
 Quadrant -&gt; Quadrant
@@ -134,7 +134,7 @@ $cenumFromTo :: Quadrant -&gt; Quadrant -&gt; [Quadrant]
 enumFromTo :: Quadrant -&gt; Quadrant -&gt; [Quadrant]
 $cenumFromThenTo :: Quadrant -&gt; Quadrant -&gt; Quadrant -&gt; [Quadrant]
 enumFromThenTo :: Quadrant -&gt; Quadrant -&gt; Quadrant -&gt; [Quadrant]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679218328"><span id="local-6989586621679218330"><span class="annot"><span class="annottext">Quadrant
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679218465"><span id="local-6989586621679218467"><span class="annot"><span class="annottext">Quadrant
 Quadrant -&gt; Quadrant -&gt; Bounded Quadrant
 forall a. a -&gt; a -&gt; Bounded a
 $cminBound :: Quadrant
@@ -146,15 +146,15 @@ maxBound :: Quadrant
 </span><span id="line-20"></span><span class="hs-comment">-- | Quadrants around point c; quadrants are closed on their &quot;previous&quot;</span><span>
 </span><span id="line-21"></span><span class="hs-comment">-- boundary (i..e the boundary with the previous quadrant in the CCW order),</span><span>
 </span><span id="line-22"></span><span class="hs-comment">-- open on next boundary. The origin itself is assigned the topRight quadrant</span><span>
-</span><span id="line-23"></span><span id="local-6989586621679218129"><span id="local-6989586621679218130"><span class="annot"><a href="HGeometry.Point.Quadrants.html#quadrantWith"><span class="hs-identifier hs-type">quadrantWith</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679218129"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679218130"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679218129"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-24"></span><span>                 </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679218130"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679218130"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Point.Quadrants.html#Quadrant"><span class="hs-identifier hs-type">Quadrant</span></a></span></span></span><span>
+</span><span id="line-23"></span><span id="local-6989586621679218266"><span id="local-6989586621679218267"><span class="annot"><a href="HGeometry.Point.Quadrants.html#quadrantWith"><span class="hs-identifier hs-type">quadrantWith</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679218266"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679218267"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679218266"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span>                 </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679218267"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679218267"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Point.Quadrants.html#Quadrant"><span class="hs-identifier hs-type">Quadrant</span></a></span></span></span><span>
 </span><span id="line-25"></span><span id="quadrantWith"><span class="annot"><span class="annottext">quadrantWith :: forall r point.
 (Ord r, Point_ point 2 r) =&gt;
 point -&gt; point -&gt; Quadrant
-</span><a href="HGeometry.Point.Quadrants.html#quadrantWith"><span class="hs-identifier hs-var hs-var">quadrantWith</span></a></span></span><span> </span><span id="local-6989586621679218584"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679218584"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679218585"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679218585"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679218584"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+</span><a href="HGeometry.Point.Quadrants.html#quadrantWith"><span class="hs-identifier hs-var hs-var">quadrantWith</span></a></span></span><span> </span><span id="local-6989586621679218721"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679218721"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679218722"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679218722"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679218721"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
 forall (d :: Natural) point r.
@@ -164,7 +164,7 @@ IndexedLens' Int point r
 </span><a href="HGeometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
 forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
 </span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679218585"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+</span><a href="#local-6989586621679218722"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
 forall (d :: Natural) point r.
@@ -173,7 +173,7 @@ IndexedLens' Int point r
 IndexedLens' Int point r
 </span><a href="HGeometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-26"></span><span>                        </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679218584"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+</span><a href="#local-6989586621679218721"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
 forall (d :: Natural) point r.
@@ -183,7 +183,7 @@ IndexedLens' Int point r
 </span><a href="HGeometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
 forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
 </span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679218585"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+</span><a href="#local-6989586621679218722"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
 forall (d :: Natural) point r.
@@ -229,7 +229,7 @@ IndexedLens' Int point r
 </span><a href="HGeometry.Point.Quadrants.html#BottomRight"><span class="hs-identifier hs-var">BottomRight</span></a></span><span>
 </span><span id="line-36"></span><span>
 </span><span id="line-37"></span><span class="annot"><span class="hs-comment">-- | Quadrants with respect to the origin</span></span><span>
-</span><span id="line-38"></span><span id="local-6989586621679218180"><span id="local-6989586621679218181"><span class="annot"><a href="HGeometry.Point.Quadrants.html#quadrant"><span class="hs-identifier hs-type">quadrant</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679218180"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679218180"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#ConstructablePoint_"><span class="hs-identifier hs-type">ConstructablePoint_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679218181"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679218180"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679218181"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Point.Quadrants.html#Quadrant"><span class="hs-identifier hs-type">Quadrant</span></a></span></span></span><span>
+</span><span id="line-38"></span><span id="local-6989586621679218317"><span id="local-6989586621679218318"><span class="annot"><a href="HGeometry.Point.Quadrants.html#quadrant"><span class="hs-identifier hs-type">quadrant</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679218317"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679218317"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#ConstructablePoint_"><span class="hs-identifier hs-type">ConstructablePoint_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679218318"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679218317"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679218318"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Point.Quadrants.html#Quadrant"><span class="hs-identifier hs-type">Quadrant</span></a></span></span></span><span>
 </span><span id="line-39"></span><span id="quadrant"><span class="annot"><span class="annottext">quadrant :: forall r point.
 (Ord r, Num r, ConstructablePoint_ point 2 r) =&gt;
 point -&gt; Quadrant
@@ -248,72 +248,72 @@ point
 </span><span id="line-43"></span><span class="hs-comment">-- reported in the order topLeft, topRight, bottomLeft, bottomRight. The points</span><span>
 </span><span id="line-44"></span><span class="hs-comment">-- are in the same order as they were in the original input lists.</span><span>
 </span><span id="line-45"></span><span class="hs-comment">-- Points with the same x-or y coordinate as p, are &quot;rounded&quot; to above.</span><span>
-</span><span id="line-46"></span><span id="local-6989586621679218191"><span id="local-6989586621679218192"><span class="annot"><a href="HGeometry.Point.Quadrants.html#partitionIntoQuadrants"><span class="hs-identifier hs-type">partitionIntoQuadrants</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679218191"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679218192"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679218191"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-47"></span><span>                             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679218192"><span class="hs-identifier hs-type">point</span></a></span><span>
-</span><span id="line-48"></span><span>                             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679218192"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-49"></span><span>                             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679218192"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679218192"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-50"></span><span>                                </span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679218192"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679218192"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-46"></span><span id="local-6989586621679218328"><span id="local-6989586621679218329"><span class="annot"><a href="HGeometry.Point.Quadrants.html#partitionIntoQuadrants"><span class="hs-identifier hs-type">partitionIntoQuadrants</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679218328"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Point.Class.html#Point_"><span class="hs-identifier hs-type">Point_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679218329"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679218328"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>                             </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679218329"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-48"></span><span>                             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679218329"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-49"></span><span>                             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679218329"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679218329"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-50"></span><span>                                </span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679218329"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679218329"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-51"></span><span>                                </span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-52"></span><span id="partitionIntoQuadrants"><span class="annot"><span class="annottext">partitionIntoQuadrants :: forall r point.
 (Ord r, Point_ point 2 r) =&gt;
 point -&gt; [point] -&gt; ([point], [point], [point], [point])
-</span><a href="HGeometry.Point.Quadrants.html#partitionIntoQuadrants"><span class="hs-identifier hs-var hs-var">partitionIntoQuadrants</span></a></span></span><span> </span><span id="local-6989586621679218895"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679218895"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679218896"><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679218896"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679218897"><span class="hs-identifier hs-var">topL</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679218898"><span class="hs-identifier hs-var">topR</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679218899"><span class="hs-identifier hs-var">bottomL</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679218900"><span class="hs-identifier hs-var">bottomR</span></a></span><span class="hs-special">)</span><span>
+</span><a href="HGeometry.Point.Quadrants.html#partitionIntoQuadrants"><span class="hs-identifier hs-var hs-var">partitionIntoQuadrants</span></a></span></span><span> </span><span id="local-6989586621679219032"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679219032"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679219033"><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679219033"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679219034"><span class="hs-identifier hs-var">topL</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679219035"><span class="hs-identifier hs-var">topR</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679219036"><span class="hs-identifier hs-var">bottomL</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679219037"><span class="hs-identifier hs-var">bottomR</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-53"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-54"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679218901"><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679218901"><span class="hs-identifier hs-var">below'</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679218902"><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679218902"><span class="hs-identifier hs-var">above'</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(point -&gt; Bool) -&gt; [point] -&gt; ([point], [point])
+</span><span id="line-54"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679219038"><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679219038"><span class="hs-identifier hs-var">below'</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679219039"><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679219039"><span class="hs-identifier hs-var">above'</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(point -&gt; Bool) -&gt; [point] -&gt; ([point], [point])
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
 </span><span class="hs-identifier hs-var">L.partition</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Getting r point r -&gt; point -&gt; Bool
-</span><a href="#local-6989586621679218904"><span class="hs-identifier hs-var">on</span></a></span><span> </span><span class="annot"><span class="annottext">Getting r point r
+</span><a href="#local-6989586621679219041"><span class="hs-identifier hs-var">on</span></a></span><span> </span><span class="annot"><span class="annottext">Getting r point r
 forall (d :: Natural) point r.
 (2 &lt;= d, Point_ point d r) =&gt;
 IndexedLens' Int point r
 IndexedLens' Int point r
 </span><a href="HGeometry.Point.Class.html#yCoord"><span class="hs-identifier hs-var">yCoord</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679218896"><span class="hs-identifier hs-var">pts</span></a></span><span>
-</span><span id="line-55"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679218899"><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679218899"><span class="hs-identifier hs-var">bottomL</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679218900"><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679218900"><span class="hs-identifier hs-var">bottomR</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(point -&gt; Bool) -&gt; [point] -&gt; ([point], [point])
+</span><a href="#local-6989586621679219033"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-55"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679219036"><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679219036"><span class="hs-identifier hs-var">bottomL</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679219037"><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679219037"><span class="hs-identifier hs-var">bottomR</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(point -&gt; Bool) -&gt; [point] -&gt; ([point], [point])
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
 </span><span class="hs-identifier hs-var">L.partition</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Getting r point r -&gt; point -&gt; Bool
-</span><a href="#local-6989586621679218904"><span class="hs-identifier hs-var">on</span></a></span><span> </span><span class="annot"><span class="annottext">Getting r point r
+</span><a href="#local-6989586621679219041"><span class="hs-identifier hs-var">on</span></a></span><span> </span><span class="annot"><span class="annottext">Getting r point r
 forall (d :: Natural) point r.
 (1 &lt;= d, Point_ point d r) =&gt;
 IndexedLens' Int point r
 IndexedLens' Int point r
 </span><a href="HGeometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679218901"><span class="hs-identifier hs-var">below'</span></a></span><span>
-</span><span id="line-56"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679218897"><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679218897"><span class="hs-identifier hs-var">topL</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679218898"><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679218898"><span class="hs-identifier hs-var">topR</span></a></span></span><span class="hs-special">)</span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(point -&gt; Bool) -&gt; [point] -&gt; ([point], [point])
+</span><a href="#local-6989586621679219038"><span class="hs-identifier hs-var">below'</span></a></span><span>
+</span><span id="line-56"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679219034"><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679219034"><span class="hs-identifier hs-var">topL</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679219035"><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679219035"><span class="hs-identifier hs-var">topR</span></a></span></span><span class="hs-special">)</span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(point -&gt; Bool) -&gt; [point] -&gt; ([point], [point])
 forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
 </span><span class="hs-identifier hs-var">L.partition</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Getting r point r -&gt; point -&gt; Bool
-</span><a href="#local-6989586621679218904"><span class="hs-identifier hs-var">on</span></a></span><span> </span><span class="annot"><span class="annottext">Getting r point r
+</span><a href="#local-6989586621679219041"><span class="hs-identifier hs-var">on</span></a></span><span> </span><span class="annot"><span class="annottext">Getting r point r
 forall (d :: Natural) point r.
 (1 &lt;= d, Point_ point d r) =&gt;
 IndexedLens' Int point r
 IndexedLens' Int point r
 </span><a href="HGeometry.Point.Class.html#xCoord"><span class="hs-identifier hs-var">xCoord</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[point]
-</span><a href="#local-6989586621679218902"><span class="hs-identifier hs-var">above'</span></a></span><span>
+</span><a href="#local-6989586621679219039"><span class="hs-identifier hs-var">above'</span></a></span><span>
 </span><span id="line-57"></span><span>
-</span><span id="line-58"></span><span>    </span><span id="local-6989586621679218904"><span class="annot"><span class="annottext">on :: Getting r point r -&gt; point -&gt; Bool
-</span><a href="#local-6989586621679218904"><span class="hs-identifier hs-var hs-var">on</span></a></span></span><span> </span><span id="local-6989586621679218905"><span class="annot"><span class="annottext">Getting r point r
-</span><a href="#local-6989586621679218905"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679218906"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679218906"><span class="hs-identifier hs-var">q</span></a></span></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679218906"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+</span><span id="line-58"></span><span>    </span><span id="local-6989586621679219041"><span class="annot"><span class="annottext">on :: Getting r point r -&gt; point -&gt; Bool
+</span><a href="#local-6989586621679219041"><span class="hs-identifier hs-var hs-var">on</span></a></span></span><span> </span><span id="local-6989586621679219042"><span class="annot"><span class="annottext">Getting r point r
+</span><a href="#local-6989586621679219042"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679219043"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679219043"><span class="hs-identifier hs-var">q</span></a></span></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679219043"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
-</span><a href="#local-6989586621679218905"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+</span><a href="#local-6989586621679219042"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679218895"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+</span><a href="#local-6989586621679219032"><span class="hs-identifier hs-var">c</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
-</span><a href="#local-6989586621679218905"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><a href="#local-6989586621679219042"><span class="hs-identifier hs-var">l</span></a></span><span>
 </span><span id="line-59"></span></pre></body></html>
