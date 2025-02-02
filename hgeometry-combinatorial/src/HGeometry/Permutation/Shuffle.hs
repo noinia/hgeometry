@@ -10,10 +10,11 @@
 --------------------------------------------------------------------------------
 module HGeometry.Permutation.Shuffle
   ( shuffle
+  , shuffleSeqInOut
+  -- * For experimentation purposes only
+  , shuffleSeqInOutOrig
   , shuffleIntMap
   , shuffleSeq
-  , shuffleSeqInOut
-  , shuffleSeqInOutOrig
   ) where
 
 import           Control.Lens (singular,ix,(&),(%%~),bimap)
@@ -55,38 +56,12 @@ shuffle gen0 = construct . Builder.foldable
           | otherwise = Just . bimap (i,) (pred i,) $ uniformR (0,i) gen
 
 
-
--- | Returns a strict IntMap
-shuffleIntMap      :: (RandomGen gen, Foldable f) => gen -> f a -> IntMap.IntMap a
-shuffleIntMap gen0 = build . IntMap.fromList . zip [0..] . toList
-  where
-    build m = foldl' swap m $ List.unfoldr f (pred $ IntMap.size m, gen0)
-      where
-        f (i,gen)
-          | i < 1     = Nothing
-          | otherwise = Just . bimap (i,) (pred i,) $ uniformR (0,i) gen
-
-    swap m (i,j) = IntMap.insert i (m IntMap.! j) . IntMap.insert j (m IntMap.! i) $ m
-
-
--- | Version of Fissher-Yates shuffle that returns a Seq.
---
--- O(n\log n)
-shuffleSeq      :: (RandomGen gen, Foldable f) => gen -> f a -> Seq.Seq a
-shuffleSeq gen0 = build mempty gen0 . foldMap Seq.singleton
-  where
-    setAndRetrieve i x s = s&singular (ix i) %%~ \y -> Acc y x
-    build s gen = \case
-      Empty             -> s
-      (remaining :|> x) -> let i              = length remaining
-                               (j,gen')       = uniformR (0,i) gen
-                               (Acc y remaining')
-                                 | i /= j     = setAndRetrieve j x remaining
-                                 | otherwise  = Acc x remaining
-                           in build (y <| s) gen' remaining'
-
 --------------------------------------------------------------------------------
+-- * "Pure" versions
 
+-- below are a bunch of implementations that try to avoid using vectors/mutability.  If
+-- you care about that the "best" version is the shuffleSeqInOut version. The rest is all
+-- slower.
 
 -- | "Inside-out" version of Fissher-Yates shuffle that returns a Seq.  see
 -- https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_%22inside-out%22_algorithm
@@ -143,3 +118,36 @@ data SP a b = SP !(Maybe a) !b
 instance Applicative (SP a) where
   pure x            = SP Nothing x
   SP a f <*> SP _ x = SP a (f x)
+
+
+
+--------------------------------------------------------------------------------
+
+-- | Returns a strict IntMap
+shuffleIntMap      :: (RandomGen gen, Foldable f) => gen -> f a -> IntMap.IntMap a
+shuffleIntMap gen0 = build . IntMap.fromList . zip [0..] . toList
+  where
+    build m = foldl' swap m $ List.unfoldr f (pred $ IntMap.size m, gen0)
+      where
+        f (i,gen)
+          | i < 1     = Nothing
+          | otherwise = Just . bimap (i,) (pred i,) $ uniformR (0,i) gen
+
+    swap m (i,j) = IntMap.insert i (m IntMap.! j) . IntMap.insert j (m IntMap.! i) $ m
+
+
+-- | Version of Fissher-Yates shuffle that returns a Seq.
+--
+-- O(n\log n)
+shuffleSeq      :: (RandomGen gen, Foldable f) => gen -> f a -> Seq.Seq a
+shuffleSeq gen0 = build mempty gen0 . foldMap Seq.singleton
+  where
+    setAndRetrieve i x s = s&singular (ix i) %%~ \y -> Acc y x
+    build s gen = \case
+      Empty             -> s
+      (remaining :|> x) -> let i              = length remaining
+                               (j,gen')       = uniformR (0,i) gen
+                               (Acc y remaining')
+                                 | i /= j     = setAndRetrieve j x remaining
+                                 | otherwise  = Acc x remaining
+                           in build (y <| s) gen' remaining'
