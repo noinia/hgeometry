@@ -54,6 +54,12 @@ instance HasDefiners (Definers plane) plane where
 instance HasDefiners (core :+ Definers plane) plane where
   definersOf = view extra
 
+-- instance HasDefiners (core :+ (Definers plane, b)) plane where
+--   definersOf = view (extra._1)
+
+instance HasDefiners (Definers plane, b) plane where
+  definersOf = fst
+
 ----------------------------------------
 -- *  The planes defining a vertex
 
