@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 module Plane.LowerEnvSpec
   ( spec
   ) where
@@ -31,15 +32,49 @@ import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 
+import Debug.Trace
 
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
+
+newtype NonDegenerate plane = NonDegenerate (NonEmpty plane)
+  deriving newtype (Show,Eq,Foldable,Functor)
+
+instance Arbitrary (NonDegenerate (Plane Int)) where
+  arbitrary = do h0 <- arbitrary
+                 h1 <- arbitrary `suchThat` nonParallelWith h0
+                 h2 <- arbitrary `suchThat` \h' -> nonParallelWith h0 h' && nonParallelWith h1 h'
+                 rest <- arbitrary
+                 pure . NonDegenerate $ h0 :| (h1 : h2 : rest)
+
+instance Arbitrary (NonDegenerate (Plane R)) where
+  arbitrary = fmap f <$> arbitrary
+    where
+      f :: Plane Int -> Plane R
+      f = fmap fromIntegral
+
+nonParallelWith (Plane_ a b c) (Plane_ a' b' c') = let s = Set.fromList [a,b,c,a',b',c']
+                                                   in length s == 6
+
+
 spec :: Spec
 spec = describe "Lower Envelope tests" $ do
+         it "manual" $
+           let seed   = 0
+               planes = NonDegenerate $ NonEmpty.fromList [ Plane 0 1 2
+                                                          , Plane 3 (-2) 5
+                                                          , Plane (-1) 8 (-1)
+                                                          ]
+           in Randomized.computeVertexForm (mkStdGen seed) planes
+              `shouldBe`
+              BruteForce.computeVertexForm planes
+{-
          prop "same as brute force" $
-           \seed (planes :: NonEmpty (Plane R)) ->
+           \seed (planes :: NonDegenerate (Plane R)) ->
+             traceShow planes $
              Randomized.computeVertexForm (mkStdGen seed) planes
              ===
              BruteForce.computeVertexForm planes
+-}

@@ -42,6 +42,7 @@ import           Prelude hiding (filter, head, last)
 import           System.Random
 import           Witherable
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- n_0 :: Int
@@ -68,6 +69,7 @@ computeVertexForm' hs = NEMap.unsafeFromMap $ lowerEnvelope hs
     r = sqrt . sqrt @Double . fromIntegral $ n
 
     lowerEnvelope        :: Foldable set => set plane -> Map (Point 3 r) (Definers plane)
+    lowerEnvelope planes | traceShow (toList planes) False = undefined
     lowerEnvelope planes = NEMap.mapMaybe hasNoConflict verticesRNet
                            <>
                            foldMap lowerEnvelopeIn triangulatedEnv
@@ -84,25 +86,28 @@ computeVertexForm' hs = NEMap.unsafeFromMap $ lowerEnvelope hs
     lowerEnvelopeIn     :: (Foldable set, Monoid (set plane))
                         => Triangular r (Point 2 r :+ set plane)
                         -> Map (Point 3 r) (Definers plane)
+    lowerEnvelopeIn tri | traceShow (toList $ conflictListOf tri) False = undefined
     lowerEnvelopeIn tri = Map.filterWithKey (inRegion tri)
                         $ lowerEnvelope (conflictListOf tri)
 
-
+-- | Given a size r; take a sample of the planes from the given size (essentially by just
+-- taking the first r planes.)
 takeSample   :: (Foldable set, Ord plane) => Int -> set plane -> ([plane],Set plane)
 takeSample r = fmap Set.fromList . splitAt r . toList
 
+-- | Test whether the given point lies inside the triangular region.
 inRegion         :: (Ord r, Num r, Point_ vertex 2 r)
                  => Triangular r vertex -> Point 3 r -> a -> Bool
 inRegion tri v _ = all (projectPoint v `intersects`) (halfspaces tri)
 
 
-
+-- | The triangular region is the intersection of halfspaces; compute this set of halfspaces.
 halfspaces :: (Point_ vertex 2 r, Num r, Ord r)
            => Triangular r vertex -> NonEmpty (HalfSpaceF (LinePV 2 r))
-halfspaces = \case
-  Triangular  triangle -> toNonEmpty $ intersectingHalfPlanes triangle
-  UnboundedOne u p v   -> undefined -- TODO
-  UnboundedTwo u p q v -> undefined -- TODO
+halfspaces tr = case view asPoint <$> tr of
+  Triangular triangle  -> toNonEmpty $ intersectingHalfPlanes triangle
+  UnboundedOne u p v   -> leftHalfPlane <$> (LinePV p u) :| [ LinePV p v ]
+  UnboundedTwo u p q v -> leftHalfPlane <$> (LinePV p u) :| [ LinePV p (q .-. p), LinePV q v ]
 
 hasNoConflict                     :: Foldable set => (definers, set plane) -> Maybe definers
 hasNoConflict (defs,conflictList)
