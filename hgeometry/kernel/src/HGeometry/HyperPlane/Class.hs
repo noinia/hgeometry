@@ -32,7 +32,7 @@ import HGeometry.Ext
 import HGeometry.Point
 import HGeometry.Properties
 import HGeometry.Vector
-import Prelude hiding (head,last)
+import Prelude hiding (head, last)
 
 --------------------------------------------------------------------------------
 
@@ -117,7 +117,6 @@ class ( NumType hyperPlane ~ r
       a' = h^.hyperPlaneCoefficients
       a  = a'&last .~ -1
       a0 = a'^.last
-
   {-# INLINE hyperPlaneEquation #-}
 
   -- | Get the normal vector of the hyperplane. The vector points into
@@ -395,3 +394,8 @@ instance (NonVerticalHyperPlane_  hyperPlane d r)
   {-# INLINE hyperPlaneCoefficients #-}
   verticalSideTest q = verticalSideTest q . view core
   {-# INLINE verticalSideTest #-}
+
+
+-- | Access the last element of a vector
+last :: forall vector d r. (Vector_ vector d r, 1 <= d) => IndexedLens' Int vector r
+last = component @(d-1)

@@ -22,7 +22,7 @@ module HGeometry.Vector.Class
   , generate, vectorFromList
   , component
   , xComponent, yComponent, zComponent, wComponent
-  , head, last
+  -- , head, last
   -- , HasComponents(..), components1
 
   -- , ConstructVector, ConstructableVector_(..)
@@ -241,6 +241,7 @@ wComponent :: (Vector_ vector d r, 4 <= d)
 wComponent = component @3
 {-# INLINE wComponent #-}
 
+{-
 -- | Lens to access the first element of the vector
 head :: forall vector d r. (Vector_ vector d r, 1 <= d) => IndexedLens' Int vector r
 head = xComponent
@@ -248,6 +249,7 @@ head = xComponent
 -- | Lens to access the last element of the vector
 last :: forall vector d r. (Vector_ vector d r, 1 <= d) => IndexedLens' Int vector r
 last = component @(d-1)
+-}
 
 --------------------------------------------------------------------------------
 
