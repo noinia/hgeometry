@@ -27,11 +27,11 @@ import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map.NonEmpty (NEMap)
-import qualified Data.Map.NonEmpty as NEMap
-import           Data.Maybe (fromMaybe, listToMaybe)
+import qualified Data.Map.NonEmpty as Map
+import           Data.Maybe (fromMaybe)
 import           Data.Ord (comparing)
 import           Data.Set.NonEmpty (NESet)
-import qualified Data.Set.NonEmpty as NESet
+import qualified Data.Set.NonEmpty as Set
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
@@ -76,8 +76,8 @@ cmpPlanesAround                     :: (Plane_ plane r, Eq plane, Ord r, Fractio
                                     => plane -> plane -> plane -> Ordering
 cmpPlanesAround h0 h h' | h == h'   = EQ
                         | otherwise = case snd <$> definers (Three h0 h h') of
-                            Just (Definers (_ :| [hPrev, hSucc])) | h == hPrev -> LT
-                                                                  | otherwise  -> GT
+                            Just (Definers (_ :| [hPrev, _hSucc])) | h == hPrev -> LT
+                                                                   | otherwise  -> GT
                             _ -> error "cmpPlanesAround: precondition failed"
 --  note that the first definer will, by definition/by precondition just be h0
 
@@ -130,10 +130,11 @@ fromVertexForm :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show
                => NEMap (Point 3 r) vertex
                -> MinimizationDiagram r (Point 2 r :+ vertex) plane
 fromVertexForm = MinimizationDiagram
-               . NEMap.mapWithKey sortAroundBoundary . mapWithKeyMerge1 (\v vertexData ->
-                    NEMap.fromList . fmap (,NESet.singleton (v,vertexData))
-                    $ toNonEmpty (definersOf vertexData)
-                                                                        )
+               . Map.mapWithKey sortAroundBoundary
+               . mapWithKeyMerge1 (\v vertexData ->
+                    foldMap1 (\h -> Map.singleton h (Set.singleton (v,vertexData)))
+                             (definersOf vertexData))
+
 -- for each vertex v, we go through its definers defs; and for each such plane h, we
 -- associate it with with the set {(v,defs)}. the foldMapWithKey part thus collects all
 -- vertices (together with their definers) incident to h. i.e. it combines these sets {(v,
@@ -150,22 +151,21 @@ sortAroundBoundary            :: ( Plane_ plane r, Ord r, Fractional r, Ord plan
                                  )
                               => plane -> NESet (Point 3 r, vertex)
                               -> Region r (Point 2 r :+ vertex)
-sortAroundBoundary h vertices = case discr . inCCWOrder . fmap project . NESet.toList $ vertices of
-    Left v          -> let (u,p,w) = singleVertex h v in Unbounded u (NonEmpty.singleton p) w
-    Right vertices' -> let edges     = zip vertices' (drop 1 vertices' <> vertices')
-                       in case List.break (isInvalid h) edges of
-                            (vs, (u,v) : ws) -> let chain = NonEmpty.fromList
-                                                          . map (uncurry (:+) . fst)
-                                                          $ ws <> vs <> [(u,v)]
-                                                in unboundedRegion h chain v u
-                            (_,  [])         -> let vertices'' = fromNonEmpty
-                                                               . NonEmpty.fromList
-                                                               $ map (uncurry (:+)) vertices'
-                                                in Bounded vertices''
+sortAroundBoundary h vertices = case NonEmpty.nonEmpty rest of
+    Nothing     -> let (u,p,w) = singleVertex h v0 in Unbounded u (NonEmpty.singleton p) w
+    Just rest'  -> let edges = NonEmpty.zip vertices' (rest' <> vertices')
+                   in case NonEmpty.break (isInvalid h) edges of
+                        (_,  [])         -> boundedRegion $ uncurry (:+) <$> vertices'
+                        (vs, (u,v) : ws) -> let chain = fmap (uncurry (:+) . fst)
+                                                      . NonEmpty.fromList
+                                                      $ ws <> vs <> [(u,v)]
+                                            in unboundedRegion h chain v u
   where
-    discr = \case
-      v :| [] -> Left  v
-      vs      -> Right (F.toList vs)
+    vertices'@(v0 :| rest) = inCCWOrder . fmap project . Set.toList $ vertices
+    boundedRegion = Bounded . fromNonEmpty
+    -- The main idea is to test if the region is unbounded; i.e. containing an "edge"
+    -- that is not really an edge. If so, we break open the edges there, and
+    -- construct an appropriate chain from it.
 
 -- | Given a plane h, and the single vertex v incident to the region of h, computes the
 -- unbounded region for h.

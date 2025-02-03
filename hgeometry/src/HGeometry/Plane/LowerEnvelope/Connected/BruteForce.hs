@@ -34,7 +34,7 @@ import           HGeometry.Point
 -- pre: there are vertices
 --
 bruteForceLowerEnvelope :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
-                           , Foldable1 set
+                           , Foldable set
                            , Show r, Show plane
                            )
                         => set plane
@@ -46,7 +46,7 @@ bruteForceLowerEnvelope = fromVertexForm . computeVertexForm
 -- pre: there are vertices
 --
 -- O(n^4) time.
-computeVertexForm        :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Foldable1 set
+computeVertexForm        :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Foldable set
                             , Show plane, Show r
                             )
                          => set plane -> VertexForm r plane

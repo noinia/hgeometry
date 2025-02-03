@@ -52,7 +52,10 @@ computeVertexForm'  :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                        , Show plane, Show r
                        )
                     => V.Vector plane -> VertexForm r plane
-computeVertexForm' planes = undefined
+computeVertexForm' planes =
+
+
+  undefined
   -- | n <= n_0  = BruteForce.computeVertexForm planes
   -- -- no need to check this; I think; in this case the onflict lists will just be empty
   -- | otherwise = undefined
@@ -62,7 +65,13 @@ computeVertexForm' planes = undefined
     rNet = V.take (round $ r * logBase 2 r) planes
 
 
-    -- res = bruteForceLowerEnvelope rNet
+    env' = withConflictLists planes $ BruteForce.computeVertexForm rNet
+    triangles = undefined
+
+    -- env = bruteForceLowerEnvelope rNet
+
+    -- res =
+
 
 
 -- | Computes conflict list
