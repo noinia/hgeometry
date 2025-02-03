@@ -63,9 +63,9 @@ spec :: Spec
 spec = describe "Lower Envelope tests" $ do
          it "manual" $
            let seed   = 0
-               planes = NonDegenerate $ NonEmpty.fromList [ Plane 0 1 2
-                                                          , Plane 3 (-2) 5
-                                                          , Plane (-1) 8 (-1)
+               planes = NonDegenerate $ NonEmpty.fromList [ Plane 1    0 2
+                                                          , Plane (-1) 0 3
+                                                          , Plane 0    1 10
                                                           ]
            in Randomized.computeVertexForm (mkStdGen seed) planes
               `shouldBe`

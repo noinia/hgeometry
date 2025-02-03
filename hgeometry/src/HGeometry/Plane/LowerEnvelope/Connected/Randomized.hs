@@ -66,13 +66,15 @@ computeVertexForm'    :: forall plane r.
 computeVertexForm' hs = NEMap.unsafeFromMap $ lowerEnvelope hs
   where
     n = length hs
-    r = sqrt . sqrt @Double . fromIntegral $ n
+    r = max 3 $ sqrt . sqrt @Double . fromIntegral $ n
 
     lowerEnvelope        :: Foldable set => set plane -> Map (Point 3 r) (Definers plane)
-    lowerEnvelope planes | traceShow (toList planes) False = undefined
-    lowerEnvelope planes = NEMap.mapMaybe hasNoConflict verticesRNet
-                           <>
-                           foldMap lowerEnvelopeIn triangulatedEnv
+    lowerEnvelope planes | traceShow ("LE",toList planes) False = undefined
+    lowerEnvelope planes
+        | null planes = mempty
+        | otherwise   = NEMap.mapMaybe hasNoConflict verticesRNet
+                        <>
+                        foldMap lowerEnvelopeIn triangulatedEnv
       where
         (rNet,remaining) = takeSample (round $ r * logBase 2 r) planes
 
@@ -86,7 +88,7 @@ computeVertexForm' hs = NEMap.unsafeFromMap $ lowerEnvelope hs
     lowerEnvelopeIn     :: (Foldable set, Monoid (set plane))
                         => Triangular r (Point 2 r :+ set plane)
                         -> Map (Point 3 r) (Definers plane)
-    lowerEnvelopeIn tri | traceShow (toList $ conflictListOf tri) False = undefined
+    lowerEnvelopeIn tri | traceShow ("LEI",toList $ conflictListOf tri) False = undefined
     lowerEnvelopeIn tri = Map.filterWithKey (inRegion tri)
                         $ lowerEnvelope (conflictListOf tri)
 

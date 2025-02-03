@@ -26,6 +26,8 @@ import           HGeometry.Plane.LowerEnvelope.Connected.Regions
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Point
 
+import qualified Data.Foldable as F
+import Debug.Trace
 --------------------------------------------------------------------------------
 -- * The naive O(n^4) time algorithm.
 
@@ -50,9 +52,14 @@ computeVertexForm        :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Fo
                             , Show plane, Show r
                             )
                          => set plane -> VertexForm r plane
-computeVertexForm planes = NEMap.unsafeFromMap
+computeVertexForm planes = f . NEMap.nonEmptyMap
                          . unionsWithKey mergeDefiners
+                         . traceShowWith ("foo",F.toList planes,)
                          . map (asVertex planes) $ uniqueTriplets planes
+  where
+    f = \case
+      Nothing -> error "BruteForce.computeVertexForm: no vertices !?"
+      Just x  -> x
 
 asVertex             :: (Plane_ plane r, Foldable f, Ord plane, Ord r, Fractional r)
                      => f plane -> Three plane -> Map (Point 3 r) (Definers plane)
