@@ -15,8 +15,8 @@ module HGeometry.Plane.LowerEnvelope.Connected.Randomized
 import           Data.Foldable
 import           Data.Map (Map)
 import qualified Data.Map as Map
-import qualified Data.Map.NonEmpty as NEMap
 import           Data.Map.NonEmpty (NEMap)
+import qualified Data.Map.NonEmpty as NEMap
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Vector as V
@@ -28,6 +28,7 @@ import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.Plane.LowerEnvelope.Connected.Regions
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Point
+import           HGeometry.Triangle
 import           Prelude hiding (filter)
 import           System.Random
 import           Witherable
@@ -83,3 +84,11 @@ withConflictLists planes = NEMap.mapWithKey (\v defs -> (defs, filter (below v) 
   where
     below v h = verticalSideTest v h == LT -- TODO: not sure if this should be LT or 'not GT'
 -- TODO: dummy implementation for now
+
+
+
+
+
+-- there may be some unbounded "triangles as well no..."
+-- toTriangles :: MinimziationDiagram r vertex plane -> [Triangle vertex]
+-- toTriangles = undefined

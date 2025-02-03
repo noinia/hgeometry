@@ -34,7 +34,7 @@ import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line.General
-import           HGeometry.Plane.LowerEnvelope ( MinimizationDiagram, Region(..)
+import           HGeometry.Plane.LowerEnvelope ( MinimizationDiagram, RegionF(..), Region
                                                , lowerEnvelope, LowerEnvelope(..)
                                                , mapVertices
                                                )
