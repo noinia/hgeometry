@@ -65,8 +65,10 @@ computeVertexForm'    :: forall plane r.
                       => V.Vector plane -> VertexForm r plane
 computeVertexForm' hs = NEMap.unsafeFromMap $ lowerEnvelope hs
   where
-    n = length hs
-    r = max 3 $ sqrt . sqrt @Double . fromIntegral $ n
+    n  = length hs
+    r  = sqrt . sqrt @Double . fromIntegral $ n
+    r' = max 3 $ round $ r * logBase 2 r
+      -- take a sample of size r*log r
 
     lowerEnvelope        :: Foldable set => set plane -> Map (Point 3 r) (Definers plane)
     lowerEnvelope planes | traceShow ("LE",toList planes) False = undefined
@@ -76,7 +78,7 @@ computeVertexForm' hs = NEMap.unsafeFromMap $ lowerEnvelope hs
                         <>
                         foldMap lowerEnvelopeIn triangulatedEnv
       where
-        (rNet,remaining) = takeSample (round $ r * logBase 2 r) planes
+        (rNet,remaining) = takeSample r' planes
 
         verticesRNet    :: NEMap (Point 3 r) (Definers plane, Set plane)
         verticesRNet    = withConflictLists remaining $ BruteForce.computeVertexForm rNet
@@ -111,6 +113,9 @@ halfspaces tr = case view asPoint <$> tr of
   UnboundedOne u p v   -> leftHalfPlane <$> (LinePV p u) :| [ LinePV p v ]
   UnboundedTwo u p q v -> leftHalfPlane <$> (LinePV p u) :| [ LinePV p (q .-. p), LinePV q v ]
 
+
+
+
 hasNoConflict                     :: Foldable set => (definers, set plane) -> Maybe definers
 hasNoConflict (defs,conflictList)
   | null conflictList              = Just defs
@@ -119,6 +124,9 @@ hasNoConflict (defs,conflictList)
 -- | Get the conflictList of a triangle
 conflictListOf :: Monoid conflictList => Triangular r (vertex :+ conflictList) -> conflictList
 conflictListOf = foldMap (^.extra)
+
+--FIXME: This is wrong; for unbounded regions; we are missing planes.
+-- So maybe compute everything in a bounding box/triagnle instead after all.
 
 -- | Computes conflict list
 withConflictLists        :: (Plane_ plane r, Ord r, Num r)
