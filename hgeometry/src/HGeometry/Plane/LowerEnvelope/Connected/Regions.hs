@@ -24,6 +24,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
   , BoundedRegion
   ) where
 
+import           Control.Lens
 import           Data.Coerce
 import qualified Data.Foldable as F
 import           Data.Foldable1
@@ -33,14 +34,18 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map.NonEmpty (NEMap)
 import qualified Data.Map.NonEmpty as Map
 import           Data.Maybe (fromMaybe)
+import           Data.Monoid (First(..))
 import           Data.Ord (comparing)
 import           Data.Set.NonEmpty (NESet)
 import qualified Data.Set.NonEmpty as Set
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
+import           HGeometry.HalfLine
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
+import           HGeometry.Intersection
+import           HGeometry.LineSegment
 import           HGeometry.NonEmpty.Util
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
@@ -48,6 +53,7 @@ import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm
 import           HGeometry.Point
 import           HGeometry.Point.Either
+import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Triangle
@@ -139,20 +145,21 @@ fromVertexFormIn     :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r
                         )
                      => Triangle corner
                      -> NEMap (Point 3 r) vertexData
-                     -> NEMap plane (BoundedRegion r (Point 2 r :+ vertexData) corner)
+                     -> NEMap plane (BoundedRegion r (Point 2 r :+ vertexData) (Point 2 r))
 fromVertexFormIn tri = fmap (clipTo tri) . asMap . fromVertexForm
 
 -- | pre; all bounded vertices lie inside the triangle
-clipTo     :: Triangle corner -> Region r (Point 2 r :+ vertexData)
-           -> BoundedRegion r (Point 2 r :+ vertexData) corner
+clipTo     :: (Point_ corner 2 r, Fractional r, Ord r)
+           => Triangle corner -> Region r (Point 2 r :+ vertexData)
+           -> BoundedRegion r (Point 2 r :+ vertexData) (Point 2 r)
 clipTo tri = \case
   Bounded vs          -> uncheckedFromCCWPoints $ Original <$> vs
-  Unbounded u chain v -> let p        = NonEmpty.head pts
-                             q        = NonEmpty.last pts
+  Unbounded u chain v -> let p        = NonEmpty.head chain
+                             q        = NonEmpty.last chain
                              hp       = HalfLine (p^.asPoint) ((-1) *^ u)
                              hq       = HalfLine (q^.asPoint) v
-                             extras   = extraPoints hp hq tri
-                         in uncheckedFromCCWPoints $ (Extra <$> extras) <> (Original <$> pts)
+                             extras   = extraPoints hp hq (view asPoint <$> tri)
+                         in uncheckedFromCCWPoints $ (Extra <$> extras) <> (Original <$> chain)
 
 -- | computes the extra vertices that we have to insert to make an unbounded region bounded
 extraPoints            :: ( Triangle_ triangle corner, Point_ corner 2 r
@@ -161,6 +168,7 @@ extraPoints            :: ( Triangle_ triangle corner, Point_ corner 2 r
                           , Intersection (HalfLine point) (ClosedLineSegment corner)
                             ~ Maybe (HalfLineLineSegmentIntersection (Point 2 r)
                                                                      (ClosedLineSegment corner))
+                          , HasOuterBoundary triangle, Eq (VertexIx triangle)
                           )
                        => HalfLine point -> HalfLine point -> triangle
                        -> NonEmpty (Point 2 r)
@@ -175,17 +183,23 @@ extraPoints hp hq tri = noDuplicates $ q :| cornersInBetween qSide pSide tri <> 
                              Nothing -> error "extraPoints: precondititon failed "
                              Just x  -> x
 
-    intersectionPoint' h = flip ifoldMap (edges tri) $ \side seg ->
+    intersectionPoint' h = flip (ifoldMapOf outerBoundaryEdgeSegments) tri $ \(side,_) seg ->
       case h `intersect` seg of
         Just (HalfLine_x_LineSegment_Point x) -> First $ Just (x, side)
         _                                     -> First   Nothing
 
     noDuplicates = fmap NonEmpty.head . NonEmpty.group1
 
+cornersInBetween         :: ( HasVertices triangle triangle, Eq (VertexIx triangle)
+                            , Point_ (Vertex triangle) 2 r
+                            )
+                         => VertexIx triangle -> VertexIx triangle
+                         -> triangle -> [Point 2 r]
+cornersInBetween s e tri = map (^._2.asPoint)
+                         . takeWhile ((/= e) . fst) . dropWhile ((/= s) . fst)
+                         $ cycle (itoListOf vertices tri)
 
-
-
-
+-- TODO: there is a bunch of code duplication here with intersecting a rectangle in Type
 
 ----------------------------------------
 
