@@ -15,6 +15,8 @@ module HGeometry.Point.Either
   ) where
 
 import Control.Lens
+import Data.Bifoldable
+import Data.Bitraversable
 import HGeometry.Point.Class
 import HGeometry.Properties
 
@@ -24,6 +26,22 @@ import HGeometry.Properties
 data OriginalOrExtra orig extra = Original orig
                                 | Extra    extra
                                 deriving (Show,Eq,Functor)
+
+instance Bifunctor OriginalOrExtra where
+  bimap f g = \case
+    Original p -> Original (f p)
+    Extra p    -> Extra (g p)
+
+instance Bifoldable OriginalOrExtra where
+  bifoldMap f g = \case
+    Original p -> f p
+    Extra p    -> g p
+
+instance Bitraversable OriginalOrExtra where
+  bitraverse f g = \case
+    Original p -> Original <$> f p
+    Extra p    -> Extra <$> g p
+
 
 type instance NumType   (OriginalOrExtra orig extra) = NumType orig
 type instance Dimension (OriginalOrExtra orig extra) = Dimension orig

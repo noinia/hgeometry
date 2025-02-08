@@ -24,6 +24,7 @@ module HGeometry.Polygon.Convex.Implementation
 
 import Control.DeepSeq (NFData)
 import Control.Lens hiding (holes)
+import Data.Foldable1
 import Data.Kind (Type)
 import Data.Vector.NonEmpty (NonEmptyVector)
 import HGeometry.Boundary
@@ -50,7 +51,9 @@ newtype ConvexPolygonF f point =
   ConvexPolygon { toSimplePolygon :: SimplePolygonF f point
                 -- ^ Convert to a simple polygon, i.e. forget the polygon is convex.
                 }
-  deriving newtype (NFData, Eq)
+  deriving newtype (NFData, Eq, Functor, Foldable, Foldable1)
+  deriving stock (Traversable)
+
 
 -- | By default we use a cyclic non-empty vector to represent convex polygons.
 type ConvexPolygon :: Type -> Type
@@ -76,6 +79,10 @@ _ConvexPolygon = prism' toSimplePolygon fromSimplePolygon
 -- | Polygons are per definition 2 dimensional
 type instance Dimension (ConvexPolygonF f point) = 2
 type instance NumType   (ConvexPolygonF f point) = NumType point
+
+
+instance Traversable1 f => Traversable1 (ConvexPolygonF f) where
+  traverse1 f (ConvexPolygon vs) = ConvexPolygon <$> traverse1 f vs
 
 instance (ShiftedEq (f point), ElemCyclic (f point) ~ point
          ) => ShiftedEq (ConvexPolygonF f point) where

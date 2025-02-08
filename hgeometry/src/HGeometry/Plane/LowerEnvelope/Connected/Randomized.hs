@@ -13,6 +13,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Randomized
   ) where
 
 import           Control.Lens
+import           Data.Bifunctor
 import           Data.Foldable
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -36,13 +37,16 @@ import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.Plane.LowerEnvelope.Connected.Regions
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Point
+import           HGeometry.Point.Either
+import           HGeometry.Polygon
 import           HGeometry.Triangle
 import           HGeometry.Vector
 import           Prelude hiding (filter, head, last)
 import           System.Random
 import           Witherable
 
-import Debug.Trace
+
+import           Debug.Trace
 --------------------------------------------------------------------------------
 
 -- n_0 :: Int
@@ -113,8 +117,7 @@ computeVertexFormIn tri0 hs = NEMap.unsafeFromMap $ lowerEnvelopeIn (view asPoin
         -- -- We need them  for all vertices. We also need them for "corners"
 
         triangulatedEnv :: NonEmpty (Triangle (Point 2 r :+ Set plane))
-        triangulatedEnv = undefined -- this should now jsut be foldMap triangulate env
-          -- toTriangles . mapVertices (&extra %~ snd)
+        triangulatedEnv = foldMap1 triangulate env
 
 
     lowerEnvelopeIn'     :: (Foldable set, Monoid (set plane))
@@ -175,12 +178,18 @@ withConflictLists planes = NEMap.mapWithKey (\v defs -> (defs, Set.filter (below
   where
     below v h = verticalSideTest v h == LT -- TODO: not sure if this should be LT or 'not GT'
 
+-- | Compute the conflit lists for the extra vertices we added.
+withExtraConflictLists        :: (Plane_ plane r, Ord r, Num r, Point_ corner 2 r
+                                 )
+                              => Set plane
+                              -> NEMap plane (BoundedRegion r vertex corner)
+                              -> NEMap plane (BoundedRegion r vertex (corner :+ Set plane))
+withExtraConflictLists planes = NEMap.mapWithKey (\h -> fmap (second $ withPolygonVertex h))
+  where
+    withPolygonVertex h v = v :+ Set.filter (below (evalAt v h) v) planes
+    below z (Point2_ x y) h = verticalSideTest (Point3 x y z) h  == LT
+  -- TODO: make this fast
 
-withExtraConflictLists :: (Plane_ plane r, Ord r, Num r)
-                         => Set plane
-                         -> NEMap plane (BoundedRegion r vertex corner)
-                         -> NEMap plane (BoundedRegion r vertex (corner :+ Set plane))
-withExtraConflictLists = undefined
 
 
 -- withConflictLists
@@ -213,11 +222,15 @@ withExtraConflictLists = undefined
 --                                   p :| (q:rest) -> let z = last $ q:|rest in
 --                                                    UnboundedTwo u p z v :| triangulate' p q rest
 
-triangulate        :: vertex -> vertex -> NonEmpty vertex -> NonEmpty (Triangle vertex)
-triangulate u v vs = NonEmpty.zipWith (Triangle u) (v NonEmpty.<| vs) vs
-
--- triangulate'     :: vertex -> vertex -> [vertex] -> [Triangular r vertex]
--- triangulate' u v = maybe [] (toList . triangulate u v) . NonEmpty.nonEmpty
+triangulate      :: BoundedRegion r (vertex :+ (a, conflictList)) (vertex :+ conflictList)
+                 -> NonEmpty (Triangle (vertex :+ conflictList))
+triangulate poly = case flatten <$> toNonEmptyOf vertices poly of
+    u :| (v : vs) -> NonEmpty.zipWith (Triangle u) (v :| vs) (NonEmpty.fromList vs)
+    _             -> error "absurd. trianglulate; impossible"
+  where
+    flatten = \case
+      Original (p :+ (_,cl)) -> p :+ cl
+      Extra    p             -> p
 
 
 ----------------------------------------
