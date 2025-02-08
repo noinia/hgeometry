@@ -301,11 +301,11 @@ instance Polygon_ polygon point r  => Polygon_ (polygon :+ extra) point r where
 instance (Point_ point 2 r, Num r, Eq r) => HasOuterBoundary (Triangle point) where
   outerBoundaryVertexAt i = singular (vertexAt $ i `mod` 3)
   outerBoundary = vertices
-
-  -- orall p f. (Indexable i p, Apply f) => p a (f b) -> s -> f t
   ccwOuterBoundaryFrom i = \pvFv tri -> ifCCW tri id reversed (traverseTriangleFrom i) pvFv tri
   cwOuterBoundaryFrom  i = \pvFv tri -> ifCCW tri reversed id (traverseTriangleFrom i) pvFv tri
 
+-- | Helper to reverse the orientation of the traversal depending on the orientation
+-- of the triangle.
 ifCCW         :: (Point_ point 2 r, Num r, Eq r)
               => Triangle point
               -> Iso' (Triangle point) (Triangle point)
@@ -316,6 +316,7 @@ ifCCW tri f g t
   | (\x -> x == abs x) . triangleSignedArea2X $ tri = f.t
   | otherwise                                       = g.t
 
+-- | Traverse the boundary of a triangle from the given starting vertex
 traverseTriangleFrom   :: forall point. Int -> IndexedTraversal1' Int (Triangle point) point
 traverseTriangleFrom i = conjoined trav (itrav . indexed)
   where
