@@ -142,11 +142,52 @@ fromVertexFormIn     :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r
                      -> NEMap plane (BoundedRegion r (Point 2 r :+ vertexData) corner)
 fromVertexFormIn tri = fmap (clipTo tri) . asMap . fromVertexForm
 
+-- | pre; all bounded vertices lie inside the triangle
 clipTo     :: Triangle corner -> Region r (Point 2 r :+ vertexData)
            -> BoundedRegion r (Point 2 r :+ vertexData) corner
 clipTo tri = \case
-  Bounded vs          -> undefined
-  Unbounded u chain v -> undefined
+  Bounded vs          -> uncheckedFromCCWPoints $ Original <$> vs
+  Unbounded u chain v -> let p        = NonEmpty.head pts
+                             q        = NonEmpty.last pts
+                             hp       = HalfLine (p^.asPoint) ((-1) *^ u)
+                             hq       = HalfLine (q^.asPoint) v
+                             extras   = extraPoints hp hq tri
+                         in uncheckedFromCCWPoints $ (Extra <$> extras) <> (Original <$> pts)
+
+-- | computes the extra vertices that we have to insert to make an unbounded region bounded
+extraPoints            :: ( Triangle_ triangle corner, Point_ corner 2 r
+                          , Point_ point 2 r, Fractional r, Ord r
+                          , IsIntersectableWith (HalfLine point) (ClosedLineSegment corner)
+                          , Intersection (HalfLine point) (ClosedLineSegment corner)
+                            ~ Maybe (HalfLineLineSegmentIntersection (Point 2 r)
+                                                                     (ClosedLineSegment corner))
+                          )
+                       => HalfLine point -> HalfLine point -> triangle
+                       -> NonEmpty (Point 2 r)
+extraPoints hp hq tri = noDuplicates $ q :| cornersInBetween qSide pSide tri <> [p]
+    -- if the intersection point coincides with a corner then the current code includes
+    -- the corner. We use the noDuplicates to get rid of those.
+  where
+    (q,qSide) = intersectionPoint hq
+    (p,pSide) = intersectionPoint hp
+
+    intersectionPoint  h = case getFirst $ intersectionPoint' h of
+                             Nothing -> error "extraPoints: precondititon failed "
+                             Just x  -> x
+
+    intersectionPoint' h = flip ifoldMap (edges tri) $ \side seg ->
+      case h `intersect` seg of
+        Just (HalfLine_x_LineSegment_Point x) -> First $ Just (x, side)
+        _                                     -> First   Nothing
+
+    noDuplicates = fmap NonEmpty.head . NonEmpty.group1
+
+
+
+
+
+
+----------------------------------------
 
 
 -- NEMap plane (Region r vertex)

@@ -73,11 +73,29 @@ instance ( Point_ point (Dimension point) (NumType point)
 
 instance HasVertices' (Triangle point) where
   type Vertex   (Triangle point) = point
-  type VertexIx (Triangle point) = Int
+  type VertexIx (Triangle point) = Int -- make this an AtMostThree?
   vertexAt i = _TriangleVector.iix i
+  numVertices = const 3
 
 instance HasVertices (Triangle point) (Triangle point') where
   vertices = cloneIndexedTraversal1 (_TriangleVector.components)
+
+-- data AtMostThree = One | Two | Three
+--   deriving (Show,Read,Eq,Ord,Enum,Bounded)
+
+-- instance HasEdges' (Triangle point) where
+--   type Edge  (Triangle point)  = (point, point)
+--   type EdgeIx (Triangle point) = AtMostThree
+
+-- -- p a (f b) -> s -> f t
+--   edgeAt i =
+--   (Triangle a b c) = case i of
+--     One   ->
+--     Two   ->
+--     Three ->
+
+--   numEdges = const 3
+
 
 instance HasPoints (Triangle point) (Triangle point') point point' where
   allPoints = _TriangleVector.components

@@ -55,66 +55,104 @@ computeVertexForm        :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Fo
                             , Show plane, Show r
                             )
                          => gen -> set plane -> VertexForm r plane
-computeVertexForm gen = computeVertexForm' . shuffle gen
+computeVertexForm gen = computeVertexFormIn tri . shuffle gen
+  where
+    tri = Triangle (Point2 (-10_000) (-10_000))
+                   (Point2 (-10_000) (10_000))
+                   (Point2 (10_000)  (-10_000))
+    -- TODO: compute abounding box/triangle instead
 
 -- | pre: imput is already a random permutation
-computeVertexForm'    :: forall plane r.
-                         ( Plane_ plane r, Ord plane, Ord r, Fractional r
-                         , Show plane, Show r
-                         )
-                      => V.Vector plane -> VertexForm r plane
-computeVertexForm' hs = NEMap.unsafeFromMap $ lowerEnvelope hs
+computeVertexFormIn         :: forall plane point r.
+                              ( Plane_ plane r, Ord plane, Ord r, Fractional r
+                              , Show plane, Show r
+                              , Point_ point 2 r
+                              )
+                            => Triangle point
+                            -> V.Vector plane
+                            -> VertexForm r plane
+computeVertexFormIn tri0 hs = NEMap.unsafeFromMap $ lowerEnvelopeIn (view asPoint <$> tri0) hs
   where
     n  = length hs
     r  = sqrt . sqrt @Double . fromIntegral $ n
     r' = max 3 $ round $ r * logBase 2 r
       -- take a sample of size r*log r
 
-    lowerEnvelope        :: Foldable set => set plane -> Map (Point 3 r) (Definers plane)
-    lowerEnvelope planes | traceShow ("LE",toList planes) False = undefined
-    lowerEnvelope planes
+    lowerEnvelopeIn   :: (Foldable set)
+                      => Triangle (Point 2 r)
+                      -> set plane
+                      -> Map (Point 3 r) (Definers plane)
+    lowerEnvelopeIn tri planes | traceShow ("LE",toList planes) False = undefined
+    lowerEnvelopeIn tri planes
         | null planes = mempty
-        | otherwise   = NEMap.mapMaybe hasNoConflict verticesRNet
+        | otherwise   = NEMap.mapMaybeWithKey (asVertexIn tri) verticesRNet
                         <>
-                        foldMap lowerEnvelopeIn triangulatedEnv
+                        foldMap lowerEnvelopeIn' triangulatedEnv
       where
         (rNet,remaining) = takeSample r' planes
 
         verticesRNet    :: NEMap (Point 3 r) (Definers plane, Set plane)
         verticesRNet    = withConflictLists remaining $ BruteForce.computeVertexForm rNet
 
-        triangulatedEnv :: NonEmpty (Triangular r (Point 2 r :+ Set plane))
-        triangulatedEnv = toTriangles . mapVertices (&extra %~ snd)
-                        . fromVertexForm $ verticesRNet
+        -- verticesRNet :: NEMap (Point 3 r) (Definers plane)
+        -- verticesRNet = BruteForce.computeVertexForm rNet
 
-    lowerEnvelopeIn     :: (Foldable set, Monoid (set plane))
-                        => Triangular r (Point 2 r :+ set plane)
-                        -> Map (Point 3 r) (Definers plane)
-    lowerEnvelopeIn tri | traceShow ("LEI",toList $ conflictListOf tri) False = undefined
-    lowerEnvelopeIn tri = Map.filterWithKey (inRegion tri)
-                        $ lowerEnvelope (conflictListOf tri)
+        env :: NEMap plane (BoundedRegion r  (Point 2 r :+ (Definers plane, Set plane))
+                                             (Point 2 r :+ Set plane))
+        env = withExtraConflictLists remaining
+            . fromVertexFormIn tri $ verticesRNet
+        -- also compute the conflicts of the extra vertices
+
+        -- env :: NEMap plane (BoundedRegion r  ((Point 2 r :+ Definers plane) :+ Set plane)
+        --                                      (Point 2 r                     :+ Set plane)
+        --                    )
+        -- env = withConflictLists remaining . fromVertexFormIn tri $ verticesRNet
+        -- -- OK; maybe partially revert this agian, and only compute the
+        -- -- conflict lists of the extra vertices in a second step.
+        -- -- at least think about when we compute the conflict lists.
+        -- -- We need them  for all vertices. We also need them for "corners"
+
+        triangulatedEnv :: NonEmpty (Triangle (Point 2 r :+ Set plane))
+        triangulatedEnv = undefined -- this should now jsut be foldMap triangulate env
+          -- toTriangles . mapVertices (&extra %~ snd)
+
+
+    lowerEnvelopeIn'     :: (Foldable set, Monoid (set plane))
+                         => Triangle (Point 2 r :+ set plane)
+                         -> Map (Point 3 r) (Definers plane)
+    lowerEnvelopeIn' tri = lowerEnvelopeIn (view core <$> tri) (conflictListOf tri)
+
+
 
 -- | Given a size r; take a sample of the planes from the given size (essentially by just
 -- taking the first r planes.)
 takeSample   :: (Foldable set, Ord plane) => Int -> set plane -> ([plane],Set plane)
 takeSample r = fmap Set.fromList . splitAt r . toList
 
--- | Test whether the given point lies inside the triangular region.
-inRegion         :: (Ord r, Num r, Point_ vertex 2 r)
-                 => Triangular r vertex -> Point 3 r -> a -> Bool
-inRegion tri v _ = all (projectPoint v `intersects`) (halfspaces tri)
+
+-- | Report whether this is really a vertex of the global lower envelope in the region.
+asVertexIn :: (Ord r, Num r, Point_ vertex 2 r, Foldable set)
+           => Triangle vertex -> Point 3 r -> (definers, set plane) -> Maybe definers
+asVertexIn tri (Point3 x y _) (defs,conflictList)
+  | null conflictList && (Point2 x y) `intersects` tri = Just defs
+  | otherwise                                          = Nothing
 
 
--- | The triangular region is the intersection of halfspaces; compute this set of halfspaces.
-halfspaces :: (Point_ vertex 2 r, Num r, Ord r)
-           => Triangular r vertex -> NonEmpty (HalfSpaceF (LinePV 2 r))
-halfspaces tr = case view asPoint <$> tr of
-  Triangular triangle  -> toNonEmpty $ intersectingHalfPlanes triangle
-  UnboundedOne u p v   -> leftHalfPlane <$> (LinePV p u) :| [ LinePV p v ]
-  UnboundedTwo u p q v -> leftHalfPlane <$> (LinePV p u) :| [ LinePV p (q .-. p), LinePV q v ]
+-- -- | Test whether the given point lies inside the triangular region.
+-- inRegion         :: (Ord r, Num r, Point_ vertex 2 r)
+--                  => Triangle vertex -> Point 3 r -> a -> Bool
+-- inRegion tri v _ = projectPoint v `intersects` tri
+
+--   -- all () (halfspaces tri)
 
 
-
+-- -- | The triangular region is the intersection of halfspaces; compute this set of halfspaces.
+-- halfspaces :: (Point_ vertex 2 r, Num r, Ord r)
+--            => Triangular r vertex -> NonEmpty (HalfSpaceF (LinePV 2 r))
+-- halfspaces tr = case view asPoint <$> tr of
+--   Triangular triangle  -> toNonEmpty $ intersectingHalfPlanes triangle
+--   UnboundedOne u p v   -> leftHalfPlane <$> (LinePV p u) :| [ LinePV p v ]
+--   UnboundedTwo u p q v -> leftHalfPlane <$> (LinePV p u) :| [ LinePV p (q .-. p), LinePV q v ]
 
 hasNoConflict                     :: Foldable set => (definers, set plane) -> Maybe definers
 hasNoConflict (defs,conflictList)
@@ -122,47 +160,64 @@ hasNoConflict (defs,conflictList)
   | otherwise                      = Nothing
 
 -- | Get the conflictList of a triangle
-conflictListOf :: Monoid conflictList => Triangular r (vertex :+ conflictList) -> conflictList
+conflictListOf :: Monoid conflictList => Triangle (vertex :+ conflictList) -> conflictList
 conflictListOf = foldMap (^.extra)
 
 --FIXME: This is wrong; for unbounded regions; we are missing planes.
 -- So maybe compute everything in a bounding box/triagnle instead after all.
 
 -- | Computes conflict list
-withConflictLists        :: (Plane_ plane r, Ord r, Num r)
-                         => Set plane
-                         -> VertexForm r plane
-                         -> NEMap (Point 3 r) (Definers plane, Set plane)
+withConflictLists  :: (Plane_ plane r, Ord r, Num r)
+                   => Set plane
+                   -> VertexForm r plane
+                   -> NEMap (Point 3 r) (Definers plane, Set plane)
 withConflictLists planes = NEMap.mapWithKey (\v defs -> (defs, Set.filter (below v) planes))
   where
     below v h = verticalSideTest v h == LT -- TODO: not sure if this should be LT or 'not GT'
+
+
+withExtraConflictLists :: (Plane_ plane r, Ord r, Num r)
+                         => Set plane
+                         -> NEMap plane (BoundedRegion r vertex corner)
+                         -> NEMap plane (BoundedRegion r vertex (corner :+ Set plane))
+withExtraConflictLists = undefined
+
+
+-- withConflictLists
+-- withConflictLists planes = undefined
+-- {-
+
+                         -- NEMap (Point 3 r) (Definers plane, Set plane)
+-- withConflictLists planes = NEMap.mapWithKey (\v defs -> (defs, Set.filter (below v) planes))
+--   where
+--     below v h = verticalSideTest v h == LT -- TODO: not sure if this should be LT or 'not GT'
 -- TODO: dummy implementation for now
+--}
+
+-- data Triangular r vertex = Triangular   (Triangle vertex)
+--                          | UnboundedOne (Vector 2 r) vertex (Vector 2 r)
+--                          | UnboundedTwo (Vector 2 r) vertex vertex (Vector 2 r)
+--                          deriving (Show,Eq,Functor,Foldable)
 
 
-data Triangular r vertex = Triangular   (Triangle vertex)
-                         | UnboundedOne (Vector 2 r) vertex (Vector 2 r)
-                         | UnboundedTwo (Vector 2 r) vertex vertex (Vector 2 r)
-                         deriving (Show,Eq,Functor,Foldable)
+-- -- | Triangulate the minimization diagram.
+-- toTriangles :: MinimizationDiagram r vertex plane -> NonEmpty (Triangular r vertex)
+-- toTriangles = foldMap1 toTriangles' . asMap
+--   where
+--     toTriangles' = \case
+--       Bounded vertices       -> case toNonEmpty vertices of
+--                                   u :| (v : w : vs) -> triangulate u v (w:|vs)
+--                                   _                 -> error "bounded reg with < 3 vertices.."
+--       Unbounded u vertices v -> case vertices of
+--                                   p :| []       -> UnboundedOne u p v :| []
+--                                   p :| (q:rest) -> let z = last $ q:|rest in
+--                                                    UnboundedTwo u p z v :| triangulate' p q rest
 
+triangulate        :: vertex -> vertex -> NonEmpty vertex -> NonEmpty (Triangle vertex)
+triangulate u v vs = NonEmpty.zipWith (Triangle u) (v NonEmpty.<| vs) vs
 
--- | Triangulate the minimization diagram.
-toTriangles :: MinimizationDiagram r vertex plane -> NonEmpty (Triangular r vertex)
-toTriangles = foldMap1 toTriangles' . asMap
-  where
-    toTriangles' = \case
-      Bounded vertices       -> case toNonEmpty vertices of
-                                  u :| (v : w : vs) -> triangulate u v (w:|vs)
-                                  _                 -> error "bounded reg with < 3 vertices.."
-      Unbounded u vertices v -> case vertices of
-                                  p :| []       -> UnboundedOne u p v :| []
-                                  p :| (q:rest) -> let z = last $ q:|rest in
-                                                   UnboundedTwo u p z v :| triangulate' p q rest
-
-triangulate        :: vertex -> vertex -> NonEmpty vertex -> NonEmpty (Triangular r vertex)
-triangulate u v vs = Triangular <$> NonEmpty.zipWith (Triangle u) (v NonEmpty.<| vs) vs
-
-triangulate'     :: vertex -> vertex -> [vertex] -> [Triangular r vertex]
-triangulate' u v = maybe [] (toList . triangulate u v) . NonEmpty.nonEmpty
+-- triangulate'     :: vertex -> vertex -> [vertex] -> [Triangular r vertex]
+-- triangulate' u v = maybe [] (toList . triangulate u v) . NonEmpty.nonEmpty
 
 
 ----------------------------------------
