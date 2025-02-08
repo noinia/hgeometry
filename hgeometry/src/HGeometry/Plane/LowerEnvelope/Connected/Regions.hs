@@ -18,6 +18,10 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
   , mergeDefiners
 
   , VertexForm
+
+
+  , fromVertexFormIn
+  , BoundedRegion
   ) where
 
 import           Data.Coerce
@@ -43,6 +47,10 @@ import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm
 import           HGeometry.Point
+import           HGeometry.Point.Either
+import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Simple.Class
+import           HGeometry.Triangle
 import           HGeometry.Vector
 
 -- import           Debug.Trace
@@ -119,6 +127,30 @@ mergeDefiners v defs0 defs1 = case extractH0 v (coerce defs0 <> coerce defs1) of
 
 --------------------------------------------------------------------------------
 -- * Converting into a minimization diagram
+
+type BoundedRegion r vertex corner =
+  ConvexPolygonF NonEmpty (OriginalOrExtra vertex corner)
+
+-- | Pre: the triangle is big enough to contain all vertices of the lower envelope
+fromVertexFormIn     :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show plane
+                        , HasDefiners vertexData plane
+                        , Point_ corner 2 r
+                        , Ord vertexData -- figure out why we need this?
+                        )
+                     => Triangle corner
+                     -> NEMap (Point 3 r) vertexData
+                     -> NEMap plane (BoundedRegion r (Point 2 r :+ vertexData) corner)
+fromVertexFormIn tri = fmap (clipTo tri) . asMap . fromVertexForm
+
+clipTo     :: Triangle corner -> Region r (Point 2 r :+ vertexData)
+           -> BoundedRegion r (Point 2 r :+ vertexData) corner
+clipTo tri = \case
+  Bounded vs          -> undefined
+  Unbounded u chain v -> undefined
+
+
+-- NEMap plane (Region r vertex)
+
 
 -- | Given the vertices of the lower envelope; compute the minimization diagram.
 --
