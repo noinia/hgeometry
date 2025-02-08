@@ -17,11 +17,12 @@ import qualified Data.Set as Set
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
-import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
+import           HGeometry.HyperPlane
 import           HGeometry.Instances ()
+import           HGeometry.Intersection
 import           HGeometry.NonEmpty.Util
 import           HGeometry.Number.Real.Rational
+import           HGeometry.Plane.LowerEnvelope.Connected (VertexForm)
 import qualified HGeometry.Plane.LowerEnvelope.Connected.BruteForce as BruteForce
 import qualified HGeometry.Plane.LowerEnvelope.Connected.Randomized as Randomized
 import           HGeometry.Point
@@ -32,7 +33,7 @@ import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 
-import Debug.Trace
+import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -42,21 +43,38 @@ type R = RealNumber 5
 newtype NonDegenerate plane = NonDegenerate (NonEmpty plane)
   deriving newtype (Show,Eq,Foldable,Functor)
 
-instance Arbitrary (NonDegenerate (Plane Int)) where
+instance Arbitrary (NonDegenerate (Plane R)) where
   arbitrary = do h0 <- arbitrary
                  h1 <- arbitrary `suchThat` nonParallelWith h0
                  h2 <- arbitrary `suchThat` \h' -> nonParallelWith h0 h' && nonParallelWith h1 h'
                  rest <- arbitrary
                  pure . NonDegenerate $ h0 :| (h1 : h2 : rest)
 
-instance Arbitrary (NonDegenerate (Plane R)) where
-  arbitrary = fmap f <$> arbitrary
-    where
-      f :: Plane Int -> Plane R
-      f = fmap fromIntegral
+-- instance Arbitrary (NonDegenerate (Plane R)) where
+--   arbitrary = fmap f <$> arbitrary
+--     where
+--       f :: Plane Int -> Plane R
+--       f = fmap fromIntegral
 
-nonParallelWith (Plane_ a b c) (Plane_ a' b' c') = let s = Set.fromList [a,b,c,a',b',c']
-                                                   in length s == 6
+
+nonParallelWith      :: Plane R -> Plane R -> Bool
+nonParallelWith h h' = case h `intersect` h' of
+                         Just (Plane_x_Plane_Line _) -> True
+                         _                           -> False
+
+
+
+
+newtype Same = Same (VertexForm R (Plane R))
+  deriving newtype (Show)
+
+instance Eq Same where
+  (Same env) == (Same env') = and
+                            $ NonEmpty.zipWith (<=>) (NEMap.toAscList env) (NEMap.toAscList env')
+    where
+      (p,defs) <=> (q,defs') = p == q
+                               &&
+                               Set.fromList (F.toList defs) == Set.fromList (F.toList defs')
 
 
 spec :: Spec
@@ -67,14 +85,12 @@ spec = describe "Lower Envelope tests" $ do
                                                           , Plane (-1) 0 3
                                                           , Plane 0    1 10
                                                           ]
-           in Randomized.computeVertexForm (mkStdGen seed) planes
+           in Same (Randomized.computeVertexForm (mkStdGen seed) planes)
               `shouldBe`
-              BruteForce.computeVertexForm planes
-{-
+              Same (BruteForce.computeVertexForm planes)
+
          prop "same as brute force" $
            \seed (planes :: NonDegenerate (Plane R)) ->
-             traceShow planes $
-             Randomized.computeVertexForm (mkStdGen seed) planes
+             Same (Randomized.computeVertexForm (mkStdGen seed) planes)
              ===
-             BruteForce.computeVertexForm planes
--}
+             Same (BruteForce.computeVertexForm planes)

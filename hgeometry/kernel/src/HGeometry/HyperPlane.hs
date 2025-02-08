@@ -14,6 +14,7 @@ module HGeometry.HyperPlane
   , MkHyperPlaneConstraints
   , cmpInDirection
   , module HGeometry.HyperPlane.NonVertical
+  , PlanePlaneIntersection(..)
   ) where
 
 --------------------------------------------------------------------------------
@@ -21,3 +22,4 @@ module HGeometry.HyperPlane
 import HGeometry.HyperPlane.Class
 import HGeometry.HyperPlane.Internal
 import HGeometry.HyperPlane.NonVertical
+import HGeometry.HyperPlane.Intersection

@@ -22,7 +22,9 @@ import Control.DeepSeq
 import Control.Lens((^.), coerced)
 import GHC.Generics(Generic)
 import HGeometry.Ext
-import HGeometry.HyperPlane
+import HGeometry.HyperPlane.Class
+import HGeometry.HyperPlane.Internal
+import HGeometry.HyperPlane.NonVertical
 import HGeometry.Intersection
 import HGeometry.Intersection()
 import HGeometry.Line.Class
