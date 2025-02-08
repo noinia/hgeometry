@@ -18,10 +18,11 @@ module HGeometry.Triangle.Class
 
 import Control.Lens
 import HGeometry.HalfSpace
-import HGeometry.Point
 import HGeometry.Line.PointAndVector
+import HGeometry.Point
 import HGeometry.Properties (NumType, Dimension)
 import HGeometry.Vector
+import Hiraffe.Graph.Class(HasVertices(..), HasVertices'(..))
 
 --------------------------------------------------------------------------------
 
@@ -31,6 +32,8 @@ import HGeometry.Vector
 
 -- | Class representing triangles
 class ( Point_   point (Dimension point) (NumType point)
+      , HasVertices triangle triangle
+      , Vertex triangle ~ point
       )
      => Triangle_ triangle point | triangle -> point where
 

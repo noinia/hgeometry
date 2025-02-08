@@ -39,7 +39,7 @@ import Text.Read
 -- | Triangles in d-dimensional space
 newtype Triangle point = MkTriangle (Vector 3 point)
   deriving (Generic)
-  deriving newtype (Functor,Foldable)
+  deriving newtype (Functor,Foldable,Reversing)
 
 -- | Construct a triangle from its three points
 pattern Triangle       :: point -> point -> point -> Triangle point
