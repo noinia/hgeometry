@@ -176,9 +176,10 @@ type instance Intersection (HyperPlane 2 r) (HyperPlane 2 r) =
   Maybe (LineLineIntersection (HyperPlane 2 r))
 
 
-instance ( Num r, Eq r
-         ) => HasIntersectionWith (HyperPlane 2 r) (HyperPlane 2 r) where
-  l `intersects` h = not (isParallelTo l h) || l == h
+-- instance ( Num r, Eq r
+--          ) => HasIntersectionWith (HyperPlane 2 r) (HyperPlane 2 r) where
+--   l `intersects` h = not (isParallelTo l h) || l == h
+-- see Hyperplane.Intersection instance
   -- two dimensional hyperplanes are lines; they intersect if they are not parallel, and in
   -- case they are parallel they better be same line
 

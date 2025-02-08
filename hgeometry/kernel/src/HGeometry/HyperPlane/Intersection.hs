@@ -60,14 +60,14 @@ instance Bitraversable PlanePlaneIntersection where
     Plane_x_Plane_Plane h -> Plane_x_Plane_Plane <$> f h
 
 instance ( Has_ Metric_ d r, Num r, Eq r, 2 <= d, d < d + 1 -- this constraint is rather silly
-         , Has_ Metric_ (1+d) r
+         , Has_ Metric_ (1+d) r, Eq (Vector (1 + d) r)
          ) => HasIntersectionWith (HyperPlane d r) (HyperPlane d r) where
-  h `intersects` h' = h `isParallelTo` h'
+  h `intersects` h' = h == h' || not (h `isParallelTo` h')
 
 instance ( Has_ Metric_ d r, Num r, Eq r, 2 <= d, d < d + 1
-         , Has_ Metric_ (1+d) r, Has_ Additive_ (d-1) r
+         , Has_ Metric_ (1+d) r, Has_ Additive_ (d-1) r, Eq (Vector d r)
          ) => HasIntersectionWith (NonVerticalHyperPlane d r) (NonVerticalHyperPlane d r) where
-  h `intersects` h' = h `isParallelTo` h'
+  h `intersects` h' = h == h' ||  not (h `isParallelTo` h')
 
 
 instance (Eq r, Fractional r)
