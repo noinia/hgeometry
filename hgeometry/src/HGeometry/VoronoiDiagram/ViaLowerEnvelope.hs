@@ -15,6 +15,7 @@ module HGeometry.VoronoiDiagram.ViaLowerEnvelope
   , VoronoiDiagram'(..)
   , asMap
   , voronoiDiagram
+  , voronoiDiagramWith
   , voronoiVertices
   -- , edgeGeometries
   , pointToPlane

@@ -10,6 +10,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Plane.LowerEnvelope.Connected.BruteForce
   ( bruteForceLowerEnvelope
+  , connectedLowerEnvelopeWith
   , computeVertexForm
 
   , belowAll

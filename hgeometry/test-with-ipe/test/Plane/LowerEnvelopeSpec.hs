@@ -25,7 +25,8 @@ import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line
 import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
-import           HGeometry.Plane.LowerEnvelope.Connected
+import           HGeometry.Plane.LowerEnvelope
+import qualified HGeometry.Plane.LowerEnvelope.Connected.Randomized as Randomized
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
@@ -41,13 +42,21 @@ import           System.OsPath
 import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
+import           System.Random
+
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
 
+rVoronoiDiagram :: ( Point_ point 2 r, Functor f, Ord point
+                   , Ord r, Fractional r, Foldable1 f
+                   , Show point, Show r
+                   ) => f point -> VoronoiDiagram point
+rVoronoiDiagram = voronoiDiagramWith (lowerEnvelopeWith . connectedLowerEnvelopeWith $
+                                       Randomized.computeVertexForm (mkStdGen 1))
 
-
+--------------------------------------------------------------------------------
 
 
 instance ( Point_ point 2 r, Fractional r, Ord r
@@ -162,7 +171,8 @@ testIpe inFp outFp = do
     (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
       inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
       NonEmpty.fromList <$> readAllFrom inFp'
-    let vd = voronoiDiagram $ view core <$> points
+    let -- vd = voronoiDiagram $ view core <$> points
+        vd = rVoronoiDiagram $ view core <$> points
         vv = voronoiVertices $ view core <$> points
         out = [ iO' points
               , iO' vd
