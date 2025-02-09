@@ -90,13 +90,16 @@ extractH0 (Point3 x y _) hs = case extractMinimaBy (comparing $ evalAt (Point2 x
 -- | Given three planes h0, h and h' that all intersect in a common vertex v,
 -- and so that h0 is the lowest plane vertically above v, order the
 -- other two planes in CCW order.
-cmpPlanesAround                     :: (Plane_ plane r, Eq plane, Ord r, Fractional r)
+cmpPlanesAround                     :: (Plane_ plane r, Eq plane, Ord r, Fractional r
+                                       , Show plane, Show r
+                                       )
                                     => plane -> plane -> plane -> Ordering
 cmpPlanesAround h0 h h' | h == h'   = EQ
                         | otherwise = case snd <$> definers (Three h0 h h') of
                             Just (Definers (_ :| [hPrev, _hSucc])) | h == hPrev -> LT
                                                                    | otherwise  -> GT
-                            _ -> error "cmpPlanesAround: precondition failed"
+                            _ -> error $ "cmpPlanesAround: precondition failed"
+                                         <> show (h0,h,h')
 --  note that the first definer will, by definition/by precondition just be h0
 
 -- | Merge two lists of definers.

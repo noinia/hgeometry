@@ -103,6 +103,12 @@ spec = describe "Lower Envelope tests" $ do
               `shouldBe`
               Same (BruteForce.computeVertexForm planes)
 
+         prop "every vertex is valid" $
+           \seed (planes :: NonDegenerate (Plane R)) ->
+             all (`BruteForce.belowAll` planes) $
+               Map.keys (Randomized.computeVertexForm (mkStdGen seed) planes)
+
+
          prop "same as brute force" $
            \seed (planes :: NonDegenerate (Plane R)) ->
              Same (Randomized.computeVertexForm (mkStdGen seed) planes)

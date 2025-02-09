@@ -11,6 +11,8 @@
 module HGeometry.Plane.LowerEnvelope.Connected.BruteForce
   ( bruteForceLowerEnvelope
   , computeVertexForm
+
+  , belowAll
   ) where
 
 import           Data.Foldable1
@@ -34,17 +36,27 @@ import           Debug.Trace
 
 -- | Computes the lower envelope in O(n^4) time.
 --
--- pre: there are vertices
---
 bruteForceLowerEnvelope :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                            , Foldable set
                            , Show r, Show plane
                            )
                         => set plane
-                        -> MinimizationDiagram r (Point 2 r :+ Definers plane) plane
-bruteForceLowerEnvelope planes = case computeVertexForm planes of
-  IsNonEmpty vertices -> fromVertexForm vertices
-  IsEmpty             -> error "bruteForceLowerEnvelope: precondition failed, no vertices"
+                        -> Maybe (MinimizationDiagram r (Point 2 r :+ Definers plane) plane)
+bruteForceLowerEnvelope = connectedLowerEnvelopeWith computeVertexForm
+
+-- | Given an algorithm to compute the vertices of the lower envelope, computes
+-- the actual lower envelope. Returns a Nothing if there are no vertices
+--
+connectedLowerEnvelopeWith :: (Plane_ plane r, Ord r, Fractional r, Foldable set, Ord plane
+                              , Show plane, Show r
+                              )
+                           => (set plane -> VertexForm Map r plane)
+                           -> set plane
+                           -> Maybe (MinimizationDiagram r (Point 2 r :+ Definers plane) plane)
+connectedLowerEnvelopeWith computeVertexForm' planes = case computeVertexForm' planes of
+  IsNonEmpty vertices -> Just $ fromVertexForm vertices
+  IsEmpty             -> Nothing
+
 
 -- | Computes the vertices of the lower envelope
 --

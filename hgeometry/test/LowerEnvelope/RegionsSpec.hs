@@ -1,5 +1,6 @@
 module LowerEnvelope.RegionsSpec where
 
+import           Data.Maybe
 import           Control.Lens
 import           Data.Foldable
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -45,7 +46,7 @@ spec = describe "lowerEnvelope tests" $ do
          it "singleton diagram" $ do
            let v = Point2 10 10 :: Point 2 R
            [h1,h2,h3] <- pure $ toList inputs
-           (asMap $ mapVertices (^.core) $ bruteForceLowerEnvelope inputs) `shouldBe`
+           (asMap $ mapVertices (^.core) $ fromJust $ bruteForceLowerEnvelope inputs) `shouldBe`
              mkNEMap
                [ (h1, Unbounded (Vector2 1 1)    (NonEmpty.singleton v) (Vector2 0 1))
                , (h2, Unbounded (Vector2 (-1) 0) (NonEmpty.singleton v) (Vector2 (-1) (-1)))
@@ -64,9 +65,6 @@ verifyOnPlane h1 h2 h3 = case intersectionPoint (Three h1 h2 h3) of
   where
     allEqual (Three a b c) = a == b && b == c
 
--- | copied from the module
-belowAll   :: (Plane_ plane r, Ord r, Num r, Foldable f) => Point 3 r -> f plane -> Bool
-belowAll v = all (\h -> verticalSideTest v h /= GT)
 
 myEnv = bruteForceLowerEnvelope inputs
 -- myTriEnv = triangulatedLowerEnvelope inputs

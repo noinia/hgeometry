@@ -61,9 +61,9 @@ computeVertexForm        :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Fo
                          => gen -> set plane -> VertexForm Map r plane
 computeVertexForm gen = computeVertexFormIn tri . shuffle gen
   where
-    tri = Triangle (Point2 (-10_000) (-10_000))
-                   (Point2 (-10_000) (20_000))
-                   (Point2 (20_000)  (-10_000))
+    tri = Triangle (Point2 (-100_000) (-100_000))
+                   (Point2 (-100_000) (200_000))
+                   (Point2 (200_000)  (-100_000))
     -- TODO: compute abounding box/triangle instead
 
 -- | pre:

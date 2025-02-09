@@ -45,6 +45,11 @@ import           Test.QuickCheck.Instances ()
 
 type R = RealNumber 5
 
+
+
+
+
+
 instance ( Point_ point 2 r, Fractional r, Ord r
          , Show point, Show r, IsBoxable point
          )
