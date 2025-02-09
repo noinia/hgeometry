@@ -16,6 +16,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.BruteForce
 import           Data.Foldable1
 import           Data.Map (Map)
 import qualified Data.Map as Map
+import           Data.Map.NonEmpty (NEMap, pattern IsEmpty, pattern IsNonEmpty)
 import qualified Data.Map.NonEmpty as NEMap
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
@@ -27,7 +28,7 @@ import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Point
 
 import qualified Data.Foldable as F
-import Debug.Trace
+import           Debug.Trace
 --------------------------------------------------------------------------------
 -- * The naive O(n^4) time algorithm.
 
@@ -41,25 +42,19 @@ bruteForceLowerEnvelope :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                            )
                         => set plane
                         -> MinimizationDiagram r (Point 2 r :+ Definers plane) plane
-bruteForceLowerEnvelope = fromVertexForm . computeVertexForm
+bruteForceLowerEnvelope planes = case computeVertexForm planes of
+  IsNonEmpty vertices -> fromVertexForm vertices
+  IsEmpty             -> error "bruteForceLowerEnvelope: precondition failed, no vertices"
 
 -- | Computes the vertices of the lower envelope
---
--- pre: there are vertices
 --
 -- O(n^4) time.
 computeVertexForm        :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Foldable set
                             , Show plane, Show r
                             )
-                         => set plane -> VertexForm r plane
-computeVertexForm planes = f . NEMap.nonEmptyMap
-                         . unionsWithKey mergeDefiners
-                         . traceShowWith ("foo",F.toList planes,)
+                         => set plane -> VertexForm Map r plane
+computeVertexForm planes = unionsWithKey mergeDefiners
                          . map (asVertex planes) $ uniqueTriplets planes
-  where
-    f = \case
-      Nothing -> error "BruteForce.computeVertexForm: no vertices !?"
-      Just x  -> x
 
 asVertex             :: (Plane_ plane r, Foldable f, Ord plane, Ord r, Fractional r)
                      => f plane -> Three plane -> Map (Point 3 r) (Definers plane)

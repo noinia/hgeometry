@@ -39,7 +39,8 @@ import           HGeometry.Vector
 
 -- | The vertices of a lower envelope is just a Map with every vertex its definers,
 -- i.e. the planes that define the vertex in CCW order around it.
-type VertexForm r plane = NEMap (Point 3 r) (Definers plane)
+type VertexForm map r plane = map (Point 3 r) (Definers plane)
+
 
 -- type VertexForm' r plane = Map (Point 3 r) (Definers plane)
 

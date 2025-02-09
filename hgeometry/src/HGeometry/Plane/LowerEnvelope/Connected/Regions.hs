@@ -22,6 +22,9 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
 
   , fromVertexFormIn
   , BoundedRegion
+
+
+  , extraPoints
   ) where
 
 import           Control.Lens
@@ -59,7 +62,8 @@ import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Triangle
 import           HGeometry.Vector
 
--- import           Debug.Trace
+import           Debug.Trace
+
 ----------------------------------------
 
 -- | returns the CCW predecessor, and CCW successor of the given plane.
@@ -142,6 +146,7 @@ fromVertexFormIn     :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r
                         , HasDefiners vertexData plane
                         , Point_ corner 2 r
                         , Ord vertexData -- figure out why we need this?
+                        , Show r, Show corner
                         )
                      => Triangle corner
                      -> NEMap (Point 3 r) vertexData
@@ -149,7 +154,9 @@ fromVertexFormIn     :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r
 fromVertexFormIn tri = fmap (clipTo tri) . asMap . fromVertexForm
 
 -- | pre; all bounded vertices lie inside the triangle
-clipTo     :: (Point_ corner 2 r, Fractional r, Ord r)
+clipTo     :: (Point_ corner 2 r, Fractional r, Ord r
+              , Show r, Show corner
+              )
            => Triangle corner -> Region r (Point 2 r :+ vertexData)
            -> BoundedRegion r (Point 2 r :+ vertexData) (Point 2 r)
 clipTo tri = \case
@@ -169,9 +176,13 @@ extraPoints            :: ( Triangle_ triangle corner, Point_ corner 2 r
                             ~ Maybe (HalfLineLineSegmentIntersection (Point 2 r)
                                                                      (ClosedLineSegment corner))
                           , HasOuterBoundary triangle, Eq (VertexIx triangle)
+
+                          , Show point, Show r, Show corner
+                          , Show triangle
                           )
                        => HalfLine point -> HalfLine point -> triangle
                        -> NonEmpty (Point 2 r)
+extraPoints hp hq tri | traceShow ("extraPoints",hp,hq,tri) False = undefined
 extraPoints hp hq tri = noDuplicates $ q :| cornersInBetween qSide pSide tri <> [p]
     -- if the intersection point coincides with a corner then the current code includes
     -- the corner. We use the noDuplicates to get rid of those.
@@ -184,7 +195,8 @@ extraPoints hp hq tri = noDuplicates $ q :| cornersInBetween qSide pSide tri <> 
                              Just x  -> x
 
     intersectionPoint' h = flip (ifoldMapOf outerBoundaryEdgeSegments) tri $ \(side,_) seg ->
-      case h `intersect` seg of
+      case traceShowWith (h,seg,"  intersects in ",) $
+        h `intersect` seg of
         Just (HalfLine_x_LineSegment_Point x) -> First $ Just (x, side)
         _                                     -> First   Nothing
 

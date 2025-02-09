@@ -9,6 +9,8 @@ import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Map as Map
+import           Data.Map (Map)
 import qualified Data.Map.NonEmpty as NEMap
 import           Data.Maybe (fromMaybe, listToMaybe)
 import           Data.Ord (comparing)
@@ -20,6 +22,7 @@ import           HGeometry.Foldable.Util
 import           HGeometry.HyperPlane
 import           HGeometry.Instances ()
 import           HGeometry.Intersection
+import           HGeometry.Matrix
 import           HGeometry.NonEmpty.Util
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope.Connected (VertexForm)
@@ -43,12 +46,23 @@ type R = RealNumber 5
 newtype NonDegenerate plane = NonDegenerate (NonEmpty plane)
   deriving newtype (Show,Eq,Foldable,Functor)
 
+setOf     :: Ord a => Gen a -> Gen (Set a)
+setOf gen = Set.fromList <$> listOf gen
+
 instance Arbitrary (NonDegenerate (Plane R)) where
   arbitrary = do h0 <- arbitrary
                  h1 <- arbitrary `suchThat` nonParallelWith h0
-                 h2 <- arbitrary `suchThat` \h' -> nonParallelWith h0 h' && nonParallelWith h1 h'
-                 rest <- arbitrary
-                 pure . NonDegenerate $ h0 :| (h1 : h2 : rest)
+                 h2 <- arbitrary `suchThat` \h -> det (mkMatrix h0 h1 h) /= 0
+                   -- \h' -> nonParallelWith h0 h' && nonParallelWith h1 h'
+                 rest <- setOf (arbitrary  `suchThat` (`notElem` [h0,h1,h2]))
+                 pure . NonDegenerate $ h0 :| (h1 : h2 : (Set.toList rest))
+  -- according to
+  -- https://www.mathspanda.com/A2FM/Lessons/Intersections_of_planes_LESSON.pdf
+  -- the three planes intersect in a point only when their determinant is non-zero.
+
+mkMatrix :: Plane R -> Plane R -> Plane R -> Matrix 3 3 R
+mkMatrix (Plane a1 b1 c1) (Plane a2 b2 c2) (Plane a3 b3 c3) =
+  matrixFromRows (Vector3 (Vector3 a1 b1 c1) (Vector3 a2 b2 c2) (Vector3 a3 b3 c3))
 
 -- instance Arbitrary (NonDegenerate (Plane R)) where
 --   arbitrary = fmap f <$> arbitrary
@@ -65,12 +79,12 @@ nonParallelWith h h' = case h `intersect` h' of
 
 
 
-newtype Same = Same (VertexForm R (Plane R))
+newtype Same = Same (VertexForm Map R (Plane R))
   deriving newtype (Show)
 
 instance Eq Same where
   (Same env) == (Same env') = and
-                            $ NonEmpty.zipWith (<=>) (NEMap.toAscList env) (NEMap.toAscList env')
+                            $ zipWith (<=>) (Map.toAscList env) (Map.toAscList env')
     where
       (p,defs) <=> (q,defs') = p == q
                                &&

@@ -20,7 +20,7 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map (Map)
 import qualified Data.Map as Map
-import           Data.Map.NonEmpty (NEMap)
+import           Data.Map.NonEmpty (NEMap, pattern IsEmpty, pattern IsNonEmpty)
 import qualified Data.Map.NonEmpty as NEMap
 import           Data.Set (Set)
 import qualified Data.Set as Set
@@ -58,15 +58,17 @@ computeVertexForm        :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Fo
                             , RandomGen gen
                             , Show plane, Show r
                             )
-                         => gen -> set plane -> VertexForm r plane
+                         => gen -> set plane -> VertexForm Map r plane
 computeVertexForm gen = computeVertexFormIn tri . shuffle gen
   where
     tri = Triangle (Point2 (-10_000) (-10_000))
-                   (Point2 (-10_000) (10_000))
-                   (Point2 (10_000)  (-10_000))
+                   (Point2 (-10_000) (20_000))
+                   (Point2 (20_000)  (-10_000))
     -- TODO: compute abounding box/triangle instead
 
--- | pre: imput is already a random permutation
+-- | pre:
+--
+-- - input is already a random permutation
 computeVertexFormIn         :: forall plane point r.
                               ( Plane_ plane r, Ord plane, Ord r, Fractional r
                               , Show plane, Show r
@@ -74,8 +76,8 @@ computeVertexFormIn         :: forall plane point r.
                               )
                             => Triangle point
                             -> V.Vector plane
-                            -> VertexForm r plane
-computeVertexFormIn tri0 hs = NEMap.unsafeFromMap $ lowerEnvelopeIn (view asPoint <$> tri0) hs
+                            -> VertexForm Map r plane
+computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
   where
     n  = length hs
     r  = sqrt . sqrt @Double . fromIntegral $ n
@@ -87,37 +89,26 @@ computeVertexFormIn tri0 hs = NEMap.unsafeFromMap $ lowerEnvelopeIn (view asPoin
                       -> set plane
                       -> Map (Point 3 r) (Definers plane)
     lowerEnvelopeIn tri planes | traceShow ("LE",toList planes) False = undefined
-    lowerEnvelopeIn tri planes
-        | null planes = mempty
-        | otherwise   = NEMap.mapMaybeWithKey (asVertexIn tri) verticesRNet
-                        <>
-                        foldMap lowerEnvelopeIn' triangulatedEnv
-      where
-        (rNet,remaining) = takeSample r' planes
+    lowerEnvelopeIn tri planes =
+      let
+          (rNet,remaining) = takeSample r' planes
 
-        verticesRNet    :: NEMap (Point 3 r) (Definers plane, Set plane)
-        verticesRNet    = withConflictLists remaining $ BruteForce.computeVertexForm rNet
+          verticesRNet    :: Map (Point 3 r) (Definers plane, Set plane)
+          verticesRNet    = withConflictLists remaining $ BruteForce.computeVertexForm rNet
+      in case verticesRNet of
+           IsEmpty                  -> mempty
+           IsNonEmpty verticesRNet' -> NEMap.mapMaybeWithKey (asVertexIn tri) verticesRNet'
+                                       <>
+                                       foldMap lowerEnvelopeIn' triangulatedEnv
+             where
+               env :: NEMap plane (BoundedRegion r  (Point 2 r :+ (Definers plane, Set plane))
+                                                    (Point 2 r :+ Set plane))
+               env = withExtraConflictLists remaining
+                   . fromVertexFormIn tri $ verticesRNet'
+               -- also compute the conflicts of the extra vertices
 
-        -- verticesRNet :: NEMap (Point 3 r) (Definers plane)
-        -- verticesRNet = BruteForce.computeVertexForm rNet
-
-        env :: NEMap plane (BoundedRegion r  (Point 2 r :+ (Definers plane, Set plane))
-                                             (Point 2 r :+ Set plane))
-        env = withExtraConflictLists remaining
-            . fromVertexFormIn tri $ verticesRNet
-        -- also compute the conflicts of the extra vertices
-
-        -- env :: NEMap plane (BoundedRegion r  ((Point 2 r :+ Definers plane) :+ Set plane)
-        --                                      (Point 2 r                     :+ Set plane)
-        --                    )
-        -- env = withConflictLists remaining . fromVertexFormIn tri $ verticesRNet
-        -- -- OK; maybe partially revert this agian, and only compute the
-        -- -- conflict lists of the extra vertices in a second step.
-        -- -- at least think about when we compute the conflict lists.
-        -- -- We need them  for all vertices. We also need them for "corners"
-
-        triangulatedEnv :: NonEmpty (Triangle (Point 2 r :+ Set plane))
-        triangulatedEnv = foldMap1 triangulate env
+               triangulatedEnv :: NonEmpty (Triangle (Point 2 r :+ Set plane))
+               triangulatedEnv = foldMap1 triangulate env
 
 
     lowerEnvelopeIn'     :: (Foldable set, Monoid (set plane))
@@ -170,11 +161,13 @@ conflictListOf = foldMap (^.extra)
 -- So maybe compute everything in a bounding box/triagnle instead after all.
 
 -- | Computes conflict list
-withConflictLists  :: (Plane_ plane r, Ord r, Num r)
-                   => Set plane
-                   -> VertexForm r plane
-                   -> NEMap (Point 3 r) (Definers plane, Set plane)
-withConflictLists planes = NEMap.mapWithKey (\v defs -> (defs, Set.filter (below v) planes))
+withConflictLists        :: ( Plane_ plane r, Ord r, Num r
+                            , FunctorWithIndex (Point 3 r) (map (Point 3 r))
+                            )
+                         => Set plane
+                         -> VertexForm map r plane
+                         -> map (Point 3 r) (Definers plane, Set plane)
+withConflictLists planes = imap (\v defs -> (defs, Set.filter (below v) planes))
   where
     below v h = verticalSideTest v h == LT -- TODO: not sure if this should be LT or 'not GT'
 
