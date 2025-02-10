@@ -190,6 +190,7 @@ common ipe-setup
       , hgeometry:kernel
       , hgeometry:polyLine
       , hgeometry:polygon
+      , hgeometry:spline
 
       , hexpat                  >= 0.20.9        && < 1
       , parsec                  >= 3             && < 4
@@ -204,11 +205,14 @@ common ipe-setup
 
 common svg-setup
     build-depends:
-        hgeometry
-      , hgeometry:vector
+        hgeometry:vector
       , hgeometry:point
       , hgeometry:kernel
+      , hgeometry:polyLine
+      , hgeometry:spline
+      , hgeometry:polygon
       , hgeometry:ipe
+
       , miso                      >= 1.8.4         && < 2
       , lucid                     >= 2             && < 3
       , lucid-svg                 >= 0.7           && < 1
@@ -374,6 +378,20 @@ library polyLine
         HGeometry.PolyLine.Class
 
 --------------------------------------------------------------------------------
+-- * Splines
+
+library spline
+    import:           all-setup
+    visibility:       public
+    hs-source-dirs:   spline/src
+    build-depends:
+        hgeometry:vector
+      , hgeometry:point
+      , hgeometry:kernel
+    exposed-modules:
+        HGeometry.BezierSpline
+
+--------------------------------------------------------------------------------
 -- * Line Segment Intersection Library
 
 library lineSegmentIntersection
@@ -468,8 +486,6 @@ library
 
         -- HGeometry.ConvexHull.R3.Naive
         HGeometry.ConvexHull.R3.Naive.Dual
-
-        HGeometry.BezierSpline
 
         HGeometry.ClosestPair
         HGeometry.ClosestPair.Naive
@@ -623,7 +639,8 @@ library geojson
        , hgeometry:vector
        , hgeometry:point
        , hgeometry:kernel
-       , hgeometry
+       , hgeometry:polygon
+       -- , hgeometry
     exposed-modules:
        HGeometry.GeoJSON
 
