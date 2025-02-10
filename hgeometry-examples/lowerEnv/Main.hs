@@ -97,8 +97,8 @@ renderPlaneIn rect' h = uncheckedFromCCWPoints
   where
     eval p = p :+ evalAt p h
 
-toPolygons :: (Plane_ plane r, Ord r, Fractional r)
-           => MinimizationDiagram r plane
+toPolygons :: (Plane_ plane r, Ord r, Fractional r, Point_ vertex 2 r)
+           => MinimizationDiagram r vertex plane
            -> NonEmpty (plane, ConvexPolygonF NonEmpty (Point 2 r :+ r))
 toPolygons = fmap render . NEMap.toAscList . asMap
   where
@@ -130,8 +130,10 @@ triangulate' (h,pg) = fmap (\simple -> (h, review _UncheckedConvexPolygon $
 
 
 -- | Render a minimization diagram
-renderMinimizationDiagram     :: (Plane_ plane r, Ord r, Fractional r, HasColour plane)
-                              => MinimizationDiagram r plane
+renderMinimizationDiagram     :: (Plane_ plane r, Ord r, Fractional r, HasColour plane
+                                 , Point_ vertex 2 r
+                                 )
+                              => MinimizationDiagram r vertex plane
                               -> ( NonEmpty (Vtx r)
                                  , NonEmpty (NonEmpty Int)
                                  )
@@ -224,7 +226,8 @@ boundedVertices f = foldMap (\case
 
 
 -- | compute some sufficiently large rectangle to which we can clip the minimization diagram.
-clippingBox :: (Num r, Ord r) => MinimizationDiagram r plane -> Rectangle (Point 2 r)
+clippingBox :: (Num r, Ord r, Point_ vertex 2 r, IsBoxable vertex
+               ) => MinimizationDiagram r vertex plane -> Rectangle (Point 2 r)
 clippingBox = grow 10 . boundingBox . NonEmpty.fromList . boundedVertices (:[])
 
 
