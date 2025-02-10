@@ -156,7 +156,7 @@ fromVertexFormIn     :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r
                      -> NEMap plane (BoundedRegion r (Point 2 r :+ vertexData) (Point 2 r))
 fromVertexFormIn tri = fmap (clipTo tri) . asMap . fromVertexForm
 
--- | pre; all bounded vertices lie inside the triangle
+-- | pre: all bounded vertices lie inside the triangle
 clipTo     :: (Point_ corner 2 r, Fractional r, Ord r
               , Show r, Show corner
               )
@@ -170,6 +170,9 @@ clipTo tri = \case
                              hq       = HalfLine (q^.asPoint) v
                              extras   = extraPoints hp hq (view asPoint <$> tri)
                          in uncheckedFromCCWPoints $ (Extra <$> extras) <> (Original <$> chain)
+
+-- TODO: I don't think the precondition holds in all our recursive calls.
+-- so we should just clip them properly.
 
 -- | computes the extra vertices that we have to insert to make an unbounded region bounded
 extraPoints            :: ( Triangle_ triangle corner, Point_ corner 2 r

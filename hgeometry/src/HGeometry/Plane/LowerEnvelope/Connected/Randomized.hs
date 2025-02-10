@@ -19,31 +19,24 @@ import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map (Map)
-import qualified Data.Map as Map
 import           Data.Map.NonEmpty (NEMap, pattern IsEmpty, pattern IsNonEmpty)
 import qualified Data.Map.NonEmpty as NEMap
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Vector as V
 import           HGeometry.Ext
-import           HGeometry.HalfSpace
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Intersection
-import           HGeometry.Line.PointAndVector
 import           HGeometry.Permutation.Shuffle
 import qualified HGeometry.Plane.LowerEnvelope.Connected.BruteForce as BruteForce
-import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.Plane.LowerEnvelope.Connected.Regions
-import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Point
 import           HGeometry.Point.Either
 import           HGeometry.Polygon
 import           HGeometry.Triangle
-import           HGeometry.Vector
 import           Prelude hiding (filter, head, last)
 import           System.Random
-import           Witherable
 
 
 import           Debug.Trace
@@ -81,8 +74,12 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
   where
     n  = length hs
     r  = sqrt . sqrt @Double . fromIntegral $ n
-    r' = max 3 $ round $ r * logBase 2 r
+    r' = max 4 $ round $ r * logBase 2 r
       -- take a sample of size r*log r
+      --
+      -- the max 4 is so that we always have at least one vertex (which requires at least
+      -- three planes). Moreover since we actually include the definers of the corners
+      -- of a triangle we may get 4 planes in any case.
 
     lowerEnvelopeIn   :: (Foldable set)
                       => Triangle (Point 2 r)
@@ -125,11 +122,16 @@ takeSample r = fmap Set.fromList . splitAt r . toList
 
 
 -- | Report whether this is really a vertex of the global lower envelope in the region.
-asVertexIn :: (Ord r, Num r, Point_ vertex 2 r, Foldable set)
+asVertexIn :: (Ord r, Num r, Point_ vertex 2 r, Foldable set
+              , Show definers, Show (set plane), Show r, Show vertex
+              )
            => Triangle vertex -> Point 3 r -> (definers, set plane) -> Maybe definers
 asVertexIn tri (Point3 x y _) (defs,conflictList)
-  | null conflictList && (Point2 x y) `intersects` tri = Just defs
-  | otherwise                                          = Nothing
+  | traceShow ("asVertexIn ",tri,x,y, conflictList, null conflictList && (Point2 x y) `intersects` tri) False = undefined
+  | null conflictList && (Point2 x y) `intersects'` tri = Just defs
+  | otherwise                                           = Nothing
+  where
+    p `intersects'` tri = p `intersects` tri && notElemOf (vertices.asPoint) p tri
 
 
 -- -- | Test whether the given point lies inside the triangular region.
@@ -157,19 +159,34 @@ hasNoConflict (defs,conflictList)
 conflictListOf :: Monoid conflictList => Triangle (vertex :+ conflictList) -> conflictList
 conflictListOf = foldMap (^.extra)
 
---FIXME: This is wrong; for unbounded regions; we are missing planes.
--- So maybe compute everything in a bounding box/triagnle instead after all.
-
 -- | Computes conflict list
-withConflictLists        :: ( Plane_ plane r, Ord r, Num r
+withConflictLists        :: ( Plane_ plane r, Ord r, Num r, Ord plane
                             , FunctorWithIndex (Point 3 r) (map (Point 3 r))
+                            , Show r, Show plane
                             )
                          => Set plane
                          -> VertexForm map r plane
                          -> map (Point 3 r) (Definers plane, Set plane)
-withConflictLists planes = imap (\v defs -> (defs, Set.filter (below v) planes))
+withConflictLists planes = imap (\v defs -> (defs
+                                            , Set.fromList (toList defs)
+                                              <> Set.filter (below v) planes
+                                            )
+                                )
+                           -- note: we include the definers in the conflict lists as well,
+                           -- since we need to include them in the recursive calls
+
   where
-    below v h = verticalSideTest v h == LT -- TODO: not sure if this should be LT or 'not GT'
+    below v h =
+      traceShowWith ("below ",v,h,) $
+      verticalSideTest v h == LT -- TODO: not sure if this should be LT or 'not GT'
+
+    -- TODO: I think we may need to include the definers of the triangle; i.e.
+    -- the plane at the top of the prism and the at most 3 "neighbouring" planes
+    -- in the recursive call as well.
+    --
+    -- the above adds the conflict lists of the definers of a single corner. In case
+    -- of degeneracies that may be overkill though..
+
 
 -- | Compute the conflit lists for the extra vertices we added.
 withExtraConflictLists        :: (Plane_ plane r, Ord r, Num r, Point_ corner 2 r
