@@ -1,6 +1,5 @@
 {-# OPTIONS_GHC -F -pgmF doctest-driver-gen
                 -optF src
-                -optF polyline/src
 
                 -optF -XTypeFamilies
                 -optF -XGADTs
