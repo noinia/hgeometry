@@ -371,3 +371,18 @@ reorientTo v seg = case (seg^.end) `onSide` m of
     m = perpendicularTo $ LinePV (seg^.start.asPoint) v
     -- v points into the left halfplane of m
     flipSegment (LineSegment s t) = LineSegment t s
+
+
+
+--------------------------------------------------------------------------------
+
+-- I guess we can't actually edit the two corners that we don't store...
+-- so vertices and atVertex being traversals rather than a fold/getter is troublesome.
+-- instance HasVertices' (Rectangle point) where
+--   type Vertex   (Rectangle point) = point
+--   type VertexIx (Rectangle point) = Int
+--   vertexAt i = _RectangleVector.iix i
+--   numVertices = const 4
+
+-- instance HasVertices (Rectangle point) (Rectangle point') where
+--   vertices = cloneIndexedTraversal1 (_RectangleVector.components)

@@ -338,6 +338,13 @@ traverseTriangleFrom i = conjoined trav (itrav . indexed)
                                       <$> f 2 c Apply.<.> f 0 a Apply.<.> f 1 b
 
 
+-- We need Rectanlge to be an instance of HasVertices' first; but that requires
+-- that vertices is a fold rather than a traversal.
+-- instance (Point_ point 2 r, Num r) => HasOuterBoundary (Rectangle point) where
+--   outerBoundaryVertexAt i = undefined
+--   ccwOuterBoundaryFrom i = undefined
+--   cwOuterBoundaryFrom i = undefined
+
 
 
 -- data MultiPG
