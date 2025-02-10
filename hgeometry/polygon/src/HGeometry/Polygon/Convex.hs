@@ -17,11 +17,12 @@ module HGeometry.Polygon.Convex
   , _ConvexPolygon
   , isStrictlyConvex, isConvex
   , verifyConvex
-  , minkowskiSum
+  -- , minkowskiSum
   , maxInDirection
   , _UncheckedConvexPolygon
+  , findMaxWith
   ) where
 
 import HGeometry.Polygon.Convex.Class
 import HGeometry.Polygon.Convex.Implementation
-import HGeometry.Polygon.Convex.MinkowskiSum
+-- import HGeometry.Polygon.Convex.MinkowskiSum

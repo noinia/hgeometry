@@ -122,11 +122,21 @@ common kernel-setup
         hgeometry:vector
       , hgeometry:point
 
+common polygon-setup
+    build-depends:
+        hgeometry:vector
+      , hgeometry:point
+      , hgeometry:kernel
+      , hgeometry:lineSegmentIntersection
+
 common hgeometry-setup
     build-depends:
         hgeometry:vector
       , hgeometry:point
       , hgeometry:kernel
+      , hgeometry:polyLine
+      , hgeometry:lineSegmentIntersection
+      , hgeometry:polygon
 
 common doctest
     build-depends:
@@ -167,16 +177,20 @@ common kernel-quickcheck-setup
       , hgeometry:vector
       , hgeometry:point
       , hgeometry:kernel
+      , hgeometry:polyLine
+      , hgeometry:polygon
       , hgeometry-combinatorial:quickcheck
       , hgeometry:vector-quickcheck
       , hgeometry:point-quickcheck
 
 common ipe-setup
     build-depends:
-        hgeometry
-      , hgeometry:vector
+        hgeometry:vector
       , hgeometry:point
       , hgeometry:kernel
+      , hgeometry:polyLine
+      , hgeometry:polygon
+
       , hexpat                  >= 0.20.9        && < 1
       , parsec                  >= 3             && < 4
       , text                    >= 2             && < 3
@@ -345,12 +359,72 @@ library kernel
         HGeometry.Interval.Internal
 
 --------------------------------------------------------------------------------
+-- * PolyLine Library
+
+library polyLine
+    import:           all-setup
+    visibility:       public
+    hs-source-dirs:   polyLine/src
+    build-depends:
+        hgeometry:vector
+      , hgeometry:point
+      , hgeometry:kernel
+    exposed-modules:
+        HGeometry.PolyLine
+        HGeometry.PolyLine.Class
+
+--------------------------------------------------------------------------------
+-- * Line Segment Intersection Library
+
+library lineSegmentIntersection
+    import:           all-setup
+    visibility:       private
+    hs-source-dirs:   lineSegmentIntersection/src
+    build-depends:
+        hgeometry:vector
+      , hgeometry:point
+      , hgeometry:kernel
+    exposed-modules:
+        HGeometry.LineSegment.Intersection.Naive
+        HGeometry.LineSegment.Intersection.BentleyOttmann
+    other-modules:
+        HGeometry.LineSegment.Intersection.Types
+
+--------------------------------------------------------------------------------
+-- * Polygon Library
+
+library polygon
+    import:           all-setup,polygon-setup
+    visibility:       public
+    hs-source-dirs:   polygon/src
+    exposed-modules:
+        HGeometry.Polygon
+        HGeometry.Polygon.Class
+
+        HGeometry.Polygon.Convex
+        HGeometry.Polygon.Convex.Class
+
+        HGeometry.Polygon.Simple
+        HGeometry.Polygon.Simple.Class
+
+        HGeometry.Polygon.WithHoles
+
+    other-modules:
+        HGeometry.Polygon.Convex.Implementation
+
+        HGeometry.Polygon.Simple.Type
+        HGeometry.Polygon.Simple.Implementation
+        HGeometry.Polygon.Simple.InPolygon
+
+
+
+--------------------------------------------------------------------------------
 -- * HGeometry Library
 
 
 library
     import:           all-setup,hgeometry-setup
-    hs-source-dirs:   src, polyline/src, polygon/src
+    hs-source-dirs:   src
     exposed-modules:
         HGeometry
 
@@ -362,30 +436,21 @@ library
         HGeometry.PlaneGraph.Class
         HGeometry.PlaneGraph.Connected
 
-        HGeometry.Polygon
-        HGeometry.Polygon.Class
-
-        HGeometry.Polygon.Simple
-        HGeometry.Polygon.Simple.Class
         HGeometry.Polygon.Simple.Sample
         HGeometry.Polygon.Simple.ShortestPath.Tree
         HGeometry.Polygon.Simple.DualTree
 
 --
-        HGeometry.Polygon.Convex
-        HGeometry.Polygon.Convex.Class
         HGeometry.Polygon.Convex.Tangents
         HGeometry.Polygon.Convex.Random
+        HGeometry.Polygon.Convex.MinkowskiSum
 
         HGeometry.Polygon.Monotone
 
-        HGeometry.Polygon.WithHoles
 
         -- HGeometry.Polygon.Visibility
         HGeometry.Polygon.Visibility.Naive
 
-        HGeometry.PolyLine
-        HGeometry.PolyLine.Class
         HGeometry.PolyLine.Simplification.DouglasPeucker
         HGeometry.PolyLine.Simplification.ImaiIri
 
@@ -420,8 +485,6 @@ library
 
         HGeometry.Line.LowerEnvelope
 
-        HGeometry.LineSegment.Intersection.Naive
-        HGeometry.LineSegment.Intersection.BentleyOttmann
 
         HGeometry.Plane.LowerEnvelope
         HGeometry.Plane.LowerEnvelope.Naive
@@ -431,8 +494,6 @@ library
 
         HGeometry.Plane.LowerEnvelope.Connected.BruteForce
         HGeometry.Plane.LowerEnvelope.Connected.Randomized
-
-
 
         HGeometry.VoronoiDiagram
         HGeometry.VoronoiDiagram.ViaLowerEnvelope
@@ -448,21 +509,18 @@ library
         HGeometry.VerticalRayShooting
         HGeometry.VerticalRayShooting.PersistentSweep
 
+    reexported-modules:
+        HGeometry.LineSegment.Intersection.Naive
+      , HGeometry.LineSegment.Intersection.BentleyOttmann
+
     other-modules:
         HGeometry.HalfPlane.CommonIntersection.Chain
 
-        HGeometry.Polygon.Simple.Type
-        HGeometry.Polygon.Simple.Implementation
-        HGeometry.Polygon.Simple.InPolygon
 
-        HGeometry.Polygon.Convex.Implementation
-        HGeometry.Polygon.Convex.MinkowskiSum
         HGeometry.Polygon.Triangulation.Types
 
         HGeometry.PlaneGraph.Type
         HGeometry.PlaneGraph.Connected.Type
-
-        HGeometry.LineSegment.Intersection.Types
 
         HGeometry.Plane.LowerEnvelope.Type
         -- HGeometry.Plane.LowerEnvelope.Sample

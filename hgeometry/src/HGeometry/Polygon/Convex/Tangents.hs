@@ -26,8 +26,7 @@ import           HGeometry.Ext
 import           HGeometry.LineSegment
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Convex.Class
-import           HGeometry.Polygon.Convex.Implementation (findMaxWith)
+import           HGeometry.Polygon.Convex
 import           HGeometry.Vector
 
 --------------------------------------------------------------------------------

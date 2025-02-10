@@ -21,8 +21,7 @@ import           Data.Ord (comparing)
 import           HGeometry.Ext
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Convex.Class
-import           HGeometry.Polygon.Convex.Implementation
+import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple.Class
 
 --------------------------------------------------------------------------------
