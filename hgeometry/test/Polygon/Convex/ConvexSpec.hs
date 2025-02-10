@@ -16,6 +16,7 @@ import           HGeometry.LineSegment
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Convex.MinkowskiSum
 import           HGeometry.Polygon.Convex.Random
 import           HGeometry.Polygon.Instances ()
 import           HGeometry.Polygon.Simple
