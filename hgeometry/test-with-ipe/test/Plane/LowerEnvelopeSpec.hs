@@ -171,8 +171,8 @@ testIpe inFp outFp = do
     (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
       inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
       NonEmpty.fromList <$> readAllFrom inFp'
-    let -- vd = voronoiDiagram $ view core <$> points
-        vd = rVoronoiDiagram $ view core <$> points
+    let vd = voronoiDiagram $ view core <$> points
+        -- vd = rVoronoiDiagram $ view core <$> points
         vv = voronoiVertices $ view core <$> points
         out = [ iO' points
               , iO' vd
@@ -180,6 +180,35 @@ testIpe inFp outFp = do
     goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
                (ipeFileGolden { name = outFp })
                (addStyleSheet opacitiesStyle $ singlePageFromContent out)
+
+
+-- testClipVoronoi            :: OsPath -> OsPath -> Spec
+-- testClipVoronoi inFp outFp = do
+--     (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
+--       inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
+--       NonEmpty.fromList <$> readAllFrom inFp'
+--     let vd'    = asMap $ voronoiDiagram $ view core <$> points
+--         theMap = undefined
+--         -- theMap = NEMap.mapWithKey (\p reg -> )
+--         -- vv = voronoiVertices $ view core <$> points
+
+--         a  = Point2 0    0
+--         b  = Point2 0    2000
+--         c  = Point2 2000 1000
+--         vd = fromVertexFormIn (Triangle a b c) theMap
+
+
+--         -- vd = rVoronoiDiagram $ view core <$> points
+
+--         out = [ iO' points
+--               , iO' vd
+--               ] <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
+--     goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
+--                (ipeFileGolden { name = outFp })
+--                (addStyleSheet opacitiesStyle $ singlePageFromContent out)
+
+
+
 
 
 -- theEdges :: PlaneGraph' (Point 2 R) h (E R) -> IpeObject' Group R

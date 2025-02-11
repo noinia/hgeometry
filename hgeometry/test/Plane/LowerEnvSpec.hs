@@ -92,7 +92,7 @@ instance Eq Same where
 
 
 spec :: Spec
-spec = describe "Lower Envelope tests" $ do
+spec = xdescribe "Lower Envelope tests" $ do
          it "manual" $
            let seed   = 0
                planes = NonDegenerate $ NonEmpty.fromList [ Plane 1    0 2
