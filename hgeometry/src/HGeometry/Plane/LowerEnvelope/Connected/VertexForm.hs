@@ -21,8 +21,6 @@ import           Control.Lens
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Map.NonEmpty (NEMap)
-import qualified Data.Map.NonEmpty as NEMap
 import           Data.Maybe (fromMaybe)
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext

@@ -18,12 +18,10 @@ module HGeometry.Trie.Type
 import           Control.Lens
 import           Data.Bifoldable
 import           Data.Bitraversable
-import qualified Data.Foldable as F
 import           Data.Foldable1
 import           Data.Functor.Apply ((<.*>))
 import           Data.Functor.Classes
 import           Data.Semigroup.Traversable
-import           HGeometry.Sequence.KV
 
 -- import Debug.Trace
 --------------------------------------------------------------------------------
