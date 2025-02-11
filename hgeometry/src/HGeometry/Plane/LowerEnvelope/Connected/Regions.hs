@@ -51,7 +51,7 @@ import           HGeometry.Intersection
 import           HGeometry.LineSegment
 import           HGeometry.NonEmpty.Util
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
-import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
+import           HGeometry.Plane.LowerEnvelope.Connected.Primitives (intersectionVector)
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm
 import           HGeometry.Point
@@ -154,22 +154,59 @@ fromVertexFormIn     :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r
                      => Triangle corner
                      -> NEMap (Point 3 r) vertexData
                      -> NEMap plane (BoundedRegion r (Point 2 r :+ vertexData) (Point 2 r))
-fromVertexFormIn tri = fmap (clipTo tri) . asMap . fromVertexForm
+fromVertexFormIn tri = case fromPoints $ (Extra . (^.asPoint)) <$> tri of
+  Just tri' -> fmap (fromMaybe tri' . clipTo tri) . asMap . fromVertexForm
+  Nothing   -> error "absurd: fromVertexFormIn"
 
--- | pre: all bounded vertices lie inside the triangle
 clipTo     :: (Point_ corner 2 r, Fractional r, Ord r
               , Show r, Show corner
               )
            => Triangle corner -> Region r (Point 2 r :+ vertexData)
-           -> BoundedRegion r (Point 2 r :+ vertexData) (Point 2 r)
+           -> Maybe (BoundedRegion r (Point 2 r :+ vertexData) (Point 2 r))
 clipTo tri = \case
-  Bounded vs          -> uncheckedFromCCWPoints $ Original <$> vs
-  Unbounded u chain v -> let p        = NonEmpty.head chain
-                             q        = NonEmpty.last chain
-                             hp       = HalfLine (p^.asPoint) ((-1) *^ u)
-                             hq       = HalfLine (q^.asPoint) v
-                             extras   = extraPoints hp hq (view asPoint <$> tri)
-                         in uncheckedFromCCWPoints $ (Extra <$> extras) <> (Original <$> chain)
+  Bounded vs          -> Just $ uncheckedFromCCWPoints $ Original <$> vs
+    --todo ; fix clip this as well
+  Unbounded u chain v -> do (u',chain0) <- trimChain  tri u chain
+                            (v',chain') <- trimRChain tri v chain0
+                            let p        = NonEmpty.head chain
+                                q        = NonEmpty.last chain
+                                hp       = HalfLine (p^.asPoint) ((-1) *^ u')
+                                hq       = HalfLine (q^.asPoint) v'
+                                extras   = extraPoints hp hq (view asPoint <$> tri)
+                            pure . uncheckedFromCCWPoints $
+                              (Extra <$> extras) <> (Original <$> chain')
+
+
+trimChain     :: (Point_ corner 2 r, Point_ point 2 r, Num r, Ord r)
+              => Triangle corner
+              -> Vector 2 r -> NonEmpty point -> Maybe (Vector 2 r, NonEmpty point)
+trimChain tri = go
+  where
+    go u chain@(p :| rest)
+      | (p^.asPoint) `intersects` tri = Just (u,chain)
+      | otherwise                     = case NonEmpty.nonEmpty rest of
+                                          Nothing           -> Nothing
+                                          Just rest'@(q:|_) -> go (q .-. p) rest'
+
+
+trimRChain       :: (Point_ corner 2 r, Point_ point 2 r, Num r, Ord r)
+                 => Triangle corner
+                 -> Vector 2 r -> NonEmpty point -> Maybe (Vector 2 r, NonEmpty point)
+trimRChain tri v = either (const Nothing) Just . go
+  where
+    -- main idea: we compute either the result (i.e. the vector and the chain), or
+    -- the first point of the suffix  that lies outside the triangle
+    go chain@(p :| rest) = case NonEmpty.nonEmpty rest of
+      Nothing
+        | (p^.asPoint) `intersects` tri -> Right (v,chain)
+        | otherwise                     -> Left p
+      Just rest'                        -> case go rest' of
+        Left q
+          | (p^.asPoint) `intersects` tri -> Right (q .-. p, NonEmpty.singleton p)
+          | otherwise                     -> Left p
+        Right (w,result)                  -> Right (w, p NonEmpty.<| result)
+  -- TODO: hmm, come to think of it; can't the chain enter/exit the triangle multiple times?
+
 
 -- TODO: I don't think the precondition holds in all our recursive calls.
 -- so we should just clip them properly.
@@ -251,22 +288,22 @@ fromVertexForm = MinimizationDiagram
 
 -- | Given a plane h, and the set of vertices incident to h, compute the corresponding
 -- region in the minimization diagram.
-sortAroundBoundary            :: ( Plane_ plane r, Ord r, Fractional r, Ord plane
-                                 , HasDefiners vertex plane
-                                 )
-                              => plane -> NESet (Point 3 r, vertex)
-                              -> Region r (Point 2 r :+ vertex)
-sortAroundBoundary h vertices = case NonEmpty.nonEmpty rest of
+sortAroundBoundary             :: ( Plane_ plane r, Ord r, Fractional r, Ord plane
+                                  , HasDefiners vertex plane
+                                  )
+                               => plane -> NESet (Point 3 r, vertex)
+                               -> Region r (Point 2 r :+ vertex)
+sortAroundBoundary h vertices' = case NonEmpty.nonEmpty rest of
     Nothing     -> let (u,p,w) = singleVertex h v0 in Unbounded u (NonEmpty.singleton p) w
-    Just rest'  -> let edges = NonEmpty.zip vertices' (rest' <> vertices')
-                   in case NonEmpty.break (isInvalid h) edges of
-                        (_,  [])         -> boundedRegion $ uncurry (:+) <$> vertices'
+    Just rest'  -> let edges' = NonEmpty.zip vertices'' (rest' <> vertices'')
+                   in case NonEmpty.break (isInvalid h) edges' of
+                        (_,  [])         -> boundedRegion $ uncurry (:+) <$> vertices''
                         (vs, (u,v) : ws) -> let chain = fmap (uncurry (:+) . fst)
                                                       . NonEmpty.fromList
                                                       $ ws <> vs <> [(u,v)]
                                             in unboundedRegion h chain v u
   where
-    vertices'@(v0 :| rest) = inCCWOrder . fmap project . Set.toList $ vertices
+    vertices''@(v0 :| rest) = inCCWOrder . fmap project . Set.toList $ vertices'
     boundedRegion = Bounded . fromNonEmpty
     -- The main idea is to test if the region is unbounded; i.e. containing an "edge"
     -- that is not really an edge. If so, we break open the edges there, and
