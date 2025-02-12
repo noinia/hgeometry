@@ -16,160 +16,210 @@
 </span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Region"><span class="hs-identifier">Region</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
 </span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#toConvexPolygonIn"><span class="hs-identifier">toConvexPolygonIn</span></a></span><span>
 </span><span id="line-18"></span><span>
-</span><span id="line-19"></span><span>  </span><span class="hs-comment">--   LowerEnvelope'(LowerEnvelope)</span><span>
-</span><span id="line-20"></span><span>  </span><span class="hs-comment">-- , theUnboundedVertex, boundedVertices</span><span>
-</span><span id="line-21"></span><span>  </span><span class="hs-comment">-- , traverseLowerEnvelope</span><span>
-</span><span id="line-22"></span><span>
-</span><span id="line-23"></span><span>  </span><span class="hs-comment">-- , singleton</span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#mapVertices"><span class="hs-identifier">mapVertices</span></a></span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-comment">--   LowerEnvelope'(LowerEnvelope)</span><span>
+</span><span id="line-22"></span><span>  </span><span class="hs-comment">-- , theUnboundedVertex, boundedVertices</span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-comment">-- , traverseLowerEnvelope</span><span>
 </span><span id="line-24"></span><span>
-</span><span id="line-25"></span><span>  </span><span class="hs-comment">-- , BoundedVertex</span><span>
-</span><span id="line-26"></span><span>  </span><span class="hs-comment">-- , BoundedVertexF(Vertex)</span><span>
-</span><span id="line-27"></span><span>  </span><span class="hs-comment">-- , location, definers, location2</span><span>
-</span><span id="line-28"></span><span>
-</span><span id="line-29"></span><span>  </span><span class="hs-comment">-- , UnboundedVertex(UnboundedVertex)</span><span>
-</span><span id="line-30"></span><span>  </span><span class="hs-comment">-- , unboundedVertexId</span><span>
-</span><span id="line-31"></span><span>  </span><span class="hs-comment">-- , HasUnboundedEdges(..)</span><span>
-</span><span id="line-32"></span><span>
-</span><span id="line-33"></span><span>  </span><span class="hs-comment">-- , EdgeGeometry</span><span>
-</span><span id="line-34"></span><span>  </span><span class="hs-comment">-- , projectedEdgeGeometries, projectedEdgeGeometry</span><span>
-</span><span id="line-35"></span><span>
-</span><span id="line-36"></span><span>
-</span><span id="line-37"></span><span>  </span><span class="hs-comment">-- , outgoingUnboundedEdge</span><span>
-</span><span id="line-38"></span><span>  </span><span class="hs-comment">-- , edgeIntersectionLine</span><span>
-</span><span id="line-39"></span><span>  </span><span class="hs-comment">-- , intersectionLine'</span><span>
-</span><span id="line-40"></span><span>  </span><span class="hs-comment">-- , intersectionLineWithDefiners</span><span>
-</span><span id="line-41"></span><span>  </span><span class="hs-comment">-- , EdgeDefiners(..)</span><span>
-</span><span id="line-42"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-43"></span><span>
-</span><span id="line-44"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
-</span><span id="line-45"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/subcategories-0.2.1.1-979be93e740ab5688129e81e16aa88a54d1964866253d540065f299f4f47fced/share/doc/html/src/Control.Subcategory.Functor.html/Control.Subcategory.Functor.html"><span class="hs-identifier">Control.Subcategory.Functor</span></a></span><span>
-</span><span id="line-46"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-47"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
-</span><span id="line-48"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-5a5abb77bb90784d7c8b6bd69a8ee42852de9afc6f28c69d632846d366db41f3/share/doc/html/src/Data.Map.NonEmpty.html/Data.Map.NonEmpty.html"><span class="hs-identifier">Data.Map.NonEmpty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-5a5abb77bb90784d7c8b6bd69a8ee42852de9afc6f28c69d632846d366db41f3/share/doc/html/src/Data.Map.NonEmpty.Internal.html/Data.Map.NonEmpty.Internal.html#NEMap"><span class="hs-identifier">NEMap</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-49"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-5a5abb77bb90784d7c8b6bd69a8ee42852de9afc6f28c69d632846d366db41f3/share/doc/html/src/Data.Map.NonEmpty.html/Data.Map.NonEmpty.html"><span class="hs-identifier">Data.Map.NonEmpty</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NEMap</span></span><span>
-</span><span id="line-50"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">First</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-51"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Box</span></span><span>
-</span><span id="line-52"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Cyclic.html/HGeometry.Cyclic.html"><span class="hs-identifier">HGeometry.Cyclic</span></a></span><span>
-</span><span id="line-53"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Direction</span></span><span>
-</span><span id="line-54"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.HalfLine</span></span><span>
-</span><span id="line-55"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Intersection</span></span><span>
-</span><span id="line-56"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.LineSegment</span></span><span>
-</span><span id="line-57"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
-</span><span id="line-58"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point.Either</span></span><span>
-</span><span id="line-59"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Polygon.Convex.html"><span class="hs-identifier">HGeometry.Polygon.Convex</span></a></span><span>
-</span><span id="line-60"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html"><span class="hs-identifier">HGeometry.Polygon.Simple.Class</span></a></span><span>
-</span><span id="line-61"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span>
-</span><span id="line-62"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span>
-</span><span id="line-63"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Vector.NonEmpty.Util.html/HGeometry.Vector.NonEmpty.Util.html"><span class="hs-identifier">HGeometry.Vector.NonEmpty.Util</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-64"></span><span>
-</span><span id="line-65"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-66"></span><span class="annot"><span class="hs-comment">-- * The Minimization Diagram, i.e. the type that we use to represent our</span></span><span>
-</span><span id="line-67"></span><span class="hs-comment">-- lower envelope</span><span>
-</span><span id="line-68"></span><span>
-</span><span id="line-69"></span><span class="hs-comment">-- | A minimization daigram just maps every plane on the lower envelope to the region</span><span>
-</span><span id="line-70"></span><span class="hs-comment">-- above which it is minimal. Every plane has at most one such a region.</span><span>
-</span><span id="line-71"></span><span class="hs-keyword">newtype</span><span> </span><span id="MinimizationDiagram"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-var">MinimizationDiagram</span></a></span></span><span> </span><span id="local-6989586621679522390"><span class="annot"><a href="#local-6989586621679522390"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679522389"><span class="annot"><a href="#local-6989586621679522389"><span class="hs-identifier hs-type">plane</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="MinimizationDiagram"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-var">MinimizationDiagram</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-5a5abb77bb90784d7c8b6bd69a8ee42852de9afc6f28c69d632846d366db41f3/share/doc/html/src/Data.Map.NonEmpty.Internal.html/Data.Map.NonEmpty.Internal.html#NEMap"><span class="hs-identifier hs-type">NEMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679522389"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679522390"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679522390"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-72"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679522733"><span id="local-6989586621679522740"><span id="local-6989586621679522744"><span class="annot"><span class="annottext">Int -&gt; MinimizationDiagram r plane -&gt; ShowS
-[MinimizationDiagram r plane] -&gt; ShowS
-MinimizationDiagram r plane -&gt; String
-(Int -&gt; MinimizationDiagram r plane -&gt; ShowS)
--&gt; (MinimizationDiagram r plane -&gt; String)
--&gt; ([MinimizationDiagram r plane] -&gt; ShowS)
--&gt; Show (MinimizationDiagram r plane)
+</span><span id="line-25"></span><span>  </span><span class="hs-comment">-- , singleton</span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-comment">-- , BoundedVertex</span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-comment">-- , BoundedVertexF(Vertex)</span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-comment">-- , location, definers, location2</span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-comment">-- , UnboundedVertex(UnboundedVertex)</span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-comment">-- , unboundedVertexId</span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-comment">-- , HasUnboundedEdges(..)</span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-comment">-- , EdgeGeometry</span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-comment">-- , projectedEdgeGeometries, projectedEdgeGeometry</span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-comment">-- , outgoingUnboundedEdge</span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-comment">-- , edgeIntersectionLine</span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-comment">-- , intersectionLine'</span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-comment">-- , intersectionLineWithDefiners</span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-comment">-- , EdgeDefiners(..)</span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/subcategories-0.2.1.1-4999bd21d9097ceb696e5e4cf7a99dbacd9d75a5e522f00a5e76357f579c7a41/share/doc/html/src/Control.Subcategory.Functor.html/Control.Subcategory.Functor.html"><span class="hs-identifier">Control.Subcategory.Functor</span></a></span><span>
+</span><span id="line-48"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-49"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-50"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-5a5abb77bb90784d7c8b6bd69a8ee42852de9afc6f28c69d632846d366db41f3/share/doc/html/src/Data.Map.NonEmpty.html/Data.Map.NonEmpty.html"><span class="hs-identifier">Data.Map.NonEmpty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-5a5abb77bb90784d7c8b6bd69a8ee42852de9afc6f28c69d632846d366db41f3/share/doc/html/src/Data.Map.NonEmpty.Internal.html/Data.Map.NonEmpty.Internal.html#NEMap"><span class="hs-identifier">NEMap</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-5a5abb77bb90784d7c8b6bd69a8ee42852de9afc6f28c69d632846d366db41f3/share/doc/html/src/Data.Map.NonEmpty.html/Data.Map.NonEmpty.html"><span class="hs-identifier">Data.Map.NonEmpty</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NEMap</span></span><span>
+</span><span id="line-52"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">First</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Box</span></span><span>
+</span><span id="line-54"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Cyclic.html/HGeometry.Cyclic.html"><span class="hs-identifier">HGeometry.Cyclic</span></a></span><span>
+</span><span id="line-55"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Direction</span></span><span>
+</span><span id="line-56"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.HalfLine</span></span><span>
+</span><span id="line-57"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Intersection</span></span><span>
+</span><span id="line-58"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.LineSegment</span></span><span>
+</span><span id="line-59"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-60"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point.Either</span></span><span>
+</span><span id="line-61"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Polygon.Convex</span></span><span>
+</span><span id="line-62"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Polygon.Simple.Class</span></span><span>
+</span><span id="line-63"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span>
+</span><span id="line-64"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span>
+</span><span id="line-65"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Vector.NonEmpty.Util.html/HGeometry.Vector.NonEmpty.Util.html"><span class="hs-identifier">HGeometry.Vector.NonEmpty.Util</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-68"></span><span class="annot"><span class="hs-comment">-- * The Minimization Diagram, i.e. the type that we use to represent our</span></span><span>
+</span><span id="line-69"></span><span class="hs-comment">-- lower envelope</span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="hs-comment">-- | A minimization daigram just maps every plane on the lower envelope to the region</span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- above which it is minimal. Every plane has at most one such a region.</span><span>
+</span><span id="line-73"></span><span class="hs-keyword">newtype</span><span> </span><span id="MinimizationDiagram"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-var">MinimizationDiagram</span></a></span></span><span> </span><span id="local-6989586621679402728"><span class="annot"><a href="#local-6989586621679402728"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679402729"><span class="annot"><a href="#local-6989586621679402729"><span class="hs-identifier hs-type">vertex</span></a></span></span><span> </span><span id="local-6989586621679402727"><span class="annot"><a href="#local-6989586621679402727"><span class="hs-identifier hs-type">plane</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="MinimizationDiagram"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-var">MinimizationDiagram</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-5a5abb77bb90784d7c8b6bd69a8ee42852de9afc6f28c69d632846d366db41f3/share/doc/html/src/Data.Map.NonEmpty.Internal.html/Data.Map.NonEmpty.Internal.html#NEMap"><span class="hs-identifier hs-type">NEMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402727"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402728"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402729"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679403099"><span id="local-6989586621679403106"><span id="local-6989586621679403110"><span class="annot"><span class="annottext">Int -&gt; MinimizationDiagram r vertex plane -&gt; ShowS
+[MinimizationDiagram r vertex plane] -&gt; ShowS
+MinimizationDiagram r vertex plane -&gt; String
+(Int -&gt; MinimizationDiagram r vertex plane -&gt; ShowS)
+-&gt; (MinimizationDiagram r vertex plane -&gt; String)
+-&gt; ([MinimizationDiagram r vertex plane] -&gt; ShowS)
+-&gt; Show (MinimizationDiagram r vertex plane)
 forall a.
 (Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
-forall r plane.
-(Show plane, Show r) =&gt;
-Int -&gt; MinimizationDiagram r plane -&gt; ShowS
-forall r plane.
-(Show plane, Show r) =&gt;
-[MinimizationDiagram r plane] -&gt; ShowS
-forall r plane.
-(Show plane, Show r) =&gt;
-MinimizationDiagram r plane -&gt; String
-$cshowsPrec :: forall r plane.
-(Show plane, Show r) =&gt;
-Int -&gt; MinimizationDiagram r plane -&gt; ShowS
-showsPrec :: Int -&gt; MinimizationDiagram r plane -&gt; ShowS
-$cshow :: forall r plane.
-(Show plane, Show r) =&gt;
-MinimizationDiagram r plane -&gt; String
-show :: MinimizationDiagram r plane -&gt; String
-$cshowList :: forall r plane.
-(Show plane, Show r) =&gt;
-[MinimizationDiagram r plane] -&gt; ShowS
-showList :: [MinimizationDiagram r plane] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679522785"><span id="local-6989586621679522790"><span class="annot"><span class="annottext">MinimizationDiagram r plane -&gt; MinimizationDiagram r plane -&gt; Bool
-(MinimizationDiagram r plane
- -&gt; MinimizationDiagram r plane -&gt; Bool)
--&gt; (MinimizationDiagram r plane
-    -&gt; MinimizationDiagram r plane -&gt; Bool)
--&gt; Eq (MinimizationDiagram r plane)
+forall r vertex plane.
+(Show plane, Show vertex, Show r) =&gt;
+Int -&gt; MinimizationDiagram r vertex plane -&gt; ShowS
+forall r vertex plane.
+(Show plane, Show vertex, Show r) =&gt;
+[MinimizationDiagram r vertex plane] -&gt; ShowS
+forall r vertex plane.
+(Show plane, Show vertex, Show r) =&gt;
+MinimizationDiagram r vertex plane -&gt; String
+$cshowsPrec :: forall r vertex plane.
+(Show plane, Show vertex, Show r) =&gt;
+Int -&gt; MinimizationDiagram r vertex plane -&gt; ShowS
+showsPrec :: Int -&gt; MinimizationDiagram r vertex plane -&gt; ShowS
+$cshow :: forall r vertex plane.
+(Show plane, Show vertex, Show r) =&gt;
+MinimizationDiagram r vertex plane -&gt; String
+show :: MinimizationDiagram r vertex plane -&gt; String
+$cshowList :: forall r vertex plane.
+(Show plane, Show vertex, Show r) =&gt;
+[MinimizationDiagram r vertex plane] -&gt; ShowS
+showList :: [MinimizationDiagram r vertex plane] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679403119"><span id="local-6989586621679403124"><span class="annot"><span class="annottext">MinimizationDiagram r vertex plane
+-&gt; MinimizationDiagram r vertex plane -&gt; Bool
+(MinimizationDiagram r vertex plane
+ -&gt; MinimizationDiagram r vertex plane -&gt; Bool)
+-&gt; (MinimizationDiagram r vertex plane
+    -&gt; MinimizationDiagram r vertex plane -&gt; Bool)
+-&gt; Eq (MinimizationDiagram r vertex plane)
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
-forall r plane.
-(Eq plane, Eq r) =&gt;
-MinimizationDiagram r plane -&gt; MinimizationDiagram r plane -&gt; Bool
-$c== :: forall r plane.
-(Eq plane, Eq r) =&gt;
-MinimizationDiagram r plane -&gt; MinimizationDiagram r plane -&gt; Bool
-== :: MinimizationDiagram r plane -&gt; MinimizationDiagram r plane -&gt; Bool
-$c/= :: forall r plane.
-(Eq plane, Eq r) =&gt;
-MinimizationDiagram r plane -&gt; MinimizationDiagram r plane -&gt; Bool
-/= :: MinimizationDiagram r plane -&gt; MinimizationDiagram r plane -&gt; Bool
+forall r vertex plane.
+(Eq plane, Eq vertex, Eq r) =&gt;
+MinimizationDiagram r vertex plane
+-&gt; MinimizationDiagram r vertex plane -&gt; Bool
+$c== :: forall r vertex plane.
+(Eq plane, Eq vertex, Eq r) =&gt;
+MinimizationDiagram r vertex plane
+-&gt; MinimizationDiagram r vertex plane -&gt; Bool
+== :: MinimizationDiagram r vertex plane
+-&gt; MinimizationDiagram r vertex plane -&gt; Bool
+$c/= :: forall r vertex plane.
+(Eq plane, Eq vertex, Eq r) =&gt;
+MinimizationDiagram r vertex plane
+-&gt; MinimizationDiagram r vertex plane -&gt; Bool
+/= :: MinimizationDiagram r vertex plane
+-&gt; MinimizationDiagram r vertex plane -&gt; Bool
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-73"></span><span>
-</span><span id="line-74"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679522799"><span id="local-6989586621679522800"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679522799"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679522800"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679522799"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-75"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679522801"><span id="local-6989586621679522802"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679522801"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679522802"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
-</span><span id="line-76"></span><span>
-</span><span id="line-77"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679522374"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/subcategories-0.2.1.1-979be93e740ab5688129e81e16aa88a54d1964866253d540065f299f4f47fced/share/doc/html/src/Control.Subcategory.Functor.html/Control.Subcategory.Functor.html#Constrained"><span class="hs-identifier hs-type">Constrained</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679522374"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-78"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="Dom"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/subcategories-0.2.1.1-979be93e740ab5688129e81e16aa88a54d1964866253d540065f299f4f47fced/share/doc/html/src/Control.Subcategory.Functor.html/Control.Subcategory.Functor.html#Dom"><span class="hs-identifier hs-var">Dom</span></a></span></span><span> </span><span id="local-6989586621679522805"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679522374"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679522805"><span class="hs-identifier hs-type">plane</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679522805"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679522805"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="#local-6989586621679522374"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-79"></span><span>
-</span><span id="line-80"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679522386"><span id="local-6989586621679522810"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/subcategories-0.2.1.1-979be93e740ab5688129e81e16aa88a54d1964866253d540065f299f4f47fced/share/doc/html/src/Control.Subcategory.Functor.html/Control.Subcategory.Functor.html#CFunctor"><span class="hs-identifier hs-type">CFunctor</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679522386"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-81"></span><span>  </span><span id="local-6989586621679522831"><span class="annot"><span class="annottext">cmap :: forall a b.
-(Dom (MinimizationDiagram r) a, Dom (MinimizationDiagram r) b) =&gt;
-(a -&gt; b) -&gt; MinimizationDiagram r a -&gt; MinimizationDiagram r b
-</span><a href="#local-6989586621679522831"><span class="hs-identifier hs-var hs-var hs-var">cmap</span></a></span></span><span> </span><span id="local-6989586621679522833"><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621679522833"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span id="local-6989586621679522834"><span class="annot"><span class="annottext">NEMap a (Region r (Point 2 r))
-</span><a href="#local-6989586621679522834"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NEMap b (Region r (Point 2 r)) -&gt; MinimizationDiagram r b
-forall r plane.
-NEMap plane (Region r (Point 2 r)) -&gt; MinimizationDiagram r plane
-</span><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-var">MinimizationDiagram</span></a></span><span> </span><span class="annot"><span class="annottext">(NEMap b (Region r (Point 2 r)) -&gt; MinimizationDiagram r b)
--&gt; NEMap b (Region r (Point 2 r)) -&gt; MinimizationDiagram r b
+</span><span id="line-75"></span><span>
+</span><span id="line-76"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679403129"><span id="local-6989586621679403130"><span id="local-6989586621679403131"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679403129"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679403130"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679403131"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679403129"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-77"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679403132"><span id="local-6989586621679403133"><span id="local-6989586621679403134"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679403132"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679403133"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679403134"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679402706"><span id="local-6989586621679402707"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/subcategories-0.2.1.1-4999bd21d9097ceb696e5e4cf7a99dbacd9d75a5e522f00a5e76357f579c7a41/share/doc/html/src/Control.Subcategory.Functor.html/Control.Subcategory.Functor.html#Constrained"><span class="hs-identifier hs-type">Constrained</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402706"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402707"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-80"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="Dom"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/subcategories-0.2.1.1-4999bd21d9097ceb696e5e4cf7a99dbacd9d75a5e522f00a5e76357f579c7a41/share/doc/html/src/Control.Subcategory.Functor.html/Control.Subcategory.Functor.html#Dom"><span class="hs-identifier hs-var">Dom</span></a></span></span><span> </span><span id="local-6989586621679403137"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402706"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402707"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679403137"><span class="hs-identifier hs-type">plane</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679403137"><span class="hs-identifier hs-type">plane</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679403137"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="#local-6989586621679402706"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-81"></span><span>                                                  </span><span class="hs-comment">-- , NumType vertex ~ r</span><span>
+</span><span id="line-82"></span><span>                                                  </span><span class="hs-special">)</span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679402723"><span id="local-6989586621679402724"><span id="local-6989586621679403142"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/subcategories-0.2.1.1-4999bd21d9097ceb696e5e4cf7a99dbacd9d75a5e522f00a5e76357f579c7a41/share/doc/html/src/Control.Subcategory.Functor.html/Control.Subcategory.Functor.html#CFunctor"><span class="hs-identifier hs-type">CFunctor</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402723"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402724"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-85"></span><span>  </span><span id="local-6989586621679403163"><span class="annot"><span class="annottext">cmap :: forall a b.
+(Dom (MinimizationDiagram r vertex) a,
+ Dom (MinimizationDiagram r vertex) b) =&gt;
+(a -&gt; b)
+-&gt; MinimizationDiagram r vertex a -&gt; MinimizationDiagram r vertex b
+</span><a href="#local-6989586621679403163"><span class="hs-identifier hs-var hs-var hs-var">cmap</span></a></span></span><span> </span><span id="local-6989586621679403165"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679403165"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span id="local-6989586621679403166"><span class="annot"><span class="annottext">NEMap a (Region r vertex)
+</span><a href="#local-6989586621679403166"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NEMap b (Region r vertex) -&gt; MinimizationDiagram r vertex b
+forall r vertex plane.
+NEMap plane (Region r vertex) -&gt; MinimizationDiagram r vertex plane
+</span><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-var">MinimizationDiagram</span></a></span><span> </span><span class="annot"><span class="annottext">(NEMap b (Region r vertex) -&gt; MinimizationDiagram r vertex b)
+-&gt; NEMap b (Region r vertex) -&gt; MinimizationDiagram r vertex b
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; b)
--&gt; NEMap a (Region r (Point 2 r)) -&gt; NEMap b (Region r (Point 2 r))
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; NEMap a (Region r vertex) -&gt; NEMap b (Region r vertex)
 forall k2 k1 a. Ord k2 =&gt; (k1 -&gt; k2) -&gt; NEMap k1 a -&gt; NEMap k2 a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-5a5abb77bb90784d7c8b6bd69a8ee42852de9afc6f28c69d632846d366db41f3/share/doc/html/src/Data.Map.NonEmpty.html/Data.Map.NonEmpty.html#mapKeys"><span class="hs-identifier hs-var">NEMap.mapKeys</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
-</span><a href="#local-6989586621679522833"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">NEMap a (Region r (Point 2 r))
-</span><a href="#local-6989586621679522834"><span class="hs-identifier hs-var">m</span></a></span><span>
-</span><span id="line-82"></span><span>
-</span><span id="line-83"></span><span>
-</span><span id="line-84"></span><span>
-</span><span id="line-85"></span><span class="annot"><span class="hs-comment">-- | Get the underlying Map that relates every plane in the envelope to its projected region</span></span><span>
-</span><span id="line-86"></span><span id="local-6989586621679522398"><span id="local-6989586621679522399"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#asMap"><span class="hs-identifier hs-type">asMap</span></a></span><span>                         </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679522398"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679522399"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-5a5abb77bb90784d7c8b6bd69a8ee42852de9afc6f28c69d632846d366db41f3/share/doc/html/src/Data.Map.NonEmpty.Internal.html/Data.Map.NonEmpty.Internal.html#NEMap"><span class="hs-identifier hs-type">NEMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679522399"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679522398"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679522398"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
-</span><span id="line-87"></span><span id="asMap"><span class="annot"><span class="annottext">asMap :: forall r plane.
-MinimizationDiagram r plane -&gt; NEMap plane (Region r (Point 2 r))
-</span><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#asMap"><span class="hs-identifier hs-var hs-var">asMap</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span id="local-6989586621679522836"><span class="annot"><span class="annottext">NEMap plane (Region r (Point 2 r))
-</span><a href="#local-6989586621679522836"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NEMap plane (Region r (Point 2 r))
-</span><a href="#local-6989586621679522836"><span class="hs-identifier hs-var">m</span></a></span><span>
-</span><span id="line-88"></span><span>
-</span><span id="line-89"></span><span>
-</span><span id="line-90"></span><span>
-</span><span id="line-91"></span><span class="hs-comment">-- | A region in the minimization diagram. The boundary is given in CCW order; i.e. the</span><span>
-</span><span id="line-92"></span><span class="hs-comment">-- region is to the left of the boundary.</span><span>
-</span><span id="line-93"></span><span class="hs-keyword">data</span><span> </span><span id="Region"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Region"><span class="hs-identifier hs-var">Region</span></a></span></span><span> </span><span id="local-6989586621679522837"><span class="annot"><a href="#local-6989586621679522837"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679522838"><span class="annot"><a href="#local-6989586621679522838"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Bounded"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Bounded"><span class="hs-identifier hs-var">Bounded</span></a></span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Cyclic.html/HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679522838"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-94"></span><span>                    </span><span class="hs-glyph">|</span><span> </span><span id="Unbounded"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Unbounded"><span class="hs-identifier hs-var">Unbounded</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679522837"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-95"></span><span>                                </span><span class="hs-comment">-- ^ vector indicating the direction of the unbounded edge</span><span>
-</span><span id="line-96"></span><span>                                </span><span class="hs-comment">-- incident to the first vertex. Note that this vector</span><span>
-</span><span id="line-97"></span><span>                                </span><span class="hs-comment">-- thus points INTO vertex v.</span><span>
-</span><span id="line-98"></span><span>                                </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679522838"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-99"></span><span>                                </span><span class="annot"><span class="hs-comment">-- ^ the vertices in CCW order,</span></span><span>
-</span><span id="line-100"></span><span>                                </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679522837"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-101"></span><span>                                </span><span class="hs-comment">-- ^ the vector indicating the direction of the unbounded</span><span>
-</span><span id="line-102"></span><span>                                </span><span class="hs-comment">-- edge incident to the last vertex. The vector points</span><span>
-</span><span id="line-103"></span><span>                                </span><span class="hs-comment">-- away from the vertex (i.e. towards +infty).</span><span>
-</span><span id="line-104"></span><span>                      </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679522844"><span id="local-6989586621679522857"><span id="local-6989586621679522860"><span class="annot"><span class="annottext">Int -&gt; Region r point -&gt; ShowS
+</span><a href="#local-6989586621679403165"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">NEMap a (Region r vertex)
+</span><a href="#local-6989586621679403166"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span class="annot"><span class="hs-comment">-- | Get the underlying Map that relates every plane in the envelope to its projected region</span></span><span>
+</span><span id="line-88"></span><span id="local-6989586621679402737"><span id="local-6989586621679402738"><span id="local-6989586621679402739"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#asMap"><span class="hs-identifier hs-type">asMap</span></a></span><span>                         </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402737"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402738"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402739"><span class="hs-identifier hs-type">plane</span></a></span><span>
+</span><span id="line-89"></span><span>                              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-5a5abb77bb90784d7c8b6bd69a8ee42852de9afc6f28c69d632846d366db41f3/share/doc/html/src/Data.Map.NonEmpty.Internal.html/Data.Map.NonEmpty.Internal.html#NEMap"><span class="hs-identifier hs-type">NEMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402739"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402737"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402738"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-90"></span><span id="asMap"><span class="annot"><span class="annottext">asMap :: forall r vertex plane.
+MinimizationDiagram r vertex plane -&gt; NEMap plane (Region r vertex)
+</span><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#asMap"><span class="hs-identifier hs-var hs-var">asMap</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span id="local-6989586621679403168"><span class="annot"><span class="annottext">NEMap plane (Region r vertex)
+</span><a href="#local-6989586621679403168"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NEMap plane (Region r vertex)
+</span><a href="#local-6989586621679403168"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span class="annot"><span class="hs-comment">-- | Apply some mapping function to the vertex data of each vertex</span></span><span>
+</span><span id="line-94"></span><span id="local-6989586621679402743"><span id="local-6989586621679402744"><span id="local-6989586621679402745"><span id="local-6989586621679402746"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#mapVertices"><span class="hs-identifier hs-type">mapVertices</span></a></span><span>                           </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679402743"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679402744"><span class="hs-identifier hs-type">vertex'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-95"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402745"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402743"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402746"><span class="hs-identifier hs-type">plane</span></a></span><span>
+</span><span id="line-96"></span><span>                                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402745"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402744"><span class="hs-identifier hs-type">vertex'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402746"><span class="hs-identifier hs-type">plane</span></a></span></span></span></span></span><span>
+</span><span id="line-97"></span><span id="mapVertices"><span class="annot"><span class="annottext">mapVertices :: forall vertex vertex' r plane.
+(vertex -&gt; vertex')
+-&gt; MinimizationDiagram r vertex plane
+-&gt; MinimizationDiagram r vertex' plane
+</span><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#mapVertices"><span class="hs-identifier hs-var hs-var">mapVertices</span></a></span></span><span> </span><span id="local-6989586621679403173"><span class="annot"><span class="annottext">vertex -&gt; vertex'
+</span><a href="#local-6989586621679403173"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-type">MinimizationDiagram</span></a></span><span> </span><span id="local-6989586621679403174"><span class="annot"><span class="annottext">NEMap plane (Region r vertex)
+</span><a href="#local-6989586621679403174"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NEMap plane (Region r vertex')
+-&gt; MinimizationDiagram r vertex' plane
+forall r vertex plane.
+NEMap plane (Region r vertex) -&gt; MinimizationDiagram r vertex plane
+</span><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#MinimizationDiagram"><span class="hs-identifier hs-var">MinimizationDiagram</span></a></span><span> </span><span class="annot"><span class="annottext">(NEMap plane (Region r vertex')
+ -&gt; MinimizationDiagram r vertex' plane)
+-&gt; NEMap plane (Region r vertex')
+-&gt; MinimizationDiagram r vertex' plane
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Region r vertex -&gt; Region r vertex')
+-&gt; NEMap plane (Region r vertex) -&gt; NEMap plane (Region r vertex')
+forall a b. (a -&gt; b) -&gt; NEMap plane a -&gt; NEMap plane b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(vertex -&gt; vertex') -&gt; Region r vertex -&gt; Region r vertex'
+forall a b. (a -&gt; b) -&gt; Region r a -&gt; Region r b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">vertex -&gt; vertex'
+</span><a href="#local-6989586621679403173"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NEMap plane (Region r vertex)
+</span><a href="#local-6989586621679403174"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span class="hs-comment">-- -- | Apply some mapping function to both the vertices and the planes.</span><span>
+</span><span id="line-100"></span><span class="hs-comment">-- cbimap :: (Ord plane, Ord plane', NumType plane ~ r, NumType plane' ~ r)</span><span>
+</span><span id="line-101"></span><span class="hs-comment">--        =&gt; (vertex -&gt; vertex') -&gt; (plane -&gt; plane')</span><span>
+</span><span id="line-102"></span><span class="hs-comment">--        -&gt; MinimizationDiagram r vertex plane</span><span>
+</span><span id="line-103"></span><span class="hs-comment">--        -&gt; MinimizationDiagram r vertex' plane'</span><span>
+</span><span id="line-104"></span><span class="hs-comment">-- cbimap f g (MinimizationDiagram m) = MinimizationDiagram . fmap (fmap f) $ NEMap.mapKeys g m</span><span>
+</span><span id="line-105"></span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span class="hs-comment">-- | A region in the minimization diagram. The boundary is given in CCW order; i.e. the</span><span>
+</span><span id="line-111"></span><span class="hs-comment">-- region is to the left of the boundary.</span><span>
+</span><span id="line-112"></span><span class="hs-keyword">data</span><span> </span><span id="Region"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Region"><span class="hs-identifier hs-var">Region</span></a></span></span><span> </span><span id="local-6989586621679403175"><span class="annot"><a href="#local-6989586621679403175"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679403176"><span class="annot"><a href="#local-6989586621679403176"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Bounded"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Bounded"><span class="hs-identifier hs-var">Bounded</span></a></span></span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Cyclic.html/HGeometry.Cyclic.html#Cyclic"><span class="hs-identifier hs-type">Cyclic</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679403176"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-113"></span><span>                    </span><span class="hs-glyph">|</span><span> </span><span id="Unbounded"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Unbounded"><span class="hs-identifier hs-var">Unbounded</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679403175"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-114"></span><span>                                </span><span class="hs-comment">-- ^ vector indicating the direction of the unbounded edge</span><span>
+</span><span id="line-115"></span><span>                                </span><span class="hs-comment">-- incident to the first vertex. Note that this vector</span><span>
+</span><span id="line-116"></span><span>                                </span><span class="hs-comment">-- thus points INTO vertex v.</span><span>
+</span><span id="line-117"></span><span>                                </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679403176"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-118"></span><span>                                </span><span class="annot"><span class="hs-comment">-- ^ the vertices in CCW order,</span></span><span>
+</span><span id="line-119"></span><span>                                </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679403175"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-120"></span><span>                                </span><span class="hs-comment">-- ^ the vector indicating the direction of the unbounded</span><span>
+</span><span id="line-121"></span><span>                                </span><span class="hs-comment">-- edge incident to the last vertex. The vector points</span><span>
+</span><span id="line-122"></span><span>                                </span><span class="hs-comment">-- away from the vertex (i.e. towards +infty).</span><span>
+</span><span id="line-123"></span><span>                      </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679403182"><span id="local-6989586621679403195"><span id="local-6989586621679403198"><span class="annot"><span class="annottext">Int -&gt; Region r point -&gt; ShowS
 [Region r point] -&gt; ShowS
 Region r point -&gt; String
 (Int -&gt; Region r point -&gt; ShowS)
@@ -191,7 +241,7 @@ $cshow :: forall r point. (Show point, Show r) =&gt; Region r point -&gt; String
 show :: Region r point -&gt; String
 $cshowList :: forall r point. (Show point, Show r) =&gt; [Region r point] -&gt; ShowS
 showList :: [Region r point] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679522866"><span id="local-6989586621679522877"><span class="annot"><span class="annottext">Region r point -&gt; Region r point -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679403205"><span id="local-6989586621679403217"><span class="annot"><span class="annottext">Region r point -&gt; Region r point -&gt; Bool
 (Region r point -&gt; Region r point -&gt; Bool)
 -&gt; (Region r point -&gt; Region r point -&gt; Bool)
 -&gt; Eq (Region r point)
@@ -207,7 +257,7 @@ $c/= :: forall r point.
 (Eq point, Eq r) =&gt;
 Region r point -&gt; Region r point -&gt; Bool
 /= :: Region r point -&gt; Region r point -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679522881"><span id="local-6989586621679522887"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; Region r a -&gt; Region r b)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679403221"><span id="local-6989586621679403227"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; Region r a -&gt; Region r b)
 -&gt; (forall a b. a -&gt; Region r b -&gt; Region r a)
 -&gt; Functor (Region r)
 forall a b. a -&gt; Region r b -&gt; Region r a
@@ -221,7 +271,7 @@ $cfmap :: forall r a b. (a -&gt; b) -&gt; Region r a -&gt; Region r b
 fmap :: forall a b. (a -&gt; b) -&gt; Region r a -&gt; Region r b
 $c&lt;$ :: forall r a b. a -&gt; Region r b -&gt; Region r a
 &lt;$ :: forall a b. a -&gt; Region r b -&gt; Region r a
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679522896"><span id="local-6989586621679522902"><span id="local-6989586621679522911"><span id="local-6989586621679522916"><span id="local-6989586621679522921"><span id="local-6989586621679522924"><span id="local-6989586621679522927"><span id="local-6989586621679522930"><span id="local-6989586621679522933"><span id="local-6989586621679522936"><span id="local-6989586621679522939"><span id="local-6989586621679522944"><span id="local-6989586621679522947"><span id="local-6989586621679522952"><span id="local-6989586621679522957"><span id="local-6989586621679522962"><span id="local-6989586621679522967"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; Region r m -&gt; m)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679403235"><span id="local-6989586621679403241"><span id="local-6989586621679403250"><span id="local-6989586621679403255"><span id="local-6989586621679403260"><span id="local-6989586621679403263"><span id="local-6989586621679403266"><span id="local-6989586621679403269"><span id="local-6989586621679403272"><span id="local-6989586621679403275"><span id="local-6989586621679403278"><span id="local-6989586621679403283"><span id="local-6989586621679403286"><span id="local-6989586621679403291"><span id="local-6989586621679403296"><span id="local-6989586621679403301"><span id="local-6989586621679403306"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; Region r m -&gt; m)
 -&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Region r a -&gt; m)
 -&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Region r a -&gt; m)
 -&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Region r a -&gt; b)
@@ -314,7 +364,7 @@ $csum :: forall r a. Num a =&gt; Region r a -&gt; a
 sum :: forall a. Num a =&gt; Region r a -&gt; a
 $cproduct :: forall r a. Num a =&gt; Region r a -&gt; a
 product :: forall a. Num a =&gt; Region r a -&gt; a
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679522981"><span id="local-6989586621679522993"><span id="local-6989586621679522999"><span id="local-6989586621679523004"><span class="annot"><span class="annottext">Functor (Region r)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679403320"><span id="local-6989586621679403332"><span id="local-6989586621679403338"><span id="local-6989586621679403343"><span class="annot"><span class="annottext">Functor (Region r)
 Foldable (Region r)
 (Functor (Region r), Foldable (Region r)) =&gt;
 (forall (f :: * -&gt; *) a b.
@@ -388,21 +438,21 @@ Monad m =&gt;
 Region r (m a) -&gt; m (Region r a)
 sequence :: forall (m :: * -&gt; *) a. Monad m =&gt; Region r (m a) -&gt; m (Region r a)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-105"></span><span>
-</span><span id="line-106"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679523012"><span id="local-6989586621679523013"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679523012"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679523013"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679523012"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-107"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679523014"><span id="local-6989586621679523015"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679523014"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679523015"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679523015"><span class="hs-identifier hs-type">point</span></a></span><span>
-</span><span id="line-108"></span><span>
-</span><span id="line-109"></span><span>
-</span><span id="line-110"></span><span class="hs-comment">-- | Computes a convex polygon corresponding to the region.</span><span>
-</span><span id="line-111"></span><span class="hs-comment">--</span><span>
-</span><span id="line-112"></span><span class="hs-comment">-- pre: the bounding box (strictly) contains all vertices in its interior</span><span>
-</span><span id="line-113"></span><span id="local-6989586621679522472"><span id="local-6989586621679522473"><span id="local-6989586621679522475"><span id="local-6989586621679522477"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#toConvexPolygonIn"><span class="hs-identifier hs-type">toConvexPolygonIn</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rectangle_</span></span><span> </span><span class="annot"><a href="#local-6989586621679522472"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679522473"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679522473"><span class="hs-identifier hs-type">corner</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679522475"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-114"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679522477"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679522475"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679522475"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679522475"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-115"></span><span>                          </span><span class="hs-special">)</span><span>
-</span><span id="line-116"></span><span>                       </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679522472"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679522475"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679522477"><span class="hs-identifier hs-type">point</span></a></span><span>
-</span><span id="line-117"></span><span>                       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Convex.Implementation.html#ConvexPolygonF"><span class="hs-identifier hs-type">ConvexPolygonF</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679522477"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-118"></span><span>                                 </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Convex.Implementation.html#ConvexPolygonF"><span class="hs-identifier hs-type">ConvexPolygonF</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OriginalOrExtra</span></span><span> </span><span class="annot"><a href="#local-6989586621679522477"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679522475"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span></span></span></span></span><span>
-</span><span id="line-119"></span><span id="toConvexPolygonIn"><span class="annot"><span class="annottext">toConvexPolygonIn :: forall rectangle corner r point.
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679403351"><span id="local-6989586621679403352"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679403351"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679403352"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679403351"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-126"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679403353"><span id="local-6989586621679403354"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679403353"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679403354"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679403354"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-127"></span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span class="hs-comment">-- | Computes a convex polygon corresponding to the region.</span><span>
+</span><span id="line-130"></span><span class="hs-comment">--</span><span>
+</span><span id="line-131"></span><span class="hs-comment">-- pre: the bounding box (strictly) contains all vertices in its interior</span><span>
+</span><span id="line-132"></span><span id="local-6989586621679402828"><span id="local-6989586621679402829"><span id="local-6989586621679402831"><span id="local-6989586621679402833"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#toConvexPolygonIn"><span class="hs-identifier hs-type">toConvexPolygonIn</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rectangle_</span></span><span> </span><span class="annot"><a href="#local-6989586621679402828"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402829"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679402829"><span class="hs-identifier hs-type">corner</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679402831"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-133"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679402833"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679402831"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679402831"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679402831"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-134"></span><span>                          </span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span>                       </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679402828"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Region"><span class="hs-identifier hs-type">Region</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402831"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679402833"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-136"></span><span>                       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ConvexPolygonF</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679402833"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>                                 </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ConvexPolygonF</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OriginalOrExtra</span></span><span> </span><span class="annot"><a href="#local-6989586621679402833"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679402831"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-138"></span><span id="toConvexPolygonIn"><span class="annot"><span class="annottext">toConvexPolygonIn :: forall rectangle corner r point.
 (Rectangle_ rectangle corner, Point_ corner 2 r, Point_ point 2 r,
  Ord r, Fractional r) =&gt;
 rectangle
@@ -410,10 +460,10 @@ rectangle
 -&gt; Either
      (ConvexPolygonF NonEmpty point)
      (ConvexPolygonF NonEmpty (OriginalOrExtra point (Point 2 r)))
-</span><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#toConvexPolygonIn"><span class="hs-identifier hs-var hs-var">toConvexPolygonIn</span></a></span></span><span> </span><span id="local-6989586621679523591"><span class="annot"><span class="annottext">rectangle
-</span><a href="#local-6989586621679523591"><span class="hs-identifier hs-var">rect</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
-</span><span id="line-120"></span><span>    </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Bounded"><span class="hs-identifier hs-type">Bounded</span></a></span><span> </span><span id="local-6989586621679523592"><span class="annot"><span class="annottext">Cyclic NonEmpty point
-</span><a href="#local-6989586621679523592"><span class="hs-identifier hs-var">vertices</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ConvexPolygonF NonEmpty point
+</span><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#toConvexPolygonIn"><span class="hs-identifier hs-var hs-var">toConvexPolygonIn</span></a></span></span><span> </span><span id="local-6989586621679403930"><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679403930"><span class="hs-identifier hs-var">rect</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-139"></span><span>    </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Bounded"><span class="hs-identifier hs-type">Bounded</span></a></span><span> </span><span id="local-6989586621679403931"><span class="annot"><span class="annottext">Cyclic NonEmpty point
+</span><a href="#local-6989586621679403931"><span class="hs-identifier hs-var">vertices</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ConvexPolygonF NonEmpty point
 -&gt; Either
      (ConvexPolygonF NonEmpty point)
      (ConvexPolygonF NonEmpty (OriginalOrExtra point (Point 2 r)))
@@ -434,29 +484,29 @@ f point -&gt; simplePolygon
 forall (f :: * -&gt; *).
 Foldable1 f =&gt;
 f point -&gt; ConvexPolygonF NonEmpty point
-</span><a href="HGeometry.Polygon.Simple.Class.html#uncheckedFromCCWPoints"><span class="hs-identifier hs-var">uncheckedFromCCWPoints</span></a></span><span> </span><span class="annot"><span class="annottext">Cyclic NonEmpty point
-</span><a href="#local-6989586621679523592"><span class="hs-identifier hs-var">vertices</span></a></span><span>
-</span><span id="line-121"></span><span>    </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Unbounded"><span class="hs-identifier hs-type">Unbounded</span></a></span><span> </span><span id="local-6989586621679523594"><span class="annot"><span class="annottext">Vector 2 r
-</span><a href="#local-6989586621679523594"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span id="local-6989586621679523595"><span class="annot"><span class="annottext">NonEmpty point
-</span><a href="#local-6989586621679523595"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span id="local-6989586621679523596"><span class="annot"><span class="annottext">Vector 2 r
-</span><a href="#local-6989586621679523596"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679523597"><span class="annot"><span class="annottext">p :: point
-</span><a href="#local-6989586621679523597"><span class="hs-identifier hs-var hs-var">p</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty point -&gt; point
+</span><span class="hs-identifier hs-var">uncheckedFromCCWPoints</span></span><span> </span><span class="annot"><span class="annottext">Cyclic NonEmpty point
+</span><a href="#local-6989586621679403931"><span class="hs-identifier hs-var">vertices</span></a></span><span>
+</span><span id="line-140"></span><span>    </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Unbounded"><span class="hs-identifier hs-type">Unbounded</span></a></span><span> </span><span id="local-6989586621679403933"><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679403933"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span id="local-6989586621679403934"><span class="annot"><span class="annottext">NonEmpty point
+</span><a href="#local-6989586621679403934"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span id="local-6989586621679403935"><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679403935"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679403936"><span class="annot"><span class="annottext">p :: point
+</span><a href="#local-6989586621679403936"><span class="hs-identifier hs-var hs-var">p</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty point -&gt; point
 forall a. NonEmpty a -&gt; a
 </span><span class="hs-identifier hs-var">NonEmpty.head</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty point
-</span><a href="#local-6989586621679523595"><span class="hs-identifier hs-var">pts</span></a></span><span>
-</span><span id="line-122"></span><span>                             </span><span id="local-6989586621679523599"><span class="annot"><span class="annottext">q :: point
-</span><a href="#local-6989586621679523599"><span class="hs-identifier hs-var hs-var">q</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty point -&gt; point
+</span><a href="#local-6989586621679403934"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-141"></span><span>                             </span><span id="local-6989586621679403938"><span class="annot"><span class="annottext">q :: point
+</span><a href="#local-6989586621679403938"><span class="hs-identifier hs-var hs-var">q</span></a></span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty point -&gt; point
 forall a. NonEmpty a -&gt; a
 </span><span class="hs-identifier hs-var">NonEmpty.last</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty point
-</span><a href="#local-6989586621679523595"><span class="hs-identifier hs-var">pts</span></a></span><span>
-</span><span id="line-123"></span><span>                             </span><span id="local-6989586621679523601"><span class="annot"><span class="annottext">hp :: HalfLine (Point 2 r)
-</span><a href="#local-6989586621679523601"><span class="hs-identifier hs-var hs-var">hp</span></a></span></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679403934"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-142"></span><span>                             </span><span id="local-6989586621679403940"><span class="annot"><span class="annottext">hp :: HalfLine (Point 2 r)
+</span><a href="#local-6989586621679403940"><span class="hs-identifier hs-var hs-var">hp</span></a></span></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
 -&gt; Vector (Dimension (Point 2 r)) (NumType (Point 2 r))
 -&gt; HalfLine (Point 2 r)
 forall point.
 point -&gt; Vector (Dimension point) (NumType point) -&gt; HalfLine point
 </span><span class="hs-identifier hs-var">HalfLine</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679523597"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Point 2 r) point (Point 2 r) -&gt; Point 2 r
+</span><a href="#local-6989586621679403936"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Point 2 r) point (Point 2 r) -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
 forall point (d :: Nat) r.
@@ -469,15 +519,15 @@ forall r vector (d :: Nat).
 (Num r, Vector_ vector d r) =&gt;
 r -&gt; vector -&gt; vector
 </span><span class="hs-operator hs-var">*^</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
-</span><a href="#local-6989586621679523594"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-124"></span><span>                             </span><span id="local-6989586621679523606"><span class="annot"><span class="annottext">hq :: HalfLine (Point 2 r)
-</span><a href="#local-6989586621679523606"><span class="hs-identifier hs-var hs-var">hq</span></a></span></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679403933"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>                             </span><span id="local-6989586621679403945"><span class="annot"><span class="annottext">hq :: HalfLine (Point 2 r)
+</span><a href="#local-6989586621679403945"><span class="hs-identifier hs-var hs-var">hq</span></a></span></span><span>       </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
 -&gt; Vector (Dimension (Point 2 r)) (NumType (Point 2 r))
 -&gt; HalfLine (Point 2 r)
 forall point.
 point -&gt; Vector (Dimension point) (NumType point) -&gt; HalfLine point
 </span><span class="hs-identifier hs-var">HalfLine</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679523599"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Point 2 r) point (Point 2 r) -&gt; Point 2 r
+</span><a href="#local-6989586621679403938"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Point 2 r) point (Point 2 r) -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
 forall point (d :: Nat) r.
@@ -486,9 +536,9 @@ Lens' point (Point d r)
 Lens' point (Point 2 r)
 </span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector 2 r
 Vector (Dimension (Point 2 r)) (NumType (Point 2 r))
-</span><a href="#local-6989586621679523596"><span class="hs-identifier hs-var">v</span></a></span><span>
-</span><span id="line-125"></span><span>                             </span><span id="local-6989586621679523607"><span class="annot"><span class="annottext">extras :: NonEmpty (Point 2 r)
-</span><a href="#local-6989586621679523607"><span class="hs-identifier hs-var hs-var">extras</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HalfLine (Point 2 r)
+</span><a href="#local-6989586621679403935"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-144"></span><span>                             </span><span id="local-6989586621679403946"><span class="annot"><span class="annottext">extras :: NonEmpty (Point 2 r)
+</span><a href="#local-6989586621679403946"><span class="hs-identifier hs-var hs-var">extras</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HalfLine (Point 2 r)
 -&gt; HalfLine (Point 2 r) -&gt; Box (Point 2 r) -&gt; NonEmpty (Point 2 r)
 forall rectangle corner r point.
 (Rectangle_ rectangle corner, Point_ corner 2 r, Point_ point 2 r,
@@ -501,14 +551,14 @@ forall rectangle corner r point.
 HalfLine point
 -&gt; HalfLine point -&gt; rectangle -&gt; NonEmpty (Point 2 r)
 </span><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#extraPoints"><span class="hs-identifier hs-var">extraPoints</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine (Point 2 r)
-</span><a href="#local-6989586621679523601"><span class="hs-identifier hs-var">hp</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine (Point 2 r)
-</span><a href="#local-6989586621679523606"><span class="hs-identifier hs-var">hq</span></a></span><span> </span><span class="annot"><span class="annottext">(Box (Point 2 r) -&gt; NonEmpty (Point 2 r))
+</span><a href="#local-6989586621679403940"><span class="hs-identifier hs-var">hp</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine (Point 2 r)
+</span><a href="#local-6989586621679403945"><span class="hs-identifier hs-var">hq</span></a></span><span> </span><span class="annot"><span class="annottext">(Box (Point 2 r) -&gt; NonEmpty (Point 2 r))
 -&gt; Box (Point 2 r) -&gt; NonEmpty (Point 2 r)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Box (Point 2 r)
 forall point. point -&gt; point -&gt; Box point
 </span><span class="hs-identifier hs-var">Box</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">rectangle
-</span><a href="#local-6989586621679523591"><span class="hs-identifier hs-var">rect</span></a></span><span class="annot"><span class="annottext">rectangle -&gt; Getting (Point 2 r) rectangle (Point 2 r) -&gt; Point 2 r
+</span><a href="#local-6989586621679403930"><span class="hs-identifier hs-var">rect</span></a></span><span class="annot"><span class="annottext">rectangle -&gt; Getting (Point 2 r) rectangle (Point 2 r) -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(corner -&gt; Const (Point 2 r) corner)
 -&gt; rectangle -&gt; Const (Point 2 r) rectangle
@@ -527,8 +577,8 @@ Point_ point d r =&gt;
 Lens' point (Point d r)
 Lens' corner (Point 2 r)
 </span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span>
-</span><span id="line-126"></span><span>                                                                </span><span class="hs-special">(</span><span class="annot"><span class="annottext">rectangle
-</span><a href="#local-6989586621679523591"><span class="hs-identifier hs-var">rect</span></a></span><span class="annot"><span class="annottext">rectangle -&gt; Getting (Point 2 r) rectangle (Point 2 r) -&gt; Point 2 r
+</span><span id="line-145"></span><span>                                                                </span><span class="hs-special">(</span><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679403930"><span class="hs-identifier hs-var">rect</span></a></span><span class="annot"><span class="annottext">rectangle -&gt; Getting (Point 2 r) rectangle (Point 2 r) -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(corner -&gt; Const (Point 2 r) corner)
 -&gt; rectangle -&gt; Const (Point 2 r) rectangle
@@ -547,7 +597,7 @@ Point_ point d r =&gt;
 Lens' point (Point d r)
 Lens' corner (Point 2 r)
 </span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span>
-</span><span id="line-127"></span><span>                         </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">ConvexPolygonF NonEmpty (OriginalOrExtra point (Point 2 r))
+</span><span id="line-146"></span><span>                         </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">ConvexPolygonF NonEmpty (OriginalOrExtra point (Point 2 r))
 -&gt; Either
      (ConvexPolygonF NonEmpty point)
      (ConvexPolygonF NonEmpty (OriginalOrExtra point (Point 2 r)))
@@ -572,7 +622,7 @@ forall (f :: * -&gt; *).
 Foldable1 f =&gt;
 f (OriginalOrExtra point (Point 2 r))
 -&gt; ConvexPolygonF NonEmpty (OriginalOrExtra point (Point 2 r))
-</span><a href="HGeometry.Polygon.Simple.Class.html#uncheckedFromCCWPoints"><span class="hs-identifier hs-var">uncheckedFromCCWPoints</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (OriginalOrExtra point (Point 2 r))
+</span><span class="hs-identifier hs-var">uncheckedFromCCWPoints</span></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (OriginalOrExtra point (Point 2 r))
  -&gt; Either
       (ConvexPolygonF NonEmpty point)
       (ConvexPolygonF NonEmpty (OriginalOrExtra point (Point 2 r))))
@@ -582,14 +632,14 @@ f (OriginalOrExtra point (Point 2 r))
      (ConvexPolygonF NonEmpty (OriginalOrExtra point (Point 2 r)))
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span>
-</span><span id="line-128"></span><span>                                </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; OriginalOrExtra point (Point 2 r)
+</span><span id="line-147"></span><span>                                </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; OriginalOrExtra point (Point 2 r)
 forall orig extra. extra -&gt; OriginalOrExtra orig extra
 </span><span class="hs-identifier hs-var">Extra</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; OriginalOrExtra point (Point 2 r))
 -&gt; NonEmpty (Point 2 r)
 -&gt; NonEmpty (OriginalOrExtra point (Point 2 r))
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r)
-</span><a href="#local-6989586621679523607"><span class="hs-identifier hs-var">extras</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NonEmpty (OriginalOrExtra point (Point 2 r))
+</span><a href="#local-6989586621679403946"><span class="hs-identifier hs-var">extras</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NonEmpty (OriginalOrExtra point (Point 2 r))
 -&gt; NonEmpty (OriginalOrExtra point (Point 2 r))
 -&gt; NonEmpty (OriginalOrExtra point (Point 2 r))
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
@@ -599,19 +649,19 @@ forall orig extra. orig -&gt; OriginalOrExtra orig extra
 -&gt; NonEmpty point -&gt; NonEmpty (OriginalOrExtra point (Point 2 r))
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty point
-</span><a href="#local-6989586621679523595"><span class="hs-identifier hs-var">pts</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-129"></span><span>
-</span><span id="line-130"></span><span class="annot"><span class="hs-comment">-- | computes the extra vertices that we have to insert to make an unbounded region bounded</span></span><span>
-</span><span id="line-131"></span><span id="local-6989586621679522658"><span id="local-6989586621679522659"><span id="local-6989586621679522660"><span id="local-6989586621679522661"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#extraPoints"><span class="hs-identifier hs-type">extraPoints</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rectangle_</span></span><span> </span><span class="annot"><a href="#local-6989586621679522658"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679522659"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679522659"><span class="hs-identifier hs-type">corner</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679522660"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-132"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679522661"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679522660"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679522660"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679522660"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-133"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsIntersectableWith</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HalfLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679522661"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679522659"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-134"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Intersection</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HalfLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679522661"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679522659"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-135"></span><span>                            </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HalfLineLineSegmentIntersection</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679522660"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-136"></span><span>                                                                     </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679522659"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-137"></span><span>                          </span><span class="hs-special">)</span><span>
-</span><span id="line-138"></span><span>                       </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HalfLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679522661"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HalfLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679522661"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679522658"><span class="hs-identifier hs-type">rectangle</span></a></span><span>
-</span><span id="line-139"></span><span>                       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679522660"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
-</span><span id="line-140"></span><span id="extraPoints"><span class="annot"><span class="annottext">extraPoints :: forall rectangle corner r point.
+</span><a href="#local-6989586621679403934"><span class="hs-identifier hs-var">pts</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span class="annot"><span class="hs-comment">-- | computes the extra vertices that we have to insert to make an unbounded region bounded</span></span><span>
+</span><span id="line-150"></span><span id="local-6989586621679403021"><span id="local-6989586621679403022"><span id="local-6989586621679403023"><span id="local-6989586621679403024"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#extraPoints"><span class="hs-identifier hs-type">extraPoints</span></a></span><span>            </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rectangle_</span></span><span> </span><span class="annot"><a href="#local-6989586621679403021"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679403022"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679403022"><span class="hs-identifier hs-type">corner</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679403023"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-151"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679403024"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679403023"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679403023"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679403023"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-152"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsIntersectableWith</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HalfLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679403024"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679403022"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-153"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Intersection</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HalfLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679403024"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679403022"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-154"></span><span>                            </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HalfLineLineSegmentIntersection</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679403023"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-155"></span><span>                                                                     </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679403022"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-156"></span><span>                          </span><span class="hs-special">)</span><span>
+</span><span id="line-157"></span><span>                       </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HalfLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679403024"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HalfLine</span></span><span> </span><span class="annot"><a href="#local-6989586621679403024"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679403021"><span class="hs-identifier hs-type">rectangle</span></a></span><span>
+</span><span id="line-158"></span><span>                       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679403023"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-159"></span><span id="extraPoints"><span class="annot"><span class="annottext">extraPoints :: forall rectangle corner r point.
 (Rectangle_ rectangle corner, Point_ corner 2 r, Point_ point 2 r,
  Fractional r, Ord r,
  IsIntersectableWith (HalfLine point) (ClosedLineSegment corner),
@@ -621,44 +671,44 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
         (Point 2 r) (ClosedLineSegment corner))) =&gt;
 HalfLine point
 -&gt; HalfLine point -&gt; rectangle -&gt; NonEmpty (Point 2 r)
-</span><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#extraPoints"><span class="hs-identifier hs-var hs-var">extraPoints</span></a></span></span><span> </span><span id="local-6989586621679523716"><span class="annot"><span class="annottext">HalfLine point
-</span><a href="#local-6989586621679523716"><span class="hs-identifier hs-var">hp</span></a></span></span><span> </span><span id="local-6989586621679523717"><span class="annot"><span class="annottext">HalfLine point
-</span><a href="#local-6989586621679523717"><span class="hs-identifier hs-var">hq</span></a></span></span><span> </span><span id="local-6989586621679523718"><span class="annot"><span class="annottext">rectangle
-</span><a href="#local-6989586621679523718"><span class="hs-identifier hs-var">rect</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r) -&gt; NonEmpty (Point 2 r)
-</span><a href="#local-6989586621679523719"><span class="hs-identifier hs-var">noDuplicates</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (Point 2 r) -&gt; NonEmpty (Point 2 r))
+</span><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#extraPoints"><span class="hs-identifier hs-var hs-var">extraPoints</span></a></span></span><span> </span><span id="local-6989586621679404055"><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679404055"><span class="hs-identifier hs-var">hp</span></a></span></span><span> </span><span id="local-6989586621679404056"><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679404056"><span class="hs-identifier hs-var">hq</span></a></span></span><span> </span><span id="local-6989586621679404057"><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679404057"><span class="hs-identifier hs-var">rect</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r) -&gt; NonEmpty (Point 2 r)
+</span><a href="#local-6989586621679404058"><span class="hs-identifier hs-var">noDuplicates</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (Point 2 r) -&gt; NonEmpty (Point 2 r))
 -&gt; NonEmpty (Point 2 r) -&gt; NonEmpty (Point 2 r)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679523720"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; [Point 2 r] -&gt; NonEmpty (Point 2 r)
+</span><a href="#local-6989586621679404059"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; [Point 2 r] -&gt; NonEmpty (Point 2 r)
 forall a. a -&gt; [a] -&gt; NonEmpty a
 </span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="annot"><span class="annottext">CardinalDirection -&gt; CardinalDirection -&gt; rectangle -&gt; [Point 2 r]
 forall rectangle point r.
 (Rectangle_ rectangle point, Point_ point 2 r, Num r) =&gt;
 CardinalDirection -&gt; CardinalDirection -&gt; rectangle -&gt; [Point 2 r]
 </span><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#cornersInBetween"><span class="hs-identifier hs-var">cornersInBetween</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
-</span><a href="#local-6989586621679523723"><span class="hs-identifier hs-var">qSide</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
-</span><a href="#local-6989586621679523724"><span class="hs-identifier hs-var">pSide</span></a></span><span> </span><span class="annot"><span class="annottext">rectangle
-</span><a href="#local-6989586621679523718"><span class="hs-identifier hs-var">rect</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r] -&gt; [Point 2 r] -&gt; [Point 2 r]
+</span><a href="#local-6989586621679404062"><span class="hs-identifier hs-var">qSide</span></a></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679404063"><span class="hs-identifier hs-var">pSide</span></a></span><span> </span><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679404057"><span class="hs-identifier hs-var">rect</span></a></span><span> </span><span class="annot"><span class="annottext">[Point 2 r] -&gt; [Point 2 r] -&gt; [Point 2 r]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679523725"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-141"></span><span>    </span><span class="hs-comment">-- if the intersection point coincides with a corner then the current code includes</span><span>
-</span><span id="line-142"></span><span>    </span><span class="hs-comment">-- the corner. We use the noDuplicates to get rid of those.</span><span>
-</span><span id="line-143"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-144"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679523720"><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679523720"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679523723"><span class="annot"><span class="annottext">CardinalDirection
-</span><a href="#local-6989586621679523723"><span class="hs-identifier hs-var">qSide</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HalfLine point -&gt; (Point 2 r, CardinalDirection)
-</span><a href="#local-6989586621679523726"><span class="hs-identifier hs-var">intersectionPoint</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine point
-</span><a href="#local-6989586621679523717"><span class="hs-identifier hs-var">hq</span></a></span><span>
-</span><span id="line-145"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679523725"><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679523725"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679523724"><span class="annot"><span class="annottext">CardinalDirection
-</span><a href="#local-6989586621679523724"><span class="hs-identifier hs-var">pSide</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HalfLine point -&gt; (Point 2 r, CardinalDirection)
-</span><a href="#local-6989586621679523726"><span class="hs-identifier hs-var">intersectionPoint</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine point
-</span><a href="#local-6989586621679523716"><span class="hs-identifier hs-var">hp</span></a></span><span>
-</span><span id="line-146"></span><span>
-</span><span id="line-147"></span><span>    </span><span id="local-6989586621679523726"><span class="annot"><span class="annottext">intersectionPoint :: HalfLine point -&gt; (Point 2 r, CardinalDirection)
-</span><a href="#local-6989586621679523726"><span class="hs-identifier hs-var hs-var">intersectionPoint</span></a></span></span><span>  </span><span id="local-6989586621679523727"><span class="annot"><span class="annottext">HalfLine point
-</span><a href="#local-6989586621679523727"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">First (Point 2 r, CardinalDirection)
+</span><a href="#local-6989586621679404064"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-160"></span><span>    </span><span class="hs-comment">-- if the intersection point coincides with a corner then the current code includes</span><span>
+</span><span id="line-161"></span><span>    </span><span class="hs-comment">-- the corner. We use the noDuplicates to get rid of those.</span><span>
+</span><span id="line-162"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-163"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679404059"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679404059"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679404062"><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679404062"><span class="hs-identifier hs-var">qSide</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HalfLine point -&gt; (Point 2 r, CardinalDirection)
+</span><a href="#local-6989586621679404065"><span class="hs-identifier hs-var">intersectionPoint</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679404056"><span class="hs-identifier hs-var">hq</span></a></span><span>
+</span><span id="line-164"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679404064"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679404064"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679404063"><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679404063"><span class="hs-identifier hs-var">pSide</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HalfLine point -&gt; (Point 2 r, CardinalDirection)
+</span><a href="#local-6989586621679404065"><span class="hs-identifier hs-var">intersectionPoint</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679404055"><span class="hs-identifier hs-var">hp</span></a></span><span>
+</span><span id="line-165"></span><span>
+</span><span id="line-166"></span><span>    </span><span id="local-6989586621679404065"><span class="annot"><span class="annottext">intersectionPoint :: HalfLine point -&gt; (Point 2 r, CardinalDirection)
+</span><a href="#local-6989586621679404065"><span class="hs-identifier hs-var hs-var">intersectionPoint</span></a></span></span><span>  </span><span id="local-6989586621679404066"><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679404066"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">First (Point 2 r, CardinalDirection)
 -&gt; Maybe (Point 2 r, CardinalDirection)
 forall a. First a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">getFirst</span></span><span> </span><span class="annot"><span class="annottext">(First (Point 2 r, CardinalDirection)
@@ -667,19 +717,19 @@ forall a. First a -&gt; Maybe a
 -&gt; Maybe (Point 2 r, CardinalDirection)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">HalfLine point -&gt; First (Point 2 r, CardinalDirection)
-</span><a href="#local-6989586621679523729"><span class="hs-identifier hs-var">intersectionPoint'</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine point
-</span><a href="#local-6989586621679523727"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-148"></span><span>                             </span><span class="annot"><span class="annottext">Maybe (Point 2 r, CardinalDirection)
+</span><a href="#local-6989586621679404068"><span class="hs-identifier hs-var">intersectionPoint'</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679404066"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-167"></span><span>                             </span><span class="annot"><span class="annottext">Maybe (Point 2 r, CardinalDirection)
 </span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; (Point 2 r, CardinalDirection)
 forall a. HasCallStack =&gt; String -&gt; a
 </span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;extraPoints: precondititon failed &quot;</span></span><span>
-</span><span id="line-149"></span><span>                             </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679523731"><span class="annot"><span class="annottext">(Point 2 r, CardinalDirection)
-</span><a href="#local-6989586621679523731"><span class="hs-identifier hs-var">x</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Point 2 r, CardinalDirection)
-</span><a href="#local-6989586621679523731"><span class="hs-identifier hs-var">x</span></a></span><span>
-</span><span id="line-150"></span><span>    </span><span id="local-6989586621679523729"><span class="annot"><span class="annottext">intersectionPoint' :: HalfLine point -&gt; First (Point 2 r, CardinalDirection)
-</span><a href="#local-6989586621679523729"><span class="hs-identifier hs-var hs-var">intersectionPoint'</span></a></span></span><span> </span><span id="local-6989586621679523732"><span class="annot"><span class="annottext">HalfLine point
-</span><a href="#local-6989586621679523732"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((CardinalDirection
+</span><span id="line-168"></span><span>                             </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679404070"><span class="annot"><span class="annottext">(Point 2 r, CardinalDirection)
+</span><a href="#local-6989586621679404070"><span class="hs-identifier hs-var">x</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(Point 2 r, CardinalDirection)
+</span><a href="#local-6989586621679404070"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-169"></span><span>    </span><span id="local-6989586621679404068"><span class="annot"><span class="annottext">intersectionPoint' :: HalfLine point -&gt; First (Point 2 r, CardinalDirection)
+</span><a href="#local-6989586621679404068"><span class="hs-identifier hs-var hs-var">intersectionPoint'</span></a></span></span><span> </span><span id="local-6989586621679404071"><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679404071"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((CardinalDirection
   -&gt; ClosedLineSegment corner
   -&gt; First (Point 2 r, CardinalDirection))
  -&gt; Sides (ClosedLineSegment corner)
@@ -706,7 +756,7 @@ forall r rectangle point.
 (Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
 rectangle -&gt; Sides (ClosedLineSegment point)
 </span><span class="hs-identifier hs-var">sides</span></span><span> </span><span class="annot"><span class="annottext">rectangle
-</span><a href="#local-6989586621679523718"><span class="hs-identifier hs-var">rect</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((CardinalDirection
+</span><a href="#local-6989586621679404057"><span class="hs-identifier hs-var">rect</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((CardinalDirection
   -&gt; ClosedLineSegment corner
   -&gt; First (Point 2 r, CardinalDirection))
  -&gt; First (Point 2 r, CardinalDirection))
@@ -715,18 +765,18 @@ rectangle -&gt; Sides (ClosedLineSegment point)
     -&gt; First (Point 2 r, CardinalDirection))
 -&gt; First (Point 2 r, CardinalDirection)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679523736"><span class="annot"><span class="annottext">CardinalDirection
-</span><a href="#local-6989586621679523736"><span class="hs-identifier hs-var">side</span></a></span></span><span> </span><span id="local-6989586621679523737"><span class="annot"><span class="annottext">ClosedLineSegment corner
-</span><a href="#local-6989586621679523737"><span class="hs-identifier hs-var">seg</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-151"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">HalfLine point
-</span><a href="#local-6989586621679523732"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine point
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679404075"><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679404075"><span class="hs-identifier hs-var">side</span></a></span></span><span> </span><span id="local-6989586621679404076"><span class="annot"><span class="annottext">ClosedLineSegment corner
+</span><a href="#local-6989586621679404076"><span class="hs-identifier hs-var">seg</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-170"></span><span>      </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">HalfLine point
+</span><a href="#local-6989586621679404071"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine point
 -&gt; ClosedLineSegment corner
 -&gt; Intersection (HalfLine point) (ClosedLineSegment corner)
 forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
 </span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment corner
-</span><a href="#local-6989586621679523737"><span class="hs-identifier hs-var">seg</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-152"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HalfLine_x_LineSegment_Point</span></span><span> </span><span id="local-6989586621679523740"><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679523740"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 r, CardinalDirection)
+</span><a href="#local-6989586621679404076"><span class="hs-identifier hs-var">seg</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-171"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HalfLine_x_LineSegment_Point</span></span><span> </span><span id="local-6989586621679404079"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679404079"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 r, CardinalDirection)
 -&gt; First (Point 2 r, CardinalDirection)
 forall a. Maybe a -&gt; First a
 </span><span class="hs-identifier hs-var">First</span></span><span> </span><span class="annot"><span class="annottext">(Maybe (Point 2 r, CardinalDirection)
@@ -738,18 +788,18 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 -&gt; Maybe (Point 2 r, CardinalDirection)
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679523740"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">CardinalDirection
-</span><a href="#local-6989586621679523736"><span class="hs-identifier hs-var">side</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-153"></span><span>        </span><span class="annot"><span class="annottext">Intersection (HalfLine point) (ClosedLineSegment corner)
+</span><a href="#local-6989586621679404079"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679404075"><span class="hs-identifier hs-var">side</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-172"></span><span>        </span><span class="annot"><span class="annottext">Intersection (HalfLine point) (ClosedLineSegment corner)
 </span><span class="hs-identifier">_</span></span><span>                                     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 r, CardinalDirection)
 -&gt; First (Point 2 r, CardinalDirection)
 forall a. Maybe a -&gt; First a
 </span><span class="hs-identifier hs-var">First</span></span><span>   </span><span class="annot"><span class="annottext">Maybe (Point 2 r, CardinalDirection)
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
-</span><span id="line-154"></span><span>
-</span><span id="line-155"></span><span>    </span><span id="local-6989586621679523719"><span class="annot"><span class="annottext">noDuplicates :: NonEmpty (Point 2 r) -&gt; NonEmpty (Point 2 r)
-</span><a href="#local-6989586621679523719"><span class="hs-identifier hs-var hs-var">noDuplicates</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(NonEmpty (Point 2 r) -&gt; Point 2 r)
+</span><span id="line-173"></span><span>
+</span><span id="line-174"></span><span>    </span><span id="local-6989586621679404058"><span class="annot"><span class="annottext">noDuplicates :: NonEmpty (Point 2 r) -&gt; NonEmpty (Point 2 r)
+</span><a href="#local-6989586621679404058"><span class="hs-identifier hs-var hs-var">noDuplicates</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(NonEmpty (Point 2 r) -&gt; Point 2 r)
 -&gt; NonEmpty (NonEmpty (Point 2 r)) -&gt; NonEmpty (Point 2 r)
 forall a b. (a -&gt; b) -&gt; NonEmpty a -&gt; NonEmpty b
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
@@ -763,24 +813,24 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r) -&gt; NonEmpty (NonEmpty (Point 2 r))
 forall a. Eq a =&gt; NonEmpty a -&gt; NonEmpty (NonEmpty a)
 </span><span class="hs-identifier hs-var">NonEmpty.group1</span></span><span>
-</span><span id="line-156"></span><span>
-</span><span id="line-157"></span><span>
-</span><span id="line-158"></span><span class="annot"><span class="hs-comment">-- | Computes the corners in between the two given sides (in CCW order)</span></span><span>
-</span><span id="line-159"></span><span id="local-6989586621679522687"><span id="local-6989586621679522688"><span id="local-6989586621679522689"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#cornersInBetween"><span class="hs-identifier hs-type">cornersInBetween</span></a></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Rectangle_</span></span><span> </span><span class="annot"><a href="#local-6989586621679522687"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679522688"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679522688"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679522689"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679522689"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-160"></span><span>                          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CardinalDirection</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CardinalDirection</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679522687"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679522689"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span></span></span></span><span>
-</span><span id="line-161"></span><span id="cornersInBetween"><span class="annot"><span class="annottext">cornersInBetween :: forall rectangle point r.
+</span><span id="line-175"></span><span>
+</span><span id="line-176"></span><span>
+</span><span id="line-177"></span><span class="annot"><span class="hs-comment">-- | Computes the corners in between the two given sides (in CCW order)</span></span><span>
+</span><span id="line-178"></span><span id="local-6989586621679403050"><span id="local-6989586621679403051"><span id="local-6989586621679403052"><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#cornersInBetween"><span class="hs-identifier hs-type">cornersInBetween</span></a></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Rectangle_</span></span><span> </span><span class="annot"><a href="#local-6989586621679403050"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679403051"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679403051"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679403052"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679403052"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-179"></span><span>                          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CardinalDirection</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">CardinalDirection</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679403050"><span class="hs-identifier hs-type">rectangle</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679403052"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span></span></span></span><span>
+</span><span id="line-180"></span><span id="cornersInBetween"><span class="annot"><span class="annottext">cornersInBetween :: forall rectangle point r.
 (Rectangle_ rectangle point, Point_ point 2 r, Num r) =&gt;
 CardinalDirection -&gt; CardinalDirection -&gt; rectangle -&gt; [Point 2 r]
-</span><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#cornersInBetween"><span class="hs-identifier hs-var hs-var">cornersInBetween</span></a></span></span><span> </span><span id="local-6989586621679523835"><span class="annot"><span class="annottext">CardinalDirection
-</span><a href="#local-6989586621679523835"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679523836"><span class="annot"><span class="annottext">CardinalDirection
-</span><a href="#local-6989586621679523836"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span id="local-6989586621679523837"><span class="annot"><span class="annottext">rectangle
-</span><a href="#local-6989586621679523837"><span class="hs-identifier hs-var">rect</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((CardinalDirection, Point 2 r) -&gt; Point 2 r)
+</span><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#cornersInBetween"><span class="hs-identifier hs-var hs-var">cornersInBetween</span></a></span></span><span> </span><span id="local-6989586621679404175"><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679404175"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679404176"><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679404176"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span id="local-6989586621679404177"><span class="annot"><span class="annottext">rectangle
+</span><a href="#local-6989586621679404177"><span class="hs-identifier hs-var">rect</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((CardinalDirection, Point 2 r) -&gt; Point 2 r)
 -&gt; [(CardinalDirection, Point 2 r)] -&gt; [Point 2 r]
 forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(CardinalDirection, Point 2 r) -&gt; Point 2 r
 forall a b. (a, b) -&gt; b
 </span><span class="hs-identifier hs-var">snd</span></span><span>
-</span><span id="line-162"></span><span>                          </span><span class="annot"><span class="annottext">([(CardinalDirection, Point 2 r)] -&gt; [Point 2 r])
+</span><span id="line-181"></span><span>                          </span><span class="annot"><span class="annottext">([(CardinalDirection, Point 2 r)] -&gt; [Point 2 r])
 -&gt; ([(CardinalDirection, Point 2 r)]
     -&gt; [(CardinalDirection, Point 2 r)])
 -&gt; [(CardinalDirection, Point 2 r)]
@@ -793,7 +843,7 @@ forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">takeWhile</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">CardinalDirection -&gt; CardinalDirection -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
-</span><a href="#local-6989586621679523836"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CardinalDirection -&gt; Bool)
+</span><a href="#local-6989586621679404176"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CardinalDirection -&gt; Bool)
 -&gt; ((CardinalDirection, Point 2 r) -&gt; CardinalDirection)
 -&gt; (CardinalDirection, Point 2 r)
 -&gt; Bool
@@ -814,7 +864,7 @@ forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">dropWhile</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">CardinalDirection -&gt; CardinalDirection -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">CardinalDirection
-</span><a href="#local-6989586621679523835"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CardinalDirection -&gt; Bool)
+</span><a href="#local-6989586621679404175"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(CardinalDirection -&gt; Bool)
 -&gt; ((CardinalDirection, Point 2 r) -&gt; CardinalDirection)
 -&gt; (CardinalDirection, Point 2 r)
 -&gt; Bool
@@ -822,7 +872,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(CardinalDirection, Point 2 r) -&gt; CardinalDirection
 forall a b. (a, b) -&gt; a
 </span><span class="hs-identifier hs-var">fst</span></span><span class="hs-special">)</span><span>
-</span><span id="line-163"></span><span>                          </span><span class="annot"><span class="annottext">([(CardinalDirection, Point 2 r)] -&gt; [Point 2 r])
+</span><span id="line-182"></span><span>                          </span><span class="annot"><span class="annottext">([(CardinalDirection, Point 2 r)] -&gt; [Point 2 r])
 -&gt; [(CardinalDirection, Point 2 r)] -&gt; [Point 2 r]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[(CardinalDirection, Point 2 r)]
@@ -830,19 +880,19 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall a. HasCallStack =&gt; [a] -&gt; [a]
 </span><span class="hs-identifier hs-var">cycle</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">CardinalDirection
 </span><span class="hs-identifier hs-var">East</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679523845"><span class="hs-identifier hs-var">tr</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679404185"><span class="hs-identifier hs-var">tr</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">CardinalDirection
 </span><span class="hs-identifier hs-var">North</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679523847"><span class="hs-identifier hs-var">tl</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679404187"><span class="hs-identifier hs-var">tl</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">CardinalDirection
 </span><span class="hs-identifier hs-var">West</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679523849"><span class="hs-identifier hs-var">bl</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">CardinalDirection
+</span><a href="#local-6989586621679404189"><span class="hs-identifier hs-var">bl</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span class="hs-special">(</span><span class="annot"><span class="annottext">CardinalDirection
 </span><span class="hs-identifier hs-var">South</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679523851"><span class="hs-identifier hs-var">br</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
-</span><span id="line-164"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-165"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Corners</span></span><span> </span><span id="local-6989586621679523847"><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679523847"><span class="hs-identifier hs-var">tl</span></a></span></span><span> </span><span id="local-6989586621679523845"><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679523845"><span class="hs-identifier hs-var">tr</span></a></span></span><span> </span><span id="local-6989586621679523851"><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679523851"><span class="hs-identifier hs-var">br</span></a></span></span><span> </span><span id="local-6989586621679523849"><span class="annot"><span class="annottext">Point 2 r
-</span><a href="#local-6989586621679523849"><span class="hs-identifier hs-var">bl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r) -&gt; point -&gt; Point 2 r
+</span><a href="#local-6989586621679404191"><span class="hs-identifier hs-var">br</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-183"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-184"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Corners</span></span><span> </span><span id="local-6989586621679404187"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679404187"><span class="hs-identifier hs-var">tl</span></a></span></span><span> </span><span id="local-6989586621679404185"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679404185"><span class="hs-identifier hs-var">tr</span></a></span></span><span> </span><span id="local-6989586621679404191"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679404191"><span class="hs-identifier hs-var">br</span></a></span></span><span> </span><span id="local-6989586621679404189"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679404189"><span class="hs-identifier hs-var">bl</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r) -&gt; point -&gt; Point 2 r
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
 forall point (d :: Nat) r.
@@ -856,30 +906,30 @@ forall r rectangle point.
 (Num r, Rectangle_ rectangle point, Point_ point 2 r) =&gt;
 rectangle -&gt; Corners point
 </span><span class="hs-identifier hs-var">corners</span></span><span> </span><span class="annot"><span class="annottext">rectangle
-</span><a href="#local-6989586621679523837"><span class="hs-identifier hs-var">rect</span></a></span><span>
-</span><span id="line-166"></span><span>
-</span><span id="line-167"></span><span>
-</span><span id="line-168"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-169"></span><span>
-</span><span id="line-170"></span><span class="hs-comment">-- instance HasVertices' (MinimizationDiagram r plane) where</span><span>
-</span><span id="line-171"></span><span class="hs-comment">--   -- | invariant: vertexIx == UnboundedVertex &lt;=&gt; vertex = UnboundedVertex</span><span>
-</span><span id="line-172"></span><span class="hs-comment">--   type VertexIx (MinimizationDiagram r plane) = MDVertexIx</span><span>
-</span><span id="line-173"></span><span class="hs-comment">--   type Vertex (MinimizationDiagram r plane)   = MDVertex r plane</span><span>
-</span><span id="line-174"></span><span class="hs-comment">--   vertexAt = \case</span><span>
-</span><span id="line-175"></span><span class="hs-comment">--     UnboundedVertexIx -&gt; pure UnboundedVertex</span><span>
-</span><span id="line-176"></span><span class="hs-comment">--     BoundedVertexIx i -&gt;</span><span>
-</span><span id="line-177"></span><span>
-</span><span id="line-178"></span><span class="hs-comment">-- instance HasVertices (MinimizationDiagram r plane) (MinimizationDiagram r plane) where</span><span>
-</span><span id="line-179"></span><span class="hs-comment">-- instance HasDarts' (MinimizationDiagram r plane) where</span><span>
-</span><span id="line-180"></span><span class="hs-comment">--   type DartIx (MinimizationDiagram r plane) = (MDVertexIx, MDVertexIx)</span><span>
-</span><span id="line-181"></span><span class="hs-comment">--   type Dart (MinimizationDiagram r plane)   = (MDVertex r plane, MDVertex r plane)</span><span>
-</span><span id="line-182"></span><span class="hs-comment">--   dartAt = undefined</span><span>
-</span><span id="line-183"></span><span>
-</span><span id="line-184"></span><span class="hs-comment">-- instance HasDarts (MinimizationDiagram r plane) (MinimizationDiagram r plane) where</span><span>
+</span><a href="#local-6989586621679404177"><span class="hs-identifier hs-var">rect</span></a></span><span>
 </span><span id="line-185"></span><span>
-</span><span id="line-186"></span><span class="hs-comment">-- instance DiGraph_ (MinimizationDiagram r plane) where</span><span>
-</span><span id="line-187"></span><span class="hs-comment">--   diGraphFromAdjacencyLists = undefined</span><span>
-</span><span id="line-188"></span><span class="hs-comment">--   endPoints = undefined</span><span>
-</span><span id="line-189"></span><span class="hs-comment">--   outNeighboursOf = undefined</span><span>
-</span><span id="line-190"></span><span class="hs-comment">--   twinDartOf = undefined</span><span>
-</span><span id="line-191"></span></pre></body></html>
+</span><span id="line-186"></span><span>
+</span><span id="line-187"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-188"></span><span>
+</span><span id="line-189"></span><span class="hs-comment">-- instance HasVertices' (MinimizationDiagram r plane) where</span><span>
+</span><span id="line-190"></span><span class="hs-comment">--   -- | invariant: vertexIx == UnboundedVertex &lt;=&gt; vertex = UnboundedVertex</span><span>
+</span><span id="line-191"></span><span class="hs-comment">--   type VertexIx (MinimizationDiagram r plane) = MDVertexIx</span><span>
+</span><span id="line-192"></span><span class="hs-comment">--   type Vertex (MinimizationDiagram r plane)   = MDVertex r plane</span><span>
+</span><span id="line-193"></span><span class="hs-comment">--   vertexAt = \case</span><span>
+</span><span id="line-194"></span><span class="hs-comment">--     UnboundedVertexIx -&gt; pure UnboundedVertex</span><span>
+</span><span id="line-195"></span><span class="hs-comment">--     BoundedVertexIx i -&gt;</span><span>
+</span><span id="line-196"></span><span>
+</span><span id="line-197"></span><span class="hs-comment">-- instance HasVertices (MinimizationDiagram r plane) (MinimizationDiagram r plane) where</span><span>
+</span><span id="line-198"></span><span class="hs-comment">-- instance HasDarts' (MinimizationDiagram r plane) where</span><span>
+</span><span id="line-199"></span><span class="hs-comment">--   type DartIx (MinimizationDiagram r plane) = (MDVertexIx, MDVertexIx)</span><span>
+</span><span id="line-200"></span><span class="hs-comment">--   type Dart (MinimizationDiagram r plane)   = (MDVertex r plane, MDVertex r plane)</span><span>
+</span><span id="line-201"></span><span class="hs-comment">--   dartAt = undefined</span><span>
+</span><span id="line-202"></span><span>
+</span><span id="line-203"></span><span class="hs-comment">-- instance HasDarts (MinimizationDiagram r plane) (MinimizationDiagram r plane) where</span><span>
+</span><span id="line-204"></span><span>
+</span><span id="line-205"></span><span class="hs-comment">-- instance DiGraph_ (MinimizationDiagram r plane) where</span><span>
+</span><span id="line-206"></span><span class="hs-comment">--   diGraphFromAdjacencyLists = undefined</span><span>
+</span><span id="line-207"></span><span class="hs-comment">--   endPoints = undefined</span><span>
+</span><span id="line-208"></span><span class="hs-comment">--   outNeighboursOf = undefined</span><span>
+</span><span id="line-209"></span><span class="hs-comment">--   twinDartOf = undefined</span><span>
+</span><span id="line-210"></span></pre></body></html>

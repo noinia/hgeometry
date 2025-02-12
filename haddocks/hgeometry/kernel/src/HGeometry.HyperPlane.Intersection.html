@@ -1,0 +1,773 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# OPTIONS_GHC -Wno-orphans #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}</span><span>
+</span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -fplugin-opt GHC.TypeLits.Normalise:allow-negated-numbers #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}</span><span>
+</span><span id="line-5"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-6"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Module      :  HGeometry.HyperPlane.Intersection</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--</span><span>
+</span><span id="line-13"></span><span class="hs-comment">-- Intersection between hyperplanes in R^3</span><span>
+</span><span id="line-14"></span><span class="hs-comment">--</span><span>
+</span><span id="line-15"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html"><span class="hs-identifier">HGeometry.HyperPlane.Intersection</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#PlanePlaneIntersection"><span class="hs-identifier">PlanePlaneIntersection</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#planePlaneIntersection"><span class="hs-identifier">planePlaneIntersection</span></a></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bifoldable</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bifunctor</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bitraversable</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Type.Ord</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.TypeNats</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Class.html"><span class="hs-identifier">HGeometry.HyperPlane.Class</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Internal.html"><span class="hs-identifier">HGeometry.HyperPlane.Internal</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html"><span class="hs-identifier">HGeometry.HyperPlane.NonVertical</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html"><span class="hs-identifier">HGeometry.Intersection</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Line.General.html"><span class="hs-identifier">HGeometry.Line.General</span></a></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Line.LineEQ.html"><span class="hs-identifier">HGeometry.Line.LineEQ</span></a></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Intersection"><span class="annot"><a href="HGeometry.Intersection.html#Intersection"><span class="hs-identifier hs-var">Intersection</span></a></span></span><span> </span><span id="local-6989586621679367207"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.Internal.html#HyperPlane"><span class="hs-identifier hs-type">HyperPlane</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679367207"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.Internal.html#HyperPlane"><span class="hs-identifier hs-type">HyperPlane</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679367207"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-37"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#PlanePlaneIntersection"><span class="hs-identifier hs-type">PlanePlaneIntersection</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html#Plane"><span class="hs-identifier hs-type">Plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367207"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.General.html#VerticalOrLineEQ"><span class="hs-identifier hs-type">VerticalOrLineEQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367207"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Intersection"><span class="annot"><a href="HGeometry.Intersection.html#Intersection"><span class="hs-identifier hs-var">Intersection</span></a></span></span><span> </span><span id="local-6989586621679367208"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html#Plane"><span class="hs-identifier hs-type">Plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367208"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html#Plane"><span class="hs-identifier hs-type">Plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367208"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-40"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#PlanePlaneIntersection"><span class="hs-identifier hs-type">PlanePlaneIntersection</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html#Plane"><span class="hs-identifier hs-type">Plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367208"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.General.html#VerticalOrLineEQ"><span class="hs-identifier hs-type">VerticalOrLineEQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367208"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="annot"><span class="hs-comment">-- | The intersection between two planes in R^3.</span></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">data</span><span> </span><span id="PlanePlaneIntersection"><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#PlanePlaneIntersection"><span class="hs-identifier hs-var">PlanePlaneIntersection</span></a></span></span><span> </span><span id="local-6989586621679367087"><span class="annot"><a href="#local-6989586621679367087"><span class="hs-identifier hs-type">plane</span></a></span></span><span> </span><span id="local-6989586621679367086"><span class="annot"><a href="#local-6989586621679367086"><span class="hs-identifier hs-type">line</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Plane_x_Plane_Line"><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#Plane_x_Plane_Line"><span class="hs-identifier hs-var">Plane_x_Plane_Line</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679367086"><span class="hs-identifier hs-type">line</span></a></span><span>
+</span><span id="line-44"></span><span>                                       </span><span class="hs-glyph">|</span><span> </span><span id="Plane_x_Plane_Plane"><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#Plane_x_Plane_Plane"><span class="hs-identifier hs-var">Plane_x_Plane_Plane</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679367087"><span class="hs-identifier hs-type">plane</span></a></span><span>
+</span><span id="line-45"></span><span>                                       </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679367214"><span id="local-6989586621679367221"><span id="local-6989586621679367225"><span class="annot"><span class="annottext">Int -&gt; PlanePlaneIntersection plane line -&gt; ShowS
+[PlanePlaneIntersection plane line] -&gt; ShowS
+PlanePlaneIntersection plane line -&gt; String
+(Int -&gt; PlanePlaneIntersection plane line -&gt; ShowS)
+-&gt; (PlanePlaneIntersection plane line -&gt; String)
+-&gt; ([PlanePlaneIntersection plane line] -&gt; ShowS)
+-&gt; Show (PlanePlaneIntersection plane line)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall plane line.
+(Show line, Show plane) =&gt;
+Int -&gt; PlanePlaneIntersection plane line -&gt; ShowS
+forall plane line.
+(Show line, Show plane) =&gt;
+[PlanePlaneIntersection plane line] -&gt; ShowS
+forall plane line.
+(Show line, Show plane) =&gt;
+PlanePlaneIntersection plane line -&gt; String
+$cshowsPrec :: forall plane line.
+(Show line, Show plane) =&gt;
+Int -&gt; PlanePlaneIntersection plane line -&gt; ShowS
+showsPrec :: Int -&gt; PlanePlaneIntersection plane line -&gt; ShowS
+$cshow :: forall plane line.
+(Show line, Show plane) =&gt;
+PlanePlaneIntersection plane line -&gt; String
+show :: PlanePlaneIntersection plane line -&gt; String
+$cshowList :: forall plane line.
+(Show line, Show plane) =&gt;
+[PlanePlaneIntersection plane line] -&gt; ShowS
+showList :: [PlanePlaneIntersection plane line] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679367232"><span id="local-6989586621679367236"><span id="local-6989586621679367239"><span id="local-6989586621679367250"><span class="annot"><span class="annottext">ReadPrec [PlanePlaneIntersection plane line]
+ReadPrec (PlanePlaneIntersection plane line)
+Int -&gt; ReadS (PlanePlaneIntersection plane line)
+ReadS [PlanePlaneIntersection plane line]
+(Int -&gt; ReadS (PlanePlaneIntersection plane line))
+-&gt; ReadS [PlanePlaneIntersection plane line]
+-&gt; ReadPrec (PlanePlaneIntersection plane line)
+-&gt; ReadPrec [PlanePlaneIntersection plane line]
+-&gt; Read (PlanePlaneIntersection plane line)
+forall a.
+(Int -&gt; ReadS a)
+-&gt; ReadS [a] -&gt; ReadPrec a -&gt; ReadPrec [a] -&gt; Read a
+forall plane line.
+(Read line, Read plane) =&gt;
+ReadPrec [PlanePlaneIntersection plane line]
+forall plane line.
+(Read line, Read plane) =&gt;
+ReadPrec (PlanePlaneIntersection plane line)
+forall plane line.
+(Read line, Read plane) =&gt;
+Int -&gt; ReadS (PlanePlaneIntersection plane line)
+forall plane line.
+(Read line, Read plane) =&gt;
+ReadS [PlanePlaneIntersection plane line]
+$creadsPrec :: forall plane line.
+(Read line, Read plane) =&gt;
+Int -&gt; ReadS (PlanePlaneIntersection plane line)
+readsPrec :: Int -&gt; ReadS (PlanePlaneIntersection plane line)
+$creadList :: forall plane line.
+(Read line, Read plane) =&gt;
+ReadS [PlanePlaneIntersection plane line]
+readList :: ReadS [PlanePlaneIntersection plane line]
+$creadPrec :: forall plane line.
+(Read line, Read plane) =&gt;
+ReadPrec (PlanePlaneIntersection plane line)
+readPrec :: ReadPrec (PlanePlaneIntersection plane line)
+$creadListPrec :: forall plane line.
+(Read line, Read plane) =&gt;
+ReadPrec [PlanePlaneIntersection plane line]
+readListPrec :: ReadPrec [PlanePlaneIntersection plane line]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679367259"><span id="local-6989586621679367266"><span class="annot"><span class="annottext">PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Bool
+(PlanePlaneIntersection plane line
+ -&gt; PlanePlaneIntersection plane line -&gt; Bool)
+-&gt; (PlanePlaneIntersection plane line
+    -&gt; PlanePlaneIntersection plane line -&gt; Bool)
+-&gt; Eq (PlanePlaneIntersection plane line)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall plane line.
+(Eq line, Eq plane) =&gt;
+PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Bool
+$c== :: forall plane line.
+(Eq line, Eq plane) =&gt;
+PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Bool
+== :: PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Bool
+$c/= :: forall plane line.
+(Eq line, Eq plane) =&gt;
+PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Bool
+/= :: PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679367277"><span id="local-6989586621679367281"><span id="local-6989586621679367285"><span id="local-6989586621679367289"><span id="local-6989586621679367292"><span id="local-6989586621679367295"><span id="local-6989586621679367298"><span class="annot"><span class="annottext">Eq (PlanePlaneIntersection plane line)
+Eq (PlanePlaneIntersection plane line) =&gt;
+(PlanePlaneIntersection plane line
+ -&gt; PlanePlaneIntersection plane line -&gt; Ordering)
+-&gt; (PlanePlaneIntersection plane line
+    -&gt; PlanePlaneIntersection plane line -&gt; Bool)
+-&gt; (PlanePlaneIntersection plane line
+    -&gt; PlanePlaneIntersection plane line -&gt; Bool)
+-&gt; (PlanePlaneIntersection plane line
+    -&gt; PlanePlaneIntersection plane line -&gt; Bool)
+-&gt; (PlanePlaneIntersection plane line
+    -&gt; PlanePlaneIntersection plane line -&gt; Bool)
+-&gt; (PlanePlaneIntersection plane line
+    -&gt; PlanePlaneIntersection plane line
+    -&gt; PlanePlaneIntersection plane line)
+-&gt; (PlanePlaneIntersection plane line
+    -&gt; PlanePlaneIntersection plane line
+    -&gt; PlanePlaneIntersection plane line)
+-&gt; Ord (PlanePlaneIntersection plane line)
+PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Bool
+PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Ordering
+PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line
+forall a.
+Eq a =&gt;
+(a -&gt; a -&gt; Ordering)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; Bool)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; (a -&gt; a -&gt; a)
+-&gt; Ord a
+forall plane line.
+(Ord line, Ord plane) =&gt;
+Eq (PlanePlaneIntersection plane line)
+forall plane line.
+(Ord line, Ord plane) =&gt;
+PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Bool
+forall plane line.
+(Ord line, Ord plane) =&gt;
+PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Ordering
+forall plane line.
+(Ord line, Ord plane) =&gt;
+PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line
+$ccompare :: forall plane line.
+(Ord line, Ord plane) =&gt;
+PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Ordering
+compare :: PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Ordering
+$c&lt; :: forall plane line.
+(Ord line, Ord plane) =&gt;
+PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Bool
+&lt; :: PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Bool
+$c&lt;= :: forall plane line.
+(Ord line, Ord plane) =&gt;
+PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Bool
+&lt;= :: PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Bool
+$c&gt; :: forall plane line.
+(Ord line, Ord plane) =&gt;
+PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Bool
+&gt; :: PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Bool
+$c&gt;= :: forall plane line.
+(Ord line, Ord plane) =&gt;
+PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Bool
+&gt;= :: PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line -&gt; Bool
+$cmax :: forall plane line.
+(Ord line, Ord plane) =&gt;
+PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line
+max :: PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line
+$cmin :: forall plane line.
+(Ord line, Ord plane) =&gt;
+PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line
+min :: PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line
+-&gt; PlanePlaneIntersection plane line
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679367307"><span id="local-6989586621679367309"><span class="annot"><span class="annottext">(forall a b.
+ (a -&gt; b)
+ -&gt; PlanePlaneIntersection plane a
+ -&gt; PlanePlaneIntersection plane b)
+-&gt; (forall a b.
+    a
+    -&gt; PlanePlaneIntersection plane b
+    -&gt; PlanePlaneIntersection plane a)
+-&gt; Functor (PlanePlaneIntersection plane)
+forall a b.
+a
+-&gt; PlanePlaneIntersection plane b -&gt; PlanePlaneIntersection plane a
+forall a b.
+(a -&gt; b)
+-&gt; PlanePlaneIntersection plane a -&gt; PlanePlaneIntersection plane b
+forall plane a b.
+a
+-&gt; PlanePlaneIntersection plane b -&gt; PlanePlaneIntersection plane a
+forall plane a b.
+(a -&gt; b)
+-&gt; PlanePlaneIntersection plane a -&gt; PlanePlaneIntersection plane b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall plane a b.
+(a -&gt; b)
+-&gt; PlanePlaneIntersection plane a -&gt; PlanePlaneIntersection plane b
+fmap :: forall a b.
+(a -&gt; b)
+-&gt; PlanePlaneIntersection plane a -&gt; PlanePlaneIntersection plane b
+$c&lt;$ :: forall plane a b.
+a
+-&gt; PlanePlaneIntersection plane b -&gt; PlanePlaneIntersection plane a
+&lt;$ :: forall a b.
+a
+-&gt; PlanePlaneIntersection plane b -&gt; PlanePlaneIntersection plane a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679367314"><span id="local-6989586621679367320"><span id="local-6989586621679367324"><span id="local-6989586621679367329"><span id="local-6989586621679367331"><span id="local-6989586621679367334"><span id="local-6989586621679367337"><span id="local-6989586621679367340"><span id="local-6989586621679367343"><span id="local-6989586621679367346"><span id="local-6989586621679367349"><span id="local-6989586621679367351"><span id="local-6989586621679367354"><span id="local-6989586621679367359"><span id="local-6989586621679367364"><span id="local-6989586621679367369"><span id="local-6989586621679367374"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; PlanePlaneIntersection plane m -&gt; m)
+-&gt; (forall m a.
+    Monoid m =&gt;
+    (a -&gt; m) -&gt; PlanePlaneIntersection plane a -&gt; m)
+-&gt; (forall m a.
+    Monoid m =&gt;
+    (a -&gt; m) -&gt; PlanePlaneIntersection plane a -&gt; m)
+-&gt; (forall a b.
+    (a -&gt; b -&gt; b) -&gt; b -&gt; PlanePlaneIntersection plane a -&gt; b)
+-&gt; (forall a b.
+    (a -&gt; b -&gt; b) -&gt; b -&gt; PlanePlaneIntersection plane a -&gt; b)
+-&gt; (forall b a.
+    (b -&gt; a -&gt; b) -&gt; b -&gt; PlanePlaneIntersection plane a -&gt; b)
+-&gt; (forall b a.
+    (b -&gt; a -&gt; b) -&gt; b -&gt; PlanePlaneIntersection plane a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; PlanePlaneIntersection plane a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; PlanePlaneIntersection plane a -&gt; a)
+-&gt; (forall a. PlanePlaneIntersection plane a -&gt; [a])
+-&gt; (forall a. PlanePlaneIntersection plane a -&gt; Bool)
+-&gt; (forall a. PlanePlaneIntersection plane a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; PlanePlaneIntersection plane a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; PlanePlaneIntersection plane a -&gt; a)
+-&gt; (forall a. Ord a =&gt; PlanePlaneIntersection plane a -&gt; a)
+-&gt; (forall a. Num a =&gt; PlanePlaneIntersection plane a -&gt; a)
+-&gt; (forall a. Num a =&gt; PlanePlaneIntersection plane a -&gt; a)
+-&gt; Foldable (PlanePlaneIntersection plane)
+forall a. Eq a =&gt; a -&gt; PlanePlaneIntersection plane a -&gt; Bool
+forall a. Num a =&gt; PlanePlaneIntersection plane a -&gt; a
+forall a. Ord a =&gt; PlanePlaneIntersection plane a -&gt; a
+forall m. Monoid m =&gt; PlanePlaneIntersection plane m -&gt; m
+forall a. PlanePlaneIntersection plane a -&gt; Bool
+forall a. PlanePlaneIntersection plane a -&gt; Int
+forall a. PlanePlaneIntersection plane a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; PlanePlaneIntersection plane a -&gt; a
+forall plane a. Eq a =&gt; a -&gt; PlanePlaneIntersection plane a -&gt; Bool
+forall plane a. Num a =&gt; PlanePlaneIntersection plane a -&gt; a
+forall plane a. Ord a =&gt; PlanePlaneIntersection plane a -&gt; a
+forall plane m. Monoid m =&gt; PlanePlaneIntersection plane m -&gt; m
+forall m a.
+Monoid m =&gt;
+(a -&gt; m) -&gt; PlanePlaneIntersection plane a -&gt; m
+forall plane a. PlanePlaneIntersection plane a -&gt; Bool
+forall plane a. PlanePlaneIntersection plane a -&gt; Int
+forall plane a. PlanePlaneIntersection plane a -&gt; [a]
+forall b a.
+(b -&gt; a -&gt; b) -&gt; b -&gt; PlanePlaneIntersection plane a -&gt; b
+forall a b.
+(a -&gt; b -&gt; b) -&gt; b -&gt; PlanePlaneIntersection plane a -&gt; b
+forall plane a.
+(a -&gt; a -&gt; a) -&gt; PlanePlaneIntersection plane a -&gt; a
+forall plane m a.
+Monoid m =&gt;
+(a -&gt; m) -&gt; PlanePlaneIntersection plane a -&gt; m
+forall plane b a.
+(b -&gt; a -&gt; b) -&gt; b -&gt; PlanePlaneIntersection plane a -&gt; b
+forall plane a b.
+(a -&gt; b -&gt; b) -&gt; b -&gt; PlanePlaneIntersection plane a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+$cfold :: forall plane m. Monoid m =&gt; PlanePlaneIntersection plane m -&gt; m
+fold :: forall m. Monoid m =&gt; PlanePlaneIntersection plane m -&gt; m
+$cfoldMap :: forall plane m a.
+Monoid m =&gt;
+(a -&gt; m) -&gt; PlanePlaneIntersection plane a -&gt; m
+foldMap :: forall m a.
+Monoid m =&gt;
+(a -&gt; m) -&gt; PlanePlaneIntersection plane a -&gt; m
+$cfoldMap' :: forall plane m a.
+Monoid m =&gt;
+(a -&gt; m) -&gt; PlanePlaneIntersection plane a -&gt; m
+foldMap' :: forall m a.
+Monoid m =&gt;
+(a -&gt; m) -&gt; PlanePlaneIntersection plane a -&gt; m
+$cfoldr :: forall plane a b.
+(a -&gt; b -&gt; b) -&gt; b -&gt; PlanePlaneIntersection plane a -&gt; b
+foldr :: forall a b.
+(a -&gt; b -&gt; b) -&gt; b -&gt; PlanePlaneIntersection plane a -&gt; b
+$cfoldr' :: forall plane a b.
+(a -&gt; b -&gt; b) -&gt; b -&gt; PlanePlaneIntersection plane a -&gt; b
+foldr' :: forall a b.
+(a -&gt; b -&gt; b) -&gt; b -&gt; PlanePlaneIntersection plane a -&gt; b
+$cfoldl :: forall plane b a.
+(b -&gt; a -&gt; b) -&gt; b -&gt; PlanePlaneIntersection plane a -&gt; b
+foldl :: forall b a.
+(b -&gt; a -&gt; b) -&gt; b -&gt; PlanePlaneIntersection plane a -&gt; b
+$cfoldl' :: forall plane b a.
+(b -&gt; a -&gt; b) -&gt; b -&gt; PlanePlaneIntersection plane a -&gt; b
+foldl' :: forall b a.
+(b -&gt; a -&gt; b) -&gt; b -&gt; PlanePlaneIntersection plane a -&gt; b
+$cfoldr1 :: forall plane a.
+(a -&gt; a -&gt; a) -&gt; PlanePlaneIntersection plane a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; PlanePlaneIntersection plane a -&gt; a
+$cfoldl1 :: forall plane a.
+(a -&gt; a -&gt; a) -&gt; PlanePlaneIntersection plane a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; PlanePlaneIntersection plane a -&gt; a
+$ctoList :: forall plane a. PlanePlaneIntersection plane a -&gt; [a]
+toList :: forall a. PlanePlaneIntersection plane a -&gt; [a]
+$cnull :: forall plane a. PlanePlaneIntersection plane a -&gt; Bool
+null :: forall a. PlanePlaneIntersection plane a -&gt; Bool
+$clength :: forall plane a. PlanePlaneIntersection plane a -&gt; Int
+length :: forall a. PlanePlaneIntersection plane a -&gt; Int
+$celem :: forall plane a. Eq a =&gt; a -&gt; PlanePlaneIntersection plane a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; PlanePlaneIntersection plane a -&gt; Bool
+$cmaximum :: forall plane a. Ord a =&gt; PlanePlaneIntersection plane a -&gt; a
+maximum :: forall a. Ord a =&gt; PlanePlaneIntersection plane a -&gt; a
+$cminimum :: forall plane a. Ord a =&gt; PlanePlaneIntersection plane a -&gt; a
+minimum :: forall a. Ord a =&gt; PlanePlaneIntersection plane a -&gt; a
+$csum :: forall plane a. Num a =&gt; PlanePlaneIntersection plane a -&gt; a
+sum :: forall a. Num a =&gt; PlanePlaneIntersection plane a -&gt; a
+$cproduct :: forall plane a. Num a =&gt; PlanePlaneIntersection plane a -&gt; a
+product :: forall a. Num a =&gt; PlanePlaneIntersection plane a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679367387"><span id="local-6989586621679367393"><span id="local-6989586621679367399"><span id="local-6989586621679367404"><span class="annot"><span class="annottext">Functor (PlanePlaneIntersection plane)
+Foldable (PlanePlaneIntersection plane)
+(Functor (PlanePlaneIntersection plane),
+ Foldable (PlanePlaneIntersection plane)) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b)
+ -&gt; PlanePlaneIntersection plane a
+ -&gt; f (PlanePlaneIntersection plane b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    PlanePlaneIntersection plane (f a)
+    -&gt; f (PlanePlaneIntersection plane a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b)
+    -&gt; PlanePlaneIntersection plane a
+    -&gt; m (PlanePlaneIntersection plane b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    PlanePlaneIntersection plane (m a)
+    -&gt; m (PlanePlaneIntersection plane a))
+-&gt; Traversable (PlanePlaneIntersection plane)
+forall plane. Functor (PlanePlaneIntersection plane)
+forall plane. Foldable (PlanePlaneIntersection plane)
+forall plane (m :: * -&gt; *) a.
+Monad m =&gt;
+PlanePlaneIntersection plane (m a)
+-&gt; m (PlanePlaneIntersection plane a)
+forall plane (f :: * -&gt; *) a.
+Applicative f =&gt;
+PlanePlaneIntersection plane (f a)
+-&gt; f (PlanePlaneIntersection plane a)
+forall plane (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b)
+-&gt; PlanePlaneIntersection plane a
+-&gt; m (PlanePlaneIntersection plane b)
+forall plane (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b)
+-&gt; PlanePlaneIntersection plane a
+-&gt; f (PlanePlaneIntersection plane b)
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+PlanePlaneIntersection plane (m a)
+-&gt; m (PlanePlaneIntersection plane a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+PlanePlaneIntersection plane (f a)
+-&gt; f (PlanePlaneIntersection plane a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b)
+-&gt; PlanePlaneIntersection plane a
+-&gt; m (PlanePlaneIntersection plane b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b)
+-&gt; PlanePlaneIntersection plane a
+-&gt; f (PlanePlaneIntersection plane b)
+$ctraverse :: forall plane (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b)
+-&gt; PlanePlaneIntersection plane a
+-&gt; f (PlanePlaneIntersection plane b)
+traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b)
+-&gt; PlanePlaneIntersection plane a
+-&gt; f (PlanePlaneIntersection plane b)
+$csequenceA :: forall plane (f :: * -&gt; *) a.
+Applicative f =&gt;
+PlanePlaneIntersection plane (f a)
+-&gt; f (PlanePlaneIntersection plane a)
+sequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+PlanePlaneIntersection plane (f a)
+-&gt; f (PlanePlaneIntersection plane a)
+$cmapM :: forall plane (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b)
+-&gt; PlanePlaneIntersection plane a
+-&gt; m (PlanePlaneIntersection plane b)
+mapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b)
+-&gt; PlanePlaneIntersection plane a
+-&gt; m (PlanePlaneIntersection plane b)
+$csequence :: forall plane (m :: * -&gt; *) a.
+Monad m =&gt;
+PlanePlaneIntersection plane (m a)
+-&gt; m (PlanePlaneIntersection plane a)
+sequence :: forall (m :: * -&gt; *) a.
+Monad m =&gt;
+PlanePlaneIntersection plane (m a)
+-&gt; m (PlanePlaneIntersection plane a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679367415"><span id="local-6989586621679367419"><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#PlanePlaneIntersection"><span class="hs-identifier hs-type">PlanePlaneIntersection</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-48"></span><span>  </span><span id="local-6989586621679367422"><span class="annot"><span class="annottext">bimap :: forall a b c d.
+(a -&gt; b)
+-&gt; (c -&gt; d)
+-&gt; PlanePlaneIntersection a c
+-&gt; PlanePlaneIntersection b d
+</span><a href="#local-6989586621679367422"><span class="hs-identifier hs-var hs-var hs-var">bimap</span></a></span></span><span> </span><span id="local-6989586621679367424"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679367424"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679367425"><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679367425"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-49"></span><span>    </span><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#Plane_x_Plane_Line"><span class="hs-identifier hs-type">Plane_x_Plane_Line</span></a></span><span>  </span><span id="local-6989586621679367426"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679367426"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">d -&gt; PlanePlaneIntersection b d
+forall plane line. line -&gt; PlanePlaneIntersection plane line
+</span><a href="HGeometry.HyperPlane.Intersection.html#Plane_x_Plane_Line"><span class="hs-identifier hs-var">Plane_x_Plane_Line</span></a></span><span> </span><span class="annot"><span class="annottext">(d -&gt; PlanePlaneIntersection b d)
+-&gt; d -&gt; PlanePlaneIntersection b d
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679367425"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679367426"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-50"></span><span>    </span><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#Plane_x_Plane_Plane"><span class="hs-identifier hs-type">Plane_x_Plane_Plane</span></a></span><span> </span><span id="local-6989586621679367427"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679367427"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">b -&gt; PlanePlaneIntersection b d
+forall plane line. plane -&gt; PlanePlaneIntersection plane line
+</span><a href="HGeometry.HyperPlane.Intersection.html#Plane_x_Plane_Plane"><span class="hs-identifier hs-var">Plane_x_Plane_Plane</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; PlanePlaneIntersection b d)
+-&gt; b -&gt; PlanePlaneIntersection b d
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679367424"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679367427"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679367429"><span id="local-6989586621679367436"><span id="local-6989586621679367439"><span class="annot"><span class="hs-identifier hs-type">Bifoldable</span></span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#PlanePlaneIntersection"><span class="hs-identifier hs-type">PlanePlaneIntersection</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-53"></span><span>  </span><span id="local-6989586621679367443"><span class="annot"><span class="annottext">bifoldMap :: forall m a b.
+Monoid m =&gt;
+(a -&gt; m) -&gt; (b -&gt; m) -&gt; PlanePlaneIntersection a b -&gt; m
+</span><a href="#local-6989586621679367443"><span class="hs-identifier hs-var hs-var hs-var">bifoldMap</span></a></span></span><span> </span><span id="local-6989586621679367445"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679367445"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679367446"><span class="annot"><span class="annottext">b -&gt; m
+</span><a href="#local-6989586621679367446"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-54"></span><span>    </span><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#Plane_x_Plane_Line"><span class="hs-identifier hs-type">Plane_x_Plane_Line</span></a></span><span>  </span><span id="local-6989586621679367447"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679367447"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">b -&gt; m
+</span><a href="#local-6989586621679367446"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679367447"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-55"></span><span>    </span><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#Plane_x_Plane_Plane"><span class="hs-identifier hs-type">Plane_x_Plane_Plane</span></a></span><span> </span><span id="local-6989586621679367448"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679367448"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679367445"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679367448"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bitraversable</span></span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#PlanePlaneIntersection"><span class="hs-identifier hs-type">PlanePlaneIntersection</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-58"></span><span>  </span><span id="local-6989586621679367460"><span class="annot"><span class="annottext">bitraverse :: forall (f :: * -&gt; *) a c b d.
+Applicative f =&gt;
+(a -&gt; f c)
+-&gt; (b -&gt; f d)
+-&gt; PlanePlaneIntersection a b
+-&gt; f (PlanePlaneIntersection c d)
+</span><a href="#local-6989586621679367460"><span class="hs-identifier hs-var hs-var hs-var">bitraverse</span></a></span></span><span> </span><span id="local-6989586621679367462"><span class="annot"><span class="annottext">a -&gt; f c
+</span><a href="#local-6989586621679367462"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679367463"><span class="annot"><span class="annottext">b -&gt; f d
+</span><a href="#local-6989586621679367463"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-59"></span><span>    </span><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#Plane_x_Plane_Line"><span class="hs-identifier hs-type">Plane_x_Plane_Line</span></a></span><span>  </span><span id="local-6989586621679367464"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679367464"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">d -&gt; PlanePlaneIntersection c d
+forall plane line. line -&gt; PlanePlaneIntersection plane line
+</span><a href="HGeometry.HyperPlane.Intersection.html#Plane_x_Plane_Line"><span class="hs-identifier hs-var">Plane_x_Plane_Line</span></a></span><span> </span><span class="annot"><span class="annottext">(d -&gt; PlanePlaneIntersection c d)
+-&gt; f d -&gt; f (PlanePlaneIntersection c d)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; f d
+</span><a href="#local-6989586621679367463"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679367464"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-60"></span><span>    </span><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#Plane_x_Plane_Plane"><span class="hs-identifier hs-type">Plane_x_Plane_Plane</span></a></span><span> </span><span id="local-6989586621679367466"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679367466"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">c -&gt; PlanePlaneIntersection c d
+forall plane line. plane -&gt; PlanePlaneIntersection plane line
+</span><a href="HGeometry.HyperPlane.Intersection.html#Plane_x_Plane_Plane"><span class="hs-identifier hs-var">Plane_x_Plane_Plane</span></a></span><span> </span><span class="annot"><span class="annottext">(c -&gt; PlanePlaneIntersection c d)
+-&gt; f c -&gt; f (PlanePlaneIntersection c d)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f c
+</span><a href="#local-6989586621679367462"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679367466"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679367135"><span id="local-6989586621679367136"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Has_</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Metric_</span></span><span> </span><span class="annot"><a href="#local-6989586621679367135"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679367136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679367136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;=</span></span><span> </span><span class="annot"><a href="#local-6989586621679367135"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679367135"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679367135"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">+</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="hs-comment">-- this constraint is rather silly</span><span>
+</span><span id="line-63"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Has_</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Metric_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">1</span></span><span class="annot"><span class="hs-operator hs-type">+</span></span><span class="annot"><a href="#local-6989586621679367135"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679367136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">+</span></span><span> </span><span class="annot"><a href="#local-6989586621679367135"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679367136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#HasIntersectionWith"><span class="hs-identifier hs-type">HasIntersectionWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.Internal.html#HyperPlane"><span class="hs-identifier hs-type">HyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367135"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.Internal.html#HyperPlane"><span class="hs-identifier hs-type">HyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367135"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367136"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-65"></span><span>  </span><span id="local-6989586621679367502"><span class="annot"><span class="annottext">HyperPlane d r
+</span><a href="#local-6989586621679367502"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span id="local-6989586621679367503"><span class="annot"><span class="annottext">intersects :: HyperPlane d r -&gt; HyperPlane d r -&gt; Bool
+</span><a href="#local-6989586621679367503"><span class="hs-operator hs-var hs-var hs-var">`intersects`</span></a></span></span><span> </span><span id="local-6989586621679367505"><span class="annot"><span class="annottext">HyperPlane d r
+</span><a href="#local-6989586621679367505"><span class="hs-identifier hs-var">h'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HyperPlane d r
+</span><a href="#local-6989586621679367502"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">HyperPlane d r -&gt; HyperPlane d r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">HyperPlane d r
+</span><a href="#local-6989586621679367505"><span class="hs-identifier hs-var">h'</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HyperPlane d r
+</span><a href="#local-6989586621679367502"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">HyperPlane d r -&gt; HyperPlane d r -&gt; Bool
+forall hyperPlane (d :: Nat) r hyperPlane'.
+(HyperPlane_ hyperPlane d r, HyperPlane_ hyperPlane' d r,
+ Has_ Metric_ d r, Num r, Eq r, 1 &lt;= d) =&gt;
+hyperPlane -&gt; hyperPlane' -&gt; Bool
+</span><a href="HGeometry.HyperPlane.Class.html#isParallelTo"><span class="hs-operator hs-var">`isParallelTo`</span></a></span><span> </span><span class="annot"><span class="annottext">HyperPlane d r
+</span><a href="#local-6989586621679367505"><span class="hs-identifier hs-var">h'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679367169"><span id="local-6989586621679367170"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Has_</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Metric_</span></span><span> </span><span class="annot"><a href="#local-6989586621679367169"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367170"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679367170"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679367170"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;=</span></span><span> </span><span class="annot"><a href="#local-6989586621679367169"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679367169"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;</span></span><span> </span><span class="annot"><a href="#local-6989586621679367169"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">+</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span>
+</span><span id="line-68"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Has_</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Metric_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-number">1</span></span><span class="annot"><span class="hs-operator hs-type">+</span></span><span class="annot"><a href="#local-6989586621679367169"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679367170"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Has_</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Additive_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679367169"><span class="hs-identifier hs-type">d</span></a></span><span class="annot"><span class="hs-glyph hs-type">-</span></span><span class="annot"><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679367170"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679367169"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367170"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#HasIntersectionWith"><span class="hs-identifier hs-type">HasIntersectionWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html#NonVerticalHyperPlane"><span class="hs-identifier hs-type">NonVerticalHyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367169"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367170"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html#NonVerticalHyperPlane"><span class="hs-identifier hs-type">NonVerticalHyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367169"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367170"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-70"></span><span>  </span><span id="local-6989586621679367543"><span class="annot"><span class="annottext">NonVerticalHyperPlane d r
+</span><a href="#local-6989586621679367543"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span id="local-6989586621679367544"><span class="annot"><span class="annottext">intersects :: NonVerticalHyperPlane d r -&gt; NonVerticalHyperPlane d r -&gt; Bool
+</span><a href="HGeometry.Intersection.html#intersects"><span class="hs-operator hs-var hs-var hs-var">`intersects`</span></a></span></span><span> </span><span id="local-6989586621679367545"><span class="annot"><span class="annottext">NonVerticalHyperPlane d r
+</span><a href="#local-6989586621679367545"><span class="hs-identifier hs-var">h'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonVerticalHyperPlane d r
+</span><a href="#local-6989586621679367543"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">NonVerticalHyperPlane d r -&gt; NonVerticalHyperPlane d r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">NonVerticalHyperPlane d r
+</span><a href="#local-6989586621679367545"><span class="hs-identifier hs-var">h'</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span>  </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonVerticalHyperPlane d r
+</span><a href="#local-6989586621679367543"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">NonVerticalHyperPlane d r -&gt; NonVerticalHyperPlane d r -&gt; Bool
+forall hyperPlane (d :: Nat) r hyperPlane'.
+(HyperPlane_ hyperPlane d r, HyperPlane_ hyperPlane' d r,
+ Has_ Metric_ d r, Num r, Eq r, 1 &lt;= d) =&gt;
+hyperPlane -&gt; hyperPlane' -&gt; Bool
+</span><a href="HGeometry.HyperPlane.Class.html#isParallelTo"><span class="hs-operator hs-var">`isParallelTo`</span></a></span><span> </span><span class="annot"><span class="annottext">NonVerticalHyperPlane d r
+</span><a href="#local-6989586621679367545"><span class="hs-identifier hs-var">h'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-71"></span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679367186"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679367186"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679367186"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span>         </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#IsIntersectableWith"><span class="hs-identifier hs-type">IsIntersectableWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html#Plane"><span class="hs-identifier hs-type">Plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367186"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html#Plane"><span class="hs-identifier hs-type">Plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367186"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-75"></span><span>  </span><span id="local-6989586621679367587"><span class="annot"><span class="annottext">intersect :: Plane r -&gt; Plane r -&gt; Intersection (Plane r) (Plane r)
+</span><a href="#local-6989586621679367587"><span class="hs-identifier hs-var hs-var hs-var">intersect</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Plane r
+-&gt; Plane r
+-&gt; Maybe (PlanePlaneIntersection (Plane r) (VerticalOrLineEQ r))
+Plane r -&gt; Plane r -&gt; Intersection (Plane r) (Plane r)
+forall plane r.
+(Plane_ plane r, Fractional r, Eq r) =&gt;
+plane
+-&gt; plane
+-&gt; Maybe (PlanePlaneIntersection plane (VerticalOrLineEQ r))
+</span><a href="HGeometry.HyperPlane.Intersection.html#planePlaneIntersection"><span class="hs-identifier hs-var">planePlaneIntersection</span></a></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="annot"><span class="hs-comment">-- | Given two planes, computes the line in which they intersect.</span></span><span>
+</span><span id="line-79"></span><span id="local-6989586621679367195"><span id="local-6989586621679367196"><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#planePlaneIntersection"><span class="hs-identifier hs-type">planePlaneIntersection</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html#Plane_"><span class="hs-identifier hs-type">Plane_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367195"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367196"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679367196"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679367196"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-80"></span><span>                       </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679367195"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679367195"><span class="hs-identifier hs-type">plane</span></a></span><span>
+</span><span id="line-81"></span><span>                       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.Intersection.html#PlanePlaneIntersection"><span class="hs-identifier hs-type">PlanePlaneIntersection</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367195"><span class="hs-identifier hs-type">plane</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.General.html#VerticalOrLineEQ"><span class="hs-identifier hs-type">VerticalOrLineEQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367196"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-82"></span><span id="planePlaneIntersection"><span class="annot"><span class="annottext">planePlaneIntersection :: forall plane r.
+(Plane_ plane r, Fractional r, Eq r) =&gt;
+plane
+-&gt; plane
+-&gt; Maybe (PlanePlaneIntersection plane (VerticalOrLineEQ r))
+</span><a href="HGeometry.HyperPlane.Intersection.html#planePlaneIntersection"><span class="hs-identifier hs-var hs-var">planePlaneIntersection</span></a></span></span><span> </span><span id="local-6989586621679367606"><span class="annot"><span class="annottext">h :: plane
+</span><a href="#local-6989586621679367606"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html#Plane_"><span class="hs-identifier hs-type">Plane_</span></a></span><span> </span><span id="local-6989586621679367608"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367608"><span class="hs-identifier hs-var">a1</span></a></span></span><span> </span><span id="local-6989586621679367609"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367609"><span class="hs-identifier hs-var">b1</span></a></span></span><span> </span><span id="local-6989586621679367610"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367610"><span class="hs-identifier hs-var">c1</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.NonVertical.html#Plane_"><span class="hs-identifier hs-type">Plane_</span></a></span><span> </span><span id="local-6989586621679367611"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367611"><span class="hs-identifier hs-var">a2</span></a></span></span><span> </span><span id="local-6989586621679367612"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367612"><span class="hs-identifier hs-var">b2</span></a></span></span><span> </span><span id="local-6989586621679367613"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367613"><span class="hs-identifier hs-var">c2</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-83"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367609"><span class="hs-identifier hs-var">b1</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367612"><span class="hs-identifier hs-var">b2</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanePlaneIntersection plane (VerticalOrLineEQ r)
+-&gt; Maybe (PlanePlaneIntersection plane (VerticalOrLineEQ r))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(PlanePlaneIntersection plane (VerticalOrLineEQ r)
+ -&gt; Maybe (PlanePlaneIntersection plane (VerticalOrLineEQ r)))
+-&gt; (LineEQ r -&gt; PlanePlaneIntersection plane (VerticalOrLineEQ r))
+-&gt; LineEQ r
+-&gt; Maybe (PlanePlaneIntersection plane (VerticalOrLineEQ r))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">VerticalOrLineEQ r
+-&gt; PlanePlaneIntersection plane (VerticalOrLineEQ r)
+forall plane line. line -&gt; PlanePlaneIntersection plane line
+</span><a href="HGeometry.HyperPlane.Intersection.html#Plane_x_Plane_Line"><span class="hs-identifier hs-var">Plane_x_Plane_Line</span></a></span><span> </span><span class="annot"><span class="annottext">(VerticalOrLineEQ r
+ -&gt; PlanePlaneIntersection plane (VerticalOrLineEQ r))
+-&gt; (LineEQ r -&gt; VerticalOrLineEQ r)
+-&gt; LineEQ r
+-&gt; PlanePlaneIntersection plane (VerticalOrLineEQ r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">LineEQ r -&gt; VerticalOrLineEQ r
+forall r. LineEQ r -&gt; VerticalOrLineEQ r
+</span><a href="HGeometry.Line.General.html#NonVertical"><span class="hs-identifier hs-var">NonVertical</span></a></span><span>
+</span><span id="line-84"></span><span>                </span><span class="annot"><span class="annottext">(LineEQ r
+ -&gt; Maybe (PlanePlaneIntersection plane (VerticalOrLineEQ r)))
+-&gt; LineEQ r
+-&gt; Maybe (PlanePlaneIntersection plane (VerticalOrLineEQ r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; LineEQ r
+forall r. r -&gt; r -&gt; LineEQ r
+</span><a href="HGeometry.Line.LineEQ.html#LineEQ"><span class="hs-identifier hs-var">LineEQ</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367611"><span class="hs-identifier hs-var">a2</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367608"><span class="hs-identifier hs-var">a1</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367619"><span class="hs-identifier hs-var">diffB</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367613"><span class="hs-identifier hs-var">c2</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367610"><span class="hs-identifier hs-var">c1</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367619"><span class="hs-identifier hs-var">diffB</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>                  </span><span class="hs-comment">-- the two planes intersect in some normal line</span><span>
+</span><span id="line-86"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367608"><span class="hs-identifier hs-var">a1</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367611"><span class="hs-identifier hs-var">a2</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanePlaneIntersection plane (VerticalOrLineEQ r)
+-&gt; Maybe (PlanePlaneIntersection plane (VerticalOrLineEQ r))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(PlanePlaneIntersection plane (VerticalOrLineEQ r)
+ -&gt; Maybe (PlanePlaneIntersection plane (VerticalOrLineEQ r)))
+-&gt; (VerticalOrLineEQ r
+    -&gt; PlanePlaneIntersection plane (VerticalOrLineEQ r))
+-&gt; VerticalOrLineEQ r
+-&gt; Maybe (PlanePlaneIntersection plane (VerticalOrLineEQ r))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">VerticalOrLineEQ r
+-&gt; PlanePlaneIntersection plane (VerticalOrLineEQ r)
+forall plane line. line -&gt; PlanePlaneIntersection plane line
+</span><a href="HGeometry.HyperPlane.Intersection.html#Plane_x_Plane_Line"><span class="hs-identifier hs-var">Plane_x_Plane_Line</span></a></span><span>
+</span><span id="line-87"></span><span>                </span><span class="annot"><span class="annottext">(VerticalOrLineEQ r
+ -&gt; Maybe (PlanePlaneIntersection plane (VerticalOrLineEQ r)))
+-&gt; VerticalOrLineEQ r
+-&gt; Maybe (PlanePlaneIntersection plane (VerticalOrLineEQ r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; VerticalOrLineEQ r
+forall r. r -&gt; VerticalOrLineEQ r
+</span><a href="HGeometry.Line.General.html#VerticalLineThrough"><span class="hs-identifier hs-var">VerticalLineThrough</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367613"><span class="hs-identifier hs-var">c2</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367610"><span class="hs-identifier hs-var">c1</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Fractional a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">/</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367608"><span class="hs-identifier hs-var">a1</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367611"><span class="hs-identifier hs-var">a2</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span>                  </span><span class="hs-comment">-- the planes intersect in a vertical line</span><span>
+</span><span id="line-89"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367610"><span class="hs-identifier hs-var">c1</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367613"><span class="hs-identifier hs-var">c2</span></a></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">PlanePlaneIntersection plane (VerticalOrLineEQ r)
+-&gt; Maybe (PlanePlaneIntersection plane (VerticalOrLineEQ r))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(PlanePlaneIntersection plane (VerticalOrLineEQ r)
+ -&gt; Maybe (PlanePlaneIntersection plane (VerticalOrLineEQ r)))
+-&gt; PlanePlaneIntersection plane (VerticalOrLineEQ r)
+-&gt; Maybe (PlanePlaneIntersection plane (VerticalOrLineEQ r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">plane -&gt; PlanePlaneIntersection plane (VerticalOrLineEQ r)
+forall plane line. plane -&gt; PlanePlaneIntersection plane line
+</span><a href="HGeometry.HyperPlane.Intersection.html#Plane_x_Plane_Plane"><span class="hs-identifier hs-var">Plane_x_Plane_Plane</span></a></span><span> </span><span class="annot"><span class="annottext">plane
+</span><a href="#local-6989586621679367606"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-90"></span><span>                  </span><span class="hs-comment">-- all others are the same</span><span>
+</span><span id="line-91"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (PlanePlaneIntersection plane (VerticalOrLineEQ r))
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-92"></span><span>                  </span><span class="hs-comment">-- the planes don't intersect at all</span><span>
+</span><span id="line-93"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-94"></span><span>    </span><span id="local-6989586621679367619"><span class="annot"><span class="annottext">diffB :: r
+</span><a href="#local-6989586621679367619"><span class="hs-identifier hs-var hs-var">diffB</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367609"><span class="hs-identifier hs-var">b1</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679367612"><span class="hs-identifier hs-var">b2</span></a></span><span>
+</span><span id="line-95"></span></pre></body></html>

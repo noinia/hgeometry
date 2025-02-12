@@ -1,0 +1,929 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE DefaultSignatures #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  HGeometry.Polygon.Simple.InPolygon</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Testing if a point lies in a polygon</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html"><span class="hs-identifier">HGeometry.Polygon.Simple.InPolygon</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#HasInPolygon"><span class="hs-identifier">HasInPolygon</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#inSimplePolygon"><span class="hs-identifier">inSimplePolygon</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-comment">-- , insidePolygon</span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-comment">-- , onBoundary</span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#containedIn"><span class="hs-identifier">containedIn</span></a></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-comment">-- , AboveCount(..)</span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Boundary</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Intersection</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Interval</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.LineSegment</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Class.html"><span class="hs-identifier">HGeometry.Polygon.Class</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html"><span class="hs-identifier">HGeometry.Polygon.Simple.Class</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="annot"><span class="hs-comment">{- $setup
+&gt;&gt;&gt; import HGeometry.Polygon.Simple
+&gt;&gt;&gt; import qualified Data.List.NonEmpty as NonEmpty
+&gt;&gt;&gt; :{
+let simplePoly :: SimplePolygon (Point 2 Int)
+    simplePoly = uncheckedFromCCWPoints . NonEmpty.fromList $
+                 [ Point2 0 0
+                 , Point2 10 0
+                 , Point2 10 10
+                 , Point2 5 15
+                 , Point2 1 11
+                 ]
+:}
+-}</span></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- simpleTriangle :: SimplePolygon (Point 2 Int)</span><span>
+</span><span id="line-49"></span><span class="hs-comment">-- simpleTriangle = uncheckedFromCCWPoints . NonEmpty.fromList $ [ Point2 0 0, Point2 2 0, Point2 1 1]</span><span>
+</span><span id="line-50"></span><span class="hs-comment">-- test = Point2 1 1 `inPolygon` simplePoly</span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="hs-keyword">data</span><span> </span><span id="AboveCount"><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#AboveCount"><span class="hs-identifier hs-var">AboveCount</span></a></span></span><span> </span><span id="local-6989586621679265144"><span class="annot"><a href="#local-6989586621679265144"><span class="hs-identifier hs-type">seg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="OnEdge"><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#OnEdge"><span class="hs-identifier hs-var">OnEdge</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679265144"><span class="hs-identifier hs-type">seg</span></a></span><span>
+</span><span id="line-53"></span><span>                    </span><span class="hs-glyph">|</span><span> </span><span id="NumStrictlyAbove"><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#NumStrictlyAbove"><span class="hs-identifier hs-var">NumStrictlyAbove</span></a></span></span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span>
+</span><span id="line-54"></span><span>                    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679265371"><span id="local-6989586621679265379"><span id="local-6989586621679265383"><span class="annot"><span class="annottext">Int -&gt; AboveCount seg -&gt; ShowS
+[AboveCount seg] -&gt; ShowS
+AboveCount seg -&gt; String
+(Int -&gt; AboveCount seg -&gt; ShowS)
+-&gt; (AboveCount seg -&gt; String)
+-&gt; ([AboveCount seg] -&gt; ShowS)
+-&gt; Show (AboveCount seg)
+forall seg. Show seg =&gt; Int -&gt; AboveCount seg -&gt; ShowS
+forall seg. Show seg =&gt; [AboveCount seg] -&gt; ShowS
+forall seg. Show seg =&gt; AboveCount seg -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: forall seg. Show seg =&gt; Int -&gt; AboveCount seg -&gt; ShowS
+showsPrec :: Int -&gt; AboveCount seg -&gt; ShowS
+$cshow :: forall seg. Show seg =&gt; AboveCount seg -&gt; String
+show :: AboveCount seg -&gt; String
+$cshowList :: forall seg. Show seg =&gt; [AboveCount seg] -&gt; ShowS
+showList :: [AboveCount seg] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679265389"><span id="local-6989586621679265397"><span class="annot"><span class="annottext">AboveCount seg -&gt; AboveCount seg -&gt; Bool
+(AboveCount seg -&gt; AboveCount seg -&gt; Bool)
+-&gt; (AboveCount seg -&gt; AboveCount seg -&gt; Bool)
+-&gt; Eq (AboveCount seg)
+forall seg. Eq seg =&gt; AboveCount seg -&gt; AboveCount seg -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: forall seg. Eq seg =&gt; AboveCount seg -&gt; AboveCount seg -&gt; Bool
+== :: AboveCount seg -&gt; AboveCount seg -&gt; Bool
+$c/= :: forall seg. Eq seg =&gt; AboveCount seg -&gt; AboveCount seg -&gt; Bool
+/= :: AboveCount seg -&gt; AboveCount seg -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679265143"><span id="local-6989586621679265403"><span id="local-6989586621679265407"><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#AboveCount"><span class="hs-identifier hs-type">AboveCount</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265143"><span class="hs-identifier hs-type">seg</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-57"></span><span>  </span><span id="local-6989586621679265414"><span class="annot"><span class="annottext">l :: AboveCount seg
+</span><a href="#local-6989586621679265414"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#OnEdge"><span class="hs-identifier hs-type">OnEdge</span></a></span><span> </span><span class="annot"><span class="annottext">seg
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>         </span><span id="local-6989586621679265415"><span class="annot"><span class="annottext">&lt;&gt; :: AboveCount seg -&gt; AboveCount seg -&gt; AboveCount seg
+</span><span class="hs-operator hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="annot"><span class="annottext">AboveCount seg
+</span><span class="hs-identifier">_</span></span><span>                    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AboveCount seg
+</span><a href="#local-6989586621679265414"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="hs-comment">-- ^ prefers the first segment</span><span>
+</span><span id="line-58"></span><span>  </span><span class="annot"><span class="annottext">AboveCount seg
+</span><span class="hs-identifier">_</span></span><span>                    </span><span class="annot"><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span id="local-6989586621679265416"><span class="annot"><span class="annottext">r :: AboveCount seg
+</span><a href="#local-6989586621679265416"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#OnEdge"><span class="hs-identifier hs-type">OnEdge</span></a></span><span> </span><span class="annot"><span class="annottext">seg
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">AboveCount seg
+</span><a href="#local-6989586621679265416"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-comment">-- ^ already found a boundary</span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#NumStrictlyAbove"><span class="hs-identifier hs-type">NumStrictlyAbove</span></a></span><span> </span><span id="local-6989586621679265417"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679265417"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#NumStrictlyAbove"><span class="hs-identifier hs-type">NumStrictlyAbove</span></a></span><span> </span><span id="local-6989586621679265418"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679265418"><span class="hs-identifier hs-var">r</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; AboveCount seg
+forall seg. Int -&gt; AboveCount seg
+</span><a href="HGeometry.Polygon.Simple.InPolygon.html#NumStrictlyAbove"><span class="hs-identifier hs-var">NumStrictlyAbove</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679265417"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679265418"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679265148"><span id="local-6989586621679265424"><span id="local-6989586621679265428"><span class="annot"><span class="hs-identifier hs-type">Monoid</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#AboveCount"><span class="hs-identifier hs-type">AboveCount</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265148"><span class="hs-identifier hs-type">seg</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-62"></span><span>  </span><span id="local-6989586621679265431"><span class="annot"><span class="annottext">mempty :: AboveCount seg
+</span><span class="hs-identifier hs-var hs-var hs-var">mempty</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; AboveCount seg
+forall seg. Int -&gt; AboveCount seg
+</span><a href="HGeometry.Polygon.Simple.InPolygon.html#NumStrictlyAbove"><span class="hs-identifier hs-var">NumStrictlyAbove</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="annot"><span class="hs-comment">-- | Types that implement a point-in-polygon test.</span></span><span>
+</span><span id="line-65"></span><span class="hs-keyword">class</span><span> </span><span id="HasInPolygon"><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#HasInPolygon"><span class="hs-identifier hs-var">HasInPolygon</span></a></span></span><span> </span><span id="local-6989586621679265153"><span class="annot"><a href="#local-6989586621679265153"><span class="hs-identifier hs-type">polygon</span></a></span></span><span> </span><span id="local-6989586621679265150"><span class="annot"><a href="#local-6989586621679265150"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span id="local-6989586621679265149"><span class="annot"><a href="#local-6989586621679265149"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="#local-6989586621679265153"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265150"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679265150"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265149"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-66"></span><span>  </span><span class="hs-comment">-- | Check if a point lies inside a polygon, on the boundary, or outside of the</span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-comment">-- polygon. If the point lies on the boundary we also return an edge e containing the</span><span>
+</span><span id="line-68"></span><span>  </span><span class="hs-comment">-- point (identified by the vertex v so that e follows v in the CCW order along the</span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-comment">-- boundary). No guarantees are given about which edge is returned if the query point</span><span>
+</span><span id="line-70"></span><span>  </span><span class="hs-comment">-- lies on multiple edges (i.e. when it coincides with a vertex.)</span><span>
+</span><span id="line-71"></span><span>  </span><span id="inPolygon"><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#inPolygon"><span class="hs-identifier hs-type">inPolygon</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679265322"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679265149"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679265149"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679265322"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679265149"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>            </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265322"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265153"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PointLocationResultWith</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265153"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-keyword">default</span><span> </span><span id="inPolygon"><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#inPolygon"><span class="hs-identifier hs-type">inPolygon</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679265152"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679265149"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679265149"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679265150"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679265149"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679265152"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679265149"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-74"></span><span>                       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#SimplePolygon_"><span class="hs-identifier hs-type">SimplePolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265153"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265150"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265149"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-75"></span><span>                       </span><span class="hs-special">)</span><span>
+</span><span id="line-76"></span><span>                    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265152"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265153"><span class="hs-identifier hs-type">polygon</span></a></span><span>
+</span><span id="line-77"></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PointLocationResultWith</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265153"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-78"></span><span>  </span><span id="local-6989586621679265434"><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#inPolygon"><span class="hs-identifier hs-var hs-var">inPolygon</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">queryPoint -&gt; polygon -&gt; PointLocationResultWith (VertexIx polygon)
+forall queryPoint simplePolygon point r.
+(Num r, Ord r, Point_ point 2 r, Point_ queryPoint 2 r,
+ SimplePolygon_ simplePolygon point r) =&gt;
+queryPoint
+-&gt; simplePolygon
+-&gt; PointLocationResultWith (VertexIx simplePolygon)
+</span><a href="HGeometry.Polygon.Simple.InPolygon.html#inSimplePolygon"><span class="hs-identifier hs-var">inSimplePolygon</span></a></span></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- rename the thing below to InSimplePolygon?</span><span>
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- | Check if a point lies inside a polygon, on the boundary, or</span><span>
+</span><span id="line-83"></span><span class="hs-comment">-- outside of the polygon. If the point lies on the boundary we also</span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- return an edge e containing the point (identified by the vertex v</span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- so that e follows v in the CCW order along the boundary). No</span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- guarantees are given about which edge is returned if the query</span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- point lies on multiple edges (i.e. when it coincides with a</span><span>
+</span><span id="line-88"></span><span class="hs-comment">-- vertex.)</span><span>
+</span><span id="line-89"></span><span class="hs-comment">--</span><span>
+</span><span id="line-90"></span><span class="hs-comment">--</span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- Running time: O(n).</span><span>
+</span><span id="line-92"></span><span class="hs-comment">--</span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 1 1 `inPolygon` simplePoly</span><span>
+</span><span id="line-94"></span><span class="hs-comment">-- StrictlyInside</span><span>
+</span><span id="line-95"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 0 0 `inPolygon` simplePoly</span><span>
+</span><span id="line-96"></span><span class="hs-comment">-- OnBoundaryEdge 0</span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 10 0 `inPolygon` simplePoly</span><span>
+</span><span id="line-98"></span><span class="hs-comment">-- OnBoundaryEdge 1</span><span>
+</span><span id="line-99"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 5 13 `inPolygon` simplePoly</span><span>
+</span><span id="line-100"></span><span class="hs-comment">-- StrictlyInside</span><span>
+</span><span id="line-101"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 5 10 `inPolygon` simplePoly</span><span>
+</span><span id="line-102"></span><span class="hs-comment">-- StrictlyInside</span><span>
+</span><span id="line-103"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 10 5 `inPolygon` simplePoly</span><span>
+</span><span id="line-104"></span><span class="hs-comment">-- OnBoundaryEdge 1</span><span>
+</span><span id="line-105"></span><span class="hs-comment">-- &gt;&gt;&gt; Point2 20 5 `inPolygon` simplePoly</span><span>
+</span><span id="line-106"></span><span class="hs-comment">-- StrictlyOutside</span><span>
+</span><span id="line-107"></span><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#inSimplePolygon"><span class="hs-identifier hs-type">inSimplePolygon</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679265229"><span class="annot"><a href="#local-6989586621679265229"><span class="hs-identifier hs-type">queryPoint</span></a></span></span><span> </span><span id="local-6989586621679265230"><span class="annot"><a href="#local-6989586621679265230"><span class="hs-identifier hs-type">simplePolygon</span></a></span></span><span> </span><span id="local-6989586621679265228"><span class="annot"><a href="#local-6989586621679265228"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span id="local-6989586621679265227"><span class="annot"><a href="#local-6989586621679265227"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-108"></span><span>                          </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679265227"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679265227"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679265228"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679265227"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679265229"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679265227"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-109"></span><span>                          </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#SimplePolygon_"><span class="hs-identifier hs-type">SimplePolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265230"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265228"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265227"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-110"></span><span>                          </span><span class="hs-special">)</span><span>
+</span><span id="line-111"></span><span>                       </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265229"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265230"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span>
+</span><span id="line-112"></span><span>                       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PointLocationResultWith</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265230"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-113"></span><span id="local-6989586621679266999"><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679266999"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="inSimplePolygon"><span class="annot"><span class="annottext">inSimplePolygon :: forall queryPoint simplePolygon point r.
+(Num r, Ord r, Point_ point 2 r, Point_ queryPoint 2 r,
+ SimplePolygon_ simplePolygon point r) =&gt;
+queryPoint
+-&gt; simplePolygon
+-&gt; PointLocationResultWith (VertexIx simplePolygon)
+</span><a href="HGeometry.Polygon.Simple.InPolygon.html#inSimplePolygon"><span class="hs-operator hs-var hs-var">`inSimplePolygon`</span></a></span></span><span> </span><span id="local-6989586621679267000"><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679267000"><span class="hs-identifier hs-var">pg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">IndexedGetting
+  (Int, (Int, Int))
+  (AboveCount Int)
+  simplePolygon
+  (point, (point, point))
+-&gt; ((Int, (Int, Int)) -&gt; (point, (point, point)) -&gt; AboveCount Int)
+-&gt; simplePolygon
+-&gt; AboveCount Int
+forall i m s a. IndexedGetting i m s a -&gt; (i -&gt; a -&gt; m) -&gt; s -&gt; m
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#ifoldMapOf"><span class="hs-identifier hs-var">ifoldMapOf</span></a></span><span> </span><span class="annot"><span class="annottext">IndexedGetting
+  (Int, (Int, Int))
+  (AboveCount Int)
+  simplePolygon
+  (point, (point, point))
+Indexed
+  (Int, (Int, Int))
+  (Vertex simplePolygon,
+   (Vertex simplePolygon, Vertex simplePolygon))
+  (Const
+     (AboveCount Int)
+     (Vertex simplePolygon,
+      (Vertex simplePolygon, Vertex simplePolygon)))
+-&gt; simplePolygon -&gt; Const (AboveCount Int) simplePolygon
+forall polygon.
+(HasOuterBoundary polygon, VertexIx polygon ~ Int) =&gt;
+IndexedFold1
+  (VertexIx polygon, (VertexIx polygon, VertexIx polygon))
+  polygon
+  (Vertex polygon, (Vertex polygon, Vertex polygon))
+IndexedFold1
+  (VertexIx simplePolygon,
+   (VertexIx simplePolygon, VertexIx simplePolygon))
+  simplePolygon
+  (Vertex simplePolygon,
+   (Vertex simplePolygon, Vertex simplePolygon))
+</span><a href="HGeometry.Polygon.Class.html#outerBoundaryWithNeighbours"><span class="hs-identifier hs-var">outerBoundaryWithNeighbours</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, (Int, Int)) -&gt; (point, (point, point)) -&gt; AboveCount Int
+</span><a href="#local-6989586621679267003"><span class="hs-identifier hs-var">countAbove</span></a></span><span> </span><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679267000"><span class="hs-identifier hs-var">pg</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-114"></span><span>                            </span><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#OnEdge"><span class="hs-identifier hs-type">OnEdge</span></a></span><span> </span><span id="local-6989586621679267004"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267004"><span class="hs-identifier hs-var">s</span></a></span></span><span>                       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; PointLocationResultWith Int
+forall edge. edge -&gt; PointLocationResultWith edge
+</span><span class="hs-identifier hs-var">OnBoundaryEdge</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267004"><span class="hs-identifier hs-var">s</span></a></span><span>
+</span><span id="line-115"></span><span>                            </span><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#NumStrictlyAbove"><span class="hs-identifier hs-type">NumStrictlyAbove</span></a></span><span> </span><span id="local-6989586621679267006"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267006"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Bool
+forall a. Integral a =&gt; a -&gt; Bool
+</span><span class="hs-identifier hs-var">odd</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267006"><span class="hs-identifier hs-var">m</span></a></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PointLocationResultWith Int
+PointLocationResultWith (VertexIx simplePolygon)
+forall edge. PointLocationResultWith edge
+</span><span class="hs-identifier hs-var">StrictlyInside</span></span><span>
+</span><span id="line-116"></span><span>                                               </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PointLocationResultWith Int
+PointLocationResultWith (VertexIx simplePolygon)
+forall edge. PointLocationResultWith edge
+</span><span class="hs-identifier hs-var">StrictlyOutside</span></span><span>
+</span><span id="line-117"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-118"></span><span>    </span><span class="hs-comment">-- we count the number of by the vertical upward ray from q intersects the boundary of</span><span>
+</span><span id="line-119"></span><span>    </span><span class="hs-comment">-- the polygon. If the number of times we intersect the boundary is odd we are inside,</span><span>
+</span><span id="line-120"></span><span>    </span><span class="hs-comment">-- and outside othwerise.</span><span>
+</span><span id="line-121"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-122"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-123"></span><span>    </span><span class="hs-comment">-- Generally, countAbove will compute the contribution of the edge uv (which is edge i).</span><span>
+</span><span id="line-124"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-125"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-126"></span><span>    </span><span class="hs-comment">-- we have to take special care of vertical edges, and when the ray goes through a</span><span>
+</span><span id="line-127"></span><span>    </span><span class="hs-comment">-- vertex u.</span><span>
+</span><span id="line-128"></span><span>    </span><span id="local-6989586621679267003"><span class="annot"><span class="annottext">countAbove :: (Int, (Int, Int)) -&gt; (point, (point, point)) -&gt; AboveCount Int
+</span><a href="#local-6989586621679267003"><span class="hs-identifier hs-var hs-var">countAbove</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679267010"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267010"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">(Int, Int)
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679267011"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267011"><span class="hs-identifier hs-var">u</span></a></span></span><span class="hs-special">,</span><span class="hs-special">(</span><span id="local-6989586621679267012"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267012"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679267013"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267013"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267011"><span class="hs-identifier hs-var">u</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int point r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679266999"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">queryPoint -&gt; Getting r queryPoint r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r queryPoint r
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int queryPoint r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-129"></span><span>      </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679266999"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">queryPoint -&gt; Getting r queryPoint r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r queryPoint r
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int queryPoint r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267013"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int point r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; point -&gt; point -&gt; AboveCount Int
+</span><a href="#local-6989586621679267018"><span class="hs-identifier hs-var">belowLineSeg</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267010"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267011"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267013"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-130"></span><span>         </span><span class="hs-comment">-- for q to lie below the edge, v has to lie right of q and q has to actually lie</span><span>
+</span><span id="line-131"></span><span>         </span><span class="hs-comment">-- below the line segment.</span><span>
+</span><span id="line-132"></span><span>         </span><span class="hs-comment">--</span><span>
+</span><span id="line-133"></span><span>         </span><span class="hs-comment">-- Note that if q lies strictly below v we don't count it here. We handle it</span><span>
+</span><span id="line-134"></span><span>         </span><span class="hs-comment">-- when handing vertex v</span><span>
+</span><span id="line-135"></span><span>         </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>                 </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">AboveCount Int
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-136"></span><span>
+</span><span id="line-137"></span><span>      </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679266999"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">queryPoint -&gt; Getting r queryPoint r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r queryPoint r
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int queryPoint r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267013"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int point r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; point -&gt; point -&gt; AboveCount Int
+</span><a href="#local-6989586621679267018"><span class="hs-identifier hs-var">belowLineSeg</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267010"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267013"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267011"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><span id="line-138"></span><span>            </span><span class="hs-comment">-- for q to lie below the edge, v has to lie left of q and</span><span>
+</span><span id="line-139"></span><span>            </span><span class="hs-comment">-- q has to actually lie below the line through u and v.</span><span>
+</span><span id="line-140"></span><span>         </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>                 </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">AboveCount Int
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-141"></span><span>
+</span><span id="line-142"></span><span>
+</span><span id="line-143"></span><span>      </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267011"><span class="hs-identifier hs-var">u</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
+forall (d :: Nat) point r.
+(2 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int point r
+</span><span class="hs-identifier hs-var">yCoord</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679266999"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">queryPoint -&gt; Getting r queryPoint r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r queryPoint r
+forall (d :: Nat) point r.
+(2 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int queryPoint r
+</span><span class="hs-identifier hs-var">yCoord</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-144"></span><span>              </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span>                             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; AboveCount Int
+forall seg. seg -&gt; AboveCount seg
+</span><a href="HGeometry.Polygon.Simple.InPolygon.html#OnEdge"><span class="hs-identifier hs-var">OnEdge</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267010"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-145"></span><span>                </span><span class="hs-comment">-- q == u, so it lies on edge i</span><span>
+</span><span id="line-146"></span><span>
+</span><span id="line-147"></span><span>              </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679266999"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">queryPoint -&gt; Getting r queryPoint r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r queryPoint r
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int queryPoint r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267013"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int point r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span>
+</span><span id="line-148"></span><span>                   </span><span class="hs-special">(</span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679266999"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">queryPoint -&gt; Getting r queryPoint r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r queryPoint r
+forall (d :: Nat) point r.
+(2 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int queryPoint r
+</span><span class="hs-identifier hs-var">yCoord</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267013"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
+forall (d :: Nat) point r.
+(2 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int point r
+</span><span class="hs-identifier hs-var">yCoord</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; AboveCount Int
+forall seg. seg -&gt; AboveCount seg
+</span><a href="HGeometry.Polygon.Simple.InPolygon.html#OnEdge"><span class="hs-identifier hs-var">OnEdge</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267010"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-149"></span><span>                 </span><span class="hs-comment">-- q lies above u. So the only case in which q does lie on the edge uv</span><span>
+</span><span id="line-150"></span><span>                 </span><span class="hs-comment">-- is if it is vertical, and q lies on it.</span><span>
+</span><span id="line-151"></span><span>                 </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>                 </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">AboveCount Int
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-152"></span><span>                 </span><span class="hs-comment">-- q lies above u, so otherwise it does not lie on the edge starting at u.</span><span>
+</span><span id="line-153"></span><span>
+</span><span id="line-154"></span><span>              </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679266999"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">queryPoint -&gt; Getting r queryPoint r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r queryPoint r
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int queryPoint r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267013"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int point r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-155"></span><span>                </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679266999"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">queryPoint -&gt; Getting r queryPoint r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r queryPoint r
+forall (d :: Nat) point r.
+(2 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int queryPoint r
+</span><span class="hs-identifier hs-var">yCoord</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267013"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
+forall (d :: Nat) point r.
+(2 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int point r
+</span><span class="hs-identifier hs-var">yCoord</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; AboveCount Int
+forall seg. seg -&gt; AboveCount seg
+</span><a href="HGeometry.Polygon.Simple.InPolygon.html#OnEdge"><span class="hs-identifier hs-var">OnEdge</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267010"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-156"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>                 </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">AboveCount Int
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-157"></span><span>                   </span><span class="hs-comment">-- the edge uv is vertical. We already established that u lies above</span><span>
+</span><span id="line-158"></span><span>                   </span><span class="hs-comment">-- q, so it lies on the edge only if v lies strictly below q.</span><span>
+</span><span id="line-159"></span><span>
+</span><span id="line-160"></span><span>                </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679266999"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">queryPoint -&gt; Getting r queryPoint r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r queryPoint r
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int queryPoint r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267012"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int point r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">AboveCount Int
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span>
+</span><span id="line-161"></span><span>                   </span><span class="hs-comment">-- the predecessor vertex p and v lie on the same side of the vertical line</span><span>
+</span><span id="line-162"></span><span>                   </span><span class="hs-comment">-- through u. So we don't count this vertex/edge</span><span>
+</span><span id="line-163"></span><span>                   </span><span class="hs-comment">-- TODO: not sure if this should be &lt;= or &lt;</span><span>
+</span><span id="line-164"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; point -&gt; point -&gt; AboveCount Int
+</span><a href="#local-6989586621679267018"><span class="hs-identifier hs-var">belowLineSeg</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267010"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267011"><span class="hs-identifier hs-var">u</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267013"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-165"></span><span>                </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679266999"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">queryPoint -&gt; Getting r queryPoint r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r queryPoint r
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int queryPoint r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267012"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int point r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">AboveCount Int
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-comment">-- same as before v and p on the same side.</span><span>
+</span><span id="line-166"></span><span>                   </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; point -&gt; point -&gt; AboveCount Int
+</span><a href="#local-6989586621679267018"><span class="hs-identifier hs-var">belowLineSeg</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267010"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267013"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267011"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><span id="line-167"></span><span>
+</span><span id="line-168"></span><span>    </span><span class="hs-comment">-- | count the edge if q is below the line through l and r,</span><span>
+</span><span id="line-169"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-170"></span><span>    </span><span class="hs-comment">-- pre: l is left of r.</span><span>
+</span><span id="line-171"></span><span>    </span><span class="hs-comment">-- pre: q-x lies in the interval [lx,rx]</span><span>
+</span><span id="line-172"></span><span>    </span><span id="local-6989586621679267018"><span class="annot"><span class="annottext">belowLineSeg :: Int -&gt; point -&gt; point -&gt; AboveCount Int
+</span><a href="#local-6989586621679267018"><span class="hs-identifier hs-var hs-var">belowLineSeg</span></a></span></span><span> </span><span id="local-6989586621679267023"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267023"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679267024"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267024"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679267025"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267025"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">point -&gt; queryPoint -&gt; point -&gt; CCW
+forall point r point' point''.
+(Point_ point 2 r, Point_ point' 2 r, Point_ point'' 2 r, Num r,
+ Ord r) =&gt;
+point -&gt; point' -&gt; point'' -&gt; CCW
+</span><span class="hs-identifier hs-var">ccw</span></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267024"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679266999"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267025"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-173"></span><span>      </span><span class="annot"><span class="annottext">CCW
+</span><span class="hs-identifier hs-var">CW</span></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">AboveCount Int
+forall a. Monoid a =&gt; a
+</span><span class="hs-identifier hs-var">mempty</span></span><span> </span><span class="hs-comment">-- q lies strictly above the segment lr</span><span>
+</span><span id="line-174"></span><span>      </span><span class="annot"><span class="annottext">CCW
+</span><span class="hs-identifier hs-var">CoLinear</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; AboveCount Int
+forall seg. seg -&gt; AboveCount seg
+</span><a href="HGeometry.Polygon.Simple.InPolygon.html#OnEdge"><span class="hs-identifier hs-var">OnEdge</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267023"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-175"></span><span>      </span><span class="annot"><span class="annottext">CCW
+</span><span class="hs-identifier hs-var">CCW</span></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Int -&gt; AboveCount Int
+forall seg. Int -&gt; AboveCount seg
+</span><a href="HGeometry.Polygon.Simple.InPolygon.html#NumStrictlyAbove"><span class="hs-identifier hs-var">NumStrictlyAbove</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span>  </span><span class="hs-comment">-- q lies strictly below the segment lr</span><span>
+</span><span id="line-176"></span><span>
+</span><span id="line-177"></span><span>
+</span><span id="line-178"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-179"></span><span class="annot"><span class="hs-comment">-- * Test if a segment is contained in a polygon</span></span><span>
+</span><span id="line-180"></span><span>
+</span><span id="line-181"></span><span class="hs-comment">-- | test if the given line segment is contained in the polygon. It is also ok if the</span><span>
+</span><span id="line-182"></span><span class="hs-comment">-- segment lies partially on the boundary</span><span>
+</span><span id="line-183"></span><span id="local-6989586621679265273"><span id="local-6989586621679265274"><span id="local-6989586621679265276"><span id="local-6989586621679265277"><span id="local-6989586621679265278"><span id="local-6989586621679265281"><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#containedIn"><span class="hs-identifier hs-type">containedIn</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment_</span></span><span> </span><span class="annot"><a href="#local-6989586621679265273"><span class="hs-identifier hs-type">lineSegment</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265274"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-184"></span><span>               </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.Class.html#SimplePolygon_"><span class="hs-identifier hs-type">SimplePolygon_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265276"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265277"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265278"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-185"></span><span>               </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Intersection</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679265277"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679265273"><span class="hs-identifier hs-type">lineSegment</span></a></span><span>
+</span><span id="line-186"></span><span>                 </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LineSegmentLineSegmentIntersection</span></span><span> </span><span class="annot"><a href="#local-6989586621679265281"><span class="hs-identifier hs-type">lineSegment'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-187"></span><span>               </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IsIntersectableWith</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679265277"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679265273"><span class="hs-identifier hs-type">lineSegment</span></a></span><span>
+</span><span id="line-188"></span><span>               </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679265281"><span class="hs-identifier hs-type">lineSegment'</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="#local-6989586621679265278"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-189"></span><span>               </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#HasInPolygon"><span class="hs-identifier hs-type">HasInPolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265276"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265277"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679265278"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-190"></span><span>               </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679265274"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679265278"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679265277"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679265278"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679265278"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679265278"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-191"></span><span>               </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265273"><span class="hs-identifier hs-type">lineSegment</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265276"><span class="hs-identifier hs-type">simplePolygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span></span></span></span></span><span>
+</span><span id="line-192"></span><span id="containedIn"><span class="annot"><span class="annottext">containedIn :: forall lineSegment point simplePolygon vertex r lineSegment'.
+(ClosedLineSegment_ lineSegment point,
+ SimplePolygon_ simplePolygon vertex r,
+ Intersection (ClosedLineSegment vertex) lineSegment
+ ~ Maybe (LineSegmentLineSegmentIntersection lineSegment'),
+ IsIntersectableWith (ClosedLineSegment vertex) lineSegment,
+ NumType lineSegment' ~ r, HasInPolygon simplePolygon vertex r,
+ Point_ point 2 r, Point_ vertex 2 r, Ord r, Fractional r) =&gt;
+lineSegment -&gt; simplePolygon -&gt; Bool
+</span><a href="HGeometry.Polygon.Simple.InPolygon.html#containedIn"><span class="hs-identifier hs-var hs-var">containedIn</span></a></span></span><span> </span><span id="local-6989586621679267318"><span class="annot"><span class="annottext">lineSegment
+</span><a href="#local-6989586621679267318"><span class="hs-identifier hs-var">seg</span></a></span></span><span> </span><span id="local-6989586621679267319"><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679267319"><span class="hs-identifier hs-var">poly</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">lineSegment
+</span><a href="#local-6989586621679267318"><span class="hs-identifier hs-var">seg</span></a></span><span class="annot"><span class="annottext">lineSegment -&gt; Getting point lineSegment point -&gt; point
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point lineSegment point
+forall seg p. HasStart seg p =&gt; Lens' seg p
+Lens' lineSegment point
+</span><span class="hs-identifier hs-var">start</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">point
+-&gt; simplePolygon
+-&gt; PointLocationResultWith (VertexIx simplePolygon)
+forall queryPoint.
+(Num r, Ord r, Point_ queryPoint 2 r) =&gt;
+queryPoint
+-&gt; simplePolygon
+-&gt; PointLocationResultWith (VertexIx simplePolygon)
+forall polygon point r queryPoint.
+(HasInPolygon polygon point r, Num r, Ord r,
+ Point_ queryPoint 2 r) =&gt;
+queryPoint -&gt; polygon -&gt; PointLocationResultWith (VertexIx polygon)
+</span><a href="HGeometry.Polygon.Simple.InPolygon.html#inPolygon"><span class="hs-operator hs-var">`inPolygon`</span></a></span><span> </span><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679267319"><span class="hs-identifier hs-var">poly</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-193"></span><span>    </span><span class="annot"><span class="annottext">PointLocationResultWith (VertexIx simplePolygon)
+</span><span class="hs-identifier hs-var">StrictlyInside</span></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">lineSegment
+</span><a href="#local-6989586621679267318"><span class="hs-identifier hs-var">seg</span></a></span><span class="annot"><span class="annottext">lineSegment -&gt; Getting point lineSegment point -&gt; point
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point lineSegment point
+forall seg p. HasEnd seg p =&gt; Lens' seg p
+Lens' lineSegment point
+</span><span class="hs-identifier hs-var">end</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">point
+-&gt; simplePolygon
+-&gt; PointLocationResultWith (VertexIx simplePolygon)
+forall queryPoint.
+(Num r, Ord r, Point_ queryPoint 2 r) =&gt;
+queryPoint
+-&gt; simplePolygon
+-&gt; PointLocationResultWith (VertexIx simplePolygon)
+forall polygon point r queryPoint.
+(HasInPolygon polygon point r, Num r, Ord r,
+ Point_ queryPoint 2 r) =&gt;
+queryPoint -&gt; polygon -&gt; PointLocationResultWith (VertexIx polygon)
+</span><a href="HGeometry.Polygon.Simple.InPolygon.html#inPolygon"><span class="hs-operator hs-var">`inPolygon`</span></a></span><span> </span><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679267319"><span class="hs-identifier hs-var">poly</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-194"></span><span>                           </span><span class="annot"><span class="annottext">PointLocationResultWith (VertexIx simplePolygon)
+</span><span class="hs-identifier hs-var">StrictlyInside</span></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679267323"><span class="hs-identifier hs-var">properIntersection</span></a></span><span>
+</span><span id="line-195"></span><span>                           </span><span class="annot"><span class="annottext">PointLocationResultWith (VertexIx simplePolygon)
+</span><span class="hs-identifier hs-var">StrictlyOutside</span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-196"></span><span>                           </span><span class="annot"><span class="hs-identifier hs-type">OnBoundaryEdge</span></span><span> </span><span id="local-6989586621679267324"><span class="annot"><span class="annottext">VertexIx simplePolygon
+</span><a href="#local-6989586621679267324"><span class="hs-identifier hs-var">vj</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679267323"><span class="hs-identifier hs-var">properIntersection</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; point -&gt; Bool
+</span><a href="#local-6989586621679267325"><span class="hs-identifier hs-var">inCone'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+VertexIx simplePolygon
+</span><a href="#local-6989586621679267324"><span class="hs-identifier hs-var">vj</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">lineSegment
+</span><a href="#local-6989586621679267318"><span class="hs-identifier hs-var">seg</span></a></span><span class="annot"><span class="annottext">lineSegment -&gt; Getting point lineSegment point -&gt; point
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point lineSegment point
+forall seg p. HasStart seg p =&gt; Lens' seg p
+Lens' lineSegment point
+</span><span class="hs-identifier hs-var">start</span></span><span class="hs-special">)</span><span>
+</span><span id="line-197"></span><span>    </span><span class="annot"><span class="annottext">PointLocationResultWith (VertexIx simplePolygon)
+</span><span class="hs-identifier hs-var">StrictlyOutside</span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-198"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">OnBoundaryEdge</span></span><span> </span><span id="local-6989586621679267326"><span class="annot"><span class="annottext">VertexIx simplePolygon
+</span><a href="#local-6989586621679267326"><span class="hs-identifier hs-var">vi</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">lineSegment
+</span><a href="#local-6989586621679267318"><span class="hs-identifier hs-var">seg</span></a></span><span class="annot"><span class="annottext">lineSegment -&gt; Getting point lineSegment point -&gt; point
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point lineSegment point
+forall seg p. HasEnd seg p =&gt; Lens' seg p
+Lens' lineSegment point
+</span><span class="hs-identifier hs-var">end</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">point
+-&gt; simplePolygon
+-&gt; PointLocationResultWith (VertexIx simplePolygon)
+forall queryPoint.
+(Num r, Ord r, Point_ queryPoint 2 r) =&gt;
+queryPoint
+-&gt; simplePolygon
+-&gt; PointLocationResultWith (VertexIx simplePolygon)
+forall polygon point r queryPoint.
+(HasInPolygon polygon point r, Num r, Ord r,
+ Point_ queryPoint 2 r) =&gt;
+queryPoint -&gt; polygon -&gt; PointLocationResultWith (VertexIx polygon)
+</span><a href="HGeometry.Polygon.Simple.InPolygon.html#inPolygon"><span class="hs-operator hs-var">`inPolygon`</span></a></span><span> </span><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679267319"><span class="hs-identifier hs-var">poly</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-199"></span><span>                           </span><span class="annot"><span class="annottext">PointLocationResultWith (VertexIx simplePolygon)
+</span><span class="hs-identifier hs-var">StrictlyInside</span></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679267323"><span class="hs-identifier hs-var">properIntersection</span></a></span><span>
+</span><span id="line-200"></span><span>                           </span><span class="annot"><span class="annottext">PointLocationResultWith (VertexIx simplePolygon)
+</span><span class="hs-identifier hs-var">StrictlyOutside</span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-201"></span><span>                           </span><span class="annot"><span class="hs-identifier hs-type">OnBoundaryEdge</span></span><span> </span><span id="local-6989586621679267327"><span class="annot"><span class="annottext">VertexIx simplePolygon
+</span><a href="#local-6989586621679267327"><span class="hs-identifier hs-var">vj</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679267323"><span class="hs-identifier hs-var">properIntersection</span></a></span><span>
+</span><span id="line-202"></span><span>                                                </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; point -&gt; Bool
+</span><a href="#local-6989586621679267325"><span class="hs-identifier hs-var">inCone'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+VertexIx simplePolygon
+</span><a href="#local-6989586621679267326"><span class="hs-identifier hs-var">vi</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">lineSegment
+</span><a href="#local-6989586621679267318"><span class="hs-identifier hs-var">seg</span></a></span><span class="annot"><span class="annottext">lineSegment -&gt; Getting point lineSegment point -&gt; point
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point lineSegment point
+forall seg p. HasEnd seg p =&gt; Lens' seg p
+Lens' lineSegment point
+</span><span class="hs-identifier hs-var">end</span></span><span class="hs-special">)</span><span>
+</span><span id="line-203"></span><span>                                                </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; point -&gt; Bool
+</span><a href="#local-6989586621679267325"><span class="hs-identifier hs-var">inCone'</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+VertexIx simplePolygon
+</span><a href="#local-6989586621679267327"><span class="hs-identifier hs-var">vj</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">lineSegment
+</span><a href="#local-6989586621679267318"><span class="hs-identifier hs-var">seg</span></a></span><span class="annot"><span class="annottext">lineSegment -&gt; Getting point lineSegment point -&gt; point
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point lineSegment point
+forall seg p. HasStart seg p =&gt; Lens' seg p
+Lens' lineSegment point
+</span><span class="hs-identifier hs-var">start</span></span><span class="hs-special">)</span><span>
+</span><span id="line-204"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-205"></span><span>    </span><span id="local-6989586621679267323"><span class="annot"><span class="annottext">properIntersection :: Bool
+</span><a href="#local-6989586621679267323"><span class="hs-identifier hs-var hs-var">properIntersection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting Any simplePolygon (ClosedLineSegment vertex)
+-&gt; (ClosedLineSegment vertex -&gt; Bool) -&gt; simplePolygon -&gt; Bool
+forall s a. Getting Any s a -&gt; (a -&gt; Bool) -&gt; s -&gt; Bool
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#anyOf"><span class="hs-identifier hs-var">anyOf</span></a></span><span> </span><span class="annot"><span class="annottext">Getting Any simplePolygon (ClosedLineSegment vertex)
+forall polygon point r.
+(HasOuterBoundary polygon, Vertex polygon ~ point,
+ Point_ point 2 r) =&gt;
+IndexedFold1
+  (VertexIx polygon, VertexIx polygon)
+  polygon
+  (ClosedLineSegment point)
+IndexedFold1
+  (VertexIx simplePolygon, VertexIx simplePolygon)
+  simplePolygon
+  (ClosedLineSegment vertex)
+</span><a href="HGeometry.Polygon.Class.html#outerBoundaryEdgeSegments"><span class="hs-identifier hs-var">outerBoundaryEdgeSegments</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679267330"><span class="annot"><span class="annottext">ClosedLineSegment vertex
+</span><a href="#local-6989586621679267330"><span class="hs-identifier hs-var">edgeSeg</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-206"></span><span>                           </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment vertex
+</span><a href="#local-6989586621679267330"><span class="hs-identifier hs-var">edgeSeg</span></a></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment vertex
+-&gt; lineSegment
+-&gt; Intersection (ClosedLineSegment vertex) lineSegment
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="annot"><span class="annottext">lineSegment
+</span><a href="#local-6989586621679267318"><span class="hs-identifier hs-var">seg</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-207"></span><span>                             </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LineSegment_x_LineSegment_Point</span></span><span> </span><span id="local-6989586621679267333"><span class="annot"><span class="annottext">Point 2 (NumType lineSegment')
+</span><a href="#local-6989586621679267333"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Bool) -&gt; Bool -&gt; Bool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-208"></span><span>                               </span><span class="annot"><span class="annottext">Point 2 r
+Point 2 (NumType lineSegment')
+</span><a href="#local-6989586621679267333"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ClosedLineSegment vertex
+</span><a href="#local-6989586621679267330"><span class="hs-identifier hs-var">edgeSeg</span></a></span><span class="annot"><span class="annottext">ClosedLineSegment vertex
+-&gt; Getting (Point 2 r) (ClosedLineSegment vertex) (Point 2 r)
+-&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(vertex -&gt; Const (Point 2 r) vertex)
+-&gt; ClosedLineSegment vertex
+-&gt; Const (Point 2 r) (ClosedLineSegment vertex)
+forall seg p. HasStart seg p =&gt; Lens' seg p
+Lens' (ClosedLineSegment vertex) vertex
+</span><span class="hs-identifier hs-var">start</span></span><span class="annot"><span class="annottext">((vertex -&gt; Const (Point 2 r) vertex)
+ -&gt; ClosedLineSegment vertex
+ -&gt; Const (Point 2 r) (ClosedLineSegment vertex))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; vertex -&gt; Const (Point 2 r) vertex)
+-&gt; Getting (Point 2 r) (ClosedLineSegment vertex) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; vertex -&gt; Const (Point 2 r) vertex
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' vertex (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">||</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+Point 2 (NumType lineSegment')
+</span><a href="#local-6989586621679267333"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ClosedLineSegment vertex
+</span><a href="#local-6989586621679267330"><span class="hs-identifier hs-var">edgeSeg</span></a></span><span class="annot"><span class="annottext">ClosedLineSegment vertex
+-&gt; Getting (Point 2 r) (ClosedLineSegment vertex) (Point 2 r)
+-&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(vertex -&gt; Const (Point 2 r) vertex)
+-&gt; ClosedLineSegment vertex
+-&gt; Const (Point 2 r) (ClosedLineSegment vertex)
+forall seg p. HasEnd seg p =&gt; Lens' seg p
+Lens' (ClosedLineSegment vertex) vertex
+</span><span class="hs-identifier hs-var">end</span></span><span class="annot"><span class="annottext">((vertex -&gt; Const (Point 2 r) vertex)
+ -&gt; ClosedLineSegment vertex
+ -&gt; Const (Point 2 r) (ClosedLineSegment vertex))
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; vertex -&gt; Const (Point 2 r) vertex)
+-&gt; Getting (Point 2 r) (ClosedLineSegment vertex) (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; vertex -&gt; Const (Point 2 r) vertex
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' vertex (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span>
+</span><span id="line-209"></span><span>                             </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="annottext">LineSegmentLineSegmentIntersection lineSegment'
+</span><span class="hs-identifier">_</span></span><span>                                   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-210"></span><span>                             </span><span class="annot"><span class="annottext">Maybe (LineSegmentLineSegmentIntersection lineSegment')
+Intersection (ClosedLineSegment vertex) lineSegment
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>                                  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-211"></span><span>                                                         </span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679267319"><span class="hs-identifier hs-var">poly</span></a></span><span>
+</span><span id="line-212"></span><span>    </span><span id="local-6989586621679267325"><span class="annot"><span class="annottext">inCone' :: Int -&gt; point -&gt; Bool
+</span><a href="#local-6989586621679267325"><span class="hs-identifier hs-var hs-var">inCone'</span></a></span></span><span> </span><span id="local-6989586621679267338"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267338"><span class="hs-identifier hs-var">i</span></a></span></span><span> </span><span id="local-6989586621679267339"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267339"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679267340"><span class="annot"><span class="annottext">a :: vertex
+</span><a href="#local-6989586621679267340"><span class="hs-identifier hs-var hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679267319"><span class="hs-identifier hs-var">poly</span></a></span><span class="annot"><span class="annottext">simplePolygon
+-&gt; Getting (Endo vertex) simplePolygon vertex -&gt; vertex
+forall s a. HasCallStack =&gt; s -&gt; Getting (Endo a) s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#%5E%3F%21"><span class="hs-operator hs-var">^?!</span></a></span><span class="annot"><span class="annottext">VertexIx simplePolygon
+-&gt; IndexedTraversal'
+     (VertexIx simplePolygon) simplePolygon (Vertex simplePolygon)
+forall graph.
+HasVertices' graph =&gt;
+VertexIx graph
+-&gt; IndexedTraversal' (VertexIx graph) graph (Vertex graph)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#vertexAt"><span class="hs-identifier hs-var">vertexAt</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+VertexIx simplePolygon
+</span><a href="#local-6989586621679267338"><span class="hs-identifier hs-var">i</span></a></span><span>
+</span><span id="line-213"></span><span>                      </span><span id="local-6989586621679267343"><span class="annot"><span class="annottext">p :: vertex
+</span><a href="#local-6989586621679267343"><span class="hs-identifier hs-var hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679267319"><span class="hs-identifier hs-var">poly</span></a></span><span class="annot"><span class="annottext">simplePolygon
+-&gt; Getting (Endo vertex) simplePolygon vertex -&gt; vertex
+forall s a. HasCallStack =&gt; s -&gt; Getting (Endo a) s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#%5E%3F%21"><span class="hs-operator hs-var">^?!</span></a></span><span class="annot"><span class="annottext">VertexIx simplePolygon
+-&gt; IndexedTraversal'
+     (VertexIx simplePolygon) simplePolygon (Vertex simplePolygon)
+forall graph.
+HasVertices' graph =&gt;
+VertexIx graph
+-&gt; IndexedTraversal' (VertexIx graph) graph (Vertex graph)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#vertexAt"><span class="hs-identifier hs-var">vertexAt</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267338"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-214"></span><span>                      </span><span id="local-6989586621679267344"><span class="annot"><span class="annottext">n :: vertex
+</span><a href="#local-6989586621679267344"><span class="hs-identifier hs-var hs-var">n</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">simplePolygon
+</span><a href="#local-6989586621679267319"><span class="hs-identifier hs-var">poly</span></a></span><span class="annot"><span class="annottext">simplePolygon
+-&gt; Getting (Endo vertex) simplePolygon vertex -&gt; vertex
+forall s a. HasCallStack =&gt; s -&gt; Getting (Endo a) s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#%5E%3F%21"><span class="hs-operator hs-var">^?!</span></a></span><span class="annot"><span class="annottext">VertexIx simplePolygon
+-&gt; IndexedTraversal'
+     (VertexIx simplePolygon) simplePolygon (Vertex simplePolygon)
+forall graph.
+HasVertices' graph =&gt;
+VertexIx graph
+-&gt; IndexedTraversal' (VertexIx graph) graph (Vertex graph)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#vertexAt"><span class="hs-identifier hs-var">vertexAt</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679267338"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Int
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-215"></span><span>                  </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">point -&gt; vertex -&gt; vertex -&gt; vertex -&gt; Bool
+forall queryPoint r apex point point'.
+(Point_ queryPoint 2 r, Point_ apex 2 r, Point_ point 2 r,
+ Point_ point' 2 r, Ord r, Num r) =&gt;
+queryPoint -&gt; apex -&gt; point -&gt; point' -&gt; Bool
+</span><a href="HGeometry.Polygon.Simple.InPolygon.html#inCone"><span class="hs-identifier hs-var">inCone</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267339"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679267340"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679267343"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679267344"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-216"></span><span>
+</span><span id="line-217"></span><span class="annot"><span class="hs-comment">-- | Test if a point lies inside a cone.</span></span><span>
+</span><span id="line-218"></span><span id="local-6989586621679265346"><span id="local-6989586621679265347"><span id="local-6989586621679265348"><span id="local-6989586621679265349"><span id="local-6989586621679265350"><span class="annot"><a href="HGeometry.Polygon.Simple.InPolygon.html#inCone"><span class="hs-identifier hs-type">inCone</span></a></span><span>           </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679265346"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679265347"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679265348"><span class="hs-identifier hs-type">apex</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679265347"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679265349"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679265347"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679265350"><span class="hs-identifier hs-type">point'</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679265347"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-219"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679265347"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679265347"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-220"></span><span>                    </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-221"></span><span>                    </span><span class="annot"><a href="#local-6989586621679265346"><span class="hs-identifier hs-type">queryPoint</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265348"><span class="hs-identifier hs-type">apex</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265349"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679265350"><span class="hs-identifier hs-type">point'</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span></span></span></span></span><span>
+</span><span id="line-222"></span><span id="inCone"><span class="annot"><span class="annottext">inCone :: forall queryPoint r apex point point'.
+(Point_ queryPoint 2 r, Point_ apex 2 r, Point_ point 2 r,
+ Point_ point' 2 r, Ord r, Num r) =&gt;
+queryPoint -&gt; apex -&gt; point -&gt; point' -&gt; Bool
+</span><a href="HGeometry.Polygon.Simple.InPolygon.html#inCone"><span class="hs-identifier hs-var hs-var">inCone</span></a></span></span><span> </span><span id="local-6989586621679267691"><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679267691"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679267692"><span class="annot"><span class="annottext">apex
+</span><a href="#local-6989586621679267692"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679267693"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267693"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679267694"><span class="annot"><span class="annottext">point'
+</span><a href="#local-6989586621679267694"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; apex -&gt; Point 2 r -&gt; Point 2 r -&gt; Ordering
+forall center r point.
+(Point_ center 2 r, Point_ point 2 r, Ord r, Num r) =&gt;
+Vector 2 r -&gt; center -&gt; point -&gt; point -&gt; Ordering
+</span><span class="hs-identifier hs-var">cwCmpAroundWith</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679267693"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Point 2 r) point (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' point (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Vector 2 r
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; point -&gt; Vector d r
+</span><span class="hs-operator hs-var">.-.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">apex
+</span><a href="#local-6989586621679267692"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">apex -&gt; Getting (Point 2 r) apex (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) apex (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' apex (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">apex
+</span><a href="#local-6989586621679267692"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">queryPoint
+</span><a href="#local-6989586621679267691"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">queryPoint
+-&gt; Getting (Point 2 r) queryPoint (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) queryPoint (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' queryPoint (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point'
+</span><a href="#local-6989586621679267694"><span class="hs-identifier hs-var">r</span></a></span><span class="annot"><span class="annottext">point' -&gt; Getting (Point 2 r) point' (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point' (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' point' (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-223"></span><span>                   </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-224"></span><span>                   </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier">_</span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-225"></span><span>
+</span><span id="line-226"></span><span>  </span><span class="hs-comment">-- case ccw a l q of</span><span>
+</span><span id="line-227"></span><span>  </span><span class="hs-comment">--                  CCW -&gt; False</span><span>
+</span><span id="line-228"></span><span>  </span><span class="hs-comment">--                  _   -&gt; case ccw a r q of</span><span>
+</span><span id="line-229"></span><span>  </span><span class="hs-comment">--                           CW -&gt; False</span><span>
+</span><span id="line-230"></span><span>  </span><span class="hs-comment">--                           _  -&gt; True</span><span>
+</span><span id="line-231"></span><span>
+</span><span id="line-232"></span><span class="hs-comment">-- it seems we cannot define the cmpCCwAroundwith with flip; since now the zero vector is actually treated last. i.e. they are not inverses.</span><span>
+</span><span id="line-233"></span></pre></body></html>
