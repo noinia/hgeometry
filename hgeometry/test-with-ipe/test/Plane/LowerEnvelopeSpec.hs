@@ -25,7 +25,8 @@ import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line
 import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
-import           HGeometry.Plane.LowerEnvelope.Connected
+import           HGeometry.Plane.LowerEnvelope
+import qualified HGeometry.Plane.LowerEnvelope.Connected.Randomized as Randomized
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
@@ -41,9 +42,22 @@ import           System.OsPath
 import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
+import           System.Random
+
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
+
+
+rVoronoiDiagram :: ( Point_ point 2 r, Functor f, Ord point
+                   , Ord r, Fractional r, Foldable1 f
+                   , Show point, Show r
+                   ) => f point -> VoronoiDiagram point
+rVoronoiDiagram = voronoiDiagramWith (lowerEnvelopeWith . connectedLowerEnvelopeWith $
+                                       Randomized.computeVertexForm (mkStdGen 1))
+
+--------------------------------------------------------------------------------
+
 
 instance ( Point_ point 2 r, Fractional r, Ord r
          , Show point, Show r, IsBoxable point
@@ -115,10 +129,11 @@ instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
     ConnectedVD vd          -> defIO vd
 
 instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
-         , Show point, Show r
+         , Show point, Show r, Show vertex
+         , Point_ vertex 2 r, IsBoxable vertex
          )
-         => HasDefaultIpeOut (VoronoiDiagram' point) where
-  type DefaultIpeOut (VoronoiDiagram' point) = Group
+         => HasDefaultIpeOut (VoronoiDiagram' vertex point) where
+  type DefaultIpeOut (VoronoiDiagram' vertex point) = Group
   defIO = ipeGroup . zipWith render (cycle $ drop 3 basicNamedColors)
         . toList . NEMap.assocs . VD.asMap
     where
@@ -157,6 +172,7 @@ testIpe inFp outFp = do
       inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
       NonEmpty.fromList <$> readAllFrom inFp'
     let vd = voronoiDiagram $ view core <$> points
+        -- vd = rVoronoiDiagram $ view core <$> points
         vv = voronoiVertices $ view core <$> points
         out = [ iO' points
               , iO' vd
@@ -164,6 +180,35 @@ testIpe inFp outFp = do
     goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
                (ipeFileGolden { name = outFp })
                (addStyleSheet opacitiesStyle $ singlePageFromContent out)
+
+
+-- testClipVoronoi            :: OsPath -> OsPath -> Spec
+-- testClipVoronoi inFp outFp = do
+--     (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
+--       inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
+--       NonEmpty.fromList <$> readAllFrom inFp'
+--     let vd'    = asMap $ voronoiDiagram $ view core <$> points
+--         theMap = undefined
+--         -- theMap = NEMap.mapWithKey (\p reg -> )
+--         -- vv = voronoiVertices $ view core <$> points
+
+--         a  = Point2 0    0
+--         b  = Point2 0    2000
+--         c  = Point2 2000 1000
+--         vd = fromVertexFormIn (Triangle a b c) theMap
+
+
+--         -- vd = rVoronoiDiagram $ view core <$> points
+
+--         out = [ iO' points
+--               , iO' vd
+--               ] <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
+--     goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
+--                (ipeFileGolden { name = outFp })
+--                (addStyleSheet opacitiesStyle $ singlePageFromContent out)
+
+
+
 
 
 -- theEdges :: PlaneGraph' (Point 2 R) h (E R) -> IpeObject' Group R

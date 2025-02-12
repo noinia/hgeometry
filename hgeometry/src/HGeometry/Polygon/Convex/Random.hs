@@ -21,7 +21,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Vector.Unboxed as VU
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Convex.Implementation
+import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple.Class
 import           System.Random.Stateful
 

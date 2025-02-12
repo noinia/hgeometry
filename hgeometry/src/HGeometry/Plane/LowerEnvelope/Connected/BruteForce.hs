@@ -10,12 +10,19 @@
 --------------------------------------------------------------------------------
 module HGeometry.Plane.LowerEnvelope.Connected.BruteForce
   ( bruteForceLowerEnvelope
+  , connectedLowerEnvelopeWith
   , computeVertexForm
+
+  , belowAll
   ) where
 
+import           Data.Foldable1
 import           Data.Map (Map)
 import qualified Data.Map as Map
+import           Data.Map.NonEmpty (NEMap, pattern IsEmpty, pattern IsNonEmpty)
+import qualified Data.Map.NonEmpty as NEMap
 import           HGeometry.Combinatorial.Util
+import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
@@ -23,23 +30,42 @@ import           HGeometry.Plane.LowerEnvelope.Connected.Regions
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Point
 
+import qualified Data.Foldable as F
+import           Debug.Trace
 --------------------------------------------------------------------------------
 -- * The naive O(n^4) time algorithm.
 
 -- | Computes the lower envelope in O(n^4) time.
+--
 bruteForceLowerEnvelope :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                            , Foldable set
                            , Show r, Show plane
-                           ) => set plane -> MinimizationDiagram r plane
-bruteForceLowerEnvelope = fromVertexForm . computeVertexForm
+                           )
+                        => set plane
+                        -> Maybe (MinimizationDiagram r (Point 2 r :+ Definers plane) plane)
+bruteForceLowerEnvelope = connectedLowerEnvelopeWith computeVertexForm
+
+-- | Given an algorithm to compute the vertices of the lower envelope, computes
+-- the actual lower envelope. Returns a Nothing if there are no vertices
+--
+connectedLowerEnvelopeWith :: (Plane_ plane r, Ord r, Fractional r, Foldable set, Ord plane
+                              , Show plane, Show r
+                              )
+                           => (set plane -> VertexForm Map r plane)
+                           -> set plane
+                           -> Maybe (MinimizationDiagram r (Point 2 r :+ Definers plane) plane)
+connectedLowerEnvelopeWith computeVertexForm' planes = case computeVertexForm' planes of
+  IsNonEmpty vertices -> Just $ fromVertexForm vertices
+  IsEmpty             -> Nothing
+
 
 -- | Computes the vertices of the lower envelope
 --
 -- O(n^4) time.
-computeVertexForm        :: (Plane_ plane r, Ord plane, Ord r, Fractional r, Foldable set
+computeVertexForm        :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Foldable set
                             , Show plane, Show r
                             )
-                         => set plane -> VertexForm r plane
+                         => set plane -> VertexForm Map r plane
 computeVertexForm planes = unionsWithKey mergeDefiners
                          . map (asVertex planes) $ uniqueTriplets planes
 

@@ -31,6 +31,7 @@ import           HGeometry.Properties
 import           HGeometry.Vector
 import           Prelude hiding (last)
 import           Text.Read (Read (..), readListPrecDefault)
+
 --------------------------------------------------------------------------------
 
 -- $setup
@@ -176,3 +177,12 @@ type Plane_ plane = NonVerticalHyperPlane_ plane 3
 pattern Plane_       :: Plane_ plane r => r -> r -> r -> plane
 pattern Plane_ a b c <- (view hyperPlaneCoefficients -> (Vector3 a b c))
 {-# COMPLETE Plane_ #-}
+
+
+
+
+--------------------------------------------------------------------------------
+
+-- | Access the last element of a vector
+last :: forall vector d r. (Vector_ vector d r, 1 <= d) => IndexedLens' Int vector r
+last = component @(d-1)

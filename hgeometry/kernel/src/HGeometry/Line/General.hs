@@ -16,7 +16,7 @@ import Control.DeepSeq
 import Control.Lens ((^.))
 import GHC.Generics
 import HGeometry.Ext
-import HGeometry.HyperPlane
+import HGeometry.HyperPlane.Class
 import HGeometry.Intersection
 import HGeometry.Line.Class
 import HGeometry.Line.Intersection

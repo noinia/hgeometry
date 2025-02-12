@@ -23,22 +23,18 @@ import           HGeometry.Line
 import           HGeometry.Line.General
 import           HGeometry.Point
 import           HGeometry.Vector
+import           HGeometry.HyperPlane.Intersection
 
 --------------------------------------------------------------------------------
 -- * Geometric Primitives
 
+
 -- | Given two planes, computes the line in which they intersect.
-intersectionLine :: (Plane_ plane r, Fractional r, Eq r)
-                 => plane -> plane -> Maybe (VerticalOrLineEQ r)
-intersectionLine (Plane_ a1 b1 c1) (Plane_ a2 b2 c2)
-    | b1 /= b2  = Just $ NonVertical $ LineEQ ((a2 - a1) / diffB) ((c2 - c1) / diffB)
-                  -- the two planes intersect in some normal line
-    | a1 /= a2  = Just $ VerticalLineThrough ((c2 -c1) / (a1 - a2))
-                  -- the planes intersect in a vertical line
-    | otherwise = Nothing
-                  -- the planes don't intersect at all
-  where
-    diffB = b1 - b2
+intersectionLine      :: (Plane_ plane r, Fractional r, Eq r)
+                      => plane -> plane
+                      -> Maybe (VerticalOrLineEQ r)
+intersectionLine h h' = do Plane_x_Plane_Line l <- planePlaneIntersection h h'
+                           pure l
 
 -- -- | Computes the directed line in which the two planes h and h' intersect. The returned
 -- -- line will have h to its left and h' to its right.

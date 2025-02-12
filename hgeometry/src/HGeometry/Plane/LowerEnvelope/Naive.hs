@@ -49,15 +49,22 @@ lowerEnvelope = lowerEnvelopeWith bruteForceLowerEnvelope
 -- lower envelope algorithm to compute the lower envelope of the (parallel) planes.
 --
 -- \(O(T(n) + n \log n)\).
-lowerEnvelopeWith                        :: forall nonEmpty plane r.
-                                            ( Plane_ plane r
-                                            , Ord r, Fractional r, Foldable1 nonEmpty
-                                          )
-                                         => (NonEmpty plane -> MinimizationDiagram r plane)
-                                         -> nonEmpty plane -> LowerEnvelope plane
-lowerEnvelopeWith minimizationDiagram hs = case distinguish (toNonEmpty hs) of
-    Left lines'                   -> ParallelStrips . fromLines $ lines'
-    Right (Vector3 h1 h2 h3, hs') -> ConnectedEnvelope $ minimizationDiagram (h1 :| h2 : h3 : hs')
+lowerEnvelopeWith  :: forall nonEmpty plane r.
+                      ( Plane_ plane r
+                      , Ord r, Fractional r, Foldable1 nonEmpty
+                      )
+                   => (nonEmpty plane ->
+                        Maybe (MinimizationDiagram r  (Point 2 r :+ Definers plane) plane))
+                   -> nonEmpty plane -> LowerEnvelope plane
+lowerEnvelopeWith minimizationDiagram hs = case minimizationDiagram hs of
+    Just env -> ConnectedEnvelope env
+    Nothing  -> case distinguish (toNonEmpty hs) of
+                  Left lines'                   -> ParallelStrips . fromLines $ lines'
+                  Right _ ->
+                  -- Right (Vector3 h1 h2 h3, hs') ->
+                    -- ConnectedEnvelope $ minimizationDiagram (h1 :| h2 : h3 : hs')
+                    error "lowerEnvelopeWith: absurd, this code should be unreachable. to refactor"
+                    -- TODO: Refactor.
   where
     fromLines = firstWithNeighbors (\h _ h' -> fromMaybe err $ intersectionLine h h')
               . fmap (view extra) . view Line._Alternating
@@ -69,6 +76,7 @@ lowerEnvelopeWith minimizationDiagram hs = case distinguish (toNonEmpty hs) of
     lowerEnvelope' = Line.lowerEnvelope
     -- for whatever reason GHC 9.8 does not want to compile this without the type signature
     -- things are fine with 9.10 though; so maybe at some point we an just inline this.
+
 
 -- | We distinguish whether the planes are all parallel (left), and thus actually just
 -- define a 2D lower envelope of lines, or that the planes actually have a connected lower

@@ -22,7 +22,9 @@ import Control.DeepSeq
 import Control.Lens((^.), coerced)
 import GHC.Generics(Generic)
 import HGeometry.Ext
-import HGeometry.HyperPlane
+import HGeometry.HyperPlane.Class
+import HGeometry.HyperPlane.Internal
+import HGeometry.HyperPlane.NonVertical
 import HGeometry.Intersection
 import HGeometry.Intersection()
 import HGeometry.Line.Class
@@ -174,9 +176,10 @@ type instance Intersection (HyperPlane 2 r) (HyperPlane 2 r) =
   Maybe (LineLineIntersection (HyperPlane 2 r))
 
 
-instance ( Num r, Eq r
-         ) => HasIntersectionWith (HyperPlane 2 r) (HyperPlane 2 r) where
-  l `intersects` h = not (isParallelTo l h) || l == h
+-- instance ( Num r, Eq r
+--          ) => HasIntersectionWith (HyperPlane 2 r) (HyperPlane 2 r) where
+--   l `intersects` h = not (isParallelTo l h) || l == h
+-- see Hyperplane.Intersection instance
   -- two dimensional hyperplanes are lines; they intersect if they are not parallel, and in
   -- case they are parallel they better be same line
 

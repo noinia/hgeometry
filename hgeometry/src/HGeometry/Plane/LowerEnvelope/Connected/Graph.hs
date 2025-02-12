@@ -45,14 +45,14 @@ type PlaneGraphMap k v e = NEMap k (NEMap e k, v)
 -- | Produce a triangulated plane graph on the bounded vertices.  every vertex is
 -- represented by its point, it stores a list of its outgoing edges, and some data.
 toTriangulatedPlaneGraph' :: (Plane_ plane r, Num r, Ord r)
-                          => MinimizationDiagram r plane
+                          => MinimizationDiagram r (Point 2 r) plane
                           -> PlaneGraph' (Point 2 r) (First r) (E r)
 toTriangulatedPlaneGraph' = toPlaneGraph'' . toTriangulatedPlaneGraphMap
 
 -- | Produce a plane graph on the bounded vertices.  every vertex is represented by its
 -- point, it stores a list of its outgoing edges, and some data.
 toPlaneGraph' :: (Plane_ plane r, Num r, Ord r)
-             => MinimizationDiagram r plane -> PlaneGraph' (Point 2 r) (First r) (E r)
+             => MinimizationDiagram r  (Point 2 r) plane -> PlaneGraph' (Point 2 r) (First r) (E r)
 toPlaneGraph' = toPlaneGraph'' . toPlaneGraphMap
 
 -- | Helper to produce the graphs
@@ -69,7 +69,7 @@ toPlaneGraph'' = Graph
 -- | Produce a triangulated plane graph on the bounded vertices.  every vertex is
 -- represented by its point, it stores a list of its outgoing edges, and some data.
 toTriangulatedPlaneGraphMap :: (Plane_ plane r, Num r, Ord r)
-                            => MinimizationDiagram r plane
+                            => MinimizationDiagram r  (Point 2 r) plane
                             -> PlaneGraphMap (Point 2 r) (First r) (E r)
 toTriangulatedPlaneGraphMap = mapWithKeyMerge1 toTriangulatedGr . asMap
 
@@ -104,7 +104,8 @@ toTriangulatedGr h = NEMap.unsafeFromMap
 -- point, it stores a list of its outgoing edges (to other bounded vertices), and some
 -- data.
 toPlaneGraphMap :: (Plane_ plane r, Num r, Ord r)
-                => MinimizationDiagram r plane -> PlaneGraphMap (Point 2 r) (First r) (E r)
+                => MinimizationDiagram r  (Point 2 r) plane
+                -> PlaneGraphMap (Point 2 r) (First r) (E r)
 toPlaneGraphMap = mapWithKeyMerge1 toGr . asMap
 
 

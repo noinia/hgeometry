@@ -118,6 +118,9 @@ instance FromJSON r => FromJSON (Vector 1 r) where
         [x] -> Vector1 <$> parseJSON x
         _   -> fail "expected exactly 1 element"
 
+instance Reversing (Vector 1 r) where
+  reversing = id
+
 --------------------------------------------------------------------------------
 
 newtype instance Vector 2 r = MkVector2 (Linear.V2 r)
@@ -173,6 +176,9 @@ instance FromJSON r => FromJSON (Vector 2 r) where
       f = \case
         [x,y] -> Vector2 <$> parseJSON x <*> parseJSON y
         _     -> fail "expected exactly 2 elements"
+
+instance Reversing (Vector 2 r) where
+  reversing (Vector2 x y) = Vector2 y x
 
 --------------------------------------------------------------------------------
 
@@ -231,6 +237,9 @@ instance FromJSON r => FromJSON (Vector 3 r) where
       f = \case
         [x,y,z] -> Vector3 <$> parseJSON x <*> parseJSON y <*> parseJSON z
         _       -> fail "expected exactly 3 elements"
+
+instance Reversing (Vector 3 r) where
+  reversing (Vector3 x y z) = Vector3 z y x
 
 
 -- | cross product
@@ -298,6 +307,9 @@ instance FromJSON r => FromJSON (Vector 4 r) where
       f = \case
         [x,y,z,w] -> Vector4 <$> parseJSON x <*> parseJSON y <*> parseJSON z <*> parseJSON w
         _         -> fail "expected exactly 4 elements"
+
+instance Reversing (Vector 4 r) where
+  reversing (Vector4 x y z w) = Vector4 w z y x
 
 --------------------------------------------------------------------------------
 -- * Linear Instances

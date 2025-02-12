@@ -16,6 +16,8 @@ module HGeometry.Plane.LowerEnvelope.Connected.Type
   , Region(..)
   , toConvexPolygonIn
 
+  , mapVertices
+
   --   LowerEnvelope'(LowerEnvelope)
   -- , theUnboundedVertex, boundedVertices
   -- , traverseLowerEnvelope
@@ -68,23 +70,40 @@ import           HGeometry.Vector.NonEmpty.Util ()
 
 -- | A minimization daigram just maps every plane on the lower envelope to the region
 -- above which it is minimal. Every plane has at most one such a region.
-newtype MinimizationDiagram r plane = MinimizationDiagram (NEMap plane (Region r (Point 2 r)))
+newtype MinimizationDiagram r vertex plane = MinimizationDiagram (NEMap plane (Region r vertex))
   deriving stock (Show,Eq)
 
-type instance NumType   (MinimizationDiagram r plane) = r
-type instance Dimension (MinimizationDiagram r plane) = 2
+type instance NumType   (MinimizationDiagram r vertex plane) = r
+type instance Dimension (MinimizationDiagram r vertex plane) = 2
 
-instance Constrained (MinimizationDiagram r) where
-  type Dom (MinimizationDiagram r) plane = (Ord plane, NumType plane ~ r)
+instance Constrained (MinimizationDiagram r vertex) where
+  type Dom (MinimizationDiagram r vertex) plane = ( Ord plane, NumType plane ~ r
+                                                  -- , NumType vertex ~ r
+                                                  )
 
-instance CFunctor (MinimizationDiagram r) where
+instance CFunctor (MinimizationDiagram r vertex) where
   cmap f (MinimizationDiagram m) = MinimizationDiagram $ NEMap.mapKeys f m
 
-
-
 -- | Get the underlying Map that relates every plane in the envelope to its projected region
-asMap                         :: MinimizationDiagram r plane -> NEMap plane (Region r (Point 2 r))
+asMap                         :: MinimizationDiagram r vertex plane
+                              -> NEMap plane (Region r vertex)
 asMap (MinimizationDiagram m) = m
+
+
+-- | Apply some mapping function to the vertex data of each vertex
+mapVertices                           :: (vertex -> vertex')
+                                      -> MinimizationDiagram r vertex plane
+                                      -> MinimizationDiagram r vertex' plane
+mapVertices f (MinimizationDiagram m) = MinimizationDiagram $ fmap (fmap f) m
+
+-- -- | Apply some mapping function to both the vertices and the planes.
+-- cbimap :: (Ord plane, Ord plane', NumType plane ~ r, NumType plane' ~ r)
+--        => (vertex -> vertex') -> (plane -> plane')
+--        -> MinimizationDiagram r vertex plane
+--        -> MinimizationDiagram r vertex' plane'
+-- cbimap f g (MinimizationDiagram m) = MinimizationDiagram . fmap (fmap f) $ NEMap.mapKeys g m
+
+
 
 
 

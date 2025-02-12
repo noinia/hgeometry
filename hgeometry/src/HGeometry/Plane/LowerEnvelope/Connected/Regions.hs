@@ -18,33 +18,52 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
   , mergeDefiners
 
   , VertexForm
+
+
+  , fromVertexFormIn
+  , BoundedRegion
+
+
+  , extraPoints
   ) where
 
+import           Control.Lens
 import           Data.Coerce
 import qualified Data.Foldable as F
 import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map.NonEmpty as NEMap
-import           Data.Maybe (fromMaybe, listToMaybe)
+import           Data.Map.NonEmpty (NEMap)
+import qualified Data.Map.NonEmpty as Map
+import           Data.Maybe (fromMaybe)
+import           Data.Monoid (First(..))
 import           Data.Ord (comparing)
-import           Data.Set (Set)
-import qualified Data.Set as Set
+import           Data.Set.NonEmpty (NESet)
+import qualified Data.Set.NonEmpty as Set
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
+import           HGeometry.HalfLine
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
+import           HGeometry.Intersection
+import           HGeometry.LineSegment
 import           HGeometry.NonEmpty.Util
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
-import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
+import           HGeometry.Plane.LowerEnvelope.Connected.Primitives (intersectionVector)
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm
 import           HGeometry.Point
+import           HGeometry.Point.Either
+import           HGeometry.Polygon.Class
+import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Simple.Class
+import           HGeometry.Triangle
 import           HGeometry.Vector
 
--- import           Debug.Trace
+import           Debug.Trace
+
 ----------------------------------------
 
 -- | returns the CCW predecessor, and CCW successor of the given plane.
@@ -71,13 +90,16 @@ extractH0 (Point3 x y _) hs = case extractMinimaBy (comparing $ evalAt (Point2 x
 -- | Given three planes h0, h and h' that all intersect in a common vertex v,
 -- and so that h0 is the lowest plane vertically above v, order the
 -- other two planes in CCW order.
-cmpPlanesAround                     :: (Plane_ plane r, Eq plane, Ord r, Fractional r)
+cmpPlanesAround                     :: (Plane_ plane r, Eq plane, Ord r, Fractional r
+                                       , Show plane, Show r
+                                       )
                                     => plane -> plane -> plane -> Ordering
 cmpPlanesAround h0 h h' | h == h'   = EQ
                         | otherwise = case snd <$> definers (Three h0 h h') of
-                            Just (Definers (_ :| [hPrev, hSucc])) | h == hPrev -> LT
-                                                                  | otherwise  -> GT
-                            _ -> error "cmpPlanesAround: precondition failed"
+                            Just (Definers (_ :| [hPrev, _hSucc])) | h == hPrev -> LT
+                                                                   | otherwise  -> GT
+                            _ -> error $ "cmpPlanesAround: precondition failed"
+                                         <> show (h0,h,h')
 --  note that the first definer will, by definition/by precondition just be h0
 
 -- | Merge two lists of definers.
@@ -119,17 +141,141 @@ mergeDefiners v defs0 defs1 = case extractH0 v (coerce defs0 <> coerce defs1) of
 --------------------------------------------------------------------------------
 -- * Converting into a minimization diagram
 
+type BoundedRegion r vertex corner =
+  ConvexPolygonF NonEmpty (OriginalOrExtra vertex corner)
+
+-- | Pre: the triangle is big enough to contain all vertices of the lower envelope
+fromVertexFormIn     :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show plane
+                        , HasDefiners vertexData plane
+                        , Point_ corner 2 r
+                        , Ord vertexData -- figure out why we need this?
+                        , Show r, Show corner
+                        )
+                     => Triangle corner
+                     -> NEMap (Point 3 r) vertexData
+                     -> NEMap plane (BoundedRegion r (Point 2 r :+ vertexData) (Point 2 r))
+fromVertexFormIn tri = case fromPoints $ (Extra . (^.asPoint)) <$> tri of
+  Just tri' -> fmap (fromMaybe tri' . clipTo tri) . asMap . fromVertexForm
+  Nothing   -> error "absurd: fromVertexFormIn"
+
+clipTo     :: (Point_ corner 2 r, Fractional r, Ord r
+              , Show r, Show corner
+              )
+           => Triangle corner -> Region r (Point 2 r :+ vertexData)
+           -> Maybe (BoundedRegion r (Point 2 r :+ vertexData) (Point 2 r))
+clipTo tri = \case
+  Bounded vs          -> Just $ uncheckedFromCCWPoints $ Original <$> vs
+    --todo ; fix clip this as well
+  Unbounded u chain v -> do (u',chain0) <- trimChain  tri u chain
+                            (v',chain') <- trimRChain tri v chain0
+                            let p        = NonEmpty.head chain
+                                q        = NonEmpty.last chain
+                                hp       = HalfLine (p^.asPoint) ((-1) *^ u')
+                                hq       = HalfLine (q^.asPoint) v'
+                                extras   = extraPoints hp hq (view asPoint <$> tri)
+                            pure . uncheckedFromCCWPoints $
+                              (Extra <$> extras) <> (Original <$> chain')
+
+
+trimChain     :: (Point_ corner 2 r, Point_ point 2 r, Num r, Ord r)
+              => Triangle corner
+              -> Vector 2 r -> NonEmpty point -> Maybe (Vector 2 r, NonEmpty point)
+trimChain tri = go
+  where
+    go u chain@(p :| rest)
+      | (p^.asPoint) `intersects` tri = Just (u,chain)
+      | otherwise                     = case NonEmpty.nonEmpty rest of
+                                          Nothing           -> Nothing
+                                          Just rest'@(q:|_) -> go (q .-. p) rest'
+
+
+trimRChain       :: (Point_ corner 2 r, Point_ point 2 r, Num r, Ord r)
+                 => Triangle corner
+                 -> Vector 2 r -> NonEmpty point -> Maybe (Vector 2 r, NonEmpty point)
+trimRChain tri v = either (const Nothing) Just . go
+  where
+    -- main idea: we compute either the result (i.e. the vector and the chain), or
+    -- the first point of the suffix  that lies outside the triangle
+    go chain@(p :| rest) = case NonEmpty.nonEmpty rest of
+      Nothing
+        | (p^.asPoint) `intersects` tri -> Right (v,chain)
+        | otherwise                     -> Left p
+      Just rest'                        -> case go rest' of
+        Left q
+          | (p^.asPoint) `intersects` tri -> Right (q .-. p, NonEmpty.singleton p)
+          | otherwise                     -> Left p
+        Right (w,result)                  -> Right (w, p NonEmpty.<| result)
+  -- TODO: hmm, come to think of it; can't the chain enter/exit the triangle multiple times?
+
+
+-- TODO: I don't think the precondition holds in all our recursive calls.
+-- so we should just clip them properly.
+
+-- | computes the extra vertices that we have to insert to make an unbounded region bounded
+extraPoints            :: ( Triangle_ triangle corner, Point_ corner 2 r
+                          , Point_ point 2 r, Fractional r, Ord r
+                          , IsIntersectableWith (HalfLine point) (ClosedLineSegment corner)
+                          , Intersection (HalfLine point) (ClosedLineSegment corner)
+                            ~ Maybe (HalfLineLineSegmentIntersection (Point 2 r)
+                                                                     (ClosedLineSegment corner))
+                          , HasOuterBoundary triangle, Eq (VertexIx triangle)
+
+                          , Show point, Show r, Show corner
+                          , Show triangle
+                          )
+                       => HalfLine point -> HalfLine point -> triangle
+                       -> NonEmpty (Point 2 r)
+extraPoints hp hq tri | traceShow ("extraPoints",hp,hq,tri) False = undefined
+extraPoints hp hq tri = noDuplicates $ q :| cornersInBetween qSide pSide tri <> [p]
+    -- if the intersection point coincides with a corner then the current code includes
+    -- the corner. We use the noDuplicates to get rid of those.
+  where
+    (q,qSide) = intersectionPoint hq
+    (p,pSide) = intersectionPoint hp
+
+    intersectionPoint  h = case getFirst $ intersectionPoint' h of
+                             Nothing -> error "extraPoints: precondititon failed "
+                             Just x  -> x
+
+    intersectionPoint' h = flip (ifoldMapOf outerBoundaryEdgeSegments) tri $ \(side,_) seg ->
+      case traceShowWith (h,seg,"  intersects in ",) $
+        h `intersect` seg of
+        Just (HalfLine_x_LineSegment_Point x) -> First $ Just (x, side)
+        _                                     -> First   Nothing
+
+    noDuplicates = fmap NonEmpty.head . NonEmpty.group1
+
+cornersInBetween         :: ( HasVertices triangle triangle, Eq (VertexIx triangle)
+                            , Point_ (Vertex triangle) 2 r
+                            )
+                         => VertexIx triangle -> VertexIx triangle
+                         -> triangle -> [Point 2 r]
+cornersInBetween s e tri = map (^._2.asPoint)
+                         . takeWhile ((/= e) . fst) . dropWhile ((/= s) . fst)
+                         $ cycle (itoListOf vertices tri)
+
+-- TODO: there is a bunch of code duplication here with intersecting a rectangle in Type
+
+----------------------------------------
+
+
+-- NEMap plane (Region r vertex)
+
+
 -- | Given the vertices of the lower envelope; compute the minimization diagram.
 --
--- \(O(h\log h)\) assuming that the input is degenerate.
-fromVertexForm :: (Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show plane)
-               => VertexForm r plane -> MinimizationDiagram r plane
+-- \(O(h\log h)\) assuming that the input is non-degenerate.
+fromVertexForm :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show plane
+                  , HasDefiners vertex plane
+                  , Ord vertex -- figure out why we need this?
+                  )
+               => NEMap (Point 3 r) vertex
+               -> MinimizationDiagram r (Point 2 r :+ vertex) plane
 fromVertexForm = MinimizationDiagram
-               . NEMap.mapWithKey sortAroundBoundary . mapWithKeyMerge1 (\v defs ->
-                    NEMap.fromList . fmap (,Set.singleton (v,defs)) . toNonEmpty $ defs)
-               . f
-  where
-    f = NEMap.unsafeFromMap -- FIXME
+               . Map.mapWithKey sortAroundBoundary
+               . mapWithKeyMerge1 (\v vertexData ->
+                    foldMap1 (\h -> Map.singleton h (Set.singleton (v,vertexData)))
+                             (definersOf vertexData))
 
 -- for each vertex v, we go through its definers defs; and for each such plane h, we
 -- associate it with with the set {(v,defs)}. the foldMapWithKey part thus collects all
@@ -142,36 +288,42 @@ fromVertexForm = MinimizationDiagram
 
 -- | Given a plane h, and the set of vertices incident to h, compute the corresponding
 -- region in the minimization diagram.
-sortAroundBoundary            :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
-                              => plane -> Set (Point 3 r, Definers plane)
-                              -> Region r (Point 2 r)
-sortAroundBoundary h vertices = case inCCWOrder . map project . Set.toList $ vertices of
-    []        -> error "absurd: every plane has a non-empty set of incident vertices"
-    [v]       -> let (u,p,w) = singleVertex h v in Unbounded u (NonEmpty.singleton p) w
-    vertices' -> let edges     = zip vertices' (drop 1 vertices' <> vertices')
-                 in case List.break (isInvalid h) edges of
-                            (vs, (u,v) : ws) -> let chain = NonEmpty.fromList . map (fst . fst)
-                                                          $ ws <> vs <> [(u,v)]
-                                                in unboundedRegion h chain v u
-                            (_,  [])         -> let vertices'' = fromNonEmpty
-                                                               . NonEmpty.fromList
-                                                               $ map fst vertices'
-                                                in Bounded vertices''
-
+sortAroundBoundary             :: ( Plane_ plane r, Ord r, Fractional r, Ord plane
+                                  , HasDefiners vertex plane
+                                  )
+                               => plane -> NESet (Point 3 r, vertex)
+                               -> Region r (Point 2 r :+ vertex)
+sortAroundBoundary h vertices' = case NonEmpty.nonEmpty rest of
+    Nothing     -> let (u,p,w) = singleVertex h v0 in Unbounded u (NonEmpty.singleton p) w
+    Just rest'  -> let edges' = NonEmpty.zip vertices'' (rest' <> vertices'')
+                   in case NonEmpty.break (isInvalid h) edges' of
+                        (_,  [])         -> boundedRegion $ uncurry (:+) <$> vertices''
+                        (vs, (u,v) : ws) -> let chain = fmap (uncurry (:+) . fst)
+                                                      . NonEmpty.fromList
+                                                      $ ws <> vs <> [(u,v)]
+                                            in unboundedRegion h chain v u
+  where
+    vertices''@(v0 :| rest) = inCCWOrder . fmap project . Set.toList $ vertices'
+    boundedRegion = Bounded . fromNonEmpty
+    -- The main idea is to test if the region is unbounded; i.e. containing an "edge"
+    -- that is not really an edge. If so, we break open the edges there, and
+    -- construct an appropriate chain from it.
 
 -- | Given a plane h, and the single vertex v incident to the region of h, computes the
 -- unbounded region for h.
 --
--- In particular, returns the pair (u,p,w). h is the region to the left of u, and also the
+-- In particular, returns the triple (u,p,w). h is the region to the left of u, and also the
 -- left of w.
-singleVertex           :: (Plane_ plane r, Ord r, Fractional r, Ord plane)
-                       => plane -> (Point 2 r, Definers plane)
-                       -> (Vector 2 r, Point 2 r, Vector 2 r)
-singleVertex h (v,defs) = fromMaybe (error "singleVertex: absurd") $
-    do (hPred,hSucc) <- findNeighbours h defs
+singleVertex           :: ( Plane_ plane r, Ord r, Fractional r, Ord plane
+                          , HasDefiners vData plane
+                          )
+                       => plane -> (Point 2 r, vData)
+                       -> (Vector 2 r, Point 2 r :+ vData, Vector 2 r)
+singleVertex h (v,vData) = fromMaybe (error "singleVertex: absurd") $
+    do (hPred,hSucc) <- findNeighbours h (definersOf vData)
        u             <- intersectionVector h hPred
        w             <- intersectionVector h hSucc
-       pure (w, v, u)
+       pure (w, v :+ vData, u)
 
 -- | Given:
 --
@@ -182,11 +334,14 @@ singleVertex h (v,defs) = fromMaybe (error "singleVertex: absurd") $
 --
 -- computes the actual region R. In particular, we compute the direction that the
 -- unbounded edges have.
-unboundedRegion              :: forall plane r.(Plane_ plane r, Ord r, Fractional r, Ord plane)
+unboundedRegion              :: forall plane r vertexData.
+                                ( Plane_ plane r, Ord r, Fractional r, Ord plane
+                                , HasDefiners vertexData plane
+                                )
                              => plane
-                             -> NonEmpty (Point 2 r)
-                             -> (Point 2 r, Definers plane) -> (Point 2 r, Definers plane)
-                             -> Region r (Point 2 r)
+                             -> NonEmpty (Point 2 r :+ vertexData)
+                             -> (Point 2 r, vertexData) -> (Point 2 r, vertexData)
+                             -> Region r (Point 2 r :+ vertexData)
 unboundedRegion h chain v@(v',_) u@(u',_)  = Unbounded wv chain wu
   where
     (v1,_,v2) = singleVertex h v
@@ -224,14 +379,17 @@ unboundedRegion h chain v@(v',_) u@(u',_)  = Unbounded wv chain wu
 -- | Test if (u,v) is an invalid edge to be on the CCW boundary of h.  this can mean that
 -- either (u,v) is not an actual edge (i.e. u and v) are connected to the vertex at
 -- infinity. Or that the edge is in the wrong orientation
-isInvalid                          :: (Plane_ plane r, Eq plane, Ord r, Fractional r)
+isInvalid                          :: ( Plane_ plane r, Eq plane, Ord r, Fractional r
+                                      , HasDefiners vertexData plane
+                                      )
                                    => plane
-                                   -> ( (Point 2 r, Definers plane)
-                                      , (Point 2 r, Definers plane)) -> Bool
-isInvalid h ((_u,defsU), (_v,defsV)) =
+                                   -> ( (Point 2 r, vertexData)
+                                      , (Point 2 r, vertexData)
+                                      ) -> Bool
+isInvalid h ((_u,uData), (_v,vData)) =
   fromMaybe (error "isInvalid: h not found in the definers!?") $ do
-      (hPredU,_) <- findNeighbours h defsU
-      (_,hSuccV) <- findNeighbours h defsV
+      (hPredU,_) <- findNeighbours h (definersOf uData)
+      (_,hSuccV) <- findNeighbours h (definersOf vData)
       pure $ hPredU /= hSuccV
     -- if (u,v) is actually a valid edge, i.e. it has h to its left, then the CCW
     -- successor w.r.t to v, and the CCW predecessor w.r.t u must be the same plane.
@@ -243,9 +401,9 @@ project (Point3 x y _, loc) = (Point2 x y, loc)
 
 -- | Given a list of vertices of a (possibly unbounded) convex polygonal region (in
 -- arbitrary orientation), sort the vertices so that they are listed in CCW order.
-inCCWOrder     :: (Ord r, Fractional r) => [(Point 2 r, a)] -> [(Point 2 r, a)]
+inCCWOrder     :: (Ord r, Fractional r) => NonEmpty (Point 2 r, a) -> NonEmpty (Point 2 r, a)
 inCCWOrder pts = case pts of
-  ((p,_):(q,_):_) -> let c               = p .+^ ((q .-. p) ^/ 2)
-                         cmp (a,_) (b,_) = ccwCmpAround c a b <> cmpByDistanceTo c a b
-                     in List.sortBy cmp pts
-  _               -> pts -- already sorted.
+  ((p,_):|(q,_):_) -> let c               = p .+^ ((q .-. p) ^/ 2)
+                          cmp (a,_) (b,_) = ccwCmpAround c a b <> cmpByDistanceTo c a b
+                      in NonEmpty.sortBy cmp pts
+  _                -> pts -- already sorted.

@@ -43,7 +43,8 @@ upperHull = lowerEnvelope . fmap (\p -> dualHyperPlane p :+ p)
 type Facet point = NonEmpty point
 
 -- | Outputs the facets of the upper hull.
-facets :: (Ord (NumType point)) => UpperHull point -> [Facet point]
+facets :: (Ord (NumType point), Ord point
+          ) => UpperHull point -> [Facet point]
 facets = \case
     ParallelStrips _      -> [] -- error "facets: parallel strips; no bounded facets"
     ConnectedEnvelope env -> toList $ toFacet <$> NEMap.elems theVertices

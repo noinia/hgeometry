@@ -26,18 +26,13 @@ import           Data.Aeson
 import qualified Data.Aeson as Aeson
 import qualified Data.Foldable as F
 import           Data.Functor.Classes
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.List.NonEmpty (NonEmpty)
-import qualified Data.Map as Map
 import           Data.Semigroup.Foldable
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
 import           GHC.Generics
-import           HGeometry.Boundary
 import           HGeometry.Box
 import           HGeometry.Cyclic
 import           HGeometry.Foldable.Util
 import qualified HGeometry.Foldable.Util as F
-import           HGeometry.Intersection
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector.NonEmpty.Util ()

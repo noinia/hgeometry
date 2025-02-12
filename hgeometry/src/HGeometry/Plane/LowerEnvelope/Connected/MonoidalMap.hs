@@ -4,6 +4,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
   , mapWithKeyMerge
 
   , MonoidalNEMap(..)
+  , unions1WithKey
   , mapWithKeyMerge1
   ) where
 
@@ -42,10 +43,9 @@ instance (Ord k, Semigroup v) => Monoid (MonoidalMap k v) where
 
 --------------------------------------------------------------------------------
 
--- -- | Merge a bunch of maps
--- unions1WithKey   :: (Foldable1 f, Ord k) => (k -> a-> a ->a) -> f (NEMap k a) -> NEMap k a
--- unions1WithKey f = F.foldl' (NEMap.unionWithKey f) Map.empty
-
+-- | Merge a bunch of non-empty maps with the given mergin function
+unions1WithKey   :: (Foldable1 f, Ord k) => (k -> a-> a ->a) -> f (NEMap k a) -> NEMap k a
+unions1WithKey f = foldl1' (NEMap.unionWithKey f)
 
 -- | Merge the maps. When they share a key, combine their values using a semigroup.
 mapWithKeyMerge1   :: (Ord k', Semigroup v')

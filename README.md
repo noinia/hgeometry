@@ -62,6 +62,22 @@ The hgeometry package itself actually consists of several libraries:
   primitives. For example lines, halfspaces, line segments, balls,
   circles, rectangles etc.
 
+* hgeometry:polygon
+
+  Defines types for representing Polygons, in particular Simple polygons,
+  Convex polygons, and polygons with holes, as well as a typeclasses
+  that capture some basic operations involving polygons.
+
+* hgeometry:polyLine
+
+  Defines a type for representing PolyLines, as well as a typeclass
+  that captures some basic operations of this type.
+
+* hgeometry:spline
+
+  Defines bezier splines.
+
+
 * hgeometry:ipe
 
   Defines functions for reading, writing, and manipulating
@@ -82,6 +98,18 @@ using the library.
 This is a brief overview of some of the main available algorithms in
 HGeometry. Refer to the haddocks for more details. HGeometry contains
 algorithms for computing
+
+* The *lower envelope* of a set of $n$ planes in $\mathbb{R}^3$. This
+  then also allows us to compute
+
+  - the convex hull of a set of $n$ points in $\mathbb{R}^3$,
+  - the Voronoi diagram of a set of $n$ points in $\mathbb{R}^2$, as
+    well as compute the
+  - Delaunay triangulation of $n$ points in $\mathbb{R}^2$.
+
+  Currently we provide only a naive $O(n^4)$ time implementation for
+  this, but work is ongoing to implement $O(n\log n)$ time algorithms
+  (both expected and worst case).
 
 * the *convex hull* of $n$ points in $\mathbb{R}^2$. In particular,
 

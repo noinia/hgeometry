@@ -13,14 +13,17 @@ module HGeometry.Plane.LowerEnvelope.Connected.VertexForm
   , Definers(..)
   , fromCCWList
   , definers
+
+  , HasDefiners(..)
   ) where
 
+import           Control.Lens
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Map (Map)
 import           Data.Maybe (fromMaybe)
 import           HGeometry.Combinatorial.Util
+import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Intersection
@@ -34,7 +37,27 @@ import           HGeometry.Vector
 
 -- | The vertices of a lower envelope is just a Map with every vertex its definers,
 -- i.e. the planes that define the vertex in CCW order around it.
-type VertexForm r plane = Map (Point 3 r) (Definers plane)
+type VertexForm map r plane = map (Point 3 r) (Definers plane)
+
+
+-- type VertexForm' r plane = Map (Point 3 r) (Definers plane)
+
+
+class HasDefiners vertex plane | vertex -> plane where
+  -- | Access the definers of some object
+  definersOf :: vertex -> Definers plane
+
+instance HasDefiners (Definers plane) plane where
+  definersOf = id
+
+instance HasDefiners (core :+ Definers plane) plane where
+  definersOf = view extra
+
+-- instance HasDefiners (core :+ (Definers plane, b)) plane where
+--   definersOf = view (extra._1)
+
+instance HasDefiners (Definers plane, b) plane where
+  definersOf = fst
 
 ----------------------------------------
 -- *  The planes defining a vertex

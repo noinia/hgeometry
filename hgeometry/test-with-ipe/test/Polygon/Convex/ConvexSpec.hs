@@ -15,6 +15,7 @@ import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Convex.MinkowskiSum
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Transformation
 import           HGeometry.Vector

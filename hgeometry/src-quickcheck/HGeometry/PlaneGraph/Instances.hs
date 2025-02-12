@@ -103,7 +103,7 @@ largestComponent gr = witherGraphTo tr gr
 -- | Convert a Vornooi diagram into a minimization diagram again
 asMD :: ( Point_ point 2 r
         , Num r, Ord r
-        ) => VoronoiDiagram' point -> MinimizationDiagram r (Plane r)
+        ) => VoronoiDiagram' vertex point -> MinimizationDiagram r vertex (Plane r)
 asMD = MinimizationDiagram . NEMap.mapKeys pointToPlane . coerce
 
 

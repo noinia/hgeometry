@@ -1,4 +1,5 @@
 {-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Polygon.Class
@@ -25,22 +26,23 @@ module HGeometry.Polygon.Class
   , HasEdges(..), HasEdges'(..)
   ) where
 
-import Control.Lens hiding (holes)
-import Data.Function (on)
-import Data.Kind (Type)
-import Data.Void
-import HGeometry.Ext
-import HGeometry.Lens.Util
--- import qualified Data.Functor.Apply as Apply
-import Data.Semigroup (First(..))
-import HGeometry.LineSegment
-import HGeometry.Point
-import HGeometry.Properties
-import HGeometry.Vector
-import HGeometry.Polygon.Simple.Type
-import Hiraffe.Graph
-import Data.Vector.NonEmpty.Internal (NonEmptyVector)
-import HGeometry.Cyclic (Cyclic)
+import           Control.Lens hiding (holes)
+import           Data.Function (on)
+import qualified Data.Functor.Apply as Apply
+import           Data.Kind (Type)
+import           Data.Semigroup (First(..))
+import           Data.Vector.NonEmpty.Internal (NonEmptyVector)
+import           Data.Void
+import           HGeometry.Cyclic (Cyclic)
+import           HGeometry.Ext
+import           HGeometry.Lens.Util
+import           HGeometry.LineSegment
+import           HGeometry.Point
+import           HGeometry.Polygon.Simple.Type
+import           HGeometry.Properties
+import           HGeometry.Triangle
+import           HGeometry.Vector
+import           Hiraffe.Graph
 
 --------------------------------------------------------------------------------
 -- ^ A class for items that have an outer boundary.
@@ -295,6 +297,55 @@ instance Polygon_ polygon point r  => Polygon_ (polygon :+ extra) point r where
   ccwSuccessorOf   u = core .> ccwSuccessorOf   u
 
 --------------------------------------------------------------------------------
+
+instance (Point_ point 2 r, Num r, Eq r) => HasOuterBoundary (Triangle point) where
+  outerBoundaryVertexAt i = singular (vertexAt $ i `mod` 3)
+  outerBoundary = vertices
+  ccwOuterBoundaryFrom i = \pvFv tri -> ifCCW tri id reversed (traverseTriangleFrom i) pvFv tri
+  cwOuterBoundaryFrom  i = \pvFv tri -> ifCCW tri reversed id (traverseTriangleFrom i) pvFv tri
+
+-- | Helper to reverse the orientation of the traversal depending on the orientation
+-- of the triangle.
+ifCCW         :: (Point_ point 2 r, Num r, Eq r)
+              => Triangle point
+              -> Iso' (Triangle point) (Triangle point)
+              -> Iso' (Triangle point) (Triangle point)
+              -> IndexedTraversal1' Int (Triangle point) point
+              -> IndexedTraversal1' Int (Triangle point) point
+ifCCW tri f g t
+  | (\x -> x == abs x) . triangleSignedArea2X $ tri = f.t
+  | otherwise                                       = g.t
+
+-- | Traverse the boundary of a triangle from the given starting vertex
+traverseTriangleFrom   :: forall point. Int -> IndexedTraversal1' Int (Triangle point) point
+traverseTriangleFrom i = conjoined trav (itrav . indexed)
+  where
+    trav :: Apply.Apply f => (point -> f point) -> Triangle point -> f (Triangle point)
+    trav f (Triangle a b c) = case i `mod` 3 of
+                                0 -> Triangle
+                                      <$> f a Apply.<.> f b Apply.<.> f c
+                                1 -> (\b' c' a' -> Triangle a' b' c')
+                                     <$> f b Apply.<.> f c Apply.<.> f a
+                                _ -> (\c' a' b' -> Triangle a' b' c')
+                                     <$> f c Apply.<.> f a Apply.<.> f b
+    itrav :: Apply.Apply f => (Int -> point -> f point) -> Triangle point -> f (Triangle point)
+    itrav f (Triangle a b c) = case i `mod` 3 of
+                                 0 -> Triangle
+                                      <$> f 0 a Apply.<.> f 1 b Apply.<.> f 2 c
+                                 1 -> (\b' c' a' -> Triangle a' b' c')
+                                      <$> f 1 b Apply.<.> f 2 c Apply.<.> f 0 a
+                                 _ -> (\c' a' b' -> Triangle a' b' c')
+                                      <$> f 2 c Apply.<.> f 0 a Apply.<.> f 1 b
+
+
+-- We need Rectanlge to be an instance of HasVertices' first; but that requires
+-- that vertices is a fold rather than a traversal.
+-- instance (Point_ point 2 r, Num r) => HasOuterBoundary (Rectangle point) where
+--   outerBoundaryVertexAt i = undefined
+--   ccwOuterBoundaryFrom i = undefined
+--   cwOuterBoundaryFrom i = undefined
+
+
 
 -- data MultiPG
 -- data SimplePG
