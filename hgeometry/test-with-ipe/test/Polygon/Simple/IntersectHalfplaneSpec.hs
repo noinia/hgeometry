@@ -6,8 +6,10 @@ module Polygon.Simple.IntersectHalfplaneSpec where
 
 import           Control.Lens
 import           Control.Monad.State
-import           Data.Foldable (toList)
+import           Data.Foldable (toList, for_)
 import           Data.Foldable1
+import           Data.Functor.Apply (Apply)
+import           Data.Functor.Contravariant (phantom)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (isJust, mapMaybe)
@@ -35,7 +37,9 @@ import           HGeometry.Vector
 import           Ipe
 import           System.OsPath
 import           Test.Hspec
-import Data.Functor.Contravariant (phantom)
+import           Test.Hspec.WithTempFile
+import HGeometry.Box
+import Ipe.Color
 
 --------------------------------------------------------------------------------
 
@@ -82,9 +86,16 @@ data HalfPlanePolygonIntersection f r vertex =
 type instance Intersection (HalfPlane line) (SimplePolygonF f point) =
   [HalfPlanePolygonIntersection f (NumType point) point]
 
+type instance Intersection (HalfPlane line :+ extra) (SimplePolygonF f point :+ extra') =
+  Intersection (HalfPlane line) (SimplePolygonF f point)
+
+
+-- FIX: we halfplane polygon intersection should again be a convex polygon
 type instance Intersection (HalfPlane line) (ConvexPolygonF f point) =
   Maybe (HalfPlanePolygonIntersection f (NumType point) point)
 
+type instance Intersection (HalfPlane line :+ extra) (ConvexPolygonF f point :+ extra') =
+  [HalfPlanePolygonIntersection f (NumType point) point]
 
 instance ( Point_ point 2 r, Num r, Ord r, VertexContainer f point
          , HyperPlane_ line 2 r
@@ -145,17 +156,26 @@ withCyclicSuccessor :: forall cyclic a b. Traversable1 cyclic
 withCyclicSuccessor = \f xs -> let x0 :| xs' = toNonEmpty xs
                                in sequence1 $ zipWithList (\s x -> f (x,s)) (xs' <> [x0]) xs
 
+-- | An indexed version of 'withCyclicSuccessor'
+iWithCyclicSuccessor :: forall cyclic i a b. (Traversable1 cyclic, TraversableWithIndex i cyclic)
+                     => IndexedTraversal1 (i,i) (cyclic a) (cyclic b) (a,a) b
+iWithCyclicSuccessor = conjoined withCyclicSuccessor (theITrav . indexed)
+  where
+    theITrav      :: Apply f => ((i,i) -> (a,a) -> f b) -> cyclic a -> f (cyclic b)
+    theITrav f xs = let x0 :| xs' = toNonEmpty $ imap ((,)) xs
+                    in sequence1 $ izipWithList (\(j,s) i x -> f (i,j) (x,s)) (xs' <> [x0]) xs
+
+
+  -- f xs -> let x0 :| xs' = toNonEmpty xs
+  --                              in sequence1 $ zipWithList (\s x -> f (x,s)) (xs' <> [x0]) xs
+
+
   -- conjoined theTrav (theITrav . indexed)
   -- where
   --   theTrav      :: Apply f
   --                => ((a,a) -> f b) -> cyclic a -> f (cyclic b)
   --   theTrav f xs =
 
-  --   theITrav      :: Apply f
-  --                 => ((i,i) -> (a,a) -> f b) -> cyclic a -> f (cyclic b)
-  --   theITrav f xs = let x0 :| xs' = toNonEmpty $ imap ((,)) xs
-  --                   in sequence1 $
-  --                      izipWithList (\(j,s) i x -> f (i,j) (x,s)) (xs' <> [x0]) xs
 
 -- | A traversal that associates every elemnt with its predecessor
 withCyclicPredecessor :: forall cyclic a b. Traversable1 cyclic
@@ -163,39 +183,49 @@ withCyclicPredecessor :: forall cyclic a b. Traversable1 cyclic
 withCyclicPredecessor = \f xs -> let xs' = toList xs
                                  in sequence1 $ zipWithList (\p x -> f (p,x)) (xs^.last1 : xs') xs
 
-    -- theITrav      :: Apply f
-    --               => ((i,i) -> (a,a) -> f b) -> cyclic a -> f (cyclic b)
-    -- theITrav f xs = let xs' = imap ((,)) xs
-    --                 in sequence1 $
-    --                    izipWithList (\(i,p) j x -> f (i,j) (p,x)) (xs'^.last1 : toList xs') xs
+
+-- | An indexed traversal that associates every elemnt with its predecessor
+iWithCyclicPredecessor :: forall cyclic i a b. (Traversable1 cyclic, TraversableWithIndex i cyclic)
+                       => IndexedTraversal1 (i,i) (cyclic a) (cyclic b) (a,a) b
+iWithCyclicPredecessor = conjoined withCyclicPredecessor (theITrav . indexed)
+  where
+    theITrav      :: Apply f => ((i,i) -> (a,a) -> f b) -> cyclic a -> f (cyclic b)
+    theITrav f xs = let xs' = imap ((,)) xs
+                    in sequence1 $
+                       izipWithList (\(i,p) j x -> f (i,j) (p,x)) (xs'^.last1 : toList xs') xs
 
 -- | Traverse a cyclic structure together with both its neighbors
-withCyclicNeighbors :: forall cyclic a b. Traversable1 cyclic
-                    => Traversal1 (cyclic a) (cyclic b) (a, Vector 2 a) b
-withCyclicNeighbors = \f xs -> let x0 :| xs' = toNonEmpty xs
-                                   ns        = zipWith Vector2 (xs^.last1 : x0 : xs') (xs' <> [x0])
-                               in sequence1 $ zipWithList (\s x -> f (x,s)) ns xs
+withCyclicNeighbours :: forall cyclic a b. Traversable1 cyclic
+                     => Traversal1 (cyclic a) (cyclic b) (a, Vector 2 a) b
+withCyclicNeighbours = \f xs -> let x0 :| xs' = toNonEmpty xs
+                                    ns        = zipWith Vector2 (xs^.last1 : x0 : xs') (xs' <> [x0])
+                                in sequence1 $ zipWithList (\s x -> f (x,s)) ns xs
 
+-- | An indexed traversal that associates every elemnt with its neighbours
+iWithCyclicNeighbours :: forall cyclic i a b. (Traversable1 cyclic, TraversableWithIndex i cyclic)
+                      => IndexedTraversal1 (i,Vector 2 i) (cyclic a) (cyclic b) (a,Vector 2 a) b
+iWithCyclicNeighbours = conjoined withCyclicNeighbours (theITrav . indexed)
+  where
+    theITrav      :: Apply f
+                  => ((i,Vector 2 i) -> (a,Vector 2 a) -> f b) -> cyclic a -> f (cyclic b)
+    theITrav f xs = let xs'       = imap ((,)) xs
+                        y0 :| ys' = toNonEmpty xs'
+                        ns        = zipWith Vector2 (xs'^.last1 : toList xs') (ys' <> [y0])
+                    in sequence1 $ izipWithList (\(Vector2 (h,p) (j,s)) i x
+                                                  -> f (i, Vector2 h j) (x,Vector2 p s)) ns xs
 
 -- type Fold s a = forall f. (Contravariant f, Applicative f) => (a -> f a) -> s -> f s
 
 
   -- forall p f. (Indexable i p, Contravariant f, Apply f) => p a (f a) -> s -> f s
 
--- withCyclicNeighbors' :: forall cyclic a. Traversable1 cyclic
+-- withCyclicNeighbours' :: forall cyclic a. Traversable1 cyclic
 --                     => Fold1 (cyclic a) (a, Vector 2 a)
--- withCyclicNeighbors' = \aFa xs -> phantom $ withCyclicNeighbors aFa xs
+-- withCyclicNeighbours' = \aFa xs -> phantom $ withCyclicNeighbours aFa xs
 
 
 
 
-    -- theITrav      :: Apply f
-    --               => ((i,Vector 2 i) -> (a,Vector 2 a) -> f b) -> cyclic a -> f (cyclic b)
-    -- theITrav f xs = let xs'       = imap ((,)) xs
-    --                     y0 :| ys' = toNonEmpty xs'
-    --                     ns        = zipWith Vector2 (xs'^.last1 : toList xs') (ys' <> [y0])
-    --                 in sequence1 $ izipWithList (\(Vector2 (h,p) (j,s)) i x
-    --                                               -> f (i, Vector2 h j) (x,Vector2 p s)) ns xs
 
 
 -- -- | A fold that associates every elemnt with its successor
@@ -240,13 +270,13 @@ test2 = toNonEmptyOf traverse1 (NonEmpty.fromList "abcde")
 
 
 test3 :: NonEmpty (Char,Vector 2 Char)
-test3 = runIdentity $ withCyclicNeighbors pure (NonEmpty.fromList "abcde")
+test3 = runIdentity $ withCyclicNeighbours pure (NonEmpty.fromList "abcde")
 
 -- itest :: NonEmpty ((Int, Vector 2 Int), (Char, Vector 2 Char))
--- itest = runIdentity $ withCyclicNeighbors (Indexed $ \i x -> pure (i,x)) (NonEmpty.fromList "abcde")
+-- itest = runIdentity $ withCyclicNeighbours (Indexed $ \i x -> pure (i,x)) (NonEmpty.fromList "abcde")
 
 
--- test4 = runIdentity $ (withCyclicNeighbors.withIndex) (Indexed $ \i x -> pure (i,x)) (NonEmpty.fromList "abcde")
+-- test4 = runIdentity $ (withCyclicNeighbours.withIndex) (Indexed $ \i x -> pure (i,x)) (NonEmpty.fromList "abcde")
 
 -- itest = toNonEmptyOf (withCyclicSuccessor.withIndex) (NonEmpty.fromList "abcde")
 
@@ -261,16 +291,16 @@ zipWithList f xs = flip evalState xs . traverse go
       (x:xs') -> do put xs'
                     pure $ f x y
 
--- -- | pre: the f and the list have the same size
--- izipWithList      :: forall f i a b c. TraversableWithIndex i f
---                  => (a -> i -> b -> c) -> [a] -> f b -> f c
--- izipWithList f xs = flip evalState xs . itraverse go
---   where
---     go     :: i -> b -> State [a] c
---     go i y = get >>= \case
---       []      -> error "izipWithList. precondition failed, too few a's"
---       (x:xs') -> do put xs'
---                     pure $ f x i y
+-- | pre: the f and the list have the same size
+izipWithList      :: forall f i a b c. TraversableWithIndex i f
+                 => (a -> i -> b -> c) -> [a] -> f b -> f c
+izipWithList f xs = flip evalState xs . itraverse go
+  where
+    go     :: i -> b -> State [a] c
+    go i y = get >>= \case
+      []      -> error "izipWithList. precondition failed, too few a's"
+      (x:xs') -> do put xs'
+                    pure $ f x i y
 
 --------------------------------------------------------------------------------
 
@@ -335,7 +365,7 @@ collectComponents   :: forall cyclic f vertex r. ( Point_ vertex 2 r, Ord r, Fra
                     => LinePV 2 r
                     -> cyclic (Bool, NonEmpty vertex)
                     -> [HalfPlanePolygonIntersection f r vertex]
-collectComponents l = foldMapOf (asFold1 withCyclicNeighbors) f
+collectComponents l = foldMapOf (asFold1 withCyclicNeighbours) f
   where
     f :: ((Bool, NonEmpty vertex), Vector 2 (Bool, NonEmpty vertex))
       -> [HalfPlanePolygonIntersection f r vertex]
@@ -379,7 +409,16 @@ instance ( Point_ vertex 2 r, Fractional r, Ord r, VertexContainer f vertex
 
 
 
+-- instance ( HasIntersectionWith (HalfPlane line) (SimplePolygonF f vertex)
+--          ) => HasIntersectionWith (HalfPlane line :+ extra)
+--                                   (SimplePolygonF f vertex :+ extra') where
+--   (halfPlane :+ _) `intersects` (poly :+ _) = halfPlane `intersects` poly
 
+instance ( IsIntersectableWith (HalfPlane line) (SimplePolygonF f vertex)
+         , HasIntersectionWith (HalfPlane line :+ extra) (SimplePolygonF f vertex :+ extra')
+         ) => IsIntersectableWith (HalfPlane line :+ extra)
+                                  (SimplePolygonF f vertex :+ extra') where
+  (halfPlane :+ _) `intersect` (poly :+ _) = halfPlane `intersect` poly
 
 
 
@@ -484,8 +523,57 @@ testIpe inFp outFp = describe (show inFp) $ do
         -- take the left halfpalne of every halfline
         pure (over core (leftHalfPlane . asOrientedLine) <$> rays, pgs)
 
-    for polygons $ \polygon ->
-      for halfPlanes $ \halfPlane ->
+    for_ polygons $ \polygon ->
+      for_ halfPlanes $ \halfPlane -> do
         it ("intersects halfplane and polygon") $
           (halfPlane `intersects` polygon) `shouldBe` True -- TODO; fix
+
+    let forMap'  = flip foldMap
+        content' = forMap' polygons $ \polygon ->
+                      forMap' halfPlanes $ \halfPlane ->
+                         [ iO' polygon
+                         , iO $ defIO (halfPlane^.core)
+                         , iO $ ipeGroup [ renderComponent comp
+                                         | comp <- halfPlane `intersect` polygon
+                                         ]
+                         ]
+    describe "compute intersection" $
+      goldenWith [osp|data/test-with-ipe/Polygon/Simple/|]
+                 (ipeContentGolden { name = outFp })
+                 content'
     pure ()
+
+
+renderComponent :: forall vertex f r.
+                   ( Point_ vertex 2 r, Foldable1 f
+                   , HasVertices (SimplePolygonF f (OriginalOrExtra vertex (Point 2 r)))
+                                 (SimplePolygonF f (Point 2 r))
+                   --  VertexContainer f (OriginalOrExtra vertex (Point 2 r))
+                   -- , VertexContainer f (Point 2 r)
+                   )
+                => HalfPlanePolygonIntersection f r vertex -> IpeObject r
+renderComponent = \case
+    HalfPlane_x_SimplePolygon_Vertex v     -> iO $ defIO (v^.asPoint)
+                                                 ! attr SStroke red
+    HalfPlane_x_SimplePolygon_Edge e       -> iO $ defIO (view asPoint <$> e)
+                                                 ! attr SStroke red
+    HalfPlane_x_SimplePolygon_Polygon poly -> iO $ ipeSimplePolygon @f (poly&vertices %~ getPt)
+                                                 ! attr SStroke red
+  where
+    getPt = \case
+      Original v -> v^.asPoint
+      Extra p    -> p
+
+
+instance (Fractional r, Ord r, Show r) => HasDefaultIpeOut (HalfSpaceF (LinePV 2 r)) where
+  type DefaultIpeOut (HalfSpaceF (LinePV 2 r)) = Group
+  defIO = ipeHalfPlane
+
+ipeHalfPlane :: (Show r, Fractional r, Ord r) => IpeOut (HalfSpaceF (LinePV 2 r)) Group r
+ipeHalfPlane = ipeHalfPlaneIn defaultBox
+
+ipeHalfPlaneIn          :: (Ord r, Fractional r, Show r)
+                        => Rectangle (Point 2 r) -> IpeOut (HalfSpaceF (LinePV 2 r)) Group r
+ipeHalfPlaneIn rect' hl = ipeGroup [ iO $ ipeLineIn rect' (hl^.boundingHyperPlane)
+                                   ]
+  -- TDOO: I think we also want to display the interior
