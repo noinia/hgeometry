@@ -369,7 +369,7 @@ collectComponents l = foldMapOf (asFold1 withCyclicNeighbours) f
   where
     f :: ((Bool, NonEmpty vertex), Vector 2 (Bool, NonEmpty vertex))
       -> [HalfPlanePolygonIntersection f r vertex]
-    f ((b, current@(v :| rest)), Vector2 (_,NonEmpty.last -> u) (_,w :| _))
+    f ((b, current@(v :| rest)), Vector2 (_,u :| _) (_,NonEmpty.last -> w))
       | not b     = []
       | otherwise = let vn     = NonEmpty.last current
                         extras = mapMaybe (intersectionPoint l) [(u,vn), (v,w)]
@@ -395,8 +395,8 @@ intersectionPoint line (u,v) = case LinePV (u^.asPoint) (v .-. u) `intersect` li
 -- TODO
 
 
-flatten :: NonEmpty (NonEmpty (a, b)) -> NonEmpty (b, NonEmpty a)
-flatten = fmap (\((x,b) :| xs) -> (b, x :| map fst xs))
+-- flatten :: NonEmpty (NonEmpty (a, b)) -> NonEmpty (b, NonEmpty a)
+-- flatten = fmap (\((x,b) :| xs) -> (b, x :| map fst xs))
 
 
 instance ( Point_ vertex 2 r, Fractional r, Ord r, VertexContainer f vertex
@@ -511,7 +511,9 @@ instance ( Point_ point 2 r, Num r, Ord r, VertexContainer f point
 spec :: Spec
 spec = describe "simple polygon x halfspace intersection" $ do
          testIpe [osp|polygonHalfspaceIntersection.ipe|]
-                 [osp|polygonHalfspaceIntersection.out.ipe|]
+                 [osp|polygonHalfspaceIntersection.out|]
+         testIpe [osp|convexHalfspaceIntersection.ipe|]
+                 [osp|convexHalfspaceIntersection.out|]
 
 testIpe            :: OsPath -> OsPath -> Spec
 testIpe inFp outFp = describe (show inFp) $ do
