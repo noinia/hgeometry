@@ -36,6 +36,7 @@ module Ipe.FromIpe(
   ) where
 
 import           Control.Lens hiding (Simple)
+import           Data.Foldable1
 import           Data.Kind (Type)
 import qualified Data.Sequence as Seq
 import           Data.Vector.NonEmpty (NonEmptyVector)
@@ -127,7 +128,9 @@ _asPolyLine = prism' poly2path path2poly
     -- than ignoring everything that does not fit
 
 -- | Convert to a simple polygon
-_asSimplePolygon :: Prism' (Path r) (SimplePolygon (Point 2 r))
+_asSimplePolygon :: Foldable1 f
+                 => Prism (Path r) (Path r)
+                          (SimplePolygon (Point 2 r)) (SimplePolygonF f (Point 2 r))
 _asSimplePolygon = prism' polygonToPath pathToPolygon
 
 -- | Convert to a convex polygon
@@ -180,7 +183,7 @@ _asRectangle = prism' rectToPath pathToRect
 _asTriangle :: Prism' (Path r) (Triangle (Point 2 r))
 _asTriangle = prism' triToPath path2tri
   where
-    triToPath = polygonToPath . uncheckedFromCCWPoints
+    triToPath = polygonToPath @NonEmptyVector . uncheckedFromCCWPoints
     path2tri p = case p^..pathSegments.traverse._PolygonPath._2 of
                     []   -> Nothing
                     [pg] -> case pg^..vertices of
@@ -223,8 +226,10 @@ _asDisk = _asCircle.from _DiskCircle
 --     embed     = either polygonToPath polygonToPath
 
 
-polygonToPath :: SimplePolygon (Point 2 r) -> Path r
-polygonToPath = Path . fromSingleton . PolygonPath AsIs
+polygonToPath                      :: Foldable1 f
+                                   => SimplePolygonF f (Point 2 r) -> Path r
+polygonToPath (MkSimplePolygon vs) = Path . fromSingleton . PolygonPath AsIs
+                                   . uncheckedFromCCWPoints $ vs
 
 
 -- polygonToPath (MultiPolygon vs hs) = Path . LSeq.fromNonEmpty . fmap PolygonPath
