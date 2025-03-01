@@ -52,25 +52,6 @@ type R = RealNumber 5
 
 --------------------------------------------------------------------------------
 -- to ipe
-instance (Fractional r, Ord r, Show r) => HasDefaultFromIpe (HalfLine (Point 2 r)) where
-  type DefaultFromIpe (HalfLine (Point 2 r)) = Path
-  defaultFromIpe = _asHalfLine
-
--- | Try to parse an Line segment with an arrow head as a HalfLine
-_asHalfLine :: (Fractional r, Ord r, Show r)
-            => Prism' (IpeObject r) (HalfLine (Point 2 r) :+ IpeAttributes Path r)
-_asHalfLine = prism' (\(hl :+ ats) -> IpePath (ipeHalfLine hl ! ats)) objToHalfLine
-  where
-    objToHalfLine = \case
-      IpePath (path' :+ ats) -> case path'^?_asClosedLineSegment  of
-        Just (ClosedLineSegment s t) -> case (hasAttr SArrow ats, hasAttr SRArrow ats) of
-                                          (True,False) -> Just $ HalfLine s (t .-. s) :+ ats
-                                          (False,True) -> Just $ HalfLine s (s .-. t) :+ ats
-                                          _            -> Nothing
-        Nothing                      -> Nothing
-      _                    -> Nothing
-
-    hasAttr a = isJust . lookupAttr a
 
 --------------------------------------------------------------------------------
 
@@ -106,10 +87,6 @@ type instance Intersection (HalfPlane line) (ConvexPolygonF f point) =
 type instance Intersection (HalfPlane line :+ extra) (ConvexPolygonF f point :+ extra') =
   Maybe (HalfPlaneConvexPolygonIntersection f (NumType point) point)
 
-instance ( Point_ point 2 r, Num r, Ord r, VertexContainer f point
-         , HyperPlane_ line 2 r
-         ) => HasIntersectionWith (HalfPlane line) (SimplePolygonF f point) where
-  halfPlane `intersects` poly = anyOf (vertices.asPoint) (`intersects` halfPlane) poly
 
 --------------------------------------------------------------------------------
 
@@ -223,11 +200,6 @@ instance ( IsIntersectableWith (HalfPlane line) (SimplePolygonF f vertex)
                                   (SimplePolygonF f vertex :+ extra') where
   (halfPlane :+ _) `intersect` (poly :+ _) = halfPlane `intersect` poly
 
-instance ( Point_ point 2 r, Num r, Ord r, VertexContainer f point
-         , HyperPlane_ line 2 r
-         ) => HasIntersectionWith (HalfPlane line) (ConvexPolygonF f point) where
-  halfPlane `intersects` poly = halfPlane `intersects` (toSimplePolygon poly)
-    -- TODO there is a better, O(log n) time implementation. use that instead ...
 
 instance ( Point_ vertex 2 r, Fractional r, Ord r, VertexContainer f vertex
          , VertexContainer f (OriginalOrExtra vertex (Point 2 r))
@@ -315,6 +287,8 @@ renderComponent = \case
     getPt = \case
       Original v -> v^.asPoint
       Extra p    -> p
+
+--------------------------------------------------------------------------------
 
 
 instance (Fractional r, Ord r, Show r) => HasDefaultIpeOut (HalfSpaceF (LinePV 2 r)) where

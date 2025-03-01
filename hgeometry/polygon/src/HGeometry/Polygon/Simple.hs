@@ -35,6 +35,8 @@ import           Data.Maybe (fromMaybe)
 import           HGeometry.Boundary
 import           HGeometry.Cyclic
 import           HGeometry.Foldable.Util
+import           HGeometry.HalfSpace
+import           HGeometry.HyperPlane.Class
 import           HGeometry.Intersection
 import           HGeometry.LineSegment.Intersection.BentleyOttmann
 import           HGeometry.Point
@@ -45,7 +47,6 @@ import           HGeometry.Polygon.Simple.InPolygon
 import           HGeometry.Polygon.Simple.Type
 import           HGeometry.Transformation
 import           HGeometry.Vector.NonEmpty.Util ()
-
 --------------------------------------------------------------------------------
 
 instance ( VertexContainer f point
@@ -211,6 +212,11 @@ instance ( VertexContainer f point
   -- Note that we use fromPoints again, since the transformation may
   -- e.g. reorient the vertices; e.g. when they were given CCW before, they may now
   -- end up CW. This was actually an issue before when reading the worled file.
+
+instance ( Point_ point 2 r, Num r, Ord r, VertexContainer f point
+         , HyperPlane_ line 2 r
+         ) => HasIntersectionWith (HalfSpaceF line) (SimplePolygonF f point) where
+  halfPlane `intersects` poly = anyOf (vertices.asPoint) (`intersects` halfPlane) poly
 
 --------------------------------------------------------------------------------
 

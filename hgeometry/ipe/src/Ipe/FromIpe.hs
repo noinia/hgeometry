@@ -108,12 +108,14 @@ _asPoint = prism' (flip Symbol "mark/disk(sx)") (Just . view symbolPoint)
 _asLineSegment :: Prism' (Path r) (LineSegment AnEndPoint (Point 2 r))
 _asLineSegment = _asPolyLine.PolyLine._PolyLineLineSegment
 
+
 -- | Try to convert a path into a line segment, fails if the path is not a line
 -- segment or a polyline with more than two points.
 --
 --
 _asClosedLineSegment :: Prism' (Path r) (ClosedLineSegment (Point 2 r))
 _asClosedLineSegment = _asPolyLine.PolyLine._PolyLineLineSegment
+
 
 -- | Convert to a polyline. Ignores all non-polyline parts
 --

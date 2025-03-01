@@ -31,6 +31,8 @@ import HGeometry.Boundary
 import HGeometry.Box
 import HGeometry.Cyclic
 import HGeometry.Foldable.Util
+import HGeometry.HalfSpace
+import HGeometry.HyperPlane.Class
 import HGeometry.Intersection
 import HGeometry.LineSegment
 import HGeometry.Point
@@ -185,6 +187,13 @@ instance ( VertexContainer f point
       xMax = view xCoord $ maxInDirection (Vector2 1    0   ) pg
       yMin = view yCoord $ maxInDirection (Vector2 0    (-1)) pg
       yMax = view yCoord $ maxInDirection (Vector2 0    1   ) pg
+
+
+instance ( Point_ point 2 r, Num r, Ord r, VertexContainer f point
+         , HyperPlane_ line 2 r
+         ) => HasIntersectionWith (HalfSpaceF line) (ConvexPolygonF f point) where
+  halfPlane `intersects` poly = halfPlane `intersects` (toSimplePolygon poly)
+    -- TODO there is a better, O(log n) time implementation. use that instead ...
 
 --------------------------------------------------------------------------------
 

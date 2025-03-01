@@ -216,6 +216,7 @@ instance HasDefaultIpeOut (Group r) where
   type DefaultIpeOut (Group r) = Group
   defIO = (:+ mempty)
 
+
 --------------------------------------------------------------------------------
 -- * Point Converters
 
@@ -238,6 +239,9 @@ defaultBox = let z  = 1000
 -- | Renders a line as a Path. The line is clipped to the 'defaultBox'
 ipeLine :: (Ord r, Fractional r, Show r) => IpeOut (LinePV 2 r) Path r
 ipeLine = ipeLineIn defaultBox
+
+
+
 
 -- | Renders the line in the given box.
 --
