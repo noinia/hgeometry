@@ -5,15 +5,12 @@ module Polygon.Simple.IntersectHalfplaneSpec where
 
 
 import           Control.Lens
-import           Control.Monad.State
 import           Data.Foldable (toList, for_)
 import           Data.Foldable1
-import           Data.Functor.Apply (Apply)
 import           Data.Functor.Contravariant (phantom)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (isJust, mapMaybe)
-import           Data.Semigroup.Traversable.Class (sequence1)
 import           Data.Traversable
 import           Golden
 import           HGeometry.Box
@@ -103,8 +100,6 @@ type instance Intersection (HalfPlane line) (SimplePolygonF f point) =
 type instance Intersection (HalfPlane line :+ extra) (SimplePolygonF f point :+ extra') =
   Intersection (HalfPlane line) (SimplePolygonF f point)
 
-
--- FIX: we halfplane polygon intersection should again be a convex polygon
 type instance Intersection (HalfPlane line) (ConvexPolygonF f point) =
   Maybe (HalfPlaneConvexPolygonIntersection f (NumType point) point)
 
@@ -116,175 +111,8 @@ instance ( Point_ point 2 r, Num r, Ord r, VertexContainer f point
          ) => HasIntersectionWith (HalfPlane line) (SimplePolygonF f point) where
   halfPlane `intersects` poly = anyOf (vertices.asPoint) (`intersects` halfPlane) poly
 
-
--- data CurrentState f r vertex =
---     First (NonEmpty vertex)
---   | Later { _lastVertex          :: vertex
---           , _currentComponent    :: Maybe (CurrentComponent r vertex)
---           , _completedComponents :: [HalfPlanePolygonIntersection f r vertex]
---           , _firstComponent      :: Maybe (FirstComponent r vertex)
---           }
-
-
--- data CurrentComponent r vertex = Current { _currentVertices :: NonEmpty vertex
---                                          -- ^ vertices of the current component
---                                          -- most recent one first
---                                          , _entryPoint :: Maybe (Point 2 r)
---                                          -- ^ the first point in our component
---                                          }
-
--- currentVertices = lens _currentVertices (\(Current _ p) vs -> Current vs p)
-
-                                 -- Complete (NonEmpty vertex)
-  --                              -- ^ current vertices of the component
-  --                              | Partial { _currentVertices :: NonEmpty vertex
-  --                                        -- ^ vertices of the current component
-  --                                        -- most recent one first
-  --                                        , _entryPoint :: Point 2 r
-  --                                        -- ^ the first point in our component
-  --                                        }
-
--- push v = \case
---   Complete vs  -> Complete $ v NonEmpty.<| vs
---   Partial vs p -> Partial (v NonEmpty.<| vs) p
-
--- data FirstComponent r vertex = FirstComponent { _exitPoint        :: Maybe (Point 2 r)
---                                               -- ^ the point where we exited the component
---                                               -- if it is not a vertex
---                                               , _interiorVertices :: NonEmpty vertex
---                                               }
-
-
--- withFalses :: NonEmpty (b, NonEmpty a) -> NonEmpty (b, b, b, NonEmpty a)
-
-
-  -- forall p f. (Indexable i p, Contravariant f, Apply f) => p a (f a) -> s -> f s
-
-
-
 --------------------------------------------------------------------------------
 
--- | A traversal that associates every elemnt with its successor
-withCyclicSuccessor :: forall cyclic a b. Traversable1 cyclic
-                    => Traversal1 (cyclic a) (cyclic b) (a,a) b
-withCyclicSuccessor = \f xs -> let x0 :| xs' = toNonEmpty xs
-                               in sequence1 $ zipWithList (\s x -> f (x,s)) (xs' <> [x0]) xs
-
--- | An indexed version of 'withCyclicSuccessor'
-iWithCyclicSuccessor :: forall cyclic i a b. (Traversable1 cyclic, TraversableWithIndex i cyclic)
-                     => IndexedTraversal1 (i,i) (cyclic a) (cyclic b) (a,a) b
-iWithCyclicSuccessor = conjoined withCyclicSuccessor (theITrav . indexed)
-  where
-    theITrav      :: Apply f => ((i,i) -> (a,a) -> f b) -> cyclic a -> f (cyclic b)
-    theITrav f xs = let x0 :| xs' = toNonEmpty $ imap ((,)) xs
-                    in sequence1 $ izipWithList (\(j,s) i x -> f (i,j) (x,s)) (xs' <> [x0]) xs
-
-
-  -- f xs -> let x0 :| xs' = toNonEmpty xs
-  --                              in sequence1 $ zipWithList (\s x -> f (x,s)) (xs' <> [x0]) xs
-
-
-  -- conjoined theTrav (theITrav . indexed)
-  -- where
-  --   theTrav      :: Apply f
-  --                => ((a,a) -> f b) -> cyclic a -> f (cyclic b)
-  --   theTrav f xs =
-
-
--- | A traversal that associates every elemnt with its predecessor
-withCyclicPredecessor :: forall cyclic a b. Traversable1 cyclic
-                      => Traversal1 (cyclic a) (cyclic b) (a,a) b
-withCyclicPredecessor = \f xs -> let xs' = toList xs
-                                 in sequence1 $ zipWithList (\p x -> f (p,x)) (xs^.last1 : xs') xs
-
-
--- | An indexed traversal that associates every elemnt with its predecessor
-iWithCyclicPredecessor :: forall cyclic i a b. (Traversable1 cyclic, TraversableWithIndex i cyclic)
-                       => IndexedTraversal1 (i,i) (cyclic a) (cyclic b) (a,a) b
-iWithCyclicPredecessor = conjoined withCyclicPredecessor (theITrav . indexed)
-  where
-    theITrav      :: Apply f => ((i,i) -> (a,a) -> f b) -> cyclic a -> f (cyclic b)
-    theITrav f xs = let xs' = imap ((,)) xs
-                    in sequence1 $
-                       izipWithList (\(i,p) j x -> f (i,j) (p,x)) (xs'^.last1 : toList xs') xs
-
--- | Traverse a cyclic structure together with both its neighbors
-withCyclicNeighbours :: forall cyclic a b. Traversable1 cyclic
-                     => Traversal1 (cyclic a) (cyclic b) (a, Vector 2 a) b
-withCyclicNeighbours = \f xs -> let x0 :| xs' = toNonEmpty xs
-                                    ns        = zipWith Vector2 (xs^.last1 : x0 : xs') (xs' <> [x0])
-                                in sequence1 $ zipWithList (\s x -> f (x,s)) ns xs
-
--- | An indexed traversal that associates every elemnt with its neighbours
-iWithCyclicNeighbours :: forall cyclic i a b. (Traversable1 cyclic, TraversableWithIndex i cyclic)
-                      => IndexedTraversal1 (i,Vector 2 i) (cyclic a) (cyclic b) (a,Vector 2 a) b
-iWithCyclicNeighbours = conjoined withCyclicNeighbours (theITrav . indexed)
-  where
-    theITrav      :: Apply f
-                  => ((i,Vector 2 i) -> (a,Vector 2 a) -> f b) -> cyclic a -> f (cyclic b)
-    theITrav f xs = let xs'       = imap ((,)) xs
-                        y0 :| ys' = toNonEmpty xs'
-                        ns        = zipWith Vector2 (xs'^.last1 : toList xs') (ys' <> [y0])
-                    in sequence1 $ izipWithList (\(Vector2 (h,p) (j,s)) i x
-                                                  -> f (i, Vector2 h j) (x,Vector2 p s)) ns xs
-
--- type Fold s a = forall f. (Contravariant f, Applicative f) => (a -> f a) -> s -> f s
-
-
-  -- forall p f. (Indexable i p, Contravariant f, Apply f) => p a (f a) -> s -> f s
-
--- withCyclicNeighbours' :: forall cyclic a. Traversable1 cyclic
---                     => Fold1 (cyclic a) (a, Vector 2 a)
--- withCyclicNeighbours' = \aFa xs -> phantom $ withCyclicNeighbours aFa xs
-
-
-
-
-
-
--- -- | A fold that associates every elemnt with its successor
--- withCyclicSuccessor :: forall cyclic i a. (Traversable1 cyclic, TraversableWithIndex i cyclic)
---                     => IndexedFold1 (i, i) (cyclic a) (a,a)
--- withCyclicSuccessor = conjoined theFold (theIFold . indexed)
---   where
---     theFold      :: (Apply f, Contravariant f)
---                  => ((a,a) -> f (a,a)) -> cyclic a -> f (cyclic a)
---     theFold f xs = let x0 :| xs' = toNonEmpty xs
---                    in phantom . sequenceA1_ $ zipWithList (\s x -> f (x,s)) (xs' <> [x0]) xs
-
---     theIFold      :: (Apply f, Contravariant f)
---                   => ((i,i) -> (a,a) -> f (a,a)) -> cyclic a -> f (cyclic a)
---     theIFold f xs = let x0 :| xs' = toNonEmpty $ imap ((,)) xs
---                     in phantom . sequenceA1_ $
---                        izipWithList (\(j,s) i x -> f (i,j) (x,s)) (xs' <> [x0]) xs
-
-
--- -- | A fold that associates every element with its predecessor
--- withCyclicPredecessor :: forall cyclic i a. (Traversable1 cyclic, TraversableWithIndex i cyclic)
---                       => IndexedFold1 (i, i) (cyclic a) (a,a)
--- withCyclicPredecessor = conjoined theFold (theIFold . indexed)
---   where
---     theFold      :: (Apply f, Contravariant f)
---                  => ((a,a) -> f (a,a)) -> cyclic a -> f (cyclic a)
---     theFold f xs = let x0 :| xs' = toNonEmpty xs
---                    in phantom . sequenceA1_ $ zipWithList (\s x -> f (x,s)) (xs' <> [x0]) xs
-
---     theIFold      :: (Apply f, Contravariant f)
---                   => ((i,i) -> (a,a) -> f (a,a)) -> cyclic a -> f (cyclic a)
---     theIFold f xs = let x0 :| xs' = toNonEmpty $ imap ((,)) xs
---                     in phantom . sequenceA1_ $
---                        izipWithList (\(j,s) i x -> f (i,j) (x,s)) (xs' <> [x0]) xs
-
-
-test :: NonEmpty (Char,Char)
-test = runIdentity $ withCyclicSuccessor pure (NonEmpty.fromList "abcde")
-
-test2 :: NonEmpty Char
-test2 = toNonEmptyOf traverse1 (NonEmpty.fromList "abcde")
-
-
-test3 :: NonEmpty (Char,Vector 2 Char)
-test3 = runIdentity $ withCyclicNeighbours pure (NonEmpty.fromList "abcde")
 
 -- itest :: NonEmpty ((Int, Vector 2 Int), (Char, Vector 2 Char))
 -- itest = runIdentity $ withCyclicNeighbours (Indexed $ \i x -> pure (i,x)) (NonEmpty.fromList "abcde")
@@ -294,27 +122,6 @@ test3 = runIdentity $ withCyclicNeighbours pure (NonEmpty.fromList "abcde")
 
 -- itest = toNonEmptyOf (withCyclicSuccessor.withIndex) (NonEmpty.fromList "abcde")
 
--- | pre: the f and the list have the same size
-zipWithList      :: forall f a b c. Traversable f
-                 => (a -> b -> c) -> [a] -> f b -> f c
-zipWithList f xs = flip evalState xs . traverse go
-  where
-    go   :: b -> State [a] c
-    go y = get >>= \case
-      []      -> error "zipWithList. precondition failed, too few a's"
-      (x:xs') -> do put xs'
-                    pure $ f x y
-
--- | pre: the f and the list have the same size
-izipWithList      :: forall f i a b c. TraversableWithIndex i f
-                 => (a -> i -> b -> c) -> [a] -> f b -> f c
-izipWithList f xs = flip evalState xs . itraverse go
-  where
-    go     :: i -> b -> State [a] c
-    go i y = get >>= \case
-      []      -> error "izipWithList. precondition failed, too few a's"
-      (x:xs') -> do put xs'
-                    pure $ f x i y
 
 --------------------------------------------------------------------------------
 
@@ -329,54 +136,9 @@ izipWithList f xs = flip evalState xs . itraverse go
 
 
 
--- | Groups the elements of a cyclic. Note in particular that this may join the first and
--- last group, thereby changing the indices of the individual elements.
---
--- the items are reported in the same order as before.
-groupWith      :: (Foldable1 cyclic, Eq b)
-               => (a -> b) -> cyclic a -> Cyclic NonEmpty (b, NonEmpty a)
-groupWith f xs = Cyclic $ case foldrMap1 initialize compute xs of
-    Left res      -> NonEmpty.singleton res
-    Right ((x, first), res@((y, current) :| completed))
-      | x == y    -> (x, first <> current) :| completed
-      | otherwise -> (x, first) NonEmpty.<| res
-  where
-    initialize x = Left (f x, NonEmpty.singleton x)
-    compute x = \case
-        Left (y,current)
-          | b == y    -> Left (y, x NonEmpty.<| current)
-          | otherwise -> Right ((y,current), NonEmpty.singleton (b, NonEmpty.singleton x))
-        Right (first, res@((y,current):|completed))
-          | b == y    -> Right (first, (y, x NonEmpty.<| current) :| completed)
-          | otherwise -> Right (first, (b, NonEmpty.singleton x) NonEmpty.<| res)
-      where
-        b = f x
 
 
-deriving newtype instance Arbitrary (f a) => Arbitrary (Cyclic f a)
 
-
-groupSpec = describe "cyclic groupWith tests" $ do
-              it "manual" $ do
-                let
-                  input = cyclic [0,2,1,2,2,3,3,4,4,5,5,5,5,66,666,00,2,10,1,20]
-                  ans   = cyclic [ (True, NonEmpty.fromList [20,0,2])
-                                 , (False, NonEmpty.fromList [1])
-                                 , (True, NonEmpty.fromList [2,2])
-                                 , (False, NonEmpty.fromList [3,3])
-                                 , (True, NonEmpty.fromList [4,4])
-                                 , (False, NonEmpty.fromList [5,5,5,5])
-                                 , (True, NonEmpty.fromList [66,666,0,2,10])
-                                 , (False, NonEmpty.fromList [1])
-                                 ]
-                groupWith even input `shouldBe` ans
-              prop "sameOrder" $
-                \(xs :: Cyclic NonEmpty (Int,Char)) ->
-                  (flatten (groupWith (even . fst) xs)) `isShiftOf` xs
-
-  where
-    cyclic  = Cyclic . NonEmpty.fromList
-    flatten = Cyclic . foldMap1 snd
 
 --------------------------------------------------------------------------------
 
@@ -404,11 +166,11 @@ collectComponents l = foldMapOf (asFold1 withCyclicNeighbours) f
     -- v1, and the intersection point of l with the edge between vn and the first vertex
     -- w1 of the next component
     --
-    f :: ((Bool, NonEmpty vertex), Vector 2 (Bool, NonEmpty vertex))
+    f :: ((Bool, NonEmpty vertex), V2 (Bool, NonEmpty vertex))
       -> [HalfPlaneSimplePolygonIntersection f r vertex]
     f x | traceShow x False = undefined
 
-    f ((b, current@(v1 :| rest)), Vector2 (_, NonEmpty.last -> um) (_, w1 :| _))
+    f ((b, current@(v1 :| rest)), V2 (_, NonEmpty.last -> um) (_, w1 :| _))
       | not b     = []
       | otherwise = let vn     = NonEmpty.last current
                         extras = mapMaybe (intersectionPoint l) [(vn,w1), (um,v1)]
@@ -490,9 +252,6 @@ spec = describe "simple polygon x halfspace intersection" $ do
                  [osp|polygonHalfspaceIntersection1.out|]
          testIpe [osp|convexHalfspaceIntersection.ipe|]
                  [osp|convexHalfspaceIntersection.out|]
-
-         groupSpec
-
 
 loadInputs      :: OsPath -> IO ( NonEmpty (HalfPlane (LinePV 2 R) :+ _)
                                 , NonEmpty (SimplePolygon (Point 2 R) :+ _)
