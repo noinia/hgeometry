@@ -24,5 +24,5 @@ module HGeometry.Polygon.Convex
   ) where
 
 import HGeometry.Polygon.Convex.Class
-import HGeometry.Polygon.Convex.Implementation
+import HGeometry.Polygon.Convex.Internal
 -- import HGeometry.Polygon.Convex.MinkowskiSum

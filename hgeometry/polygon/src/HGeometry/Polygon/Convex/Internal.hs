@@ -1,7 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  HGeometry.Polygon.Convex.Implementation
+-- Module      :  HGeometry.Polygon.Convex.Internal
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -9,7 +9,7 @@
 -- A Simple polygon and some basic functions to interact with them.
 --
 --------------------------------------------------------------------------------
-module HGeometry.Polygon.Convex.Implementation
+module HGeometry.Polygon.Convex.Internal
   ( ConvexPolygon
   , ConvexPolygonF(..)
   , fromSimplePolygon

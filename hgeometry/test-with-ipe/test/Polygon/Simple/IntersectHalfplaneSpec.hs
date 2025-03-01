@@ -23,6 +23,7 @@ import           HGeometry.Foldable.Util
 import           HGeometry.HalfLine
 import           HGeometry.HalfSpace
 import           HGeometry.HyperPlane.Class
+import           HGeometry.Instances ()
 import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.LineSegment
@@ -31,6 +32,7 @@ import           HGeometry.PlaneGraph
 import           HGeometry.Point
 import           HGeometry.Point.Either
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Convex.Internal
 import           HGeometry.Polygon.Instances ()
 import           HGeometry.Polygon.Simple
 import           HGeometry.Properties
@@ -43,11 +45,9 @@ import           Test.Hspec.QuickCheck
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck
 
-import           HGeometry.Instances ()
-
 
 import           Debug.Trace
-import Data.Functor.Classes
+import           Data.Functor.Classes
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -84,22 +84,21 @@ type HalfPlane line = HalfSpaceF line
 --------------------------------------------------------------------------------
 
 -- | A single component of a HalfPlane SimplePolygon intersection
-data HalfPlanePolygonIntersection f r vertex =
+data HalfPlanePolygonIntersection vertex polygon =
     HalfPlane_x_SimplePolygon_Vertex vertex
   | HalfPlane_x_SimplePolygon_Edge (ClosedLineSegment vertex)
-  | HalfPlane_x_SimplePolygon_Polygon (SimplePolygonF f (OriginalOrExtra vertex (Point 2 r)))
-  -- deriving (Show,Eq,Functor)
+  | HalfPlane_x_SimplePolygon_Polygon polygon
+  deriving (Show,Eq,Functor)
 
-deriving instance ( Show vertex, Show r, HasFromFoldable1 f
-                  , Point_ vertex 2 r, VertexContainer f (OriginalOrExtra vertex (Point 2 r))
-                  ) => Show (HalfPlanePolygonIntersection f r vertex)
-deriving instance ( Eq vertex, Eq r, HasFromFoldable1 f, Eq1 f
-                  , Point_ vertex 2 r, VertexContainer f (OriginalOrExtra vertex (Point 2 r))
-                  ) => Eq (HalfPlanePolygonIntersection f r vertex)
+type HalfPlaneSimplePolygonIntersection f r vertex =
+  HalfPlanePolygonIntersection vertex (SimplePolygonF f (OriginalOrExtra vertex (Point 2 r)))
+
+type HalfPlaneConvexPolygonIntersection f r vertex =
+  HalfPlanePolygonIntersection vertex (ConvexPolygonF f (OriginalOrExtra vertex (Point 2 r)))
 
 
 type instance Intersection (HalfPlane line) (SimplePolygonF f point) =
-  [HalfPlanePolygonIntersection f (NumType point) point]
+  [HalfPlaneSimplePolygonIntersection f (NumType point) point]
 
 type instance Intersection (HalfPlane line :+ extra) (SimplePolygonF f point :+ extra') =
   Intersection (HalfPlane line) (SimplePolygonF f point)
@@ -107,10 +106,10 @@ type instance Intersection (HalfPlane line :+ extra) (SimplePolygonF f point :+ 
 
 -- FIX: we halfplane polygon intersection should again be a convex polygon
 type instance Intersection (HalfPlane line) (ConvexPolygonF f point) =
-  Maybe (HalfPlanePolygonIntersection f (NumType point) point)
+  Maybe (HalfPlaneConvexPolygonIntersection f (NumType point) point)
 
 type instance Intersection (HalfPlane line :+ extra) (ConvexPolygonF f point :+ extra') =
-  [HalfPlanePolygonIntersection f (NumType point) point]
+  Maybe (HalfPlaneConvexPolygonIntersection f (NumType point) point)
 
 instance ( Point_ point 2 r, Num r, Ord r, VertexContainer f point
          , HyperPlane_ line 2 r
@@ -394,7 +393,7 @@ collectComponents   :: forall cyclic f vertex r. ( Point_ vertex 2 r, Ord r, Fra
                        )
                     => LinePV 2 r -- ^ the bounding line of the halfplane
                     -> cyclic (Bool, NonEmpty vertex)
-                    -> [HalfPlanePolygonIntersection f r vertex]
+                    -> [HalfPlaneSimplePolygonIntersection f r vertex]
 collectComponents l = foldMapOf (asFold1 withCyclicNeighbours) f
   where
     -- We go through the components with their neighbours. Each component
@@ -406,7 +405,7 @@ collectComponents l = foldMapOf (asFold1 withCyclicNeighbours) f
     -- w1 of the next component
     --
     f :: ((Bool, NonEmpty vertex), Vector 2 (Bool, NonEmpty vertex))
-      -> [HalfPlanePolygonIntersection f r vertex]
+      -> [HalfPlaneSimplePolygonIntersection f r vertex]
     f x | traceShow x False = undefined
 
     f ((b, current@(v1 :| rest)), Vector2 (_, NonEmpty.last -> um) (_, w1 :| _))
@@ -422,17 +421,20 @@ collectComponents l = foldMapOf (asFold1 withCyclicNeighbours) f
                            poly = uncheckedFromCCWPoints
                                 $ (fmap Extra <$> extras') <<> (Original <$> current)
 
+    -- todo; we are combining the components in the wrong way
 
 xs <<> ys = case xs of
               Nothing  -> ys
               Just xs' -> xs' <> ys
 
+-- | Compute the intersection between a line and the "edge" given by the two vertices.
 intersectionPoint            :: (Point_ vertex 2 r, Ord r, Fractional r)
                              => LinePV 2 r -> (vertex, vertex) -> Maybe (Point 2 r)
 intersectionPoint line (u,v) = case LinePV (u^.asPoint) (v .-. u) `intersect` line of
   Just (Line_x_Line_Point p) | p /= (u^.asPoint) -> Just p
   _                                              -> Nothing
--- TODO
+
+-- TODO:: Appropriately handle degeneracies
 
 
 -- flatten :: NonEmpty (NonEmpty (a, b)) -> NonEmpty (b, NonEmpty a)
@@ -445,12 +447,8 @@ instance ( Point_ vertex 2 r, Fractional r, Ord r, VertexContainer f vertex
          , Show r, Show vertex
          ) => IsIntersectableWith (HalfPlane (LinePV 2 r)) (SimplePolygonF f vertex) where
   halfPlane `intersect` poly = collectComponents (halfPlane^.boundingHyperPlane)
-                             . traceShowWith ("groups",)
                              . groupWith (\v -> (v^.asPoint) `intersects` halfPlane) . Cyclic
-                             . traceShowWith ("vertices",)
                              $ toNonEmptyOf vertices poly
-
-
 
 -- instance ( HasIntersectionWith (HalfPlane line) (SimplePolygonF f vertex)
 --          ) => HasIntersectionWith (HalfPlane line :+ extra)
@@ -463,90 +461,23 @@ instance ( IsIntersectableWith (HalfPlane line) (SimplePolygonF f vertex)
                                   (SimplePolygonF f vertex :+ extra') where
   (halfPlane :+ _) `intersect` (poly :+ _) = halfPlane `intersect` poly
 
-
-
-
-
---     case foldrMap1 initialize compute $ toNonEmptyOf vertices poly of
---       First _                         -> [HalfPlane_x_SimplePolygon_Polygon $ Original <$> poly]
---       Later v current completed first -> combine v current first <> completed
---     where
---       initialize v
---         | (v^.asPoint) `intersects` halfPlane = First (NonEmpty.singleton v)
---         | otherwise                           = Later v Nothing [] Nothing
-
---       -- we maintain the current component, if it exists and the completed components.
---       -- we have to handle the first component separately, as we may have to combine the first
---       -- and last component into one.
---       compute   :: vertex -> CurrentState f r vertex -> CurrentState f r vertex
---       compute v = \case
---         First vs@(u :| _)
---           | (v^.asPoint) `intersects` halfPlane -> First (v NonEmpty.<| vs)
---           | otherwise                           ->
---               Later v Nothing [] (Just $ FirstComponent exitPoint vs)
---               where
---                 exitPoint = intersectionPoint u v
-
---         Later u current completed first
---           | (v^.asPoint) `intersects` halfPlane -> Later v (Just current') completed  first
---           | otherwise                           -> Later v Nothing         completed' first
---            where
---              current'   = case current of
---                Nothing -> Current (NonEmpty.singleton v) entryPoint
---                  where
---                    entryPoint = intersectionPoint u v
---                Just current'' -> current''&currentVertices %~ (v NonEmpty.<|)
-
---              completed' = case current of
---                Nothing        -> completed
---                Just current'' -> complete (Just v) current'' : completed
-
---       -- | Given a points u and v that do not both lie on the same side of the line l
---       -- bounding the halfplane, computes the intersection point of the *open* edge (u,v)
---       -- with l (if such a point exists).
---       intersectionPoint u v = case LinePV (u^.asPoint) (v .-. u)
---                                      `intersect` (halfPlane^.boundingHyperPlane) of
---         Just (Line_x_Line_Point p) | p /= (u^.asPoint) -> Just p
---         _                          -> Nothing
-
-
---       -- | Given a vertex v that does *not* lie in the halfplane, and the current state.
---       -- finish up the current component.
---       complete   :: Maybe vertex -> CurrentComponent r vertex
---                  -> HalfPlanePolygonIntersection f r vertex
---       complete v = \case
---         Current (u :| [])  Nothing -> HalfPlane_x_SimplePolygon_Vertex u
---         Current (u :| [w]) Nothing -> HalfPlane_x_SimplePolygon_Edge (ClosedLineSegment w u)
---         Current (u :| ws)  mEntry  -> HalfPlane_x_SimplePolygon_Polygon
---                                     $ case catMaybes [mEntry, intersectionPoint u =<< v] of
---            extras -> uncheckedFromCCWPoints $ (Extra <$> extras) <<> (Original <$> (u :| ws))
-
---       combine v mCurrent = \case
---         Nothing    -> mCurrent >>= complete Nothing
---         Just first -> case mCurrent of
---           Nothing      -> _
---           Just current -> _
-
-
-
-
-
-
-
-
-                         -- (HalfSpaceF (LinePV 2 (RealNumber 5)))
-                         -- (SimplePolygonF
-                         --    (HGeometry.Cyclic.Cyclic
-                         --       Data.Vector.NonEmpty.Internal.NonEmptyVector)
-                         --    (Point 2 R))
-
-
 instance ( Point_ point 2 r, Num r, Ord r, VertexContainer f point
          , HyperPlane_ line 2 r
          ) => HasIntersectionWith (HalfPlane line) (ConvexPolygonF f point) where
   halfPlane `intersects` poly = halfPlane `intersects` (toSimplePolygon poly)
     -- TODO there is a better, O(log n) time implementation. use that instead ...
 
+instance ( Point_ vertex 2 r, Fractional r, Ord r, VertexContainer f vertex
+         , VertexContainer f (OriginalOrExtra vertex (Point 2 r))
+         , HasFromFoldable1 f
+         , Show r, Show vertex
+         ) => IsIntersectableWith (HalfPlane (LinePV 2 r)) (ConvexPolygonF f vertex) where
+  halfPlane `intersect` poly = case halfPlane `intersect` (toSimplePolygon poly) of
+    [comp] -> Just $ ConvexPolygon <$> comp
+              -- note that the intersection between a halfspace and a convex polygon
+              -- is indeed guaranteed to be convex. Hence the 'ConvexPolygon' call here
+              -- is safe.
+    _      -> Nothing
 
 --------------------------------------------------------------------------------
 
@@ -613,7 +544,7 @@ renderComponent :: forall vertex f r.
                    --  VertexContainer f (OriginalOrExtra vertex (Point 2 r))
                    -- , VertexContainer f (Point 2 r)
                    )
-                => HalfPlanePolygonIntersection f r vertex -> IpeObject r
+                => HalfPlaneSimplePolygonIntersection f r vertex -> IpeObject r
 renderComponent = \case
     HalfPlane_x_SimplePolygon_Vertex v     -> iO $ defIO (v^.asPoint)
                                                  ! attr SStroke red
