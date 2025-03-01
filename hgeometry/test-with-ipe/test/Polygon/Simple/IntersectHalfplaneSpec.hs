@@ -16,6 +16,7 @@ import           Data.Maybe (isJust, mapMaybe)
 import           Data.Semigroup.Traversable.Class (sequence1)
 import           Data.Traversable
 import           Golden
+import           HGeometry.Box
 import           HGeometry.Cyclic
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
@@ -35,12 +36,18 @@ import           HGeometry.Polygon.Simple
 import           HGeometry.Properties
 import           HGeometry.Vector
 import           Ipe
+import           Ipe.Color
 import           System.OsPath
 import           Test.Hspec
+import           Test.Hspec.QuickCheck
 import           Test.Hspec.WithTempFile
-import HGeometry.Box
-import Ipe.Color
+import           Test.QuickCheck
 
+import           HGeometry.Instances ()
+
+
+import           Debug.Trace
+import Data.Functor.Classes
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -82,6 +89,14 @@ data HalfPlanePolygonIntersection f r vertex =
   | HalfPlane_x_SimplePolygon_Edge (ClosedLineSegment vertex)
   | HalfPlane_x_SimplePolygon_Polygon (SimplePolygonF f (OriginalOrExtra vertex (Point 2 r)))
   -- deriving (Show,Eq,Functor)
+
+deriving instance ( Show vertex, Show r, HasFromFoldable1 f
+                  , Point_ vertex 2 r, VertexContainer f (OriginalOrExtra vertex (Point 2 r))
+                  ) => Show (HalfPlanePolygonIntersection f r vertex)
+deriving instance ( Eq vertex, Eq r, HasFromFoldable1 f, Eq1 f
+                  , Point_ vertex 2 r, VertexContainer f (OriginalOrExtra vertex (Point 2 r))
+                  ) => Eq (HalfPlanePolygonIntersection f r vertex)
+
 
 type instance Intersection (HalfPlane line) (SimplePolygonF f point) =
   [HalfPlanePolygonIntersection f (NumType point) point]
@@ -317,6 +332,8 @@ izipWithList f xs = flip evalState xs . itraverse go
 
 -- | Groups the elements of a cyclic. Note in particular that this may join the first and
 -- last group, thereby changing the indices of the individual elements.
+--
+-- the items are reported in the same order as before.
 groupWith      :: (Foldable1 cyclic, Eq b)
                => (a -> b) -> cyclic a -> Cyclic NonEmpty (b, NonEmpty a)
 groupWith f xs = Cyclic $ case foldrMap1 initialize compute xs of
@@ -336,22 +353,33 @@ groupWith f xs = Cyclic $ case foldrMap1 initialize compute xs of
       where
         b = f x
 
-testGr = groupWith even $ Cyclic $ NonEmpty.fromList [0,2,1,2,2,3,3,4,4,5,5,5,5,66,666,00,2,10,1,20]
+
+deriving newtype instance Arbitrary (f a) => Arbitrary (Cyclic f a)
+
+
+groupSpec = describe "cyclic groupWith tests" $ do
+              it "manual" $ do
+                let
+                  input = cyclic [0,2,1,2,2,3,3,4,4,5,5,5,5,66,666,00,2,10,1,20]
+                  ans   = cyclic [ (True, NonEmpty.fromList [20,0,2])
+                                 , (False, NonEmpty.fromList [1])
+                                 , (True, NonEmpty.fromList [2,2])
+                                 , (False, NonEmpty.fromList [3,3])
+                                 , (True, NonEmpty.fromList [4,4])
+                                 , (False, NonEmpty.fromList [5,5,5,5])
+                                 , (True, NonEmpty.fromList [66,666,0,2,10])
+                                 , (False, NonEmpty.fromList [1])
+                                 ]
+                groupWith even input `shouldBe` ans
+              prop "sameOrder" $
+                \(xs :: Cyclic NonEmpty (Int,Char)) ->
+                  (flatten (groupWith (even . fst) xs)) `isShiftOf` xs
+
+  where
+    cyclic  = Cyclic . NonEmpty.fromList
+    flatten = Cyclic . foldMap1 snd
 
 --------------------------------------------------------------------------------
-
--- -- | For the falses we just want the first and last element
--- --
--- -- i.e. they represent runs of points outside the halfplane
--- flattenFalses :: Functor f => f (Bool, NonEmpty a) -> f (Either (Vector 2 a) (NonEmpty a))
--- flattenFalses = fmap (\(b,xs) -> if b then Right xs
---                                       else Left $ Vector2 (NonEmpty.head xs) (NonEmpty.last xs)
---                      )
-
-  --   HalfPlane_x_SimplePolygon_Vertex vertex
-  -- | HalfPlane_x_SimplePolygon_Edge (ClosedLineSegment vertex)
-  -- | HalfPlane_x_SimplePolygon_Polygon (SimplePolygonF f (OriginalOrExtra vertex (Point 2 r)))
-  -- -- deriving (Show,Eq,Functor)
 
 -- | Convert a traversal into a fold.
 asFold1   :: Traversal1 s t a b -> Fold1 s a
@@ -361,22 +389,34 @@ asFold1 t = \aFa -> phantom . t (phantom . aFa)
 collectComponents   :: forall cyclic f vertex r. ( Point_ vertex 2 r, Ord r, Fractional r
                        , VertexContainer f (OriginalOrExtra vertex (Point 2 r))
                        , Traversable1 cyclic, HasFromFoldable1 f
+
+                       , Show r, Show vertex
                        )
-                    => LinePV 2 r
+                    => LinePV 2 r -- ^ the bounding line of the halfplane
                     -> cyclic (Bool, NonEmpty vertex)
                     -> [HalfPlanePolygonIntersection f r vertex]
 collectComponents l = foldMapOf (asFold1 withCyclicNeighbours) f
   where
+    -- We go through the components with their neighbours. Each component
+    -- is a non-empty list of vertices in CCW order along the polygon.
+    --
+    -- For each component [v1,..,vn] we may need to add two vertices; the intersection
+    -- point of l with the edge between the last vertex um of the previous component and
+    -- v1, and the intersection point of l with the edge between vn and the first vertex
+    -- w1 of the next component
+    --
     f :: ((Bool, NonEmpty vertex), Vector 2 (Bool, NonEmpty vertex))
       -> [HalfPlanePolygonIntersection f r vertex]
-    f ((b, current@(v :| rest)), Vector2 (_,u :| _) (_,NonEmpty.last -> w))
+    f x | traceShow x False = undefined
+
+    f ((b, current@(v1 :| rest)), Vector2 (_, NonEmpty.last -> um) (_, w1 :| _))
       | not b     = []
       | otherwise = let vn     = NonEmpty.last current
-                        extras = mapMaybe (intersectionPoint l) [(u,vn), (v,w)]
+                        extras = mapMaybe (intersectionPoint l) [(vn,w1), (um,v1)]
                     in pure $ case (NonEmpty.nonEmpty extras,NonEmpty.nonEmpty rest) of
-                       (Nothing, Nothing)        -> HalfPlane_x_SimplePolygon_Vertex v
+                       (Nothing, Nothing)        -> HalfPlane_x_SimplePolygon_Vertex v1
                        (Nothing, Just (p :| [])) -> HalfPlane_x_SimplePolygon_Edge
-                                                  $ ClosedLineSegment p v
+                                                  $ ClosedLineSegment p v1
                        (extras',  _)             -> HalfPlane_x_SimplePolygon_Polygon poly
                          where
                            poly = uncheckedFromCCWPoints
@@ -402,9 +442,12 @@ intersectionPoint line (u,v) = case LinePV (u^.asPoint) (v .-. u) `intersect` li
 instance ( Point_ vertex 2 r, Fractional r, Ord r, VertexContainer f vertex
          , VertexContainer f (OriginalOrExtra vertex (Point 2 r))
          , HasFromFoldable1 f
+         , Show r, Show vertex
          ) => IsIntersectableWith (HalfPlane (LinePV 2 r)) (SimplePolygonF f vertex) where
   halfPlane `intersect` poly = collectComponents (halfPlane^.boundingHyperPlane)
+                             . traceShowWith ("groups",)
                              . groupWith (\v -> (v^.asPoint) `intersects` halfPlane) . Cyclic
+                             . traceShowWith ("vertices",)
                              $ toNonEmptyOf vertices poly
 
 
@@ -512,12 +555,18 @@ spec :: Spec
 spec = describe "simple polygon x halfspace intersection" $ do
          testIpe [osp|polygonHalfspaceIntersection.ipe|]
                  [osp|polygonHalfspaceIntersection.out|]
+         testIpe [osp|polygonHalfspaceIntersection1.ipe|]
+                 [osp|polygonHalfspaceIntersection1.out|]
          testIpe [osp|convexHalfspaceIntersection.ipe|]
                  [osp|convexHalfspaceIntersection.out|]
 
-testIpe            :: OsPath -> OsPath -> Spec
-testIpe inFp outFp = describe (show inFp) $ do
-    (halfPlanes, polygons) <-  runIO $ do
+         groupSpec
+
+
+loadInputs      :: OsPath -> IO ( NonEmpty (HalfPlane (LinePV 2 R) :+ _)
+                                , NonEmpty (SimplePolygon (Point 2 R) :+ _)
+                                )
+loadInputs inFp = do
         inFp'      <- getDataFileName ([osp|test-with-ipe/Polygon/Simple/|] <> inFp)
         Right page <- readSinglePageFile inFp'
         let (rays :: NonEmpty (HalfLine (Point 2 R) :+ _))     = NonEmpty.fromList $ readAll page
@@ -525,10 +574,21 @@ testIpe inFp outFp = describe (show inFp) $ do
         -- take the left halfpalne of every halfline
         pure (over core (leftHalfPlane . asOrientedLine) <$> rays, pgs)
 
+testIpe            :: OsPath -> OsPath -> Spec
+testIpe inFp outFp = describe (show inFp) $ do
+    (halfPlanes, polygons) <-  runIO $ loadInputs inFp
+
     for_ polygons $ \polygon ->
       for_ halfPlanes $ \halfPlane -> do
         it ("intersects halfplane and polygon") $
           (halfPlane `intersects` polygon) `shouldBe` True -- TODO; fix
+        it ("intersect halfplane and polygon propper polygons") $ do
+           for_ (halfPlane `intersect` polygon) $ \case
+             HalfPlane_x_SimplePolygon_Vertex _     -> pure ()
+             HalfPlane_x_SimplePolygon_Edge _       -> pure ()
+             HalfPlane_x_SimplePolygon_Polygon poly ->
+               fromPoints @(SimplePolygon _) (toNonEmptyOf vertices poly)
+               `shouldSatisfy` isJust
 
     let forMap'  = flip foldMap
         content' = forMap' polygons $ \polygon ->
@@ -560,7 +620,7 @@ renderComponent = \case
     HalfPlane_x_SimplePolygon_Edge e       -> iO $ defIO (view asPoint <$> e)
                                                  ! attr SStroke red
     HalfPlane_x_SimplePolygon_Polygon poly -> iO $ ipeSimplePolygon @f (poly&vertices %~ getPt)
-                                                 ! attr SStroke red
+                                                 ! attr SFill red
   where
     getPt = \case
       Original v -> v^.asPoint
