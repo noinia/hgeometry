@@ -12,6 +12,7 @@ import           Data.Functor.Contravariant (phantom)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (isJust, mapMaybe, maybeToList)
+import qualified Data.Text as Text
 import           Data.Traversable
 import           Data.Vector.NonEmpty (NonEmptyVector)
 import           Golden
@@ -526,9 +527,8 @@ testIpe inFp outFp = describe (show inFp) $ do
                          ]
     describe "compute intersection" $
       goldenWith [osp|data/test-with-ipe/Polygon/Simple/|]
-                 (ipeContentGolden { name = outFp })
-                 content'
-    pure ()
+                 (ipeFileGolden { name = outFp })
+                   (addStyleSheet opacitiesStyle $ singlePageFromContent content')
 
 
 renderComponent :: forall vertex f r.
@@ -556,11 +556,23 @@ instance (Fractional r, Ord r, Show r) => HasDefaultIpeOut (HalfSpaceF (LinePV 2
   type DefaultIpeOut (HalfSpaceF (LinePV 2 r)) = Group
   defIO = ipeHalfPlane
 
+-- | Default rendering of halfplanes
 ipeHalfPlane :: (Show r, Fractional r, Ord r) => IpeOut (HalfSpaceF (LinePV 2 r)) Group r
 ipeHalfPlane = ipeHalfPlaneIn defaultBox
 
+-- | Draw a halfplane in the given rectangle.
+--
+-- We draw both the border (in black) and the interior (20% transparant gray) of the halfpace
 ipeHalfPlaneIn          :: (Ord r, Fractional r, Show r)
                         => Rectangle (Point 2 r) -> IpeOut (HalfSpaceF (LinePV 2 r)) Group r
-ipeHalfPlaneIn rect' hl = ipeGroup [ iO $ ipeLineIn rect' (hl^.boundingHyperPlane)
-                                   ]
-  -- TDOO: I think we also want to display the interior
+ipeHalfPlaneIn rect' hl = case hl `intersect` rect' of
+    Nothing -> ipeGroup [] -- this should not really happen I guess?
+    Just is -> case is of
+      ActualPolygon interior -> ipeGroup [ iO $ ipeSimplePolygon interior
+                                              ! attr SFill gray
+                                              ! attr SOpacity (Text.pack "20%")
+                                         , boundary
+                                         ]
+      _                      -> ipeGroup [ boundary ]
+  where
+    boundary = iO $ ipeLineIn rect' (hl^.boundingHyperPlane)
