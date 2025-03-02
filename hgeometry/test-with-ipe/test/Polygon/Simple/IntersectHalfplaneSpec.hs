@@ -220,28 +220,43 @@ instance ( Point_ point 2 r, Ord r, Fractional r
 
 --------------------------------------------------------------------------------
 
-type instance Intersection (Triangle point') (ConvexPolygonF f point) =
-  Maybe (PossiblyDegenerateSimplePolygon point (ConvexPolygonF f point))
+type instance Intersection (Triangle corner) (ConvexPolygonF f vertex) =
+  Maybe (PossiblyDegenerateSimplePolygon (OriginalOrCanonical vertex)
+                                         (ConvexPolygonF f (OriginalOrCanonical vertex))
+        )
+
+type OriginalOrCanonical orig = OriginalOrExtra orig (CanonicalPoint orig)
+
 
 instance ( Point_ point 2 r, Point_ point' 2 r, Num r, Ord r, VertexContainer f point
          ) => HasIntersectionWith (Triangle point') (ConvexPolygonF f point) where
   triangle `intersects` poly = allOf (vertices.asPoint) (`intersects` triangle) poly
 
+
+type V vertex r = OriginalOrExtra vertex (Point 2 r)
+
 instance ( Point_ vertex 2 r, Point_ corner 2 r, Fractional r, Ord r, VertexContainer f vertex
-         , VertexContainer f (OriginalOrExtra vertex (Point 2 r))
+         , VertexContainer f (OriginalOrCanonical vertex)
+         , VertexContainer f (OriginalOrExtra (OriginalOrCanonical vertex) (Point 2 r))
          , HasFromFoldable1 f
          ) => IsIntersectableWith (Triangle corner) (ConvexPolygonF f vertex) where
-  triangle `intersect` poly = undefined
+  triangle `intersect` poly = foldr intersect' (Just $ ActualPolygon $ poly&vertices %~ Original)
+                                               (intersectingHalfPlanes triangle)
+    where
+      intersect'      :: HalfSpaceF (LinePV 2 r)
+                      -> Maybe (PossiblyDegenerateSimplePolygon (V vertex r)
+                                                                (ConvexPolygonF f (V vertex r)))
+                      -> Maybe (PossiblyDegenerateSimplePolygon (V vertex r)
+                                                                (ConvexPolygonF f (V vertex r)))
+      intersect' h mp = do p <- mp
+                           bimap flatten (fmap flatten) <$> h `intersect` p
 
-    -- foldr intersect' (Just $ ActualPolygon poly)
-    --                                            (intersectingHalfPlanes triangle)
-    -- where
-    --   intersect' h mp = do p <- mp
-    --                        fmap flatten <$> h `intersect` p
+-- | Flatten two nested originals
+flatten :: OriginalOrExtra (OriginalOrExtra vertex extra) extra -> OriginalOrExtra vertex extra
+flatten = \case
+  Extra e    -> Extra e
+  Original o -> o
 
--- flatten :: ConvexPolygonF f (OriginalOrExtra (OriginalOrExtra point extra) extra)
---         -> ConvexPolygonF f (OriginalOrExtra point extra)
-flatten = undefined
 
 -- itest :: NonEmpty ((Int, Vector 2 Int), (Char, Vector 2 Char))
 -- itest = runIdentity $ withCyclicNeighbours (Indexed $ \i x -> pure (i,x)) (NonEmpty.fromList "abcde")
