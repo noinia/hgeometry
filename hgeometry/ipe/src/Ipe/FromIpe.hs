@@ -311,6 +311,10 @@ instance HasDefaultFromIpe (SimplePolygon (Point 2 r)) where
   type DefaultFromIpe (SimplePolygon (Point 2 r)) = Path
   defaultFromIpe = _withAttrs _IpePath _asSimplePolygon
 
+instance (Num r, Ord r) => HasDefaultFromIpe (ConvexPolygon (Point 2 r)) where
+  type DefaultFromIpe (ConvexPolygon (Point 2 r)) = Path
+  defaultFromIpe = _withAttrs _IpePath _asConvexPolygon
+
 -- instance HasDefaultFromIpe (MultiPolygon () r) where
 --   type DefaultFromIpe (MultiPolygon () r) = Path
 --   defaultFromIpe = _withAttrs _IpePath _asMultiPolygon

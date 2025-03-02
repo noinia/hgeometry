@@ -10,7 +10,7 @@ import           Data.Foldable1
 import           Data.Functor.Contravariant (phantom)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (isJust, mapMaybe)
+import           Data.Maybe (isJust, mapMaybe, maybeToList)
 import           Data.Traversable
 import           Golden
 import           HGeometry.Box
@@ -85,8 +85,7 @@ type instance Intersection (HalfPlane line) (ConvexPolygonF f point) =
   Maybe (HalfPlaneConvexPolygonIntersection f (NumType point) point)
 
 type instance Intersection (HalfPlane line :+ extra) (ConvexPolygonF f point :+ extra') =
-  Maybe (HalfPlaneConvexPolygonIntersection f (NumType point) point)
-
+  Intersection (HalfPlane line) (ConvexPolygonF f point)
 
 --------------------------------------------------------------------------------
 
@@ -123,6 +122,7 @@ type instance Intersection (HalfPlane line :+ extra) (ConvexPolygonF f point :+ 
 asFold1   :: Traversal1 s t a b -> Fold1 s a
 asFold1 t = \aFa -> phantom . t (phantom . aFa)
 
+
 -- | Collect the connected components
 collectComponents   :: forall cyclic f vertex r. ( Point_ vertex 2 r, Ord r, Fractional r
                        , VertexContainer f (OriginalOrExtra vertex (Point 2 r))
@@ -132,7 +132,7 @@ collectComponents   :: forall cyclic f vertex r. ( Point_ vertex 2 r, Ord r, Fra
                        )
                     => LinePV 2 r -- ^ the bounding line of the halfplane
                     -> cyclic (Bool, NonEmpty vertex)
-                    -> [HalfPlaneSimplePolygonIntersection f r vertex]
+                    -> [HalfPlaneConvexPolygonIntersection f r vertex]
 collectComponents l = foldMapOf (asFold1 withCyclicNeighbours) f
   where
     -- We go through the components with their neighbours. Each component
@@ -142,11 +142,8 @@ collectComponents l = foldMapOf (asFold1 withCyclicNeighbours) f
     -- point of l with the edge between the last vertex um of the previous component and
     -- v1, and the intersection point of l with the edge between vn and the first vertex
     -- w1 of the next component
-    --
     f :: ((Bool, NonEmpty vertex), V2 (Bool, NonEmpty vertex))
-      -> [HalfPlaneSimplePolygonIntersection f r vertex]
-    f x | traceShow x False = undefined
-
+      -> [HalfPlaneConvexPolygonIntersection f r vertex]
     f ((b, current@(v1 :| rest)), V2 (_, NonEmpty.last -> um) (_, w1 :| _))
       | not b     = []
       | otherwise = let vn     = NonEmpty.last current
@@ -160,8 +157,8 @@ collectComponents l = foldMapOf (asFold1 withCyclicNeighbours) f
                            poly = uncheckedFromCCWPoints
                                 $ (fmap Extra <$> extras') <<> (Original <$> current)
 
-    -- todo; we are combining the components in the wrong way
-
+-- | Helper to combine at most two a's into one
+(<<>)     :: Semigroup a => Maybe a -> a -> a
 xs <<> ys = case xs of
               Nothing  -> ys
               Just xs' -> xs' <> ys
@@ -180,6 +177,12 @@ intersectionPoint line (u,v) = case LinePV (u^.asPoint) (v .-. u) `intersect` li
 -- flatten = fmap (\((x,b) :| xs) -> (b, x :| map fst xs))
 
 
+-- I would have liked to give the following instance for simple polygons,
+-- but recombining the chains is more complicated I initially realized;
+-- i.e. collectComponents correctly computes the polygonal chains that lie in the halfplane
+-- however, we have to stich them together "in some order along" the bounding line.
+-- With winding polygons it is nto so clear how to compute which pieces to connect.
+{-
 instance ( Point_ vertex 2 r, Fractional r, Ord r, VertexContainer f vertex
          , VertexContainer f (OriginalOrExtra vertex (Point 2 r))
          , HasFromFoldable1 f
@@ -189,29 +192,38 @@ instance ( Point_ vertex 2 r, Fractional r, Ord r, VertexContainer f vertex
                              . groupWith (\v -> (v^.asPoint) `intersects` halfPlane) . Cyclic
                              $ toNonEmptyOf vertices poly
 
--- instance ( HasIntersectionWith (HalfPlane line) (SimplePolygonF f vertex)
---          ) => HasIntersectionWith (HalfPlane line :+ extra)
---                                   (SimplePolygonF f vertex :+ extra') where
---   (halfPlane :+ _) `intersects` (poly :+ _) = halfPlane `intersects` poly
-
-instance ( IsIntersectableWith (HalfPlane line) (SimplePolygonF f vertex)
-         , HasIntersectionWith (HalfPlane line :+ extra) (SimplePolygonF f vertex :+ extra')
-         ) => IsIntersectableWith (HalfPlane line :+ extra)
+instance ( HasIntersectionWith (HalfPlane line) (SimplePolygonF f vertex)
+         ) => HasIntersectionWith (HalfPlane line :+ extra)
                                   (SimplePolygonF f vertex :+ extra') where
-  (halfPlane :+ _) `intersect` (poly :+ _) = halfPlane `intersect` poly
-
+  (halfPlane :+ _) `intersects` (poly :+ _) = halfPlane `intersects` poly
+-}
 
 instance ( Point_ vertex 2 r, Fractional r, Ord r, VertexContainer f vertex
          , VertexContainer f (OriginalOrExtra vertex (Point 2 r))
          , HasFromFoldable1 f
          , Show r, Show vertex
          ) => IsIntersectableWith (HalfPlane (LinePV 2 r)) (ConvexPolygonF f vertex) where
-  halfPlane `intersect` poly = case halfPlane `intersect` (toSimplePolygon poly) of
-    [comp] -> Just $ ConvexPolygon <$> comp
-              -- note that the intersection between a halfspace and a convex polygon
-              -- is indeed guaranteed to be convex. Hence the 'ConvexPolygon' call here
-              -- is safe.
-    _      -> Nothing
+  halfPlane `intersect` poly = case comps of
+      []  -> Nothing
+      [c] -> Just c
+      _   -> error "halfplane x convexPolygon intersection: absurd."
+    where
+      comps = collectComponents (halfPlane^.boundingHyperPlane)
+            . groupWith (\v -> (v^.asPoint) `intersects` halfPlane) . Cyclic
+            $ toNonEmptyOf vertices poly
+  -- halfPlane `intersect` poly = case halfPlane `intersect` (toSimplePolygon poly) of
+  --   [comp] -> Just $ ConvexPolygon <$> comp
+  --             -- note that the intersection between a halfspace and a convex polygon
+  --             -- is indeed guaranteed to be convex. Hence the 'ConvexPolygon' call here
+  --             -- is safe.
+  --   _      -> Nothing
+
+
+instance ( IsIntersectableWith (HalfPlane line) (ConvexPolygonF f vertex)
+         , HasIntersectionWith (HalfPlane line :+ extra) (ConvexPolygonF f vertex :+ extra')
+         ) => IsIntersectableWith (HalfPlane line :+ extra)
+                                  (ConvexPolygonF f vertex :+ extra') where
+  (halfPlane :+ _) `intersect` (poly :+ _) = halfPlane `intersect` poly
 
 --------------------------------------------------------------------------------
 
@@ -220,19 +232,17 @@ spec :: Spec
 spec = describe "simple polygon x halfspace intersection" $ do
          testIpe [osp|polygonHalfspaceIntersection.ipe|]
                  [osp|polygonHalfspaceIntersection.out|]
-         testIpe [osp|polygonHalfspaceIntersection1.ipe|]
-                 [osp|polygonHalfspaceIntersection1.out|]
          testIpe [osp|convexHalfspaceIntersection.ipe|]
                  [osp|convexHalfspaceIntersection.out|]
 
 loadInputs      :: OsPath -> IO ( NonEmpty (HalfPlane (LinePV 2 R) :+ _)
-                                , NonEmpty (SimplePolygon (Point 2 R) :+ _)
+                                , NonEmpty (ConvexPolygon (Point 2 R) :+ _)
                                 )
 loadInputs inFp = do
         inFp'      <- getDataFileName ([osp|test-with-ipe/Polygon/Simple/|] <> inFp)
         Right page <- readSinglePageFile inFp'
         let (rays :: NonEmpty (HalfLine (Point 2 R) :+ _))     = NonEmpty.fromList $ readAll page
-            (pgs  :: NonEmpty (SimplePolygon (Point 2 R) :+ _)) = NonEmpty.fromList $ readAll page
+            (pgs  :: NonEmpty (ConvexPolygon (Point 2 R) :+ _)) = NonEmpty.fromList $ readAll page
         -- take the left halfpalne of every halfline
         pure (over core (leftHalfPlane . asOrientedLine) <$> rays, pgs)
 
@@ -258,7 +268,7 @@ testIpe inFp outFp = describe (show inFp) $ do
                          [ iO' polygon
                          , iO $ defIO (halfPlane^.core)
                          , iO $ ipeGroup [ renderComponent comp
-                                         | comp <- halfPlane `intersect` polygon
+                                         | comp <- maybeToList $ halfPlane `intersect` polygon
                                          ]
                          ]
     describe "compute intersection" $
@@ -269,24 +279,22 @@ testIpe inFp outFp = describe (show inFp) $ do
 
 
 renderComponent :: forall vertex f r.
-                   ( Point_ vertex 2 r, Foldable1 f
-                   , HasVertices (SimplePolygonF f (OriginalOrExtra vertex (Point 2 r)))
-                                 (SimplePolygonF f (Point 2 r))
+                   ( Point_ vertex 2 r
+                   , VertexContainer f (OriginalOrExtra vertex (Point 2 r))
+                   , HasFromFoldable1 f
+                   -- , HasVertices (ConvexPolygonF f (OriginalOrExtra vertex (Point 2 r)))
+                   --               (ConvexPolygonF f (Point 2 r))
                    --  VertexContainer f (OriginalOrExtra vertex (Point 2 r))
                    -- , VertexContainer f (Point 2 r)
                    )
-                => HalfPlaneSimplePolygonIntersection f r vertex -> IpeObject r
+                => HalfPlaneConvexPolygonIntersection f r vertex -> IpeObject r
 renderComponent = \case
     HalfPlane_x_SimplePolygon_Vertex v     -> iO $ defIO (v^.asPoint)
                                                  ! attr SStroke red
     HalfPlane_x_SimplePolygon_Edge e       -> iO $ defIO (view asPoint <$> e)
                                                  ! attr SStroke red
-    HalfPlane_x_SimplePolygon_Polygon poly -> iO $ ipeSimplePolygon @f (poly&vertices %~ getPt)
+    HalfPlane_x_SimplePolygon_Polygon poly -> iO $ ipeSimplePolygon poly
                                                  ! attr SFill red
-  where
-    getPt = \case
-      Original v -> v^.asPoint
-      Extra p    -> p
 
 --------------------------------------------------------------------------------
 

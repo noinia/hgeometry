@@ -331,8 +331,16 @@ toPolygonPathSegment = PolygonPath AsIs . uncheckedFromCCWPoints
   -- the polygon just using the outerBoundaryFold, but whatever.
 
 -- | Draw a polygon
-ipeSimplePolygon    :: Foldable1 f => IpeOut (SimplePolygonF f (Point 2 r)) Path r
-ipeSimplePolygon pg = review' _asSimplePolygon pg :+ mempty
+ipeSimplePolygon    :: (SimplePolygon_ simplePolygon point r)
+                    => IpeOut simplePolygon Path r
+ipeSimplePolygon pg = path (PolygonPath AsIs pg') :+ mempty
+  where
+    pg' = uncheckedFromCCWPoints $ toNonEmptyOf (vertices.asPoint) pg
+  -- TODO, maybe write a 'toNonEmptyVectorOf' to avoid copying
+
+-- | Draw a polygon
+ipeSimplePolygon'    :: Foldable1 f => IpeOut (SimplePolygonF f (Point 2 r)) Path r
+ipeSimplePolygon' pg = review' _asSimplePolygon pg :+ mempty
 
 -- | A slightly more general version of review that allows the s and t to differ.
 -- (and in some sense it is less general, since I don't care about monad constraints here)
@@ -344,7 +352,7 @@ review' p = review $ reviewing p
 
 -- | Draw a Rectangle
 ipeRectangle   :: Num r => IpeOut (Rectangle (Point 2 r)) Path r
-ipeRectangle r = ipeSimplePolygon @NonEmptyVector . uncheckedFromCCWPoints . NonEmpty.fromList
+ipeRectangle r = ipeSimplePolygon' @NonEmptyVector . uncheckedFromCCWPoints . NonEmpty.fromList
                $ [tl,tr,br,bl]
   where
     Corners tl tr br bl = corners r
