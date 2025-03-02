@@ -59,8 +59,6 @@ type R = RealNumber 5
 
 type HalfPlane line = HalfSpaceF line
 
-
-
 --------------------------------------------------------------------------------
 
 -- | A simple polygon (or a "subtype" thereof) that may be degenerate; i.e. may be a single
@@ -158,6 +156,7 @@ instance ( Point_ vertex 2 r, Fractional r, Ord r, VertexContainer f vertex
     ActualPolygon poly -> first Original <$> halfSpace `intersect` poly
 
 --------------------------------------------------------------------------------
+-- * Intersection of HalfSpaces and Line segments
 
 instance ( Point_ point d r, Ord r, Num r
          , HyperPlane_ plane d r
@@ -171,8 +170,6 @@ type instance Intersection (ClosedLineSegment point) (HalfSpaceF plane) =
                                             point
         )
 
--- | Canonical point in the dimension and numtype of the geometry
-type CanonicalPoint geom = Point (Dimension geom) (NumType geom)
 
 -- | Models the intersection of a closed linesegment and halfspace
 -- if the segment intersects the bounding hyperplane, the intersection point
@@ -218,15 +215,25 @@ instance ( Point_ point 2 r, Ord r, Fractional r
         Just (Line_x_Line_Point p) -> Extra p
         _                          -> error "line segment x halfspace intersection: absurd"
 
+
+
 --------------------------------------------------------------------------------
+
+loadInputs' inFp = do
+        inFp'      <- getDataFileName ([osp|test-with-ipe/Polygon/Simple/|] <> inFp)
+        Right page <- readSinglePageFile inFp'
+        let (rays :: NonEmpty (HalfLine (Point 2 R) :+ _))     = NonEmpty.fromList $ readAll page
+            (pgs  :: NonEmpty (ConvexPolygon (Point 2 R) :+ _)) = NonEmpty.fromList $ readAll page
+        -- take the left halfpalne of every halfline
+        pure (over core (leftHalfPlane . asOrientedLine) <$> rays, pgs)
+
+--------------------------------------------------------------------------------
+-- * Intersection of Triangle and ConvexPolygon
 
 type instance Intersection (Triangle corner) (ConvexPolygonF f vertex) =
   Maybe (PossiblyDegenerateSimplePolygon (OriginalOrCanonical vertex)
                                          (ConvexPolygonF f (OriginalOrCanonical vertex))
         )
-
-type OriginalOrCanonical orig = OriginalOrExtra orig (CanonicalPoint orig)
-
 
 instance ( Point_ point 2 r, Point_ point' 2 r, Num r, Ord r, VertexContainer f point
          ) => HasIntersectionWith (Triangle point') (ConvexPolygonF f point) where
@@ -256,6 +263,12 @@ flatten :: OriginalOrExtra (OriginalOrExtra vertex extra) extra -> OriginalOrExt
 flatten = \case
   Extra e    -> Extra e
   Original o -> o
+
+
+
+
+
+
 
 
 -- itest :: NonEmpty ((Int, Vector 2 Int), (Char, Vector 2 Char))

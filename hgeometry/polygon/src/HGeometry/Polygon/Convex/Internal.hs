@@ -231,7 +231,7 @@ isConvex = allOf outerBoundaryWithNeighbours isConvexVertex
 -- running time: \(O(\log n)\)
 maxInDirection   :: (Num r, Ord r, ConvexPolygon_ convexPolygon point r)
                  => Vector 2 r -> convexPolygon -> point
-maxInDirection u = findMaxWith (cmpInDirection u)
+maxInDirection u = findMaxWith (cmpInDirection2 u)
 
 -- | Find the maximum vertex in a convex polygon using a binary search.
 -- \( O(\log n) \)

@@ -81,7 +81,7 @@ toSingleSpec poly u = eq a c && eq b d `shouldBe` True
   where
     (a,b) = extremes u poly
     (c,d) = extremes u (review _ConvexPolygon poly)
-    eq p q = cmpInDirection u p q == EQ
+    eq p q = cmpInDirection2 u p q == EQ
 
 -- | generates 360 vectors "equally" spaced/angled
 directions :: Num r => [Vector 2 r]
