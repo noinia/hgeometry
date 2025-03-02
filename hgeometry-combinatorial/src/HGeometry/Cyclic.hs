@@ -15,6 +15,18 @@ module HGeometry.Cyclic
   ( Cyclic(..)
   , HasDirectedTraversals(..)
   , ShiftedEq(..)
+
+  , groupWith
+
+  , withCyclicSuccessor
+  , withCyclicPredecessor
+  , withCyclicNeighbours
+
+
+  , iWithCyclicSuccessor
+  , iWithCyclicPredecessor
+  , iWithCyclicNeighbours
+  , V2(..)
   ) where
 
 --------------------------------------------------------------------------------
@@ -22,13 +34,15 @@ module HGeometry.Cyclic
 import           Control.DeepSeq (NFData)
 import           Control.Lens
 import           Control.Monad (forM_)
+import           Control.Monad.State
 import           Data.Aeson
 import qualified Data.Foldable as F
+import           Data.Foldable1
 import           Data.Functor.Apply (Apply, (<.*>), MaybeApply(..))
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (isJust)
-import           Data.Semigroup.Foldable
+import           Data.Semigroup.Traversable.Class (sequence1)
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import qualified Data.Vector.NonEmpty as NV
@@ -37,6 +51,7 @@ import           HGeometry.Foldable.Util
 import           HGeometry.Sequence.NonEmpty
 import           HGeometry.StringSearch.KMP (isSubStringOf)
 import           HGeometry.Vector.NonEmpty.Util ()
+import           Linear.V2 (V2(..))
 
 --------------------------------------------------------------------------------
 
@@ -208,3 +223,114 @@ instance Foldable1 v => ShiftedEq (Cyclic v a) where
   type ElemCyclic (Cyclic v a) = a
   -- ^ runs in linear time in the inputs.
   isShiftOf = isShiftOfI
+
+
+--------------------------------------------------------------------------------
+-- * Cyclic Traversals With Neighbours
+
+
+-- | A traversal that associates every elemnt with its successor
+withCyclicSuccessor :: forall cyclic a b. Traversable1 cyclic
+                    => Traversal1 (cyclic a) (cyclic b) (a,a) b
+withCyclicSuccessor = \f xs -> let x0 :| xs' = toNonEmpty xs
+                               in sequence1 $ zipWithList (\s x -> f (x,s)) (xs' <> [x0]) xs
+
+-- | An indexed version of 'withCyclicSuccessor'
+iWithCyclicSuccessor :: forall cyclic i a b. (Traversable1 cyclic, TraversableWithIndex i cyclic)
+                     => IndexedTraversal1 (i,i) (cyclic a) (cyclic b) (a,a) b
+iWithCyclicSuccessor = conjoined withCyclicSuccessor (theITrav . indexed)
+  where
+    theITrav      :: Apply f => ((i,i) -> (a,a) -> f b) -> cyclic a -> f (cyclic b)
+    theITrav f xs = let x0 :| xs' = toNonEmpty $ imap ((,)) xs
+                    in sequence1 $ izipWithList (\(j,s) i x -> f (i,j) (x,s)) (xs' <> [x0]) xs
+
+-- | A traversal that associates every elemnt with its predecessor
+withCyclicPredecessor :: forall cyclic a b. Traversable1 cyclic
+                      => Traversal1 (cyclic a) (cyclic b) (a,a) b
+withCyclicPredecessor = \f xs -> let xs' = F.toList xs
+                                 in sequence1 $ zipWithList (\p x -> f (p,x)) (xs^.last1 : xs') xs
+
+
+-- | An indexed traversal that associates every elemnt with its predecessor
+iWithCyclicPredecessor :: forall cyclic i a b. (Traversable1 cyclic, TraversableWithIndex i cyclic)
+                       => IndexedTraversal1 (i,i) (cyclic a) (cyclic b) (a,a) b
+iWithCyclicPredecessor = conjoined withCyclicPredecessor (theITrav . indexed)
+  where
+    theITrav      :: Apply f => ((i,i) -> (a,a) -> f b) -> cyclic a -> f (cyclic b)
+    theITrav f xs = let xs' = imap ((,)) xs
+                    in sequence1 $
+                       izipWithList (\(i,p) j x -> f (i,j) (p,x)) (xs'^.last1 : F.toList xs') xs
+
+-- | Traverse a cyclic structure together with both its neighbors
+withCyclicNeighbours :: forall cyclic a b. Traversable1 cyclic
+                     => Traversal1 (cyclic a) (cyclic b) (a, V2 a) b
+withCyclicNeighbours = \f xs -> let x0 :| xs' = toNonEmpty xs
+                                    ns        = zipWith V2 (xs^.last1 : x0 : xs') (xs' <> [x0])
+                                in sequence1 $ zipWithList (\s x -> f (x,s)) ns xs
+
+-- | An indexed traversal that associates every elemnt with its neighbours
+iWithCyclicNeighbours :: forall cyclic i a b. (Traversable1 cyclic, TraversableWithIndex i cyclic)
+                      => IndexedTraversal1 (i,V2 i) (cyclic a) (cyclic b) (a,V2 a) b
+iWithCyclicNeighbours = conjoined withCyclicNeighbours (theITrav . indexed)
+  where
+    theITrav      :: Apply f
+                  => ((i,V2 i) -> (a,V2 a) -> f b) -> cyclic a -> f (cyclic b)
+    theITrav f xs = let xs'       = imap ((,)) xs
+                        y0 :| ys' = toNonEmpty xs'
+                        ns        = zipWith V2 (xs'^.last1 : F.toList xs') (ys' <> [y0])
+                    in sequence1 $ izipWithList (\(V2 (h,p) (j,s)) i x
+                                                  -> f (i, V2 h j) (x,V2 p s)) ns xs
+-- unfortuantely, we can't use Vector2 because that would introduce a cyclic dependency :(
+
+----------------------------------------
+-- Helper functions to implement the traversals above
+
+
+-- | pre: the f and the list have the same size
+zipWithList      :: forall f a b c. Traversable f
+                 => (a -> b -> c) -> [a] -> f b -> f c
+zipWithList f xs = flip evalState xs . traverse go
+  where
+    go   :: b -> State [a] c
+    go y = get >>= \case
+      []      -> error "zipWithList. precondition failed, too few a's"
+      (x:xs') -> do put xs'
+                    pure $ f x y
+
+-- | pre: the f and the list have the same size
+izipWithList      :: forall f i a b c. TraversableWithIndex i f
+                 => (a -> i -> b -> c) -> [a] -> f b -> f c
+izipWithList f xs = flip evalState xs . itraverse go
+  where
+    go     :: i -> b -> State [a] c
+    go i y = get >>= \case
+      []      -> error "izipWithList. precondition failed, too few a's"
+      (x:xs') -> do put xs'
+                    pure $ f x i y
+
+
+--------------------------------------------------------------------------------
+
+
+-- | Groups the elements of a cyclic. Note in particular that this may join the first and
+-- last group, thereby changing the indices of the individual elements.
+--
+-- the items are reported in the same order as before.
+groupWith      :: (Foldable1 cyclic, Eq b)
+               => (a -> b) -> cyclic a -> Cyclic NonEmpty (b, NonEmpty a)
+groupWith f xs = Cyclic $ case foldrMap1 initialize compute xs of
+    Left res      -> NonEmpty.singleton res
+    Right ((x, first), res@((y, current) :| completed))
+      | x == y    -> (x, first <> current) :| completed
+      | otherwise -> (x, first) NonEmpty.<| res
+  where
+    initialize x = Left (f x, NonEmpty.singleton x)
+    compute x = \case
+        Left (y,current)
+          | b == y    -> Left (y, x NonEmpty.<| current)
+          | otherwise -> Right ((y,current), NonEmpty.singleton (b, NonEmpty.singleton x))
+        Right (first, res@((y,current):|completed))
+          | b == y    -> Right (first, (y, x NonEmpty.<| current) :| completed)
+          | otherwise -> Right (first, (b, NonEmpty.singleton x) NonEmpty.<| res)
+      where
+        b = f x

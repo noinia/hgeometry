@@ -13,12 +13,16 @@ module HGeometry.Polygon
   , asTriangle
   , area2X
   , area
+
+  , module HGeometry.Polygon.Simple
+  , module HGeometry.Polygon.Convex
   ) where
 
 import Control.Lens hiding (holes)
 import HGeometry.Point.Class
 import HGeometry.Polygon.Class
 import HGeometry.Polygon.Simple
+import HGeometry.Polygon.Convex
 import HGeometry.Triangle
 
 --------------------------------------------------------------------------------

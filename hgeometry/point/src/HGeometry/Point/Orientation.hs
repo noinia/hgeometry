@@ -22,7 +22,7 @@ module HGeometry.Point.Orientation
 
   , insertIntoCyclicOrder
 
-  , cmpInDirection
+  , cmpInDirection2
   ) where
 
 import HGeometry.Point.Class
@@ -31,6 +31,6 @@ import HGeometry.Vector
 
 -- | Comparison that compares which point is 'larger' in the direction given by
 -- the vector u.
-cmpInDirection       :: (Num r, Ord r, Point_ point 2 r)
+cmpInDirection2       :: (Num r, Ord r, Point_ point 2 r)
                      => Vector 2 r -> point -> point -> Ordering
-cmpInDirection u p q = u `dot` (p .-. q) `compare` 0
+cmpInDirection2 u p q = u `dot` (p .-. q) `compare` 0

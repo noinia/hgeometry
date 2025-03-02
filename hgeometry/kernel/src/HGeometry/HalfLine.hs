@@ -11,6 +11,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.HalfLine
   ( HalfLine(..)
+  , asOrientedLine
   , halfLineThrough
   , LineHalfLineIntersection(..)
   , HasDirection(..)
@@ -146,3 +147,8 @@ instance ( Point_ point d r
 -- HalfLine (Point2 5 10) (Vector2 5 20)
 halfLineThrough     :: (Point_ point d r, Num r) => point -> point -> HalfLine point
 halfLineThrough p q = HalfLine p (q .-. p)
+
+
+-- | Convert the Halfline into an oriented line.
+asOrientedLine                :: (Point_ point d r) => HalfLine point -> LinePV d r
+asOrientedLine (HalfLine p v) = LinePV (p^.asPoint) v

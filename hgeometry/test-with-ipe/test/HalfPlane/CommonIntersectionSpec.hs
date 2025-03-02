@@ -150,7 +150,8 @@ asConstraint h = ipeGroup [ iO $ defIO seg
     l = h^.boundingHyperPlane
     n = normalVector l
     poly = fromMaybe (error "asConstraint: absurd")
-         . fromPoints . NonEmpty.fromList $ [ seg^.start, seg^.end, seg'^.end, seg'^.start ]
+         . fromPoints @(SimplePolygon (Point 2 r))
+         . NonEmpty.fromList $ [ seg^.start, seg^.end, seg'^.end, seg'^.start ]
 
     seg' = translateBy n seg
 

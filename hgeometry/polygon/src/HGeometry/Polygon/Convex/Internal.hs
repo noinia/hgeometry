@@ -1,7 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  HGeometry.Polygon.Convex.Implementation
+-- Module      :  HGeometry.Polygon.Convex.Internal
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
@@ -9,7 +9,7 @@
 -- A Simple polygon and some basic functions to interact with them.
 --
 --------------------------------------------------------------------------------
-module HGeometry.Polygon.Convex.Implementation
+module HGeometry.Polygon.Convex.Internal
   ( ConvexPolygon
   , ConvexPolygonF(..)
   , fromSimplePolygon
@@ -31,6 +31,8 @@ import HGeometry.Boundary
 import HGeometry.Box
 import HGeometry.Cyclic
 import HGeometry.Foldable.Util
+import HGeometry.HalfSpace
+import HGeometry.HyperPlane.Class
 import HGeometry.Intersection
 import HGeometry.LineSegment
 import HGeometry.Point
@@ -186,6 +188,13 @@ instance ( VertexContainer f point
       yMin = view yCoord $ maxInDirection (Vector2 0    (-1)) pg
       yMax = view yCoord $ maxInDirection (Vector2 0    1   ) pg
 
+
+instance ( Point_ point 2 r, Num r, Ord r, VertexContainer f point
+         , HyperPlane_ line 2 r
+         ) => HasIntersectionWith (HalfSpaceF line) (ConvexPolygonF f point) where
+  halfPlane `intersects` poly = halfPlane `intersects` (toSimplePolygon poly)
+    -- TODO there is a better, O(log n) time implementation. use that instead ...
+
 --------------------------------------------------------------------------------
 
 
@@ -222,7 +231,7 @@ isConvex = allOf outerBoundaryWithNeighbours isConvexVertex
 -- running time: \(O(\log n)\)
 maxInDirection   :: (Num r, Ord r, ConvexPolygon_ convexPolygon point r)
                  => Vector 2 r -> convexPolygon -> point
-maxInDirection u = findMaxWith (cmpInDirection u)
+maxInDirection u = findMaxWith (cmpInDirection2 u)
 
 -- | Find the maximum vertex in a convex polygon using a binary search.
 -- \( O(\log n) \)

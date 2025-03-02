@@ -421,6 +421,7 @@ library polygon
 
         HGeometry.Polygon.Convex
         HGeometry.Polygon.Convex.Class
+        HGeometry.Polygon.Convex.Internal
 
         HGeometry.Polygon.Simple
         HGeometry.Polygon.Simple.Class
@@ -428,7 +429,6 @@ library polygon
         HGeometry.Polygon.WithHoles
 
     other-modules:
-        HGeometry.Polygon.Convex.Implementation
 
         HGeometry.Polygon.Simple.Type
         HGeometry.Polygon.Simple.Implementation
@@ -852,6 +852,7 @@ test-suite with-ipe-hspec
       LineSegmentSpec
       HalfLineSpec
       Polygon.Simple.SPTSpec
+      Polygon.Simple.IntersectHalfplaneSpec
       Polygon.Triangulation.TriangulateMonotoneSpec
       Polygon.Triangulation.TriangulateSpec
       Polygon.Triangulation.WorldSpec

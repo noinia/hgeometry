@@ -6,14 +6,12 @@ import           Control.Lens hiding (elements)
 import           Control.Monad.State
 import qualified Data.List.NonEmpty as NonEmpty
 import           HGeometry.Boundary
-import           HGeometry.Box
 import           HGeometry.ConvexHull.GrahamScan (convexHull)
 import           HGeometry.Cyclic
 import           HGeometry.Ext
 import           HGeometry.Instances ()
 import           HGeometry.Kernel.Test.Box
-import           HGeometry.LineSegment
-import           HGeometry.Point
+import           HGeometry.Kernel
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Convex.MinkowskiSum
@@ -21,7 +19,6 @@ import           HGeometry.Polygon.Convex.Random
 import           HGeometry.Polygon.Instances ()
 import           HGeometry.Polygon.Simple
 import           HGeometry.Transformation
-import           HGeometry.Vector
 import           System.Random.Stateful
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
@@ -66,7 +63,7 @@ spec = describe "Convex Polygon tests" $ do
             let hull    = convexHull (toNonEmptyOf outerBoundary p)
                 fastMax = snd (extremes u hull)
                 slowMax = snd (extremes u p)
-            in cmpInDirection u fastMax slowMax === EQ
+            in cmpInDirection2 u fastMax slowMax === EQ
 
         -- Check that vertices are always considered to be OnBoundary.
         prop "inConvex boundary convex == OnBoundary" $

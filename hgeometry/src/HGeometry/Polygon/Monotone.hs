@@ -165,14 +165,14 @@ monotoneFrom direction pts = MonotonePolygon direction <$> thePolygon
   where
     thePolygon = fromPoints ([minP] <> rightHalf <> [maxP] <> leftHalf)
 
-    minP = minimumBy (cmpInDirection direction) pts
-    maxP = maximumBy (cmpInDirection direction) pts
+    minP = minimumBy (cmpInDirection2 direction) pts
+    maxP = maximumBy (cmpInDirection2 direction) pts
     -- 4
     pointsWithoutExtremes = NonEmpty.filter (\p -> p /= minP && p /= maxP) $ toNonEmpty pts
     -- 5, 6
     (leftHalfUnsorted,rightHalfUnsorted) = List.partition (toTheLeft minP maxP) pointsWithoutExtremes
-    leftHalf  = List.sortBy (flip $ cmpInDirection direction) leftHalfUnsorted
-    rightHalf = List.sortBy (cmpInDirection direction)        rightHalfUnsorted
+    leftHalf  = List.sortBy (flip $ cmpInDirection2 direction) leftHalfUnsorted
+    rightHalf = List.sortBy (cmpInDirection2 direction)        rightHalfUnsorted
 
 -------------------------------------------------------------------------------------------------
 -- helper functions

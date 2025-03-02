@@ -51,22 +51,24 @@ module HGeometry.Point
  , Quadrant(..), quadrantWith, quadrant, partitionIntoQuadrants
 
   , cmpByDistanceTo
-  , cmpInDirection
+  , cmpInDirection2
 
   , squaredEuclideanDist, euclideanDist
   , HasSquaredEuclideanDistance(..)
 
   , HasPoints(..), HasPoints'
+  , CanonicalPoint
   ) where
 
 import Control.Lens (Lens', Iso', coerced, (^.))
+import Data.Type.Ord
 import HGeometry.Point.Class
 import HGeometry.Point.EuclideanDistance
-import Data.Type.Ord
 import HGeometry.Point.Orientation
-import HGeometry.Point.Quadrants
-import HGeometry.Vector
 import HGeometry.Point.PointF
+import HGeometry.Point.Quadrants
+import HGeometry.Properties
+import HGeometry.Vector
 -- import Data.Coerce
 
 --------------------------------------------------------------------------------
@@ -114,3 +116,8 @@ pattern Point4 x y z w = (Point (Vector4 x y z w))
 projectPoint   :: forall i point d r.
                   (Point_ point d r, i <= d, Has_ Vector_ i r) => point -> Point i r
 projectPoint p = Point . prefix $ p^.asPoint.vector
+
+
+
+-- | Canonical point in the dimension and numtype of the geometry
+type CanonicalPoint geom = Point (Dimension geom) (NumType geom)

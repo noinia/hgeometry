@@ -18,12 +18,14 @@ module Ipe.IpeOut where
 
 import           Control.Lens hiding (Simple, holes)
 import           Data.Foldable (toList)
+import           Data.Foldable1 (Foldable1)
 import           Data.Kind
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Sequence as Seq
 import           Data.Text (Text)
 import qualified Data.Text as Text
+import           Data.Vector.NonEmpty (NonEmptyVector)
 import           HGeometry.Ball
 import           HGeometry.BezierSpline
 import           HGeometry.Box
@@ -214,6 +216,7 @@ instance HasDefaultIpeOut (Group r) where
   type DefaultIpeOut (Group r) = Group
   defIO = (:+ mempty)
 
+
 --------------------------------------------------------------------------------
 -- * Point Converters
 
@@ -236,6 +239,9 @@ defaultBox = let z  = 1000
 -- | Renders a line as a Path. The line is clipped to the 'defaultBox'
 ipeLine :: (Ord r, Fractional r, Show r) => IpeOut (LinePV 2 r) Path r
 ipeLine = ipeLineIn defaultBox
+
+
+
 
 -- | Renders the line in the given box.
 --
@@ -325,13 +331,28 @@ toPolygonPathSegment = PolygonPath AsIs . uncheckedFromCCWPoints
   -- the polygon just using the outerBoundaryFold, but whatever.
 
 -- | Draw a polygon
-ipeSimplePolygon    :: IpeOut (SimplePolygon (Point 2 r)) Path r
-ipeSimplePolygon pg = pg^.re _asSimplePolygon :+ mempty
+ipeSimplePolygon    :: (SimplePolygon_ simplePolygon point r)
+                    => IpeOut simplePolygon Path r
+ipeSimplePolygon pg = path (PolygonPath AsIs pg') :+ mempty
+  where
+    pg' = uncheckedFromCCWPoints $ toNonEmptyOf (vertices.asPoint) pg
+  -- TODO, maybe write a 'toNonEmptyVectorOf' to avoid copying
+
+-- | Draw a polygon
+ipeSimplePolygon'    :: Foldable1 f => IpeOut (SimplePolygonF f (Point 2 r)) Path r
+ipeSimplePolygon' pg = review' _asSimplePolygon pg :+ mempty
+
+-- | A slightly more general version of review that allows the s and t to differ.
+-- (and in some sense it is less general, since I don't care about monad constraints here)
+review'   :: forall s t a b. Prism s t a b -> b -> t
+review' p = review $ reviewing p
+-- alternatively:
+-- review' p = withPrism p (\f _ -> f)
 
 
 -- | Draw a Rectangle
 ipeRectangle   :: Num r => IpeOut (Rectangle (Point 2 r)) Path r
-ipeRectangle r = ipeSimplePolygon . uncheckedFromCCWPoints . NonEmpty.fromList
+ipeRectangle r = ipeSimplePolygon' @NonEmptyVector . uncheckedFromCCWPoints . NonEmpty.fromList
                $ [tl,tr,br,bl]
   where
     Corners tl tr br bl = corners r

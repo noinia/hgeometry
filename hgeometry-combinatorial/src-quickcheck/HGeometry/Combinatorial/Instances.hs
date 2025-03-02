@@ -14,6 +14,7 @@
 module HGeometry.Combinatorial.Instances where
 
 import           HGeometry.Ext
+import           HGeometry.Cyclic
 import           HGeometry.Number.Ratio.Generalized
 import           HGeometry.Number.Real.Rational
 import qualified HGeometry.Sign as Sign
@@ -28,6 +29,11 @@ import           HGeometry.Tree.Binary.Static
 instance (Arbitrary c, Arbitrary e) => Arbitrary (c :+ e) where
   arbitrary = (:+) <$> arbitrary <*> arbitrary
   shrink = genericShrink
+
+
+--------------------------------------------------------------------------------
+
+deriving newtype instance Arbitrary (f a) => Arbitrary (Cyclic f a)
 
 --------------------------------------------------------------------------------
 

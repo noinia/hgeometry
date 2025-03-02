@@ -12,12 +12,13 @@
 --------------------------------------------------------------------------------
 module HGeometry.Point.Either
   ( OriginalOrExtra(..)
+  , OriginalOrCanonical
   ) where
 
 import Control.Lens
 import Data.Bifoldable
 import Data.Bitraversable
-import HGeometry.Point.Class
+import HGeometry.Point
 import HGeometry.Properties
 
 --------------------------------------------------------------------------------
@@ -26,6 +27,9 @@ import HGeometry.Properties
 data OriginalOrExtra orig extra = Original orig
                                 | Extra    extra
                                 deriving (Show,Eq,Functor)
+
+-- | Shorthand for an Original or a Canonical Point
+type OriginalOrCanonical orig = OriginalOrExtra orig (CanonicalPoint orig)
 
 instance Bifunctor OriginalOrExtra where
   bimap f g = \case

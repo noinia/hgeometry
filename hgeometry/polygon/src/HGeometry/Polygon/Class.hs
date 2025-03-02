@@ -268,8 +268,8 @@ class ( HasOuterBoundary polygon
   -- running time: \(O(n)\)
   extremes      :: (Num r, Ord r, Point_ point 2 r)
                 => Vector 2 r -> polygon -> (point, point)
-  extremes u pg = ( first1Of (minimumVertexBy (cmpInDirection u)) pg
-                  , first1Of (maximumVertexBy (cmpInDirection u)) pg
+  extremes u pg = ( first1Of (minimumVertexBy (cmpInDirection2 u)) pg
+                  , first1Of (maximumVertexBy (cmpInDirection2 u)) pg
                   )
 
   -- | Given a vertexIdx v; get an IndexedLens to access the CCW predecessor of v
