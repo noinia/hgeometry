@@ -57,7 +57,7 @@ type R = RealNumber 5
 
 --------------------------------------------------------------------------------
 
-type HalfPlane line = HalfSpaceF line
+-- type HalfPlane line = HalfSpaceF line
 
 --------------------------------------------------------------------------------
 
@@ -79,7 +79,7 @@ instance Bifunctor PossiblyDegenerateSimplePolygon where
 
 -- | A HalfPlane and a simple polygon intersect in a bunch of components, each of
 -- which is a possiblyDegenerate simple polygon.
-type instance Intersection (HalfPlane line) (SimplePolygonF f point) =
+type instance Intersection (HalfSpaceF line) (SimplePolygonF f point) =
   [HalfPlane_x_SimplePolygon_Component f (NumType point) point]
 -- | A single Component of a HalfPlane x SimplePolygon intersection.
 type HalfPlane_x_SimplePolygon_Component f r vertex =
@@ -87,14 +87,14 @@ type HalfPlane_x_SimplePolygon_Component f r vertex =
 
 
 -- | If we drag along extra information in the halfplane polygon intersection we lose it
-type instance Intersection (HalfPlane line :+ extra) (SimplePolygonF f point :+ extra') =
-  Intersection (HalfPlane line) (SimplePolygonF f point)
+type instance Intersection (HalfSpaceF line :+ extra) (SimplePolygonF f point :+ extra') =
+  Intersection (HalfSpaceF line) (SimplePolygonF f point)
 
 ----------------------------------------
 
 -- | A HalfPlane and a Convex polygon intersect in a single component, which is a
 -- possiblyDegenerate convex polygon.
-type instance Intersection (HalfPlane line) (ConvexPolygonF f point) =
+type instance Intersection (HalfSpaceF line) (ConvexPolygonF f point) =
   Maybe (HalfPlaneConvexPolygonIntersection f (NumType point) point)
 
 -- | A single Component of a HalfPlane x ConvexPolygon intersection.
@@ -102,8 +102,8 @@ type HalfPlaneConvexPolygonIntersection f r vertex =
   PossiblyDegenerateSimplePolygon vertex (ConvexPolygonF f (OriginalOrExtra vertex (Point 2 r)))
 
 -- | If we drag along extra information in the halfplane polygon intersection we lose it
-type instance Intersection (HalfPlane line :+ extra) (ConvexPolygonF f point :+ extra') =
-  Intersection (HalfPlane line) (ConvexPolygonF f point)
+type instance Intersection (HalfSpaceF line :+ extra) (ConvexPolygonF f point :+ extra') =
+  Intersection (HalfSpaceF line) (ConvexPolygonF f point)
 
 --------------------------------------------------------------------------------
 
@@ -127,7 +127,7 @@ instance ( Point_ vertex 2 r, Num r, Ord r, VertexContainer f vertex
 -- | Intersecting a halfplane witha possibly degenerate convex polygon
 -- gives us a possibly degenerate polygon again.
 --
-type instance Intersection (HalfPlane line)
+type instance Intersection (HalfSpaceF line)
                            (PossiblyDegenerateSimplePolygon vertex (ConvexPolygonF f vertex))
   = Maybe (PossiblyDegenerateSimplePolygon
               (OriginalOrExtra vertex (CanonicalPoint vertex))
@@ -150,8 +150,8 @@ instance ( Point_ vertex 2 r, Fractional r, Ord r, VertexContainer f vertex
     DegenerateVertex v -> DegenerateVertex (Original v) <$ ((v^.asPoint) `intersect` halfSpace)
     DegenerateEdge e   -> e `intersect` halfSpace <&> \case
       ClosedLineSegment_x_HalfSpace_Point v           -> DegenerateVertex (Original v)
-      ClosedLineSegment_x_HalfSpace_SubSegment e      -> DegenerateEdge e
-      ClosedLineSegment_x_HalfSpace_CompleteSegment e -> DegenerateEdge (Original <$> e)
+      ClosedLineSegment_x_HalfSpace_SubSegment s      -> DegenerateEdge s
+      ClosedLineSegment_x_HalfSpace_CompleteSegment _ -> DegenerateEdge (Original <$> e)
 
     ActualPolygon poly -> first Original <$> halfSpace `intersect` poly
 
@@ -219,13 +219,26 @@ instance ( Point_ point 2 r, Ord r, Fractional r
 
 --------------------------------------------------------------------------------
 
+loadInputs'      :: OsPath -> IO ( NonEmpty (HalfSpaceF (LinePV 2 R) :+ _)
+                                 , NonEmpty (ClosedLineSegment (Point 2 R) :+ _)
+                                 )
 loadInputs' inFp = do
-        inFp'      <- getDataFileName ([osp|test-with-ipe/Polygon/Simple/|] <> inFp)
+        inFp'      <- getDataFileName ([osp|test-with-ipe/LineSegment/|] <> inFp)
         Right page <- readSinglePageFile inFp'
-        let (rays :: NonEmpty (HalfLine (Point 2 R) :+ _))     = NonEmpty.fromList $ readAll page
-            (pgs  :: NonEmpty (ConvexPolygon (Point 2 R) :+ _)) = NonEmpty.fromList $ readAll page
-        -- take the left halfpalne of every halfline
-        pure (over core (leftHalfPlane . asOrientedLine) <$> rays, pgs)
+        let (rays :: NonEmpty (HalfLine (Point 2 R) :+ _)) = NonEmpty.fromList $ readAll page
+            segs                                           = NonEmpty.fromList $ readAll page
+        -- take the left halfplane of every halfline
+        pure (over core (leftHalfPlane . asOrientedLine) <$> rays, segs)
+
+
+spec' inFp = describe "LineSegment x HalfSpace intersetion tests" $ do
+          (halfPlanes, segments) <-  runIO $ loadInputs' inFp
+
+          for_ segments $ \seg ->
+            for_ halfPlanes $ \halfPlane -> do
+              it ("intersects halfplane and line segment") $
+                (seg `intersects` halfPlane) `shouldBe` True -- TODO; fix
+
 
 --------------------------------------------------------------------------------
 -- * Intersection of Triangle and ConvexPolygon
@@ -369,13 +382,13 @@ instance ( Point_ vertex 2 r, Fractional r, Ord r, VertexContainer f vertex
          , VertexContainer f (OriginalOrExtra vertex (Point 2 r))
          , HasFromFoldable1 f
          , Show r, Show vertex
-         ) => IsIntersectableWith (HalfPlane (LinePV 2 r)) (SimplePolygonF f vertex) where
+         ) => IsIntersectableWith (HalfSpaceF (LinePV 2 r)) (SimplePolygonF f vertex) where
   halfPlane `intersect` poly = collectComponents (halfPlane^.boundingHyperPlane)
                              . groupWith (\v -> (v^.asPoint) `intersects` halfPlane) . Cyclic
                              $ toNonEmptyOf vertices poly
 
-instance ( HasIntersectionWith (HalfPlane line) (SimplePolygonF f vertex)
-         ) => HasIntersectionWith (HalfPlane line :+ extra)
+instance ( HasIntersectionWith (HalfSpaceF line) (SimplePolygonF f vertex)
+         ) => HasIntersectionWith (HalfSpaceF line :+ extra)
                                   (SimplePolygonF f vertex :+ extra') where
   (halfPlane :+ _) `intersects` (poly :+ _) = halfPlane `intersects` poly
 -}
@@ -383,7 +396,7 @@ instance ( HasIntersectionWith (HalfPlane line) (SimplePolygonF f vertex)
 instance ( Point_ vertex 2 r, Fractional r, Ord r, VertexContainer f vertex
          , VertexContainer f (OriginalOrExtra vertex (Point 2 r))
          , HasFromFoldable1 f
-         ) => IsIntersectableWith (HalfPlane (LinePV 2 r)) (ConvexPolygonF f vertex) where
+         ) => IsIntersectableWith (HalfSpaceF (LinePV 2 r)) (ConvexPolygonF f vertex) where
   halfPlane `intersect` poly = case comps of
       []  -> Nothing
       [c] -> Just c
@@ -400,9 +413,9 @@ instance ( Point_ vertex 2 r, Fractional r, Ord r, VertexContainer f vertex
   --   _      -> Nothing
 
 
-instance ( IsIntersectableWith (HalfPlane line) (ConvexPolygonF f vertex)
-         , HasIntersectionWith (HalfPlane line :+ extra) (ConvexPolygonF f vertex :+ extra')
-         ) => IsIntersectableWith (HalfPlane line :+ extra)
+instance ( IsIntersectableWith (HalfSpaceF line) (ConvexPolygonF f vertex)
+         , HasIntersectionWith (HalfSpaceF line :+ extra) (ConvexPolygonF f vertex :+ extra')
+         ) => IsIntersectableWith (HalfSpaceF line :+ extra)
                                   (ConvexPolygonF f vertex :+ extra') where
   (halfPlane :+ _) `intersect` (poly :+ _) = halfPlane `intersect` poly
 
@@ -416,7 +429,9 @@ spec = describe "simple polygon x halfspace intersection" $ do
          testIpe [osp|convexHalfspaceIntersection.ipe|]
                  [osp|convexHalfspaceIntersection.out|]
 
-loadInputs      :: OsPath -> IO ( NonEmpty (HalfPlane (LinePV 2 R) :+ _)
+         spec' [osp|intersectHalfPlane.ipe|]
+
+loadInputs      :: OsPath -> IO ( NonEmpty (HalfSpaceF (LinePV 2 R) :+ _)
                                 , NonEmpty (ConvexPolygon (Point 2 R) :+ _)
                                 )
 loadInputs inFp = do
@@ -424,7 +439,7 @@ loadInputs inFp = do
         Right page <- readSinglePageFile inFp'
         let (rays :: NonEmpty (HalfLine (Point 2 R) :+ _))     = NonEmpty.fromList $ readAll page
             (pgs  :: NonEmpty (ConvexPolygon (Point 2 R) :+ _)) = NonEmpty.fromList $ readAll page
-        -- take the left halfpalne of every halfline
+        -- take the left halfplane of every halfline
         pure (over core (leftHalfPlane . asOrientedLine) <$> rays, pgs)
 
 testIpe            :: OsPath -> OsPath -> Spec
