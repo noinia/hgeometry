@@ -486,6 +486,8 @@ spec = describe "simple polygon x halfspace intersection" $ do
                  [osp|polygonHalfspaceIntersection.out|]
          testIpe [osp|convexHalfspaceIntersection.ipe|]
                  [osp|convexHalfspaceIntersection.out|]
+         testIpe [osp|halfSpaceIntersectionDegenerate.ipe|]
+                 [osp|halfSpaceIntersectionDegenerate.out|]
 
          spec' [osp|intersectHalfPlane.ipe|]
 
@@ -493,7 +495,7 @@ loadInputs      :: OsPath -> IO ( NonEmpty (HalfSpaceF (LinePV 2 R) :+ _)
                                 , NonEmpty (ConvexPolygon (Point 2 R) :+ _)
                                 )
 loadInputs inFp = do
-        inFp'      <- getDataFileName ([osp|test-with-ipe/Polygon/Simple/|] <> inFp)
+        inFp'      <- getDataFileName ([osp|test-with-ipe/Polygon/Convex/|] <> inFp)
         Right page <- readSinglePageFile inFp'
         let (rays :: NonEmpty (HalfLine (Point 2 R) :+ _))     = NonEmpty.fromList $ readAll page
             (pgs  :: NonEmpty (ConvexPolygon (Point 2 R) :+ _)) = NonEmpty.fromList $ readAll page
@@ -526,7 +528,7 @@ testIpe inFp outFp = describe (show inFp) $ do
                                          ]
                          ]
     describe "compute intersection" $
-      goldenWith [osp|data/test-with-ipe/Polygon/Simple/|]
+      goldenWith [osp|data/test-with-ipe/Polygon/Convex/|]
                  (ipeFileGolden { name = outFp })
                    (addStyleSheet opacitiesStyle $ singlePageFromContent content')
 
