@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# OPTIONS_GHC -Wno-orphans #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  HGeometry.Polygon.Simple.PossiblyDegenerate</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- A Covnex polygon that may be degenerate, i.e. may also be a line segment or point.</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.PossiblyDegenerate.html"><span class="hs-identifier">HGeometry.Polygon.Simple.PossiblyDegenerate</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.PossiblyDegenerate.html#PossiblyDegenerateSimplePolygon"><span class="hs-identifier">PossiblyDegenerateSimplePolygon</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.PossiblyDegenerate.html#HalfPlane_x_SimplePolygon_Component"><span class="hs-identifier">HalfPlane_x_SimplePolygon_Component</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-51bc2e912bec0d2e3b17b8a780d705551325fe816454862172377dfdc74e37b2/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html"><span class="hs-identifier">HGeometry.Ext</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.HalfSpace</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Intersection</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.LineSegment</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point.Either</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Polygon.Simple.Type.html"><span class="hs-identifier">HGeometry.Polygon.Simple.Type</span></a></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-28"></span><span>
+</span><span id="line-29"></span><span class="hs-comment">-- | A simple polygon (or a &quot;subtype&quot; thereof) that may be degenerate; i.e. may be a single</span><span>
+</span><span id="line-30"></span><span class="hs-comment">-- vertex, or a point.</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">data</span><span> </span><span id="PossiblyDegenerateSimplePolygon"><span class="annot"><a href="HGeometry.Polygon.Simple.PossiblyDegenerate.html#PossiblyDegenerateSimplePolygon"><span class="hs-identifier hs-var">PossiblyDegenerateSimplePolygon</span></a></span></span><span> </span><span id="local-6989586621679270419"><span class="annot"><a href="#local-6989586621679270419"><span class="hs-identifier hs-type">vertex</span></a></span></span><span> </span><span id="local-6989586621679270420"><span class="annot"><a href="#local-6989586621679270420"><span class="hs-identifier hs-type">polygon</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-32"></span><span>    </span><span id="DegenerateVertex"><span class="annot"><a href="HGeometry.Polygon.Simple.PossiblyDegenerate.html#DegenerateVertex"><span class="hs-identifier hs-var">DegenerateVertex</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679270419"><span class="hs-identifier hs-type">vertex</span></a></span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="DegenerateEdge"><span class="annot"><a href="HGeometry.Polygon.Simple.PossiblyDegenerate.html#DegenerateEdge"><span class="hs-identifier hs-var">DegenerateEdge</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679270419"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="ActualPolygon"><span class="annot"><a href="HGeometry.Polygon.Simple.PossiblyDegenerate.html#ActualPolygon"><span class="hs-identifier hs-var">ActualPolygon</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679270420"><span class="hs-identifier hs-type">polygon</span></a></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679270428"><span id="local-6989586621679270438"><span id="local-6989586621679270442"><span class="annot"><span class="annottext">Int -&gt; PossiblyDegenerateSimplePolygon vertex polygon -&gt; ShowS
+[PossiblyDegenerateSimplePolygon vertex polygon] -&gt; ShowS
+PossiblyDegenerateSimplePolygon vertex polygon -&gt; String
+(Int -&gt; PossiblyDegenerateSimplePolygon vertex polygon -&gt; ShowS)
+-&gt; (PossiblyDegenerateSimplePolygon vertex polygon -&gt; String)
+-&gt; ([PossiblyDegenerateSimplePolygon vertex polygon] -&gt; ShowS)
+-&gt; Show (PossiblyDegenerateSimplePolygon vertex polygon)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall vertex polygon.
+(Show vertex, Show polygon) =&gt;
+Int -&gt; PossiblyDegenerateSimplePolygon vertex polygon -&gt; ShowS
+forall vertex polygon.
+(Show vertex, Show polygon) =&gt;
+[PossiblyDegenerateSimplePolygon vertex polygon] -&gt; ShowS
+forall vertex polygon.
+(Show vertex, Show polygon) =&gt;
+PossiblyDegenerateSimplePolygon vertex polygon -&gt; String
+$cshowsPrec :: forall vertex polygon.
+(Show vertex, Show polygon) =&gt;
+Int -&gt; PossiblyDegenerateSimplePolygon vertex polygon -&gt; ShowS
+showsPrec :: Int -&gt; PossiblyDegenerateSimplePolygon vertex polygon -&gt; ShowS
+$cshow :: forall vertex polygon.
+(Show vertex, Show polygon) =&gt;
+PossiblyDegenerateSimplePolygon vertex polygon -&gt; String
+show :: PossiblyDegenerateSimplePolygon vertex polygon -&gt; String
+$cshowList :: forall vertex polygon.
+(Show vertex, Show polygon) =&gt;
+[PossiblyDegenerateSimplePolygon vertex polygon] -&gt; ShowS
+showList :: [PossiblyDegenerateSimplePolygon vertex polygon] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679270449"><span id="local-6989586621679270459"><span class="annot"><span class="annottext">PossiblyDegenerateSimplePolygon vertex polygon
+-&gt; PossiblyDegenerateSimplePolygon vertex polygon -&gt; Bool
+(PossiblyDegenerateSimplePolygon vertex polygon
+ -&gt; PossiblyDegenerateSimplePolygon vertex polygon -&gt; Bool)
+-&gt; (PossiblyDegenerateSimplePolygon vertex polygon
+    -&gt; PossiblyDegenerateSimplePolygon vertex polygon -&gt; Bool)
+-&gt; Eq (PossiblyDegenerateSimplePolygon vertex polygon)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall vertex polygon.
+(Eq vertex, Eq polygon) =&gt;
+PossiblyDegenerateSimplePolygon vertex polygon
+-&gt; PossiblyDegenerateSimplePolygon vertex polygon -&gt; Bool
+$c== :: forall vertex polygon.
+(Eq vertex, Eq polygon) =&gt;
+PossiblyDegenerateSimplePolygon vertex polygon
+-&gt; PossiblyDegenerateSimplePolygon vertex polygon -&gt; Bool
+== :: PossiblyDegenerateSimplePolygon vertex polygon
+-&gt; PossiblyDegenerateSimplePolygon vertex polygon -&gt; Bool
+$c/= :: forall vertex polygon.
+(Eq vertex, Eq polygon) =&gt;
+PossiblyDegenerateSimplePolygon vertex polygon
+-&gt; PossiblyDegenerateSimplePolygon vertex polygon -&gt; Bool
+/= :: PossiblyDegenerateSimplePolygon vertex polygon
+-&gt; PossiblyDegenerateSimplePolygon vertex polygon -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679270465"><span id="local-6989586621679270467"><span class="annot"><span class="annottext">(forall a b.
+ (a -&gt; b)
+ -&gt; PossiblyDegenerateSimplePolygon vertex a
+ -&gt; PossiblyDegenerateSimplePolygon vertex b)
+-&gt; (forall a b.
+    a
+    -&gt; PossiblyDegenerateSimplePolygon vertex b
+    -&gt; PossiblyDegenerateSimplePolygon vertex a)
+-&gt; Functor (PossiblyDegenerateSimplePolygon vertex)
+forall a b.
+a
+-&gt; PossiblyDegenerateSimplePolygon vertex b
+-&gt; PossiblyDegenerateSimplePolygon vertex a
+forall a b.
+(a -&gt; b)
+-&gt; PossiblyDegenerateSimplePolygon vertex a
+-&gt; PossiblyDegenerateSimplePolygon vertex b
+forall vertex a b.
+a
+-&gt; PossiblyDegenerateSimplePolygon vertex b
+-&gt; PossiblyDegenerateSimplePolygon vertex a
+forall vertex a b.
+(a -&gt; b)
+-&gt; PossiblyDegenerateSimplePolygon vertex a
+-&gt; PossiblyDegenerateSimplePolygon vertex b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall vertex a b.
+(a -&gt; b)
+-&gt; PossiblyDegenerateSimplePolygon vertex a
+-&gt; PossiblyDegenerateSimplePolygon vertex b
+fmap :: forall a b.
+(a -&gt; b)
+-&gt; PossiblyDegenerateSimplePolygon vertex a
+-&gt; PossiblyDegenerateSimplePolygon vertex b
+$c&lt;$ :: forall vertex a b.
+a
+-&gt; PossiblyDegenerateSimplePolygon vertex b
+-&gt; PossiblyDegenerateSimplePolygon vertex a
+&lt;$ :: forall a b.
+a
+-&gt; PossiblyDegenerateSimplePolygon vertex b
+-&gt; PossiblyDegenerateSimplePolygon vertex a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679270475"><span id="local-6989586621679270479"><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="annot"><a href="HGeometry.Polygon.Simple.PossiblyDegenerate.html#PossiblyDegenerateSimplePolygon"><span class="hs-identifier hs-type">PossiblyDegenerateSimplePolygon</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-38"></span><span>  </span><span id="local-6989586621679270486"><span class="annot"><span class="annottext">bimap :: forall a b c d.
+(a -&gt; b)
+-&gt; (c -&gt; d)
+-&gt; PossiblyDegenerateSimplePolygon a c
+-&gt; PossiblyDegenerateSimplePolygon b d
+</span><a href="#local-6989586621679270486"><span class="hs-identifier hs-var hs-var hs-var">bimap</span></a></span></span><span> </span><span id="local-6989586621679270488"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679270488"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679270489"><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679270489"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-39"></span><span>    </span><span class="annot"><a href="HGeometry.Polygon.Simple.PossiblyDegenerate.html#DegenerateVertex"><span class="hs-identifier hs-type">DegenerateVertex</span></a></span><span> </span><span id="local-6989586621679270490"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679270490"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">b -&gt; PossiblyDegenerateSimplePolygon b d
+forall vertex polygon.
+vertex -&gt; PossiblyDegenerateSimplePolygon vertex polygon
+</span><a href="HGeometry.Polygon.Simple.PossiblyDegenerate.html#DegenerateVertex"><span class="hs-identifier hs-var">DegenerateVertex</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679270488"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679270490"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span>    </span><span class="annot"><a href="HGeometry.Polygon.Simple.PossiblyDegenerate.html#DegenerateEdge"><span class="hs-identifier hs-type">DegenerateEdge</span></a></span><span> </span><span id="local-6989586621679270491"><span class="annot"><span class="annottext">ClosedLineSegment a
+</span><a href="#local-6989586621679270491"><span class="hs-identifier hs-var">e</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment b -&gt; PossiblyDegenerateSimplePolygon b d
+forall vertex polygon.
+ClosedLineSegment vertex
+-&gt; PossiblyDegenerateSimplePolygon vertex polygon
+</span><a href="HGeometry.Polygon.Simple.PossiblyDegenerate.html#DegenerateEdge"><span class="hs-identifier hs-var">DegenerateEdge</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; ClosedLineSegment a -&gt; ClosedLineSegment b
+forall a b.
+(a -&gt; b)
+-&gt; LineSegment (EndPoint 'Closed) a
+-&gt; LineSegment (EndPoint 'Closed) b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679270488"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment a
+</span><a href="#local-6989586621679270491"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>    </span><span class="annot"><a href="HGeometry.Polygon.Simple.PossiblyDegenerate.html#ActualPolygon"><span class="hs-identifier hs-type">ActualPolygon</span></a></span><span> </span><span id="local-6989586621679270492"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679270492"><span class="hs-identifier hs-var">poly</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">d -&gt; PossiblyDegenerateSimplePolygon b d
+forall vertex polygon.
+polygon -&gt; PossiblyDegenerateSimplePolygon vertex polygon
+</span><a href="HGeometry.Polygon.Simple.PossiblyDegenerate.html#ActualPolygon"><span class="hs-identifier hs-var">ActualPolygon</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679270489"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679270492"><span class="hs-identifier hs-var">poly</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-44"></span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- | A HalfPlane and a simple polygon intersect in a bunch of components, each of</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- which is a possiblyDegenerate simple polygon.</span><span>
+</span><span id="line-47"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Intersection"><span class="annot"><span class="hs-identifier hs-var">Intersection</span></span></span><span> </span><span id="local-6989586621679270494"><span id="local-6989586621679270495"><span id="local-6989586621679270496"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HalfSpaceF</span></span><span> </span><span class="annot"><a href="#local-6989586621679270494"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Simple.Type.html#SimplePolygonF"><span class="hs-identifier hs-type">SimplePolygonF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270495"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270496"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-special">[</span><span class="annot"><a href="HGeometry.Polygon.Simple.PossiblyDegenerate.html#HalfPlane_x_SimplePolygon_Component"><span class="hs-identifier hs-type">HalfPlane_x_SimplePolygon_Component</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270495"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679270496"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679270496"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-49"></span><span class="annot"><span class="hs-comment">-- | A single Component of a HalfPlane x SimplePolygon intersection.</span></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-keyword">type</span><span> </span><span id="HalfPlane_x_SimplePolygon_Component"><span class="annot"><a href="HGeometry.Polygon.Simple.PossiblyDegenerate.html#HalfPlane_x_SimplePolygon_Component"><span class="hs-identifier hs-var">HalfPlane_x_SimplePolygon_Component</span></a></span></span><span> </span><span id="local-6989586621679270500"><span class="annot"><a href="#local-6989586621679270500"><span class="hs-identifier hs-type">f</span></a></span></span><span> </span><span id="local-6989586621679270501"><span class="annot"><a href="#local-6989586621679270501"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679270502"><span class="annot"><a href="#local-6989586621679270502"><span class="hs-identifier hs-type">vertex</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-52"></span><span>  </span><span class="annot"><a href="HGeometry.Polygon.Simple.PossiblyDegenerate.html#PossiblyDegenerateSimplePolygon"><span class="hs-identifier hs-type">PossiblyDegenerateSimplePolygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270502"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Simple.Type.html#SimplePolygonF"><span class="hs-identifier hs-type">SimplePolygonF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270500"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">OriginalOrExtra</span></span><span> </span><span class="annot"><a href="#local-6989586621679270502"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679270501"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="annot"><span class="hs-comment">-- | If we drag along extra information in the halfplane polygon intersection we lose it</span></span><span>
+</span><span id="line-55"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Intersection"><span class="annot"><span class="hs-identifier hs-var">Intersection</span></span></span><span> </span><span id="local-6989586621679270505"><span id="local-6989586621679270506"><span id="local-6989586621679270507"><span id="local-6989586621679270508"><span id="local-6989586621679270509"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HalfSpaceF</span></span><span> </span><span class="annot"><a href="#local-6989586621679270505"><span class="hs-identifier hs-type">line</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270506"><span class="hs-identifier hs-type">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Simple.Type.html#SimplePolygonF"><span class="hs-identifier hs-type">SimplePolygonF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270507"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270508"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270509"><span class="hs-identifier hs-type">extra'</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-56"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Intersection</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HalfSpaceF</span></span><span> </span><span class="annot"><a href="#local-6989586621679270505"><span class="hs-identifier hs-type">line</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Simple.Type.html#SimplePolygonF"><span class="hs-identifier hs-type">SimplePolygonF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270507"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270508"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span></pre></body></html>

@@ -17,8 +17,8 @@
 </span><span id="line-17"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-18"></span><span>
 </span><span id="line-19"></span><span class="annot"><span class="hs-comment">-- | At most two elements</span></span><span>
-</span><span id="line-20"></span><span class="hs-keyword">data</span><span> </span><span id="AtMostTwo"><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#AtMostTwo"><span class="hs-identifier hs-var">AtMostTwo</span></a></span></span><span> </span><span id="local-6989586621679227278"><span class="annot"><a href="#local-6989586621679227278"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Zero"><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#Zero"><span class="hs-identifier hs-var">Zero</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="One"><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#One"><span class="hs-identifier hs-var">One</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679227278"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Two"><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#Two"><span class="hs-identifier hs-var">Two</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679227278"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679227278"><span class="hs-identifier hs-type">a</span></a></span><span>
-</span><span id="line-21"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679227284"><span id="local-6989586621679227292"><span id="local-6989586621679227296"><span class="annot"><span class="annottext">Int -&gt; AtMostTwo a -&gt; ShowS
+</span><span id="line-20"></span><span class="hs-keyword">data</span><span> </span><span id="AtMostTwo"><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#AtMostTwo"><span class="hs-identifier hs-var">AtMostTwo</span></a></span></span><span> </span><span id="local-6989586621679229742"><span class="annot"><a href="#local-6989586621679229742"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Zero"><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#Zero"><span class="hs-identifier hs-var">Zero</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="One"><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#One"><span class="hs-identifier hs-var">One</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679229742"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="Two"><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#Two"><span class="hs-identifier hs-var">Two</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679229742"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="#local-6989586621679229742"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679229748"><span id="local-6989586621679229756"><span id="local-6989586621679229760"><span class="annot"><span class="annottext">Int -&gt; AtMostTwo a -&gt; ShowS
 [AtMostTwo a] -&gt; ShowS
 AtMostTwo a -&gt; String
 (Int -&gt; AtMostTwo a -&gt; ShowS)
@@ -36,7 +36,7 @@ $cshow :: forall a. Show a =&gt; AtMostTwo a -&gt; String
 show :: AtMostTwo a -&gt; String
 $cshowList :: forall a. Show a =&gt; [AtMostTwo a] -&gt; ShowS
 showList :: [AtMostTwo a] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679227302"><span id="local-6989586621679227306"><span id="local-6989586621679227309"><span id="local-6989586621679227324"><span class="annot"><span class="annottext">ReadPrec [AtMostTwo a]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679229766"><span id="local-6989586621679229770"><span id="local-6989586621679229773"><span id="local-6989586621679229788"><span class="annot"><span class="annottext">ReadPrec [AtMostTwo a]
 ReadPrec (AtMostTwo a)
 Int -&gt; ReadS (AtMostTwo a)
 ReadS [AtMostTwo a]
@@ -60,7 +60,7 @@ $creadPrec :: forall a. Read a =&gt; ReadPrec (AtMostTwo a)
 readPrec :: ReadPrec (AtMostTwo a)
 $creadListPrec :: forall a. Read a =&gt; ReadPrec [AtMostTwo a]
 readListPrec :: ReadPrec [AtMostTwo a]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679227332"><span id="local-6989586621679227340"><span class="annot"><span class="annottext">AtMostTwo a -&gt; AtMostTwo a -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679229796"><span id="local-6989586621679229804"><span class="annot"><span class="annottext">AtMostTwo a -&gt; AtMostTwo a -&gt; Bool
 (AtMostTwo a -&gt; AtMostTwo a -&gt; Bool)
 -&gt; (AtMostTwo a -&gt; AtMostTwo a -&gt; Bool) -&gt; Eq (AtMostTwo a)
 forall a. Eq a =&gt; AtMostTwo a -&gt; AtMostTwo a -&gt; Bool
@@ -69,7 +69,7 @@ $c== :: forall a. Eq a =&gt; AtMostTwo a -&gt; AtMostTwo a -&gt; Bool
 == :: AtMostTwo a -&gt; AtMostTwo a -&gt; Bool
 $c/= :: forall a. Eq a =&gt; AtMostTwo a -&gt; AtMostTwo a -&gt; Bool
 /= :: AtMostTwo a -&gt; AtMostTwo a -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679227349"><span id="local-6989586621679227354"><span id="local-6989586621679227359"><span id="local-6989586621679227363"><span id="local-6989586621679227366"><span id="local-6989586621679227369"><span id="local-6989586621679227372"><span class="annot"><span class="annottext">Eq (AtMostTwo a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679229813"><span id="local-6989586621679229818"><span id="local-6989586621679229823"><span id="local-6989586621679229827"><span id="local-6989586621679229830"><span id="local-6989586621679229833"><span id="local-6989586621679229836"><span class="annot"><span class="annottext">Eq (AtMostTwo a)
 Eq (AtMostTwo a) =&gt;
 (AtMostTwo a -&gt; AtMostTwo a -&gt; Ordering)
 -&gt; (AtMostTwo a -&gt; AtMostTwo a -&gt; Bool)
@@ -110,7 +110,7 @@ $cmax :: forall a. Ord a =&gt; AtMostTwo a -&gt; AtMostTwo a -&gt; AtMostTwo a
 max :: AtMostTwo a -&gt; AtMostTwo a -&gt; AtMostTwo a
 $cmin :: forall a. Ord a =&gt; AtMostTwo a -&gt; AtMostTwo a -&gt; AtMostTwo a
 min :: AtMostTwo a -&gt; AtMostTwo a -&gt; AtMostTwo a
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679227381"><span id="local-6989586621679227383"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; AtMostTwo a -&gt; AtMostTwo b)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679229845"><span id="local-6989586621679229847"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; AtMostTwo a -&gt; AtMostTwo b)
 -&gt; (forall a b. a -&gt; AtMostTwo b -&gt; AtMostTwo a)
 -&gt; Functor AtMostTwo
 forall a b. a -&gt; AtMostTwo b -&gt; AtMostTwo a
@@ -122,7 +122,7 @@ $cfmap :: forall a b. (a -&gt; b) -&gt; AtMostTwo a -&gt; AtMostTwo b
 fmap :: forall a b. (a -&gt; b) -&gt; AtMostTwo a -&gt; AtMostTwo b
 $c&lt;$ :: forall a b. a -&gt; AtMostTwo b -&gt; AtMostTwo a
 &lt;$ :: forall a b. a -&gt; AtMostTwo b -&gt; AtMostTwo a
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679227388"><span id="local-6989586621679227394"><span id="local-6989586621679227399"><span id="local-6989586621679227404"><span id="local-6989586621679227406"><span id="local-6989586621679227409"><span id="local-6989586621679227412"><span id="local-6989586621679227415"><span id="local-6989586621679227418"><span id="local-6989586621679227421"><span id="local-6989586621679227424"><span id="local-6989586621679227426"><span id="local-6989586621679227429"><span id="local-6989586621679227434"><span id="local-6989586621679227439"><span id="local-6989586621679227444"><span id="local-6989586621679227449"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; AtMostTwo m -&gt; m)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679229852"><span id="local-6989586621679229858"><span id="local-6989586621679229863"><span id="local-6989586621679229868"><span id="local-6989586621679229870"><span id="local-6989586621679229873"><span id="local-6989586621679229876"><span id="local-6989586621679229879"><span id="local-6989586621679229882"><span id="local-6989586621679229885"><span id="local-6989586621679229888"><span id="local-6989586621679229890"><span id="local-6989586621679229893"><span id="local-6989586621679229898"><span id="local-6989586621679229903"><span id="local-6989586621679229908"><span id="local-6989586621679229913"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; AtMostTwo m -&gt; m)
 -&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; AtMostTwo a -&gt; m)
 -&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; AtMostTwo a -&gt; m)
 -&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; AtMostTwo a -&gt; b)
@@ -204,7 +204,7 @@ $csum :: forall a. Num a =&gt; AtMostTwo a -&gt; a
 sum :: forall a. Num a =&gt; AtMostTwo a -&gt; a
 $cproduct :: forall a. Num a =&gt; AtMostTwo a -&gt; a
 product :: forall a. Num a =&gt; AtMostTwo a -&gt; a
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679227462"><span id="local-6989586621679227469"><span id="local-6989586621679227475"><span id="local-6989586621679227480"><span class="annot"><span class="annottext">Functor AtMostTwo
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679229926"><span id="local-6989586621679229933"><span id="local-6989586621679229939"><span id="local-6989586621679229944"><span class="annot"><span class="annottext">Functor AtMostTwo
 Foldable AtMostTwo
 (Functor AtMostTwo, Foldable AtMostTwo) =&gt;
 (forall (f :: * -&gt; *) a b.
@@ -269,74 +269,74 @@ Monad m =&gt;
 AtMostTwo (m a) -&gt; m (AtMostTwo a)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-22"></span><span>
-</span><span id="line-23"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679227491"><span class="annot"><span class="hs-identifier hs-type">Show1</span></span><span> </span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#AtMostTwo"><span class="hs-identifier hs-type">AtMostTwo</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-24"></span><span>  </span><span id="local-6989586621679227497"><span class="annot"><span class="annottext">liftShowsPrec :: forall a.
+</span><span id="line-23"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679229955"><span class="annot"><span class="hs-identifier hs-type">Show1</span></span><span> </span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#AtMostTwo"><span class="hs-identifier hs-type">AtMostTwo</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-24"></span><span>  </span><span id="local-6989586621679229961"><span class="annot"><span class="annottext">liftShowsPrec :: forall a.
 (Int -&gt; a -&gt; ShowS)
 -&gt; ([a] -&gt; ShowS) -&gt; Int -&gt; AtMostTwo a -&gt; ShowS
-</span><a href="#local-6989586621679227497"><span class="hs-identifier hs-var hs-var hs-var">liftShowsPrec</span></a></span></span><span> </span><span id="local-6989586621679227499"><span class="annot"><span class="annottext">Int -&gt; a -&gt; ShowS
-</span><a href="#local-6989586621679227499"><span class="hs-identifier hs-var">sp</span></a></span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; ShowS
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679227500"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679227500"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><a href="#local-6989586621679229961"><span class="hs-identifier hs-var hs-var hs-var">liftShowsPrec</span></a></span></span><span> </span><span id="local-6989586621679229963"><span class="annot"><span class="annottext">Int -&gt; a -&gt; ShowS
+</span><a href="#local-6989586621679229963"><span class="hs-identifier hs-var">sp</span></a></span></span><span> </span><span class="annot"><span class="annottext">[a] -&gt; ShowS
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679229964"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679229964"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
 </span><span id="line-25"></span><span>    </span><span class="annot"><span class="annottext">AtMostTwo a
 </span><a href="HGeometry.Small.AtMostTwo.html#Zero"><span class="hs-identifier hs-var">Zero</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-26"></span><span>      </span><span class="hs-glyph">\</span><span id="local-6989586621679227501"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679227501"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679227501"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+</span><span id="line-26"></span><span>      </span><span class="hs-glyph">\</span><span id="local-6989586621679229965"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679229965"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679229965"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Zero&quot;</span></span><span>
-</span><span id="line-27"></span><span>    </span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679227502"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679227502"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-27"></span><span>    </span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679229966"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679229966"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-28"></span><span>      </span><span class="annot"><span class="annottext">(Int -&gt; a -&gt; ShowS) -&gt; String -&gt; Int -&gt; a -&gt; ShowS
 forall a. (Int -&gt; a -&gt; ShowS) -&gt; String -&gt; Int -&gt; a -&gt; ShowS
 </span><span class="hs-identifier hs-var">showsUnaryWith</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; ShowS
-</span><a href="#local-6989586621679227499"><span class="hs-identifier hs-var">sp</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679229963"><span class="hs-identifier hs-var">sp</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;One&quot;</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679227500"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679227502"><span class="hs-identifier hs-var">x</span></a></span><span>
-</span><span id="line-29"></span><span>    </span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679227504"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679227504"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679227505"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679227505"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><a href="#local-6989586621679229964"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679229966"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-29"></span><span>    </span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679229968"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679229968"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679229969"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679229969"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
 </span><span id="line-30"></span><span>      </span><span class="annot"><span class="annottext">(Int -&gt; a -&gt; ShowS)
 -&gt; (Int -&gt; a -&gt; ShowS) -&gt; String -&gt; Int -&gt; a -&gt; a -&gt; ShowS
 forall a b.
 (Int -&gt; a -&gt; ShowS)
 -&gt; (Int -&gt; b -&gt; ShowS) -&gt; String -&gt; Int -&gt; a -&gt; b -&gt; ShowS
 </span><span class="hs-identifier hs-var">showsBinaryWith</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; ShowS
-</span><a href="#local-6989586621679227499"><span class="hs-identifier hs-var">sp</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; ShowS
-</span><a href="#local-6989586621679227499"><span class="hs-identifier hs-var">sp</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679229963"><span class="hs-identifier hs-var">sp</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; a -&gt; ShowS
+</span><a href="#local-6989586621679229963"><span class="hs-identifier hs-var">sp</span></a></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Two&quot;</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679227500"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679227504"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679227505"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><a href="#local-6989586621679229964"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679229968"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679229969"><span class="hs-identifier hs-var">y</span></a></span><span>
 </span><span id="line-31"></span><span>
 </span><span id="line-32"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq1</span></span><span>   </span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#AtMostTwo"><span class="hs-identifier hs-type">AtMostTwo</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-33"></span><span>  </span><span id="local-6989586621679227512"><span class="annot"><span class="annottext">liftEq :: forall a b. (a -&gt; b -&gt; Bool) -&gt; AtMostTwo a -&gt; AtMostTwo b -&gt; Bool
-</span><a href="#local-6989586621679227512"><span class="hs-identifier hs-var hs-var hs-var">liftEq</span></a></span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
+</span><span id="line-33"></span><span>  </span><span id="local-6989586621679229976"><span class="annot"><span class="annottext">liftEq :: forall a b. (a -&gt; b -&gt; Bool) -&gt; AtMostTwo a -&gt; AtMostTwo b -&gt; Bool
+</span><a href="#local-6989586621679229976"><span class="hs-identifier hs-var hs-var hs-var">liftEq</span></a></span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">AtMostTwo a
 </span><a href="HGeometry.Small.AtMostTwo.html#Zero"><span class="hs-identifier hs-var">Zero</span></a></span><span>      </span><span class="annot"><span class="annottext">AtMostTwo b
 </span><a href="HGeometry.Small.AtMostTwo.html#Zero"><span class="hs-identifier hs-var">Zero</span></a></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
-</span><span id="line-34"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftEq</span></span><span> </span><span id="local-6989586621679227514"><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
-</span><a href="#local-6989586621679227514"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679227515"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679227515"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679227516"><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679227516"><span class="hs-identifier hs-var">x'</span></a></span></span><span class="hs-special">)</span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
-</span><a href="#local-6989586621679227514"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679227515"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679227516"><span class="hs-identifier hs-var">x'</span></a></span><span>
-</span><span id="line-35"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftEq</span></span><span> </span><span id="local-6989586621679227517"><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
-</span><a href="#local-6989586621679227517"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679227518"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679227518"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679227519"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679227519"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679227520"><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679227520"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span id="local-6989586621679227521"><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679227521"><span class="hs-identifier hs-var">y'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
-</span><a href="#local-6989586621679227517"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679227518"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679227520"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span id="line-34"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftEq</span></span><span> </span><span id="local-6989586621679229978"><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
+</span><a href="#local-6989586621679229978"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679229979"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679229979"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679229980"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679229980"><span class="hs-identifier hs-var">x'</span></a></span></span><span class="hs-special">)</span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
+</span><a href="#local-6989586621679229978"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679229979"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679229980"><span class="hs-identifier hs-var">x'</span></a></span><span>
+</span><span id="line-35"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftEq</span></span><span> </span><span id="local-6989586621679229981"><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
+</span><a href="#local-6989586621679229981"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679229982"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679229982"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679229983"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679229983"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679229984"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679229984"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span id="local-6989586621679229985"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679229985"><span class="hs-identifier hs-var">y'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
+</span><a href="#local-6989586621679229981"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679229982"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679229984"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
 </span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
-</span><a href="#local-6989586621679227517"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679227519"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679227521"><span class="hs-identifier hs-var">y'</span></a></span><span>
+</span><a href="#local-6989586621679229981"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679229983"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679229985"><span class="hs-identifier hs-var">y'</span></a></span><span>
 </span><span id="line-36"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftEq</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Bool
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">AtMostTwo a
 </span><span class="hs-identifier">_</span></span><span>         </span><span class="annot"><span class="annottext">AtMostTwo b
@@ -344,9 +344,9 @@ forall a b.
 </span><span class="hs-identifier hs-var">False</span></span><span>
 </span><span id="line-37"></span><span>
 </span><span id="line-38"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord1</span></span><span>  </span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#AtMostTwo"><span class="hs-identifier hs-type">AtMostTwo</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-39"></span><span>  </span><span id="local-6989586621679227532"><span class="annot"><span class="annottext">liftCompare :: forall a b.
+</span><span id="line-39"></span><span>  </span><span id="local-6989586621679229996"><span class="annot"><span class="annottext">liftCompare :: forall a b.
 (a -&gt; b -&gt; Ordering) -&gt; AtMostTwo a -&gt; AtMostTwo b -&gt; Ordering
-</span><a href="#local-6989586621679227532"><span class="hs-identifier hs-var hs-var hs-var">liftCompare</span></a></span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
+</span><a href="#local-6989586621679229996"><span class="hs-identifier hs-var hs-var hs-var">liftCompare</span></a></span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">AtMostTwo a
 </span><a href="HGeometry.Small.AtMostTwo.html#Zero"><span class="hs-identifier hs-var">Zero</span></a></span><span>      </span><span class="annot"><span class="annottext">AtMostTwo b
 </span><a href="HGeometry.Small.AtMostTwo.html#Zero"><span class="hs-identifier hs-var">Zero</span></a></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ordering
@@ -362,13 +362,13 @@ forall a b.
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>   </span><span class="annot"><span class="annottext">AtMostTwo b
 </span><a href="HGeometry.Small.AtMostTwo.html#Zero"><span class="hs-identifier hs-var">Zero</span></a></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ordering
 </span><span class="hs-identifier hs-var">GT</span></span><span>
-</span><span id="line-43"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftCompare</span></span><span> </span><span id="local-6989586621679227534"><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
-</span><a href="#local-6989586621679227534"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679227535"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679227535"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679227536"><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679227536"><span class="hs-identifier hs-var">x'</span></a></span></span><span class="hs-special">)</span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
-</span><a href="#local-6989586621679227534"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679227535"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679227536"><span class="hs-identifier hs-var">x'</span></a></span><span>
+</span><span id="line-43"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftCompare</span></span><span> </span><span id="local-6989586621679229998"><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
+</span><a href="#local-6989586621679229998"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679229999"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679229999"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span id="local-6989586621679230000"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679230000"><span class="hs-identifier hs-var">x'</span></a></span></span><span class="hs-special">)</span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
+</span><a href="#local-6989586621679229998"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679229999"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679230000"><span class="hs-identifier hs-var">x'</span></a></span><span>
 </span><span id="line-44"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftCompare</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#One"><span class="hs-identifier hs-type">One</span></a></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>   </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span class="annot"><span class="annottext">b
@@ -376,20 +376,20 @@ forall a b.
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Ordering
 </span><span class="hs-identifier hs-var">LT</span></span><span>
 </span><span id="line-45"></span><span>
-</span><span id="line-46"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftCompare</span></span><span> </span><span id="local-6989586621679227537"><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
-</span><a href="#local-6989586621679227537"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679227538"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679227538"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679227539"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679227539"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679227540"><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679227540"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span id="local-6989586621679227541"><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679227541"><span class="hs-identifier hs-var">y'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
-</span><a href="#local-6989586621679227537"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679227538"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679227540"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="annot"><span class="annottext">Ordering -&gt; Ordering -&gt; Ordering
+</span><span id="line-46"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftCompare</span></span><span> </span><span id="local-6989586621679230001"><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
+</span><a href="#local-6989586621679230001"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679230002"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679230002"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679230003"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679230003"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Small.AtMostTwo.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679230004"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679230004"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span id="local-6989586621679230005"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679230005"><span class="hs-identifier hs-var">y'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
+</span><a href="#local-6989586621679230001"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679230002"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679230004"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="annot"><span class="annottext">Ordering -&gt; Ordering -&gt; Ordering
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
-</span><a href="#local-6989586621679227537"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679227539"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">b
-</span><a href="#local-6989586621679227541"><span class="hs-identifier hs-var">y'</span></a></span><span>
+</span><a href="#local-6989586621679230001"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679230003"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679230005"><span class="hs-identifier hs-var">y'</span></a></span><span>
 </span><span id="line-47"></span><span>  </span><span class="annot"><span class="hs-identifier hs-var">liftCompare</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; b -&gt; Ordering
 </span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">AtMostTwo a
 </span><span class="hs-identifier">_</span></span><span>         </span><span class="annot"><span class="annottext">AtMostTwo b

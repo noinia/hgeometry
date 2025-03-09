@@ -1,104 +1,478 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
-</span><span id="line-3"></span><span class="hs-comment">-- Module      :  Ipe</span><span>
-</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
-</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
-</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
-</span><span id="line-7"></span><span class="hs-comment">--</span><span>
-</span><span id="line-8"></span><span class="hs-comment">-- Reexports the functionality for reading and writing Ipe files.</span><span>
-</span><span id="line-9"></span><span class="hs-comment">--</span><span>
-</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Ipe.html"><span class="hs-identifier">Ipe</span></a></span><span class="hs-special">(</span><span>
-</span><span id="line-12"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Ipe Files</span></span><span>
-</span><span id="line-13"></span><span>    </span><span class="annot"><a href="Ipe.Types.html#IpeFile"><span class="hs-identifier">IpeFile</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Types.html#IpeFile"><span class="hs-identifier">IpeFile</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#preamble"><span class="hs-identifier">preamble</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#styles"><span class="hs-identifier">styles</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#pages"><span class="hs-identifier">pages</span></a></span><span>
-</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#ipeFile"><span class="hs-identifier">ipeFile</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#singlePageFile"><span class="hs-identifier">singlePageFile</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#singlePageFromContent"><span class="hs-identifier">singlePageFromContent</span></a></span><span>
-</span><span id="line-15"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Reading Ipe files</span></span><span>
-</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Reader.html#readIpeFile"><span class="hs-identifier">readIpeFile</span></a></span><span>
-</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Reader.html#readSinglePageFile"><span class="hs-identifier">readSinglePageFile</span></a></span><span>
-</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Reader.html#readSinglePageFileThrow"><span class="hs-identifier">readSinglePageFileThrow</span></a></span><span>
-</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Reader.html#readRawIpeFile"><span class="hs-identifier">readRawIpeFile</span></a></span><span>
-</span><span id="line-20"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Reader.html#ConversionError"><span class="hs-identifier">ConversionError</span></a></span><span>
-</span><span id="line-21"></span><span>  </span><span class="annot"><span class="hs-comment">-- *** Reading all Geometries from a single page ipe file</span></span><span>
-</span><span id="line-22"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#readAll"><span class="hs-identifier">readAll</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#readAllDeep"><span class="hs-identifier">readAllDeep</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#readAllFrom"><span class="hs-identifier">readAllFrom</span></a></span><span>
-</span><span id="line-23"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Writing ipe files</span></span><span>
-</span><span id="line-24"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Writer.html#writeIpeFile"><span class="hs-identifier">writeIpeFile</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Writer.html#writeIpeFile%27"><span class="hs-identifier">writeIpeFile'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Writer.html#writeIpePage"><span class="hs-identifier">writeIpePage</span></a></span><span>
-</span><span id="line-25"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Writer.html#toIpeXML"><span class="hs-identifier">toIpeXML</span></a></span><span>
-</span><span id="line-26"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Writer.html#printAsIpeSelection"><span class="hs-identifier">printAsIpeSelection</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Writer.html#toIpeSelectionXML"><span class="hs-identifier">toIpeSelectionXML</span></a></span><span>
-</span><span id="line-27"></span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# OPTIONS_GHC -Wno-orphans #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  Ipe</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Reexports the functionality for reading and writing Ipe files.</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Ipe.html"><span class="hs-identifier">Ipe</span></a></span><span class="hs-special">(</span><span>
+</span><span id="line-13"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Ipe Files</span></span><span>
+</span><span id="line-14"></span><span>    </span><span class="annot"><a href="Ipe.Types.html#IpeFile"><span class="hs-identifier">IpeFile</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Types.html#IpeFile"><span class="hs-identifier">IpeFile</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#preamble"><span class="hs-identifier">preamble</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#styles"><span class="hs-identifier">styles</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#pages"><span class="hs-identifier">pages</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#ipeFile"><span class="hs-identifier">ipeFile</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#singlePageFile"><span class="hs-identifier">singlePageFile</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#singlePageFromContent"><span class="hs-identifier">singlePageFromContent</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Reading Ipe files</span></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Reader.html#readIpeFile"><span class="hs-identifier">readIpeFile</span></a></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Reader.html#readSinglePageFile"><span class="hs-identifier">readSinglePageFile</span></a></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Reader.html#readSinglePageFileThrow"><span class="hs-identifier">readSinglePageFileThrow</span></a></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Reader.html#readRawIpeFile"><span class="hs-identifier">readRawIpeFile</span></a></span><span>
+</span><span id="line-21"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Reader.html#ConversionError"><span class="hs-identifier">ConversionError</span></a></span><span>
+</span><span id="line-22"></span><span>  </span><span class="annot"><span class="hs-comment">-- *** Reading all Geometries from a single page ipe file</span></span><span>
+</span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#readAll"><span class="hs-identifier">readAll</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#readAllDeep"><span class="hs-identifier">readAllDeep</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#readAllFrom"><span class="hs-identifier">readAllFrom</span></a></span><span>
+</span><span id="line-24"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Writing ipe files</span></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Writer.html#writeIpeFile"><span class="hs-identifier">writeIpeFile</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Writer.html#writeIpeFile%27"><span class="hs-identifier">writeIpeFile'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Writer.html#writeIpePage"><span class="hs-identifier">writeIpePage</span></a></span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Writer.html#toIpeXML"><span class="hs-identifier">toIpeXML</span></a></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Writer.html#printAsIpeSelection"><span class="hs-identifier">printAsIpeSelection</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Writer.html#toIpeSelectionXML"><span class="hs-identifier">toIpeSelectionXML</span></a></span><span>
 </span><span id="line-28"></span><span>
-</span><span id="line-29"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Ipe Pages</span></span><span>
-</span><span id="line-30"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#IpePage"><span class="hs-identifier">IpePage</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Types.html#IpePage"><span class="hs-identifier">IpePage</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#layers"><span class="hs-identifier">layers</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#views"><span class="hs-identifier">views</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#content"><span class="hs-identifier">content</span></a></span><span>
-</span><span id="line-31"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#emptyPage"><span class="hs-identifier">emptyPage</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#fromContent"><span class="hs-identifier">fromContent</span></a></span><span>
-</span><span id="line-32"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#onLayer"><span class="hs-identifier">onLayer</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#contentInView"><span class="hs-identifier">contentInView</span></a></span><span>
-</span><span id="line-33"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#withDefaults"><span class="hs-identifier">withDefaults</span></a></span><span>
-</span><span id="line-34"></span><span>
-</span><span id="line-35"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Content: Ipe Objects</span></span><span>
-</span><span id="line-36"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeObject"><span class="hs-identifier">IpeObject</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#_IpePath"><span class="hs-identifier">_IpePath</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#_IpeUse"><span class="hs-identifier">_IpeUse</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#_IpeGroup"><span class="hs-identifier">_IpeGroup</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#_IpeTextLabel"><span class="hs-identifier">_IpeTextLabel</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#_IpeMiniPage"><span class="hs-identifier">_IpeMiniPage</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#_IpeImage"><span class="hs-identifier">_IpeImage</span></a></span><span>
-</span><span id="line-37"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeObject%27"><span class="hs-identifier">IpeObject'</span></a></span><span>
-</span><span id="line-38"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#ipeObject%27"><span class="hs-identifier">ipeObject'</span></a></span><span>
-</span><span id="line-39"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#ToObject"><span class="hs-identifier">ToObject</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-40"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Specific Ipe-Objects</span></span><span>
-</span><span id="line-41"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier">Path</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier">Path</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Path.html#pathSegments"><span class="hs-identifier">pathSegments</span></a></span><span>
-</span><span id="line-42"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Path.html#PathSegment"><span class="hs-identifier">PathSegment</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-43"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeSymbol"><span class="hs-identifier">IpeSymbol</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#Symbol"><span class="hs-identifier">Symbol</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#symbolPoint"><span class="hs-identifier">symbolPoint</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#symbolName"><span class="hs-identifier">symbolName</span></a></span><span>
-</span><span id="line-44"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#Group"><span class="hs-identifier">Group</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#Group"><span class="hs-identifier">Group</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#groupItems"><span class="hs-identifier">groupItems</span></a></span><span>
-</span><span id="line-45"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#TextLabel"><span class="hs-identifier">TextLabel</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-46"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#MiniPage"><span class="hs-identifier">MiniPage</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#width"><span class="hs-identifier">width</span></a></span><span>
-</span><span id="line-47"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#Image"><span class="hs-identifier">Image</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#Image"><span class="hs-identifier">Image</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#imageData"><span class="hs-identifier">imageData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#rect"><span class="hs-identifier">rect</span></a></span><span>
-</span><span id="line-48"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#IpeBitmap"><span class="hs-identifier">IpeBitmap</span></a></span><span>
-</span><span id="line-49"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Attributes</span></span><span>
-</span><span id="line-50"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier">IpeAttributes</span></a></span><span>
-</span><span id="line-51"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#Attributes%27"><span class="hs-identifier">Attributes'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#AttributesOf"><span class="hs-identifier">AttributesOf</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#AttrMap"><span class="hs-identifier">AttrMap</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#AttrMapSym1"><span class="hs-identifier">AttrMapSym1</span></a></span><span>
-</span><span id="line-52"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#attributes"><span class="hs-identifier">attributes</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#traverseIpeAttrs"><span class="hs-identifier">traverseIpeAttrs</span></a></span><span>
-</span><span id="line-53"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#commonAttributes"><span class="hs-identifier">commonAttributes</span></a></span><span>
-</span><span id="line-54"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Layers and Views</span></span><span>
-</span><span id="line-55"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Layer.html#LayerName"><span class="hs-identifier">LayerName</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Layer.html#LayerName"><span class="hs-identifier">LayerName</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Layer.html#layerName"><span class="hs-identifier">layerName</span></a></span><span>
-</span><span id="line-56"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#View"><span class="hs-identifier">View</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Types.html#View"><span class="hs-identifier">View</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#layerNames"><span class="hs-identifier">layerNames</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#activeLayer"><span class="hs-identifier">activeLayer</span></a></span><span>
-</span><span id="line-57"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Ipe Syles and Preamble</span></span><span>
-</span><span id="line-58"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#IpeStyle"><span class="hs-identifier">IpeStyle</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Types.html#IpeStyle"><span class="hs-identifier">IpeStyle</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#styleName"><span class="hs-identifier">styleName</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#styleData"><span class="hs-identifier">styleData</span></a></span><span>
-</span><span id="line-59"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#basicIpeStyle"><span class="hs-identifier">basicIpeStyle</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#opacitiesStyle"><span class="hs-identifier">opacitiesStyle</span></a></span><span>
-</span><span id="line-60"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Reader.html#readIpeStylesheet"><span class="hs-identifier">readIpeStylesheet</span></a></span><span>
-</span><span id="line-61"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#addStyleSheet"><span class="hs-identifier">addStyleSheet</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Reader.html#addStyleSheetFrom"><span class="hs-identifier">addStyleSheetFrom</span></a></span><span>
-</span><span id="line-62"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#IpePreamble"><span class="hs-identifier">IpePreamble</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Types.html#IpePreamble"><span class="hs-identifier">IpePreamble</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#encoding"><span class="hs-identifier">encoding</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#preambleData"><span class="hs-identifier">preambleData</span></a></span><span>
-</span><span id="line-63"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Reading Geometries *From* Ipe</span></span><span>
-</span><span id="line-64"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Reader.html#IpeRead"><span class="hs-identifier">IpeRead</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-65"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Converting *from* IpeObjects</span></span><span>
-</span><span id="line-66"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_asPoint"><span class="hs-identifier">_asPoint</span></a></span><span>
-</span><span id="line-67"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_asLineSegment"><span class="hs-identifier">_asLineSegment</span></a></span><span>
-</span><span id="line-68"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_asClosedLineSegment"><span class="hs-identifier">_asClosedLineSegment</span></a></span><span>
-</span><span id="line-69"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_asRectangle"><span class="hs-identifier">_asRectangle</span></a></span><span>
-</span><span id="line-70"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_asTriangle"><span class="hs-identifier">_asTriangle</span></a></span><span>
-</span><span id="line-71"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_asPolyLine"><span class="hs-identifier">_asPolyLine</span></a></span><span>
-</span><span id="line-72"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_asSimplePolygon"><span class="hs-identifier">_asSimplePolygon</span></a></span><span>
-</span><span id="line-73"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_asConvexPolygon"><span class="hs-identifier">_asConvexPolygon</span></a></span><span>
-</span><span id="line-74"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_asPolygonalDomain"><span class="hs-identifier">_asPolygonalDomain</span></a></span><span>
-</span><span id="line-75"></span><span>
-</span><span id="line-76"></span><span>  </span><span class="annot"><span class="hs-comment">-- *** Dealing with Attributes</span></span><span>
-</span><span id="line-77"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_withAttrs"><span class="hs-identifier">_withAttrs</span></a></span><span>
-</span><span id="line-78"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Default readers</span></span><span>
-</span><span id="line-79"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#HasDefaultFromIpe"><span class="hs-identifier">HasDefaultFromIpe</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-80"></span><span>
-</span><span id="line-81"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Converting *to* IpeObjects</span></span><span>
-</span><span id="line-82"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** IpeWrite</span></span><span>
-</span><span id="line-83"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Writer.html#IpeWrite"><span class="hs-identifier">IpeWrite</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-84"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Writer.html#IpeWriteText"><span class="hs-identifier">IpeWriteText</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
-</span><span id="line-85"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** IpeOut</span></span><span>
-</span><span id="line-86"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html"><span class="hs-identifier">Ipe.IpeOut</span></a></span><span>
-</span><span id="line-87"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Batch reexports</span></span><span>
-</span><span id="line-88"></span><span>
-</span><span id="line-89"></span><span>  </span><span class="hs-comment">-- , module Ipe.Types</span><span>
-</span><span id="line-90"></span><span>  </span><span class="hs-comment">-- , module Ipe.FromIpe</span><span>
-</span><span id="line-91"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Ipe.Attributes.html"><span class="hs-identifier">Ipe.Attributes</span></a></span><span>
-</span><span id="line-92"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Ipe.Value.html"><span class="hs-identifier">Ipe.Value</span></a></span><span>
-</span><span id="line-93"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier">IpeColor</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Color.html#named"><span class="hs-identifier">named</span></a></span><span>
-</span><span id="line-94"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-95"></span><span>
-</span><span id="line-96"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Ipe.Types.html"><span class="hs-identifier">Ipe.Types</span></a></span><span>
-</span><span id="line-97"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Ipe.Writer.html"><span class="hs-identifier">Ipe.Writer</span></a></span><span>
-</span><span id="line-98"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Ipe.Reader.html"><span class="hs-identifier">Ipe.Reader</span></a></span><span>
-</span><span id="line-99"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html"><span class="hs-identifier">Ipe.IpeOut</span></a></span><span>
-</span><span id="line-100"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html"><span class="hs-identifier">Ipe.FromIpe</span></a></span><span>
-</span><span id="line-101"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Ipe.Attributes.html"><span class="hs-identifier">Ipe.Attributes</span></a></span><span>
-</span><span id="line-102"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Ipe.Value.html"><span class="hs-identifier">Ipe.Value</span></a></span><span>
-</span><span id="line-103"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Ipe.Color.html"><span class="hs-identifier">Ipe.Color</span></a></span><span>
-</span><span id="line-104"></span></pre></body></html>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Ipe Pages</span></span><span>
+</span><span id="line-31"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#IpePage"><span class="hs-identifier">IpePage</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Types.html#IpePage"><span class="hs-identifier">IpePage</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#layers"><span class="hs-identifier">layers</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#views"><span class="hs-identifier">views</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#content"><span class="hs-identifier">content</span></a></span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#emptyPage"><span class="hs-identifier">emptyPage</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#fromContent"><span class="hs-identifier">fromContent</span></a></span><span>
+</span><span id="line-33"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#onLayer"><span class="hs-identifier">onLayer</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#contentInView"><span class="hs-identifier">contentInView</span></a></span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#withDefaults"><span class="hs-identifier">withDefaults</span></a></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Content: Ipe Objects</span></span><span>
+</span><span id="line-37"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeObject"><span class="hs-identifier">IpeObject</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#_IpePath"><span class="hs-identifier">_IpePath</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#_IpeUse"><span class="hs-identifier">_IpeUse</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#_IpeGroup"><span class="hs-identifier">_IpeGroup</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#_IpeTextLabel"><span class="hs-identifier">_IpeTextLabel</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#_IpeMiniPage"><span class="hs-identifier">_IpeMiniPage</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#_IpeImage"><span class="hs-identifier">_IpeImage</span></a></span><span>
+</span><span id="line-38"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeObject%27"><span class="hs-identifier">IpeObject'</span></a></span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#ipeObject%27"><span class="hs-identifier">ipeObject'</span></a></span><span>
+</span><span id="line-40"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#ToObject"><span class="hs-identifier">ToObject</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Specific Ipe-Objects</span></span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier">Path</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier">Path</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Path.html#pathSegments"><span class="hs-identifier">pathSegments</span></a></span><span>
+</span><span id="line-43"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Path.html#PathSegment"><span class="hs-identifier">PathSegment</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeSymbol"><span class="hs-identifier">IpeSymbol</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#Symbol"><span class="hs-identifier">Symbol</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#symbolPoint"><span class="hs-identifier">symbolPoint</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#symbolName"><span class="hs-identifier">symbolName</span></a></span><span>
+</span><span id="line-45"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#Group"><span class="hs-identifier">Group</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#Group"><span class="hs-identifier">Group</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#groupItems"><span class="hs-identifier">groupItems</span></a></span><span>
+</span><span id="line-46"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#TextLabel"><span class="hs-identifier">TextLabel</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#MiniPage"><span class="hs-identifier">MiniPage</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#width"><span class="hs-identifier">width</span></a></span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#Image"><span class="hs-identifier">Image</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#Image"><span class="hs-identifier">Image</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#imageData"><span class="hs-identifier">imageData</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#rect"><span class="hs-identifier">rect</span></a></span><span>
+</span><span id="line-49"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#IpeBitmap"><span class="hs-identifier">IpeBitmap</span></a></span><span>
+</span><span id="line-50"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Attributes</span></span><span>
+</span><span id="line-51"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier">IpeAttributes</span></a></span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#Attributes%27"><span class="hs-identifier">Attributes'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#AttributesOf"><span class="hs-identifier">AttributesOf</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#AttrMap"><span class="hs-identifier">AttrMap</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#AttrMapSym1"><span class="hs-identifier">AttrMapSym1</span></a></span><span>
+</span><span id="line-53"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#attributes"><span class="hs-identifier">attributes</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#traverseIpeAttrs"><span class="hs-identifier">traverseIpeAttrs</span></a></span><span>
+</span><span id="line-54"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Content.html#commonAttributes"><span class="hs-identifier">commonAttributes</span></a></span><span>
+</span><span id="line-55"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Layers and Views</span></span><span>
+</span><span id="line-56"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Layer.html#LayerName"><span class="hs-identifier">LayerName</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Layer.html#LayerName"><span class="hs-identifier">LayerName</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Layer.html#layerName"><span class="hs-identifier">layerName</span></a></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#View"><span class="hs-identifier">View</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Types.html#View"><span class="hs-identifier">View</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#layerNames"><span class="hs-identifier">layerNames</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#activeLayer"><span class="hs-identifier">activeLayer</span></a></span><span>
+</span><span id="line-58"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Ipe Syles and Preamble</span></span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#IpeStyle"><span class="hs-identifier">IpeStyle</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Types.html#IpeStyle"><span class="hs-identifier">IpeStyle</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#styleName"><span class="hs-identifier">styleName</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#styleData"><span class="hs-identifier">styleData</span></a></span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#basicIpeStyle"><span class="hs-identifier">basicIpeStyle</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#opacitiesStyle"><span class="hs-identifier">opacitiesStyle</span></a></span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Reader.html#readIpeStylesheet"><span class="hs-identifier">readIpeStylesheet</span></a></span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#addStyleSheet"><span class="hs-identifier">addStyleSheet</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Reader.html#addStyleSheetFrom"><span class="hs-identifier">addStyleSheetFrom</span></a></span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#IpePreamble"><span class="hs-identifier">IpePreamble</span></a></span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Types.html#IpePreamble"><span class="hs-identifier">IpePreamble</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#encoding"><span class="hs-identifier">encoding</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Types.html#preambleData"><span class="hs-identifier">preambleData</span></a></span><span>
+</span><span id="line-64"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Reading Geometries *From* Ipe</span></span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Reader.html#IpeRead"><span class="hs-identifier">IpeRead</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Converting *from* IpeObjects</span></span><span>
+</span><span id="line-67"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_asPoint"><span class="hs-identifier">_asPoint</span></a></span><span>
+</span><span id="line-68"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_asLineSegment"><span class="hs-identifier">_asLineSegment</span></a></span><span>
+</span><span id="line-69"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_asClosedLineSegment"><span class="hs-identifier">_asClosedLineSegment</span></a></span><span>
+</span><span id="line-70"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.html#_asHalfLine"><span class="hs-identifier">_asHalfLine</span></a></span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_asRectangle"><span class="hs-identifier">_asRectangle</span></a></span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_asTriangle"><span class="hs-identifier">_asTriangle</span></a></span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_asPolyLine"><span class="hs-identifier">_asPolyLine</span></a></span><span>
+</span><span id="line-74"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_asSimplePolygon"><span class="hs-identifier">_asSimplePolygon</span></a></span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_asConvexPolygon"><span class="hs-identifier">_asConvexPolygon</span></a></span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_asPolygonalDomain"><span class="hs-identifier">_asPolygonalDomain</span></a></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span>  </span><span class="annot"><span class="hs-comment">-- *** Dealing with Attributes</span></span><span>
+</span><span id="line-79"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#_withAttrs"><span class="hs-identifier">_withAttrs</span></a></span><span>
+</span><span id="line-80"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Default readers</span></span><span>
+</span><span id="line-81"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#HasDefaultFromIpe"><span class="hs-identifier">HasDefaultFromIpe</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Converting *to* IpeObjects</span></span><span>
+</span><span id="line-84"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** IpeWrite</span></span><span>
+</span><span id="line-85"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Writer.html#IpeWrite"><span class="hs-identifier">IpeWrite</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-86"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Writer.html#IpeWriteText"><span class="hs-identifier">IpeWriteText</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** IpeOut</span></span><span>
+</span><span id="line-88"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html"><span class="hs-identifier">Ipe.IpeOut</span></a></span><span>
+</span><span id="line-89"></span><span>  </span><span class="annot"><span class="hs-comment">-- ** Batch reexports</span></span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span>  </span><span class="hs-comment">-- , module Ipe.Types</span><span>
+</span><span id="line-92"></span><span>  </span><span class="hs-comment">-- , module Ipe.FromIpe</span><span>
+</span><span id="line-93"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Ipe.Attributes.html"><span class="hs-identifier">Ipe.Attributes</span></a></span><span>
+</span><span id="line-94"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Ipe.Value.html"><span class="hs-identifier">Ipe.Value</span></a></span><span>
+</span><span id="line-95"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier">IpeColor</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Ipe.Color.html#named"><span class="hs-identifier">named</span></a></span><span>
+</span><span id="line-96"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-97"></span><span>
+</span><span id="line-98"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-51bc2e912bec0d2e3b17b8a780d705551325fe816454862172377dfdc74e37b2/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-51bc2e912bec0d2e3b17b8a780d705551325fe816454862172377dfdc74e37b2/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#views"><span class="hs-identifier">views</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">isJust</span></span><span class="hs-special">)</span><span>
+</span><span id="line-100"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html"><span class="hs-identifier">HGeometry.Ext</span></a></span><span>
+</span><span id="line-101"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.HalfLine</span></span><span>
+</span><span id="line-102"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.LineSegment</span></span><span>
+</span><span id="line-103"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-104"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Ipe.Attributes.html"><span class="hs-identifier">Ipe.Attributes</span></a></span><span>
+</span><span id="line-105"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Ipe.Color.html"><span class="hs-identifier">Ipe.Color</span></a></span><span>
+</span><span id="line-106"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html"><span class="hs-identifier">Ipe.FromIpe</span></a></span><span>
+</span><span id="line-107"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Ipe.IpeOut.html"><span class="hs-identifier">Ipe.IpeOut</span></a></span><span>
+</span><span id="line-108"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Ipe.Reader.html"><span class="hs-identifier">Ipe.Reader</span></a></span><span>
+</span><span id="line-109"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Ipe.Types.html"><span class="hs-identifier">Ipe.Types</span></a></span><span>
+</span><span id="line-110"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Ipe.Value.html"><span class="hs-identifier">Ipe.Value</span></a></span><span>
+</span><span id="line-111"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Ipe.Writer.html"><span class="hs-identifier">Ipe.Writer</span></a></span><span>
+</span><span id="line-112"></span><span>
+</span><span id="line-113"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span class="annot"><span class="hs-comment">-- | Try to parse an Line segment with an arrow head as a HalfLine</span></span><span>
+</span><span id="line-116"></span><span id="local-6989586621679468226"><span class="annot"><a href="Ipe.html#_asHalfLine"><span class="hs-identifier hs-type">_asHalfLine</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679468226"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679468226"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679468226"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-117"></span><span>            </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-51bc2e912bec0d2e3b17b8a780d705551325fe816454862172377dfdc74e37b2/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Prism%27"><span class="hs-identifier hs-type">Prism'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Content.html#IpeObject"><span class="hs-identifier hs-type">IpeObject</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679468226"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HalfLine</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679468226"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679468226"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-118"></span><span id="_asHalfLine"><span class="annot"><span class="annottext">_asHalfLine :: forall r.
+(Fractional r, Ord r, Show r) =&gt;
+Prism' (IpeObject r) (HalfLine (Point 2 r) :+ IpeAttributes Path r)
+</span><a href="Ipe.html#_asHalfLine"><span class="hs-identifier hs-var hs-var">_asHalfLine</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((HalfLine (Point 2 r)
+  :+ Attributes'
+       r
+       '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+          'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+          'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])
+ -&gt; IpeObject r)
+-&gt; (IpeObject r
+    -&gt; Maybe
+         (HalfLine (Point 2 r)
+          :+ Attributes'
+               r
+               '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+                  'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+                  'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
+-&gt; Prism
+     (IpeObject r)
+     (IpeObject r)
+     (HalfLine (Point 2 r)
+      :+ Attributes'
+           r
+           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])
+     (HalfLine (Point 2 r)
+      :+ Attributes'
+           r
+           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])
+forall b s a. (b -&gt; s) -&gt; (s -&gt; Maybe a) -&gt; Prism s s a b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-51bc2e912bec0d2e3b17b8a780d705551325fe816454862172377dfdc74e37b2/share/doc/html/src/Control.Lens.Prism.html/Control.Lens.Prism.html#prism%27"><span class="hs-identifier hs-var">prism'</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679468527"><span class="annot"><span class="annottext">HalfLine (Point 2 r)
+</span><a href="#local-6989586621679468527"><span class="hs-identifier hs-var">hl</span></a></span></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679468529"><span class="annot"><span class="annottext">Attributes'
+  r
+  '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+     'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+     'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]
+</span><a href="#local-6989586621679468529"><span class="hs-identifier hs-var">ats</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IpeObject' Path r -&gt; IpeObject r
+forall r. IpeObject' Path r -&gt; IpeObject r
+</span><a href="Ipe.Content.html#IpePath"><span class="hs-identifier hs-var">IpePath</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IpeOut (HalfLine (Point 2 r)) Path r
+forall r point.
+(Ord r, Fractional r, Point_ point 2 r, Show r, Show point) =&gt;
+IpeOut (HalfLine point) Path r
+</span><a href="Ipe.IpeOut.html#ipeHalfLine"><span class="hs-identifier hs-var">ipeHalfLine</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine (Point 2 r)
+</span><a href="#local-6989586621679468527"><span class="hs-identifier hs-var">hl</span></a></span><span> </span><span class="annot"><span class="annottext">IpeObject' Path r
+-&gt; Attributes (AttrMapSym1 r) (AttributesOf Path)
+-&gt; IpeObject' Path r
+forall (i :: * -&gt; *) r.
+IpeObject' i r -&gt; IpeAttributes i r -&gt; IpeObject' i r
+</span><a href="Ipe.IpeOut.html#%21"><span class="hs-operator hs-var">!</span></a></span><span> </span><span class="annot"><span class="annottext">Attributes'
+  r
+  '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+     'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+     'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]
+Attributes (AttrMapSym1 r) (AttributesOf Path)
+</span><a href="#local-6989586621679468529"><span class="hs-identifier hs-var">ats</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">IpeObject r
+-&gt; Maybe
+     (HalfLine (Point 2 r)
+      :+ Attributes'
+           r
+           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])
+</span><a href="#local-6989586621679468533"><span class="hs-identifier hs-var">objToHalfLine</span></a></span><span>
+</span><span id="line-119"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-120"></span><span>    </span><span id="local-6989586621679468533"><span class="annot"><span class="annottext">objToHalfLine :: IpeObject r
+-&gt; Maybe
+     (HalfLine (Point 2 r)
+      :+ Attributes'
+           r
+           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])
+</span><a href="#local-6989586621679468533"><span class="hs-identifier hs-var hs-var">objToHalfLine</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-121"></span><span>      </span><span class="annot"><a href="Ipe.Content.html#IpePath"><span class="hs-identifier hs-type">IpePath</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679468622"><span class="annot"><span class="annottext">Path r
+</span><a href="#local-6989586621679468622"><span class="hs-identifier hs-var">path'</span></a></span></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679468623"><span class="annot"><span class="annottext">Attributes (AttrMapSym1 r) (AttributesOf Path)
+</span><a href="#local-6989586621679468623"><span class="hs-identifier hs-var">ats</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Path r
+</span><a href="#local-6989586621679468622"><span class="hs-identifier hs-var">path'</span></a></span><span class="annot"><span class="annottext">Path r
+-&gt; Getting
+     (First (ClosedLineSegment (Point 2 r)))
+     (Path r)
+     (ClosedLineSegment (Point 2 r))
+-&gt; Maybe (ClosedLineSegment (Point 2 r))
+forall s a. s -&gt; Getting (First a) s a -&gt; Maybe a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-51bc2e912bec0d2e3b17b8a780d705551325fe816454862172377dfdc74e37b2/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#%5E%3F"><span class="hs-operator hs-var">^?</span></a></span><span class="annot"><span class="annottext">Getting
+  (First (ClosedLineSegment (Point 2 r)))
+  (Path r)
+  (ClosedLineSegment (Point 2 r))
+forall r (p :: * -&gt; * -&gt; *) (f :: * -&gt; *).
+(Choice p, Applicative f) =&gt;
+p (ClosedLineSegment (Point 2 r))
+  (f (ClosedLineSegment (Point 2 r)))
+-&gt; p (Path r) (f (Path r))
+</span><a href="Ipe.FromIpe.html#_asClosedLineSegment"><span class="hs-identifier hs-var">_asClosedLineSegment</span></a></span><span>  </span><span class="hs-keyword">of</span><span>
+</span><span id="line-122"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span id="local-6989586621679468626"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679468626"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679468627"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679468627"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">SAttributeUniverse 'Arrow
+-&gt; Attributes'
+     r
+     '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+        'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+        'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]
+-&gt; Bool
+forall {k1} {at :: k1} {ats :: [k1]} {proxy :: k1 -&gt; *}
+       {f :: TyFun k1 (*) -&gt; *}.
+RElem at ats (RIndex at ats) =&gt;
+proxy at -&gt; Attributes f ats -&gt; Bool
+</span><a href="#local-6989586621679468628"><span class="hs-identifier hs-var">hasAttr</span></a></span><span> </span><span class="annot"><span class="annottext">SAttributeUniverse 'Arrow
+</span><a href="Ipe.Attributes.html#SArrow"><span class="hs-identifier hs-var">SArrow</span></a></span><span> </span><span class="annot"><span class="annottext">Attributes'
+  r
+  '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+     'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+     'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]
+Attributes (AttrMapSym1 r) (AttributesOf Path)
+</span><a href="#local-6989586621679468623"><span class="hs-identifier hs-var">ats</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">SAttributeUniverse 'RArrow
+-&gt; Attributes'
+     r
+     '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+        'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+        'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]
+-&gt; Bool
+forall {k1} {at :: k1} {ats :: [k1]} {proxy :: k1 -&gt; *}
+       {f :: TyFun k1 (*) -&gt; *}.
+RElem at ats (RIndex at ats) =&gt;
+proxy at -&gt; Attributes f ats -&gt; Bool
+</span><a href="#local-6989586621679468628"><span class="hs-identifier hs-var">hasAttr</span></a></span><span> </span><span class="annot"><span class="annottext">SAttributeUniverse 'RArrow
+</span><a href="Ipe.Attributes.html#SRArrow"><span class="hs-identifier hs-var">SRArrow</span></a></span><span> </span><span class="annot"><span class="annottext">Attributes'
+  r
+  '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+     'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+     'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]
+Attributes (AttrMapSym1 r) (AttributesOf Path)
+</span><a href="#local-6989586621679468623"><span class="hs-identifier hs-var">ats</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-123"></span><span>                                          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(HalfLine (Point 2 r)
+ :+ Attributes'
+      r
+      '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+         'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+         'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])
+-&gt; Maybe
+     (HalfLine (Point 2 r)
+      :+ Attributes'
+           r
+           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">((HalfLine (Point 2 r)
+  :+ Attributes'
+       r
+       '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+          'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+          'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])
+ -&gt; Maybe
+      (HalfLine (Point 2 r)
+       :+ Attributes'
+            r
+            '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+               'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+               'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
+-&gt; (HalfLine (Point 2 r)
+    :+ Attributes'
+         r
+         '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+            'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+            'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])
+-&gt; Maybe
+     (HalfLine (Point 2 r)
+      :+ Attributes'
+           r
+           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+-&gt; Vector (Dimension (Point 2 r)) (NumType (Point 2 r))
+-&gt; HalfLine (Point 2 r)
+forall point.
+point -&gt; Vector (Dimension point) (NumType point) -&gt; HalfLine point
+</span><span class="hs-identifier hs-var">HalfLine</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679468626"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679468627"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Vector 2 r
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; point -&gt; Vector d r
+</span><span class="hs-operator hs-var">.-.</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679468626"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">HalfLine (Point 2 r)
+-&gt; Attributes'
+     r
+     '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+        'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+        'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]
+-&gt; HalfLine (Point 2 r)
+   :+ Attributes'
+        r
+        '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+           'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+           'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">Attributes'
+  r
+  '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+     'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+     'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]
+Attributes (AttrMapSym1 r) (AttributesOf Path)
+</span><a href="#local-6989586621679468623"><span class="hs-identifier hs-var">ats</span></a></span><span>
+</span><span id="line-124"></span><span>                                          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(HalfLine (Point 2 r)
+ :+ Attributes'
+      r
+      '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+         'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+         'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])
+-&gt; Maybe
+     (HalfLine (Point 2 r)
+      :+ Attributes'
+           r
+           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">((HalfLine (Point 2 r)
+  :+ Attributes'
+       r
+       '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+          'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+          'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])
+ -&gt; Maybe
+      (HalfLine (Point 2 r)
+       :+ Attributes'
+            r
+            '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+               'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+               'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]))
+-&gt; (HalfLine (Point 2 r)
+    :+ Attributes'
+         r
+         '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+            'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+            'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])
+-&gt; Maybe
+     (HalfLine (Point 2 r)
+      :+ Attributes'
+           r
+           '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+              'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+              'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+-&gt; Vector (Dimension (Point 2 r)) (NumType (Point 2 r))
+-&gt; HalfLine (Point 2 r)
+forall point.
+point -&gt; Vector (Dimension point) (NumType point) -&gt; HalfLine point
+</span><span class="hs-identifier hs-var">HalfLine</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679468626"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679468626"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Vector 2 r
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; point -&gt; Vector d r
+</span><span class="hs-operator hs-var">.-.</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679468627"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">HalfLine (Point 2 r)
+-&gt; Attributes'
+     r
+     '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+        'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+        'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]
+-&gt; HalfLine (Point 2 r)
+   :+ Attributes'
+        r
+        '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+           'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+           'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">Attributes'
+  r
+  '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+     'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+     'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]
+Attributes (AttrMapSym1 r) (AttributesOf Path)
+</span><a href="#local-6989586621679468623"><span class="hs-identifier hs-var">ats</span></a></span><span>
+</span><span id="line-125"></span><span>                                          </span><span class="annot"><span class="annottext">(Bool, Bool)
+</span><span class="hs-identifier">_</span></span><span>            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe
+  (HalfLine (Point 2 r)
+   :+ Attributes'
+        r
+        '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+           'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+           'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-126"></span><span>        </span><span class="annot"><span class="annottext">Maybe (ClosedLineSegment (Point 2 r))
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>                      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe
+  (HalfLine (Point 2 r)
+   :+ Attributes'
+        r
+        '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+           'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+           'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-127"></span><span>      </span><span class="annot"><span class="annottext">IpeObject r
+</span><span class="hs-identifier">_</span></span><span>                    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe
+  (HalfLine (Point 2 r)
+   :+ Attributes'
+        r
+        '[ 'Layer, 'Matrix, 'Pin, 'Transformations, 'Stroke, 'Fill, 'Dash,
+           'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
+           'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient])
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span>    </span><span id="local-6989586621679468628"><span class="annot"><span class="annottext">hasAttr :: proxy at -&gt; Attributes f ats -&gt; Bool
+</span><a href="#local-6989586621679468628"><span class="hs-identifier hs-var hs-var">hasAttr</span></a></span></span><span> </span><span id="local-6989586621679468639"><span class="annot"><span class="annottext">proxy at
+</span><a href="#local-6989586621679468639"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (Apply f at) -&gt; Bool
+forall a. Maybe a -&gt; Bool
+</span><span class="hs-identifier hs-var">isJust</span></span><span> </span><span class="annot"><span class="annottext">(Maybe (Apply f at) -&gt; Bool)
+-&gt; (Attributes f ats -&gt; Maybe (Apply f at))
+-&gt; Attributes f ats
+-&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">proxy at -&gt; Attributes f ats -&gt; Maybe (Apply f at)
+forall {k1} (at :: k1) (ats :: [k1]) (proxy :: k1 -&gt; *)
+       (f :: TyFun k1 (*) -&gt; *).
+(at &#8712; ats) =&gt;
+proxy at -&gt; Attributes f ats -&gt; Maybe (Apply f at)
+</span><a href="Ipe.Attributes.html#lookupAttr"><span class="hs-identifier hs-var">lookupAttr</span></a></span><span> </span><span class="annot"><span class="annottext">proxy at
+</span><a href="#local-6989586621679468639"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span>
+</span><span id="line-132"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679468373"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679468373"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679468373"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679468373"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Ipe.FromIpe.html#HasDefaultFromIpe"><span class="hs-identifier hs-type">HasDefaultFromIpe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HalfLine</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679468373"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-133"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="DefaultFromIpe"><span class="annot"><a href="Ipe.FromIpe.html#DefaultFromIpe"><span class="hs-identifier hs-var">DefaultFromIpe</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HalfLine</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679468373"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span>
+</span><span id="line-134"></span><span>  </span><span id="local-6989586621679468658"><span class="annot"><span class="annottext">defaultFromIpe :: forall r.
+(r ~ NumType (HalfLine (Point 2 r))) =&gt;
+Prism'
+  (IpeObject r)
+  (HalfLine (Point 2 r)
+   :+ IpeAttributes (DefaultFromIpe (HalfLine (Point 2 r))) r)
+</span><a href="#local-6989586621679468658"><span class="hs-identifier hs-var hs-var hs-var">defaultFromIpe</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">p (HalfLine (Point 2 r) :+ IpeAttributes Path r)
+  (f (HalfLine (Point 2 r) :+ IpeAttributes Path r))
+-&gt; p (IpeObject r) (f (IpeObject r))
+p (HalfLine (Point 2 r)
+   :+ Attributes
+        (AttrMapSym1 r)
+        (AttributesOf (DefaultFromIpe (HalfLine (Point 2 r)))))
+  (f (HalfLine (Point 2 r)
+      :+ Attributes
+           (AttrMapSym1 r)
+           (AttributesOf (DefaultFromIpe (HalfLine (Point 2 r))))))
+-&gt; p (IpeObject r) (f (IpeObject r))
+forall r.
+(Fractional r, Ord r, Show r) =&gt;
+Prism' (IpeObject r) (HalfLine (Point 2 r) :+ IpeAttributes Path r)
+Prism' (IpeObject r) (HalfLine (Point 2 r) :+ IpeAttributes Path r)
+</span><a href="Ipe.html#_asHalfLine"><span class="hs-identifier hs-var">_asHalfLine</span></a></span><span>
+</span><span id="line-135"></span></pre></body></html>

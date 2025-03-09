@@ -14,28 +14,34 @@
 </span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpace"><span class="hs-identifier">HalfSpace</span></a></span><span>
 </span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sign.html/HGeometry.Sign.html#Sign"><span class="hs-identifier">Sign</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
 </span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Class.html"><span class="hs-identifier">HGeometry.HalfSpace.Class</span></a></span><span>
-</span><span id="line-17"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-18"></span><span>
-</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
-</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.html"><span class="hs-identifier">HGeometry.HyperPlane</span></a></span><span>
-</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html"><span class="hs-identifier">HGeometry.Intersection</span></a></span><span>
-</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
-</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NumType</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier">Dimension</span></span><span class="hs-special">)</span><span>
-</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sign.html/HGeometry.Sign.html"><span class="hs-identifier">HGeometry.Sign</span></a></span><span>
-</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_Intersection"><span class="hs-identifier">Point_x_HalfSpace_Intersection</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-51bc2e912bec0d2e3b17b8a780d705551325fe816454862172377dfdc74e37b2/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bifoldable</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bifoldable1</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bitraversable</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/semigroupoids-6.0.1-a8bbfdf809d26cf53d1649155d1175ff37b07769640f0e81bd2ce91845990ef7/share/doc/html/src/Data.Semigroup.Bitraversable.html/Data.Semigroup.Bitraversable.html"><span class="hs-identifier">Data.Semigroup.Bitraversable</span></a></span><span>
 </span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Class.html"><span class="hs-identifier">HGeometry.HalfSpace.Class</span></a></span><span>
-</span><span id="line-27"></span><span>
-</span><span id="line-28"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-29"></span><span>
-</span><span id="line-30"></span><span class="hs-comment">-- | A HalfSpace bounded by a hyperplane. The sign indicates which</span><span>
-</span><span id="line-31"></span><span class="hs-comment">-- side of the bounding hyperplane is indicated. Iff the sign is</span><span>
-</span><span id="line-32"></span><span class="hs-comment">-- positive, we mean the points for which onSideTest returns a</span><span>
-</span><span id="line-33"></span><span class="hs-comment">-- positive value.</span><span>
-</span><span id="line-34"></span><span class="hs-comment">--</span><span>
-</span><span id="line-35"></span><span class="hs-comment">-- Half spaces include their bounding hyperplane.</span><span>
-</span><span id="line-36"></span><span class="hs-keyword">data</span><span> </span><span id="HalfSpaceF"><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-var">HalfSpaceF</span></a></span></span><span> </span><span id="local-6989586621679367739"><span class="annot"><a href="#local-6989586621679367739"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-37"></span><span>    </span><span id="HalfSpace"><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-var">HalfSpace</span></a></span></span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sign.html/HGeometry.Sign.html#Sign"><span class="hs-identifier hs-type">Sign</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367739"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span>
-</span><span id="line-38"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679367780"><span id="local-6989586621679367787"><span id="local-6989586621679367791"><span class="annot"><span class="annottext">Int -&gt; HalfSpaceF boundingHyperPlane -&gt; ShowS
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.html"><span class="hs-identifier">HGeometry.HyperPlane</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html"><span class="hs-identifier">HGeometry.Intersection</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NumType</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier">Dimension</span></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sign.html/HGeometry.Sign.html"><span class="hs-identifier">HGeometry.Sign</span></a></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- | A HalfSpace bounded by a hyperplane. The sign indicates which</span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- side of the bounding hyperplane is indicated. Iff the sign is</span><span>
+</span><span id="line-38"></span><span class="hs-comment">-- positive, we mean the points for which onSideTest returns a</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- positive value.</span><span>
+</span><span id="line-40"></span><span class="hs-comment">--</span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- Half spaces include their bounding hyperplane.</span><span>
+</span><span id="line-42"></span><span class="hs-keyword">data</span><span> </span><span id="HalfSpaceF"><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-var">HalfSpaceF</span></a></span></span><span> </span><span id="local-6989586621679371259"><span class="annot"><a href="#local-6989586621679371259"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-43"></span><span>    </span><span id="HalfSpace"><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-var">HalfSpace</span></a></span></span><span> </span><span class="hs-pragma">{-# UNPACK</span><span> </span><span class="hs-pragma">#-}</span><span> </span><span class="hs-glyph">!</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sign.html/HGeometry.Sign.html#Sign"><span class="hs-identifier hs-type">Sign</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371259"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679371412"><span id="local-6989586621679371419"><span id="local-6989586621679371423"><span class="annot"><span class="annottext">Int -&gt; HalfSpaceF boundingHyperPlane -&gt; ShowS
 [HalfSpaceF boundingHyperPlane] -&gt; ShowS
 HalfSpaceF boundingHyperPlane -&gt; String
 (Int -&gt; HalfSpaceF boundingHyperPlane -&gt; ShowS)
@@ -65,7 +71,7 @@ $cshowList :: forall boundingHyperPlane.
 Show boundingHyperPlane =&gt;
 [HalfSpaceF boundingHyperPlane] -&gt; ShowS
 showList :: [HalfSpaceF boundingHyperPlane] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679367797"><span id="local-6989586621679367802"><span class="annot"><span class="annottext">HalfSpaceF boundingHyperPlane
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679371429"><span id="local-6989586621679371434"><span class="annot"><span class="annottext">HalfSpaceF boundingHyperPlane
 -&gt; HalfSpaceF boundingHyperPlane -&gt; Bool
 (HalfSpaceF boundingHyperPlane
  -&gt; HalfSpaceF boundingHyperPlane -&gt; Bool)
@@ -89,7 +95,7 @@ HalfSpaceF boundingHyperPlane
 -&gt; HalfSpaceF boundingHyperPlane -&gt; Bool
 /= :: HalfSpaceF boundingHyperPlane
 -&gt; HalfSpaceF boundingHyperPlane -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679367811"><span id="local-6989586621679367816"><span id="local-6989586621679367820"><span id="local-6989586621679367824"><span id="local-6989586621679367827"><span id="local-6989586621679367830"><span id="local-6989586621679367833"><span class="annot"><span class="annottext">Eq (HalfSpaceF boundingHyperPlane)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679371443"><span id="local-6989586621679371448"><span id="local-6989586621679371452"><span id="local-6989586621679371456"><span id="local-6989586621679371459"><span id="local-6989586621679371462"><span id="local-6989586621679371465"><span class="annot"><span class="annottext">Eq (HalfSpaceF boundingHyperPlane)
 Eq (HalfSpaceF boundingHyperPlane) =&gt;
 (HalfSpaceF boundingHyperPlane
  -&gt; HalfSpaceF boundingHyperPlane -&gt; Ordering)
@@ -179,7 +185,7 @@ HalfSpaceF boundingHyperPlane
 -&gt; HalfSpaceF boundingHyperPlane -&gt; HalfSpaceF boundingHyperPlane
 min :: HalfSpaceF boundingHyperPlane
 -&gt; HalfSpaceF boundingHyperPlane -&gt; HalfSpaceF boundingHyperPlane
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679367842"><span id="local-6989586621679367844"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; HalfSpaceF a -&gt; HalfSpaceF b)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679371474"><span id="local-6989586621679371476"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; HalfSpaceF a -&gt; HalfSpaceF b)
 -&gt; (forall a b. a -&gt; HalfSpaceF b -&gt; HalfSpaceF a)
 -&gt; Functor HalfSpaceF
 forall a b. a -&gt; HalfSpaceF b -&gt; HalfSpaceF a
@@ -191,7 +197,7 @@ $cfmap :: forall a b. (a -&gt; b) -&gt; HalfSpaceF a -&gt; HalfSpaceF b
 fmap :: forall a b. (a -&gt; b) -&gt; HalfSpaceF a -&gt; HalfSpaceF b
 $c&lt;$ :: forall a b. a -&gt; HalfSpaceF b -&gt; HalfSpaceF a
 &lt;$ :: forall a b. a -&gt; HalfSpaceF b -&gt; HalfSpaceF a
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679367849"><span id="local-6989586621679367855"><span id="local-6989586621679367858"><span id="local-6989586621679367863"><span id="local-6989586621679367865"><span id="local-6989586621679367868"><span id="local-6989586621679367871"><span id="local-6989586621679367874"><span id="local-6989586621679367877"><span id="local-6989586621679367880"><span id="local-6989586621679367883"><span id="local-6989586621679367885"><span id="local-6989586621679367888"><span id="local-6989586621679367893"><span id="local-6989586621679367898"><span id="local-6989586621679367903"><span id="local-6989586621679367908"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; HalfSpaceF m -&gt; m)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679371481"><span id="local-6989586621679371487"><span id="local-6989586621679371490"><span id="local-6989586621679371495"><span id="local-6989586621679371497"><span id="local-6989586621679371500"><span id="local-6989586621679371503"><span id="local-6989586621679371506"><span id="local-6989586621679371509"><span id="local-6989586621679371512"><span id="local-6989586621679371515"><span id="local-6989586621679371517"><span id="local-6989586621679371520"><span id="local-6989586621679371525"><span id="local-6989586621679371530"><span id="local-6989586621679371535"><span id="local-6989586621679371540"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; HalfSpaceF m -&gt; m)
 -&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; HalfSpaceF a -&gt; m)
 -&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; HalfSpaceF a -&gt; m)
 -&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; HalfSpaceF a -&gt; b)
@@ -273,7 +279,7 @@ $csum :: forall a. Num a =&gt; HalfSpaceF a -&gt; a
 sum :: forall a. Num a =&gt; HalfSpaceF a -&gt; a
 $cproduct :: forall a. Num a =&gt; HalfSpaceF a -&gt; a
 product :: forall a. Num a =&gt; HalfSpaceF a -&gt; a
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679367921"><span id="local-6989586621679367926"><span id="local-6989586621679367932"><span id="local-6989586621679367937"><span class="annot"><span class="annottext">Functor HalfSpaceF
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679371553"><span id="local-6989586621679371558"><span id="local-6989586621679371564"><span id="local-6989586621679371569"><span class="annot"><span class="annottext">Functor HalfSpaceF
 Foldable HalfSpaceF
 (Functor HalfSpaceF, Foldable HalfSpaceF) =&gt;
 (forall (f :: * -&gt; *) a b.
@@ -337,34 +343,34 @@ sequence :: forall (m :: * -&gt; *) a.
 Monad m =&gt;
 HalfSpaceF (m a) -&gt; m (HalfSpaceF a)
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-39"></span><span>
-</span><span id="line-40"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679367730"><span id="local-6989586621679367731"><span id="local-6989586621679367732"><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Class.html#HyperPlane_"><span class="hs-identifier hs-type">HyperPlane_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367730"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367731"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367732"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-41"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Class.html#HalfSpace_"><span class="hs-identifier hs-type">HalfSpace_</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367730"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679367731"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367732"><span class="hs-identifier hs-type">r</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-42"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="BoundingHyperPlane"><span class="annot"><a href="HGeometry.HalfSpace.Class.html#BoundingHyperPlane"><span class="hs-identifier hs-var">BoundingHyperPlane</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367730"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679367731"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367732"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679367730"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span>
-</span><span id="line-43"></span><span>
-</span><span id="line-44"></span><span>  </span><span id="local-6989586621679367971"><span class="annot"><span class="annottext">halfSpaceSign :: Lens' (HalfSpaceF boundingHyperPlane) Sign
-</span><a href="#local-6989586621679367971"><span class="hs-identifier hs-var hs-var hs-var">halfSpaceSign</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(HalfSpaceF boundingHyperPlane -&gt; Sign)
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679371250"><span id="local-6989586621679371251"><span id="local-6989586621679371252"><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Class.html#HyperPlane_"><span class="hs-identifier hs-type">HyperPlane_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371250"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371251"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371252"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-47"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Class.html#HalfSpace_"><span class="hs-identifier hs-type">HalfSpace_</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371250"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679371251"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371252"><span class="hs-identifier hs-type">r</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="BoundingHyperPlane"><span class="annot"><a href="HGeometry.HalfSpace.Class.html#BoundingHyperPlane"><span class="hs-identifier hs-var">BoundingHyperPlane</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371250"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679371251"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371252"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679371250"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span>  </span><span id="local-6989586621679371603"><span class="annot"><span class="annottext">halfSpaceSign :: Lens' (HalfSpaceF boundingHyperPlane) Sign
+</span><a href="#local-6989586621679371603"><span class="hs-identifier hs-var hs-var hs-var">halfSpaceSign</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(HalfSpaceF boundingHyperPlane -&gt; Sign)
 -&gt; (HalfSpaceF boundingHyperPlane
     -&gt; Sign -&gt; HalfSpaceF boundingHyperPlane)
 -&gt; Lens' (HalfSpaceF boundingHyperPlane) Sign
 forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span id="local-6989586621679367974"><span class="annot"><span class="annottext">Sign
-</span><a href="#local-6989586621679367974"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="annot"><span class="annottext">boundingHyperPlane
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-51bc2e912bec0d2e3b17b8a780d705551325fe816454862172377dfdc74e37b2/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span id="local-6989586621679371606"><span class="annot"><span class="annottext">Sign
+</span><a href="#local-6989586621679371606"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="annot"><span class="annottext">boundingHyperPlane
 </span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Sign
-</span><a href="#local-6989586621679367974"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span class="annot"><span class="annottext">Sign
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679367975"><span class="annot"><span class="annottext">boundingHyperPlane
-</span><a href="#local-6989586621679367975"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679367976"><span class="annot"><span class="annottext">Sign
-</span><a href="#local-6989586621679367976"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Sign -&gt; boundingHyperPlane -&gt; HalfSpaceF boundingHyperPlane
+</span><a href="#local-6989586621679371606"><span class="hs-identifier hs-var">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span class="annot"><span class="annottext">Sign
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679371607"><span class="annot"><span class="annottext">boundingHyperPlane
+</span><a href="#local-6989586621679371607"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679371608"><span class="annot"><span class="annottext">Sign
+</span><a href="#local-6989586621679371608"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Sign -&gt; boundingHyperPlane -&gt; HalfSpaceF boundingHyperPlane
 forall boundingHyperPlane.
 Sign -&gt; boundingHyperPlane -&gt; HalfSpaceF boundingHyperPlane
 </span><a href="HGeometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-var">HalfSpace</span></a></span><span> </span><span class="annot"><span class="annottext">Sign
-</span><a href="#local-6989586621679367976"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">boundingHyperPlane
-</span><a href="#local-6989586621679367975"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-45"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Class.html#halfSpaceSign"><span class="hs-pragma hs-type">halfSpaceSign</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
-</span><span id="line-46"></span><span>  </span><span id="local-6989586621679367979"><span class="annot"><span class="annottext">boundingHyperPlane :: Lens'
+</span><a href="#local-6989586621679371608"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">boundingHyperPlane
+</span><a href="#local-6989586621679371607"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.Class.html#halfSpaceSign"><span class="hs-pragma hs-type">halfSpaceSign</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-52"></span><span>  </span><span id="local-6989586621679371611"><span class="annot"><span class="annottext">boundingHyperPlane :: Lens'
   (HalfSpaceF boundingHyperPlane)
   (BoundingHyperPlane (HalfSpaceF boundingHyperPlane) d r)
-</span><a href="#local-6989586621679367979"><span class="hs-identifier hs-var hs-var hs-var">boundingHyperPlane</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(boundingHyperPlane -&gt; f boundingHyperPlane)
+</span><a href="#local-6989586621679371611"><span class="hs-identifier hs-var hs-var hs-var">boundingHyperPlane</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(boundingHyperPlane -&gt; f boundingHyperPlane)
 -&gt; HalfSpaceF boundingHyperPlane
 -&gt; f (HalfSpaceF boundingHyperPlane)
 (BoundingHyperPlane (HalfSpaceF boundingHyperPlane) d r
@@ -377,11 +383,11 @@ Functor f =&gt;
 -&gt; HalfSpaceF boundingHyperPlane
 -&gt; f (HalfSpaceF boundingHyperPlane')
 </span><a href="HGeometry.HalfSpace.html#boundingHyperPlaneLens"><span class="hs-identifier hs-var">boundingHyperPlaneLens</span></a></span><span>
-</span><span id="line-47"></span><span>
-</span><span id="line-48"></span><span class="annot"><span class="hs-comment">-- | Lens to access the hyperplane bounding the halfspace</span></span><span>
-</span><span id="line-49"></span><span id="local-6989586621679367742"><span id="local-6989586621679367743"><span class="annot"><a href="HGeometry.HalfSpace.html#boundingHyperPlaneLens"><span class="hs-identifier hs-type">boundingHyperPlaneLens</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Lens"><span class="hs-identifier hs-type">Lens</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367742"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367743"><span class="hs-identifier hs-type">boundingHyperPlane'</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-50"></span><span>                           </span><span class="annot"><a href="#local-6989586621679367742"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span>              </span><span class="annot"><a href="#local-6989586621679367743"><span class="hs-identifier hs-type">boundingHyperPlane'</span></a></span></span></span><span>
-</span><span id="line-51"></span><span id="boundingHyperPlaneLens"><span class="annot"><span class="annottext">boundingHyperPlaneLens :: forall boundingHyperPlane boundingHyperPlane' (f :: * -&gt; *).
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="annot"><span class="hs-comment">-- | Lens to access the hyperplane bounding the halfspace</span></span><span>
+</span><span id="line-55"></span><span id="local-6989586621679371262"><span id="local-6989586621679371263"><span class="annot"><a href="HGeometry.HalfSpace.html#boundingHyperPlaneLens"><span class="hs-identifier hs-type">boundingHyperPlaneLens</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-51bc2e912bec0d2e3b17b8a780d705551325fe816454862172377dfdc74e37b2/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Lens"><span class="hs-identifier hs-type">Lens</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371262"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371263"><span class="hs-identifier hs-type">boundingHyperPlane'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span>                           </span><span class="annot"><a href="#local-6989586621679371262"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span>              </span><span class="annot"><a href="#local-6989586621679371263"><span class="hs-identifier hs-type">boundingHyperPlane'</span></a></span></span></span><span>
+</span><span id="line-57"></span><span id="boundingHyperPlaneLens"><span class="annot"><span class="annottext">boundingHyperPlaneLens :: forall boundingHyperPlane boundingHyperPlane' (f :: * -&gt; *).
 Functor f =&gt;
 (boundingHyperPlane -&gt; f boundingHyperPlane')
 -&gt; HalfSpaceF boundingHyperPlane
@@ -395,91 +401,720 @@ Functor f =&gt;
      boundingHyperPlane
      boundingHyperPlane'
 forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.3-ce13621ca90282c7ffe4fce28e3082324aec22dc8cdfa5fe56a4cc94c1bcacc4/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span class="annot"><span class="annottext">Sign
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679367984"><span class="annot"><span class="annottext">boundingHyperPlane
-</span><a href="#local-6989586621679367984"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">boundingHyperPlane
-</span><a href="#local-6989586621679367984"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span id="local-6989586621679367985"><span class="annot"><span class="annottext">Sign
-</span><a href="#local-6989586621679367985"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="annot"><span class="annottext">boundingHyperPlane
-</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679367986"><span class="annot"><span class="annottext">boundingHyperPlane'
-</span><a href="#local-6989586621679367986"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Sign -&gt; boundingHyperPlane' -&gt; HalfSpaceF boundingHyperPlane'
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-51bc2e912bec0d2e3b17b8a780d705551325fe816454862172377dfdc74e37b2/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span class="annot"><span class="annottext">Sign
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679371616"><span class="annot"><span class="annottext">boundingHyperPlane
+</span><a href="#local-6989586621679371616"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">boundingHyperPlane
+</span><a href="#local-6989586621679371616"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span id="local-6989586621679371617"><span class="annot"><span class="annottext">Sign
+</span><a href="#local-6989586621679371617"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="annot"><span class="annottext">boundingHyperPlane
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679371618"><span class="annot"><span class="annottext">boundingHyperPlane'
+</span><a href="#local-6989586621679371618"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Sign -&gt; boundingHyperPlane' -&gt; HalfSpaceF boundingHyperPlane'
 forall boundingHyperPlane.
 Sign -&gt; boundingHyperPlane -&gt; HalfSpaceF boundingHyperPlane
 </span><a href="HGeometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-var">HalfSpace</span></a></span><span> </span><span class="annot"><span class="annottext">Sign
-</span><a href="#local-6989586621679367985"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">boundingHyperPlane'
-</span><a href="#local-6989586621679367986"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-52"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.html#boundingHyperPlaneLens"><span class="hs-pragma hs-type">boundingHyperPlaneLens</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
-</span><span id="line-53"></span><span>
-</span><span id="line-54"></span><span class="annot"><span class="hs-comment">-- | Arbitrary halfspaces in r^d.</span></span><span>
-</span><span id="line-55"></span><span class="hs-keyword">type</span><span> </span><span id="HalfSpace"><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-var">HalfSpace</span></a></span></span><span> </span><span id="local-6989586621679367987"><span class="annot"><a href="#local-6989586621679367987"><span class="hs-identifier hs-type">d</span></a></span></span><span> </span><span id="local-6989586621679367988"><span class="annot"><a href="#local-6989586621679367988"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.Internal.html#HyperPlane"><span class="hs-identifier hs-type">HyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367987"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367988"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-56"></span><span>
-</span><span id="line-57"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679367990"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367990"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679367990"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span>
-</span><span id="line-58"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679367991"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367991"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679367991"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span>
+</span><a href="#local-6989586621679371617"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">boundingHyperPlane'
+</span><a href="#local-6989586621679371618"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-58"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.html#boundingHyperPlaneLens"><span class="hs-pragma hs-type">boundingHyperPlaneLens</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
 </span><span id="line-59"></span><span>
-</span><span id="line-60"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679367756"><span id="local-6989586621679367757"><span id="local-6989586621679367758"><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Class.html#HyperPlane_"><span class="hs-identifier hs-type">HyperPlane_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367756"><span class="hs-identifier hs-type">boudingHyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367757"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367758"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679367758"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679367758"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-61"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Has_</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Additive_</span></span><span> </span><span class="annot"><a href="#local-6989586621679367757"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367758"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-62"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#HasIntersectionWith"><span class="hs-identifier hs-type">HasIntersectionWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><a href="#local-6989586621679367757"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367758"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367756"><span class="hs-identifier hs-type">boudingHyperPlane</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-63"></span><span>  </span><span id="local-6989586621679368011"><span class="annot"><span class="annottext">Point d r
-</span><a href="#local-6989586621679368011"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679368012"><span class="annot"><span class="annottext">intersects :: Point d r -&gt; HalfSpaceF boudingHyperPlane -&gt; Bool
-</span><a href="#local-6989586621679368012"><span class="hs-operator hs-var hs-var hs-var">`intersects`</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span id="local-6989586621679368014"><span class="annot"><span class="annottext">Sign
-</span><a href="#local-6989586621679368014"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679368015"><span class="annot"><span class="annottext">boudingHyperPlane
-</span><a href="#local-6989586621679368015"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Sign
-</span><a href="#local-6989586621679368014"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-64"></span><span>                                     </span><span class="annot"><span class="annottext">Sign
-</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sign.html/HGeometry.Sign.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point d r
-</span><a href="#local-6989586621679368011"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; boudingHyperPlane -&gt; Ordering
-forall point.
-(Point_ point d r, Ord r, Num r) =&gt;
-point -&gt; boudingHyperPlane -&gt; Ordering
-forall hyperPlane (d :: Nat) r point.
-(HyperPlane_ hyperPlane d r, Point_ point d r, Ord r, Num r) =&gt;
-point -&gt; hyperPlane -&gt; Ordering
-</span><a href="HGeometry.HyperPlane.Class.html#onSideTest"><span class="hs-operator hs-var">`onSideTest`</span></a></span><span> </span><span class="annot"><span class="annottext">boudingHyperPlane
-</span><a href="#local-6989586621679368015"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">Ordering -&gt; Ordering -&gt; Bool
-forall a. Eq a =&gt; a -&gt; a -&gt; Bool
-</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Ordering
-</span><span class="hs-identifier hs-var">LT</span></span><span>
-</span><span id="line-65"></span><span>                                     </span><span class="annot"><span class="annottext">Sign
-</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sign.html/HGeometry.Sign.html#Negative"><span class="hs-identifier hs-var">Negative</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point d r
-</span><a href="#local-6989586621679368011"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; boudingHyperPlane -&gt; Ordering
-forall point.
-(Point_ point d r, Ord r, Num r) =&gt;
-point -&gt; boudingHyperPlane -&gt; Ordering
-forall hyperPlane (d :: Nat) r point.
-(HyperPlane_ hyperPlane d r, Point_ point d r, Ord r, Num r) =&gt;
-point -&gt; hyperPlane -&gt; Ordering
-</span><a href="HGeometry.HyperPlane.Class.html#onSideTest"><span class="hs-operator hs-var">`onSideTest`</span></a></span><span> </span><span class="annot"><span class="annottext">boudingHyperPlane
-</span><a href="#local-6989586621679368015"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">Ordering -&gt; Ordering -&gt; Bool
-forall a. Eq a =&gt; a -&gt; a -&gt; Bool
-</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">Ordering
-</span><span class="hs-identifier hs-var">GT</span></span><span>
-</span><span id="line-66"></span><span>
-</span><span id="line-67"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Intersection"><span class="annot"><a href="HGeometry.Intersection.html#Intersection"><span class="hs-identifier hs-var">Intersection</span></a></span></span><span> </span><span id="local-6989586621679368020"><span id="local-6989586621679368021"><span id="local-6989586621679368022"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><a href="#local-6989586621679368020"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679368021"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679368022"><span class="hs-identifier hs-type">boudingHyperPlane</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><a href="#local-6989586621679368020"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679368021"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-68"></span><span>
-</span><span id="line-69"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679367773"><span id="local-6989586621679367774"><span id="local-6989586621679367775"><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Class.html#HyperPlane_"><span class="hs-identifier hs-type">HyperPlane_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367773"><span class="hs-identifier hs-type">boudingHyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367774"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367775"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679367775"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679367775"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-70"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Has_</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Additive_</span></span><span> </span><span class="annot"><a href="#local-6989586621679367774"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367775"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-71"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#IsIntersectableWith"><span class="hs-identifier hs-type">IsIntersectableWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><a href="#local-6989586621679367774"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367775"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679367773"><span class="hs-identifier hs-type">boudingHyperPlane</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-72"></span><span>  </span><span id="local-6989586621679368033"><span class="annot"><span class="annottext">Point d r
-</span><a href="#local-6989586621679368033"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679368034"><span class="annot"><span class="annottext">intersect :: Point d r
+</span><span id="line-60"></span><span class="annot"><span class="hs-comment">-- | Arbitrary halfspaces in r^d.</span></span><span>
+</span><span id="line-61"></span><span class="hs-keyword">type</span><span> </span><span id="HalfSpace"><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-var">HalfSpace</span></a></span></span><span> </span><span id="local-6989586621679371619"><span class="annot"><a href="#local-6989586621679371619"><span class="hs-identifier hs-type">d</span></a></span></span><span> </span><span id="local-6989586621679371620"><span class="annot"><a href="#local-6989586621679371620"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HyperPlane.Internal.html#HyperPlane"><span class="hs-identifier hs-type">HyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371619"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371620"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span>
+</span><span id="line-63"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679371622"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371622"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679371622"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span>
+</span><span id="line-64"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679371623"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371623"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679371623"><span class="hs-identifier hs-type">boundingHyperPlane</span></a></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679371279"><span id="local-6989586621679371280"><span id="local-6989586621679371281"><span id="local-6989586621679371629"><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Class.html#HyperPlane_"><span class="hs-identifier hs-type">HyperPlane_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371279"><span class="hs-identifier hs-type">boudingHyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371280"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371281"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679371281"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679371281"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-67"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Has_</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Additive_</span></span><span> </span><span class="annot"><a href="#local-6989586621679371280"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371281"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-68"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#HasIntersectionWith"><span class="hs-identifier hs-type">HasIntersectionWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><a href="#local-6989586621679371280"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371281"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371279"><span class="hs-identifier hs-type">boudingHyperPlane</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Intersection"><span class="annot"><a href="HGeometry.Intersection.html#Intersection"><span class="hs-identifier hs-var">Intersection</span></a></span></span><span> </span><span id="local-6989586621679371637"><span id="local-6989586621679371638"><span id="local-6989586621679371639"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><a href="#local-6989586621679371637"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371638"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371639"><span class="hs-identifier hs-type">boudingHyperPlane</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-71"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_Intersection"><span class="hs-identifier hs-type">Point_x_HalfSpace_Intersection</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><a href="#local-6989586621679371637"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371638"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><a href="#local-6989586621679371637"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371638"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span class="annot"><span class="hs-comment">-- | Point x HalfSpace intersection</span></span><span>
+</span><span id="line-74"></span><span class="hs-keyword">data</span><span> </span><span id="Point_x_HalfSpace_Intersection"><span class="annot"><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_Intersection"><span class="hs-identifier hs-var">Point_x_HalfSpace_Intersection</span></a></span></span><span> </span><span id="local-6989586621679371330"><span class="annot"><a href="#local-6989586621679371330"><span class="hs-identifier hs-type">boundaryPoint</span></a></span></span><span> </span><span id="local-6989586621679371331"><span class="annot"><a href="#local-6989586621679371331"><span class="hs-identifier hs-type">interiorPoint</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-75"></span><span>    </span><span id="Point_x_HalfSpace_OnBoundary"><span class="annot"><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_OnBoundary"><span class="hs-identifier hs-var">Point_x_HalfSpace_OnBoundary</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679371330"><span class="hs-identifier hs-type">boundaryPoint</span></a></span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span id="Point_x_HalfSpace_Interior"><span class="annot"><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_Interior"><span class="hs-identifier hs-var">Point_x_HalfSpace_Interior</span></a></span></span><span>   </span><span class="annot"><a href="#local-6989586621679371331"><span class="hs-identifier hs-type">interiorPoint</span></a></span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679371645"><span id="local-6989586621679371651"><span id="local-6989586621679371655"><span class="annot"><span class="annottext">Int
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; ShowS
+[Point_x_HalfSpace_Intersection boundaryPoint interiorPoint]
+-&gt; ShowS
+Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; String
+(Int
+ -&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+ -&gt; ShowS)
+-&gt; (Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+    -&gt; String)
+-&gt; ([Point_x_HalfSpace_Intersection boundaryPoint interiorPoint]
+    -&gt; ShowS)
+-&gt; Show
+     (Point_x_HalfSpace_Intersection boundaryPoint interiorPoint)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall boundaryPoint interiorPoint.
+(Show boundaryPoint, Show interiorPoint) =&gt;
+Int
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; ShowS
+forall boundaryPoint interiorPoint.
+(Show boundaryPoint, Show interiorPoint) =&gt;
+[Point_x_HalfSpace_Intersection boundaryPoint interiorPoint]
+-&gt; ShowS
+forall boundaryPoint interiorPoint.
+(Show boundaryPoint, Show interiorPoint) =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; String
+$cshowsPrec :: forall boundaryPoint interiorPoint.
+(Show boundaryPoint, Show interiorPoint) =&gt;
+Int
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; ShowS
+showsPrec :: Int
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; ShowS
+$cshow :: forall boundaryPoint interiorPoint.
+(Show boundaryPoint, Show interiorPoint) =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; String
+show :: Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; String
+$cshowList :: forall boundaryPoint interiorPoint.
+(Show boundaryPoint, Show interiorPoint) =&gt;
+[Point_x_HalfSpace_Intersection boundaryPoint interiorPoint]
+-&gt; ShowS
+showList :: [Point_x_HalfSpace_Intersection boundaryPoint interiorPoint]
+-&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679371660"><span id="local-6989586621679371667"><span class="annot"><span class="annottext">Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; Bool
+(Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+ -&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+ -&gt; Bool)
+-&gt; (Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+    -&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+    -&gt; Bool)
+-&gt; Eq (Point_x_HalfSpace_Intersection boundaryPoint interiorPoint)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall boundaryPoint interiorPoint.
+(Eq boundaryPoint, Eq interiorPoint) =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; Bool
+$c== :: forall boundaryPoint interiorPoint.
+(Eq boundaryPoint, Eq interiorPoint) =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; Bool
+== :: Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; Bool
+$c/= :: forall boundaryPoint interiorPoint.
+(Eq boundaryPoint, Eq interiorPoint) =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; Bool
+/= :: Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+-&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679371671"><span id="local-6989586621679371673"><span class="annot"><span class="annottext">(forall a b.
+ (a -&gt; b)
+ -&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+ -&gt; Point_x_HalfSpace_Intersection boundaryPoint b)
+-&gt; (forall a b.
+    a
+    -&gt; Point_x_HalfSpace_Intersection boundaryPoint b
+    -&gt; Point_x_HalfSpace_Intersection boundaryPoint a)
+-&gt; Functor (Point_x_HalfSpace_Intersection boundaryPoint)
+forall a b.
+a
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint b
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+forall a b.
+(a -&gt; b)
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint b
+forall boundaryPoint a b.
+a
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint b
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+forall boundaryPoint a b.
+(a -&gt; b)
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall boundaryPoint a b.
+(a -&gt; b)
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint b
+fmap :: forall a b.
+(a -&gt; b)
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint b
+$c&lt;$ :: forall boundaryPoint a b.
+a
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint b
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+&lt;$ :: forall a b.
+a
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint b
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679371676"><span id="local-6989586621679371682"><span id="local-6989586621679371686"><span id="local-6989586621679371691"><span id="local-6989586621679371693"><span id="local-6989586621679371696"><span id="local-6989586621679371699"><span id="local-6989586621679371702"><span id="local-6989586621679371705"><span id="local-6989586621679371708"><span id="local-6989586621679371711"><span id="local-6989586621679371713"><span id="local-6989586621679371716"><span id="local-6989586621679371721"><span id="local-6989586621679371726"><span id="local-6989586621679371731"><span id="local-6989586621679371736"><span class="annot"><span class="annottext">(forall m.
+ Monoid m =&gt;
+ Point_x_HalfSpace_Intersection boundaryPoint m -&gt; m)
+-&gt; (forall m a.
+    Monoid m =&gt;
+    (a -&gt; m) -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; m)
+-&gt; (forall m a.
+    Monoid m =&gt;
+    (a -&gt; m) -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; m)
+-&gt; (forall a b.
+    (a -&gt; b -&gt; b)
+    -&gt; b -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; b)
+-&gt; (forall a b.
+    (a -&gt; b -&gt; b)
+    -&gt; b -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; b)
+-&gt; (forall b a.
+    (b -&gt; a -&gt; b)
+    -&gt; b -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; b)
+-&gt; (forall b a.
+    (b -&gt; a -&gt; b)
+    -&gt; b -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; b)
+-&gt; (forall a.
+    (a -&gt; a -&gt; a)
+    -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a)
+-&gt; (forall a.
+    (a -&gt; a -&gt; a)
+    -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a)
+-&gt; (forall a.
+    Point_x_HalfSpace_Intersection boundaryPoint a -&gt; [a])
+-&gt; (forall a.
+    Point_x_HalfSpace_Intersection boundaryPoint a -&gt; Bool)
+-&gt; (forall a.
+    Point_x_HalfSpace_Intersection boundaryPoint a -&gt; Int)
+-&gt; (forall a.
+    Eq a =&gt;
+    a -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; Bool)
+-&gt; (forall a.
+    Ord a =&gt;
+    Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a)
+-&gt; (forall a.
+    Ord a =&gt;
+    Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a)
+-&gt; (forall a.
+    Num a =&gt;
+    Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a)
+-&gt; (forall a.
+    Num a =&gt;
+    Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a)
+-&gt; Foldable (Point_x_HalfSpace_Intersection boundaryPoint)
+forall a.
+Eq a =&gt;
+a -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; Bool
+forall a.
+Num a =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a
+forall a.
+Ord a =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a
+forall m.
+Monoid m =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint m -&gt; m
+forall a. Point_x_HalfSpace_Intersection boundaryPoint a -&gt; Bool
+forall a. Point_x_HalfSpace_Intersection boundaryPoint a -&gt; Int
+forall a. Point_x_HalfSpace_Intersection boundaryPoint a -&gt; [a]
+forall a.
+(a -&gt; a -&gt; a)
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a
+forall boundaryPoint a.
+Eq a =&gt;
+a -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; Bool
+forall boundaryPoint a.
+Num a =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a
+forall boundaryPoint a.
+Ord a =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a
+forall boundaryPoint m.
+Monoid m =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint m -&gt; m
+forall m a.
+Monoid m =&gt;
+(a -&gt; m) -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; m
+forall boundaryPoint a.
+Point_x_HalfSpace_Intersection boundaryPoint a -&gt; Bool
+forall boundaryPoint a.
+Point_x_HalfSpace_Intersection boundaryPoint a -&gt; Int
+forall boundaryPoint a.
+Point_x_HalfSpace_Intersection boundaryPoint a -&gt; [a]
+forall b a.
+(b -&gt; a -&gt; b)
+-&gt; b -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; b
+forall a b.
+(a -&gt; b -&gt; b)
+-&gt; b -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; b
+forall boundaryPoint a.
+(a -&gt; a -&gt; a)
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a
+forall boundaryPoint m a.
+Monoid m =&gt;
+(a -&gt; m) -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; m
+forall boundaryPoint b a.
+(b -&gt; a -&gt; b)
+-&gt; b -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; b
+forall boundaryPoint a b.
+(a -&gt; b -&gt; b)
+-&gt; b -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+$cfold :: forall boundaryPoint m.
+Monoid m =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint m -&gt; m
+fold :: forall m.
+Monoid m =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint m -&gt; m
+$cfoldMap :: forall boundaryPoint m a.
+Monoid m =&gt;
+(a -&gt; m) -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; m
+foldMap :: forall m a.
+Monoid m =&gt;
+(a -&gt; m) -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; m
+$cfoldMap' :: forall boundaryPoint m a.
+Monoid m =&gt;
+(a -&gt; m) -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; m
+foldMap' :: forall m a.
+Monoid m =&gt;
+(a -&gt; m) -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; m
+$cfoldr :: forall boundaryPoint a b.
+(a -&gt; b -&gt; b)
+-&gt; b -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; b
+foldr :: forall a b.
+(a -&gt; b -&gt; b)
+-&gt; b -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; b
+$cfoldr' :: forall boundaryPoint a b.
+(a -&gt; b -&gt; b)
+-&gt; b -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; b
+foldr' :: forall a b.
+(a -&gt; b -&gt; b)
+-&gt; b -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; b
+$cfoldl :: forall boundaryPoint b a.
+(b -&gt; a -&gt; b)
+-&gt; b -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; b
+foldl :: forall b a.
+(b -&gt; a -&gt; b)
+-&gt; b -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; b
+$cfoldl' :: forall boundaryPoint b a.
+(b -&gt; a -&gt; b)
+-&gt; b -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; b
+foldl' :: forall b a.
+(b -&gt; a -&gt; b)
+-&gt; b -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; b
+$cfoldr1 :: forall boundaryPoint a.
+(a -&gt; a -&gt; a)
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a
+foldr1 :: forall a.
+(a -&gt; a -&gt; a)
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a
+$cfoldl1 :: forall boundaryPoint a.
+(a -&gt; a -&gt; a)
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a
+foldl1 :: forall a.
+(a -&gt; a -&gt; a)
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a
+$ctoList :: forall boundaryPoint a.
+Point_x_HalfSpace_Intersection boundaryPoint a -&gt; [a]
+toList :: forall a. Point_x_HalfSpace_Intersection boundaryPoint a -&gt; [a]
+$cnull :: forall boundaryPoint a.
+Point_x_HalfSpace_Intersection boundaryPoint a -&gt; Bool
+null :: forall a. Point_x_HalfSpace_Intersection boundaryPoint a -&gt; Bool
+$clength :: forall boundaryPoint a.
+Point_x_HalfSpace_Intersection boundaryPoint a -&gt; Int
+length :: forall a. Point_x_HalfSpace_Intersection boundaryPoint a -&gt; Int
+$celem :: forall boundaryPoint a.
+Eq a =&gt;
+a -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; Bool
+elem :: forall a.
+Eq a =&gt;
+a -&gt; Point_x_HalfSpace_Intersection boundaryPoint a -&gt; Bool
+$cmaximum :: forall boundaryPoint a.
+Ord a =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a
+maximum :: forall a.
+Ord a =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a
+$cminimum :: forall boundaryPoint a.
+Ord a =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a
+minimum :: forall a.
+Ord a =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a
+$csum :: forall boundaryPoint a.
+Num a =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a
+sum :: forall a.
+Num a =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a
+$cproduct :: forall boundaryPoint a.
+Num a =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a
+product :: forall a.
+Num a =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679371745"><span id="local-6989586621679371751"><span id="local-6989586621679371757"><span id="local-6989586621679371762"><span class="annot"><span class="annottext">Functor (Point_x_HalfSpace_Intersection boundaryPoint)
+Foldable (Point_x_HalfSpace_Intersection boundaryPoint)
+(Functor (Point_x_HalfSpace_Intersection boundaryPoint),
+ Foldable (Point_x_HalfSpace_Intersection boundaryPoint)) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b)
+ -&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+ -&gt; f (Point_x_HalfSpace_Intersection boundaryPoint b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    Point_x_HalfSpace_Intersection boundaryPoint (f a)
+    -&gt; f (Point_x_HalfSpace_Intersection boundaryPoint a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b)
+    -&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+    -&gt; m (Point_x_HalfSpace_Intersection boundaryPoint b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    Point_x_HalfSpace_Intersection boundaryPoint (m a)
+    -&gt; m (Point_x_HalfSpace_Intersection boundaryPoint a))
+-&gt; Traversable (Point_x_HalfSpace_Intersection boundaryPoint)
+forall boundaryPoint.
+Functor (Point_x_HalfSpace_Intersection boundaryPoint)
+forall boundaryPoint.
+Foldable (Point_x_HalfSpace_Intersection boundaryPoint)
+forall boundaryPoint (m :: * -&gt; *) a.
+Monad m =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint (m a)
+-&gt; m (Point_x_HalfSpace_Intersection boundaryPoint a)
+forall boundaryPoint (f :: * -&gt; *) a.
+Applicative f =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint (f a)
+-&gt; f (Point_x_HalfSpace_Intersection boundaryPoint a)
+forall boundaryPoint (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b)
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+-&gt; m (Point_x_HalfSpace_Intersection boundaryPoint b)
+forall boundaryPoint (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b)
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+-&gt; f (Point_x_HalfSpace_Intersection boundaryPoint b)
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint (m a)
+-&gt; m (Point_x_HalfSpace_Intersection boundaryPoint a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint (f a)
+-&gt; f (Point_x_HalfSpace_Intersection boundaryPoint a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b)
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+-&gt; m (Point_x_HalfSpace_Intersection boundaryPoint b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b)
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+-&gt; f (Point_x_HalfSpace_Intersection boundaryPoint b)
+$ctraverse :: forall boundaryPoint (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b)
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+-&gt; f (Point_x_HalfSpace_Intersection boundaryPoint b)
+traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b)
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+-&gt; f (Point_x_HalfSpace_Intersection boundaryPoint b)
+$csequenceA :: forall boundaryPoint (f :: * -&gt; *) a.
+Applicative f =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint (f a)
+-&gt; f (Point_x_HalfSpace_Intersection boundaryPoint a)
+sequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint (f a)
+-&gt; f (Point_x_HalfSpace_Intersection boundaryPoint a)
+$cmapM :: forall boundaryPoint (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b)
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+-&gt; m (Point_x_HalfSpace_Intersection boundaryPoint b)
+mapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b)
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint a
+-&gt; m (Point_x_HalfSpace_Intersection boundaryPoint b)
+$csequence :: forall boundaryPoint (m :: * -&gt; *) a.
+Monad m =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint (m a)
+-&gt; m (Point_x_HalfSpace_Intersection boundaryPoint a)
+sequence :: forall (m :: * -&gt; *) a.
+Monad m =&gt;
+Point_x_HalfSpace_Intersection boundaryPoint (m a)
+-&gt; m (Point_x_HalfSpace_Intersection boundaryPoint a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679371770"><span id="local-6989586621679371774"><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_Intersection"><span class="hs-identifier hs-type">Point_x_HalfSpace_Intersection</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-80"></span><span>  </span><span id="local-6989586621679371777"><span class="annot"><span class="annottext">bimap :: forall a b c d.
+(a -&gt; b)
+-&gt; (c -&gt; d)
+-&gt; Point_x_HalfSpace_Intersection a c
+-&gt; Point_x_HalfSpace_Intersection b d
+</span><a href="#local-6989586621679371777"><span class="hs-identifier hs-var hs-var hs-var">bimap</span></a></span></span><span> </span><span id="local-6989586621679371779"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679371779"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679371780"><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679371780"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-81"></span><span>    </span><span class="annot"><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_OnBoundary"><span class="hs-identifier hs-type">Point_x_HalfSpace_OnBoundary</span></a></span><span> </span><span id="local-6989586621679371781"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679371781"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">b -&gt; Point_x_HalfSpace_Intersection b d
+forall boundaryPoint interiorPoint.
+boundaryPoint
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+</span><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_OnBoundary"><span class="hs-identifier hs-var">Point_x_HalfSpace_OnBoundary</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679371779"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679371781"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-82"></span><span>    </span><span class="annot"><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_Interior"><span class="hs-identifier hs-type">Point_x_HalfSpace_Interior</span></a></span><span> </span><span id="local-6989586621679371782"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679371782"><span class="hs-identifier hs-var">p</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">d -&gt; Point_x_HalfSpace_Intersection b d
+forall boundaryPoint interiorPoint.
+interiorPoint
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+</span><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_Interior"><span class="hs-identifier hs-var">Point_x_HalfSpace_Interior</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679371780"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679371782"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679371784"><span id="local-6989586621679371791"><span id="local-6989586621679371794"><span class="annot"><span class="hs-identifier hs-type">Bifoldable</span></span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_Intersection"><span class="hs-identifier hs-type">Point_x_HalfSpace_Intersection</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-85"></span><span>  </span><span id="local-6989586621679371803"><span class="annot"><span class="annottext">bifoldMap :: forall m a b.
+Monoid m =&gt;
+(a -&gt; m) -&gt; (b -&gt; m) -&gt; Point_x_HalfSpace_Intersection a b -&gt; m
+</span><a href="#local-6989586621679371803"><span class="hs-identifier hs-var hs-var hs-var">bifoldMap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; (b -&gt; m) -&gt; Point_x_HalfSpace_Intersection a b -&gt; m
+forall m a b.
+Semigroup m =&gt;
+(a -&gt; m) -&gt; (b -&gt; m) -&gt; Point_x_HalfSpace_Intersection a b -&gt; m
+forall (t :: * -&gt; * -&gt; *) m a b.
+(Bifoldable1 t, Semigroup m) =&gt;
+(a -&gt; m) -&gt; (b -&gt; m) -&gt; t a b -&gt; m
+</span><span class="hs-identifier hs-var">bifoldMap1</span></span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679371809"><span class="annot"><span class="hs-identifier hs-type">Bifoldable1</span></span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_Intersection"><span class="hs-identifier hs-type">Point_x_HalfSpace_Intersection</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-88"></span><span>  </span><span id="local-6989586621679371816"><span class="annot"><span class="annottext">bifoldMap1 :: forall m a b.
+Semigroup m =&gt;
+(a -&gt; m) -&gt; (b -&gt; m) -&gt; Point_x_HalfSpace_Intersection a b -&gt; m
+</span><span class="hs-identifier hs-var hs-var hs-var">bifoldMap1</span></span></span><span> </span><span id="local-6989586621679371817"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679371817"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679371818"><span class="annot"><span class="annottext">b -&gt; m
+</span><a href="#local-6989586621679371818"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-89"></span><span>    </span><span class="annot"><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_OnBoundary"><span class="hs-identifier hs-type">Point_x_HalfSpace_OnBoundary</span></a></span><span> </span><span id="local-6989586621679371819"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679371819"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679371817"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679371819"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-90"></span><span>    </span><span class="annot"><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_Interior"><span class="hs-identifier hs-type">Point_x_HalfSpace_Interior</span></a></span><span> </span><span id="local-6989586621679371820"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679371820"><span class="hs-identifier hs-var">p</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">b -&gt; m
+</span><a href="#local-6989586621679371818"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679371820"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-91"></span><span>
+</span><span id="line-92"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bitraversable</span></span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_Intersection"><span class="hs-identifier hs-type">Point_x_HalfSpace_Intersection</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-93"></span><span>  </span><span id="local-6989586621679371832"><span class="annot"><span class="annottext">bitraverse :: forall (f :: * -&gt; *) a c b d.
+Applicative f =&gt;
+(a -&gt; f c)
+-&gt; (b -&gt; f d)
+-&gt; Point_x_HalfSpace_Intersection a b
+-&gt; f (Point_x_HalfSpace_Intersection c d)
+</span><a href="#local-6989586621679371832"><span class="hs-identifier hs-var hs-var hs-var">bitraverse</span></a></span></span><span> </span><span id="local-6989586621679371834"><span class="annot"><span class="annottext">a -&gt; f c
+</span><a href="#local-6989586621679371834"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679371835"><span class="annot"><span class="annottext">b -&gt; f d
+</span><a href="#local-6989586621679371835"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-94"></span><span>    </span><span class="annot"><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_OnBoundary"><span class="hs-identifier hs-type">Point_x_HalfSpace_OnBoundary</span></a></span><span> </span><span id="local-6989586621679371836"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679371836"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">c -&gt; Point_x_HalfSpace_Intersection c d
+forall boundaryPoint interiorPoint.
+boundaryPoint
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+</span><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_OnBoundary"><span class="hs-identifier hs-var">Point_x_HalfSpace_OnBoundary</span></a></span><span> </span><span class="annot"><span class="annottext">(c -&gt; Point_x_HalfSpace_Intersection c d)
+-&gt; f c -&gt; f (Point_x_HalfSpace_Intersection c d)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f c
+</span><a href="#local-6989586621679371834"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679371836"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-95"></span><span>    </span><span class="annot"><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_Interior"><span class="hs-identifier hs-type">Point_x_HalfSpace_Interior</span></a></span><span> </span><span id="local-6989586621679371838"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679371838"><span class="hs-identifier hs-var">p</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">d -&gt; Point_x_HalfSpace_Intersection c d
+forall boundaryPoint interiorPoint.
+interiorPoint
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+</span><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_Interior"><span class="hs-identifier hs-var">Point_x_HalfSpace_Interior</span></a></span><span>   </span><span class="annot"><span class="annottext">(d -&gt; Point_x_HalfSpace_Intersection c d)
+-&gt; f d -&gt; f (Point_x_HalfSpace_Intersection c d)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; f d
+</span><a href="#local-6989586621679371835"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679371838"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679371845"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/semigroupoids-6.0.1-a8bbfdf809d26cf53d1649155d1175ff37b07769640f0e81bd2ce91845990ef7/share/doc/html/src/Data.Semigroup.Traversable.Class.html/Data.Semigroup.Traversable.Class.html#Bitraversable1"><span class="hs-identifier hs-type">Bitraversable1</span></a></span><span> </span><span class="annot"><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_Intersection"><span class="hs-identifier hs-type">Point_x_HalfSpace_Intersection</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-98"></span><span>  </span><span id="local-6989586621679371856"><span class="annot"><span class="annottext">bitraverse1 :: forall (f :: * -&gt; *) a b c d.
+Apply f =&gt;
+(a -&gt; f b)
+-&gt; (c -&gt; f d)
+-&gt; Point_x_HalfSpace_Intersection a c
+-&gt; f (Point_x_HalfSpace_Intersection b d)
+</span><a href="#local-6989586621679371856"><span class="hs-identifier hs-var hs-var hs-var">bitraverse1</span></a></span></span><span> </span><span id="local-6989586621679371858"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679371858"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679371859"><span class="annot"><span class="annottext">c -&gt; f d
+</span><a href="#local-6989586621679371859"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-99"></span><span>    </span><span class="annot"><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_OnBoundary"><span class="hs-identifier hs-type">Point_x_HalfSpace_OnBoundary</span></a></span><span> </span><span id="local-6989586621679371860"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679371860"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">b -&gt; Point_x_HalfSpace_Intersection b d
+forall boundaryPoint interiorPoint.
+boundaryPoint
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+</span><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_OnBoundary"><span class="hs-identifier hs-var">Point_x_HalfSpace_OnBoundary</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; Point_x_HalfSpace_Intersection b d)
+-&gt; f b -&gt; f (Point_x_HalfSpace_Intersection b d)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679371858"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679371860"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-100"></span><span>    </span><span class="annot"><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_Interior"><span class="hs-identifier hs-type">Point_x_HalfSpace_Interior</span></a></span><span> </span><span id="local-6989586621679371861"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679371861"><span class="hs-identifier hs-var">p</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">d -&gt; Point_x_HalfSpace_Intersection b d
+forall boundaryPoint interiorPoint.
+interiorPoint
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+</span><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_Interior"><span class="hs-identifier hs-var">Point_x_HalfSpace_Interior</span></a></span><span>   </span><span class="annot"><span class="annottext">(d -&gt; Point_x_HalfSpace_Intersection b d)
+-&gt; f d -&gt; f (Point_x_HalfSpace_Intersection b d)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">c -&gt; f d
+</span><a href="#local-6989586621679371859"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679371861"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679371282"><span id="local-6989586621679371283"><span id="local-6989586621679371284"><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Class.html#HyperPlane_"><span class="hs-identifier hs-type">HyperPlane_</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371282"><span class="hs-identifier hs-type">boudingHyperPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371283"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371284"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679371284"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679371284"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-105"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Has_</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Additive_</span></span><span> </span><span class="annot"><a href="#local-6989586621679371283"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371284"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-106"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#IsIntersectableWith"><span class="hs-identifier hs-type">IsIntersectableWith</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><a href="#local-6989586621679371283"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371284"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpaceF"><span class="hs-identifier hs-type">HalfSpaceF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679371282"><span class="hs-identifier hs-type">boudingHyperPlane</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-107"></span><span>  </span><span id="local-6989586621679371879"><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679371879"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679371880"><span class="annot"><span class="annottext">intersect :: Point d r
 -&gt; HalfSpaceF boudingHyperPlane
 -&gt; Intersection (Point d r) (HalfSpaceF boudingHyperPlane)
-</span><a href="#local-6989586621679368034"><span class="hs-operator hs-var hs-var hs-var">`intersect`</span></a></span></span><span> </span><span id="local-6989586621679368036"><span class="annot"><span class="annottext">HalfSpaceF boudingHyperPlane
-</span><a href="#local-6989586621679368036"><span class="hs-identifier hs-var">h</span></a></span></span><span>
-</span><span id="line-73"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Point d r
-</span><a href="#local-6989586621679368033"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; HalfSpaceF boudingHyperPlane -&gt; Bool
-forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
-</span><a href="HGeometry.Intersection.html#intersects"><span class="hs-operator hs-var">`intersects`</span></a></span><span> </span><span class="annot"><span class="annottext">HalfSpaceF boudingHyperPlane
-</span><a href="#local-6989586621679368036"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; Maybe (Point d r)
-forall a. a -&gt; Maybe a
-</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Point d r
-</span><a href="#local-6989586621679368033"><span class="hs-identifier hs-var">q</span></a></span><span>
-</span><span id="line-74"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><span class="hs-identifier hs-var">otherwise</span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (Point d r)
+</span><a href="#local-6989586621679371880"><span class="hs-operator hs-var hs-var hs-var">`intersect`</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.HalfSpace.html#HalfSpace"><span class="hs-identifier hs-type">HalfSpace</span></a></span><span> </span><span id="local-6989586621679371882"><span class="annot"><span class="annottext">Sign
+</span><a href="#local-6989586621679371882"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span id="local-6989586621679371883"><span class="annot"><span class="annottext">boudingHyperPlane
+</span><a href="#local-6989586621679371883"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Sign
+</span><a href="#local-6989586621679371882"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-108"></span><span>    </span><span class="annot"><span class="annottext">Sign
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sign.html/HGeometry.Sign.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679371879"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; boudingHyperPlane -&gt; Ordering
+forall point.
+(Point_ point d r, Ord r, Num r) =&gt;
+point -&gt; boudingHyperPlane -&gt; Ordering
+forall hyperPlane (d :: Nat) r point.
+(HyperPlane_ hyperPlane d r, Point_ point d r, Ord r, Num r) =&gt;
+point -&gt; hyperPlane -&gt; Ordering
+</span><a href="HGeometry.HyperPlane.Class.html#onSideTest"><span class="hs-operator hs-var">`onSideTest`</span></a></span><span> </span><span class="annot"><span class="annottext">boudingHyperPlane
+</span><a href="#local-6989586621679371883"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-109"></span><span>                  </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Point_x_HalfSpace_Intersection (Point d r) (Point d r))
 Intersection (Point d r) (HalfSpaceF boudingHyperPlane)
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
-</span><span id="line-75"></span><span>
-</span><span id="line-76"></span><span class="hs-comment">-- type IntersectionOf (LinePV d r) (HalfSpaceF boudingHyperPlane) = Maybe (Point d r)</span><span>
-</span><span id="line-77"></span><span>
-</span><span id="line-78"></span><span>
-</span><span id="line-79"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-80"></span></pre></body></html>
+</span><span id="line-110"></span><span>                  </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point_x_HalfSpace_Intersection (Point d r) (Point d r)
+-&gt; Maybe (Point_x_HalfSpace_Intersection (Point d r) (Point d r))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Point_x_HalfSpace_Intersection (Point d r) (Point d r)
+ -&gt; Maybe (Point_x_HalfSpace_Intersection (Point d r) (Point d r)))
+-&gt; Point_x_HalfSpace_Intersection (Point d r) (Point d r)
+-&gt; Maybe (Point_x_HalfSpace_Intersection (Point d r) (Point d r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; Point_x_HalfSpace_Intersection (Point d r) (Point d r)
+forall boundaryPoint interiorPoint.
+boundaryPoint
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+</span><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_OnBoundary"><span class="hs-identifier hs-var">Point_x_HalfSpace_OnBoundary</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679371879"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><span id="line-111"></span><span>                  </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point_x_HalfSpace_Intersection (Point d r) (Point d r)
+-&gt; Maybe (Point_x_HalfSpace_Intersection (Point d r) (Point d r))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Point_x_HalfSpace_Intersection (Point d r) (Point d r)
+ -&gt; Maybe (Point_x_HalfSpace_Intersection (Point d r) (Point d r)))
+-&gt; Point_x_HalfSpace_Intersection (Point d r) (Point d r)
+-&gt; Maybe (Point_x_HalfSpace_Intersection (Point d r) (Point d r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; Point_x_HalfSpace_Intersection (Point d r) (Point d r)
+forall boundaryPoint interiorPoint.
+interiorPoint
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+</span><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_Interior"><span class="hs-identifier hs-var">Point_x_HalfSpace_Interior</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679371879"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><span id="line-112"></span><span>    </span><span class="annot"><span class="annottext">Sign
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sign.html/HGeometry.Sign.html#Negative"><span class="hs-identifier hs-var">Negative</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679371879"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; boudingHyperPlane -&gt; Ordering
+forall point.
+(Point_ point d r, Ord r, Num r) =&gt;
+point -&gt; boudingHyperPlane -&gt; Ordering
+forall hyperPlane (d :: Nat) r point.
+(HyperPlane_ hyperPlane d r, Point_ point d r, Ord r, Num r) =&gt;
+point -&gt; hyperPlane -&gt; Ordering
+</span><a href="HGeometry.HyperPlane.Class.html#onSideTest"><span class="hs-operator hs-var">`onSideTest`</span></a></span><span> </span><span class="annot"><span class="annottext">boudingHyperPlane
+</span><a href="#local-6989586621679371883"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-113"></span><span>                  </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point_x_HalfSpace_Intersection (Point d r) (Point d r)
+-&gt; Maybe (Point_x_HalfSpace_Intersection (Point d r) (Point d r))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Point_x_HalfSpace_Intersection (Point d r) (Point d r)
+ -&gt; Maybe (Point_x_HalfSpace_Intersection (Point d r) (Point d r)))
+-&gt; Point_x_HalfSpace_Intersection (Point d r) (Point d r)
+-&gt; Maybe (Point_x_HalfSpace_Intersection (Point d r) (Point d r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; Point_x_HalfSpace_Intersection (Point d r) (Point d r)
+forall boundaryPoint interiorPoint.
+interiorPoint
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+</span><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_Interior"><span class="hs-identifier hs-var">Point_x_HalfSpace_Interior</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679371879"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><span id="line-114"></span><span>                  </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point_x_HalfSpace_Intersection (Point d r) (Point d r)
+-&gt; Maybe (Point_x_HalfSpace_Intersection (Point d r) (Point d r))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Point_x_HalfSpace_Intersection (Point d r) (Point d r)
+ -&gt; Maybe (Point_x_HalfSpace_Intersection (Point d r) (Point d r)))
+-&gt; Point_x_HalfSpace_Intersection (Point d r) (Point d r)
+-&gt; Maybe (Point_x_HalfSpace_Intersection (Point d r) (Point d r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; Point_x_HalfSpace_Intersection (Point d r) (Point d r)
+forall boundaryPoint interiorPoint.
+boundaryPoint
+-&gt; Point_x_HalfSpace_Intersection boundaryPoint interiorPoint
+</span><a href="HGeometry.HalfSpace.html#Point_x_HalfSpace_OnBoundary"><span class="hs-identifier hs-var">Point_x_HalfSpace_OnBoundary</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679371879"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><span id="line-115"></span><span>                  </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Point_x_HalfSpace_Intersection (Point d r) (Point d r))
+Intersection (Point d r) (HalfSpaceF boudingHyperPlane)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-118"></span></pre></body></html>
