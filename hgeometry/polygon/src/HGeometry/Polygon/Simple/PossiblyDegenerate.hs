@@ -15,16 +15,7 @@ module HGeometry.Polygon.Simple.PossiblyDegenerate
   ) where
 
 import           Control.Lens
-import           Data.Bifunctor
-import           Data.Foldable (toList, for_)
-import           Data.Foldable1
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Traversable
-import           Data.Vector.NonEmpty (NonEmptyVector)
-import           HGeometry.Cyclic
 import           HGeometry.Ext
-import           HGeometry.HalfLine
 import           HGeometry.HalfSpace
 import           HGeometry.Intersection
 import           HGeometry.LineSegment

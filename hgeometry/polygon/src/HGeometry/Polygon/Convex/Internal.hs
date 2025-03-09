@@ -59,7 +59,6 @@ import qualified HGeometry.Triangle as Triangle
 import           HGeometry.Vector
 import           HGeometry.Vector.NonEmpty.Util ()
 
-import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | Convex polygons
