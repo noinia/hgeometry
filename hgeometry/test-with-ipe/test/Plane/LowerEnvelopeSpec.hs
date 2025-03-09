@@ -7,32 +7,22 @@ module Plane.LowerEnvelopeSpec
   ) where
 
 import           Control.Lens
-import           Data.Coerce
 import           Data.Foldable
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.NonEmpty as NEMap
-import           Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 import           Golden
 import           HGeometry.Box
-import           HGeometry.Duality
 import           HGeometry.Ext
-import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Line
-import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope
 import qualified HGeometry.Plane.LowerEnvelope.Connected.Randomized as Randomized
-import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
-import           HGeometry.Polygon.Simple
 import           HGeometry.Sequence.Alternating (separators)
-import           HGeometry.Vector
 import           HGeometry.VoronoiDiagram
 import qualified HGeometry.VoronoiDiagram as VD
 import           Hiraffe.Graph.Class
