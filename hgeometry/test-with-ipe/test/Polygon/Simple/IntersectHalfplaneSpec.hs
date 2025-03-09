@@ -36,6 +36,7 @@ import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Convex.Internal
 import           HGeometry.Polygon.Instances ()
 import           HGeometry.Polygon.Simple
+import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Properties
 import           HGeometry.Triangle
 import qualified HGeometry.Triangle as Triangle
@@ -53,71 +54,6 @@ import           Data.Functor.Classes
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
-
-
---------------------------------------------------------------------------------
--- to ipe
-
---------------------------------------------------------------------------------
-
--- type HalfPlane line = HalfSpaceF line
-
---------------------------------------------------------------------------------
-
-
-
---------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
--- itest :: NonEmpty ((Int, Vector 2 Int), (Char, Vector 2 Char))
--- itest = runIdentity $ withCyclicNeighbours (Indexed $ \i x -> pure (i,x)) (NonEmpty.fromList "abcde")
-
-
--- test4 = runIdentity $ (withCyclicNeighbours.withIndex) (Indexed $ \i x -> pure (i,x)) (NonEmpty.fromList "abcde")
-
--- itest = toNonEmptyOf (withCyclicSuccessor.withIndex) (NonEmpty.fromList "abcde")
-
-
---------------------------------------------------------------------------------
-
--- outerBoundaryEdges :: IndexedFold1 (VertexIx polygon,VertexIx polygon) polygon
---                                      (Vertex polygon, Vertex polygon)
-
-
--- outerBoundaryWithNeighbours :: (HasOuterBoundary polygon, VertexIx polygon ~ Int) => IndexedFold1 (VertexIx polygon, (VertexIx polygon, VertexIx polygon)) polygon (Vertex polygon, (Vertex polygon, Vertex polygon))
-
-
-
-
-
-
-
-
-
-
---------------------------------------------------------------------------------
-
-
---   LinePV u (v .-. u) `intersect` line of
-
-
---   let (u,v) = bimap (^.asPoint) (^.asPoint) e
---                            in
-
--- -- TODO:: Appropriately handle degeneracies
-
-
--- flatten :: NonEmpty (NonEmpty (a, b)) -> NonEmpty (b, NonEmpty a)
--- flatten = fmap (\((x,b) :| xs) -> (b, x :| map fst xs))
 
 
 -- I would have liked to give the following instance for simple polygons,
@@ -141,61 +77,6 @@ instance ( HasIntersectionWith (HalfSpaceF line) (SimplePolygonF f vertex)
   (halfPlane :+ _) `intersects` (poly :+ _) = halfPlane `intersects` poly
 -}
 
-
---------------------------------------------------------------------------------
--- * Halfspace x Rectangle Intersection
-
-type instance Intersection (HalfSpaceF line) (Rectangle corner) =
-  Maybe (PossiblyDegenerateSimplePolygon (CanonicalPoint corner)
-                                         (ConvexPolygon (CanonicalPoint corner))
-        )
-
--- this type is not entirely right; as we need to constrain the dimension to 2
-
-instance ( Point_ corner 2 r, Num r, Ord r
-         ) => HasIntersectionWith (HalfSpaceF (LinePV 2 r)) (Rectangle corner) where
-  halfPlane `intersects` rect' = any (`intersects` halfPlane) ((^.asPoint) <$> Box.corners rect')
-
-instance ( Point_ corner 2 r, Fractional r, Ord r
-         , Show r
-         ) => IsIntersectableWith (HalfSpaceF (LinePV 2 r)) (Rectangle corner) where
-  halfPlane `intersect` rect' = fmap (fmap flatten')
-                             <$> halfPlane `intersect` (toConvexPolygon rect')
-    where
-      flatten' = \case
-        Original p -> p
-        Extra p    -> p
-
-      toConvexPolygon :: Rectangle corner -> ConvexPolygon (Point 2 r)
-      toConvexPolygon = uncheckedFromCCWPoints . fmap (^.asPoint) . Box.corners
-
---------------------------------------------------------------------------------
--- * Halfspace x Triangle Intersection
-
-type instance Intersection (HalfSpaceF line) (Triangle corner) =
-  Maybe (PossiblyDegenerateSimplePolygon (CanonicalPoint corner)
-                                         (ConvexPolygon (CanonicalPoint corner))
-        )
--- this type is not entirely right; as we need to constrain the dimension to 2
-
-instance ( Point_ corner 2 r, Num r, Ord r
-         ) => HasIntersectionWith (HalfSpaceF (LinePV 2 r)) (Triangle corner) where
-  halfPlane `intersects` tri = anyOf (Triangle.corners.traverse1.asPoint)
-                                     (`intersects` halfPlane) tri
-
-instance ( Point_ corner 2 r, Fractional r, Ord r
-         , Show r
-         ) => IsIntersectableWith (HalfSpaceF (LinePV 2 r)) (Triangle corner) where
-  halfPlane `intersect` tri = fmap (fmap flatten')
-                           <$> halfPlane `intersect` (toConvexPolygon tri)
-    where
-      flatten' = \case
-        Original p -> p
-        Extra p    -> p
-
-      toConvexPolygon :: Triangle corner -> ConvexPolygon (Point 2 r)
-      toConvexPolygon = uncheckedFromCCWPoints . fmap (^.asPoint) . view (Triangle.corners)
-                      . toCounterClockwiseTriangle
 
 --------------------------------------------------------------------------------
 
