@@ -41,8 +41,6 @@ import           HGeometry.Number.Radical
 import           HGeometry.Point
 import           HGeometry.PolyLine
 import           HGeometry.Polygon
-import           HGeometry.Polygon.Convex
-import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.WithHoles
 import           HGeometry.Properties
 import           Ipe.Attributes

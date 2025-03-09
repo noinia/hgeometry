@@ -6,6 +6,8 @@ module HGeometry.LineSegment.Intersection
   , HalfLineLineSegmentIntersection(..)
   -- , spansIntersect
   , compareColinearInterval
+
+  , ClosedSegmentHalfSpaceIntersection(..)
   ) where
 
 import Control.Lens
@@ -13,12 +15,14 @@ import GHC.Generics (Generic)
 import HGeometry.Box.Intersection ()
 import HGeometry.Ext
 import HGeometry.HalfLine
+import HGeometry.HalfSpace
 import HGeometry.HyperPlane.Class
 import HGeometry.Intersection
 import HGeometry.Interval
 import HGeometry.Line
 import HGeometry.LineSegment.Internal
 import HGeometry.Point
+import HGeometry.Point.Either
 import HGeometry.Properties (NumType, Dimension)
 
 --------------------------------------------------------------------------------
@@ -445,3 +449,64 @@ instance ( HasSquaredEuclideanDistance point
   pointClosestToWithDistance q = \case
     HalfLine_x_LineSegment_Point p         -> pointClosestToWithDistance q p
     HalfLine_x_LineSegment_LineSegment seg -> pointClosestToWithDistance q seg
+
+
+--------------------------------------------------------------------------------
+-- * Intersection of HalfSpaces and Line segments
+
+instance ( Point_ point d r, Ord r, Num r
+         , HyperPlane_ plane d r
+         ) => HasIntersectionWith (ClosedLineSegment point) (HalfSpaceF plane) where
+  seg `intersects` halfSpace = (seg^.start.asPoint) `intersects` halfSpace
+                            || (seg^.end.asPoint)   `intersects` halfSpace
+
+
+type instance Intersection (ClosedLineSegment point) (HalfSpaceF plane) =
+  Maybe (ClosedSegmentHalfSpaceIntersection (CanonicalPoint point)
+                                            point
+        )
+
+
+-- | Models the intersection of a closed linesegment and halfspace
+-- if the segment intersects the bounding hyperplane, the intersection point
+-- is of type extra.
+data ClosedSegmentHalfSpaceIntersection extra point =
+    ClosedLineSegment_x_HalfSpace_Point           point
+  | ClosedLineSegment_x_HalfSpace_SubSegment      (ClosedLineSegment (OriginalOrExtra point extra))
+  -- ^ the subsegment is always oriented from the intersection point towards the original point
+  -- note that this may reverse the original input segment.
+  | ClosedLineSegment_x_HalfSpace_CompleteSegment (ClosedLineSegment point)
+  deriving (Show,Eq)
+
+
+instance ( Point_ point 2 r, Ord r, Fractional r
+         , HyperPlane_ plane 2 r
+         , IsIntersectableWith (LinePV 2 r) plane
+         , Intersection (LinePV 2 r) plane ~ Maybe (LineLineIntersectionG r line')
+         ) => IsIntersectableWith (ClosedLineSegment point) (HalfSpaceF plane) where
+  seg `intersect` halfSpace = case (seg^.start.asPoint) `intersect` halfSpace of
+      Nothing -> case mxEnd of
+        Nothing   -> Nothing
+        Just xEnd -> Just $ case xEnd of
+          Point_x_HalfSpace_OnBoundary _ -> ClosedLineSegment_x_HalfSpace_Point (seg^.end)
+          Point_x_HalfSpace_Interior   t -> subSegment (seg^.end) t (seg^.start.asPoint)
+
+      Just xStart -> Just $ case xStart of
+        Point_x_HalfSpace_OnBoundary _ -> case mxEnd of
+          Nothing  -> ClosedLineSegment_x_HalfSpace_Point (seg^.start)
+          Just _   -> completeSeg
+        Point_x_HalfSpace_Interior s   -> case mxEnd of
+          Nothing  -> subSegment (seg^.start) s (seg^.end.asPoint)
+          Just _   -> completeSeg
+    where
+      completeSeg = ClosedLineSegment_x_HalfSpace_CompleteSegment seg
+      mxEnd = (seg^.end.asPoint)   `intersect` halfSpace
+
+      -- Compute the subsegment ; we are guarnteed that inP is inside and outP is outside
+      -- the haflspace
+      subSegment inP' inP outP = ClosedLineSegment_x_HalfSpace_SubSegment
+                               . ClosedLineSegment (Original inP')
+                               $ case LinePV inP (outP .-. inP)
+                                       `intersect` (halfSpace^.boundingHyperPlane) of
+        Just (Line_x_Line_Point p) -> Extra p
+        _                          -> error "line segment x halfspace intersection: absurd"

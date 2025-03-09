@@ -22,29 +22,38 @@ module HGeometry.Polygon.Convex.Internal
   , inConvex
   ) where
 
-import Control.DeepSeq (NFData)
-import Control.Lens hiding (holes)
-import Data.Foldable1
-import Data.Kind (Type)
-import Data.Vector.NonEmpty (NonEmptyVector)
-import HGeometry.Boundary
-import HGeometry.Box
-import HGeometry.Cyclic
-import HGeometry.Foldable.Util
-import HGeometry.HalfSpace
-import HGeometry.HyperPlane.Class
-import HGeometry.Intersection
-import HGeometry.LineSegment
-import HGeometry.Point
-import HGeometry.Polygon.Class
-import HGeometry.Polygon.Convex.Class
-import HGeometry.Polygon.Simple
-import HGeometry.Polygon.Simple.Implementation
-import HGeometry.Properties
-import HGeometry.Transformation
-import HGeometry.Triangle
-import HGeometry.Vector
-import HGeometry.Vector.NonEmpty.Util ()
+import           Control.DeepSeq (NFData)
+import           Control.Lens hiding (holes)
+import           Data.Bifunctor
+import           Data.Foldable1
+import           Data.Functor.Contravariant (phantom)
+import           Data.Kind (Type)
+import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (mapMaybe)
+import           Data.Vector.NonEmpty (NonEmptyVector)
+import           HGeometry.Boundary
+import           HGeometry.Box
+import           HGeometry.Cyclic
+import           HGeometry.Ext
+import           HGeometry.Foldable.Util
+import           HGeometry.HalfSpace
+import           HGeometry.HyperPlane.Class
+import           HGeometry.Intersection
+import           HGeometry.Line
+import           HGeometry.LineSegment
+import           HGeometry.Point
+import           HGeometry.Point.Either
+import           HGeometry.Polygon.Class
+import           HGeometry.Polygon.Convex.Class
+import           HGeometry.Polygon.Simple
+import           HGeometry.Polygon.Simple.Implementation
+import           HGeometry.Polygon.Simple.PossiblyDegenerate
+import           HGeometry.Properties
+import           HGeometry.Transformation
+import           HGeometry.Triangle
+import           HGeometry.Vector
+import           HGeometry.Vector.NonEmpty.Util ()
 
 --------------------------------------------------------------------------------
 
@@ -302,3 +311,180 @@ inConvex (view asPoint -> q) poly
 instance ConvexPolygon_ (ConvexPolygonF f point) point r
          => HasInPolygon (ConvexPolygonF f point) point r where
   inPolygon = inConvex
+
+--------------------------------------------------------------------------------
+
+-- | A HalfPlane and a Convex polygon intersect in a single component, which is a
+-- possiblyDegenerate convex polygon.
+type instance Intersection (HalfSpaceF line) (ConvexPolygonF f point) =
+  Maybe (HalfPlaneConvexPolygonIntersection f (NumType point) point)
+
+-- | A single Component of a HalfPlane x ConvexPolygon intersection.
+type HalfPlaneConvexPolygonIntersection f r vertex =
+  PossiblyDegenerateSimplePolygon vertex (ConvexPolygonF f (OriginalOrExtra vertex (Point 2 r)))
+
+-- | If we drag along extra information in the halfplane polygon intersection we lose it
+type instance Intersection (HalfSpaceF line :+ extra) (ConvexPolygonF f point :+ extra') =
+  Intersection (HalfSpaceF line) (ConvexPolygonF f point)
+
+
+--------------------------------------------------------------------------------
+-- * Intersection between Halfspaces and possibly degenerate convex polygons
+
+instance ( Point_ vertex 2 r, Num r, Ord r, VertexContainer f vertex
+         , HyperPlane_ line 2 r
+         ) => HalfSpaceF line `HasIntersectionWith`
+              PossiblyDegenerateSimplePolygon vertex (ConvexPolygonF f vertex) where
+  halfSpace `intersects` degenPoly = case degenPoly of
+    DegenerateVertex v -> (v^.asPoint) `intersects` halfSpace
+    DegenerateEdge e   -> e `intersects` halfSpace
+    ActualPolygon poly -> halfSpace `intersects` poly
+
+--------------------------------------------------------------------------------
+
+instance ( IsIntersectableWith (HalfSpaceF line) (ConvexPolygonF f vertex)
+         , HasIntersectionWith (HalfSpaceF line :+ extra) (ConvexPolygonF f vertex :+ extra')
+         ) => IsIntersectableWith (HalfSpaceF line :+ extra)
+                                  (ConvexPolygonF f vertex :+ extra') where
+  (halfPlane :+ _) `intersect` (poly :+ _) = halfPlane `intersect` poly
+
+instance ( Point_ vertex 2 r, Fractional r, Ord r, VertexContainer f vertex
+         , VertexContainer f (OriginalOrExtra vertex (Point 2 r))
+         , HasFromFoldable1 f
+         ) => IsIntersectableWith (HalfSpaceF (LinePV 2 r)) (ConvexPolygonF f vertex) where
+  halfPlane `intersect` poly = case comps of
+      []  -> Nothing
+      [c] -> Just c
+      _   -> error "halfplane x convexPolygon intersection: absurd."
+    where
+      comps = collectComponents (halfPlane^.boundingHyperPlane)
+            . groupWith (\v -> (v^.asPoint) `intersects` halfPlane) . Cyclic
+            $ toNonEmptyOf vertices poly
+  -- halfPlane `intersect` poly = case halfPlane `intersect` (toSimplePolygon poly) of
+  --   [comp] -> Just $ ConvexPolygon <$> comp
+  --             -- note that the intersection between a halfspace and a convex polygon
+  --             -- is indeed guaranteed to be convex. Hence the 'ConvexPolygon' call here
+  --             -- is safe.
+  --   _      -> Nothing
+
+
+-- | Collect the connected components
+collectComponents   :: forall cyclic f vertex r. ( Point_ vertex 2 r, Ord r, Fractional r
+                       , VertexContainer f (OriginalOrExtra vertex (Point 2 r))
+                       , Traversable1 cyclic, HasFromFoldable1 f
+                       )
+                    => LinePV 2 r -- ^ the bounding line of the halfplane
+                    -> cyclic (Bool, NonEmpty vertex)
+                    -> [HalfPlaneConvexPolygonIntersection f r vertex]
+collectComponents l = foldMapOf (asFold1 withCyclicNeighbours) f
+  where
+    -- We go through the components with their neighbours. Each component
+    -- is a non-empty list of vertices in CCW order along the polygon.
+    --
+    -- For each component [v1,..,vn] we may need to add two vertices; the intersection
+    -- point of l with the edge between the last vertex um of the previous component and
+    -- v1, and the intersection point of l with the edge between vn and the first vertex
+    -- w1 of the next component
+    f :: ((Bool, NonEmpty vertex), V2 (Bool, NonEmpty vertex))
+      -> [HalfPlaneConvexPolygonIntersection f r vertex]
+    f ((b, current@(v1 :| rest)), V2 (_, NonEmpty.last -> um) (_, w1 :| _))
+      | not b     = []
+      | otherwise = let vn     = NonEmpty.last current
+                        extras = mapMaybe (intersectionPoint l) [(vn,w1), (um,v1)]
+                    in pure $ case (NonEmpty.nonEmpty extras,NonEmpty.nonEmpty rest) of
+                       (Nothing, Nothing)        -> DegenerateVertex v1
+                       (Nothing, Just (p :| [])) -> DegenerateEdge
+                                                  $ ClosedLineSegment p v1
+                       (extras',  _)             -> ActualPolygon poly
+                         where
+                           poly = uncheckedFromCCWPoints
+                                $ (fmap Extra <$> extras') <<> (Original <$> current)
+
+-- | Helper to combine at most two a's into one
+(<<>)     :: Semigroup a => Maybe a -> a -> a
+xs <<> ys = case xs of
+              Nothing  -> ys
+              Just xs' -> xs' <> ys
+
+-- | Compute the intersection between a line and the "edge" given by the two vertices.
+-- We treat the edge as open; i.e. we only report the intersection if it is interior
+intersectionPoint            :: (Point_ vertex 2 r, Ord r, Fractional r)
+                             => LinePV 2 r -> (vertex, vertex) -> Maybe (Point 2 r)
+intersectionPoint line (u,v) = case line `intersect` OpenLineSegment u v of
+                                 Just (Line_x_LineSegment_Point p) -> Just p
+                                 _                                 -> Nothing
+
+-- | Convert a traversal into a fold.
+asFold1   :: Traversal1 s t a b -> Fold1 s a
+asFold1 t = \aFa -> phantom . t (phantom . aFa)
+
+--------------------------------------------------------------------------------
+-- * Intersecting a Halfspace and a Possibly Degenerate Convex Polygon
+
+-- | Intersecting a halfplane witha possibly degenerate convex polygon
+-- gives us a possibly degenerate polygon again.
+--
+type instance Intersection (HalfSpaceF line)
+                           (PossiblyDegenerateSimplePolygon vertex (ConvexPolygonF f vertex))
+  = Maybe (PossiblyDegenerateSimplePolygon
+              (OriginalOrExtra vertex (CanonicalPoint vertex))
+              (ConvexPolygonF f (OriginalOrExtra vertex (CanonicalPoint vertex)))
+          )
+   -- we lose some information here; if we are a degenreate point we are guaranteed
+   -- to be an original; the type also allows it to be an Extra.
+
+instance ( Point_ vertex 2 r, Fractional r, Ord r, VertexContainer f vertex
+         , VertexContainer f (OriginalOrExtra vertex (Point 2 r))
+         , HyperPlane_ line 2 r
+         , IsIntersectableWith (HalfSpaceF line) (ConvexPolygonF f vertex)
+         -- this one is satisfied for e.g. line ~ LinePV
+
+         , IsIntersectableWith (LinePV 2 r) line
+         , Intersection (LinePV 2 r) line ~ Maybe (LineLineIntersectionG r line')
+         ) => HalfSpaceF line `IsIntersectableWith`
+              PossiblyDegenerateSimplePolygon vertex (ConvexPolygonF f vertex) where
+  halfSpace `intersect` degenPoly = case degenPoly of
+    DegenerateVertex v -> DegenerateVertex (Original v) <$ ((v^.asPoint) `intersect` halfSpace)
+    DegenerateEdge e   -> e `intersect` halfSpace <&> \case
+      ClosedLineSegment_x_HalfSpace_Point v           -> DegenerateVertex (Original v)
+      ClosedLineSegment_x_HalfSpace_SubSegment s      -> DegenerateEdge s
+      ClosedLineSegment_x_HalfSpace_CompleteSegment _ -> DegenerateEdge (Original <$> e)
+
+    ActualPolygon poly -> first Original <$> halfSpace `intersect` poly
+
+--------------------------------------------------------------------------------
+-- * Intersection of Triangle and ConvexPolygon
+
+type instance Intersection (Triangle corner) (ConvexPolygonF f vertex) =
+  Maybe (PossiblyDegenerateSimplePolygon (OriginalOrCanonical vertex)
+                                         (ConvexPolygonF f (OriginalOrCanonical vertex))
+        )
+
+instance ( Point_ point 2 r, Point_ point' 2 r, Num r, Ord r, VertexContainer f point
+         ) => HasIntersectionWith (Triangle point') (ConvexPolygonF f point) where
+  triangle `intersects` poly = allOf (vertices.asPoint) (`intersects` triangle) poly
+
+
+type V vertex r = OriginalOrExtra vertex (Point 2 r)
+
+instance ( Point_ vertex 2 r, Point_ corner 2 r, Fractional r, Ord r, VertexContainer f vertex
+         , VertexContainer f (OriginalOrCanonical vertex)
+         , VertexContainer f (OriginalOrExtra (OriginalOrCanonical vertex) (Point 2 r))
+         , HasFromFoldable1 f
+         ) => IsIntersectableWith (Triangle corner) (ConvexPolygonF f vertex) where
+  triangle `intersect` poly = foldr intersect' (Just $ ActualPolygon $ poly&vertices %~ Original)
+                                               (intersectingHalfPlanes triangle)
+    where
+      intersect'      :: HalfSpaceF (LinePV 2 r)
+                      -> Maybe (PossiblyDegenerateSimplePolygon (V vertex r)
+                                                                (ConvexPolygonF f (V vertex r)))
+                      -> Maybe (PossiblyDegenerateSimplePolygon (V vertex r)
+                                                                (ConvexPolygonF f (V vertex r)))
+      intersect' h mp = do p <- mp
+                           bimap flatten (fmap flatten) <$> h `intersect` p
+
+-- | Flatten two nested originals
+flatten :: OriginalOrExtra (OriginalOrExtra vertex extra) extra -> OriginalOrExtra vertex extra
+flatten = \case
+  Extra e    -> Extra e
+  Original o -> o
