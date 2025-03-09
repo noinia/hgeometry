@@ -43,6 +43,7 @@ import           HGeometry.PolyLine
 import           HGeometry.Polygon
 import           HGeometry.Polygon.WithHoles
 import           HGeometry.Properties
+import           HGeometry.Triangle (Triangle,toCounterClockwiseTriangle)
 import           Ipe.Attributes
 import           Ipe.Color (IpeColor(..))
 import           Ipe.FromIpe
@@ -155,6 +156,10 @@ instance ( IxValue (endPoint (Point 2 r)) ~ Point 2 r
 instance HasDefaultIpeOut (PolyLine (Point 2 r)) where
   type DefaultIpeOut (PolyLine (Point 2 r)) = Path
   defIO = ipePolyLine
+
+instance (Eq r, Num r) => HasDefaultIpeOut (Triangle (Point 2 r)) where
+  type DefaultIpeOut (Triangle (Point 2 r)) = Path
+  defIO = ipeTriangle
 
 instance (Fractional r, Ord r, Show r) => HasDefaultIpeOut (LinePV 2 r) where
   type DefaultIpeOut (LinePV 2 r) = Path
@@ -285,6 +290,7 @@ ipeLineSegment s = (path . pathSegment $ s) :+ mempty
 ipePolyLine   :: IpeOut (PolyLine (Point 2 r)) Path r
 ipePolyLine p = (path . PolyLineSegment $ p) :+ mempty
 
+
 -- | Renders an Ellipse to a Path
 ipeEllipse :: IpeOut (Ellipse r) Path r
 ipeEllipse = \e -> path (EllipseSegment e) :+ mempty
@@ -354,6 +360,11 @@ ipeRectangle r = ipeSimplePolygon' @NonEmptyVector . uncheckedFromCCWPoints . No
                $ [tl,tr,br,bl]
   where
     Corners tl tr br bl = corners r
+
+-- | Renders a polyline to a Path
+ipeTriangle :: (Eq r, Num r) => IpeOut (Triangle (Point 2 r)) Path r
+ipeTriangle = ipeSimplePolygon' @NonEmptyVector . uncheckedFromCCWPoints
+            . toCounterClockwiseTriangle
 
 --------------------------------------------------------------------------------
 -- * Group Converters

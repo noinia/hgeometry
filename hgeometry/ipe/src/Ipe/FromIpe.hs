@@ -323,6 +323,9 @@ instance (Num r, Ord r) => HasDefaultFromIpe (Rectangle (Point 2 r)) where
   type DefaultFromIpe (Rectangle (Point 2 r)) = Path
   defaultFromIpe = _withAttrs _IpePath _asRectangle
 
+instance HasDefaultFromIpe (Triangle (Point 2 r)) where
+  type DefaultFromIpe (Triangle (Point 2 r)) = Path
+  defaultFromIpe = _withAttrs _IpePath _asTriangle
 
 -- | Read all g's from some ipe page(s).
 readAll   :: forall g r. (HasDefaultFromIpe g, r ~ NumType g)
