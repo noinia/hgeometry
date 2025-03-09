@@ -13,7 +13,6 @@ import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Instances ()
-import           HGeometry.Polygon.Simple
 -- import           HGeometry.Polygon.Visibility
 import qualified HGeometry.Polygon.Visibility.Naive as Naive
 import           HGeometry.Vector

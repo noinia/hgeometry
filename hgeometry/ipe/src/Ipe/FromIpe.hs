@@ -36,6 +36,7 @@ module Ipe.FromIpe(
   ) where
 
 import           Control.Lens hiding (Simple)
+import           Data.Foldable1
 import           Data.Kind (Type)
 import qualified Data.Sequence as Seq
 import           Data.Vector.NonEmpty (NonEmptyVector)
@@ -107,12 +108,14 @@ _asPoint = prism' (flip Symbol "mark/disk(sx)") (Just . view symbolPoint)
 _asLineSegment :: Prism' (Path r) (LineSegment AnEndPoint (Point 2 r))
 _asLineSegment = _asPolyLine.PolyLine._PolyLineLineSegment
 
+
 -- | Try to convert a path into a line segment, fails if the path is not a line
 -- segment or a polyline with more than two points.
 --
 --
 _asClosedLineSegment :: Prism' (Path r) (ClosedLineSegment (Point 2 r))
 _asClosedLineSegment = _asPolyLine.PolyLine._PolyLineLineSegment
+
 
 -- | Convert to a polyline. Ignores all non-polyline parts
 --
@@ -127,7 +130,9 @@ _asPolyLine = prism' poly2path path2poly
     -- than ignoring everything that does not fit
 
 -- | Convert to a simple polygon
-_asSimplePolygon :: Prism' (Path r) (SimplePolygon (Point 2 r))
+_asSimplePolygon :: Foldable1 f
+                 => Prism (Path r) (Path r)
+                          (SimplePolygon (Point 2 r)) (SimplePolygonF f (Point 2 r))
 _asSimplePolygon = prism' polygonToPath pathToPolygon
 
 -- | Convert to a convex polygon
@@ -180,7 +185,7 @@ _asRectangle = prism' rectToPath pathToRect
 _asTriangle :: Prism' (Path r) (Triangle (Point 2 r))
 _asTriangle = prism' triToPath path2tri
   where
-    triToPath = polygonToPath . uncheckedFromCCWPoints
+    triToPath = polygonToPath @NonEmptyVector . uncheckedFromCCWPoints
     path2tri p = case p^..pathSegments.traverse._PolygonPath._2 of
                     []   -> Nothing
                     [pg] -> case pg^..vertices of
@@ -223,8 +228,10 @@ _asDisk = _asCircle.from _DiskCircle
 --     embed     = either polygonToPath polygonToPath
 
 
-polygonToPath :: SimplePolygon (Point 2 r) -> Path r
-polygonToPath = Path . fromSingleton . PolygonPath AsIs
+polygonToPath                      :: Foldable1 f
+                                   => SimplePolygonF f (Point 2 r) -> Path r
+polygonToPath (MkSimplePolygon vs) = Path . fromSingleton . PolygonPath AsIs
+                                   . uncheckedFromCCWPoints $ vs
 
 
 -- polygonToPath (MultiPolygon vs hs) = Path . LSeq.fromNonEmpty . fmap PolygonPath
@@ -304,6 +311,10 @@ instance HasDefaultFromIpe (SimplePolygon (Point 2 r)) where
   type DefaultFromIpe (SimplePolygon (Point 2 r)) = Path
   defaultFromIpe = _withAttrs _IpePath _asSimplePolygon
 
+instance (Num r, Ord r) => HasDefaultFromIpe (ConvexPolygon (Point 2 r)) where
+  type DefaultFromIpe (ConvexPolygon (Point 2 r)) = Path
+  defaultFromIpe = _withAttrs _IpePath _asConvexPolygon
+
 -- instance HasDefaultFromIpe (MultiPolygon () r) where
 --   type DefaultFromIpe (MultiPolygon () r) = Path
 --   defaultFromIpe = _withAttrs _IpePath _asMultiPolygon
@@ -312,6 +323,9 @@ instance (Num r, Ord r) => HasDefaultFromIpe (Rectangle (Point 2 r)) where
   type DefaultFromIpe (Rectangle (Point 2 r)) = Path
   defaultFromIpe = _withAttrs _IpePath _asRectangle
 
+instance HasDefaultFromIpe (Triangle (Point 2 r)) where
+  type DefaultFromIpe (Triangle (Point 2 r)) = Path
+  defaultFromIpe = _withAttrs _IpePath _asTriangle
 
 -- | Read all g's from some ipe page(s).
 readAll   :: forall g r. (HasDefaultFromIpe g, r ~ NumType g)

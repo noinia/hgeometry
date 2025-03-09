@@ -14,7 +14,6 @@ import           HGeometry.Ext
 import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
-import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple
 import           Ipe
 import           System.OsPath

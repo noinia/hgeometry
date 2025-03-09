@@ -153,6 +153,7 @@ drawFace gr f pg = [ iO $ ipeSimplePolygon pg' ! attr SLayer "face"
                    , iO $ ipeLabel (tshow (gr^?!faceAt f) :+ c) ! attr SLayer "faceLabel"
                    ]
   where
+    pg' :: SimplePolygon _
     pg' = pg&vertices %~ (^.core.asPoint)
     c = centroid pg'
 

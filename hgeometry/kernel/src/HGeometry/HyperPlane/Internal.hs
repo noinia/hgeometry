@@ -150,3 +150,12 @@ cmpInDirection n p q = p `onSideTest` fromPointAndNormal' q n
     fromPointAndNormal' q' n' = HyperPlane $ cons a0 n'
       where
         a0 = negate $ (q'^.vector) `dot` n'
+
+
+-- TODO: not sure how to do this exactly het
+-- {-# RULES
+--   "cmpInDirection/cmpInDirection2
+--      forall (u :: Vector 2 r)
+--             (p :: point)
+--             (q :: point). cmpInDirection u p q = cmpInDirection2 u p q
+--   #-}

@@ -10,24 +10,18 @@ import           Control.Lens
 import           Control.Monad (forM_)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
 import qualified Data.Vector as Vector
 import           Golden
 import           HGeometry.Box
-import           HGeometry.Duality
 import           HGeometry.Ext
-import           HGeometry.HalfLine
-import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line.General
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope
 import           HGeometry.Point
 import           HGeometry.Sequence.Alternating (Alternating(..))
-import           HGeometry.Vector
 import           HGeometry.VoronoiDiagram
-import           HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
 import           Ipe
 import           Ipe.Color
 import           Plane.LowerEnvelopeSpec () -- imports the ipe instances for Voronoi Diagram
@@ -37,7 +31,6 @@ import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
 -- import Test.Util
 
-import Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5

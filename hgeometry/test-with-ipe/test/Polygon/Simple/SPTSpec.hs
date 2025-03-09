@@ -3,14 +3,12 @@
 module Polygon.Simple.SPTSpec(spec) where
 
 import           Control.Lens
-import           Control.Monad.IO.Class
 import           Data.Bifoldable
 import           Data.Function (on)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (maybeToList, fromJust)
+import           Data.Maybe (fromJust)
 import           Golden
-import           HGeometry.Boundary
 import           HGeometry.Ext
 import           HGeometry.Intersection
 import           HGeometry.LineSegment
@@ -19,12 +17,10 @@ import           HGeometry.PlaneGraph
 import           HGeometry.Point
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Instances ()
-import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Simple.DualTree
 import           HGeometry.Polygon.Simple.Sample
 import           HGeometry.Polygon.Simple.ShortestPath.Tree
 import           HGeometry.Polygon.Triangulation
-import           HGeometry.Properties
 import           HGeometry.Trie
 import           HGeometry.Vector
 import           Ipe

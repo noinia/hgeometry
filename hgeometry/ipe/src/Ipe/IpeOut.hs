@@ -18,12 +18,14 @@ module Ipe.IpeOut where
 
 import           Control.Lens hiding (Simple, holes)
 import           Data.Foldable (toList)
+import           Data.Foldable1 (Foldable1)
 import           Data.Kind
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Sequence as Seq
 import           Data.Text (Text)
 import qualified Data.Text as Text
+import           Data.Vector.NonEmpty (NonEmptyVector)
 import           HGeometry.Ball
 import           HGeometry.BezierSpline
 import           HGeometry.Box
@@ -39,10 +41,9 @@ import           HGeometry.Number.Radical
 import           HGeometry.Point
 import           HGeometry.PolyLine
 import           HGeometry.Polygon
-import           HGeometry.Polygon.Convex
-import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.WithHoles
 import           HGeometry.Properties
+import           HGeometry.Triangle (Triangle,toCounterClockwiseTriangle)
 import           Ipe.Attributes
 import           Ipe.Color (IpeColor(..))
 import           Ipe.FromIpe
@@ -156,6 +157,10 @@ instance HasDefaultIpeOut (PolyLine (Point 2 r)) where
   type DefaultIpeOut (PolyLine (Point 2 r)) = Path
   defIO = ipePolyLine
 
+instance (Eq r, Num r) => HasDefaultIpeOut (Triangle (Point 2 r)) where
+  type DefaultIpeOut (Triangle (Point 2 r)) = Path
+  defIO = ipeTriangle
+
 instance (Fractional r, Ord r, Show r) => HasDefaultIpeOut (LinePV 2 r) where
   type DefaultIpeOut (LinePV 2 r) = Path
   defIO = ipeLine
@@ -214,6 +219,7 @@ instance HasDefaultIpeOut (Group r) where
   type DefaultIpeOut (Group r) = Group
   defIO = (:+ mempty)
 
+
 --------------------------------------------------------------------------------
 -- * Point Converters
 
@@ -236,6 +242,9 @@ defaultBox = let z  = 1000
 -- | Renders a line as a Path. The line is clipped to the 'defaultBox'
 ipeLine :: (Ord r, Fractional r, Show r) => IpeOut (LinePV 2 r) Path r
 ipeLine = ipeLineIn defaultBox
+
+
+
 
 -- | Renders the line in the given box.
 --
@@ -281,6 +290,7 @@ ipeLineSegment s = (path . pathSegment $ s) :+ mempty
 ipePolyLine   :: IpeOut (PolyLine (Point 2 r)) Path r
 ipePolyLine p = (path . PolyLineSegment $ p) :+ mempty
 
+
 -- | Renders an Ellipse to a Path
 ipeEllipse :: IpeOut (Ellipse r) Path r
 ipeEllipse = \e -> path (EllipseSegment e) :+ mempty
@@ -325,16 +335,36 @@ toPolygonPathSegment = PolygonPath AsIs . uncheckedFromCCWPoints
   -- the polygon just using the outerBoundaryFold, but whatever.
 
 -- | Draw a polygon
-ipeSimplePolygon    :: IpeOut (SimplePolygon (Point 2 r)) Path r
-ipeSimplePolygon pg = pg^.re _asSimplePolygon :+ mempty
+ipeSimplePolygon    :: (SimplePolygon_ simplePolygon point r)
+                    => IpeOut simplePolygon Path r
+ipeSimplePolygon pg = path (PolygonPath AsIs pg') :+ mempty
+  where
+    pg' = uncheckedFromCCWPoints $ toNonEmptyOf (vertices.asPoint) pg
+  -- TODO, maybe write a 'toNonEmptyVectorOf' to avoid copying
+
+-- | Draw a polygon
+ipeSimplePolygon'    :: Foldable1 f => IpeOut (SimplePolygonF f (Point 2 r)) Path r
+ipeSimplePolygon' pg = review' _asSimplePolygon pg :+ mempty
+
+-- | A slightly more general version of review that allows the s and t to differ.
+-- (and in some sense it is less general, since I don't care about monad constraints here)
+review'   :: forall s t a b. Prism s t a b -> b -> t
+review' p = review $ reviewing p
+-- alternatively:
+-- review' p = withPrism p (\f _ -> f)
 
 
 -- | Draw a Rectangle
 ipeRectangle   :: Num r => IpeOut (Rectangle (Point 2 r)) Path r
-ipeRectangle r = ipeSimplePolygon . uncheckedFromCCWPoints . NonEmpty.fromList
+ipeRectangle r = ipeSimplePolygon' @NonEmptyVector . uncheckedFromCCWPoints . NonEmpty.fromList
                $ [tl,tr,br,bl]
   where
     Corners tl tr br bl = corners r
+
+-- | Renders a polyline to a Path
+ipeTriangle :: (Eq r, Num r) => IpeOut (Triangle (Point 2 r)) Path r
+ipeTriangle = ipeSimplePolygon' @NonEmptyVector . uncheckedFromCCWPoints
+            . toCounterClockwiseTriangle
 
 --------------------------------------------------------------------------------
 -- * Group Converters

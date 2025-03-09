@@ -2,7 +2,6 @@
 module Polygon.Triangulation.WorldSpec where
 
 import           Control.Lens hiding (elements)
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe
 import           Golden
 import           HGeometry
@@ -12,7 +11,6 @@ import           HGeometry.Number.Real.Rational
 import           HGeometry.PlaneGraph
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Instances (shrinkPolygon)
-import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Triangulation
 import           HGeometry.Properties
 import           Ipe
@@ -21,11 +19,7 @@ import           System.IO.Unsafe
 import           System.OsPath
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
-import           Test.Hspec.WithTempFile
 import           Test.QuickCheck
-
--- import           Test.QuickCheck.Instances ()
-import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5

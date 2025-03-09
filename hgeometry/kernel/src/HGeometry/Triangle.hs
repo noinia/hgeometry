@@ -231,3 +231,16 @@ instance ( Point_ point  3 r
       _                                              -> Nothing
     where
       toLine (HalfLine o v) = LinePV (o^.asPoint) v
+
+-- | Testing for intersections between closed line segments and triangles
+instance (Point_ point 2 r, Point_ vertex 2 r, Num r, Ord r
+         ) => HasIntersectionWith (ClosedLineSegment point) (Triangle vertex) where
+  seg0 `intersects` tri0 =
+         (seg^.start) `intersects` tri || (seg^.end) `intersects` tri
+      || any (seg `intersects`) edges'
+    where
+      tri                  :: Triangle (Point 2 r)
+      tri@(Triangle a b c) = view asPoint <$> tri0
+      seg  :: ClosedLineSegment (Point 2 r)
+      seg  = seg0&allPoints %~ view asPoint
+      edges' = [ClosedLineSegment a b, ClosedLineSegment b c, ClosedLineSegment c a]

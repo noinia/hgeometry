@@ -9,7 +9,6 @@ import           HGeometry.Ext
 import           HGeometry.Number.Real.Rational
 import           HGeometry.PlaneGraph.Connected
 import           HGeometry.Polygon
-import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Triangulation
 import qualified HGeometry.Polygon.Triangulation.MakeMonotone as MM
 import qualified HGeometry.Polygon.Triangulation.TriangulateMonotone as TM

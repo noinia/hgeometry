@@ -421,14 +421,15 @@ library polygon
 
         HGeometry.Polygon.Convex
         HGeometry.Polygon.Convex.Class
+        HGeometry.Polygon.Convex.Internal
 
         HGeometry.Polygon.Simple
         HGeometry.Polygon.Simple.Class
+        HGeometry.Polygon.Simple.PossiblyDegenerate
 
         HGeometry.Polygon.WithHoles
 
     other-modules:
-        HGeometry.Polygon.Convex.Implementation
 
         HGeometry.Polygon.Simple.Type
         HGeometry.Polygon.Simple.Implementation
@@ -846,12 +847,15 @@ test-suite with-ipe-hspec
       Polygon.Simple.InPolygonSpec
       Polygon.Convex.ConvexSpec
       Polygon.Convex.ConvexSpec
+      Polygon.Convex.IntersectTriangleSpec
       Polygon.VisibilitySpec
       VoronoiDiagram.VoronoiSpec
       Plane.LowerEnvelopeSpec
       LineSegmentSpec
+      LineSegment.Intersection.WithHalfSpaceSpec
       HalfLineSpec
       Polygon.Simple.SPTSpec
+      Polygon.Simple.IntersectHalfplaneSpec
       Polygon.Triangulation.TriangulateMonotoneSpec
       Polygon.Triangulation.TriangulateSpec
       Polygon.Triangulation.WorldSpec
