@@ -66,11 +66,10 @@ loadInputs      :: OsPath -> IO ( NonEmpty (Triangle      (Point 2 R) :+ _)
 loadInputs inFp = do
     inFp'      <- getDataFileName ([osp|test-with-ipe/Polygon/Convex/|] <> inFp)
     Right page <- readSinglePageFile inFp'
-    pure (NonEmpty.fromList $ readAll page, NonEmpty.fromList $ readAll page)
-    -- bimap NonEmpty.fromList NonEmpty.fromList
-    -- let (tris :: NonEmpty (Triangle (Point 2 R) :+ _))      =
-    --     (pgs  :: NonEmpty (ConvexPolygon (Point 2 R) :+ _)) = NonEmpty.fromList $ readAll page
-    -- pure (tris, pgs)
+    pure ( NonEmpty.fromList $ readAll page
+         , NonEmpty.fromList $ filter (\(pg :+ _) -> numVertices pg > 3)
+         $ readAll page)
+    -- only report the convex polygons with > 3 vertices
 
 testIpe            :: OsPath -> OsPath -> Spec
 testIpe inFp outFp = describe (show inFp) $ do
@@ -86,7 +85,7 @@ testIpe inFp outFp = describe (show inFp) $ do
                       forMap' triangles $ \triangle ->
                          [ iO' polygon
                          , iO' triangle
-                         , iO $ ipeGroup [ renderComponent comp
+                         , iO $ ipeGroup [ renderComponent $ traceShowWith ("X",) comp
                                          | comp <- maybeToList
                                                    $ (triangle^.core) `intersect` (polygon^.core)
                                          ]

@@ -59,6 +59,7 @@ import qualified HGeometry.Triangle as Triangle
 import           HGeometry.Vector
 import           HGeometry.Vector.NonEmpty.Util ()
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | Convex polygons
@@ -465,13 +466,18 @@ type instance Intersection (Triangle corner) (ConvexPolygonF f vertex) =
         )
 
 instance ( Point_ point 2 r, Point_ point' 2 r, Num r, Ord r, VertexContainer f point
+         , VertexContainer f (Point 2 r)
          ) => HasIntersectionWith (Triangle point') (ConvexPolygonF f point) where
-  triangle `intersects` poly = allOf (vertices.asPoint) (`intersects` triangle) poly
-
+  triangle `intersects` poly = let  poly' :: ConvexPolygonF f (Point 2 r)
+                                    poly' = poly&vertices %~ view asPoint
+                                    tri   = view asPoint <$> triangle
+                               in anyOf vertices                  (`intersects` tri) poly'
+                               || anyOf outerBoundaryEdgeSegments (`intersects` tri) poly'
 
 type V vertex r = OriginalOrExtra vertex (Point 2 r)
 
 instance ( Point_ vertex 2 r, Point_ corner 2 r, Fractional r, Ord r, VertexContainer f vertex
+         , VertexContainer f (Point 2 r)
          , VertexContainer f (OriginalOrCanonical vertex)
          , VertexContainer f (OriginalOrExtra (OriginalOrCanonical vertex) (Point 2 r))
          , HasFromFoldable1 f
@@ -509,7 +515,6 @@ instance ( Point_ corner 2 r, Num r, Ord r
   halfPlane `intersects` rect' = any (`intersects` halfPlane) ((^.asPoint) <$> Box.corners rect')
 
 instance ( Point_ corner 2 r, Fractional r, Ord r
-         , Show r
          ) => IsIntersectableWith (HalfSpaceF (LinePV 2 r)) (Rectangle corner) where
   halfPlane `intersect` rect' = fmap (fmap flatten')
                              <$> halfPlane `intersect` (toConvexPolygon rect')
@@ -536,7 +541,6 @@ instance ( Point_ corner 2 r, Num r, Ord r
                                      (`intersects` halfPlane) tri
 
 instance ( Point_ corner 2 r, Fractional r, Ord r
-         , Show r
          ) => IsIntersectableWith (HalfSpaceF (LinePV 2 r)) (Triangle corner) where
   halfPlane `intersect` tri = fmap (fmap flatten')
                            <$> halfPlane `intersect` (toConvexPolygon tri)
