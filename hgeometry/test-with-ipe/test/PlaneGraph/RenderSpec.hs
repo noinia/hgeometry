@@ -167,7 +167,7 @@ tshow = Text.pack . show
 data SmallWorld
 
 smallGraph :: CPlaneGraph SmallWorld (Point 2 R :+ Int) Text.Text Text.Text
-smallGraph = CPlaneGraph $ AdjRep.fromAdjRep @SmallWorld small
+smallGraph = review _CPlanarGraph $ AdjRep.fromAdjRep @SmallWorld small
   where
     small :: AdjRep.Gr (AdjRep.Vtx (Point 2 R :+ Int) Text.Text) (AdjRep.Face Text.Text)
     small = AdjRep.Gr

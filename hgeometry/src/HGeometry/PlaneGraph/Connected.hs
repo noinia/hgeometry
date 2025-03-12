@@ -12,9 +12,11 @@ module HGeometry.PlaneGraph.Connected
   ( module Hiraffe.Graph.Class
   , module HGeometry.PlaneGraph.Class
   , module Hiraffe.PlanarGraph.Class
-  , CPlaneGraph(..)
+  , CPlaneGraph
   , fromAdjacencyRep
   , fromConnectedSegments
+  -- * Unchecked ways of accessing the underlying PlanarGraph
+  , _CPlanarGraph
   ) where
 
 import HGeometry.PlaneGraph.Class

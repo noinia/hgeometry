@@ -138,7 +138,7 @@ witherGraphTo vs (Graph gr) = Graph $ fmap removeEdges m
 toPlaneGraph             :: (Ord r, Foldable1 f)
                          => proxy s
                          -> GGraph f (Point 2 r) v e -> CPlaneGraph s (Point 2 r) () ()
-toPlaneGraph _ (Graph m) = CPlaneGraph $ (planarGraph theDarts)&vertexData .~ vtxData
+toPlaneGraph _ (Graph m) = review _CPlanarGraph $ (planarGraph theDarts)&vertexData .~ vtxData
   where
     vtxData = Vector.fromNonEmptyN1 (length m) (NEMap.keys m)
 

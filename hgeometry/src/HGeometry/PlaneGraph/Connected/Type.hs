@@ -12,7 +12,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.PlaneGraph.Connected.Type
-  ( CPlaneGraph(..)
+  ( CPlaneGraph
   , _CPlanarGraph
   , fromAdjacencyRep
   , fromConnectedSegments

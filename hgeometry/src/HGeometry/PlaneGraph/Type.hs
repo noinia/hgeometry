@@ -12,12 +12,13 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.PlaneGraph.Type
-  ( PlaneGraph(..)
+  ( PlaneGraph
   -- , fromAdjacencyRep
   -- , fromConnectedSegments
   -- , VertexData(VertexData), location
 
   -- , E(..)
+  , _PlanarGraph
   ) where
 
 import           Control.Lens hiding (holes, holesOf, (.=))
@@ -61,7 +62,9 @@ newtype PlaneGraph s v e f = PlaneGraph (PlanarGraph Primal s v e f)
 type instance NumType   (PlaneGraph s v e f) = NumType v
 type instance Dimension (PlaneGraph s v e f) = 2
 
--- | Iso to access the graph
+-- | Iso to access the underlying PlanarGraph. Use at your own risk.
+--
+--
 _PlanarGraph :: Iso (PlaneGraph s v e f)         (PlaneGraph s v' e' f')
                     (PlanarGraph Primal s v e f) (PlanarGraph Primal s v' e' f')
 _PlanarGraph = coerced
@@ -127,9 +130,10 @@ instance BidirGraph_ (PlaneGraph s v e f) where
   twinOf d = to $ const (PG.twin d)
   getPositiveDart (PlaneGraph g) e = getPositiveDart g e
 
-instance ( Point_ v 2 (NumType v)
-         , Ord (NumType v), Num (NumType v)
-         ) => Graph_ (PlaneGraph s v e f) where
+-- ( Point_ v 2 (NumType v)
+--          , Ord (NumType v), Num (NumType v)
+--          ) =>
+instance Graph_ (PlaneGraph s v e f) where
   neighboursOf u = _PlanarGraph.neighboursOf u
   neighboursOfByEdge u = _PlanarGraph.neighboursOfByEdge u
   incidentEdgesOf u = _PlanarGraph.incidentEdgesOf u
