@@ -55,7 +55,8 @@ import qualified Hiraffe.PlanarGraph.Dart as Dart
 
 -- | An Embedded, *connected*, planar graph
 newtype PlaneGraph s v e f = PlaneGraph (PlanarGraph Primal s v e f)
-      -- deriving stock (Show,Eq,Generic)
+                           deriving stock (Show,Generic)
+                           deriving newtype (Eq)
       -- deriving newtype (ToYAML,FromYAML)
 
 type instance NumType   (PlaneGraph s v e f) = NumType v

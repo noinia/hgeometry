@@ -26,6 +26,7 @@ import           Data.Coerce
 import           Data.Foldable1
 import           Data.Foldable1.WithIndex
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Map as Map
 import qualified Data.Map.NonEmpty as NEMap
 import qualified Data.Vector.NonEmpty as Vector
@@ -42,7 +43,9 @@ import           HGeometry.Vector
 import           Hiraffe.AdjacencyListRep.Map
 import           Hiraffe.Graph.Class
 import           Hiraffe.PlanarGraph.Class
-import           Hiraffe.PlanarGraph.Connected ( CPlanarGraph, World(..)
+import           Hiraffe.PlanarGraph.Connected ( CPlanarGraph
+                                               , cPlanarGraph
+                                               , World(..)
                                                , DartId, VertexId, FaceId
                                                )
 import qualified Hiraffe.PlanarGraph.Connected as PG
@@ -211,24 +214,26 @@ instance ( Point_ v 2 r
 --      No two segments partially overlap.
 --
 -- running time: \(O(n\log n)\)
-fromConnectedSegments      :: ( Foldable1 f, Ord r, Num r
+fromConnectedSegments      :: forall s nonEmpty lineSegment point r.
+                              ( Foldable1 nonEmpty, Ord r, Num r
                               , LineSegment_ lineSegment point
                               , Point_ point 2 r
                               )
-                           => f lineSegment
-                           -> CPlaneGraph s (NonEmpty.NonEmpty point) lineSegment ()
-fromConnectedSegments segs = CPlaneGraph $
-                             (PG.planarGraph theDarts)&PG.vertexData .~ vtxData
+                           => nonEmpty lineSegment
+                           -> CPlaneGraph s (NonEmpty point) lineSegment ()
+fromConnectedSegments segs = CPlaneGraph $ cPlanarGraph theDarts
   where
-    -- to get the darts we simply convert the NEMap (_, NEMap _ (dart, seg)) into
-    -- a NonEmpty (NonEmpty (dart, seg))
-    theDarts = toNonEmpty . snd  <$> verts
-    vtxData  = Vector.fromNonEmpty $ fst <$> verts
-
     -- Collects all edges per vertex
-    verts    = toNonEmpty . ifoldMap1 f $ toNonEmpty segs
+    theDarts :: NonEmpty (NonEmpty point, NonEmpty (Dart.Dart s, lineSegment))
+    theDarts = over _2 toNonEmpty <$> theDarts'
+
+    theDarts' :: NonEmpty (NonEmpty point, NEMap.NEMap _ (Dart.Dart s, lineSegment))
+    theDarts' = toNonEmpty . ifoldMap1 f $ toNonEmpty segs
 
     -- Creates two vertices with one edge each ; combines them into a single Map
+    f       :: Int -> lineSegment
+            -> MonoidalNEMap (Point 2 r)
+                             (VtxData (NonEmpty point) r (Dart.Dart s, lineSegment))
     f i seg = let u = seg^.start
                   v = seg^.end
                   d = Dart.Dart (Dart.Arc i) Dart.Positive
