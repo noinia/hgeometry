@@ -15,6 +15,8 @@ module HGeometry.PlaneGraph.Connected
   , CPlaneGraph
   , fromAdjacencyRep
   , fromConnectedSegments
+  , fromSimplePolygon
+  , fromSimplePolygonWith
   -- * Unchecked ways of accessing the underlying PlanarGraph
   , _CPlanarGraph
   ) where

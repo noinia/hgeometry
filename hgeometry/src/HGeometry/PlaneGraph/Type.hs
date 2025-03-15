@@ -13,6 +13,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.PlaneGraph.Type
   ( PlaneGraph
+  , fromCPlaneGraph, fromCPlaneGraphWith
   -- , fromAdjacencyRep
   -- , fromConnectedSegments
   -- , VertexData(VertexData), location
@@ -35,6 +36,7 @@ import           HGeometry.Foldable.Sort (sortBy )
 import           HGeometry.LineSegment
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.PlaneGraph.Class
+import           HGeometry.PlaneGraph.Connected
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Transformation
@@ -44,10 +46,9 @@ import           Hiraffe.Graph.Class
 import           Hiraffe.PlanarGraph ( PlanarGraph, World(..)
                                      , DartId, VertexId, FaceId
                                      )
-import           Hiraffe.PlanarGraph.Class
 import qualified Hiraffe.PlanarGraph as PG
+import           Hiraffe.PlanarGraph.Class
 import qualified Hiraffe.PlanarGraph.Dart as Dart
-
 
 -- import           Data.YAML
 
@@ -56,7 +57,8 @@ import qualified Hiraffe.PlanarGraph.Dart as Dart
 
 -- | An Embedded, *connected*, planar graph
 newtype PlaneGraph s v e f = PlaneGraph (PlanarGraph Primal s v e f)
-      -- deriving stock (Show,Eq,Generic)
+                           deriving stock (Show,Generic)
+                           deriving newtype (Eq)
       -- deriving newtype (ToYAML,FromYAML)
 
 type instance NumType   (PlaneGraph s v e f) = NumType v
@@ -246,7 +248,8 @@ fromAdjacencyRep proxy = PlaneGraph . PG.fromAdjacencyRep proxy
 
 -- | Helper type to sort vectors cyclically around the origine
 newtype E r = E (Vector 2 r)
-  deriving newtype (Show)
+
+deriving newtype (Show)
 
 instance (Ord r, Num r) => Eq (E r) where
   a == b = a `compare` b == EQ
@@ -254,3 +257,18 @@ instance (Ord r, Num r) => Ord (E r) where
   (E v) `compare` (E u) = ccwCmpAroundWith (Vector2 0 1) (origin :: Point 2 r) (Point v) (Point u)
 
 -}
+
+
+
+-- | Given a connected Plane graph, constructs a PlaneGraph.
+--
+-- \(O(n)\)
+fromCPlaneGraph   :: ( Point_ vertex 2 r, Ord r, Num r
+                     ) => CPlaneGraph s vertex e f -> PlaneGraph s vertex e f
+fromCPlaneGraph c = fromCPlaneGraphWith (outerFaceDart c) c
+
+-- | Given a dart that thas the outer face on its left, and a Connected Plane Graph,
+-- construct a PlaneGraph.
+fromCPlaneGraphWith                  :: Dart.Dart s -> CPlaneGraph s v e f -> PlaneGraph s v e f
+fromCPlaneGraphWith outerFaceDart' c = review _PlanarGraph
+                                     $ PG.fromConnected' (c^._CPlanarGraph) outerFaceDart'

@@ -13,18 +13,20 @@ module HGeometry.PlaneGraph
   , module HGeometry.PlaneGraph.Class
   , module Hiraffe.PlanarGraph.Class
   , module HGeometry.PlaneGraph.Type
-  , CPlaneGraph
-  , fromAdjacencyRep
-  , fromConnectedSegments
+  , module HGeometry.PlaneGraph.Connected
+  -- , CPlaneGraph
+  -- , fromAdjacencyRep
+  -- , fromConnectedSegments
 
-  -- * Unchecked ways of accessing the underlying PlanarGraph
-  -- , _PlanarGraph
-  , _CPlanarGraph
+  -- -- * Unchecked ways of accessing the underlying PlanarGraph
+  -- -- , _PlanarGraph
+  -- , _CPlanarGraph
   ) where
 
 import HGeometry.PlaneGraph.Class
 import HGeometry.PlaneGraph.Connected
 import HGeometry.PlaneGraph.Type
+
 import Hiraffe.Graph.Class
 import Hiraffe.PlanarGraph.Class
 

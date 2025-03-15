@@ -41,7 +41,7 @@ import HGeometry.VoronoiDiagram
 import HGeometry.VoronoiDiagram.ViaLowerEnvelope
 import Hiraffe.AdjacencyListRep.Map
 import Hiraffe.BFS.Pure
-import Hiraffe.PlanarGraph(planarGraph, vertexData)
+import Hiraffe.PlanarGraph(cPlanarGraph, vertexData)
 import Hiraffe.PlanarGraph.Dart(Arc(..), Dart(..), Direction(..))
 import Prelude hiding (filter)
 import Test.QuickCheck hiding (Positive, Negative)
@@ -138,12 +138,12 @@ witherGraphTo vs (Graph gr) = Graph $ fmap removeEdges m
 toPlaneGraph             :: (Ord r, Foldable1 f)
                          => proxy s
                          -> GGraph f (Point 2 r) v e -> CPlaneGraph s (Point 2 r) () ()
-toPlaneGraph _ (Graph m) = review _CPlanarGraph $ (planarGraph theDarts)&vertexData .~ vtxData
+toPlaneGraph _ (Graph m) = review _CPlanarGraph $ (cPlanarGraph theDarts)&vertexData .~ vtxData
   where
     vtxData = Vector.fromNonEmptyN1 (length m) (NEMap.keys m)
 
     --  a non-empty list of vertices, with for each vertex the darts in order around the vertex
-    theDarts  = evalState (sequence' theDarts') (0 :+ Map.empty)
+    theDarts  = ((),) <$> evalState (sequence' theDarts') (0 :+ Map.empty)
     theDarts' = toNonEmpty $ NEMap.mapWithKey toIncidentDarts m
     -- turn the outgoing edges of u into darts
     toIncidentDarts u (VertexData _ _ neighOrder) =

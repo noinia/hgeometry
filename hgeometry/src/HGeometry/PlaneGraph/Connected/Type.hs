@@ -16,7 +16,11 @@ module HGeometry.PlaneGraph.Connected.Type
   , _CPlanarGraph
   , fromAdjacencyRep
   , fromConnectedSegments
+  , fromSimplePolygon
+  , fromSimplePolygonWith
   -- , VertexData(VertexData), location
+
+
 
   , E(..)
   ) where
@@ -25,24 +29,31 @@ import           Control.Lens hiding (holes, holesOf, (.=))
 import           Data.Coerce
 import           Data.Foldable1
 import           Data.Foldable1.WithIndex
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Data.Map.NonEmpty as NEMap
 import qualified Data.Vector.NonEmpty as Vector
 import           GHC.Generics (Generic)
+import           HGeometry.Boundary
 import           HGeometry.Box
+import           HGeometry.Ext
 import           HGeometry.Foldable.Sort (sortBy )
+import           HGeometry.Foldable.Util
 import           HGeometry.LineSegment
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.PlaneGraph.Class
 import           HGeometry.Point
+import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Properties
 import           HGeometry.Transformation
 import           HGeometry.Vector
 import           Hiraffe.AdjacencyListRep.Map
 import           Hiraffe.Graph.Class
 import           Hiraffe.PlanarGraph.Class
-import           Hiraffe.PlanarGraph.Connected ( CPlanarGraph, World(..)
+import           Hiraffe.PlanarGraph.Connected ( CPlanarGraph
+                                               , cPlanarGraph
+                                               , World(..)
                                                , DartId, VertexId, FaceId
                                                )
 import qualified Hiraffe.PlanarGraph.Connected as PG
@@ -211,24 +222,26 @@ instance ( Point_ v 2 r
 --      No two segments partially overlap.
 --
 -- running time: \(O(n\log n)\)
-fromConnectedSegments      :: ( Foldable1 f, Ord r, Num r
+fromConnectedSegments      :: forall s nonEmpty lineSegment point r.
+                              ( Foldable1 nonEmpty, Ord r, Num r
                               , LineSegment_ lineSegment point
                               , Point_ point 2 r
                               )
-                           => f lineSegment
-                           -> CPlaneGraph s (NonEmpty.NonEmpty point) lineSegment ()
-fromConnectedSegments segs = CPlaneGraph $
-                             (PG.planarGraph theDarts)&PG.vertexData .~ vtxData
+                           => nonEmpty lineSegment
+                           -> CPlaneGraph s (NonEmpty point) lineSegment ()
+fromConnectedSegments segs = CPlaneGraph $ cPlanarGraph theDarts
   where
-    -- to get the darts we simply convert the NEMap (_, NEMap _ (dart, seg)) into
-    -- a NonEmpty (NonEmpty (dart, seg))
-    theDarts = toNonEmpty . snd  <$> verts
-    vtxData  = Vector.fromNonEmpty $ fst <$> verts
-
     -- Collects all edges per vertex
-    verts    = toNonEmpty . ifoldMap1 f $ toNonEmpty segs
+    theDarts :: NonEmpty (NonEmpty point, NonEmpty (Dart.Dart s, lineSegment))
+    theDarts = over _2 toNonEmpty <$> theDarts'
+
+    theDarts' :: NonEmpty (NonEmpty point, NEMap.NEMap _ (Dart.Dart s, lineSegment))
+    theDarts' = toNonEmpty . ifoldMap1 f $ toNonEmpty segs
 
     -- Creates two vertices with one edge each ; combines them into a single Map
+    f       :: Int -> lineSegment
+            -> MonoidalNEMap (Point 2 r)
+                             (VtxData (NonEmpty point) r (Dart.Dart s, lineSegment))
     f i seg = let u = seg^.start
                   v = seg^.end
                   d = Dart.Dart (Dart.Arc i) Dart.Positive
@@ -267,3 +280,49 @@ instance (Ord r, Num r) => Eq (E r) where
   a == b = a `compare` b == EQ
 instance (Ord r, Num r) => Ord (E r) where
   (E v) `compare` (E u) = ccwCmpAroundWith (Vector2 0 1) (origin :: Point 2 r) (Point v) (Point u)
+
+
+--------------------------------------------------------------------------------
+
+-- | Construct a connected PlaneGraph from a single simple polygon.
+--
+-- the interior of the polygon will have faceId 0
+--
+-- running time: \(O(n)\).
+fromSimplePolygon      :: ( SimplePolygon_ simplePolygon vertex r
+                          , EdgeIx simplePolygon ~ Int
+                          )
+                       => simplePolygon
+                       -> CPlaneGraph s (vertex :+ VertexIx simplePolygon)
+                                        (EdgeIx simplePolygon)
+                                        PointLocationResult
+fromSimplePolygon poly = fromSimplePolygonWith poly Inside Outside
+
+-- | Construct a plane graph from a simple polygon.
+--
+-- the interior of the polygon will have faceId 0
+--
+-- running time: \(O(n)\).
+fromSimplePolygonWith                     :: ( SimplePolygon_ simplePolygon vertex r
+                                             , EdgeIx simplePolygon ~ Int
+                                             )
+                                          => simplePolygon
+                                          -> face
+                                          -- ^ Data for the face representing the inside
+                                          -> face
+                                          -- ^ Data for the face representing the outside
+                                          -> CPlaneGraph s (vertex :+ VertexIx simplePolygon)
+                                                           (EdgeIx simplePolygon)
+                                                           face
+fromSimplePolygonWith poly inData outData = (review _CPlanarGraph) $ g&PG.faceData .~ fData
+  where
+    fData  = fromNonEmpty $ inData :| [outData]
+    n      = numVertices poly
+    -- We explicitly construct two darts around every vertex.
+    g      = cPlanarGraph $ ifoldMapOf vertices mkDarts poly
+    mkDarts i v = NonEmpty.singleton (v :+ i
+                                     , NonEmpty.fromList
+                                       [ (Dart.Dart (Dart.Arc i)               Dart.Positive, i)
+                                       , (Dart.Dart (Dart.Arc $ (i+1) `mod` n) Dart.Negative, i)
+                                       ]
+                                     )

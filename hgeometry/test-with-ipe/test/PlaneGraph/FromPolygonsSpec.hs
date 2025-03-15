@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE QuasiQuotes #-}
 module PlaneGraph.FromPolygonsSpec where
 
 import           Control.Lens
@@ -35,20 +36,8 @@ type R = RealNumber 5
 --------------------------------------------------------------------------------
 
 
--- | Given a connected Plane graph, constructs a PlaneGraph.
---
--- \(O(n)\)
-fromCPlaneGraph   :: ( Point_ vertex 2 r, Ord r, Num r
-                     ) => CPlaneGraph s vertex e f -> PlaneGraph s vertex e f
-fromCPlaneGraph c = fromCPlaneGraphWith (outerFaceDart c) c
 
--- | Given a dart that thas the outer face on its left, and a Connected Plane Graph,
--- construct a PlaneGraph.
-fromCPlaneGraphWith                  :: Dart.Dart s -> CPlaneGraph s v e f -> PlaneGraph s v e f
-fromCPlaneGraphWith outerFaceDart' c = review _PlanarGraph
-                                     $ fromConnected' (c^._CPlanarGraph) outerFaceDart'
-
-
+--------------------------------------------------------------------------------
 
 
 
@@ -102,57 +91,7 @@ fromPolygons = undefined
 
 
 --------------------------------------------------------------------------------
-
--- | Construct a connected PlaneGraph from a single simple polygon.
---
--- the interior of the polygon will have faceId 0
---
--- running time: \(O(n)\).
-fromSimplePolygon      :: ( SimplePolygon_ simplePolygon vertex r
-                          , EdgeIx simplePolygon ~ Int
-                          )
-                       => simplePolygon
-                       -> CPlaneGraph s (vertex :+ VertexIx simplePolygon)
-                                        (EdgeIx simplePolygon)
-                                        PointLocationResult
-fromSimplePolygon poly = fromSimplePolygonWith poly Inside Outside
-
--- | Construct a plane graph from a simple polygon.
---
--- the interior of the polygon will have faceId 0
---
--- running time: \(O(n)\).
-fromSimplePolygonWith                     :: ( SimplePolygon_ simplePolygon vertex r
-                                             , EdgeIx simplePolygon ~ Int
-                                             )
-                                          => simplePolygon
-                                          -> face
-                                          -- ^ Data for the face representing the inside
-                                          -> face
-                                          -- ^ Data for the face representing the outside
-                                          -> CPlaneGraph s (vertex :+ VertexIx simplePolygon)
-                                                           (EdgeIx simplePolygon)
-                                                           face
-fromSimplePolygonWith poly inData outData = cPlaneGraph $ g&faceData   .~ fData
-                                                           &vertexData .~ vData
-  where
-    cPlaneGraph = review _CPlanarGraph
-
-    fData  = fromNonEmpty $ inData :| [outData]
-    n      = numVertices poly
-    -- We explicitly construct two darts around every vertex.
-    g      = planarGraph $ foldMapOf (vertices.asIndex) mkDarts poly
-    mkDarts i = NonEmpty.singleton $ NonEmpty.fromList
-                [ (Dart.Dart (Dart.Arc i)               Dart.Positive, i)
-                , (Dart.Dart (Dart.Arc $ (i+1) `mod` n) Dart.Negative, i)
-                ]
-    vData = fromFoldable1 $ toNonEmptyOf (vertices.asIndexedExt) poly
-    -- this part may not be ideal; in the case of SimplePolygon vertex this is
-    -- converting from array into NonEmpty and Back
-
--- TODO: the 'planarGraph' function might as well take the 'v' values
--- so that we don't have to fiddle with the vData ourselves.
-
+-- * Move to PlaneGraph
 
 --------------------------------------------------------------------------------
 
@@ -244,14 +183,18 @@ spec = describe "Constructing a PlaneGraph from overlapping Polygons" $ do
          -- it "all inside" $
          --   let g = fromSimplePolygonWith testPoly "In" "Out"
          --   in allOf (vertices.withIndex) (\v _ -> v&outNeighboursOfByDart )
-
-
-
+         testIpe [osp|components.ipe|]
+                 [osp|components.out|]
 
 --------------------------------------------------------------------------------
 
 readInput      :: OsPath -> IO (NonEmpty (ClosedLineSegment (Point 2 R) :+ _))
-readInput inFP = NonEmpty.fromList <$> readAllFrom inFP
+readInput inFP = NonEmpty.fromList <$>
+                 readAllFrom ([osp|data/test-with-ipe/PlaneGraph|] </> inFP)
+
+
+-- verifyColors =
+
 
 testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ do
     segs <- runIO $ readInput inFP
@@ -261,3 +204,10 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
           )  = fromDisjointSegments segs
     it "test" $ do
       show gr `shouldBe` ""
+
+    -- goldenWith [osp|data/test-with-ipe/PlaneGraph/|]
+    --            (ipeContentGolden { name = inFP})
+    --            (drawGraph gr)
+
+
+  -- tests: all edges of a component have the same color
