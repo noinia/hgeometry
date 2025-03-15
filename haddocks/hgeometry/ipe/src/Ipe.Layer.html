@@ -20,7 +20,7 @@
 </span><span id="line-20"></span><span>
 </span><span id="line-21"></span><span class="annot"><span class="hs-comment">-- | Defines an Layer in Ipe.</span></span><span>
 </span><span id="line-22"></span><span class="hs-keyword">newtype</span><span> </span><span id="LayerName"><span class="annot"><a href="Ipe.Layer.html#LayerName"><span class="hs-identifier hs-var">LayerName</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="LayerName"><span class="annot"><a href="Ipe.Layer.html#LayerName"><span class="hs-identifier hs-var">LayerName</span></a></span></span><span> </span><span class="hs-special">{</span><span id="_layerName"><span class="annot"><span class="annottext">LayerName -&gt; Text
-</span><a href="Ipe.Layer.html#_layerName"><span class="hs-identifier hs-var hs-var">_layerName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679447286"><span id="local-6989586621679447292"><span id="local-6989586621679447296"><span class="annot"><span class="annottext">Int -&gt; LayerName -&gt; ShowS
+</span><a href="Ipe.Layer.html#_layerName"><span class="hs-identifier hs-var hs-var">_layerName</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-special">}</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679447291"><span id="local-6989586621679447297"><span id="local-6989586621679447301"><span class="annot"><span class="annottext">Int -&gt; LayerName -&gt; ShowS
 [LayerName] -&gt; ShowS
 LayerName -&gt; String
 (Int -&gt; LayerName -&gt; ShowS)
@@ -35,7 +35,7 @@ $cshow :: LayerName -&gt; String
 show :: LayerName -&gt; String
 $cshowList :: [LayerName] -&gt; ShowS
 showList :: [LayerName] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679447301"><span id="local-6989586621679447305"><span id="local-6989586621679447308"><span id="local-6989586621679447318"><span class="annot"><span class="annottext">ReadPrec [LayerName]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679447306"><span id="local-6989586621679447310"><span id="local-6989586621679447313"><span id="local-6989586621679447323"><span class="annot"><span class="annottext">ReadPrec [LayerName]
 ReadPrec LayerName
 Int -&gt; ReadS LayerName
 ReadS [LayerName]
@@ -55,7 +55,7 @@ $creadPrec :: ReadPrec LayerName
 readPrec :: ReadPrec LayerName
 $creadListPrec :: ReadPrec [LayerName]
 readListPrec :: ReadPrec [LayerName]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679447325"><span id="local-6989586621679447330"><span class="annot"><span class="annottext">LayerName -&gt; LayerName -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679447330"><span id="local-6989586621679447335"><span class="annot"><span class="annottext">LayerName -&gt; LayerName -&gt; Bool
 (LayerName -&gt; LayerName -&gt; Bool)
 -&gt; (LayerName -&gt; LayerName -&gt; Bool) -&gt; Eq LayerName
 forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
@@ -63,7 +63,7 @@ $c== :: LayerName -&gt; LayerName -&gt; Bool
 == :: LayerName -&gt; LayerName -&gt; Bool
 $c/= :: LayerName -&gt; LayerName -&gt; Bool
 /= :: LayerName -&gt; LayerName -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679447339"><span id="local-6989586621679447344"><span id="local-6989586621679447348"><span id="local-6989586621679447352"><span id="local-6989586621679447356"><span id="local-6989586621679447360"><span id="local-6989586621679447364"><span class="annot"><span class="annottext">Eq LayerName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679447344"><span id="local-6989586621679447349"><span id="local-6989586621679447353"><span id="local-6989586621679447357"><span id="local-6989586621679447361"><span id="local-6989586621679447365"><span id="local-6989586621679447369"><span class="annot"><span class="annottext">Eq LayerName
 Eq LayerName =&gt;
 (LayerName -&gt; LayerName -&gt; Ordering)
 -&gt; (LayerName -&gt; LayerName -&gt; Bool)
@@ -100,7 +100,7 @@ $cmax :: LayerName -&gt; LayerName -&gt; LayerName
 max :: LayerName -&gt; LayerName -&gt; LayerName
 $cmin :: LayerName -&gt; LayerName -&gt; LayerName
 min :: LayerName -&gt; LayerName -&gt; LayerName
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679447376"><span class="annot"><span class="annottext">String -&gt; LayerName
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Ord</span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679447381"><span class="annot"><span class="annottext">String -&gt; LayerName
 (String -&gt; LayerName) -&gt; IsString LayerName
 forall a. (String -&gt; a) -&gt; IsString a
 $cfromString :: String -&gt; LayerName

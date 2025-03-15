@@ -25,18 +25,18 @@
 </span><span id="line-25"></span><span>
 </span><span id="line-26"></span><span>
 </span><span id="line-27"></span><span>
-</span><span id="line-28"></span><span class="hs-keyword">type</span><span> </span><span id="UpperHull"><span class="annot"><a href="HGeometry.ConvexHull.R3.Naive.Dual.html#UpperHull"><span class="hs-identifier hs-var">UpperHull</span></a></span></span><span> </span><span id="local-6989586621679411366"><span class="annot"><a href="#local-6989586621679411366"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Type.html#LowerEnvelope"><span class="hs-identifier hs-type">LowerEnvelope</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonVerticalHyperPlane</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679411366"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679411366"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">type</span><span> </span><span id="UpperHull"><span class="annot"><a href="HGeometry.ConvexHull.R3.Naive.Dual.html#UpperHull"><span class="hs-identifier hs-var">UpperHull</span></a></span></span><span> </span><span id="local-6989586621679411361"><span class="annot"><a href="#local-6989586621679411361"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Type.html#LowerEnvelope"><span class="hs-identifier hs-type">LowerEnvelope</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NonVerticalHyperPlane</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679411361"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679411361"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-29"></span><span>
 </span><span id="line-30"></span><span>
 </span><span id="line-31"></span><span class="hs-comment">-- | Computes the upper hull of a set of points in R^3</span><span>
 </span><span id="line-32"></span><span class="hs-comment">--</span><span>
 </span><span id="line-33"></span><span class="hs-comment">-- \(O(n^4)\)</span><span>
-</span><span id="line-34"></span><span id="local-6989586621679411215"><span id="local-6989586621679411216"><span id="local-6989586621679411218"><span class="annot"><a href="HGeometry.ConvexHull.R3.Naive.Dual.html#upperHull"><span class="hs-identifier hs-type">upperHull</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679411215"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679411216"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-35"></span><span>             </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679411216"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679411216"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-36"></span><span>             </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679411218"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679411218"><span class="hs-identifier hs-type">f</span></a></span><span>
+</span><span id="line-34"></span><span id="local-6989586621679411210"><span id="local-6989586621679411211"><span id="local-6989586621679411213"><span class="annot"><a href="HGeometry.ConvexHull.R3.Naive.Dual.html#upperHull"><span class="hs-identifier hs-type">upperHull</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679411210"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679411211"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-35"></span><span>             </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679411211"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679411211"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-36"></span><span>             </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679411213"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679411213"><span class="hs-identifier hs-type">f</span></a></span><span>
 </span><span id="line-37"></span><span>
-</span><span id="line-38"></span><span>             </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679411215"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679411216"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679411215"><span class="hs-identifier hs-type">point</span></a></span><span>
-</span><span id="line-39"></span><span>             </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679411218"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679411215"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.R3.Naive.Dual.html#UpperHull"><span class="hs-identifier hs-type">UpperHull</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679411215"><span class="hs-identifier hs-type">point</span></a></span></span></span></span><span>
+</span><span id="line-38"></span><span>             </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679411210"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679411211"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679411210"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-39"></span><span>             </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679411213"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679411210"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.R3.Naive.Dual.html#UpperHull"><span class="hs-identifier hs-type">UpperHull</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679411210"><span class="hs-identifier hs-type">point</span></a></span></span></span></span><span>
 </span><span id="line-40"></span><span id="upperHull"><span class="annot"><span class="annottext">upperHull :: forall point r (f :: * -&gt; *).
 (Point_ point 3 r, Ord r, Fractional r, Foldable1 f, Functor f,
  Show point, Show r, Ord point) =&gt;
@@ -57,24 +57,24 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 -&gt; f point -&gt; f (NonVerticalHyperPlane 3 r :+ point)
 forall a b. (a -&gt; b) -&gt; f a -&gt; f b
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
-</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679411484"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679411484"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">point -&gt; NonVerticalHyperPlane 3 r
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679411479"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679411479"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">point -&gt; NonVerticalHyperPlane 3 r
 forall point (d :: Natural) r.
 (Point_ point d r, Num r, 1 &lt;= d) =&gt;
 point -&gt; NonVerticalHyperPlane d r
 </span><span class="hs-identifier hs-var">dualHyperPlane</span></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679411484"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">NonVerticalHyperPlane 3 r
+</span><a href="#local-6989586621679411479"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">NonVerticalHyperPlane 3 r
 -&gt; point -&gt; NonVerticalHyperPlane 3 r :+ point
 forall core extra. core -&gt; extra -&gt; core :+ extra
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679411484"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679411479"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-41"></span><span>
 </span><span id="line-42"></span><span>
-</span><span id="line-43"></span><span class="hs-keyword">type</span><span> </span><span id="Facet"><span class="annot"><a href="HGeometry.ConvexHull.R3.Naive.Dual.html#Facet"><span class="hs-identifier hs-var">Facet</span></a></span></span><span> </span><span id="local-6989586621679411487"><span class="annot"><a href="#local-6989586621679411487"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679411487"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-43"></span><span class="hs-keyword">type</span><span> </span><span id="Facet"><span class="annot"><a href="HGeometry.ConvexHull.R3.Naive.Dual.html#Facet"><span class="hs-identifier hs-var">Facet</span></a></span></span><span> </span><span id="local-6989586621679411482"><span class="annot"><a href="#local-6989586621679411482"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679411482"><span class="hs-identifier hs-type">point</span></a></span><span>
 </span><span id="line-44"></span><span>
 </span><span id="line-45"></span><span class="annot"><span class="hs-comment">-- | Outputs the facets of the upper hull.</span></span><span>
-</span><span id="line-46"></span><span id="local-6989586621679411307"><span class="annot"><a href="HGeometry.ConvexHull.R3.Naive.Dual.html#facets"><span class="hs-identifier hs-type">facets</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679411307"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679411307"><span class="hs-identifier hs-type">point</span></a></span><span>
-</span><span id="line-47"></span><span>          </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.R3.Naive.Dual.html#UpperHull"><span class="hs-identifier hs-type">UpperHull</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679411307"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="HGeometry.ConvexHull.R3.Naive.Dual.html#Facet"><span class="hs-identifier hs-type">Facet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679411307"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-46"></span><span id="local-6989586621679411302"><span class="annot"><a href="HGeometry.ConvexHull.R3.Naive.Dual.html#facets"><span class="hs-identifier hs-type">facets</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679411302"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679411302"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-47"></span><span>          </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.ConvexHull.R3.Naive.Dual.html#UpperHull"><span class="hs-identifier hs-type">UpperHull</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679411302"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="HGeometry.ConvexHull.R3.Naive.Dual.html#Facet"><span class="hs-identifier hs-type">Facet</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679411302"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">]</span></span><span>
 </span><span id="line-48"></span><span id="facets"><span class="annot"><span class="annottext">facets :: forall point.
 (Ord (NumType point), Ord point) =&gt;
 UpperHull point -&gt; [Facet point]
@@ -85,13 +85,13 @@ UpperHull point -&gt; [Facet point]
      (NumType (NonVerticalHyperPlane 3 (NumType point) :+ point)))
   (NonVerticalHyperPlane 3 (NumType point) :+ point)
 </span><span class="hs-identifier">_</span></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- error &quot;facets: parallel strips; no bounded facets&quot;</span><span>
-</span><span id="line-50"></span><span>    </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Type.html#ConnectedEnvelope"><span class="hs-identifier hs-type">ConnectedEnvelope</span></a></span><span> </span><span id="local-6989586621679411511"><span class="annot"><span class="annottext">MinimizationDiagram
+</span><span id="line-50"></span><span>    </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Type.html#ConnectedEnvelope"><span class="hs-identifier hs-type">ConnectedEnvelope</span></a></span><span> </span><span id="local-6989586621679411506"><span class="annot"><span class="annottext">MinimizationDiagram
   (NumType (NonVerticalHyperPlane 3 (NumType point) :+ point))
   (Point
      2 (NumType (NonVerticalHyperPlane 3 (NumType point) :+ point))
    :+ Definers (NonVerticalHyperPlane 3 (NumType point) :+ point))
   (NonVerticalHyperPlane 3 (NumType point) :+ point)
-</span><a href="#local-6989586621679411511"><span class="hs-identifier hs-var">env</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NonEmpty (Facet point) -&gt; [Facet point]
+</span><a href="#local-6989586621679411506"><span class="hs-identifier hs-var">env</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NonEmpty (Facet point) -&gt; [Facet point]
 forall a. NonEmpty a -&gt; [a]
 forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
 </span><span class="hs-identifier hs-var">toList</span></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (Facet point) -&gt; [Facet point])
@@ -100,7 +100,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty (NonVerticalHyperPlane 3 (NumType point) :+ point)
 -&gt; Facet point
 forall {f :: * -&gt; *} {core} {b}. Functor f =&gt; f (core :+ b) -&gt; f b
-</span><a href="#local-6989586621679411512"><span class="hs-identifier hs-var">toFacet</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (NonVerticalHyperPlane 3 (NumType point) :+ point)
+</span><a href="#local-6989586621679411507"><span class="hs-identifier hs-var">toFacet</span></a></span><span> </span><span class="annot"><span class="annottext">(NonEmpty (NonVerticalHyperPlane 3 (NumType point) :+ point)
  -&gt; Facet point)
 -&gt; NonEmpty
      (NonEmpty (NonVerticalHyperPlane 3 (NumType point) :+ point))
@@ -117,13 +117,13 @@ forall k a. NEMap k a -&gt; NonEmpty a
   (Point 2 (NumType point)
    :+ Definers (NonVerticalHyperPlane 3 (NumType point) :+ point))
   (NonEmpty (NonVerticalHyperPlane 3 (NumType point) :+ point))
-</span><a href="#local-6989586621679411515"><span class="hs-identifier hs-var">theVertices</span></a></span><span>
+</span><a href="#local-6989586621679411510"><span class="hs-identifier hs-var">theVertices</span></a></span><span>
 </span><span id="line-51"></span><span>      </span><span class="hs-keyword">where</span><span>
-</span><span id="line-52"></span><span>        </span><span id="local-6989586621679411515"><span class="annot"><span class="annottext">theVertices :: NEMap
+</span><span id="line-52"></span><span>        </span><span id="local-6989586621679411510"><span class="annot"><span class="annottext">theVertices :: NEMap
   (Point 2 (NumType point)
    :+ Definers (NonVerticalHyperPlane 3 (NumType point) :+ point))
   (NonEmpty (NonVerticalHyperPlane 3 (NumType point) :+ point))
-</span><a href="#local-6989586621679411515"><span class="hs-identifier hs-var hs-var">theVertices</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((NonVerticalHyperPlane 3 (NumType point) :+ point)
+</span><a href="#local-6989586621679411510"><span class="hs-identifier hs-var hs-var">theVertices</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((NonVerticalHyperPlane 3 (NumType point) :+ point)
  -&gt; Region
       (NumType point)
       (Point 2 (NumType point)
@@ -145,12 +145,12 @@ forall k a. NEMap k a -&gt; NonEmpty a
 forall k' v' k v.
 (Ord k', Semigroup v') =&gt;
 (k -&gt; v -&gt; NEMap k' v') -&gt; NEMap k v -&gt; NEMap k' v'
-</span><a href="HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap.html#mapWithKeyMerge1"><span class="hs-identifier hs-var">mapWithKeyMerge1</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679411516"><span class="annot"><span class="annottext">NonVerticalHyperPlane 3 (NumType point) :+ point
-</span><a href="#local-6989586621679411516"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span id="local-6989586621679411517"><span class="annot"><span class="annottext">Region
+</span><a href="HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap.html#mapWithKeyMerge1"><span class="hs-identifier hs-var">mapWithKeyMerge1</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679411511"><span class="annot"><span class="annottext">NonVerticalHyperPlane 3 (NumType point) :+ point
+</span><a href="#local-6989586621679411511"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span id="local-6989586621679411512"><span class="annot"><span class="annottext">Region
   (NumType point)
   (Point 2 (NumType point)
    :+ Definers (NonVerticalHyperPlane 3 (NumType point) :+ point))
-</span><a href="#local-6989586621679411517"><span class="hs-identifier hs-var">reg</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NonEmpty
+</span><a href="#local-6989586621679411512"><span class="hs-identifier hs-var">reg</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NonEmpty
   (Point 2 (NumType point)
    :+ Definers (NonVerticalHyperPlane 3 (NumType point) :+ point),
    NonEmpty (NonVerticalHyperPlane 3 (NumType point) :+ point))
@@ -181,7 +181,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 -&gt; NonEmpty (NonVerticalHyperPlane 3 (NumType point) :+ point)
 forall a. a -&gt; NonEmpty a
 </span><span class="hs-identifier hs-var">NonEmpty.singleton</span></span><span> </span><span class="annot"><span class="annottext">NonVerticalHyperPlane 3 (NumType point) :+ point
-</span><a href="#local-6989586621679411516"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Point 2 (NumType point)
+</span><a href="#local-6989586621679411511"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Point 2 (NumType point)
   :+ Definers (NonVerticalHyperPlane 3 (NumType point) :+ point))
  -&gt; (Point 2 (NumType point)
      :+ Definers (NonVerticalHyperPlane 3 (NumType point) :+ point),
@@ -202,11 +202,11 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
      (Point 2 (NumType point)
       :+ Definers (NonVerticalHyperPlane 3 (NumType point) :+ point))
 forall {r} {a}. Region r a -&gt; NonEmpty a
-</span><a href="#local-6989586621679411520"><span class="hs-identifier hs-var">verticesOf</span></a></span><span> </span><span class="annot"><span class="annottext">Region
+</span><a href="#local-6989586621679411515"><span class="hs-identifier hs-var">verticesOf</span></a></span><span> </span><span class="annot"><span class="annottext">Region
   (NumType point)
   (Point 2 (NumType point)
    :+ Definers (NonVerticalHyperPlane 3 (NumType point) :+ point))
-</span><a href="#local-6989586621679411517"><span class="hs-identifier hs-var">reg</span></a></span><span>
+</span><a href="#local-6989586621679411512"><span class="hs-identifier hs-var">reg</span></a></span><span>
 </span><span id="line-54"></span><span>                                       </span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MinimizationDiagram
   (NumType point)
   (Point 2 (NumType point)
@@ -231,24 +231,24 @@ MinimizationDiagram
      2 (NumType (NonVerticalHyperPlane 3 (NumType point) :+ point))
    :+ Definers (NonVerticalHyperPlane 3 (NumType point) :+ point))
   (NonVerticalHyperPlane 3 (NumType point) :+ point)
-</span><a href="#local-6989586621679411511"><span class="hs-identifier hs-var">env</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-55"></span><span>        </span><span id="local-6989586621679411520"><span class="annot"><span class="annottext">verticesOf :: Region r a -&gt; NonEmpty a
-</span><a href="#local-6989586621679411520"><span class="hs-identifier hs-var hs-var">verticesOf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
-</span><span id="line-56"></span><span>          </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Bounded"><span class="hs-identifier hs-type">Bounded</span></a></span><span> </span><span id="local-6989586621679411527"><span class="annot"><span class="annottext">Cyclic NonEmpty a
-</span><a href="#local-6989586621679411527"><span class="hs-identifier hs-var">vertices</span></a></span></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Cyclic NonEmpty a -&gt; NonEmpty a
+</span><a href="#local-6989586621679411506"><span class="hs-identifier hs-var">env</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>        </span><span id="local-6989586621679411515"><span class="annot"><span class="annottext">verticesOf :: Region r a -&gt; NonEmpty a
+</span><a href="#local-6989586621679411515"><span class="hs-identifier hs-var hs-var">verticesOf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-56"></span><span>          </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Bounded"><span class="hs-identifier hs-type">Bounded</span></a></span><span> </span><span id="local-6989586621679411522"><span class="annot"><span class="annottext">Cyclic NonEmpty a
+</span><a href="#local-6989586621679411522"><span class="hs-identifier hs-var">vertices</span></a></span></span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Cyclic NonEmpty a -&gt; NonEmpty a
 forall a. Cyclic NonEmpty a -&gt; NonEmpty a
 forall (t :: * -&gt; *) a. Foldable1 t =&gt; t a -&gt; NonEmpty a
 </span><span class="hs-identifier hs-var">toNonEmpty</span></span><span> </span><span class="annot"><span class="annottext">Cyclic NonEmpty a
-</span><a href="#local-6989586621679411527"><span class="hs-identifier hs-var">vertices</span></a></span><span>
+</span><a href="#local-6989586621679411522"><span class="hs-identifier hs-var">vertices</span></a></span><span>
 </span><span id="line-57"></span><span>          </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Connected.Type.html#Unbounded"><span class="hs-identifier hs-type">Unbounded</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679411530"><span class="annot"><span class="annottext">NonEmpty a
-</span><a href="#local-6989586621679411530"><span class="hs-identifier hs-var">vertices</span></a></span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679411525"><span class="annot"><span class="annottext">NonEmpty a
+</span><a href="#local-6989586621679411525"><span class="hs-identifier hs-var">vertices</span></a></span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NonEmpty a
-</span><a href="#local-6989586621679411530"><span class="hs-identifier hs-var">vertices</span></a></span><span>
+</span><a href="#local-6989586621679411525"><span class="hs-identifier hs-var">vertices</span></a></span><span>
 </span><span id="line-58"></span><span>
-</span><span id="line-59"></span><span>        </span><span id="local-6989586621679411512"><span class="annot"><span class="annottext">toFacet :: f (core :+ b) -&gt; f b
-</span><a href="#local-6989586621679411512"><span class="hs-identifier hs-var hs-var">toFacet</span></a></span></span><span> </span><span id="local-6989586621679411535"><span class="annot"><span class="annottext">f (core :+ b)
-</span><a href="#local-6989586621679411535"><span class="hs-identifier hs-var">hv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(core :+ b) -&gt; Getting b (core :+ b) b -&gt; b
+</span><span id="line-59"></span><span>        </span><span id="local-6989586621679411507"><span class="annot"><span class="annottext">toFacet :: f (core :+ b) -&gt; f b
+</span><a href="#local-6989586621679411507"><span class="hs-identifier hs-var hs-var">toFacet</span></a></span></span><span> </span><span id="local-6989586621679411530"><span class="annot"><span class="annottext">f (core :+ b)
+</span><a href="#local-6989586621679411530"><span class="hs-identifier hs-var">hv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(core :+ b) -&gt; Getting b (core :+ b) b -&gt; b
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-51bc2e912bec0d2e3b17b8a780d705551325fe816454862172377dfdc74e37b2/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting b (core :+ b) b
 forall core extra extra' (f :: * -&gt; *).
@@ -257,7 +257,7 @@ Functor f =&gt;
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#extra"><span class="hs-identifier hs-var">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((core :+ b) -&gt; b) -&gt; f (core :+ b) -&gt; f b
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">f (core :+ b)
-</span><a href="#local-6989586621679411535"><span class="hs-identifier hs-var">hv</span></a></span><span>
+</span><a href="#local-6989586621679411530"><span class="hs-identifier hs-var">hv</span></a></span><span>
 </span><span id="line-60"></span><span>  </span><span class="hs-comment">-- We want all vertices v of the lower envelope; let H_v denote all planes that</span><span>
 </span><span id="line-61"></span><span>  </span><span class="hs-comment">-- intersect in v.</span><span>
 </span><span id="line-62"></span><span>  </span><span class="hs-comment">--</span><span>
