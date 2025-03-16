@@ -41,7 +41,7 @@ import           HGeometry.Ext
 import           HGeometry.Foldable.Sort (sortBy )
 import           HGeometry.Foldable.Util
 import           HGeometry.LineSegment
-import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
+import           HGeometry.Map.NonEmpty.Monoidal
 import           HGeometry.PlaneGraph.Class
 import           HGeometry.Point
 import           HGeometry.Polygon.Simple.Class

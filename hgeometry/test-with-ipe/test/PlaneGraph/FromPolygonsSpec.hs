@@ -19,8 +19,8 @@ import           HGeometry.Boundary
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
 import           HGeometry.LineSegment
-import qualified HGeometry.Map.NonEmmpty.Monoidal as MonoidalNEMap
-import           HGeometry.Map.NonEmmpty.Monoidal (MonoidalNEMap)
+import qualified HGeometry.Map.NonEmpty.Monoidal as MonoidalNEMap
+import           HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap)
 import           HGeometry.Number.Real.Rational
 import           HGeometry.PlaneGraph
 import           HGeometry.Point
@@ -418,9 +418,9 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
 
 
         segsbyColor :: MonoidalNEMap (IpeColor R) (NonEmpty (ClosedLineSegment (Point 2 R) :+ _))
-        segsbyColor = foldMap (\seg -> MonoidalNEMap.singleton (seg^?!extra._Attr SStroke)
-                                                               (NonEmpty.singleton seg)
-                              ) segs
+        segsbyColor = foldMap1 (\seg -> MonoidalNEMap.singleton (seg^?!extra._Attr SStroke)
+                                                                (NonEmpty.singleton seg)
+                               ) segs
 
         graphs = fromConnectedSegments <$> segsbyColor
 

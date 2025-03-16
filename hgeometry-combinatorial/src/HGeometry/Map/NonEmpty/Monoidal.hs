@@ -16,10 +16,7 @@ module HGeometry.Map.NonEmpty.Monoidal
   , mapWithKeyMerge1
   ) where
 
-import qualified Data.Foldable as F
 import           Data.Foldable1
-import           Data.Map (Map)
-import qualified Data.Map as Map
 import           Data.Map.NonEmpty (NEMap)
 import qualified Data.Map.NonEmpty as NEMap
 
