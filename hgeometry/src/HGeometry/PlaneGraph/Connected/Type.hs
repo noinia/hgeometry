@@ -193,7 +193,11 @@ instance ( Point_ v 2 (NumType v)
 
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
-         ) => PlaneGraph_ (CPlaneGraph s v e f) v where
+         ) => PlaneGraph_ (CPlaneGraph s v e f) v
+
+instance ( Point_ v 2 (NumType v)
+         , Ord (NumType v), Num (NumType v)
+         ) => ConstructablePlaneGraph_ (CPlaneGraph s v e f) v where
   fromEmbedding = CPlaneGraph . fromAdjacencyLists
 
 instance ( Point_ v 2 r, Point_ v' 2 r'
@@ -247,8 +251,6 @@ fromConnectedSegments segs = CPlaneGraph $ cPlanarGraph theDarts
                   d = Dart.Dart (Dart.Arc i) Dart.Positive
               in    singleton (u^.asPoint) (vtx (d          ,seg) u v)
                  <> singleton (v^.asPoint) (vtx (Dart.twin d,seg) v u)
-
-    singleton k v = MonoidalNEMap $ NEMap.singleton k v
 
 -- | Helper type to represent the vertex data of a vertex. The NEMap
 -- represents the edges ordered cyclically around the vertex

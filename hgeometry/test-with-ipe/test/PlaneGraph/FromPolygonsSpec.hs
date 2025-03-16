@@ -15,12 +15,13 @@ import qualified Data.Vector as Vector
 import           Data.Vector.NonEmpty (NonEmptyVector)
 import qualified Data.Vector.NonEmpty as NonEmptyV
 import           GHC.Generics (Generic)
+import           Golden
 import           HGeometry.Boundary
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
 import           HGeometry.LineSegment
-import qualified HGeometry.Map.NonEmpty.Monoidal as MonoidalNEMap
 import           HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap)
+import qualified HGeometry.Map.NonEmpty.Monoidal as MonoidalNEMap
 import           HGeometry.Number.Real.Rational
 import           HGeometry.PlaneGraph
 import           HGeometry.Point
@@ -30,8 +31,10 @@ import           Hiraffe.PlanarGraph
 import           Hiraffe.PlanarGraph.Component
 import qualified Hiraffe.PlanarGraph.Dart as Dart
 import           Ipe
+import           PlaneGraph.RenderSpec
 import           System.OsPath
 import           Test.Hspec
+import           Test.Hspec.WithTempFile
 import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.Vector as Builder
 
@@ -280,6 +283,28 @@ goFaces globalOuterFaceId localOuterFaceId raw nf = imapAccumLOf faces go (nf, m
       -- data.
 
 
+--------------------------------------------------------------------------------
+
+instance PlanarGraph_ (PlaneGraph s vertex e f) where
+  type DualGraphOf (PlaneGraph s vertex e f) = CPlanarGraph Dual s f e vertex
+  type WorldOf     (PlaneGraph s vertex e f) = Primal
+
+  dualGraph = dualGraph . view _PlanarGraph
+  _DualFaceIx     _ = undefined
+  _DualVertexIx   _ = undefined
+  incidentFaceOf  d = undefined
+  rightFaceOf     d = undefined
+  prevDartOf      d = undefined
+  nextDartOf      d = undefined
+  boundaryDartOf  f = undefined
+  boundaryDarts   f g = undefined
+
+
+instance ( Point_ vertex 2 r, Ord r, Num r
+         ) => PlaneGraph_ (PlaneGraph s vertex e f) vertex
+instance ( Point_ vertex 2 r, Ord r, Num r
+         ) => ConstructablePlaneGraph_ (PlaneGraph s vertex e f) vertex where
+  fromEmbedding = undefined
 
 
 
@@ -422,14 +447,37 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
                                                                 (NonEmpty.singleton seg)
                                ) segs
 
-        graphs = fromConnectedSegments <$> segsbyColor
+
+        graphs0 :: MonoidalNEMap _ (CPlaneGraph (Wrap ()) (NonEmpty (Point 2 R)) _ _)
+        graphs0 = fromConnectedSegments <$> segsbyColor
+
+        graphs :: MonoidalNEMap _
+                                (CPlaneGraph (Wrap ())
+                                      (Point 2 R)
+                                      (ClosedLineSegment (Point 2 R) :+ IpeAttributes Path R)
+                                      ()
+                                )
+        graphs = over vertices NonEmpty.head <$> graphs0
+
+        grr :: PlaneGraph ()
+                          (Point 2 R)
+                          (ClosedLineSegment (Point 2 R) :+ IpeAttributes Path R)
+                          ()
+        grr = fromDisjointComponents (const ()) graphs
+
+        out = drawGraph grr
+
 
     xit "fromDisjointSegment" $ do
       show gr `shouldBe` ""
 
-    xit "fromDisjointComponets" $ do
-      show graphs `shouldBe` ""
+    it "fromDisjointComponets" $ do
+      show grr `shouldBe` ""
 
+    xdescribe "golden" $ do
+      goldenWith [osp|data/test-with-ipe/PlaneGraph|]
+        (ipeContentGolden { name = outFP })
+        (drawGraph grr)
 
 
 

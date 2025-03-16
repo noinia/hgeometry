@@ -14,8 +14,8 @@
 --------------------------------------------------------------------------------
 module HGeometry.PlaneGraph.Class
   ( PlaneGraph_(..)
+  , ConstructablePlaneGraph_(..)
   -- , HasLocation(..)
-
 
   , dartSegmentAt
   , edgeSegmentAt
@@ -53,22 +53,7 @@ class ( PlanarGraph_ planeGraph
       -- , HasVertices graph graph
       , HasEdges planeGraph planeGraph
       ) => PlaneGraph_ planeGraph vertex | planeGraph -> vertex where
-
-  {-# MINIMAL fromEmbedding #-}
-
-  -- | Build a graph from its embedding; i.e. for each vertex we expect its adjacencies in
-  -- CCW order.
-  --
-  -- If the, in the list of neighbours of vertex u we see a vertex v
-  -- that itself does not appear in the adjacencylist, we may drop
-  -- it. In other words if u has a neighbour v, then v better have a
-  -- specification of its neighbours somewhere.
-  fromEmbedding :: ( Foldable1 f, Functor f, Foldable h, Functor h
-                   , vi ~ VertexIx planeGraph
-                   , v ~ Vertex planeGraph
-                   , e ~ Edge planeGraph
-                   , GraphFromAdjListExtraConstraints planeGraph h
-                   ) => f (vi, v, h (vi, e)) -> planeGraph
+  {-# MINIMAL #-}
 
   -- | Getter to access the outer face
   outerFace :: Eq (FaceIx planeGraph)
@@ -121,6 +106,24 @@ class ( PlanarGraph_ planeGraph
       -- vertec cw vertex around v. First with respect to some direction
       -- pointing towards the left.
 
+-- | A class representing constructable Plane graphs, i.e. planar graphs that have a
+-- straight line embedding in the plane.
+class PlaneGraph_ planeGraph vertex => ConstructablePlaneGraph_ planeGraph vertex where
+  {-# MINIMAL fromEmbedding #-}
+
+  -- | Build a graph from its embedding; i.e. for each vertex we expect its adjacencies in
+  -- CCW order.
+  --
+  -- If the, in the list of neighbours of vertex u we see a vertex v
+  -- that itself does not appear in the adjacencylist, we may drop
+  -- it. In other words if u has a neighbour v, then v better have a
+  -- specification of its neighbours somewhere.
+  fromEmbedding :: ( Foldable1 f, Functor f, Foldable h, Functor h
+                   , vi ~ VertexIx planeGraph
+                   , v ~ Vertex planeGraph
+                   , e ~ Edge planeGraph
+                   , GraphFromAdjListExtraConstraints planeGraph h
+                   ) => f (vi, v, h (vi, e)) -> planeGraph
 
 --------------------------------------------------------------------------------
 
