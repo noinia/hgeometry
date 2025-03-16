@@ -8,6 +8,8 @@ import           Data.Foldable1
 import           Data.Functor.Apply (WrappedApplicative(..))
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Map.NonEmpty (NEMap)
+import qualified Data.Map.NonEmpty as NEMap
 import qualified Data.Sequence as Seq
 import qualified Data.Vector as Vector
 import           Data.Vector.NonEmpty (NonEmptyVector)
@@ -17,6 +19,8 @@ import           HGeometry.Boundary
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
 import           HGeometry.LineSegment
+import qualified HGeometry.Map.NonEmmpty.Monoidal as MonoidalNEMap
+import           HGeometry.Map.NonEmmpty.Monoidal (MonoidalNEMap)
 import           HGeometry.Number.Real.Rational
 import           HGeometry.PlaneGraph
 import           HGeometry.Point
@@ -217,13 +221,11 @@ data Comps v e f =
         , _fData'       :: f -- ^ information about the darts we've already seen
         }
 
+-- | Computes, for each local vertex its global vertexId
 goVertices        ::(VertexId (Wrap s) -> v -> v')
-                  -> Int
-                     -- ^ vertex offset
+                  -> Int -- ^ vertex offset
                   -> CPlanarGraph Primal (Wrap s) v e f
-                  -> ( (Int, Builder.Builder v')
-                      , CPlanarGraph Primal (Wrap s) (VertexId s) e f
-                      )
+                  -> ((Int, Builder.Builder v'), CPlanarGraph Primal (Wrap s) (VertexId s) e f)
 goVertices raw nv = imapAccumLOf vertices
                                  (\vi (offSet,res) x -> let vi' = vi `shiftR` offSet
                                                         in ((offSet+1, res <> raw' vi x), vi')
@@ -232,13 +234,11 @@ goVertices raw nv = imapAccumLOf vertices
     shiftR i offSet = coerce $ (coerce i) + offSet
     raw' a b = Builder.singleton $ raw a b
 
-goDarts        :: ( Dart.Dart (Wrap s) -> e -> e')
-               -> Int
-                 -- ^ initial offset
+-- | Computes for each ddart the global dart
+goDarts        :: ( Dart.Dart (Wrap s) -> e -> e') -- ^ compute the new dart data
+               -> Int -- ^ initial offset
                -> CPlanarGraph Primal (Wrap s) v e f
-               -> ( (Int, Builder.Builder e')
-                  , CPlanarGraph Primal (Wrap s) v (Dart.Dart s) f
-                  )
+               -> ((Int, Builder.Builder e'), CPlanarGraph Primal (Wrap s) v (Dart.Dart s) f)
 goDarts raw nd = imapAccumLOf darts
                                  (\d (offSet,res) x -> let d' = d `shiftR` offSet
                                                        in ((offSet+1, res <> raw' d x), d')
@@ -404,12 +404,9 @@ spec = describe "Constructing a PlaneGraph from overlapping Polygons" $ do
 
 --------------------------------------------------------------------------------
 
-readInput      :: OsPath -> IO (NonEmpty (ClosedLineSegment (Point 2 R) :+ _))
+readInput      :: OsPath -> IO (NonEmpty (ClosedLineSegment (Point 2 R) :+ IpeAttributes Path R))
 readInput inFP = NonEmpty.fromList <$>
                  readAllFrom ([osp|data/test-with-ipe/PlaneGraph|] </> inFP)
-
-
--- verifyColors =
 
 
 testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ do
@@ -418,8 +415,24 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
                              (ClosedLineSegment (Point 2 R) :+ _)
                              ()
           )  = fromDisjointSegments segs
-    xit "test" $ do
+
+
+        segsbyColor :: MonoidalNEMap (IpeColor R) (NonEmpty (ClosedLineSegment (Point 2 R) :+ _))
+        segsbyColor = foldMap (\seg -> MonoidalNEMap.singleton (seg^?!extra._Attr SStroke)
+                                                               (NonEmpty.singleton seg)
+                              ) segs
+
+        graphs = fromConnectedSegments <$> segsbyColor
+
+    xit "fromDisjointSegment" $ do
       show gr `shouldBe` ""
+
+    xit "fromDisjointComponets" $ do
+      show graphs `shouldBe` ""
+
+
+
+
 
     -- goldenWith [osp|data/test-with-ipe/PlaneGraph/|]
     --            (ipeContentGolden { name = inFP})

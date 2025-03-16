@@ -2,7 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  HGeometryPlaneGraph.Class
+-- Module      :  HGeometry.PlaneGraph.Class
 -- Copyright   :  (C) Frank Staals
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
