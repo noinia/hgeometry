@@ -27,6 +27,7 @@ import           HGeometry.PlaneGraph
 import           HGeometry.Point
 import           HGeometry.Polygon
 import           HGeometry.Properties
+import           HGeometry.Vector.NonEmpty.Util ()
 import           Hiraffe.PlanarGraph
 import           Hiraffe.PlanarGraph.Component
 import qualified Hiraffe.PlanarGraph.Dart as Dart
@@ -285,6 +286,27 @@ goFaces globalOuterFaceId localOuterFaceId raw nf = imapAccumLOf faces go (nf, m
 
 --------------------------------------------------------------------------------
 
+instance HasConnectedComponents' (PlanarGraph w s vertex e f) where
+  type ConnectedComponentIx (PlanarGraph w s vertex e f) = ComponentId s
+  type ConnectedComponent   (PlanarGraph w s vertex e f) = Component w s
+  connectedComponentAt i = components .> iix' i
+    where
+      iix'   :: ComponentId s
+             -> IndexedTraversal' (ComponentId s)
+                                  (NonEmptyVector (Component w s)) (Component w s)
+      iix' i = reindexed (ComponentId :: Int -> ComponentId s) $ iix (coerce i)
+
+  numConnectedComponents = lengthOf components
+
+instance HasConnectedComponents' (PlaneGraph s vertex e f) where
+  type ConnectedComponentIx (PlaneGraph s vertex e f) =
+    ConnectedComponentIx (PlanarGraph Primal s vertex e f)
+  type ConnectedComponent (PlaneGraph s vertex e f)   = Component Primal s
+  --
+  connectedComponentAt i = _PlanarGraph .> connectedComponentAt i
+  numConnectedComponents = numConnectedComponents . view _PlanarGraph
+
+
 instance PlanarGraph_ (PlaneGraph s vertex e f) where
   type DualGraphOf (PlaneGraph s vertex e f) = CPlanarGraph Dual s f e vertex
   type WorldOf     (PlaneGraph s vertex e f) = Primal
@@ -465,14 +487,15 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
                           ()
         grr = fromDisjointComponents (const ()) graphs
 
-        out = drawGraph grr
 
 
     xit "fromDisjointSegment" $ do
       show gr `shouldBe` ""
 
-    it "fromDisjointComponets" $ do
-      show grr `shouldBe` ""
+    it "fromDisjointComponents components" $ do
+      numConnectedComponents grr `shouldBe` length graphs0
+    it "fromDisjointComponents faces" $ do
+      numFaces grr `shouldBe` 5
 
     xdescribe "golden" $ do
       goldenWith [osp|data/test-with-ipe/PlaneGraph|]
