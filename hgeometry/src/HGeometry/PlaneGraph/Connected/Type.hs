@@ -12,11 +12,15 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.PlaneGraph.Connected.Type
-  ( CPlaneGraph(..)
+  ( CPlaneGraph
   , _CPlanarGraph
   , fromAdjacencyRep
   , fromConnectedSegments
+  , fromSimplePolygon
+  , fromSimplePolygonWith
   -- , VertexData(VertexData), location
+
+
 
   , E(..)
   ) where
@@ -25,18 +29,22 @@ import           Control.Lens hiding (holes, holesOf, (.=))
 import           Data.Coerce
 import           Data.Foldable1
 import           Data.Foldable1.WithIndex
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Data.Map.NonEmpty as NEMap
 import qualified Data.Vector.NonEmpty as Vector
 import           GHC.Generics (Generic)
+import           HGeometry.Boundary
 import           HGeometry.Box
+import           HGeometry.Ext
 import           HGeometry.Foldable.Sort (sortBy )
+import           HGeometry.Foldable.Util
 import           HGeometry.LineSegment
-import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
+import           HGeometry.Map.NonEmpty.Monoidal
 import           HGeometry.PlaneGraph.Class
 import           HGeometry.Point
+import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Properties
 import           HGeometry.Transformation
 import           HGeometry.Vector
@@ -185,7 +193,11 @@ instance ( Point_ v 2 (NumType v)
 
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
-         ) => PlaneGraph_ (CPlaneGraph s v e f) v where
+         ) => PlaneGraph_ (CPlaneGraph s v e f) v
+
+instance ( Point_ v 2 (NumType v)
+         , Ord (NumType v), Num (NumType v)
+         ) => ConstructablePlaneGraph_ (CPlaneGraph s v e f) v where
   fromEmbedding = CPlaneGraph . fromAdjacencyLists
 
 instance ( Point_ v 2 r, Point_ v' 2 r'
@@ -240,8 +252,6 @@ fromConnectedSegments segs = CPlaneGraph $ cPlanarGraph theDarts
               in    singleton (u^.asPoint) (vtx (d          ,seg) u v)
                  <> singleton (v^.asPoint) (vtx (Dart.twin d,seg) v u)
 
-    singleton k v = MonoidalNEMap $ NEMap.singleton k v
-
 -- | Helper type to represent the vertex data of a vertex. The NEMap
 -- represents the edges ordered cyclically around the vertex
 type VtxData v r e = (v, NEMap.NEMap (E r) e)
@@ -272,3 +282,49 @@ instance (Ord r, Num r) => Eq (E r) where
   a == b = a `compare` b == EQ
 instance (Ord r, Num r) => Ord (E r) where
   (E v) `compare` (E u) = ccwCmpAroundWith (Vector2 0 1) (origin :: Point 2 r) (Point v) (Point u)
+
+
+--------------------------------------------------------------------------------
+
+-- | Construct a connected PlaneGraph from a single simple polygon.
+--
+-- the interior of the polygon will have faceId 0
+--
+-- running time: \(O(n)\).
+fromSimplePolygon      :: ( SimplePolygon_ simplePolygon vertex r
+                          , EdgeIx simplePolygon ~ Int
+                          )
+                       => simplePolygon
+                       -> CPlaneGraph s (vertex :+ VertexIx simplePolygon)
+                                        (EdgeIx simplePolygon)
+                                        PointLocationResult
+fromSimplePolygon poly = fromSimplePolygonWith poly Inside Outside
+
+-- | Construct a plane graph from a simple polygon.
+--
+-- the interior of the polygon will have faceId 0
+--
+-- running time: \(O(n)\).
+fromSimplePolygonWith                     :: ( SimplePolygon_ simplePolygon vertex r
+                                             , EdgeIx simplePolygon ~ Int
+                                             )
+                                          => simplePolygon
+                                          -> face
+                                          -- ^ Data for the face representing the inside
+                                          -> face
+                                          -- ^ Data for the face representing the outside
+                                          -> CPlaneGraph s (vertex :+ VertexIx simplePolygon)
+                                                           (EdgeIx simplePolygon)
+                                                           face
+fromSimplePolygonWith poly inData outData = (review _CPlanarGraph) $ g&PG.faceData .~ fData
+  where
+    fData  = fromNonEmpty $ inData :| [outData]
+    n      = numVertices poly
+    -- We explicitly construct two darts around every vertex.
+    g      = cPlanarGraph $ ifoldMapOf vertices mkDarts poly
+    mkDarts i v = NonEmpty.singleton (v :+ i
+                                     , NonEmpty.fromList
+                                       [ (Dart.Dart (Dart.Arc i)               Dart.Positive, i)
+                                       , (Dart.Dart (Dart.Arc $ (i+1) `mod` n) Dart.Negative, i)
+                                       ]
+                                     )

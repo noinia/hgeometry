@@ -16,8 +16,8 @@ import qualified Data.Map.NonEmpty as NEMap
 import           HGeometry.Duality
 import           HGeometry.Ext
 import           HGeometry.HyperPlane
+import           HGeometry.Map.NonEmpty.Monoidal (mapWithKeyMerge1)
 import           HGeometry.Plane.LowerEnvelope
-import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap (mapWithKeyMerge1)
 import           HGeometry.Point
 import           HGeometry.Properties
 

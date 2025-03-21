@@ -25,7 +25,7 @@ import qualified Data.Map.NonEmpty as NEMap
 import           Data.Semigroup (First(..))
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
+import           HGeometry.Map.NonEmpty.Monoidal
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.PlaneGraph.Connected.Type (E(..))
 import           HGeometry.Point
