@@ -40,6 +40,8 @@ import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.Vector as Builder
 
 -- import HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
+
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -296,7 +298,7 @@ instance HasConnectedComponents' (PlanarGraph w s vertex e f) where
                                   (NonEmptyVector (Component w s)) (Component w s)
       iix' i = reindexed (ComponentId :: Int -> ComponentId s) $ iix (coerce i)
 
-  numConnectedComponents = lengthOf components
+  numConnectedComponents = NonEmptyV.length . view components
 
 instance HasConnectedComponents' (PlaneGraph s vertex e f) where
   type ConnectedComponentIx (PlaneGraph s vertex e f) =
@@ -312,13 +314,14 @@ instance PlanarGraph_ (PlaneGraph s vertex e f) where
   type WorldOf     (PlaneGraph s vertex e f) = Primal
 
   dualGraph = dualGraph . view _PlanarGraph
-  _DualFaceIx     _ = undefined
-  _DualVertexIx   _ = undefined
-  incidentFaceOf  d = undefined
-  rightFaceOf     d = undefined
-  prevDartOf      d = undefined
-  nextDartOf      d = undefined
-  boundaryDartOf  f = undefined
+  _DualFaceIx     _ = coerced
+  _DualVertexIx   _ = coerced
+  incidentFaceOf  d = _PlanarGraph .> incidentFaceOf d
+
+  prevDartOf      d = _PlanarGraph .> prevDartOf d
+  nextDartOf      d = _PlanarGraph .> nextDartOf d
+
+  boundaryDartOf  f = _PlanarGraph .> boundaryDartOf f
   boundaryDarts   f g = undefined
 
 
@@ -379,18 +382,33 @@ instance ( -- PlanarGraph_ (Component s)
          -- , EdgeIx   (Component s) ~ Dart.Dart (Wrap s)
          -- , Edge     (Component s) ~ Dart.Dart s
          ) => PlanarGraph_ (PlanarGraph w s v e f) where
-  -- dualGraph, (incidentFaceOf | leftFaceOf), rightFaceOf, prevDartOf, nextDartOf, boundaryDartOf, boundaryDartOf, boundaryDarts
+  -- dualGraph, (incidentFaceOf | leftFaceOf), prevDartOf, nextDartOf, boundaryDartOf, boundaryDartOf, boundaryDarts
   type DualGraphOf (PlanarGraph w s v e f) = CPlanarGraph (DualOf w) s f e v
   type WorldOf     (PlanarGraph w s v e f) = w
 
   dualGraph =  computeDualGraph
-  _DualFaceIx     _ = undefined
-  _DualVertexIx   _ = undefined
-  incidentFaceOf  d = undefined
-  rightFaceOf     d = undefined
-  prevDartOf      d = undefined
-  nextDartOf      d = undefined
-  boundaryDartOf  f = undefined
+  _DualFaceIx     _ = coerced
+  _DualVertexIx   _ = coerced
+
+  incidentFaceOf  d = \pF gr -> let (_,d', c) = asLocalD d gr
+                                    fi        = c^.incidentFaceOf d'
+                                in singular (faceAt fi) pF gr
+
+
+  prevDartOf      d = \pF gr -> let (_,d', c) = asLocalD d gr
+                                    prevD     = c^.prevDartOf d'
+                                in singular (dartAt prevD) pF gr
+
+  nextDartOf      d = \pF gr -> let (_,d', c) = asLocalD d gr
+                                    nextD     = c^.nextDartOf d'
+                                in singular (dartAt nextD) pF gr
+
+  boundaryDartOf _ = undefined
+
+  -- boundaryDartOf  f = \pF gr -> let (_,f', c) = asLocalF f gr
+  --                                   d         = c^.boundaryDartOf f'
+  --                               in singular (dartAt d) pF gr
+
   boundaryDarts   f g = undefined
 
 
@@ -489,8 +507,10 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
 
 
 
-    xit "fromDisjointSegment" $ do
+    xit "fromDisjointSegments" $ do
       show gr `shouldBe` ""
+    it "fromDisjointComponents" $ do
+      show grr `shouldBe` ""
 
     it "fromDisjointComponents components" $ do
       numConnectedComponents grr `shouldBe` length graphs0
