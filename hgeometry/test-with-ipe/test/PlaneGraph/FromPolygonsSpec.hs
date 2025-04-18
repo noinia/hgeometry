@@ -288,27 +288,6 @@ goFaces globalOuterFaceId localOuterFaceId raw nf = imapAccumLOf faces go (nf, m
 
 --------------------------------------------------------------------------------
 
-instance HasConnectedComponents' (PlanarGraph w s vertex e f) where
-  type ConnectedComponentIx (PlanarGraph w s vertex e f) = ComponentId s
-  type ConnectedComponent   (PlanarGraph w s vertex e f) = Component w s
-  connectedComponentAt i = components .> iix' i
-    where
-      iix'   :: ComponentId s
-             -> IndexedTraversal' (ComponentId s)
-                                  (NonEmptyVector (Component w s)) (Component w s)
-      iix' i = reindexed (ComponentId :: Int -> ComponentId s) $ iix (coerce i)
-
-  numConnectedComponents = NonEmptyV.length . view components
-
-instance HasConnectedComponents' (PlaneGraph s vertex e f) where
-  type ConnectedComponentIx (PlaneGraph s vertex e f) =
-    ConnectedComponentIx (PlanarGraph Primal s vertex e f)
-  type ConnectedComponent (PlaneGraph s vertex e f)   = Component Primal s
-  --
-  connectedComponentAt i = _PlanarGraph .> connectedComponentAt i
-  numConnectedComponents = numConnectedComponents . view _PlanarGraph
-
-
 instance PlanarGraph_ (PlaneGraph s vertex e f) where
   type DualGraphOf (PlaneGraph s vertex e f) = CPlanarGraph Dual s f e vertex
   type WorldOf     (PlaneGraph s vertex e f) = Primal
@@ -323,7 +302,7 @@ instance PlanarGraph_ (PlaneGraph s vertex e f) where
 
   boundaryDartOf  f = _PlanarGraph .> boundaryDartOf f
   boundaryDarts   f g = undefined
-
+                        -- FIXME!!!!!!
 
 instance ( Point_ vertex 2 r, Ord r, Num r
          ) => PlaneGraph_ (PlaneGraph s vertex e f) vertex

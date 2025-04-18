@@ -114,6 +114,20 @@ instance HasFaces (PlaneGraph s v e f) (PlaneGraph s v e f') where
   faces = _PlanarGraph.faces
 
 ----------------------------------------
+
+instance HasConnectedComponents' (PlaneGraph s vertex e f) where
+  type ConnectedComponentIx (PlaneGraph s vertex e f) =
+    ConnectedComponentIx (PlanarGraph Primal s vertex e f)
+  type ConnectedComponent (PlaneGraph s vertex e f)   = Component Primal s
+  --
+  connectedComponentAt i = _PlanarGraph .> connectedComponentAt i
+  numConnectedComponents = numConnectedComponents . view _PlanarGraph
+
+instance HasConnectedComponents (PlaneGraph s vertex e f)
+                                (PlaneGraph s vertex e f) where
+  connectedComponents = _PlanarGraph .> connectedComponents
+
+----------------------------------------
 instance DiGraph_ (PlaneGraph s v e f) where
   endPoints (PlaneGraph g) = endPoints g
   twinDartOf d = twinOf d . to Just
