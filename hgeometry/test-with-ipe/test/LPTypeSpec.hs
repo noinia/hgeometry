@@ -4,14 +4,20 @@ module LPTypeSpec
   ) where
 
 import           Control.Lens
+import           Data.Foldable (toList)
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Ord (comparing)
+import           Data.Proxy
 import           Data.Semigroup
 import qualified Data.Vector as Vector
 import           Data.Word
+import           GHC.TypeLits
 import           HGeometry.HalfSpace
+import           HGeometry.Intersection
 import           HGeometry.Line
+import           HGeometry.Line.General
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Permutation.Shuffle
 import           HGeometry.Point
@@ -19,6 +25,7 @@ import           HGeometry.Unbounded
 import           Ipe
 import           Ipe.Color
 import           Paths_hgeometry
+import           Prelude hiding (filter)
 import           System.OsPath
 import           System.Random
 import           Test.Hspec
@@ -27,6 +34,7 @@ import           Test.QuickCheck ((===))
 import           Test.QuickCheck.Instances ()
 import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.Vector as Builder
+import           Witherable
 
 --------------------------------------------------------------------------------
 
@@ -35,7 +43,6 @@ type R = RealNumber 5
 
 --------------------------------------------------------------------------------
 
-{-
 -- subEx :: HalfSpace_ halfSpace d r
 --       => Vector d r
 --       -- ^ optimization direction
@@ -46,10 +53,129 @@ type R = RealNumber 5
 --       -> Maybe (Point d r, [halfSpace])
 
 
-data LPType t set a = LPType { optimizationGoal :: set a -> t
-                             , elements         :: set a
-                             , basisCost        :: set a -> t
+data LPType t basis set a = LPType
+                            { costFunction :: basis a -> t
+                            -- ^ the function we are trying to minimize
+                             , inputs      :: set a
+                             -- ^
+                             , combinatorialDimension :: Int
+                             -- ^ the combinatorial dimension of the problem
+                             , extendBasis :: a -> basis a -> basis a
+                             -- ^ function to construct the an optimal basis (possibly expensive)
+                             , initialBasis :: set a -> basis a
+                             -- ^ function to construct some initial basis
+                             -- the input may be large.
                              }
+
+
+
+-- linearProgramming              :: Vector d r -> set halfSpace -> LPType (Top r) set halfSpace
+-- linearProgramming v constraints = LPType {
+--     costFunction hs        = undefined
+--   , elements               = constraints
+--   , combinatorialDimension = 2 -- TODO:
+--   , basisFor          hs  = take d hs
+--   , initialBasis      hs  = take d hs
+--   }
+
+
+-- data Basis halfSpace d where
+--   Basis :: (i <= d + 1) => Vector i halfSpace
+
+data Basis2D r halfSpace = Basis1 halfSpace
+                         | Basis2 (Point 2 r) halfSpace halfSpace
+                         -- | Basis3 halfSpace halfSpace halfSpace
+                       deriving (Show,Eq,Functor,Foldable)
+
+
+type HalfPlane r = HalfSpaceF (LineEQ r)
+
+-- | Given a basis, compute the cost associated with the basis
+lpCost :: (Eq r, Num r) => Basis2D r (HalfPlane r) -> Bottom r
+lpCost = \case
+  Basis1 (HalfSpace sign (LineEQ a b)) -> case sign of
+    Negative             -> Bottom
+    Positive | a == 0    -> ValB b
+             | otherwise -> Bottom
+  Basis2 p _ _ -> ValB $ p^.yCoord
+
+
+  -- (HalfSpace sign l) (HalfSpace sign' l') -> case (sign,sign') of
+  --   (Negative,_) -> Bottom
+  --   (_,Negative) -> Bottom
+  --   _            -> case l `intersect` l' of
+  --                     Nothing -> error "absurd"
+  --                     Just p  -> ValB (p^.yCoord)
+
+-- | Tries to extend the basis with the given halfplane
+lpRecomputeBasis :: (Ord r, Fractional r)
+                                            => HalfPlane r
+                                            -> Basis2D r (HalfPlane r) -> Basis2D r (HalfPlane r)
+lpRecomputeBasis h@(HalfSpace sign l) basis = case sign of
+    Negative -> basis -- shouldn't happen for now
+
+    Positive -> case basis of
+      Basis1 h1@(HalfSpace _ l1) -> case l `intersect'` l1 of
+        Just p                       -> Basis2 p h h1
+        Nothing | l `isLowerThan` l1 -> Basis1 h -- replace the basis
+                | otherwise          -> basis
+
+      Basis2 p h1 h2
+        | p `intersects` h -> basis -- solution remains the same
+        | otherwise        -> case l `intersect'` (h1^.boundingHyperPlane) of
+            Nothing -> case l `intersect'` (h2^.boundingHyperPlane) of
+              Just p2 -> Basis2 p2 h h2
+              Nothing -> error "absurd"
+                -- this shouldn't happen, as this implies h1 and h2 are colinear. However
+                -- since p is their intersection point; that cannot be the case .
+            Just p1 -> case l `intersect'` (h2^.boundingHyperPlane) of
+              Nothing -> Basis2 p1 h h1
+              Just p2 -> case p1 `cmp` p2 of
+                LT -> Basis2 p2 h h2
+                _  -> Basis2 p1 h h1
+  where
+    (LineEQ _ b) `isLowerThan` (LineEQ _ b') = b < b'
+    (Point2 x y) `cmp` (Point2 x' y') = compare y y' <> compare x x'
+
+    l `intersect'` l' = do Line_x_Line_Point p  <- l `intersect` l'
+                           pure p  -- fail on something other than a point
+
+
+
+-- | Find an initial basis; i.e. some halfplanes that bound the initial solution from below
+lpInitialBasis    :: (Foldable set, Ord r, Fractional r)
+                  => set (HalfPlane r)
+                  -> Basis2D r (HalfPlane r)
+lpInitialBasis hs = case filter (\h -> h^.halfSpaceSign == Positive) (toList hs) of
+  []        -> error "lpInitialBasis: unounded?"
+  (h1:rest) ->  foldr (\h basis -> case basis of
+                          Basis1 _ -> lpRecomputeBasis h basis
+                          _        -> basis
+                        -- find a second halfplane to go along with it. As soon as
+                        -- we found one we are good.
+                      ) (Basis1 h1) rest
+
+-- | minimize the y-coordinate. (Lexicographically)
+-- pre: LP is feasible
+linearProgrammingMinY             :: (Fractional r, Ord r, Foldable set)
+                                  => set (HalfPlane r)
+                                  -> LPType (Bottom r) (Basis2D r) set (HalfPlane r)
+linearProgrammingMinY constraints = LPType {
+    costFunction           = lpCost
+  , inputs                 = constraints
+  , combinatorialDimension = 2
+  , extendBasis         = lpRecomputeBasis
+  , initialBasis           = lpInitialBasis
+  }
+
+
+
+
+
+
+
+{-
+
 
 -- | Solves the LP Type problem. In particular, a minimization problem.
 --
@@ -160,40 +286,34 @@ clarkson2 gen0 dim v hs
 weightedSample :: gen -> Weight -> f (Weighted a) -> vector a
 weightedSample = undefined
 
+-}
 --------------------------------------------------------------------------------
 
 -- | SubExponential time algorithm to solve the LP-type problem
-subExp      :: ( Foldable1 set
-               , Ord t
-               , RandomGen gen
-                  )
-               => gen
-                  -- ^ random generator
-              -> Int
-              -- ^ The combinatorial dimension
-              -> (set element -> t)
-              -- ^ The optimization goal
-              -> set element
-              -- ^ the input elements
-              -> Maybe (t, NonEmpty element)
-
-subExp gen v hs = subExpWithBasis hs someBasis
+subExp        :: ( Witherable set, Foldable basis
+                 , Ord t
+                 , RandomGen gen
+                 , Eq a
+                 )
+                 => gen
+                    -- ^ random generator
+                -> LPType t basis set a
+                -- ^ an LP-type problem
+                -> (t, basis a)
+subExp gen (LPType v hs _ extendBasis initialBasis) =
+    case extract (initialBasis hs) hs of
+      (basis,gs) -> foldr go (v basis, basis) (Vector.toList $ shuffle gen gs)
   where
-    subExpWithBasis gs basis
-      | gs `eq` basis  = Just (v basis, basis)
-      | otherwise      = let (h,gs') = extract1 gen gs basis
-                             cost    = v basis
-                         in
-          case subExpWithBasis gs' basis of
-            ValT sol@(_, basis') | cost < v (h NonEmpty.<| basis) ->
-                                     subExpWithBasis gs (h NonEmpty.<| basis')
-                                     -- add h to the basis
-                                 | otherwise -> sol
+    go h sol@(cost,basis) = let basis' = extendBasis h basis
+                                cost'  = v basis'
+                            in if cost < cost' then (cost',basis') else sol
 
-    eq gs bs = all (`elem` bs) gs -- the other side is trivailly true
 
--}
+extract          :: (Foldable basis, Eq a, Witherable set) => basis a -> set a -> (basis a, set a)
+extract basis gs = (basis, filter (`notElem` basis) gs)
 
+-- no longer needed:
+{-
 extract1            :: (RandomGen gen, Eq a, Foldable1 f, Foldable set)
                     => gen -> f a -> set a -> (a, [a])
 extract1 gen0 gs bs = go gen0
@@ -208,12 +328,25 @@ extract            :: Int -> NonEmpty a -> (a,[a])
 extract 0 (x :| xs) = (x,xs)
 extract j (x :| xs) = let (y,rest) = extract (j-1) (NonEmpty.fromList xs)
                       in (y,x:rest)
+-}
+
 
 --------------------------------------------------------------------------------
 
 spec :: Spec
 spec = describe "LPType Spec" $ do
-         it "extract" $
-           extract 3 (NonEmpty.fromList "foobarenzo") `shouldBe` ('b',"fooarenzo")
-         prop "extract1" $
-           extract1 (mkStdGen 42) (NonEmpty.fromList "foobarenzo") "foo" ===  ('b',"fooarenzo")
+         it "subExp" $
+           subExp (mkStdGen 42) exampleLP `shouldBe`
+           ( Bottom, Basis1 (HalfSpace Positive (LineEQ 1    0)))
+         -- it "extract" $
+         --   extract 3 (NonEmpty.fromList "foobarenzo") `shouldBe` ('b',"fooarenzo")
+         -- prop "extract1" $
+         --   extract1 (mkStdGen 42) (NonEmpty.fromList "foobarenzo") "foo" ===  ('n',"foobarezo")
+
+
+
+exampleLP :: LPType (Bottom R) (Basis2D R) [] (HalfPlane R)
+exampleLP = linearProgrammingMinY [ HalfSpace Positive (LineEQ 1    0)
+                                  , HalfSpace Positive (LineEQ (-1) 5)
+                                  , HalfSpace Positive (LineEQ 2    (-3))
+                                  ]
