@@ -46,6 +46,30 @@ import           Witherable
 type R = RealNumber 5
 
 
+
+--------------------------------------------------------------------------------
+
+-- | A solution for 1D Linear pgoramming
+data Basis1DLP r = InFeasible1 (HalfSpaceF r) (HalfSpaceF r)
+                 | Feasible1 (HalfSpaceF r)
+                 | Unbounded
+                 deriving (Show,Eq)
+
+-- | Linear programming in 1D, minimizes the x-coord.
+--
+-- \(O(n)\).
+lp1D             :: (Ord r, Foldable1 set) => set (HalfSpaceF r) -> Basis1DLP r
+lp1D constraints = case foldr f (Bottom,Top) constraints of
+    (Bottom,_)             -> Unbounded
+    (ValB (Arg x p), negs) -> case negs of
+      Top                         -> Feasible1 p
+      ValT (Arg x' n) | x <= x'   -> Feasible1 p
+                      | otherwise -> InFeasible1 p n
+  where
+    f h@(HalfSpace sign x) (pos,neg) = case sign of
+      Positive -> (ValB (Arg x h) `max` pos, neg)
+      Negative -> (pos,                      ValT (Arg x h) `min` neg)
+
 --------------------------------------------------------------------------------
 
 -- subEx :: HalfSpace_ halfSpace d r
@@ -115,6 +139,7 @@ lpCost = \case
 
 
 
+
 -- | Tries to extend the basis with the given halfplane
 lpRecomputeBasis :: (Ord r, Fractional r)
                                             => HalfPlane r
@@ -129,7 +154,9 @@ lpRecomputeBasis h@(HalfSpace sign l) basis = case sign of
             -- if the signs are the same, the LP is unbounded and it doesn't help to add
             -- the new plane
         Nothing
-          | l `isLowerThan` l1                      -> Basis1 h -- replace the basis
+          | l1 `isLowerThan` l                      -> Basis1 h
+            -- the bounding lines are parallel, but the new one is higher than
+            -- the one in the basis. So the new one is more restrictive.
         _                                           -> basis
 
       Basis2 p h1 h2
@@ -350,6 +377,24 @@ extract j (x :| xs) = let (y,rest) = extract (j-1) (NonEmpty.fromList xs)
 
 spec :: Spec
 spec = describe "LPType Spec" $ do
+         describe "1D LP" $ do
+           it "1D feasible example" $ do
+             lp1D (NonEmpty.fromList [ HalfSpace Positive 0
+                                     , HalfSpace Negative 10
+                                     , HalfSpace Positive 3
+                                     , HalfSpace Negative 5
+                                     , HalfSpace Positive 2
+                                     ]) `shouldBe` Feasible1 (HalfSpace Positive 3)
+
+           it "1D infeasible example" $ do
+             lp1D (NonEmpty.fromList [ HalfSpace Positive 0
+                                     , HalfSpace Negative 10
+                                     , HalfSpace Positive 3
+                                     , HalfSpace Negative 5
+                                     , HalfSpace Negative 2
+                                     ]) `shouldBe` InFeasible1 (HalfSpace Positive 3)
+                                                               (HalfSpace Negative 2)
+
          it "initialBasis" $ do
            let (h1:h2:_) = exampleLP
            lpInitialBasis exampleLP `shouldBe` (Basis2 (Point2 2.5 2.5) h2 h1)
@@ -385,8 +430,8 @@ testIpe      :: OsPath -> Spec
 testIpe inFp = describe ("linear programming on file " <> show inFp) $ do
           (halfPlanes, solution) <- runIO $ loadInputs inFp
 
-          it "subExp correct" $ do
-            let (_,basis) = subExp (mkStdGen 42) $ linearProgrammingMinY (view core <$> halfPlanes)
+          let (sol,basis) = subExp (mkStdGen 42) $ linearProgrammingMinY (view core <$> halfPlanes)
+          it ("subExp correct, " <> show sol) $ do
             Set.fromList (toList basis) `shouldBe` solution
 
 
