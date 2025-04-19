@@ -12,11 +12,13 @@ import           Data.Maybe (fromJust)
 import           Data.Ord (comparing)
 import           Data.Proxy
 import           Data.Semigroup
+import qualified Data.Set as Set
 import qualified Data.Vector as Vector
 import           Data.Word
 import           GHC.TypeLits
 import           Golden
 import           HGeometry.Ext
+import           HGeometry.Foldable.Util
 import           HGeometry.HalfLine
 import           HGeometry.HalfSpace
 import           HGeometry.Intersection
@@ -110,6 +112,9 @@ lpCost = \case
   --                     Nothing -> error "absurd"
   --                     Just p  -> ValB (p^.yCoord)
 
+
+
+
 -- | Tries to extend the basis with the given halfplane
 lpRecomputeBasis :: (Ord r, Fractional r)
                                             => HalfPlane r
@@ -119,9 +124,13 @@ lpRecomputeBasis h@(HalfSpace sign l) basis = case sign of
 
     Positive -> case basis of
       Basis1 h1@(HalfSpace _ l1) -> case l `intersect'` l1 of
-        Just p                       -> Basis2 p h h1
-        Nothing | l `isLowerThan` l1 -> Basis1 h -- replace the basis
-                | otherwise          -> basis
+        Just p
+          | signum (l1^.slope) /= signum (l^.slope) -> Basis2 p h h1
+            -- if the signs are the same, the LP is unbounded and it doesn't help to add
+            -- the new plane
+        Nothing
+          | l `isLowerThan` l1                      -> Basis1 h -- replace the basis
+        _                                           -> basis
 
       Basis2 p h1 h2
         | p `intersects` h -> basis -- solution remains the same
@@ -134,14 +143,14 @@ lpRecomputeBasis h@(HalfSpace sign l) basis = case sign of
             Just p1 -> case l `intersect'` (h2^.boundingHyperPlane) of
               Nothing -> Basis2 p1 h h1
               Just p2 -> case p1 `cmp` p2 of
-                LT -> Basis2 p2 h h2
-                _  -> Basis2 p1 h h1
+                LT -> Basis2 p1 h h2
+                _  -> Basis2 p2 h h1
   where
     (LineEQ _ b) `isLowerThan` (LineEQ _ b') = b < b'
     (Point2 x y) `cmp` (Point2 x' y') = compare y y' <> compare x x'
 
-    l `intersect'` l' = do Line_x_Line_Point p  <- l `intersect` l'
-                           pure p  -- fail on something other than a point
+    la `intersect'` lb = do Line_x_Line_Point p  <- la `intersect` lb
+                            pure p  -- fail on something other than a point
 
 
 
@@ -341,33 +350,46 @@ extract j (x :| xs) = let (y,rest) = extract (j-1) (NonEmpty.fromList xs)
 
 spec :: Spec
 spec = describe "LPType Spec" $ do
+         it "initialBasis" $ do
+           let (h1:h2:_) = exampleLP
+           lpInitialBasis exampleLP `shouldBe` (Basis2 (Point2 2.5 2.5) h2 h1)
+
+         it "lp extend basis" $ do
+           let (_:_:h3:_) = exampleLP
+               basis = lpInitialBasis exampleLP
+           lpRecomputeBasis h3 basis `shouldBe` basis
+
          it "subExp" $
-           fst (subExp (mkStdGen 42) exampleLP) `shouldBe` (ValB 2.5)
+           fst (subExp (mkStdGen 42) (linearProgrammingMinY exampleLP)) `shouldBe` (ValB 2.5)
+
          testIpe [osp|LPType/lpType_linearProgramming.ipe|]
+         testIpe [osp|LPType/linearProgramming1.ipe|]
+         testIpe [osp|LPType/linearProgramming2.ipe|]
+
          -- it "extract" $
          --   extract 3 (NonEmpty.fromList "foobarenzo") `shouldBe` ('b',"fooarenzo")
          -- prop "extract1" $
          --   extract1 (mkStdGen 42) (NonEmpty.fromList "foobarenzo") "foo" ===  ('n',"foobarezo")
 
 
-
-exampleLP :: LPType (Bottom R) (Basis2D R) [] (HalfPlane R)
-exampleLP = linearProgrammingMinY [ HalfSpace Positive (LineEQ 1    0)
-                                  , HalfSpace Positive (LineEQ (-1) 5)
-                                  , HalfSpace Positive (LineEQ 2    (-3))
-                                  ]
-
+exampleLP :: [HalfPlane R]
+exampleLP = [ HalfSpace Positive (LineEQ 1    0)
+            , HalfSpace Positive (LineEQ (-1) 5)
+            , HalfSpace Positive (LineEQ 2    (-3))
+            ]
 
 --------------------------------------------------------------------------------
 
 
 testIpe      :: OsPath -> Spec
 testIpe inFp = describe ("linear programming on file " <> show inFp) $ do
-          (halfPlanes, solution :| _) <- runIO $ loadInputs inFp
+          (halfPlanes, solution) <- runIO $ loadInputs inFp
 
           it "subExp correct" $ do
-            let (answer,_) = subExp (mkStdGen 42) $ linearProgrammingMinY (view core <$> halfPlanes)
-            answer `shouldBe` (ValB $ solution^.yCoord)
+            let (_,basis) = subExp (mkStdGen 42) $ linearProgrammingMinY (view core <$> halfPlanes)
+            Set.fromList (toList basis) `shouldBe` solution
+
+
 
           -- for_ segments $ \seg ->
           --   for_ halfPlanes $ \halfPlane -> do
@@ -376,15 +398,19 @@ testIpe inFp = describe ("linear programming on file " <> show inFp) $ do
 
 
 loadInputs      :: OsPath -> IO ( NonEmpty (HalfPlane R :+ _)
-                                , NonEmpty (Point 2 R :+ _)
+                                , Set.Set (HalfPlane R)
                                 )
 loadInputs inFp = do
         inFp'      <- getDataFileName ([osp|test-with-ipe/|] <> inFp)
         Right page <- readSinglePageFile inFp'
         let (rays :: NonEmpty (HalfLine (Point 2 R) :+ _)) = NonEmpty.fromList $ readAll page
-            pts                                            = NonEmpty.fromList $ readAll page
         -- take the left halfplane of every halfline
-        pure (over core (toLineEQ . leftHalfPlane . asOrientedLine) <$> rays, pts)
+            halfPlanes = over core (toLineEQ . leftHalfPlane . asOrientedLine) <$> rays
+            solution   = foldMap (\(h :+ ats) ->
+                                    if lookupAttr SStroke ats == Just red
+                                    then Set.singleton h else mempty
+                                 ) halfPlanes
+        pure (halfPlanes, solution)
 
 toLineEQ :: HalfSpaceF (LinePV 2 R) -> HalfPlane R
 toLineEQ = over boundingHyperPlaneLens (fromJust . toLinearFunction)
