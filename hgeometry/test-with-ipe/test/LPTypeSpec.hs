@@ -8,12 +8,16 @@ import           Data.Foldable (toList)
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe (fromJust)
 import           Data.Ord (comparing)
 import           Data.Proxy
 import           Data.Semigroup
 import qualified Data.Vector as Vector
 import           Data.Word
 import           GHC.TypeLits
+import           Golden
+import           HGeometry.Ext
+import           HGeometry.HalfLine
 import           HGeometry.HalfSpace
 import           HGeometry.Intersection
 import           HGeometry.Line
@@ -24,7 +28,6 @@ import           HGeometry.Point
 import           HGeometry.Unbounded
 import           Ipe
 import           Ipe.Color
-import           Paths_hgeometry
 import           Prelude hiding (filter)
 import           System.OsPath
 import           System.Random
@@ -164,7 +167,7 @@ linearProgrammingMinY constraints = LPType {
     costFunction           = lpCost
   , inputs                 = constraints
   , combinatorialDimension = 2
-  , extendBasis         = lpRecomputeBasis
+  , extendBasis            = lpRecomputeBasis
   , initialBasis           = lpInitialBasis
   }
 
@@ -290,7 +293,11 @@ weightedSample = undefined
 --------------------------------------------------------------------------------
 
 -- | SubExponential time algorithm to solve the LP-type problem
-subExp        :: ( Witherable set, Foldable basis
+--
+-- input: \(n\) constraints, combinatorial dimension \(d\)
+--
+-- running time: \(O(d^2 + nd) * e^{O(\sqrt{d\ln n})}\)
+subExp        :: ( Foldable set, Foldable basis
                  , Ord t
                  , RandomGen gen
                  , Eq a
@@ -308,9 +315,8 @@ subExp gen (LPType v hs _ extendBasis initialBasis) =
                                 cost'  = v basis'
                             in if cost < cost' then (cost',basis') else sol
 
-
-extract          :: (Foldable basis, Eq a, Witherable set) => basis a -> set a -> (basis a, set a)
-extract basis gs = (basis, filter (`notElem` basis) gs)
+extract          :: (Foldable basis, Eq a, Foldable set) => basis a -> set a -> (basis a, [a])
+extract basis gs = (basis, filter (`notElem` basis) $ toList gs)
 
 -- no longer needed:
 {-
@@ -336,8 +342,8 @@ extract j (x :| xs) = let (y,rest) = extract (j-1) (NonEmpty.fromList xs)
 spec :: Spec
 spec = describe "LPType Spec" $ do
          it "subExp" $
-           subExp (mkStdGen 42) exampleLP `shouldBe`
-           ( Bottom, Basis1 (HalfSpace Positive (LineEQ 1    0)))
+           fst (subExp (mkStdGen 42) exampleLP) `shouldBe` (ValB 2.5)
+         testIpe [osp|LPType/lpType_linearProgramming.ipe|]
          -- it "extract" $
          --   extract 3 (NonEmpty.fromList "foobarenzo") `shouldBe` ('b',"fooarenzo")
          -- prop "extract1" $
@@ -350,3 +356,39 @@ exampleLP = linearProgrammingMinY [ HalfSpace Positive (LineEQ 1    0)
                                   , HalfSpace Positive (LineEQ (-1) 5)
                                   , HalfSpace Positive (LineEQ 2    (-3))
                                   ]
+
+
+--------------------------------------------------------------------------------
+
+
+testIpe      :: OsPath -> Spec
+testIpe inFp = describe ("linear programming on file " <> show inFp) $ do
+          (halfPlanes, solution :| _) <- runIO $ loadInputs inFp
+
+          it "subExp correct" $ do
+            let (answer,_) = subExp (mkStdGen 42) $ linearProgrammingMinY (view core <$> halfPlanes)
+            answer `shouldBe` (ValB $ solution^.yCoord)
+
+          -- for_ segments $ \seg ->
+          --   for_ halfPlanes $ \halfPlane -> do
+          --     it ("intersects halfplane and line segment") $
+          --       (seg `intersects` halfPlane) `shouldBe` True
+
+
+loadInputs      :: OsPath -> IO ( NonEmpty (HalfPlane R :+ _)
+                                , NonEmpty (Point 2 R :+ _)
+                                )
+loadInputs inFp = do
+        inFp'      <- getDataFileName ([osp|test-with-ipe/|] <> inFp)
+        Right page <- readSinglePageFile inFp'
+        let (rays :: NonEmpty (HalfLine (Point 2 R) :+ _)) = NonEmpty.fromList $ readAll page
+            pts                                            = NonEmpty.fromList $ readAll page
+        -- take the left halfplane of every halfline
+        pure (over core (toLineEQ . leftHalfPlane . asOrientedLine) <$> rays, pts)
+
+toLineEQ :: HalfSpaceF (LinePV 2 R) -> HalfPlane R
+toLineEQ = over boundingHyperPlaneLens (fromJust . toLinearFunction)
+
+    -- goldenWith [osp|data/test-with-ipe/golden/|]
+    --                 (ipeContentGolden { name = theName  })
+    --                 ( myIpeTest halfPlanes)

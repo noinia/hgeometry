@@ -16,6 +16,9 @@ module HGeometry.HalfSpace
   , module HGeometry.HalfSpace.Class
 
   , Point_x_HalfSpace_Intersection(..)
+
+
+  , boundingHyperPlaneLens
   ) where
 
 import Control.Lens
@@ -52,6 +55,9 @@ instance ( HyperPlane_ boundingHyperPlane d r
   boundingHyperPlane = boundingHyperPlaneLens
 
 -- | Lens to access the hyperplane bounding the halfspace
+--
+-- Generally, one can just use boundingHyperPlane from the HalfSpace_ class. But this one
+-- is useful if you need a lens to change the type of the bounding hyperplane.
 boundingHyperPlaneLens :: Lens (HalfSpaceF boundingHyperPlane) (HalfSpaceF boundingHyperPlane')
                            boundingHyperPlane              boundingHyperPlane'
 boundingHyperPlaneLens = lens (\(HalfSpace _ h) -> h) (\(HalfSpace s _) h -> HalfSpace s h)
