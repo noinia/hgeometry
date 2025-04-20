@@ -31,7 +31,7 @@ import           HGeometry.Permutation.Shuffle
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Unbounded
-import           HGeometry.Vector
+import           HGeometry.Vector hiding (basis)
 import           Ipe
 import           Ipe.Color
 import           Prelude hiding (filter)
@@ -192,12 +192,13 @@ constructHalfSpaceOn :: (Fractional r, Ord r)
                      -> HalfPlane r
                      -- ^ the existing halfplane
                      -> Maybe (Extend r (HalfPlane r))
-constructHalfSpaceOn h@(HalfSpace sign l) h'@(HalfSpace sign' l')
+constructHalfSpaceOn h h'
     | not (h `intersects` h') = Just $ Infeasible2 h'
-    | otherwise               = case l `intersect` l' of
+    | otherwise               = case l `intersect` (h'^.boundingHyperPlane) of
         Just (Line_x_Line_Point p) -> Just . Partial $ halfSpace1D p :+ (p,h')
         _                          -> Nothing -- constraint is not useful
   where
+    l = h^.boundingHyperPlane
     -- the halfpsace of h' on the bounding line of h
     halfSpace1D (Point2 x y) = HalfSpace newSign (Point1 (y,x))
       where
@@ -245,7 +246,6 @@ lpRecomputeBasis h@(HalfSpace sign l) basis = case sign of
 
   where
     (LineEQ _ b) `isLowerThan` (LineEQ _ b') = b < b'
-    (Point2 x y) `cmp` (Point2 x' y') = compare y y' <> compare x x'
 
     la `intersect'` lb = do Line_x_Line_Point p  <- la `intersect` lb
                             pure p  -- fail on something other than a point
@@ -422,8 +422,8 @@ subExp gen (LPType v hs _ extendBasis initialBasis) =
                                 cost'  = v basis'
                             in if cost < cost' then (cost',basis') else sol
 
-extract          :: (Foldable basis, Eq a, Foldable set) => basis a -> set a -> (basis a, [a])
-extract basis gs = (basis, filter (`notElem` basis) $ toList gs)
+extract           :: (Foldable basis, Eq a, Foldable set) => basis a -> set a -> (basis a, [a])
+extract basis' gs = (basis', filter (`notElem` basis') $ toList gs)
 
 -- no longer needed:
 {-
@@ -476,8 +476,8 @@ spec = describe "LPType Spec" $ do
 
          it "lp extend basis" $ do
            let (_:_:h3:_) = exampleLP
-               basis = lpInitialBasis exampleLP
-           lpRecomputeBasis h3 basis `shouldBe` basis
+               basis' = lpInitialBasis exampleLP
+           lpRecomputeBasis h3 basis' `shouldBe` basis'
 
          it "subExp" $
            fst (subExp (mkStdGen 42) (linearProgrammingMinY exampleLP)) `shouldBe` (ValB 2.5)
@@ -538,9 +538,10 @@ testIpe inFp = describe ("linear programming on file " <> show inFp) $ do
 -- HalfSpace Positive (LineEQ (-0.6) 195.2)
 
 
-          let (sol,basis) = subExp (mkStdGen 42) $ linearProgrammingMinY (view core <$> halfPlanes)
+          let (sol,basis') = subExp (mkStdGen 42)
+                           $ linearProgrammingMinY (view core <$> halfPlanes)
           it ("subExp correct, " <> show sol) $ do
-            Set.fromList (toList basis) `shouldBe` solution
+            Set.fromList (toList basis') `shouldBe` solution
 
 
 
