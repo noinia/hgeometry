@@ -46,7 +46,8 @@ data HalfSpaceF boundingHyperPlane =
     HalfSpace {-# UNPACK #-} !Sign boundingHyperPlane
   deriving (Show,Eq,Ord,Functor,Foldable,Traversable)
 
-instance ( HyperPlane_ boundingHyperPlane d r
+instance ( NumType boundingHyperPlane ~ r
+         , Dimension boundingHyperPlane ~ d
          ) => HalfSpace_ (HalfSpaceF boundingHyperPlane) d r where
   type BoundingHyperPlane (HalfSpaceF boundingHyperPlane) d r = boundingHyperPlane
 
