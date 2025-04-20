@@ -138,25 +138,32 @@ data LPType t basis set a = LPType
 --   }
 
 
+--------------------------------------------------------------------------------
+
+
+
+
 -- data Basis halfSpace d where
 --   Basis :: (i <= d + 1) => Vector i halfSpace
 
 data Basis2D r halfSpace = Basis1 halfSpace
                          | Basis2 (Point 2 r) halfSpace halfSpace
-                         -- | Basis3 halfSpace halfSpace halfSpace
+                         | Infeasible (Vector 3 halfSpace)
+                         -- ^ Infeasible
                        deriving (Show,Eq,Functor,Foldable)
 
 
 type HalfPlane r = HalfSpaceF (LineEQ r)
 
 -- | Given a basis, compute the cost associated with the basis
-lpCost :: (Eq r, Num r) => Basis2D r (HalfPlane r) -> Bottom r
+lpCost :: (Eq r, Num r) => Basis2D r (HalfPlane r) -> UnBounded r
 lpCost = \case
   Basis1 (HalfSpace sign (LineEQ a b)) -> case sign of
-    Negative             -> Bottom
-    Positive | a == 0    -> ValB b
-             | otherwise -> Bottom
-  Basis2 p _ _ -> ValB $ p^.yCoord
+                                            Negative             -> MinInfinity
+                                            Positive | a == 0    -> Val b
+                                                     | otherwise -> MinInfinity
+  Basis2 p _ _                         -> Val $ p^.yCoord
+  Infeasible _                         -> MaxInfinity
 
 
 type HalfSpace1 r halfSpace = HalfSpaceF (Point 1 (r,r)) :+ (Point 2 r, halfSpace)
@@ -215,40 +222,40 @@ constructHalfSpaceOn h h'
 
 
 -- | Tries to extend the basis with the given halfplane
-lpRecomputeBasis :: (Ord r, Fractional r)
+lpRecomputeBasis                            :: (Ord r, Fractional r)
                                             => HalfPlane r
                                             -> Basis2D r (HalfPlane r) -> Basis2D r (HalfPlane r)
 lpRecomputeBasis h@(HalfSpace sign l) basis = case sign of
     Negative -> basis -- shouldn't happen for now
 
     Positive -> case basis of
-      Basis1 h1@(HalfSpace _ l1) -> case l `intersect'` l1 of
-        Just p
+      Basis1 h1@(HalfSpace _ l1) -> case l `intersect` l1 of
+        Just (Line_x_Line_Point p)
           | signum (l1^.slope) /= signum (l^.slope) -> Basis2 p h h1
             -- if the signs are the same, the LP is unbounded and it doesn't help to add
             -- the new plane
-        Nothing
+        _
           | l1 `isLowerThan` l                      -> Basis1 h
             -- the bounding lines are parallel, but the new one is higher than
             -- the one in the basis. So the new one is more restrictive.
-        _                                           -> basis
+          | otherwise                               -> basis
+       where
+         (LineEQ _ b) `isLowerThan` (LineEQ _ b') = b < b'
 
       Basis2 p h1 h2
-        | p `intersects` h -> basis -- solution remains the same
-        | otherwise        -> case collect $ mapMaybe (constructHalfSpaceOn h) [h1,h2] of
-            Left _h'           -> error "infeasible" -- TODO
-            Right constraints -> case NonEmpty.nonEmpty constraints of
-              Nothing          -> error "absurd: unbounded?"
-              Just constraints' -> case lp1D constraints' of
-                InFeasible1 _ _         -> error "infeasible" -- TODO
-                Feasible1 (_ :+ (q,h')) -> Basis2 q h h'
-                Unbounded                              -> error "absurd: unbounded?"
+          | p `intersects` h -> basis -- solution remains the same
+          | otherwise        -> case collect $ mapMaybe (constructHalfSpaceOn h) [h1,h2] of
+              Left _            -> infeasible
+              Right constraints -> case NonEmpty.nonEmpty constraints of
+                Nothing          -> error "absurd: lpExtendBasis. No constraints, so unbounded?"
+                Just constraints' -> case lp1D constraints' of
+                  InFeasible1 _ _         -> infeasible
+                  Feasible1 (_ :+ (q,h')) -> Basis2 q h h'
+                  Unbounded               -> error "absurd: lpExtendBasis. unbounded?"
+        where
+          infeasible = Infeasible (Vector3 h h1 h2)
 
-  where
-    (LineEQ _ b) `isLowerThan` (LineEQ _ b') = b < b'
-
-    la `intersect'` lb = do Line_x_Line_Point p  <- la `intersect` lb
-                            pure p  -- fail on something other than a point
+      Infeasible _         -> basis -- already infeasible, so remains infeasible
 
 
 
@@ -269,11 +276,11 @@ lpInitialBasis hs = case filter (\h -> h^.halfSpaceSign == Positive) (toList hs)
 -- pre: LP is feasible
 linearProgrammingMinY             :: (Fractional r, Ord r, Foldable set)
                                   => set (HalfPlane r)
-                                  -> LPType (Bottom r) (Basis2D r) set (HalfPlane r)
+                                  -> LPType (UnBounded r) (Basis2D r) set (HalfPlane r)
 linearProgrammingMinY constraints = LPType {
     costFunction           = lpCost
   , inputs                 = constraints
-  , combinatorialDimension = 2
+  , combinatorialDimension = 3
   , extendBasis            = lpRecomputeBasis
   , initialBasis           = lpInitialBasis
   }
@@ -422,6 +429,7 @@ subExp gen (LPType v hs _ extendBasis initialBasis) =
                                 cost'  = v basis'
                             in if cost < cost' then (cost',basis') else sol
 
+-- | Remoevs the items from the basis from the input set.
 extract           :: (Foldable basis, Eq a, Foldable set) => basis a -> set a -> (basis a, [a])
 extract basis' gs = (basis', filter (`notElem` basis') $ toList gs)
 
@@ -480,12 +488,13 @@ spec = describe "LPType Spec" $ do
            lpRecomputeBasis h3 basis' `shouldBe` basis'
 
          it "subExp" $
-           fst (subExp (mkStdGen 42) (linearProgrammingMinY exampleLP)) `shouldBe` (ValB 2.5)
+           fst (subExp (mkStdGen 42) (linearProgrammingMinY exampleLP)) `shouldBe` (Val 2.5)
 
          testIpe [osp|LPType/lpType_linearProgramming.ipe|]
          testIpe [osp|LPType/linearProgramming1.ipe|]
          testIpe [osp|LPType/linearProgramming2.ipe|]
          testIpe [osp|LPType/linearProgramming2_simpl.ipe|]
+         testIpe [osp|LPType/infeasible_lp.ipe|]
 
          -- it "extract" $
          --   extract 3 (NonEmpty.fromList "foobarenzo") `shouldBe` ('b',"fooarenzo")
