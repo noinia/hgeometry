@@ -7,6 +7,7 @@ module LPTypeSpec
 import           Control.Lens
 import           Data.Foldable (toList)
 import           Data.Foldable1
+import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust)
@@ -146,8 +147,13 @@ data LPType t basis set a = LPType
 -- data Basis halfSpace d where
 --   Basis :: (i <= d + 1) => Vector i halfSpace
 
-data Basis2D r halfSpace = Basis1 halfSpace
+data Basis2D r halfSpace = EmptyBasis
+                         -- ^ The solution must be unbounded
+                         | Basis1 r halfSpace
+                         -- ^ apparently we have a halfspace perpendicular to the
+                         -- optimization direction. So it just has a fixed value r.
                          | Basis2 (Point 2 r) halfSpace halfSpace
+                         -- ^ The normal case in which a feasible solution (optimum)
                          | Infeasible (Vector 3 halfSpace)
                          -- ^ Infeasible
                        deriving (Show,Eq,Functor,Foldable)
@@ -158,12 +164,15 @@ type HalfPlane r = HalfSpaceF (LineEQ r)
 -- | Given a basis, compute the cost associated with the basis
 lpCost :: (Eq r, Num r) => Basis2D r (HalfPlane r) -> UnBounded r
 lpCost = \case
-  Basis1 (HalfSpace sign (LineEQ a b)) -> case sign of
-                                            Negative             -> MinInfinity
-                                            Positive | a == 0    -> Val b
-                                                     | otherwise -> MinInfinity
-  Basis2 p _ _                         -> Val $ p^.yCoord
-  Infeasible _                         -> MaxInfinity
+  EmptyBasis   -> MinInfinity
+  Basis1 y _   -> Val y
+  Basis2 p _ _ -> Val $ p^.yCoord
+  Infeasible _ -> MaxInfinity
+
+  -- (HalfSpace sign (LineEQ a b)) -> case sign of
+  --                                           Negative             -> MinInfinity
+  --                                           Positive | a == 0    -> Val b
+  --                                                    | otherwise -> MinInfinity
 
 
 type HalfSpace1 r halfSpace = HalfSpaceF (Point 1 (r,r)) :+ (Point 2 r, halfSpace)
@@ -225,52 +234,54 @@ constructHalfSpaceOn h h'
 lpRecomputeBasis                            :: (Ord r, Fractional r)
                                             => HalfPlane r
                                             -> Basis2D r (HalfPlane r) -> Basis2D r (HalfPlane r)
-lpRecomputeBasis h@(HalfSpace sign l) basis = case sign of
-    Negative -> basis -- shouldn't happen for now
+lpRecomputeBasis h@(HalfSpace sign l) basis = case basis of
+    Infeasible _         -> basis -- already infeasible, so remains infeasible
 
-    Positive -> case basis of
-      Basis1 h1@(HalfSpace _ l1) -> case l `intersect` l1 of
-        Just (Line_x_Line_Point p)
-          | signum (l1^.slope) /= signum (l^.slope) -> Basis2 p h h1
-            -- if the signs are the same, the LP is unbounded and it doesn't help to add
-            -- the new plane
-        _
-          | l1 `isLowerThan` l                      -> Basis1 h
-            -- the bounding lines are parallel, but the new one is higher than
-            -- the one in the basis. So the new one is more restrictive.
-          | otherwise                               -> basis
-       where
-         (LineEQ _ b) `isLowerThan` (LineEQ _ b') = b < b'
+    Basis2 p h1 h2
+        | p `intersects` h -> basis -- solution remains the same
+        | otherwise        -> case collect $ mapMaybe (constructHalfSpaceOn h) [h1,h2] of
+            Left _            -> infeasible
+            Right constraints -> case NonEmpty.nonEmpty constraints of
+              Nothing          -> error "absurd: lpExtendBasis. No constraints, so unbounded?"
+              Just constraints' -> case lp1D constraints' of
+                InFeasible1 _ _         -> infeasible
+                Feasible1 (_ :+ (q,h')) -> Basis2 q h h'
+                Unbounded               -> error "absurd: lpExtendBasis. unbounded?"
+      where
+        infeasible = Infeasible (Vector3 h h1 h2)
 
-      Basis2 p h1 h2
-          | p `intersects` h -> basis -- solution remains the same
-          | otherwise        -> case collect $ mapMaybe (constructHalfSpaceOn h) [h1,h2] of
-              Left _            -> infeasible
-              Right constraints -> case NonEmpty.nonEmpty constraints of
-                Nothing          -> error "absurd: lpExtendBasis. No constraints, so unbounded?"
-                Just constraints' -> case lp1D constraints' of
-                  InFeasible1 _ _         -> infeasible
-                  Feasible1 (_ :+ (q,h')) -> Basis2 q h h'
-                  Unbounded               -> error "absurd: lpExtendBasis. unbounded?"
+    Basis1 y h1 -> case l `intersect` (h1^.boundingHyperPlane) of
+      Just (Line_x_Line_Line _)                -> basis -- not useful yet
+      Just (Line_x_Line_Point p)
+        | (p .-^ (Vector2 1 0)) `intersects` h -> basis
+          -- h defines the 1D halfspace (-infty,p_x] on h1. So it's not useful
+        | otherwise                            -> Basis2 p h1 h
+      Nothing
+        | b > y                                -> Basis1 b h -- h is more restrictive than h1
+        | otherwise                            -> basis
         where
-          infeasible = Infeasible (Vector3 h h1 h2)
+          b = l^.intercept
 
-      Infeasible _         -> basis -- already infeasible, so remains infeasible
-
+    EmptyBasis -> case sign of
+      Positive | l^.slope == 0 -> Basis1 (l^.intercept) h
+      _                        -> EmptyBasis -- basis remains empty
 
 
 -- | Find an initial basis; i.e. some halfplanes that bound the initial solution from below
 lpInitialBasis    :: (Foldable set, Ord r, Fractional r)
                   => set (HalfPlane r)
                   -> Basis2D r (HalfPlane r)
-lpInitialBasis hs = case filter (\h -> h^.halfSpaceSign == Positive) (toList hs) of
-  []        -> error "lpInitialBasis: unounded?"
-  (h1:rest) ->  foldr (\h basis -> case basis of
-                          Basis1 _ -> lpRecomputeBasis h basis
-                          _        -> basis
-                        -- find a second halfplane to go along with it. As soon as
-                        -- we found one we are good.
-                      ) (Basis1 h1) rest
+lpInitialBasis hs = case List.partition (\h -> h^.boundingHyperPlane.slope >= 0)
+                       . filter (\h -> h^.halfSpaceSign == Positive)
+                       . toList $ hs
+                    of
+  (pos:_,neg:_) -> case (pos^.boundingHyperPlane) `intersect` (neg^.boundingHyperPlane) of
+                     Just (Line_x_Line_Point p) -> Basis2 p pos neg
+                     _                          -> error "lpInitialBasis: absurd"
+  ([],_)        -> EmptyBasis
+  (poss,[])     -> case filter (\h -> h^.boundingHyperPlane.slope == 0) poss of
+                     []      -> EmptyBasis
+                     (pos:_) -> Basis1 (pos^.boundingHyperPlane.intercept) pos
 
 -- | minimize the y-coordinate. (Lexicographically)
 -- pre: LP is feasible
@@ -480,7 +491,7 @@ spec = describe "LPType Spec" $ do
 
          it "initialBasis" $ do
            let (h1:h2:_) = exampleLP
-           lpInitialBasis exampleLP `shouldBe` (Basis2 (Point2 2.5 2.5) h2 h1)
+           lpInitialBasis exampleLP `shouldBe` (Basis2 (Point2 2.5 2.5) h1 h2)
 
          it "lp extend basis" $ do
            let (_:_:h3:_) = exampleLP
@@ -489,6 +500,14 @@ spec = describe "LPType Spec" $ do
 
          it "subExp" $
            fst (subExp (mkStdGen 42) (linearProgrammingMinY exampleLP)) `shouldBe` (Val 2.5)
+
+         it "manual infeasible" $ do
+           let h1 = HalfSpace Positive (LineEQ 0.29166 38.66671) :: HalfSpaceF (LineEQ R)
+               h2 = HalfSpace Positive (LineEQ (-0.6) 195.2)
+               h3 = HalfSpace Negative (LineEQ 0 80)
+               ib = lpInitialBasis [h1,h2]
+           lpRecomputeBasis h3 ib `shouldBe` Infeasible (Vector3 h3 h1 h2)
+
 
          testIpe [osp|LPType/lpType_linearProgramming.ipe|]
          testIpe [osp|LPType/linearProgramming1.ipe|]
@@ -575,8 +594,13 @@ loadInputs inFp = do
                                  ) halfPlanes
         pure (halfPlanes, solution)
 
-toLineEQ :: HalfSpaceF (LinePV 2 R) -> HalfPlane R
-toLineEQ = over boundingHyperPlaneLens (fromJust . toLinearFunction)
+toLineEQ                :: HalfSpaceF (LinePV 2 R) -> HalfPlane R
+toLineEQ (HalfSpace _ l)
+    | l^.direction.xComponent > 0 = HalfSpace Positive l' -- sign was already positive
+    | otherwise                   = HalfSpace Negative l'
+  where
+    l' = fromJust . toLinearFunction $ l
+
 
     -- goldenWith [osp|data/test-with-ipe/golden/|]
     --                 (ipeContentGolden { name = theName  })
