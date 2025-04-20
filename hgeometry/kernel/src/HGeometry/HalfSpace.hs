@@ -121,3 +121,12 @@ instance ( HyperPlane_ boudingHyperPlane d r, Ord r, Num r
                   GT -> Nothing
 
 --------------------------------------------------------------------------------
+
+
+instance (HasIntersectionWith line line'
+         , HyperPlane_ line 2 r, HyperPlane_ line' 2 r
+         , Ord r, Fractional r
+         )
+       => HasIntersectionWith (HalfSpaceF line) (HalfSpaceF line') where
+  h@(HalfSpace _ l) `intersects` h'@(HalfSpace _ l') =
+    l `intersects` l' || pointOn l `intersects`  h' || pointOn l' `intersects`  h

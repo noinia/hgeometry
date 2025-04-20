@@ -68,6 +68,7 @@ commonIntersection     :: forall f halfPlane r.
                           ( Foldable1 f, Functor f
                           , HalfPlane_ halfPlane r
                           , Fractional r, Ord r
+                          , HyperPlane_ (BoundingHyperPlane halfPlane 2 r) 2 r
 
                           , Show halfPlane, Show r
                           )
@@ -246,6 +247,7 @@ type NonVerticals halfPlane r = These2 (NonEmpty (LineEQ r :+ halfPlane))
 partitionhalfPlanes     :: forall f halfPlane r.
                            ( Foldable1 f
                            , HalfPlane_ halfPlane r, Ord r, Fractional r
+                           , HyperPlane_ (BoundingHyperPlane halfPlane 2 r) 2 r
                            ) => f halfPlane
                         -> These (Verticals halfPlane r) (NonVerticals halfPlane r)
 partitionhalfPlanes = bimap partition' partition'
@@ -448,7 +450,10 @@ intersectVertical x (l' :+ _) _ = Point2 x (evalAt' x l')
 
 -- | Classify the halfplane as either having a vertical bounding line or a general
 -- non-vertical line.
-classifyHalfPlane   :: (HalfPlane_ halfPlane r, Fractional r, Eq r)
+classifyHalfPlane   :: ( HalfPlane_ halfPlane r
+                       , HyperPlane_ (BoundingHyperPlane halfPlane 2 r) 2 r
+                       , Fractional r, Eq r
+                       )
                     => halfPlane
                     -> Either (r :+ halfPlane) (LineEQ r :+ halfPlane)
 classifyHalfPlane h = case h^.boundingHyperPlane.to asGeneralLine of

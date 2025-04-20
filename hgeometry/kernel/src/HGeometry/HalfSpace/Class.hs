@@ -14,20 +14,22 @@ module HGeometry.HalfSpace.Class
   ) where
 
 import Control.Lens
-import HGeometry.HyperPlane.Class
+-- import HGeometry.HyperPlane.Class
 import HGeometry.Properties (NumType, Dimension)
 import HGeometry.Sign
 
 --------------------------------------------------------------------------------
 
 -- | Types modelling halfspaces.
-class ( HyperPlane_ (BoundingHyperPlane halfSpace d r) d r
-      , Dimension halfSpace ~ d, Dimension (BoundingHyperPlane halfSpace d r) ~ d
+class ( Dimension halfSpace ~ d, Dimension (BoundingHyperPlane halfSpace d r) ~ d
       , NumType halfSpace ~ r,   NumType (BoundingHyperPlane halfSpace d r) ~ r
       )
        => HalfSpace_ halfSpace d r | halfSpace -> d,
                                      halfSpace -> r where
   type BoundingHyperPlane halfSpace d r
+  -- removed the 'HyperPlane_' constraint on BoundingHyperPlane. Since at least in R^1
+  -- it's useful to not have it.
+  -- HyperPlane_ (BoundingHyperPlane halfSpace d r) d r
 
   -- | Access the bounding hyperplane
   boundingHyperPlane :: Lens' halfSpace (BoundingHyperPlane halfSpace d r)
