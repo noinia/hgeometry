@@ -55,11 +55,34 @@ type R = RealNumber 5
 -- * 1D Linear Programming
 
 -- | A solution for 1D Linear pgoramming
-data Basis1DLP r = InFeasible1 (HalfSpaceF r) (HalfSpaceF r)
-                 | Feasible1 (HalfSpaceF r)
-                 | Unbounded
-                 deriving (Show,Eq)
+data Basis1DLP halfSpace = InFeasible1 halfSpace halfSpace
+                         | Feasible1 halfSpace
+                         | Unbounded
+                         deriving (Show,Eq,Functor)
 
+-- | Linear programming in 1D, minimizes the coordinate values.
+--
+-- \(O(n)\).
+lp1D             :: ( Ord r, Foldable1 set
+                    , HalfSpace_ halfSpace 1 r
+                    , Point_ (BoundingHyperPlane halfSpace 1 r) 1 r
+                    ) => set halfSpace -> Basis1DLP halfSpace
+lp1D constraints = case foldr f (Bottom,Top) constraints of
+    (Bottom,_)             -> Unbounded
+    (ValB (Arg x p), negs) -> case negs of
+      Top                         -> Feasible1 p
+      ValT (Arg x' n) | x <= x'   -> Feasible1 p
+                      | otherwise -> InFeasible1 p n
+  where
+    f h (pos,neg) = let x = h^.boundingHyperPlane.xCoord
+                    in case h^.halfSpaceSign of
+      Positive -> (ValB (Arg x h) `max` pos, neg)
+      Negative -> (pos,                      ValT (Arg x h) `min` neg)
+      -- h is bounded by a 1d-hyperplane: i.e. a point
+
+
+
+{-
 -- | Linear programming in 1D, minimizes the coordinate values.
 --
 -- \(O(n)\).
@@ -74,9 +97,7 @@ lp1D constraints = case foldr f (Bottom,Top) constraints of
     f h@(HalfSpace sign x) (pos,neg) = case sign of
       Positive -> (ValB (Arg x h) `max` pos, neg)
       Negative -> (pos,                      ValT (Arg x h) `min` neg)
-
-
-
+-}
 
 
 --------------------------------------------------------------------------------
@@ -138,100 +159,25 @@ lpCost = \case
   Basis2 p _ _ -> ValB $ p^.yCoord
 
 
+type HalfSpace1 r halfSpace = HalfSpaceF (Point 1 (r,r)) :+ (Point 2 r, halfSpace)
 
-
-instance (HasIntersectionWith line line'
-         , HyperPlane_ line 2 r, HyperPlane_ line' 2 r
-         , Ord r, Fractional r
-         )
-       => HasIntersectionWith (HalfSpaceF line) (HalfSpaceF line') where
-  h@(HalfSpace _ l) `intersects` h'@(HalfSpace _ l') =
-    l `intersects` l' || pointOn l `intersects`  h' || pointOn l' `intersects`  h
-
-
-data Slab' r orientedLine = Slab { _definingLine        :: orientedLine
-                                 , _signedSquaredWidth  :: !r
-                                 }
-                          deriving stock (Show,Eq,Ord,Functor,Foldable)
-
-type Slab orientedLine = Slab' (NumType orientedLine) orientedLine
-
--- | Intersection between two halfplanes
-data HalfPlaneIntersection r orientedLine line =
-    HalfPlane_x_HalfPlane_Line      line
-  | HalfPlane_x_HalfPlane_Slab      (Slab' r orientedLine)
-  | HalfPlane_x_HalfPlane_Wedge     (Vector 2 r) (Point 2 r) (Vector 2 r)
-    -- ^ The first vector points into p, the second one points away from p.
-    -- This way, we mean the wedge to the left of both vectors.
-  | HalfPlane_x_HalfPlane_HalfPlane (HalfSpaceF line)
-  deriving stock (Show,Eq)
-
-type instance Intersection (HalfSpaceF (LineEQ r)) (HalfSpaceF line') =
-  Maybe (HalfPlaneIntersection r (LinePV 2 r) (LineEQ r))
-
-instance ( Ord r, Fractional r
-         )
-       => IsIntersectableWith (HalfSpaceF (LineEQ r)) (HalfSpaceF (LineEQ r)) where
-  h@(HalfSpace sign l) `intersect` h'@(HalfSpace sign' l') = case l `intersect` l' of
-      Nothing -> case (pointOn l `intersects` h', pointOn l' `intersects` h) of
-        (False,False) -> Nothing
-        (True,False)  -> Just $ HalfPlane_x_HalfPlane_HalfPlane h
-        (False,True)  -> Just $ HalfPlane_x_HalfPlane_HalfPlane h'
-        (True,True)   -> Just $ HalfPlane_x_HalfPlane_Slab slab
-
-      Just (Line_x_Line_Point p) -> Just $ HalfPlane_x_HalfPlane_Wedge u p u'
-        where
-          LinePV _ v  = fromLineEQ l
-          LinePV _ v' = fromLineEQ l'
-
-          u  = error "not implemeted yet" -- if (p .+^ Vector2 0 1) `intersects` h  then negated v else v
-          u' = error "not implemeted yet" -- if (p .+^ Vector2 0 1) `intersects` h' then v'        else negated v'
-          -- FIXME: I don't think this is correct yet!!!
-
-
-      Just (Line_x_Line_Line _)
-          | sameSide  -> Just $ HalfPlane_x_HalfPlane_HalfPlane h
-          | otherwise -> Just $ HalfPlane_x_HalfPlane_Line l
-    where
-      -- we take some point that is not on the bounding line; if the halfplanes both
-      -- contain this point they are oriented the same way. Otherwise, they are oriented
-      -- in opposite directions, and thus the halfplanes intersect in a line.
-      sameSide = q `intersects` h == q `intersects` h'
-      q = pointOn l .+^ Vector2 0 1 -- take some offset; this uses that l is not vertial.
-
-
-      slab = let w = squaredEuclideanDistTo (pointOn l') l
-             in Slab (fromLineEQ l) (if l^.intercept  > l'^.intercept then w else negate w)
-
-
-fromLineEQ              :: Num r => LineEQ r -> LinePV 2 r
-fromLineEQ (LineEQ a b) = fromLinearFunction a b
-
-instance Fractional r => HasSquaredEuclideanDistance (LineEQ r) where
-  pointClosestTo q l = pointClosestTo q (fromLineEQ l)
+-- lp1D' :: Ord r => NonEmpty (HalfSpace1 r halfSpace) -> Basis1DLP (HalfSpace1 r halfSpace)
+-- lp1D' = lp1D
 
 
 
-  -- (HalfSpace sign l) (HalfSpace sign' l') -> case (sign,sign') of
-  --   (Negative,_) -> Bottom
-  --   (_,Negative) -> Bottom
-  --   _            -> case l `intersect` l' of
-  --                     Nothing -> error "absurd"
-  --                     Just p  -> ValB (p^.yCoord)
 
-
--- type HalfSpace1D h r = HalfSpace (Arg r h)
 
 -- | Represents the intersection of a halfplane with some line
 data Extend r halfSpace = Infeasible2 halfSpace
                         -- ^ there is no solution
-                        | Partial (HalfSpaceF (Arg (r,r) (Point 2 r, halfSpace)))
-                        -- ^ The
+                        | Partial (HalfSpace1 r halfSpace)
+                        -- ^ The halfspace
                         deriving (Show)
 
 -- | Collects the 1d halfspaces. Left signifies that we have an infeasible solution
 collect :: Foldable f => f (Extend r halfSpace)
-        -> Either halfSpace [HalfSpaceF (Arg (r,r) (Point 2 r, halfSpace))]
+        -> Either halfSpace [HalfSpaceF (Point 1 (r,r)) :+ (Point 2 r, halfSpace)]
 collect = foldr f (Right []) . toList
   where
     f (Infeasible2 h) _            = Left h
@@ -249,11 +195,11 @@ constructHalfSpaceOn :: (Fractional r, Ord r)
 constructHalfSpaceOn h@(HalfSpace sign l) h'@(HalfSpace sign' l')
     | not (h `intersects` h') = Just $ Infeasible2 h'
     | otherwise               = case l `intersect` l' of
-        Just (Line_x_Line_Point p) -> Just . Partial $ halfSpace1D p
+        Just (Line_x_Line_Point p) -> Just . Partial $ halfSpace1D p :+ (p,h')
         _                          -> Nothing -- constraint is not useful
   where
     -- the halfpsace of h' on the bounding line of h
-    halfSpace1D p@(Point2 x y) = HalfSpace newSign (Arg (y,x) (p, h'))
+    halfSpace1D (Point2 x y) = HalfSpace newSign (Point1 (y,x))
       where
         x'  = if l^.slope >= 0 then x - 1 else x + 1
         y'  = evalAt (Point1 x') l
@@ -293,22 +239,10 @@ lpRecomputeBasis h@(HalfSpace sign l) basis = case sign of
             Right constraints -> case NonEmpty.nonEmpty constraints of
               Nothing          -> error "absurd: unbounded?"
               Just constraints' -> case lp1D constraints' of
-                InFeasible1 _ _ -> error "infeasible" -- TODO
-                Feasible1 (HalfSpace _ (Arg _ (q,h'))) -> Basis2 q h h'
+                InFeasible1 _ _         -> error "infeasible" -- TODO
+                Feasible1 (_ :+ (q,h')) -> Basis2 q h h'
                 Unbounded                              -> error "absurd: unbounded?"
 
-
-          -- case l `intersect'` (h1^.boundingHyperPlane) of
-          --   Nothing -> case l `intersect'` (h2^.boundingHyperPlane) of
-          --     Just p2 -> Basis2 p2 h h2
-          --     Nothing -> error "absurd"
-          --       -- this shouldn't happen, as this implies h1 and h2 are colinear. However
-          --       -- since p is their intersection point; that cannot be the case .
-          --   Just p1 -> case l `intersect'` (h2^.boundingHyperPlane) of
-          --     Nothing -> Basis2 p1 h h1
-          --     Just p2 -> case p1 `cmp` p2 of
-          --       LT -> Basis2 p1 h h2
-          --       _  -> Basis2 p2 h h1
   where
     (LineEQ _ b) `isLowerThan` (LineEQ _ b') = b < b'
     (Point2 x y) `cmp` (Point2 x' y') = compare y y' <> compare x x'
@@ -510,27 +444,31 @@ extract j (x :| xs) = let (y,rest) = extract (j-1) (NonEmpty.fromList xs)
 -}
 
 
+-- instance HyperPlane_ (Point 1 r) 1 r where
+
+-- instance NonVerticalHyperPlane_ (Point 1 r) 1 r --
+
 --------------------------------------------------------------------------------
 
 spec :: Spec
 spec = describe "LPType Spec" $ do
          describe "1D LP" $ do
            it "1D feasible example" $ do
-             lp1D (NonEmpty.fromList [ HalfSpace Positive 0
-                                     , HalfSpace Negative 10
-                                     , HalfSpace Positive 3
-                                     , HalfSpace Negative 5
-                                     , HalfSpace Positive 2
-                                     ]) `shouldBe` Feasible1 (HalfSpace Positive 3)
+             lp1D (NonEmpty.fromList [ HalfSpace Positive (Point1 0 :: Point 1 R)
+                                     , HalfSpace Negative (Point1 10)
+                                     , HalfSpace Positive (Point1 3)
+                                     , HalfSpace Negative (Point1 5)
+                                     , HalfSpace Positive (Point1 2)
+                                     ]) `shouldBe` Feasible1 (HalfSpace Positive (Point1 3))
 
            it "1D infeasible example" $ do
-             lp1D (NonEmpty.fromList [ HalfSpace Positive 0
-                                     , HalfSpace Negative 10
-                                     , HalfSpace Positive 3
-                                     , HalfSpace Negative 5
-                                     , HalfSpace Negative 2
-                                     ]) `shouldBe` InFeasible1 (HalfSpace Positive 3)
-                                                               (HalfSpace Negative 2)
+             lp1D (NonEmpty.fromList [ HalfSpace Positive (Point1 0 :: Point 1 R)
+                                     , HalfSpace Negative (Point1 10)
+                                     , HalfSpace Positive (Point1 3)
+                                     , HalfSpace Negative (Point1 5)
+                                     , HalfSpace Negative (Point1 2)
+                                     ]) `shouldBe` InFeasible1 (HalfSpace Positive (Point1 3))
+                                                               (HalfSpace Negative (Point1 2))
 
          it "initialBasis" $ do
            let (h1:h2:_) = exampleLP
@@ -560,6 +498,12 @@ exampleLP = [ HalfSpace Positive (LineEQ 1    0)
             , HalfSpace Positive (LineEQ (-1) 5)
             , HalfSpace Positive (LineEQ 2    (-3))
             ]
+
+
+instance HalfSpace_ core d r => HalfSpace_ (core :+ extra) d r where
+  type BoundingHyperPlane (core :+ extra) d r = BoundingHyperPlane core d r
+  boundingHyperPlane = core.boundingHyperPlane
+  halfSpaceSign = core.halfSpaceSign
 
 --------------------------------------------------------------------------------
 
