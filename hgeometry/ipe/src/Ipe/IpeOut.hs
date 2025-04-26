@@ -223,8 +223,7 @@ instance HasDefaultIpeOut (Group r) where
 
 instance (Fractional r, Ord r, Show r) => HasDefaultIpeOut (HalfSpaceF (LinePV 2 r)) where
   type DefaultIpeOut (HalfSpaceF (LinePV 2 r)) = Group
-  defIO = ipeHalfPlane
-
+  defIO = ipeHalfPlane gray
 
 instance (Fractional r, Ord r, Show r) => HasDefaultIpeOut (HalfSpaceF (LineEQ r)) where
   type DefaultIpeOut (HalfSpaceF (LineEQ r)) = Group
@@ -378,19 +377,22 @@ ipeTriangle = ipeSimplePolygon' @NonEmptyVector . uncheckedFromCCWPoints
 
 
 -- | Default rendering of halfplanes
-ipeHalfPlane :: (Show r, Fractional r, Ord r) => IpeOut (HalfSpaceF (LinePV 2 r)) Group r
+ipeHalfPlane :: (Show r, Fractional r, Ord r)
+             => IpeColor r -> IpeOut (HalfSpaceF (LinePV 2 r)) Group r
 ipeHalfPlane = ipeHalfPlaneIn defaultBox
 
 -- | Draw a halfplane in the given rectangle.
 --
 -- We draw both the border (in black) and the interior (20% transparant gray) of the halfpace
-ipeHalfPlaneIn          :: (Ord r, Fractional r, Show r)
-                        => Rectangle (Point 2 r) -> IpeOut (HalfSpaceF (LinePV 2 r)) Group r
-ipeHalfPlaneIn rect' hl = case hl `intersect` rect' of
+ipeHalfPlaneIn            :: (Ord r, Fractional r, Show r)
+                          => Rectangle (Point 2 r)
+                          -> IpeColor r
+                          -> IpeOut (HalfSpaceF (LinePV 2 r)) Group r
+ipeHalfPlaneIn rect' c hl = case hl `intersect` rect' of
     Nothing -> ipeGroup [] -- this should not really happen I guess?
     Just is -> case is of
       ActualPolygon interior -> ipeGroup [ iO $ ipeSimplePolygon interior
-                                              ! attr SFill gray
+                                              ! attr SFill c
                                               ! attr SOpacity (Text.pack "20%")
                                          , boundary
                                          ]

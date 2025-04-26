@@ -2,6 +2,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 module LPTypeSpec
   ( spec
+  , render
+  , bug2
   ) where
 
 import           Control.Lens
@@ -19,11 +21,13 @@ import qualified Data.Vector as Vector
 import           Data.Word
 import           GHC.TypeLits
 import           Golden
+import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
 import           HGeometry.HalfLine
 import           HGeometry.HalfSpace
 import           HGeometry.HyperPlane
+import           HGeometry.Instances ()
 import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.Line.General
@@ -40,12 +44,15 @@ import           System.OsPath
 import           System.Random
 import           Test.Hspec hiding (Arg(..))
 import           Test.Hspec.QuickCheck
-import           Test.QuickCheck ((===))
+import           Test.QuickCheck ( (===),property,Discard(..), counterexample
+                                 , Arbitrary(..), oneof, suchThat
+                                 , withDiscardRatio, withMaxSuccess
+                                 )
 import           Test.QuickCheck.Instances ()
 import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.Vector as Builder
 import           Witherable
-
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -113,6 +120,8 @@ lp1D constraints = case foldr f (Bottom,Top) constraints of
 --       -> Maybe (Point d r, [halfSpace])
 
 
+
+
 data LPType t basis set a = LPType
                             { costFunction :: basis a -> t
                             -- ^ the function we are trying to minimize
@@ -120,8 +129,15 @@ data LPType t basis set a = LPType
                              -- ^
                              , combinatorialDimension :: Int
                              -- ^ the combinatorial dimension of the problem
-                             , extendBasis :: a -> basis a -> basis a
-                             -- ^ function to construct the an optimal basis (possibly expensive)
+                             , extendBasis :: a
+                                           -> basis a
+                                           -> Maybe (basis a, [a])
+                             -- ^ function to extend the current basis into a new basis.
+                             -- it returns the basis (if it has changed) as well as the
+                             -- elements that were removed from the basis.
+                             --
+                             -- returns Nothing if the basis did not change
+
                              , initialBasis :: set a -> basis a
                              -- ^ function to construct some initial basis
                              -- the input may be large.
@@ -157,6 +173,21 @@ data Basis2D r halfSpace = EmptyBasis
                          | Infeasible (Vector 3 halfSpace)
                          -- ^ Infeasible
                        deriving (Show,Eq,Functor,Foldable)
+
+instance (Arbitrary r, Eq r, Fractional r) => Arbitrary (Basis2D r (HalfSpaceF (LineEQ r))) where
+  arbitrary = oneof [ pure EmptyBasis
+                    , do y <- arbitrary
+                         pure $ Basis1 y (HalfSpace Positive (LineEQ 0 y))
+                    , do l  <- arbitrary
+                         l' <- arbitrary `suchThat` (\(LineEQ a _) ->
+                                                       signum a /= signum (l^.slope))
+                         case l `intersect` l' of
+                           Just (Line_x_Line_Point p) ->
+                             pure $ Basis2 p (HalfSpace Positive l) (HalfSpace Positive l')
+                           _ -> arbitrary -- retry
+-- don't generate infeasible basises for now
+                    ]
+
 
 
 type HalfPlane r = HalfSpaceF (LineEQ r)
@@ -233,38 +264,44 @@ constructHalfSpaceOn h h'
 -- | Tries to extend the basis with the given halfplane
 lpRecomputeBasis                            :: (Ord r, Fractional r)
                                             => HalfPlane r
-                                            -> Basis2D r (HalfPlane r) -> Basis2D r (HalfPlane r)
+                                            -> Basis2D r (HalfPlane r)
+                                            -> Maybe ( Basis2D r (HalfPlane r)
+                                                     , [HalfPlane r]
+                                                     )
 lpRecomputeBasis h@(HalfSpace sign l) basis = case basis of
-    Infeasible _         -> basis -- already infeasible, so remains infeasible
+    Infeasible _         -> Nothing -- already infeasible, so remains infeasible
 
     Basis2 p h1 h2
-        | p `intersects` h -> basis -- solution remains the same
-        | otherwise        -> case collect $ mapMaybe (constructHalfSpaceOn h) [h1,h2] of
+        | p `intersects` h -> Nothing -- solution remains the same
+        | otherwise        -> Just $ case collect $ mapMaybe (constructHalfSpaceOn h) [h1,h2] of
             Left _            -> infeasible
+              -- not sure if we removed anything here.
             Right constraints -> case NonEmpty.nonEmpty constraints of
               Nothing          -> error "absurd: lpExtendBasis. No constraints, so unbounded?"
               Just constraints' -> case lp1D constraints' of
                 InFeasible1 _ _         -> infeasible
-                Feasible1 (_ :+ (q,h')) -> Basis2 q h h'
+                Feasible1 (_ :+ (q,h')) -> (Basis2 q h h', [if h' == h1 then h2 else h1
+                                                           ]) -- FIXME!!!
                 Unbounded               -> error "absurd: lpExtendBasis. unbounded?"
       where
-        infeasible = Infeasible (Vector3 h h1 h2)
+        infeasible = (Infeasible (Vector3 h h1 h2), [])
 
     Basis1 y h1 -> case l `intersect` (h1^.boundingHyperPlane) of
-      Just (Line_x_Line_Line _)                -> basis -- not useful yet
+      Just (Line_x_Line_Line _)                -> Nothing -- not useful yet
       Just (Line_x_Line_Point p)
-        | (p .-^ (Vector2 1 0)) `intersects` h -> basis
+        | (p .-^ (Vector2 1 0)) `intersects` h -> Nothing
           -- h defines the 1D halfspace (-infty,p_x] on h1. So it's not useful
-        | otherwise                            -> Basis2 p h1 h
+        | otherwise                            -> Just $ (Basis2 p h1 h,[])
       Nothing
-        | b > y                                -> Basis1 b h -- h is more restrictive than h1
-        | otherwise                            -> basis
+        | b > y                                -> Just $ (Basis1 b h, [h1])
+                                                   -- h is more restrictive than h1
+        | otherwise                            -> Nothing
         where
           b = l^.intercept
 
     EmptyBasis -> case sign of
-      Positive | l^.slope == 0 -> Basis1 (l^.intercept) h
-      _                        -> EmptyBasis -- basis remains empty
+      Positive | l^.slope == 0 -> Just $ (Basis1 (l^.intercept) h, [])
+      _                        -> Nothing -- basis remains empty
 
 
 -- | Find an initial basis; i.e. some halfplanes that bound the initial solution from below
@@ -433,12 +470,19 @@ subExp        :: ( Foldable set, Foldable basis
                 -- ^ an LP-type problem
                 -> (t, basis a)
 subExp gen (LPType v hs _ extendBasis initialBasis) =
-    case extract (initialBasis hs) hs of
-      (basis,gs) -> foldr go (v basis, basis) (Vector.toList $ shuffle gen gs)
+    let basis = subExp' (initialBasis hs) (Vector.toList $ shuffle gen hs)
+    in (v basis, basis)
   where
-    go h sol@(cost,basis) = let basis' = extendBasis h basis
-                                cost'  = v basis'
-                            in if cost < cost' then (cost',basis') else sol
+      -- traceShowWith ("subExp'",basis,"inp: ",inpGs,) $ case inpGs of
+    subExp' basis = \case
+      []     -> basis
+      (h:gs) -> let basis' = subExp' basis gs
+                in case extendBasis h basis' of
+                     Nothing                       -> basis'
+                     Just (extendedBasis, removed) -> subExp' extendedBasis (removed <> gs)
+      -- TODO: there is still a small diff. in that
+      -- the orig description picks a random item from "removed <> gs"
+      -- whereas here we always pick the removed ones "first/last" instead of at random
 
 -- | Remoevs the items from the basis from the input set.
 extract           :: (Foldable basis, Eq a, Foldable set) => basis a -> set a -> (basis a, [a])
@@ -496,7 +540,7 @@ spec = describe "LPType Spec" $ do
          it "lp extend basis" $ do
            let (_:_:h3:_) = exampleLP
                basis' = lpInitialBasis exampleLP
-           lpRecomputeBasis h3 basis' `shouldBe` basis'
+           lpRecomputeBasis h3 basis' `shouldBe` Nothing
 
          it "subExp" $
            fst (subExp (mkStdGen 42) (linearProgrammingMinY exampleLP)) `shouldBe` (Val 2.5)
@@ -506,8 +550,36 @@ spec = describe "LPType Spec" $ do
                h2 = HalfSpace Positive (LineEQ (-0.6) 195.2)
                h3 = HalfSpace Negative (LineEQ 0 80)
                ib = lpInitialBasis [h1,h2]
-           lpRecomputeBasis h3 ib `shouldBe` Infeasible (Vector3 h3 h1 h2)
+           lpRecomputeBasis h3 ib `shouldBe` Just (Infeasible (Vector3 h3 h1 h2), [])
 
+         prop "feasible means feasible" $ withMaxSuccess 50 $ withDiscardRatio 1000 $
+           \gen (halfPlanes :: [HalfPlane R]) ->
+             case subExp (mkStdGen gen) (linearProgrammingMinY halfPlanes) of
+               (_,Basis2 v _ _) -> property $ all (v `intersects`) halfPlanes
+               _                -> property Discard
+
+         -- prop "feasible means interseciton point" $
+         --   \gen (halfPlanes :: HalfPlane R) ->
+         --     case subExp (mkStdGen gen) (linearProgrammingMinY halfPlanes) of
+         --       (_,Basis2 v _ _) -> property $ isAVertex v
+         --       _                -> property Discard
+
+
+         prop "brute force test" $
+           \gen (halfPlanes :: [HalfPlane R]) ->
+             let res = subExp (mkStdGen gen) (linearProgrammingMinY halfPlanes)
+             in counterexample (show res) $
+             case bruteForceSolutions halfPlanes of
+               [] -> case res of
+                       (_, EmptyBasis)   -> True -- for now
+                       (_, Basis1 _ h)   -> h^.boundingHyperPlane.slope == 0
+                       (_, Infeasible _) -> True
+                       (_, Basis2 _ _ _) -> False
+               vs -> case res of
+                       (_, Basis2 v _ _) -> v `elem` vs
+                       (_, EmptyBasis)   -> True -- could be true
+                       (_, Basis1 _ _)   -> True -- could be true
+                       _                 -> False
 
          testIpe [osp|LPType/lpType_linearProgramming.ipe|]
          testIpe [osp|LPType/linearProgramming1.ipe|]
@@ -515,10 +587,111 @@ spec = describe "LPType Spec" $ do
          testIpe [osp|LPType/linearProgramming2_simpl.ipe|]
          testIpe [osp|LPType/infeasible_lp.ipe|]
 
+         bug
+         bug2
+
          -- it "extract" $
          --   extract 3 (NonEmpty.fromList "foobarenzo") `shouldBe` ('b',"fooarenzo")
          -- prop "extract1" $
          --   extract1 (mkStdGen 42) (NonEmpty.fromList "foobarenzo") "foo" ===  ('n',"foobarezo")
+
+
+bruteForceSolutions    :: ( Ord r, Fractional r
+                          , HyperPlane_ line 2 r
+                          , IsIntersectableWith line line
+                          , Intersection line line ~ Maybe (LineLineIntersectionG r line)
+                          , Dimension line ~ 2, NumType line ~ r
+                          , Foldable set, Functor set
+                          )
+                       => set (HalfSpaceF line) -> [Point 2 r]
+bruteForceSolutions hs = mapMaybe intersectionPoint $ uniquePairs (view boundingHyperPlane <$> hs)
+  where
+    intersectionPoint (Two l l') = case l `intersect` l' of
+      Just (Line_x_Line_Point p) | all (p `intersects`) hs -> Just p
+      _                                                    -> Nothing
+
+bug = describe "bug" $ do
+        let cs = [HalfSpace Positive (LineEQ 3 (-1.5))
+                 ,HalfSpace Positive (LineEQ (-5.5) 2.6)
+                 ,HalfSpace Positive (LineEQ 5 4)
+                 ,HalfSpace Negative (LineEQ (-3) 2)
+                 ]
+            gen = 1
+            res = subExp (mkStdGen gen) (linearProgrammingMinY cs)
+
+            ib = lpInitialBasis cs
+
+        it "initial basis" $
+          ib `shouldSatisfy` (\case
+             Basis2 _ a b -> a == cs !! 0 && b == cs !! 1
+             _            -> False)
+
+        -- prop "extend 2" $
+        --   lpRecomputeBasis (cs !! 2) ib `shouldBe` Nothing
+
+        -- prop "extend 23" $
+        --   lpRecomputeBasis (cs !! 3) (lpRecomputeBasis (cs !! 2) ib) `shouldSatisfy` (\case
+        --     (Infeasible _) -> True
+        --     _              -> False)
+
+        -- prop "extend 3" $
+        --   lpRecomputeBasis (cs !! 3) ib `shouldBe` ans
+
+
+        prop "thebug" $ counterexample (show res) $
+          case res of
+            (_, Basis2 v _ _) -> all (v `intersects`) cs
+            (_, Infeasible _) -> True
+            _                 -> False
+        it "bruteforce" $
+          bruteForceSolutions cs `shouldBe` []
+
+        it "bruteforce 234" $
+          bruteForceSolutions (drop 1 cs) `shouldBe` []
+
+bug2 = describe "bug2" $ do
+        let cs :: [HalfPlane R]
+            cs = [HalfSpace Positive (LineEQ 13.33333 (-17.5))        -- :+ red
+                 ,HalfSpace Positive (LineEQ (-16.57143) (-11.26316)) -- :+ purple
+                 ,HalfSpace Positive (LineEQ (-3.05883) 17.5)         -- :+ blue
+                 ,HalfSpace Positive (LineEQ 5 (-11.2))               -- :+ green
+                 ]
+            gen = 1
+            res = subExp (mkStdGen gen) (linearProgrammingMinY cs)
+
+            ib = lpInitialBasis cs
+
+        -- it "initial basis" $
+        --   ib `shouldSatisfy` (\case
+        --      Basis2 _ a b -> a == cs !! 0 && b == cs !! 1
+        --      _            -> False)
+
+        -- it "extend 0" $
+        --   let ib = Basis2 (Point2 3.5131 6.60655) (cs !! 2) (cs !! 3) in
+        --   lpRecomputeBasis (cs !! 0) ib `shouldSatisfy` (\case
+        --     Just (Basis2 _ a b,[_]) -> a == cs !! 0 && b == cs !! 2
+        --     _                       -> False
+        --                                                 )
+
+        prop "recompute basis -> removed correct" $
+          \(h :: HalfPlane R) basis ->
+            case lpRecomputeBasis h basis of
+              Just (newBasis,removed) -> Set.fromList (h : toList basis)
+                                         ===
+                                         Set.fromList (toList newBasis <> removed)
+              Nothing -> property Discard
+
+        prop "thebug" $ counterexample (show res) $
+          case res of
+            (_, Basis2 v _ _) -> all (v `intersects`) cs
+            (_, Infeasible _) -> True
+            _                 -> False
+        it "bruteforce" $
+          bruteForceSolutions cs `shouldSatisfy` ((== 2) . length)
+
+        -- it "bruteforce 234" $
+        --   bruteForceSolutions (drop 1 cs) `shouldBe` []
+
 
 
 exampleLP :: [HalfPlane R]
@@ -605,3 +778,21 @@ toLineEQ (HalfSpace _ l)
     -- goldenWith [osp|data/test-with-ipe/golden/|]
     --                 (ipeContentGolden { name = theName  })
     --                 ( myIpeTest halfPlanes)
+
+
+--------------------------------------------------------------------------------
+
+render = writeIpeFile [osp|/tmp/out.ipe|] . addStyleSheet opacitiesStyle . singlePageFromContent $
+           map (iO . ipeConstraint) cs
+  where
+    cs :: [HalfPlane R :+ IpeColor R]
+    cs = [HalfSpace Positive (LineEQ 13.33333 (-17.5))        :+ red
+         ,HalfSpace Positive (LineEQ (-16.57143) (-11.26316)) :+ purple
+         ,HalfSpace Positive (LineEQ (-3.05883) 17.5)         :+ blue
+         ,HalfSpace Positive (LineEQ 5 (-11.2))               :+ green
+         ]
+
+ipeConstraint (h :+ c) = ipeHalfPlane c $ h&boundingHyperPlaneLens %~ fromLineEQ
+                                           &halfSpaceSign %~ \case
+                                                                Positive -> Negative
+                                                                Negative -> Positive
