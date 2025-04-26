@@ -33,6 +33,7 @@ import           HGeometry.Ellipse (Ellipse, circleToEllipse)
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
 import           HGeometry.HalfLine
+import           HGeometry.HalfSpace
 import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.Line.General
@@ -41,11 +42,12 @@ import           HGeometry.Number.Radical
 import           HGeometry.Point
 import           HGeometry.PolyLine
 import           HGeometry.Polygon
+import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Polygon.WithHoles
 import           HGeometry.Properties
 import           HGeometry.Triangle (Triangle,toCounterClockwiseTriangle)
 import           Ipe.Attributes
-import           Ipe.Color (IpeColor(..))
+import           Ipe.Color (IpeColor(..), gray)
 import           Ipe.FromIpe
 import           Ipe.Path (Orientation(..))
 import           Ipe.Types
@@ -219,6 +221,14 @@ instance HasDefaultIpeOut (Group r) where
   type DefaultIpeOut (Group r) = Group
   defIO = (:+ mempty)
 
+instance (Fractional r, Ord r, Show r) => HasDefaultIpeOut (HalfSpaceF (LinePV 2 r)) where
+  type DefaultIpeOut (HalfSpaceF (LinePV 2 r)) = Group
+  defIO = ipeHalfPlane
+
+
+instance (Fractional r, Ord r, Show r) => HasDefaultIpeOut (HalfSpaceF (LineEQ r)) where
+  type DefaultIpeOut (HalfSpaceF (LineEQ r)) = Group
+  defIO h = defIO $ h&boundingHyperPlaneLens %~ fromLineEQ
 
 --------------------------------------------------------------------------------
 -- * Point Converters
@@ -365,6 +375,29 @@ ipeRectangle r = ipeSimplePolygon' @NonEmptyVector . uncheckedFromCCWPoints . No
 ipeTriangle :: (Eq r, Num r) => IpeOut (Triangle (Point 2 r)) Path r
 ipeTriangle = ipeSimplePolygon' @NonEmptyVector . uncheckedFromCCWPoints
             . toCounterClockwiseTriangle
+
+
+-- | Default rendering of halfplanes
+ipeHalfPlane :: (Show r, Fractional r, Ord r) => IpeOut (HalfSpaceF (LinePV 2 r)) Group r
+ipeHalfPlane = ipeHalfPlaneIn defaultBox
+
+-- | Draw a halfplane in the given rectangle.
+--
+-- We draw both the border (in black) and the interior (20% transparant gray) of the halfpace
+ipeHalfPlaneIn          :: (Ord r, Fractional r, Show r)
+                        => Rectangle (Point 2 r) -> IpeOut (HalfSpaceF (LinePV 2 r)) Group r
+ipeHalfPlaneIn rect' hl = case hl `intersect` rect' of
+    Nothing -> ipeGroup [] -- this should not really happen I guess?
+    Just is -> case is of
+      ActualPolygon interior -> ipeGroup [ iO $ ipeSimplePolygon interior
+                                              ! attr SFill gray
+                                              ! attr SOpacity (Text.pack "20%")
+                                         , boundary
+                                         ]
+      _                      -> ipeGroup [ boundary ]
+  where
+    boundary = iO $ ipeLineIn rect' (hl^.boundingHyperPlane)
+
 
 --------------------------------------------------------------------------------
 -- * Group Converters
