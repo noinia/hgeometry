@@ -62,7 +62,7 @@ import qualified Linear.V3 as Linear
 import qualified Linear.V4 as Linear
 import           Prelude hiding (zipWith, head, last)
 import           System.Random (Random (..))
-import           System.Random.Stateful (UniformRange(..), Uniform(..))
+import           System.Random.Stateful (UniformRange(..), Uniform(..), isInRangeOrd)
 import qualified HGeometry.Number.Radical as Radical
 
 --------------------------------------------------------------------------------
@@ -423,14 +423,16 @@ class Additive_ vector d r => Metric_ vector d r where
 --------------------------------------------------------------------------------
 
 instance ( Additive_ (Vector d r) d r
-         , UniformRange r
+         , UniformRange r, Ord (Vector d r)
          ) => UniformRange (Vector d r) where
   uniformRM (lows,highs) gen = Apply.unwrapApplicative $
       liftI2A (\l h -> Apply.WrapApplicative $ uniformRM (l,h) gen) lows highs
+  isInRange = isInRangeOrd
 
 instance (Vector_ (Vector d r) d r, Uniform r) => Uniform (Vector d r) where
   uniformM gen = generateA (const $ uniformM gen)
-instance (Additive_ (Vector d r) d r, Uniform r, UniformRange r) => Random (Vector d r)
+instance (Additive_ (Vector d r) d r, Uniform r, UniformRange r, Ord (Vector d r)
+         ) => Random (Vector d r)
 
 --------------------------------------------------------------------------------
 -- * instances for Linear
