@@ -576,12 +576,19 @@ spec = describe "LPType Spec" $ do
          --       _                -> property Discard
 
 
-         prop "clarkson2 same as subExp" $
-           \gen (halfPlanes :: [HalfPlane R]) ->
+         modifyMaxSize (const 1000) $ prop "clarkson2 same as subExp" $
+           \gen (halfPlanes :: V.Vector (HalfPlane R)) ->
              let (resSubExp, _) = subExp (mkStdGen gen) (linearProgrammingMinY halfPlanes)
-                 (res,_)        = clarkson2 (mkStdGen gen) (linearProgrammingMinY halfPlanes')
-                 halfPlanes' = V.fromList halfPlanes
+                 (res,_)        = clarkson2 (mkStdGen gen) (linearProgrammingMinY halfPlanes)
              in res `shouldBe` resSubExp
+
+         modifyMaxSize (const 1000) $ prop "clarkson2 same as subExp (positives)" $
+           \gen (lines' :: [LineEQ R]) ->
+             let (resSubExp, _) = subExp (mkStdGen gen) (linearProgrammingMinY halfPlanes)
+                 (res,_)        = clarkson2 (mkStdGen gen) (linearProgrammingMinY halfPlanes)
+                 halfPlanes     = V.fromList [ HalfSpace Positive l | l <- lines' ]
+             in res `shouldBe` resSubExp
+
 
          prop "brute force test" $
            \gen (halfPlanes :: [HalfPlane R]) ->
