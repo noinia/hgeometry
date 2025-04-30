@@ -17,8 +17,10 @@ import           Data.Ord (comparing)
 import           Data.Proxy
 import           Data.Semigroup
 import qualified Data.Set as Set
-import qualified Data.Vector as Vector
+import qualified Data.Vector as V
+import qualified Data.Vector.Generic as Vector
 import           Data.Word
+import           Debug.Trace
 import           GHC.TypeLits
 import           Golden
 import           HGeometry.Combinatorial.Util
@@ -52,7 +54,6 @@ import           Test.QuickCheck.Instances ()
 import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.Vector as Builder
 import           Witherable
-import Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -387,39 +388,43 @@ clarkson gen0 dim v hs
 -- gens      :: SplitGen gen => gen -> NonEmpty gen
 -- gens gen0 = let (g,g1) = splitGen gen0 in g NonEmpty.<| gens g1
 
+-}
 
 -- | Take a sample of size r uniformly at random.
 --
 -- O(n)
 --
 -- TODO: make sure this is lazy enough to actually get O(r) time instead!
-sample          :: ( Foldable1 f, V.Vector vector, RandomGen gen)
+sample          :: ( Foldable f, Vector.Vector vector a, RandomGen gen)
                 => gen -> Int -> f a -> vector a
-sample gen r hs = V.take r $ shuffle gen hs
-
--}
-
-type Weight = Int
-
-data Weighted a = Weighted {-# UNPACK #-}!Weight a
-                  deriving (Show,Eq)
-
--- | Get the total weight
-totalWeight :: Foldable f => f (Weighted a) -> Weight
-totalWeight = getSum . foldMap' (\(Weighted w _) -> Sum w)
+sample gen r hs = Vector.take r $ shuffle gen hs
 
 
--- | double the weight of some element.
-doubleWeight                :: Weighted a -> Weighted a
-doubleWeight (Weighted w x) = Weighted (2*w) x
+-- type Weight = Int
+
+-- data Weighted a = Weighted {-# UNPACK #-}!Weight a
+--                   deriving (Show,Eq)
+
+-- -- | Get the total weight
+-- totalWeight :: Foldable f => f (Weighted a) -> Weight
+-- totalWeight = getSum . foldMap' (\(Weighted w _) -> Sum w)
+
+
+-- -- | double the weight of some element.
+-- doubleWeight                :: Weighted a -> Weighted a
+-- doubleWeight (Weighted w x) = Weighted (2*w) x
 
 
 -- TODO: just return the basis. compute the value at the end
 
 -- | The clarkson2 algorithm.
-clarkson2      :: ( Foldable1 set
+clarkson2      :: ( Foldable set
                   , Ord t
-                  , RandomGen gen
+                  , SplitGen gen
+                  , Foldable basis
+                  , Eq a
+                  , Vector.Vector set a -- TODO:
+                  , Semigroup (set a)
                   )
                => gen
                   -- ^ random generator
@@ -428,33 +433,34 @@ clarkson2      :: ( Foldable1 set
                -> (t, basis a)
 clarkson2 gen0 problem@(LPType _ hs dim extendBasis initialBasis)
     | n <= r    = subExp gen0 problem
-    | otherwise = step gen0 mempty (Weighted 1 <$> hs)
+    | otherwise = step gen0 hs
   where
     n = length hs
     r = 6* (dim*dim)
 
-    treshold hs' = totalWeight hs' `div` 3*dim
+    treshold hs' = length hs' `div` 3*dim
 
     step gen hs' = case violated basis of
         Nothing -> sol -- no more violated constraints, so we found opt.
         Just (vs,rest)
-          | length vs <= treshold hs' -> step gen2 ((doubleWeight <$> vs) <> rest)
+          | length vs <= treshold hs' -> step gen2 $ (duplicate vs) <> rest
           | otherwise                 -> step gen2 hs' -- too many violated constraints, retry
       where
-        sol@(_,basis) = subExp gen1 $ problem { inputs = weightedSample gen r hs' }
+        sol@(_,basis) = subExp gen1 $ problem { inputs = sample gen r hs'
+                                              }
         (gen1,gen2)   = splitGen gen
 
     -- computes the violated constraints
-    violated basis = case List.partition (\h -> isJust $ extendBasis h basis) hs' of
-      ([],_)    -> Nothing -- no more violated constraints
-      (vs,rest) -> Just (vs,rest)
-
-    hs' = toList hs
+    violated basis = case Vector.partition (\h -> isJust $ extendBasis h basis) hs of
+      (vs,rest) | null vs   -> Nothing -- no more violated constraints
+                | otherwise -> Just (vs,rest)
 
 
+duplicate   :: Vector.Vector set a => set a -> set a
+duplicate v = Vector.fromListN (2*Vector.length v) $ Vector.foldMap (\x -> [x,x]) v
 
-weightedSample :: gen -> Weight -> f (Weighted a) -> vector a
-weightedSample = undefined
+-- weightedSample :: gen -> Weight -> f (Weighted a) -> vector a
+-- weightedSample = undefined
 
 
 --------------------------------------------------------------------------------
@@ -475,7 +481,7 @@ subExp        :: ( Foldable set, Foldable basis
                 -- ^ an LP-type problem
                 -> (t, basis a)
 subExp gen (LPType v hs _ extendBasis initialBasis) =
-    let basis = subExp' (initialBasis hs) (Vector.toList $ shuffle gen hs)
+    let basis = subExp' (initialBasis hs) (V.toList $ shuffle gen hs)
     in (v basis, basis)
   where
       -- traceShowWith ("subExp'",basis,"inp: ",inpGs,) $ case inpGs of
