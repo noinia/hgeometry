@@ -576,6 +576,13 @@ spec = describe "LPType Spec" $ do
          --       _                -> property Discard
 
 
+         prop "clarkson2 same as subExp" $
+           \gen (halfPlanes :: [HalfPlane R]) ->
+             let (resSubExp, _) = subExp (mkStdGen gen) (linearProgrammingMinY halfPlanes)
+                 (res,_)        = clarkson2 (mkStdGen gen) (linearProgrammingMinY halfPlanes')
+                 halfPlanes' = V.fromList halfPlanes
+             in res `shouldBe` resSubExp
+
          prop "brute force test" $
            \gen (halfPlanes :: [HalfPlane R]) ->
              let res = subExp (mkStdGen gen) (linearProgrammingMinY halfPlanes)
