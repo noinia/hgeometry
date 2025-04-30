@@ -7,12 +7,12 @@ module LPTypeSpec
   ) where
 
 import           Control.Lens
-import           Data.Foldable (toList)
+import           Data.Foldable (toList, foldMap')
 import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (fromJust)
+import           Data.Maybe (fromJust, isJust)
 import           Data.Ord (comparing)
 import           Data.Proxy
 import           Data.Semigroup
@@ -127,9 +127,9 @@ data LPType t basis set a = LPType
                             -- ^ the function we are trying to minimize
                              , inputs      :: set a
                              -- ^
-                             , combinatorialDimension :: Int
+                            , combinatorialDimension :: Int
                              -- ^ the combinatorial dimension of the problem
-                             , extendBasis :: a
+                            , extendBasis :: a
                                            -> basis a
                                            -> Maybe (basis a, [a])
                              -- ^ function to extend the current basis into a new basis.
@@ -138,10 +138,10 @@ data LPType t basis set a = LPType
                              --
                              -- returns Nothing if the basis did not change
 
-                             , initialBasis :: set a -> basis a
+                            , initialBasis :: set a -> basis a
                              -- ^ function to construct some initial basis
                              -- the input may be large.
-                             }
+                            }
 
 
 
@@ -397,61 +397,66 @@ sample          :: ( Foldable1 f, V.Vector vector, RandomGen gen)
                 => gen -> Int -> f a -> vector a
 sample gen r hs = V.take r $ shuffle gen hs
 
+-}
 
 type Weight = Int
 
-data WithWeight a = WithWeight {-# UNPACK #-}!Weight a
+data Weighted a = Weighted {-# UNPACK #-}!Weight a
                   deriving (Show,Eq)
 
 -- | Get the total weight
-totalWeight :: Foldable f => f (WithWeight a) -> Weight
-totalWeight = getSum . foldMap' (\(WithWeight w _) -> w)
+totalWeight :: Foldable f => f (Weighted a) -> Weight
+totalWeight = getSum . foldMap' (\(Weighted w _) -> Sum w)
 
 
+-- | double the weight of some element.
+doubleWeight                :: Weighted a -> Weighted a
+doubleWeight (Weighted w x) = Weighted (2*w) x
+
+
+-- TODO: just return the basis. compute the value at the end
+
+-- | The clarkson2 algorithm.
 clarkson2      :: ( Foldable1 set
                   , Ord t
                   , RandomGen gen
                   )
                => gen
                   -- ^ random generator
-              -> Int
-              -- ^ The combinatorial dimension
-              -> (set element -> t)
-              -- ^ The optimization goal
-              -> set element
-              -- ^ the input elements
-              -> Maybe (t, NonEmpty element)
-clarkson2 gen0 dim v hs
-    | n <= r    = subExp v hs
-    | otherwise = step gen0 mempty (WithWeight 1 <$> hs)
+                -> LPType t basis set a
+                -- ^ an LP-type problem
+               -> (t, basis a)
+clarkson2 gen0 problem@(LPType _ hs dim extendBasis initialBasis)
+    | n <= r    = subExp gen0 problem
+    | otherwise = step gen0 mempty (Weighted 1 <$> hs)
   where
     n = length hs
     r = 6* (dim*dim)
 
     treshold hs' = totalWeight hs' `div` 3*dim
 
-    step gen hs' = let sol         = subEx v (weightedSample gen r hs')
-                       (gen1,gen2) = splitGen gen in
-      case violated sol of
-        Nothing        -> sol -- no more violated constraints, so we found opt.
+    step gen hs' = case violated basis of
+        Nothing -> sol -- no more violated constraints, so we found opt.
         Just (vs,rest)
           | length vs <= treshold hs' -> step gen2 ((doubleWeight <$> vs) <> rest)
           | otherwise                 -> step gen2 hs' -- too many violated constraints, retry
+      where
+        sol@(_,basis) = subExp gen1 $ problem { inputs = weightedSample gen r hs' }
+        (gen1,gen2)   = splitGen gen
 
     -- computes the violated constraints
-    violated = \case
-      ValT (cost, basis) -> case partition (\h -> cost < v (h NonEmpty.<| basis)) (toList hs) of
-                              ([],_)    -> Nothing -- no more violated constraints
-                              (vs,rest) -> Just (vs,rest)
-      Top                -> Nothing
-                            -- Cost is already infinity; so adding constraints cannot
-                            -- make it worse.
+    violated basis = case List.partition (\h -> isJust $ extendBasis h basis) hs' of
+      ([],_)    -> Nothing -- no more violated constraints
+      (vs,rest) -> Just (vs,rest)
+
+    hs' = toList hs
+
 
 
 weightedSample :: gen -> Weight -> f (Weighted a) -> vector a
 weightedSample = undefined
 
--}
+
 --------------------------------------------------------------------------------
 
 -- | SubExponential time algorithm to solve the LP-type problem
