@@ -7,13 +7,12 @@ module LPTypeSpec
   ) where
 
 import           Control.Lens
-import           Data.Foldable (toList, foldMap')
+import           Data.Foldable (toList)
 import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust, isJust)
-import           Data.Ord (comparing)
 import           Data.Proxy
 import           Data.Semigroup
 import qualified Data.Set as Set
@@ -44,15 +43,13 @@ import           Ipe.Color
 import           Prelude hiding (filter)
 import           System.OsPath
 import           System.Random
-import           Test.Hspec hiding (Arg(..))
+import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck ( (===),property,Discard(..), counterexample
                                  , Arbitrary(..), oneof, suchThat
                                  , withDiscardRatio, withMaxSuccess
                                  )
 import           Test.QuickCheck.Instances ()
-import qualified VectorBuilder.Builder as Builder
-import qualified VectorBuilder.Vector as Builder
 import           Witherable
 --------------------------------------------------------------------------------
 
@@ -140,18 +137,6 @@ data LPType t basis set a = LPType
                              -- the input may be large.
                             }
 
-
-
--- linearProgramming              :: Vector d r -> set halfSpace -> LPType (Top r) set halfSpace
--- linearProgramming v constraints = LPType {
---     costFunction hs        = undefined
---   , elements               = constraints
---   , combinatorialDimension = 2 -- TODO:
---   , basisFor          hs  = take d hs
---   , initialBasis      hs  = take d hs
---   }
-
-
 --------------------------------------------------------------------------------
 
 
@@ -190,27 +175,16 @@ instance (Arbitrary r, Eq r, Fractional r) => Arbitrary (Basis2D r (HalfSpaceF (
 type HalfPlane r = HalfSpaceF (LineEQ r)
 
 -- | Given a basis, compute the cost associated with the basis
-lpCost :: (Eq r, Num r) => Basis2D r (HalfPlane r) -> UnBounded r
+lpCost :: (Eq r, Num r) => Basis2D r halfPlane -> UnBounded r
 lpCost = \case
   EmptyBasis   -> MinInfinity
   Basis1 y _   -> Val y
   Basis2 p _ _ -> Val $ p^.yCoord
   Infeasible _ -> MaxInfinity
 
-  -- (HalfSpace sign (LineEQ a b)) -> case sign of
-  --                                           Negative             -> MinInfinity
-  --                                           Positive | a == 0    -> Val b
-  --                                                    | otherwise -> MinInfinity
-
-
+-- | Let l be some line in R^2, and let h be a halfplane. In general h and l intersect
+-- in a halfline. Halfspace1 represents this halfline, as a 1D halfspace on l.
 type HalfSpace1 r halfSpace = HalfSpaceF (Point 1 (r,r)) :+ (Point 2 r, halfSpace)
-
--- lp1D' :: Ord r => NonEmpty (HalfSpace1 r halfSpace) -> Basis1DLP (HalfSpace1 r halfSpace)
--- lp1D' = lp1D
-
-
-
-
 
 -- | Represents the intersection of a halfplane with some line
 data Extend r halfSpace = Infeasible2 halfSpace
@@ -229,7 +203,7 @@ collect = foldr f (Right []) . toList
     f (Partial h)     (Right hs)   = Right (h:hs)
 
 
--- | Constructs a 1D halfspace
+-- | Constructs a 1D halfspace on the bounding line
 constructHalfSpaceOn :: (Fractional r, Ord r)
                      => HalfPlane r
                      -- ^ the bounding line of the new halfspace
@@ -330,14 +304,87 @@ linearProgrammingMinY = LPType {
 
 
 
+-- do the skew transform
+
+
+-- linearProgramming              :: Vector d r -> LPType (Top r) set halfSpace
+-- linearProgramming v constraints = LPType {
+--     costFunction hs        = undefined
+--   , elements               = constraints
+--   , combinatorialDimension = 2 -- TODO:
+--   , basisFor          hs  = take d hs
+--   , initialBasis      hs  = take d hs
+--   }
+
+
+--------------------------------------------------------------------------------
+-- * MinDisk
+
+{-
+-- | minimize the y-coordinate. (Lexicographically)
+-- set contains at least two points
+minDisk :: (Point_ point 2 r, Foldable set, Ord r, Num r)
+        => LPType r (DiskByPoints point) set point
+minDisk = LPType {
+    costFunction           = squaredRadius
+  , combinatorialDimension = 2
+  , extendBasis            = recomputeDisk
+  , initialBasis           = initialDisk
+  }
+
+-- | pre:
+--  - needs at least 2 distinct points!
+initialDisk     :: (Foldable set, Point_ point 2 r, Eq point)
+                => set point -> DiskByPoints point
+initialDisk pts = case toList pts of
+                    p:ps -> case filter (/= q) ps of
+                              q:_ -> fromDiametralPair p q
+                              _   -> error "initialDisk: Too few distinct points!"
+                    _     -> error "initialDisk: precondition failed; no points!"
+
+-- | Tries to extend the disk into the smallest enclosing disk.
+extendDisk           :: point -> DiskByPoints point -> Maybe (DiskByPoints point)
+extendDisk q disk
+  | q `intersects` disk = Nothing
+  | otherwise           = Just disk'
+    where
+      Min (Arg _ disk') = foldMap1 minDisk' $ uniquePairs' (toNonEmpty disk)
+      minDisk' (Two a b) = let disk = diskByPoints a b q
+                           in Min (Arg (squaredRadius disk) disk)
+      -- if q does not lie in the disk, it is guaranteed to lie on the boundary. To compute the
+      -- new smallest enclosing disk; just try all options with q. There are only O(1)
+      -- such disks anyway.
+
+    -- FIXME: this is incorrect, since it only tries the disks with three points. Not with two
+    -- in particular, I guess "diskByPoints" could fail if the three points are colinear.
+
+
+-- | pre: we have at least two elements.
+uniquePairs' :: Foldable1 f => f a -> NonEmpty (Two a)
+uniquePairs' = fromMaybe (error "uniquePairs': precondition failed")
+             . NonEmpty.nonEmpty . uniquePairs
+
+
+
+    -- Just $ case disk of
+    --   DiametralDisk (DiametralPoints a b)            -> diskByPoints a b q
+    --   DiskByPoints
+
+    --   (BoundaryPoints
+
+    --                  (Vector3 a b c)) -> uniquePairs []
+    --   -- just try all combinatoions with q
+-}
+
 --------------------------------------------------------------------------------
 
 
 -- | Solves the LP Type problem. In particular, a minimization problem.
 --
--- returns the cost of an optimal solution (if it exists), and the subset of elements realizing it
+-- returns the cost of an optimal solution (if it exists), and the subset of elements
+-- realizing it
 --
--- expected: O(n)
+-- expected: O(n) time.
 clarkson            :: ( Foldable set, Monoid (set a), Vector.Vector set a
                        , Foldable basis, Ord t, Eq a, SplitGen gen
                        )
@@ -420,7 +467,7 @@ clarkson2 gen0 problem@(LPType _ dim extendBasis _) hs
         (gen1,gen2) = splitGen gen
 
     -- Compute the violated, and satisfied constraints
-    violated basis hs = case Vector.partition (\h -> isJust $ extendBasis h basis) hs of
+    violated basis hs' = case Vector.partition (\h -> isJust $ extendBasis h basis) hs' of
       (vs,rest) | null vs   -> Nothing -- no more violated constraints
                 | otherwise -> Just (vs,rest)
 
@@ -477,9 +524,9 @@ withOpt         :: (b -> t) -> b -> (t, b)
 withOpt v basis = (v basis, basis)
 
 
--- | Remoevs the items from the basis from the input set.
-extract           :: (Foldable basis, Eq a, Foldable set) => basis a -> set a -> (basis a, [a])
-extract basis' gs = (basis', filter (`notElem` basis') $ toList gs)
+-- -- | Remoevs the items from the basis from the input set.
+-- extract           :: (Foldable basis, Eq a, Foldable set) => basis a -> set a -> (basis a, [a])
+-- extract basis' gs = (basis', filter (`notElem` basis') $ toList gs)
 
 -- no longer needed:
 {-
@@ -527,13 +574,15 @@ spec = describe "LPType Spec" $ do
                                                                (HalfSpace Negative (Point1 2))
 
          it "initialBasis" $ do
-           let (h1:h2:_) = exampleLP
-           lpInitialBasis exampleLP `shouldBe` (Basis2 (Point2 2.5 2.5) h1 h2)
+           case exampleLP of
+             (h1:h2:_) -> lpInitialBasis exampleLP `shouldBe` (Basis2 (Point2 2.5 2.5) h1 h2)
+             _         -> fail "error"
 
          it "lp extend basis" $ do
-           let (_:_:h3:_) = exampleLP
-               basis' = lpInitialBasis exampleLP
-           lpRecomputeBasis h3 basis' `shouldBe` Nothing
+           case exampleLP of
+             (_:_:h3:_) -> let basis' = lpInitialBasis exampleLP
+                           in lpRecomputeBasis h3 basis' `shouldBe` Nothing
+             _          -> fail "error"
 
          it "subExp" $
            fst (subExpWith (mkStdGen 42) linearProgrammingMinY exampleLP) `shouldBe` (Val 2.5)
@@ -678,7 +727,7 @@ bug2 = describe "bug2" $ do
             gen = 1
             res = subExpWith (mkStdGen gen) linearProgrammingMinY cs
 
-            ib = lpInitialBasis cs
+            -- ib = lpInitialBasis cs
 
         -- it "initial basis" $
         --   ib `shouldSatisfy` (\case
