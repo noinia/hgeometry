@@ -347,37 +347,24 @@ clarkson            :: ( Foldable set, Monoid (set a), Vector.Vector set a
                     -- ^ an LP-type problem
                     -> set a
                     -> (t, basis a)
-clarkson gen0 problem@(LPType _ dim extendBasis _) hs
-    | n <= 9* (dim*dim) = clarkson2 gen0 problem hs
-    | otherwise         = step gen0 mempty
+clarkson gen0 problem@(LPType v dim extendBasis _) hs
+    | n <= 9* (dim*dim) = withOpt v $ clarkson2 gen0 problem hs
+    | otherwise         = withOpt v $ step gen0 mempty
   where
     n      = length hs
     sqrtN' = sqrt . fromIntegral $ n
     sqrtN  = floor sqrtN'
     r      = floor $ fromIntegral dim * sqrtN'
 
-    step gen partial = case violated extendBasis basis hs of
-        Nothing                  -> sol -- no more violated constraints, so we found opt.
-        Just (vs,_)
-          | length vs <= 2*sqrtN -> step gen2 (vs <> partial) -- extend and continue
-          | otherwise            -> step gen2 partial -- too many violated constraints, retry
+    step gen partial = case Vector.filter (isViolated basis) hs of
+        vs | null vs              -> basis  -- no more violated constraints, so we found opt.
+           | length vs <= 2*sqrtN -> step gen2 (vs <> partial) -- extend and continue
+           | otherwise            -> step gen2 partial -- too many violated constraints, retry
       where
-        sol@(_,basis) = clarkson2 gen1 problem (partial <> sample gen r hs)
-        (gen1,gen2)   = splitGen gen
+        basis       = clarkson2 gen1 problem (partial <> sample gen r hs)
+        (gen1,gen2) = splitGen gen
 
-    -- -- computes the violated constraints
-    -- violated = \case
-    --   ValT (cost, basis) -> NonEmpty.nonEmpty $
-    --                         filter (\h -> cost < v (h NonEmpty.<| basis)) (toList hs)
-    --   Top                -> Nothing
-    --                         -- Cost is already infinity; so adding constraints cannot
-    --                         -- make it worse.
-
--- -- | Produce na infinite stream of generators
--- gens      :: SplitGen gen => gen -> NonEmpty gen
--- gens gen0 = let (g,g1) = splitGen gen0 in g NonEmpty.<| gens g1
-
-
+    isViolated basis h = isJust $ extendBasis h basis
 
 -- | Take a sample of size r uniformly at random.
 --
@@ -404,8 +391,6 @@ sample gen r hs = Vector.take r $ shuffle gen hs
 -- doubleWeight (Weighted w x) = Weighted (2*w) x
 
 
--- TODO: just return the basis. compute the value at the end
-
 -- | The clarkson2 algorithm.
 clarkson2      :: ( Foldable set, Semigroup (set a), Vector.Vector set a
                   , Foldable basis, Ord t, Eq a, SplitGen gen
@@ -415,7 +400,7 @@ clarkson2      :: ( Foldable set, Semigroup (set a), Vector.Vector set a
                 -> LPType t basis set a
                 -- ^ an LP-type problem
                 -> set a
-               -> (t, basis a)
+                -> basis a
 clarkson2 gen0 problem@(LPType _ dim extendBasis _) hs
     | n <= r    = subExp gen0 problem hs
     | otherwise = step gen0 hs
@@ -425,27 +410,19 @@ clarkson2 gen0 problem@(LPType _ dim extendBasis _) hs
 
     treshold hs' = length hs' `div` 3*dim
 
-    step gen hs' = case violated extendBasis basis hs' of
-        Nothing -> sol -- no more violated constraints, so we found opt.
+    step gen hs' = case violated basis hs' of
+        Nothing                       -> basis -- no more violated constraints, so we found opt.
         Just (vs,rest)
           | length vs <= treshold hs' -> step gen2 $ (duplicate vs) <> rest
           | otherwise                 -> step gen2 hs' -- too many violated constraints, retry
       where
-        sol@(_,basis) = subExp gen1 problem (sample gen r hs')
-        (gen1,gen2)   = splitGen gen
+        basis       = subExp gen1 problem (sample gen r hs')
+        (gen1,gen2) = splitGen gen
 
--- | computes the set of violated constraints, and the set of satisified constraints
-violated                      :: (Vector.Vector set a, Foldable set)
-                              => (a -> basis -> Maybe b)
-                              -> basis
-                              -> set a -> Maybe (set a, set a)
-violated extendBasis basis hs = case Vector.partition isViolated hs of
-    (vs,rest) | null vs   -> Nothing -- no more violated constraints
-              | otherwise -> Just (vs,rest)
-  where
-    isViolated h = isJust $ extendBasis h basis
-
-
+    -- Compute the violated, and satisfied constraints
+    violated basis hs = case Vector.partition (\h -> isJust $ extendBasis h basis) hs of
+      (vs,rest) | null vs   -> Nothing -- no more violated constraints
+                | otherwise -> Just (vs,rest)
 
 duplicate   :: Vector.Vector set a => set a -> set a
 duplicate v = Vector.fromListN (2*Vector.length v) $ Vector.foldMap (\x -> [x,x]) v
@@ -455,6 +432,19 @@ duplicate v = Vector.fromListN (2*Vector.length v) $ Vector.foldMap (\x -> [x,x]
 
 
 --------------------------------------------------------------------------------
+
+
+-- | Runs the subexponential time and returns both the cost and the optimal basis.
+subExpWith                  :: ( Foldable set, Foldable basis
+                               , Ord t, Eq a, RandomGen gen
+                               )
+                           => gen
+                               -- ^ random generator
+                          -> LPType t basis set a
+                          -- ^ an LP-type problem
+                          -> set a
+                          -> (t, basis a)
+subExpWith gen problem hs = withOpt (costFunction problem) $ subExp gen problem hs
 
 -- | SubExponential time algorithm to solve the LP-type problem
 --
@@ -471,12 +461,10 @@ subExp        :: ( Foldable set, Foldable basis
                 -> LPType t basis set a
                 -- ^ an LP-type problem
                 -> set a
-                -> (t, basis a)
-subExp gen (LPType v _ extendBasis initialBasis) hs =
-    let basis = subExp' (initialBasis hs) (V.toList $ shuffle gen hs)
-    in (v basis, basis)
+                -> basis a
+subExp gen (LPType _ _ extendBasis initialBasis) hs =
+    subExp' (initialBasis hs) (V.toList $ shuffle gen hs)
   where
-      -- traceShowWith ("subExp'",basis,"inp: ",inpGs,) $ case inpGs of
     subExp' basis = \case
       []     -> basis
       (h:gs) -> let basis' = subExp' basis gs
@@ -484,10 +472,10 @@ subExp gen (LPType v _ extendBasis initialBasis) hs =
                      Nothing            -> basis'
                      Just extendedBasis -> subExp' extendedBasis gs
 
+-- | Also return the value of the optimal solution
+withOpt         :: (b -> t) -> b -> (t, b)
+withOpt v basis = (v basis, basis)
 
-      -- TODO: there is still a small diff. in that
-      -- the orig description picks a random item from "removed <> gs"
-      -- whereas here we always pick the removed ones "first/last" instead of at random
 
 -- | Remoevs the items from the basis from the input set.
 extract           :: (Foldable basis, Eq a, Foldable set) => basis a -> set a -> (basis a, [a])
@@ -548,7 +536,7 @@ spec = describe "LPType Spec" $ do
            lpRecomputeBasis h3 basis' `shouldBe` Nothing
 
          it "subExp" $
-           fst (subExp (mkStdGen 42) linearProgrammingMinY exampleLP) `shouldBe` (Val 2.5)
+           fst (subExpWith (mkStdGen 42) linearProgrammingMinY exampleLP) `shouldBe` (Val 2.5)
 
          it "manual infeasible" $ do
            let h1 = HalfSpace Positive (LineEQ 0.29166 38.66671) :: HalfSpaceF (LineEQ R)
@@ -560,8 +548,8 @@ spec = describe "LPType Spec" $ do
          prop "feasible means feasible" $ withMaxSuccess 50 $ withDiscardRatio 1000 $
            \gen (halfPlanes :: [HalfPlane R]) ->
              case subExp (mkStdGen gen) linearProgrammingMinY halfPlanes of
-               (_,Basis2 v _ _) -> property $ all (v `intersects`) halfPlanes
-               _                -> property Discard
+               Basis2 v _ _ -> property $ all (v `intersects`) halfPlanes
+               _            -> property Discard
 
          -- prop "feasible means interseciton point" $
          --   \gen (halfPlanes :: HalfPlane R) ->
@@ -572,27 +560,33 @@ spec = describe "LPType Spec" $ do
 
          modifyMaxSize (const 1000) $ prop "clarkson2 same as subExp" $
            \gen (halfPlanes :: V.Vector (HalfPlane R)) ->
-             let (resSubExp, _) = subExp (mkStdGen gen) linearProgrammingMinY halfPlanes
-                 (res,_)        = clarkson2 (mkStdGen gen) linearProgrammingMinY halfPlanes
+             let problem        = linearProgrammingMinY
+                 (resSubExp, _) = subExpWith (mkStdGen gen) problem halfPlanes
+                 (res,_)        = withOpt (costFunction problem)
+                                $ clarkson2 (mkStdGen gen) problem halfPlanes
              in res `shouldBe` resSubExp
 
          modifyMaxSize (const 1000) $ prop "clarkson2 same as subExp (positives)" $
            \gen (lines' :: [LineEQ R]) ->
-             let (resSubExp, _) = subExp (mkStdGen gen)    linearProgrammingMinY halfPlanes
-                 (res,_)        = clarkson2 (mkStdGen gen) linearProgrammingMinY halfPlanes
+             let problem        = linearProgrammingMinY
+                 (resSubExp, _) = subExpWith (mkStdGen gen)    problem halfPlanes
+                 (res,_)        = withOpt (costFunction problem)
+                                $ clarkson2 (mkStdGen gen) problem halfPlanes
                  halfPlanes     = V.fromList [ HalfSpace Positive l | l <- lines' ]
              in res `shouldBe` resSubExp
 
          modifyMaxSize (const 1000) $ prop "clarkson same as clarkson2 (positives)" $
            \gen (lines' :: [LineEQ R]) ->
-             let (res2, _)  = clarkson2 (mkStdGen gen) linearProgrammingMinY halfPlanes
-                 (res,_)    = clarkson  (mkStdGen gen) linearProgrammingMinY halfPlanes
+             let problem    = linearProgrammingMinY
+                 (res2, _)  = withOpt (costFunction problem)
+                            $ clarkson2 (mkStdGen gen) problem halfPlanes
+                 (res,_)    = clarkson  (mkStdGen gen) problem halfPlanes
                  halfPlanes = V.fromList [ HalfSpace Positive l | l <- lines' ]
              in res `shouldBe` res2
 
          prop "brute force test" $
            \gen (halfPlanes :: [HalfPlane R]) ->
-             let res = subExp (mkStdGen gen) linearProgrammingMinY halfPlanes
+             let res = subExpWith (mkStdGen gen) linearProgrammingMinY halfPlanes
              in counterexample (show res) $
              case bruteForceSolutions halfPlanes of
                [] -> case res of
@@ -642,7 +636,7 @@ bug = describe "bug" $ do
                  ,HalfSpace Negative (LineEQ (-3) 2)
                  ]
             gen = 1
-            res = subExp (mkStdGen gen) linearProgrammingMinY cs
+            res = subExpWith (mkStdGen gen) linearProgrammingMinY cs
 
             ib = lpInitialBasis cs
 
@@ -682,7 +676,7 @@ bug2 = describe "bug2" $ do
                  ,HalfSpace Positive (LineEQ 5 (-11.2))               -- :+ green
                  ]
             gen = 1
-            res = subExp (mkStdGen gen) linearProgrammingMinY cs
+            res = subExpWith (mkStdGen gen) linearProgrammingMinY cs
 
             ib = lpInitialBasis cs
 
@@ -766,7 +760,7 @@ testIpe inFp = describe ("linear programming on file " <> show inFp) $ do
 -- HalfSpace Positive (LineEQ (-0.6) 195.2)
 
           prop "subExp correct, " $
-            let (sol,basis') = subExp (mkStdGen 42) linearProgrammingMinY
+            let (sol,basis') = subExpWith (mkStdGen 42) linearProgrammingMinY
                                       (view core <$> halfPlanes)
             in counterexample (show sol) $ Set.fromList (toList basis') === solution
 
