@@ -122,22 +122,18 @@ lp1D constraints = case foldr f (Bottom,Top) constraints of
 
 
 
-
+-- | A Description of an LPType problem
 data LPType t basis set a = LPType
                             { costFunction :: basis a -> t
                             -- ^ the function we are trying to minimize
-                             , inputs      :: set a
-                             -- ^
                             , combinatorialDimension :: Int
                              -- ^ the combinatorial dimension of the problem
                             , extendBasis :: a
                                            -> basis a
-                                           -> Maybe (basis a, [a])
+                                           -> Maybe (basis a)
                              -- ^ function to extend the current basis into a new basis.
-                             -- it returns the basis (if it has changed) as well as the
-                             -- elements that were removed from the basis.
-                             --
-                             -- returns Nothing if the basis did not change
+                             -- it returns the new basis (if it has changed) and Nothing
+                             -- otherwise.
 
                             , initialBasis :: set a -> basis a
                              -- ^ function to construct some initial basis
@@ -266,9 +262,7 @@ constructHalfSpaceOn h h'
 lpRecomputeBasis                            :: (Ord r, Fractional r)
                                             => HalfPlane r
                                             -> Basis2D r (HalfPlane r)
-                                            -> Maybe ( Basis2D r (HalfPlane r)
-                                                     , [HalfPlane r]
-                                                     )
+                                            -> Maybe ( Basis2D r (HalfPlane r) )
 lpRecomputeBasis h@(HalfSpace sign l) basis = case basis of
     Infeasible _         -> Nothing -- already infeasible, so remains infeasible
 
@@ -281,27 +275,26 @@ lpRecomputeBasis h@(HalfSpace sign l) basis = case basis of
               Nothing          -> error "absurd: lpExtendBasis. No constraints, so unbounded?"
               Just constraints' -> case lp1D constraints' of
                 InFeasible1 _ _         -> infeasible
-                Feasible1 (_ :+ (q,h')) -> (Basis2 q h h', [if h' == h1 then h2 else h1
-                                                           ]) -- FIXME!!!
+                Feasible1 (_ :+ (q,h')) -> Basis2 q h h'
                 Unbounded               -> error "absurd: lpExtendBasis. unbounded?"
       where
-        infeasible = (Infeasible (Vector3 h h1 h2), [])
+        infeasible = Infeasible (Vector3 h h1 h2)
 
     Basis1 y h1 -> case l `intersect` (h1^.boundingHyperPlane) of
       Just (Line_x_Line_Line _)                -> Nothing -- not useful yet
       Just (Line_x_Line_Point p)
         | (p .-^ (Vector2 1 0)) `intersects` h -> Nothing
           -- h defines the 1D halfspace (-infty,p_x] on h1. So it's not useful
-        | otherwise                            -> Just $ (Basis2 p h1 h,[])
+        | otherwise                            -> Just $ Basis2 p h1 h
       Nothing
-        | b > y                                -> Just $ (Basis1 b h, [h1])
+        | b > y                                -> Just $ Basis1 b h
                                                    -- h is more restrictive than h1
         | otherwise                            -> Nothing
         where
           b = l^.intercept
 
     EmptyBasis -> case sign of
-      Positive | l^.slope == 0 -> Just $ (Basis1 (l^.intercept) h, [])
+      Positive | l^.slope == 0 -> Just $ Basis1 (l^.intercept) h
       _                        -> Nothing -- basis remains empty
 
 
@@ -323,12 +316,10 @@ lpInitialBasis hs = case List.partition (\h -> h^.boundingHyperPlane.slope >= 0)
 
 -- | minimize the y-coordinate. (Lexicographically)
 -- pre: LP is feasible
-linearProgrammingMinY             :: (Fractional r, Ord r, Foldable set)
-                                  => set (HalfPlane r)
-                                  -> LPType (UnBounded r) (Basis2D r) set (HalfPlane r)
-linearProgrammingMinY constraints = LPType {
+linearProgrammingMinY :: (Fractional r, Ord r, Foldable set)
+                      => LPType (UnBounded r) (Basis2D r) set (HalfPlane r)
+linearProgrammingMinY = LPType {
     costFunction           = lpCost
-  , inputs                 = constraints
   , combinatorialDimension = 3
   , extendBasis            = lpRecomputeBasis
   , initialBasis           = lpInitialBasis
@@ -354,9 +345,10 @@ clarkson            :: ( Foldable set, Monoid (set a), Vector.Vector set a
                     -- ^ random generator
                     -> LPType t basis set a
                     -- ^ an LP-type problem
+                    -> set a
                     -> (t, basis a)
-clarkson gen0 problem@(LPType _ hs dim extendBasis _)
-    | n <= 9* (dim*dim) = clarkson2 gen0 problem
+clarkson gen0 problem@(LPType _ dim extendBasis _) hs
+    | n <= 9* (dim*dim) = clarkson2 gen0 problem hs
     | otherwise         = step gen0 mempty
   where
     n      = length hs
@@ -370,7 +362,7 @@ clarkson gen0 problem@(LPType _ hs dim extendBasis _)
           | length vs <= 2*sqrtN -> step gen2 (vs <> partial) -- extend and continue
           | otherwise            -> step gen2 partial -- too many violated constraints, retry
       where
-        sol@(_,basis) = clarkson2 gen1 $ problem { inputs = partial <> sample gen r hs }
+        sol@(_,basis) = clarkson2 gen1 problem (partial <> sample gen r hs)
         (gen1,gen2)   = splitGen gen
 
     -- -- computes the violated constraints
@@ -422,9 +414,10 @@ clarkson2      :: ( Foldable set, Semigroup (set a), Vector.Vector set a
                   -- ^ random generator
                 -> LPType t basis set a
                 -- ^ an LP-type problem
+                -> set a
                -> (t, basis a)
-clarkson2 gen0 problem@(LPType _ hs dim extendBasis _)
-    | n <= r    = subExp gen0 problem
+clarkson2 gen0 problem@(LPType _ dim extendBasis _) hs
+    | n <= r    = subExp gen0 problem hs
     | otherwise = step gen0 hs
   where
     n = length hs
@@ -438,8 +431,7 @@ clarkson2 gen0 problem@(LPType _ hs dim extendBasis _)
           | length vs <= treshold hs' -> step gen2 $ (duplicate vs) <> rest
           | otherwise                 -> step gen2 hs' -- too many violated constraints, retry
       where
-        sol@(_,basis) = subExp gen1 $ problem { inputs = sample gen r hs'
-                                              }
+        sol@(_,basis) = subExp gen1 problem (sample gen r hs')
         (gen1,gen2)   = splitGen gen
 
 -- | computes the set of violated constraints, and the set of satisified constraints
@@ -478,8 +470,9 @@ subExp        :: ( Foldable set, Foldable basis
                     -- ^ random generator
                 -> LPType t basis set a
                 -- ^ an LP-type problem
+                -> set a
                 -> (t, basis a)
-subExp gen (LPType v hs _ extendBasis initialBasis) =
+subExp gen (LPType v _ extendBasis initialBasis) hs =
     let basis = subExp' (initialBasis hs) (V.toList $ shuffle gen hs)
     in (v basis, basis)
   where
@@ -488,8 +481,10 @@ subExp gen (LPType v hs _ extendBasis initialBasis) =
       []     -> basis
       (h:gs) -> let basis' = subExp' basis gs
                 in case extendBasis h basis' of
-                     Nothing                       -> basis'
-                     Just (extendedBasis, removed) -> subExp' extendedBasis (removed <> gs)
+                     Nothing            -> basis'
+                     Just extendedBasis -> subExp' extendedBasis gs
+
+
       -- TODO: there is still a small diff. in that
       -- the orig description picks a random item from "removed <> gs"
       -- whereas here we always pick the removed ones "first/last" instead of at random
@@ -553,18 +548,18 @@ spec = describe "LPType Spec" $ do
            lpRecomputeBasis h3 basis' `shouldBe` Nothing
 
          it "subExp" $
-           fst (subExp (mkStdGen 42) (linearProgrammingMinY exampleLP)) `shouldBe` (Val 2.5)
+           fst (subExp (mkStdGen 42) linearProgrammingMinY exampleLP) `shouldBe` (Val 2.5)
 
          it "manual infeasible" $ do
            let h1 = HalfSpace Positive (LineEQ 0.29166 38.66671) :: HalfSpaceF (LineEQ R)
                h2 = HalfSpace Positive (LineEQ (-0.6) 195.2)
                h3 = HalfSpace Negative (LineEQ 0 80)
                ib = lpInitialBasis [h1,h2]
-           lpRecomputeBasis h3 ib `shouldBe` Just (Infeasible (Vector3 h3 h1 h2), [])
+           lpRecomputeBasis h3 ib `shouldBe` Just (Infeasible (Vector3 h3 h1 h2))
 
          prop "feasible means feasible" $ withMaxSuccess 50 $ withDiscardRatio 1000 $
            \gen (halfPlanes :: [HalfPlane R]) ->
-             case subExp (mkStdGen gen) (linearProgrammingMinY halfPlanes) of
+             case subExp (mkStdGen gen) linearProgrammingMinY halfPlanes of
                (_,Basis2 v _ _) -> property $ all (v `intersects`) halfPlanes
                _                -> property Discard
 
@@ -577,27 +572,27 @@ spec = describe "LPType Spec" $ do
 
          modifyMaxSize (const 1000) $ prop "clarkson2 same as subExp" $
            \gen (halfPlanes :: V.Vector (HalfPlane R)) ->
-             let (resSubExp, _) = subExp (mkStdGen gen) (linearProgrammingMinY halfPlanes)
-                 (res,_)        = clarkson2 (mkStdGen gen) (linearProgrammingMinY halfPlanes)
+             let (resSubExp, _) = subExp (mkStdGen gen) linearProgrammingMinY halfPlanes
+                 (res,_)        = clarkson2 (mkStdGen gen) linearProgrammingMinY halfPlanes
              in res `shouldBe` resSubExp
 
          modifyMaxSize (const 1000) $ prop "clarkson2 same as subExp (positives)" $
            \gen (lines' :: [LineEQ R]) ->
-             let (resSubExp, _) = subExp (mkStdGen gen) (linearProgrammingMinY halfPlanes)
-                 (res,_)        = clarkson2 (mkStdGen gen) (linearProgrammingMinY halfPlanes)
+             let (resSubExp, _) = subExp (mkStdGen gen)    linearProgrammingMinY halfPlanes
+                 (res,_)        = clarkson2 (mkStdGen gen) linearProgrammingMinY halfPlanes
                  halfPlanes     = V.fromList [ HalfSpace Positive l | l <- lines' ]
              in res `shouldBe` resSubExp
 
          modifyMaxSize (const 1000) $ prop "clarkson same as clarkson2 (positives)" $
            \gen (lines' :: [LineEQ R]) ->
-             let (res2, _)  = clarkson2 (mkStdGen gen) (linearProgrammingMinY halfPlanes)
-                 (res,_)    = clarkson  (mkStdGen gen) (linearProgrammingMinY halfPlanes)
+             let (res2, _)  = clarkson2 (mkStdGen gen) linearProgrammingMinY halfPlanes
+                 (res,_)    = clarkson  (mkStdGen gen) linearProgrammingMinY halfPlanes
                  halfPlanes = V.fromList [ HalfSpace Positive l | l <- lines' ]
              in res `shouldBe` res2
 
          prop "brute force test" $
            \gen (halfPlanes :: [HalfPlane R]) ->
-             let res = subExp (mkStdGen gen) (linearProgrammingMinY halfPlanes)
+             let res = subExp (mkStdGen gen) linearProgrammingMinY halfPlanes
              in counterexample (show res) $
              case bruteForceSolutions halfPlanes of
                [] -> case res of
@@ -647,7 +642,7 @@ bug = describe "bug" $ do
                  ,HalfSpace Negative (LineEQ (-3) 2)
                  ]
             gen = 1
-            res = subExp (mkStdGen gen) (linearProgrammingMinY cs)
+            res = subExp (mkStdGen gen) linearProgrammingMinY cs
 
             ib = lpInitialBasis cs
 
@@ -687,7 +682,7 @@ bug2 = describe "bug2" $ do
                  ,HalfSpace Positive (LineEQ 5 (-11.2))               -- :+ green
                  ]
             gen = 1
-            res = subExp (mkStdGen gen) (linearProgrammingMinY cs)
+            res = subExp (mkStdGen gen) linearProgrammingMinY cs
 
             ib = lpInitialBasis cs
 
@@ -703,13 +698,13 @@ bug2 = describe "bug2" $ do
         --     _                       -> False
         --                                                 )
 
-        prop "recompute basis -> removed correct" $
-          \(h :: HalfPlane R) basis ->
-            case lpRecomputeBasis h basis of
-              Just (newBasis,removed) -> Set.fromList (h : toList basis)
-                                         ===
-                                         Set.fromList (toList newBasis <> removed)
-              Nothing -> property Discard
+        -- prop "recompute basis -> removed correct" $
+        --   \(h :: HalfPlane R) basis ->
+        --     case lpRecomputeBasis h basis of
+        --       Just (newBasis,removed) -> Set.fromList (h : toList basis)
+        --                                  ===
+        --                                  Set.fromList (toList newBasis <> removed)
+        --       Nothing -> property Discard
 
         prop "thebug" $ counterexample (show res) $
           case res of
@@ -771,13 +766,13 @@ testIpe inFp = describe ("linear programming on file " <> show inFp) $ do
 -- HalfSpace Positive (LineEQ (-0.6) 195.2)
 
           prop "subExp correct, " $
-            let (sol,basis') = subExp (mkStdGen 42)
-                             $ linearProgrammingMinY (view core <$> halfPlanes)
+            let (sol,basis') = subExp (mkStdGen 42) linearProgrammingMinY
+                                      (view core <$> halfPlanes)
             in counterexample (show sol) $ Set.fromList (toList basis') === solution
 
           prop "clarkson correct, " $
-            let (sol,basis') = clarkson (mkStdGen 42)
-                             $ linearProgrammingMinY (view core <$> halfPlanes)
+            let (sol,basis') = clarkson (mkStdGen 42)  linearProgrammingMinY
+                                        (view core <$> halfPlanes)
             in counterexample (show sol) $ Set.fromList (toList basis') === solution
 
 
