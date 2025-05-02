@@ -17,10 +17,14 @@ module HGeometry.Ball.Class
   , Disk_ -- (..)
   , fromBoundaryPoints
   , pattern Disk_
+
+  , HasInBall(..)
+  , inDisk
   ) where
 
 import           Control.Arrow ((&&&))
 import           Control.Lens
+import           HGeometry.Boundary
 import qualified HGeometry.Number.Radical as Radical
 import           HGeometry.Point
 import           HGeometry.Properties
@@ -65,6 +69,19 @@ pattern Ball_ c r <- ((view center &&& view squaredRadius) -> (c,r))
 {-# COMPLETE Ball_ #-}
 
 --------------------------------------------------------------------------------
+
+-- | Class for types that have an "in ball" test.
+class HasInBall ball d r | ball -> d, ball -> r where
+  -- | Test if a query point lies inside or outside of a ball.
+  inBall :: (Point_ point d r, Ord r, Num r) => point -> ball -> PointLocationResult
+
+-- | In Disk test
+inDisk :: (Point_ point 2 r, HasInBall disk 2 r, Ord r, Num r)
+       => point -> disk -> PointLocationResult
+inDisk = inBall
+
+--------------------------------------------------------------------------------
+
 
 -- -- | Constructs a ball from d+1 points on the boundary
 -- fromBoundaryPoints :: Vector (d+1) point -> ball
