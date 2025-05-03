@@ -17,6 +17,7 @@ import Data.Maybe (catMaybes)
 import Data.Semialign
 import GHC.TypeLits
 import HGeometry.Ball
+import HGeometry.Disk
 import HGeometry.Box
 import HGeometry.Combinatorial.Instances ()
 import HGeometry.HalfSpace
@@ -127,6 +128,10 @@ instance (Arbitrary point, Point_ point 2 r, Ord r, Num r
     catMaybes [ diskFromPoints a' b' c'
               | a' <- shrink a, b' <- shrink b, c' <- shrink c
               ]
+
+instance (Arbitrary point, ConstructablePoint_ point 2 r, Ord r, Num r, Eq point
+         ) => Arbitrary (DiskByPoints point) where
+  arbitrary = oneof [DiametralDisk <$> arbitrary, DiskByPoints <$> arbitrary]
 
 instance ( Arbitrary point
          , Point_ point 2 r, Num r, Ord r
