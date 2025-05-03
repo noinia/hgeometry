@@ -52,6 +52,11 @@ instance Traversable1 DiskByPoints where
     DiskByPoints d  -> DiskByPoints  <$> traverse1 f d
 
 
+instance (Point_ point 2 r, Fractional r) => Ball_ (DiskByPoints point) (Point 2 r) where
+  squaredRadius = to $ \case
+    DiametralDisk d -> d^.squaredRadius
+    DiskByPoints d  -> d^.squaredRadius
+
 --------------------------------------------------------------------------------
 
 instance Point_ point 2 r => HasInBall (DiskByPoints point) where
