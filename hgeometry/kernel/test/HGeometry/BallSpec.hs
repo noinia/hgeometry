@@ -92,3 +92,7 @@ diametralSpec = describe "Diametral" $ do
       \a (b :: Point 2 R) ->
         a /= b ==> let disk = DiametralPoints a b
                    in a `inBall` disk == OnBoundary && b `inBall` disk == OnBoundary
+
+    prop "consistant with other" $
+      \(q :: Point 2 R) (disk :: DiametralBall (Point 2 R)) ->
+      q `inBall` disk === q `inBall` (Ball (disk^.center) (disk^.squaredRadius))

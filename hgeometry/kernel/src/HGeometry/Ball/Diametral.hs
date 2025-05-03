@@ -39,17 +39,28 @@ type instance NumType   (DiametralBall point) = NumType   point
 instance Traversable1 DiametralBall where
   traverse1 f (MkDiametralBall v) = MkDiametralBall <$> traverse1 f v
 
+--------------------------------------------------------------------------------
+
+instance (Point_ point d r, Fractional r, Has_ Metric_ d r
+         ) => Ball_ (DiametralBall point) (Point d r) where
+  squaredRadius = to $ \(DiametralPoints p q) -> quadrance $ (p .-. q) ^/ 2
 
 --------------------------------------------------------------------------------
 -- * Point in ball
 
 instance (Point_ point d r, Has_ Metric_ d r) => HasInBall (DiametralBall point) where
-  inBall q (DiametralPoints a b) = let v = 4 *^ (q^.vector) ^+^ 2 *^ (a^.vector ^+^ b^.vector)
-                                   in case (v `dot` v) `compare` (squaredEuclideanDist a b) of
+  inBall q (DiametralPoints a b) = let a' = a^.vector
+                                       b' = b^.vector
+                                       v = 2 *^ (q^.vector) ^-^ (a' ^+^ b')
+                                       w = a' ^-^ b'
+                                   in case (v `dot` v) `compare` (w `dot` w) of
                                         LT -> Inside
                                         EQ -> OnBoundary
                                         GT -> Outside
-
+    -- main idea: solve: ||q-c||^2 <= r^2
+    -- since we have c = (a+b)/2, and r=|a-b|/2
+    -- we essentially avoid the division by using (2^2)*r^2 = (2r)^2 = (a-b)^2
+    -- simialrly on the left side.
 
 type instance Intersection (Point d r) (DiametralBall point) = Maybe (Point d r)
 
@@ -63,6 +74,7 @@ instance ( Point_ point d r
          ) => (Point d r) `IsIntersectableWith` (DiametralBall point) where
   intersect q b | q `intersects` b = Just q
                 | otherwise        = Nothing
+
 
 --------------------------------------------------------------------------------
 
