@@ -11,6 +11,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.Ball.CenterAndRadius
   ( Ball(Ball,Disk)
+  , squaredRadius'
   , Disk
 
 
@@ -20,12 +21,17 @@ module HGeometry.Ball.CenterAndRadius
   , _BallSphere
   , _DiskCircle
 
+  , fromDiametralPair, fromCenterAndPoint
+  , fromBoundaryPoints
 
   , IntersectionOf(..)
   ) where
 
 import Control.Lens
+import HGeometry.Ball.BoundaryPoints
+import HGeometry.Boundary
 import HGeometry.Ball.Class
+import HGeometry.Ball.Diametral
 import HGeometry.Ext
 import HGeometry.HalfLine
 import HGeometry.HyperPlane
@@ -53,19 +59,32 @@ instance HasCenter (Ball point) point where
   center = lens (\(Ball c _) -> c) (\(Ball _ r) c -> Ball c r)
 
 instance Point_ point (Dimension point) (NumType point) => Ball_ (Ball point) point where
-  squaredRadius = lens (\(Ball _ r) -> r) (\(Ball c _) r -> Ball c r)
+  squaredRadius = squaredRadius'
+
+-- | Lens to access the squared radius of a ball
+squaredRadius' :: Lens' (Ball point) (NumType point)
+squaredRadius' = lens (\(Ball _ r) -> r) (\(Ball c _) r -> Ball c r)
+
+
+instance Point_ point (Dimension point) (NumType point)
+         => ConstructableBall_ (Ball point) point where
   fromCenterAndSquaredRadius = Ball
 
 --------------------------------------------------------------------------------
 -- * Point in ball
 
+instance ( Point_ point d r, Ord r, Num r, Has_ Metric_ d r
+         ) => HasInBall (Ball point) where
+  inBall q (Ball c r) = case squaredEuclideanDist (q^.asPoint) (c^.asPoint) `compare` r of
+    LT -> Inside
+    EQ -> OnBoundary
+    GT -> Outside
+
 type instance Intersection (Point d r) (Ball point) = Maybe (Point d r)
 
-instance ( Point_ point d r
-         , Ord r, Num r
-         , Has_ Metric_ d r
+instance ( Point_ point d r, Ord r, Num r, Has_ Metric_ d r
          ) => (Point d r) `HasIntersectionWith` (Ball point) where
-  intersects q (Ball c r) = squaredEuclideanDist q (c^.asPoint) <= r
+  intersects q b = q `inBall` b /= Outside
 
 instance ( Point_ point d r
          , Ord r, Num r
@@ -307,3 +326,24 @@ instance ( Point_ point d r, Point_ point' d r
          , HasSquaredEuclideanDistance point'
          ) => (ClosedLineSegment point') `HasIntersectionWith` (Sphere point) where
   intersects s (Sphere c r) = squaredEuclideanDistTo c s <= r
+
+
+-- | Given two points on the diameter of the ball, construct a ball.
+fromDiametralPair     :: (Fractional r, Point_ point d r, Has_ Metric_ d r)
+                      => point -> point -> Ball (Point d r)
+fromDiametralPair p q = let disk = DiametralPoints p q
+                        in fromCenterAndPoint (disk^.center) p
+
+-- | Construct a ball given the center point and a point p on the boundary.
+fromCenterAndPoint     :: ( Num r, Point_ point d r, Point_ center d r
+                          , Has_ Metric_ d r
+                          )
+                       => center -> point -> Ball center
+fromCenterAndPoint c p = fromCenterAndSquaredRadius c (squaredEuclideanDist c p)
+
+-- | Tries to create a disk from three points on the boundary.
+fromBoundaryPoints                 :: ( Point_ point 2 r, Fractional r, Ord r)
+                                   => Vector 3 point -> Maybe (Disk (Point 2 r))
+fromBoundaryPoints (Vector3 a b d) = diskFromPoints a b d <&> \case
+  disk -> let c = disk^.center
+          in Ball c (squaredEuclideanDist c a)

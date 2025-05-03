@@ -8,13 +8,16 @@ import HGeometry.Ball
 import HGeometry.Intersection
 import HGeometry.LineSegment
 import HGeometry.Point
+import HGeometry.Kernel.Instances ()
+import HGeometry.Boundary
 import HGeometry.HalfLine
 import HGeometry.Vector
 import HGeometry.HyperPlane
 import HGeometry.HalfSpace
 import HGeometry.Line.PointAndVector
 import Test.Hspec
--- import Test.QuickCheck
+import Test.Hspec.QuickCheck
+import Test.QuickCheck ((===),(==>), Discard(..), property)
 -- import Test.Util
 
 --------------------------------------------------------------------------------
@@ -53,6 +56,8 @@ spec = do
         let ray      = HalfLine (Point3 (0 :: R) (1/2) 10000) (Vector3 0 0 (-1))
         in (ray `intersects` (unitBall :: Ball (Point 3 R))) `shouldBe`  True
 
+    boundaryPointsSpec
+    diametralSpec
 
 unitCircle :: (Num r) => Circle (Point 2 r)
 unitCircle = Circle origin 1
@@ -60,3 +65,30 @@ unitCircle = Circle origin 1
 segment     :: (Floating r)
             => r -> r -> ClosedLineSegment (Point 2 r)
 segment r x = ClosedLineSegment origin (Point2 (r*cos x) (r*sin x))
+
+
+boundaryPointsSpec :: Spec
+boundaryPointsSpec = describe "BoundaryPoints" $ do
+    prop "center in disk" $
+      \a b (c :: Point 2 R) ->
+        case diskFromPoints a b c of
+          Just disk -> (disk^.center) `inBall` disk === Inside
+          Nothing   -> property Discard
+
+    prop "on boundary correct" $
+      \a b (c :: Point 2 R) ->
+        case diskFromPoints a b c of
+          Just disk -> property $ all (\q -> q `inBall` disk == OnBoundary) [a,b,c]
+          Nothing   -> property Discard
+
+diametralSpec :: Spec
+diametralSpec = describe "Diametral" $ do
+    prop "center in disk" $
+      \a (b :: Point 2 R) ->
+        a /= b ==> let disk = DiametralPoints a b
+                   in (disk^.center) `inBall` disk === Inside
+
+    prop "on boundary correct" $
+      \a (b :: Point 2 R) ->
+        a /= b ==> let disk = DiametralPoints a b
+                   in a `inBall` disk == OnBoundary && b `inBall` disk == OnBoundary
