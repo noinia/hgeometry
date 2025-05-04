@@ -1,0 +1,605 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Ball.Diametral</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- A ball represented by its two diametral points</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Ball.Diametral.html"><span class="hs-identifier">HGeometry.Ball.Diametral</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralBall"><span class="hs-identifier">DiametralBall</span></a></span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Ball.Diametral.html#MkDiametralBall"><span class="hs-identifier">MkDiametralBall</span></a></span><span class="hs-special">,</span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralPoints"><span class="hs-identifier">DiametralPoints</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Ball.Class.html"><span class="hs-identifier">HGeometry.Ball.Class</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Boundary.html"><span class="hs-identifier">HGeometry.Boundary</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html"><span class="hs-identifier">HGeometry.Intersection</span></a></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="annot"><span class="hs-comment">-- | A ball defined by its two diametral points</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">newtype</span><span> </span><span id="DiametralBall"><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralBall"><span class="hs-identifier hs-var">DiametralBall</span></a></span></span><span> </span><span id="local-6989586621679417092"><span class="annot"><a href="#local-6989586621679417092"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="MkDiametralBall"><span class="annot"><a href="HGeometry.Ball.Diametral.html#MkDiametralBall"><span class="hs-identifier hs-var">MkDiametralBall</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679417092"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span>                            </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679417252"><span id="local-6989586621679417260"><span id="local-6989586621679417264"><span class="annot"><span class="annottext">Int -&gt; DiametralBall point -&gt; ShowS
+[DiametralBall point] -&gt; ShowS
+DiametralBall point -&gt; String
+(Int -&gt; DiametralBall point -&gt; ShowS)
+-&gt; (DiametralBall point -&gt; String)
+-&gt; ([DiametralBall point] -&gt; ShowS)
+-&gt; Show (DiametralBall point)
+forall point. Show point =&gt; Int -&gt; DiametralBall point -&gt; ShowS
+forall point. Show point =&gt; [DiametralBall point] -&gt; ShowS
+forall point. Show point =&gt; DiametralBall point -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: forall point. Show point =&gt; Int -&gt; DiametralBall point -&gt; ShowS
+showsPrec :: Int -&gt; DiametralBall point -&gt; ShowS
+$cshow :: forall point. Show point =&gt; DiametralBall point -&gt; String
+show :: DiametralBall point -&gt; String
+$cshowList :: forall point. Show point =&gt; [DiametralBall point] -&gt; ShowS
+showList :: [DiametralBall point] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679417271"><span id="local-6989586621679417275"><span class="annot"><span class="annottext">DiametralBall point -&gt; DiametralBall point -&gt; Bool
+(DiametralBall point -&gt; DiametralBall point -&gt; Bool)
+-&gt; (DiametralBall point -&gt; DiametralBall point -&gt; Bool)
+-&gt; Eq (DiametralBall point)
+forall point.
+Eq point =&gt;
+DiametralBall point -&gt; DiametralBall point -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: forall point.
+Eq point =&gt;
+DiametralBall point -&gt; DiametralBall point -&gt; Bool
+== :: DiametralBall point -&gt; DiametralBall point -&gt; Bool
+$c/= :: forall point.
+Eq point =&gt;
+DiametralBall point -&gt; DiametralBall point -&gt; Bool
+/= :: DiametralBall point -&gt; DiametralBall point -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679417280"><span id="local-6989586621679417284"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; DiametralBall a -&gt; DiametralBall b)
+-&gt; (forall a b. a -&gt; DiametralBall b -&gt; DiametralBall a)
+-&gt; Functor DiametralBall
+forall a b. a -&gt; DiametralBall b -&gt; DiametralBall a
+forall a b. (a -&gt; b) -&gt; DiametralBall a -&gt; DiametralBall b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall a b. (a -&gt; b) -&gt; DiametralBall a -&gt; DiametralBall b
+fmap :: forall a b. (a -&gt; b) -&gt; DiametralBall a -&gt; DiametralBall b
+$c&lt;$ :: forall a b. a -&gt; DiametralBall b -&gt; DiametralBall a
+&lt;$ :: forall a b. a -&gt; DiametralBall b -&gt; DiametralBall a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679417290"><span id="local-6989586621679417296"><span id="local-6989586621679417302"><span id="local-6989586621679417307"><span id="local-6989586621679417310"><span id="local-6989586621679417313"><span id="local-6989586621679417316"><span id="local-6989586621679417319"><span id="local-6989586621679417322"><span id="local-6989586621679417325"><span id="local-6989586621679417328"><span id="local-6989586621679417331"><span id="local-6989586621679417334"><span id="local-6989586621679417339"><span id="local-6989586621679417344"><span id="local-6989586621679417349"><span id="local-6989586621679417354"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; DiametralBall m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; DiametralBall a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; DiametralBall a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; DiametralBall a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; DiametralBall a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; DiametralBall a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; DiametralBall a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; DiametralBall a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; DiametralBall a -&gt; a)
+-&gt; (forall a. DiametralBall a -&gt; [a])
+-&gt; (forall a. DiametralBall a -&gt; Bool)
+-&gt; (forall a. DiametralBall a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; DiametralBall a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; DiametralBall a -&gt; a)
+-&gt; (forall a. Ord a =&gt; DiametralBall a -&gt; a)
+-&gt; (forall a. Num a =&gt; DiametralBall a -&gt; a)
+-&gt; (forall a. Num a =&gt; DiametralBall a -&gt; a)
+-&gt; Foldable DiametralBall
+forall a. Eq a =&gt; a -&gt; DiametralBall a -&gt; Bool
+forall a. Num a =&gt; DiametralBall a -&gt; a
+forall a. Ord a =&gt; DiametralBall a -&gt; a
+forall m. Monoid m =&gt; DiametralBall m -&gt; m
+forall a. DiametralBall a -&gt; Bool
+forall a. DiametralBall a -&gt; Int
+forall a. DiametralBall a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; DiametralBall a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; DiametralBall a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; DiametralBall a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; DiametralBall a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+$cfold :: forall m. Monoid m =&gt; DiametralBall m -&gt; m
+fold :: forall m. Monoid m =&gt; DiametralBall m -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; DiametralBall a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; DiametralBall a -&gt; m
+$cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; DiametralBall a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; DiametralBall a -&gt; m
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; DiametralBall a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; DiametralBall a -&gt; b
+$cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; DiametralBall a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; DiametralBall a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; DiametralBall a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; DiametralBall a -&gt; b
+$cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; DiametralBall a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; DiametralBall a -&gt; b
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; DiametralBall a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; DiametralBall a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; DiametralBall a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; DiametralBall a -&gt; a
+$ctoList :: forall a. DiametralBall a -&gt; [a]
+toList :: forall a. DiametralBall a -&gt; [a]
+$cnull :: forall a. DiametralBall a -&gt; Bool
+null :: forall a. DiametralBall a -&gt; Bool
+$clength :: forall a. DiametralBall a -&gt; Int
+length :: forall a. DiametralBall a -&gt; Int
+$celem :: forall a. Eq a =&gt; a -&gt; DiametralBall a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; DiametralBall a -&gt; Bool
+$cmaximum :: forall a. Ord a =&gt; DiametralBall a -&gt; a
+maximum :: forall a. Ord a =&gt; DiametralBall a -&gt; a
+$cminimum :: forall a. Ord a =&gt; DiametralBall a -&gt; a
+minimum :: forall a. Ord a =&gt; DiametralBall a -&gt; a
+$csum :: forall a. Num a =&gt; DiametralBall a -&gt; a
+sum :: forall a. Num a =&gt; DiametralBall a -&gt; a
+$cproduct :: forall a. Num a =&gt; DiametralBall a -&gt; a
+product :: forall a. Num a =&gt; DiametralBall a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679417367"><span id="local-6989586621679417375"><span id="local-6989586621679417381"><span id="local-6989586621679417386"><span class="annot"><span class="annottext">Functor DiametralBall
+Foldable DiametralBall
+(Functor DiametralBall, Foldable DiametralBall) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; DiametralBall a -&gt; f (DiametralBall b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    DiametralBall (f a) -&gt; f (DiametralBall a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; DiametralBall a -&gt; m (DiametralBall b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    DiametralBall (m a) -&gt; m (DiametralBall a))
+-&gt; Traversable DiametralBall
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+DiametralBall (m a) -&gt; m (DiametralBall a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+DiametralBall (f a) -&gt; f (DiametralBall a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; DiametralBall a -&gt; m (DiametralBall b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; DiametralBall a -&gt; f (DiametralBall b)
+$ctraverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; DiametralBall a -&gt; f (DiametralBall b)
+traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; DiametralBall a -&gt; f (DiametralBall b)
+$csequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+DiametralBall (f a) -&gt; f (DiametralBall a)
+sequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+DiametralBall (f a) -&gt; f (DiametralBall a)
+$cmapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; DiametralBall a -&gt; m (DiametralBall b)
+mapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; DiametralBall a -&gt; m (DiametralBall b)
+$csequence :: forall (m :: * -&gt; *) a.
+Monad m =&gt;
+DiametralBall (m a) -&gt; m (DiametralBall a)
+sequence :: forall (m :: * -&gt; *) a.
+Monad m =&gt;
+DiametralBall (m a) -&gt; m (DiametralBall a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>                            </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">newtype</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679417398"><span id="local-6989586621679417407"><span id="local-6989586621679417415"><span id="local-6989586621679417421"><span id="local-6989586621679417427"><span id="local-6989586621679417435"><span id="local-6989586621679417441"><span id="local-6989586621679417445"><span id="local-6989586621679417449"><span id="local-6989586621679417453"><span id="local-6989586621679417457"><span id="local-6989586621679417461"><span class="annot"><span class="annottext">Foldable DiametralBall
+Foldable DiametralBall =&gt;
+(forall m. Semigroup m =&gt; DiametralBall m -&gt; m)
+-&gt; (forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; DiametralBall a -&gt; m)
+-&gt; (forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; DiametralBall a -&gt; m)
+-&gt; (forall a. DiametralBall a -&gt; NonEmpty a)
+-&gt; (forall a. Ord a =&gt; DiametralBall a -&gt; a)
+-&gt; (forall a. Ord a =&gt; DiametralBall a -&gt; a)
+-&gt; (forall a. DiametralBall a -&gt; a)
+-&gt; (forall a. DiametralBall a -&gt; a)
+-&gt; (forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; DiametralBall a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; DiametralBall a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; DiametralBall a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; DiametralBall a -&gt; b)
+-&gt; Foldable1 DiametralBall
+forall a. Ord a =&gt; DiametralBall a -&gt; a
+forall m. Semigroup m =&gt; DiametralBall m -&gt; m
+forall a. DiametralBall a -&gt; a
+forall a. DiametralBall a -&gt; NonEmpty a
+forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; DiametralBall a -&gt; m
+forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; DiametralBall a -&gt; b
+forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; DiametralBall a -&gt; b
+forall (t :: * -&gt; *).
+Foldable t =&gt;
+(forall m. Semigroup m =&gt; t m -&gt; m)
+-&gt; (forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a. t a -&gt; NonEmpty a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; a)
+-&gt; (forall a. t a -&gt; a)
+-&gt; (forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; t a -&gt; b)
+-&gt; Foldable1 t
+$cfold1 :: forall m. Semigroup m =&gt; DiametralBall m -&gt; m
+fold1 :: forall m. Semigroup m =&gt; DiametralBall m -&gt; m
+$cfoldMap1 :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; DiametralBall a -&gt; m
+foldMap1 :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; DiametralBall a -&gt; m
+$cfoldMap1' :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; DiametralBall a -&gt; m
+foldMap1' :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; DiametralBall a -&gt; m
+$ctoNonEmpty :: forall a. DiametralBall a -&gt; NonEmpty a
+toNonEmpty :: forall a. DiametralBall a -&gt; NonEmpty a
+$cmaximum :: forall a. Ord a =&gt; DiametralBall a -&gt; a
+maximum :: forall a. Ord a =&gt; DiametralBall a -&gt; a
+$cminimum :: forall a. Ord a =&gt; DiametralBall a -&gt; a
+minimum :: forall a. Ord a =&gt; DiametralBall a -&gt; a
+$chead :: forall a. DiametralBall a -&gt; a
+head :: forall a. DiametralBall a -&gt; a
+$clast :: forall a. DiametralBall a -&gt; a
+last :: forall a. DiametralBall a -&gt; a
+$cfoldrMap1 :: forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; DiametralBall a -&gt; b
+foldrMap1 :: forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; DiametralBall a -&gt; b
+$cfoldlMap1' :: forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; DiametralBall a -&gt; b
+foldlMap1' :: forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; DiametralBall a -&gt; b
+$cfoldlMap1 :: forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; DiametralBall a -&gt; b
+foldlMap1 :: forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; DiametralBall a -&gt; b
+$cfoldrMap1' :: forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; DiametralBall a -&gt; b
+foldrMap1' :: forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; DiametralBall a -&gt; b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable1</span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralPoints"><span class="hs-identifier hs-type">DiametralPoints</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679417089"><span class="annot"><a href="#local-6989586621679417089"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679417089"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralBall"><span class="hs-identifier hs-type">DiametralBall</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417089"><span class="hs-identifier hs-type">point</span></a></span></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">pattern</span><span> </span><span id="DiametralPoints"><span id="%24mDiametralPoints"><span id="%24bDiametralPoints"><span class="annot"><span class="annottext">$mDiametralPoints :: forall {r} {point}.
+DiametralBall point -&gt; (point -&gt; point -&gt; r) -&gt; ((# #) -&gt; r) -&gt; r
+$bDiametralPoints :: forall point. point -&gt; point -&gt; DiametralBall point
+</span><a href="HGeometry.Ball.Diametral.html#DiametralPoints"><span class="hs-identifier hs-var hs-var hs-var">DiametralPoints</span></a></span></span></span></span><span> </span><span class="annot"><a href="#local-6989586621679417480"><span class="hs-identifier hs-type">p</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417481"><span class="hs-identifier hs-type">q</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.Ball.Diametral.html#MkDiametralBall"><span class="hs-identifier hs-type">MkDiametralBall</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector2</span></span><span> </span><span id="local-6989586621679417480"><span class="annot"><a href="#local-6989586621679417480"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679417481"><span class="annot"><a href="#local-6989586621679417481"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span class="hs-pragma">{-# COMPLETE</span><span> </span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralPoints"><span class="hs-pragma hs-type">DiametralPoints</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679417483"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralBall"><span class="hs-identifier hs-type">DiametralBall</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417483"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679417483"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679417484"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralBall"><span class="hs-identifier hs-type">DiametralBall</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417484"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span>   </span><span class="annot"><a href="#local-6989586621679417484"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679417491"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/semigroupoids-6.0.1-a8bbfdf809d26cf53d1649155d1175ff37b07769640f0e81bd2ce91845990ef7/share/doc/html/src/Data.Semigroup.Traversable.Class.html/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralBall"><span class="hs-identifier hs-type">DiametralBall</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-40"></span><span>  </span><span id="local-6989586621679417504"><span class="annot"><span class="annottext">traverse1 :: forall (f :: * -&gt; *) a b.
+Apply f =&gt;
+(a -&gt; f b) -&gt; DiametralBall a -&gt; f (DiametralBall b)
+</span><a href="#local-6989586621679417504"><span class="hs-identifier hs-var hs-var hs-var">traverse1</span></a></span></span><span> </span><span id="local-6989586621679417506"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679417506"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Ball.Diametral.html#MkDiametralBall"><span class="hs-identifier hs-type">MkDiametralBall</span></a></span><span> </span><span id="local-6989586621679417507"><span class="annot"><span class="annottext">Vector 2 a
+</span><a href="#local-6989586621679417507"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 2 b -&gt; DiametralBall b
+forall point. Vector 2 point -&gt; DiametralBall point
+</span><a href="HGeometry.Ball.Diametral.html#MkDiametralBall"><span class="hs-identifier hs-var">MkDiametralBall</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector 2 b -&gt; DiametralBall b)
+-&gt; f (Vector 2 b) -&gt; f (DiametralBall b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; Vector 2 a -&gt; f (Vector 2 b)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable1 t, Apply f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Apply f =&gt;
+(a -&gt; f b) -&gt; Vector 2 a -&gt; f (Vector 2 b)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/semigroupoids-6.0.1-a8bbfdf809d26cf53d1649155d1175ff37b07769640f0e81bd2ce91845990ef7/share/doc/html/src/Data.Semigroup.Traversable.Class.html/Data.Semigroup.Traversable.Class.html#traverse1"><span class="hs-identifier hs-var">traverse1</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679417506"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 a
+</span><a href="#local-6989586621679417507"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679417154"><span id="local-6989586621679417155"><span id="local-6989586621679417156"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679417154"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417155"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417156"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679417156"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Has_</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Metric_</span></span><span> </span><span class="annot"><a href="#local-6989586621679417155"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417156"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-45"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Ball.Class.html#Ball_"><span class="hs-identifier hs-type">Ball_</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralBall"><span class="hs-identifier hs-type">DiametralBall</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417154"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><a href="#local-6989586621679417155"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417156"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-46"></span><span>  </span><span id="local-6989586621679417590"><span class="annot"><span class="annottext">squaredRadius :: Getter (DiametralBall point) (NumType (DiametralBall point))
+</span><a href="#local-6989586621679417590"><span class="hs-identifier hs-var hs-var hs-var">squaredRadius</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DiametralBall point -&gt; NumType (DiametralBall point))
+-&gt; (NumType (DiametralBall point)
+    -&gt; f (NumType (DiametralBall point)))
+-&gt; DiametralBall point
+-&gt; f (DiametralBall point)
+forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s a.
+(Profunctor p, Contravariant f) =&gt;
+(s -&gt; a) -&gt; Optic' p f s a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#to"><span class="hs-identifier hs-var">to</span></a></span><span> </span><span class="annot"><span class="annottext">((DiametralBall point -&gt; NumType (DiametralBall point))
+ -&gt; (NumType (DiametralBall point)
+     -&gt; f (NumType (DiametralBall point)))
+ -&gt; DiametralBall point
+ -&gt; f (DiametralBall point))
+-&gt; (DiametralBall point -&gt; NumType (DiametralBall point))
+-&gt; (NumType (DiametralBall point)
+    -&gt; f (NumType (DiametralBall point)))
+-&gt; DiametralBall point
+-&gt; f (DiametralBall point)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralPoints"><span class="hs-identifier hs-type">DiametralPoints</span></a></span><span> </span><span id="local-6989586621679417593"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679417593"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679417594"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679417594"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Vector d r -&gt; NumType (DiametralBall point)
+forall vector (d :: Nat) r.
+(Metric_ vector d r, Num r) =&gt;
+vector -&gt; r
+</span><span class="hs-identifier hs-var">quadrance</span></span><span> </span><span class="annot"><span class="annottext">(Vector d r -&gt; NumType (DiametralBall point))
+-&gt; Vector d r -&gt; NumType (DiametralBall point)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679417593"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; Vector d r
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; point -&gt; Vector d r
+</span><span class="hs-operator hs-var">.-.</span></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679417594"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector d r -&gt; r -&gt; Vector d r
+forall vector (d :: Nat) r.
+(Vector_ vector d r, Fractional r) =&gt;
+vector -&gt; r -&gt; vector
+</span><span class="hs-operator hs-var">^/</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">2</span></span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-49"></span><span class="annot"><span class="hs-comment">-- * Point in ball</span></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679417183"><span id="local-6989586621679417184"><span id="local-6989586621679417185"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679417183"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417184"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417185"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Has_</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Metric_</span></span><span> </span><span class="annot"><a href="#local-6989586621679417184"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417185"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Ball.Class.html#HasInBall"><span class="hs-identifier hs-type">HasInBall</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralBall"><span class="hs-identifier hs-type">DiametralBall</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417183"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-52"></span><span>  </span><span id="local-6989586621679417762"><span class="annot"><span class="annottext">inBall :: forall point (d :: Nat) r.
+(Point_ point d r, Ord r, Num r, NumType (DiametralBall point) ~ r,
+ Dimension (DiametralBall point) ~ d) =&gt;
+point -&gt; DiametralBall point -&gt; PointLocationResult
+</span><a href="#local-6989586621679417762"><span class="hs-identifier hs-var hs-var hs-var">inBall</span></a></span></span><span> </span><span id="local-6989586621679417764"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679417764"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralPoints"><span class="hs-identifier hs-type">DiametralPoints</span></a></span><span> </span><span id="local-6989586621679417765"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679417765"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679417766"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679417766"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679417767"><span class="annot"><span class="annottext">a' :: Vector d r
+</span><a href="#local-6989586621679417767"><span class="hs-identifier hs-var hs-var">a'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679417765"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Vector d r) point (Vector d r) -&gt; Vector d r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
+forall (d :: Nat) r s.
+(Dimension point ~ d, NumType point ~ r, Dimension point ~ d,
+ NumType point ~ s) =&gt;
+Lens point point (Vector d r) (Vector d s)
+forall point point' (d :: Nat) r s.
+(HasVector point point', Dimension point ~ d, NumType point ~ r,
+ Dimension point' ~ d, NumType point' ~ s) =&gt;
+Lens point point' (Vector d r) (Vector d s)
+Lens point point (Vector d r) (Vector d r)
+</span><span class="hs-identifier hs-var">vector</span></span><span>
+</span><span id="line-53"></span><span>                                       </span><span id="local-6989586621679417770"><span class="annot"><span class="annottext">b' :: Vector d r
+</span><a href="#local-6989586621679417770"><span class="hs-identifier hs-var hs-var">b'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679417766"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Vector d r) point (Vector d r) -&gt; Vector d r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
+forall (d :: Nat) r s.
+(Dimension point ~ d, NumType point ~ r, Dimension point ~ d,
+ NumType point ~ s) =&gt;
+Lens point point (Vector d r) (Vector d s)
+forall point point' (d :: Nat) r s.
+(HasVector point point', Dimension point ~ d, NumType point ~ r,
+ Dimension point' ~ d, NumType point' ~ s) =&gt;
+Lens point point' (Vector d r) (Vector d s)
+Lens point point (Vector d r) (Vector d r)
+</span><span class="hs-identifier hs-var">vector</span></span><span>
+</span><span id="line-54"></span><span>                                       </span><span id="local-6989586621679417771"><span class="annot"><span class="annottext">v :: Vector d r
+</span><a href="#local-6989586621679417771"><span class="hs-identifier hs-var hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; Vector d r -&gt; Vector d r
+forall r vector (d :: Nat).
+(Num r, Vector_ vector d r) =&gt;
+r -&gt; vector -&gt; vector
+</span><span class="hs-operator hs-var">*^</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679417764"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Vector d r) point (Vector d r) -&gt; Vector d r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
+forall (d :: Nat) r s.
+(Dimension point ~ d, NumType point ~ r, Dimension point ~ d,
+ NumType point ~ s) =&gt;
+Lens point point (Vector d r) (Vector d s)
+forall point point' (d :: Nat) r s.
+(HasVector point point', Dimension point ~ d, NumType point ~ r,
+ Dimension point' ~ d, NumType point' ~ s) =&gt;
+Lens point point' (Vector d r) (Vector d s)
+Lens point point (Vector d r) (Vector d r)
+</span><span class="hs-identifier hs-var">vector</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector d r -&gt; Vector d r -&gt; Vector d r
+forall r vector (d :: Nat).
+(Num r, Additive_ vector d r) =&gt;
+vector -&gt; vector -&gt; vector
+</span><span class="hs-operator hs-var">^-^</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector d r
+</span><a href="#local-6989586621679417767"><span class="hs-identifier hs-var">a'</span></a></span><span> </span><span class="annot"><span class="annottext">Vector d r -&gt; Vector d r -&gt; Vector d r
+forall r vector (d :: Nat).
+(Num r, Additive_ vector d r) =&gt;
+vector -&gt; vector -&gt; vector
+</span><span class="hs-operator hs-var">^+^</span></span><span> </span><span class="annot"><span class="annottext">Vector d r
+</span><a href="#local-6989586621679417770"><span class="hs-identifier hs-var">b'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>                                       </span><span id="local-6989586621679417775"><span class="annot"><span class="annottext">w :: Vector d r
+</span><a href="#local-6989586621679417775"><span class="hs-identifier hs-var hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector d r
+</span><a href="#local-6989586621679417767"><span class="hs-identifier hs-var">a'</span></a></span><span> </span><span class="annot"><span class="annottext">Vector d r -&gt; Vector d r -&gt; Vector d r
+forall r vector (d :: Nat).
+(Num r, Additive_ vector d r) =&gt;
+vector -&gt; vector -&gt; vector
+</span><span class="hs-operator hs-var">^-^</span></span><span> </span><span class="annot"><span class="annottext">Vector d r
+</span><a href="#local-6989586621679417770"><span class="hs-identifier hs-var">b'</span></a></span><span>
+</span><span id="line-56"></span><span>                                   </span><span class="hs-keyword">in</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector d r
+</span><a href="#local-6989586621679417771"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Vector d r -&gt; Vector d r -&gt; r
+forall vector (d :: Nat) r.
+(Metric_ vector d r, Num r) =&gt;
+vector -&gt; vector -&gt; r
+</span><span class="hs-operator hs-var">`dot`</span></span><span> </span><span class="annot"><span class="annottext">Vector d r
+</span><a href="#local-6989586621679417771"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector d r
+</span><a href="#local-6989586621679417775"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">Vector d r -&gt; Vector d r -&gt; r
+forall vector (d :: Nat) r.
+(Metric_ vector d r, Num r) =&gt;
+vector -&gt; vector -&gt; r
+</span><span class="hs-operator hs-var">`dot`</span></span><span> </span><span class="annot"><span class="annottext">Vector d r
+</span><a href="#local-6989586621679417775"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-57"></span><span>                                        </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">LT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PointLocationResult
+</span><a href="HGeometry.Boundary.html#Inside"><span class="hs-identifier hs-var">Inside</span></a></span><span>
+</span><span id="line-58"></span><span>                                        </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PointLocationResult
+</span><a href="HGeometry.Boundary.html#OnBoundary"><span class="hs-identifier hs-var">OnBoundary</span></a></span><span>
+</span><span id="line-59"></span><span>                                        </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">GT</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">PointLocationResult
+</span><a href="HGeometry.Boundary.html#Outside"><span class="hs-identifier hs-var">Outside</span></a></span><span>
+</span><span id="line-60"></span><span>    </span><span class="hs-comment">-- main idea: solve: ||q-c||^2 &lt;= r^2</span><span>
+</span><span id="line-61"></span><span>    </span><span class="hs-comment">-- since we have c = (a+b)/2, and r=|a-b|/2</span><span>
+</span><span id="line-62"></span><span>    </span><span class="hs-comment">-- we essentially avoid the division by using (2^2)*r^2 = (2r)^2 = (a-b)^2</span><span>
+</span><span id="line-63"></span><span>    </span><span class="hs-comment">-- simialrly on the left side.</span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Intersection"><span class="annot"><a href="HGeometry.Intersection.html#Intersection"><span class="hs-identifier hs-var">Intersection</span></a></span></span><span> </span><span id="local-6989586621679417781"><span id="local-6989586621679417782"><span id="local-6989586621679417783"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><a href="#local-6989586621679417781"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417782"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralBall"><span class="hs-identifier hs-type">DiametralBall</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417783"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><a href="#local-6989586621679417781"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417782"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679417214"><span id="local-6989586621679417215"><span id="local-6989586621679417216"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679417214"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417215"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417216"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679417216"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679417216"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Has_</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Metric_</span></span><span> </span><span class="annot"><a href="#local-6989586621679417215"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417216"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-68"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><a href="#local-6989586621679417215"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417216"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#HasIntersectionWith"><span class="hs-operator hs-type">`HasIntersectionWith`</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralBall"><span class="hs-identifier hs-type">DiametralBall</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417214"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-69"></span><span>  </span><span id="local-6989586621679417880"><span class="annot"><span class="annottext">intersects :: Point d r -&gt; DiametralBall point -&gt; Bool
+</span><a href="#local-6989586621679417880"><span class="hs-identifier hs-var hs-var hs-var">intersects</span></a></span></span><span> </span><span id="local-6989586621679417882"><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679417882"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679417883"><span class="annot"><span class="annottext">DiametralBall point
+</span><a href="#local-6989586621679417883"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679417882"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; DiametralBall point -&gt; PointLocationResult
+forall ball point (d :: Nat) r.
+(HasInBall ball, Point_ point d r, Ord r, Num r, NumType ball ~ r,
+ Dimension ball ~ d) =&gt;
+point -&gt; ball -&gt; PointLocationResult
+forall point (d :: Nat) r.
+(Point_ point d r, Ord r, Num r, NumType (DiametralBall point) ~ r,
+ Dimension (DiametralBall point) ~ d) =&gt;
+point -&gt; DiametralBall point -&gt; PointLocationResult
+</span><a href="HGeometry.Ball.Class.html#inBall"><span class="hs-operator hs-var">`inBall`</span></a></span><span> </span><span class="annot"><span class="annottext">DiametralBall point
+</span><a href="#local-6989586621679417883"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">PointLocationResult -&gt; PointLocationResult -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">PointLocationResult
+</span><a href="HGeometry.Boundary.html#Outside"><span class="hs-identifier hs-var">Outside</span></a></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679417224"><span id="local-6989586621679417225"><span id="local-6989586621679417226"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679417224"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417225"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417226"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-72"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679417226"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679417226"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-73"></span><span>         </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Has_</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Metric_</span></span><span> </span><span class="annot"><a href="#local-6989586621679417225"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417226"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-74"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><a href="#local-6989586621679417225"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417226"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#IsIntersectableWith"><span class="hs-operator hs-type">`IsIntersectableWith`</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralBall"><span class="hs-identifier hs-type">DiametralBall</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417224"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-75"></span><span>  </span><span id="local-6989586621679417895"><span class="annot"><span class="annottext">intersect :: Point d r
+-&gt; DiametralBall point
+-&gt; Intersection (Point d r) (DiametralBall point)
+</span><a href="#local-6989586621679417895"><span class="hs-identifier hs-var hs-var hs-var">intersect</span></a></span></span><span> </span><span id="local-6989586621679417897"><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679417897"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679417898"><span class="annot"><span class="annottext">DiametralBall point
+</span><a href="#local-6989586621679417898"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679417897"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; DiametralBall point -&gt; Bool
+forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
+</span><a href="HGeometry.Intersection.html#intersects"><span class="hs-operator hs-var">`intersects`</span></a></span><span> </span><span class="annot"><span class="annottext">DiametralBall point
+</span><a href="#local-6989586621679417898"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; Maybe (Point d r)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679417897"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><span id="line-76"></span><span>                </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (Point d r)
+Intersection (Point d r) (DiametralBall point)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679417151"><span id="local-6989586621679417152"><span id="local-6989586621679417153"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679417151"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417152"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417153"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679417153"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Ball.Class.html#HasCenter"><span class="hs-identifier hs-type">HasCenter</span></a></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralBall"><span class="hs-identifier hs-type">DiametralBall</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417151"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><a href="#local-6989586621679417152"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417153"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-82"></span><span>  </span><span id="local-6989586621679417920"><span class="annot"><span class="annottext">center :: Lens' (DiametralBall point) (Point d r)
+</span><a href="#local-6989586621679417920"><span class="hs-identifier hs-var hs-var hs-var">center</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DiametralBall point -&gt; Point d r)
+-&gt; (DiametralBall point -&gt; Point d r -&gt; DiametralBall point)
+-&gt; Lens' (DiametralBall point) (Point d r)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">DiametralBall point -&gt; Point d r
+forall point (d :: Nat) r.
+(Point_ point d r, Fractional r) =&gt;
+DiametralBall point -&gt; Point d r
+</span><a href="HGeometry.Ball.Diametral.html#computeCenter"><span class="hs-identifier hs-var">computeCenter</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679417924"><span class="annot"><span class="annottext">DiametralBall point
+</span><a href="#local-6989586621679417924"><span class="hs-identifier hs-var">ball</span></a></span></span><span> </span><span id="local-6989586621679417925"><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679417925"><span class="hs-identifier hs-var">c'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679417926"><span class="annot"><span class="annottext">c :: Point d r
+</span><a href="#local-6989586621679417926"><span class="hs-identifier hs-var hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DiametralBall point -&gt; Point d r
+forall point (d :: Nat) r.
+(Point_ point d r, Fractional r) =&gt;
+DiametralBall point -&gt; Point d r
+</span><a href="HGeometry.Ball.Diametral.html#computeCenter"><span class="hs-identifier hs-var">computeCenter</span></a></span><span> </span><span class="annot"><span class="annottext">DiametralBall point
+</span><a href="#local-6989586621679417924"><span class="hs-identifier hs-var">ball</span></a></span><span>
+</span><span id="line-83"></span><span>                                               </span><span id="local-6989586621679417927"><span class="annot"><span class="annottext">v :: Vector d r
+</span><a href="#local-6989586621679417927"><span class="hs-identifier hs-var hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679417925"><span class="hs-identifier hs-var">c'</span></a></span><span> </span><span class="annot"><span class="annottext">Point d r -&gt; Point d r -&gt; Vector d r
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; point -&gt; Vector d r
+</span><span class="hs-operator hs-var">.-.</span></span><span> </span><span class="annot"><span class="annottext">Point d r
+</span><a href="#local-6989586621679417926"><span class="hs-identifier hs-var">c</span></a></span><span>
+</span><span id="line-84"></span><span>                                           </span><span class="hs-keyword">in</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point -&gt; Vector d r -&gt; point
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; Vector d r -&gt; point
+</span><span class="hs-operator hs-var">.+^</span></span><span> </span><span class="annot"><span class="annottext">Vector d r
+</span><a href="#local-6989586621679417927"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(point -&gt; point) -&gt; DiametralBall point -&gt; DiametralBall point
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">DiametralBall point
+</span><a href="#local-6989586621679417924"><span class="hs-identifier hs-var">ball</span></a></span><span>
+</span><span id="line-85"></span><span>                              </span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- shifts the center to the new position</span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span class="annot"><span class="hs-comment">-- | Computes the center of the ball</span></span><span>
+</span><span id="line-88"></span><span id="local-6989586621679417241"><span id="local-6989586621679417242"><span id="local-6989586621679417243"><span class="annot"><a href="HGeometry.Ball.Diametral.html#computeCenter"><span class="hs-identifier hs-type">computeCenter</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679417241"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417242"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417243"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679417243"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralBall"><span class="hs-identifier hs-type">DiametralBall</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417241"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><a href="#local-6989586621679417242"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679417243"><span class="hs-identifier hs-type">r</span></a></span></span></span></span><span>
+</span><span id="line-89"></span><span id="computeCenter"><span class="annot"><span class="annottext">computeCenter :: forall point (d :: Nat) r.
+(Point_ point d r, Fractional r) =&gt;
+DiametralBall point -&gt; Point d r
+</span><a href="HGeometry.Ball.Diametral.html#computeCenter"><span class="hs-identifier hs-var hs-var">computeCenter</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralPoints"><span class="hs-identifier hs-type">DiametralPoints</span></a></span><span> </span><span id="local-6989586621679417996"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679417996"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679417997"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679417997"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector d r -&gt; PointF (Vector d r)
+forall v. v -&gt; PointF v
+</span><span class="hs-identifier hs-var">Point</span></span><span> </span><span class="annot"><span class="annottext">(Vector d r -&gt; PointF (Vector d r))
+-&gt; Vector d r -&gt; PointF (Vector d r)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679417996"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Vector d r) point (Vector d r) -&gt; Vector d r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
+forall (d :: Nat) r s.
+(Dimension point ~ d, NumType point ~ r, Dimension point ~ d,
+ NumType point ~ s) =&gt;
+Lens point point (Vector d r) (Vector d s)
+forall point point' (d :: Nat) r s.
+(HasVector point point', Dimension point ~ d, NumType point ~ r,
+ Dimension point' ~ d, NumType point' ~ s) =&gt;
+Lens point point' (Vector d r) (Vector d s)
+Lens point point (Vector d r) (Vector d r)
+</span><span class="hs-identifier hs-var">vector</span></span><span> </span><span class="annot"><span class="annottext">Vector d r -&gt; Vector d r -&gt; Vector d r
+forall r vector (d :: Nat).
+(Num r, Additive_ vector d r) =&gt;
+vector -&gt; vector -&gt; vector
+</span><span class="hs-operator hs-var">^+^</span></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679417997"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Vector d r) point (Vector d r) -&gt; Vector d r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
+forall (d :: Nat) r s.
+(Dimension point ~ d, NumType point ~ r, Dimension point ~ d,
+ NumType point ~ s) =&gt;
+Lens point point (Vector d r) (Vector d s)
+forall point point' (d :: Nat) r s.
+(HasVector point point', Dimension point ~ d, NumType point ~ r,
+ Dimension point' ~ d, NumType point' ~ s) =&gt;
+Lens point point' (Vector d r) (Vector d s)
+Lens point point (Vector d r) (Vector d r)
+</span><span class="hs-identifier hs-var">vector</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector d r -&gt; r -&gt; Vector d r
+forall vector (d :: Nat) r.
+(Vector_ vector d r, Fractional r) =&gt;
+vector -&gt; r -&gt; vector
+</span><span class="hs-operator hs-var">^/</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">2</span></span><span>
+</span><span id="line-90"></span></pre></body></html>

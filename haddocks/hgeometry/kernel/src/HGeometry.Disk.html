@@ -1,0 +1,476 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE UndecidableInstances #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><span id="line-3"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Module      :  HGeometry.Ball.Diametral</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- A ball represented by its two diametral points</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Disk.html"><span class="hs-identifier">HGeometry.Disk</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier">DiskByPoints</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Ball.BoundaryPoints.html"><span class="hs-identifier">HGeometry.Ball.BoundaryPoints</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Ball.Class.html"><span class="hs-identifier">HGeometry.Ball.Class</span></a></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Ball.Diametral.html"><span class="hs-identifier">HGeometry.Ball.Diametral</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Boundary.html"><span class="hs-identifier">HGeometry.Boundary</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html"><span class="hs-identifier">HGeometry.Intersection</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-28"></span><span class="annot"><span class="hs-comment">-- | Disks are either diametral, or specified by three points</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">data</span><span> </span><span id="DiskByPoints"><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-var">DiskByPoints</span></a></span></span><span> </span><span id="local-6989586621679435406"><span class="annot"><a href="#local-6989586621679435406"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="DiametralDisk"><span class="annot"><a href="HGeometry.Disk.html#DiametralDisk"><span class="hs-identifier hs-var">DiametralDisk</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralBall"><span class="hs-identifier hs-type">DiametralBall</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679435406"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>                        </span><span class="hs-glyph">|</span><span> </span><span id="DiskByPoints"><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-var">DiskByPoints</span></a></span></span><span>  </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Ball.BoundaryPoints.html#BallByPoints%27"><span class="hs-identifier hs-type">BallByPoints'</span></a></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679435406"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span>                        </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679435612"><span id="local-6989586621679435622"><span id="local-6989586621679435626"><span class="annot"><span class="annottext">Int -&gt; DiskByPoints point -&gt; ShowS
+[DiskByPoints point] -&gt; ShowS
+DiskByPoints point -&gt; String
+(Int -&gt; DiskByPoints point -&gt; ShowS)
+-&gt; (DiskByPoints point -&gt; String)
+-&gt; ([DiskByPoints point] -&gt; ShowS)
+-&gt; Show (DiskByPoints point)
+forall point. Show point =&gt; Int -&gt; DiskByPoints point -&gt; ShowS
+forall point. Show point =&gt; [DiskByPoints point] -&gt; ShowS
+forall point. Show point =&gt; DiskByPoints point -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: forall point. Show point =&gt; Int -&gt; DiskByPoints point -&gt; ShowS
+showsPrec :: Int -&gt; DiskByPoints point -&gt; ShowS
+$cshow :: forall point. Show point =&gt; DiskByPoints point -&gt; String
+show :: DiskByPoints point -&gt; String
+$cshowList :: forall point. Show point =&gt; [DiskByPoints point] -&gt; ShowS
+showList :: [DiskByPoints point] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679435636"><span id="local-6989586621679435646"><span class="annot"><span class="annottext">DiskByPoints point -&gt; DiskByPoints point -&gt; Bool
+(DiskByPoints point -&gt; DiskByPoints point -&gt; Bool)
+-&gt; (DiskByPoints point -&gt; DiskByPoints point -&gt; Bool)
+-&gt; Eq (DiskByPoints point)
+forall point.
+Eq point =&gt;
+DiskByPoints point -&gt; DiskByPoints point -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: forall point.
+Eq point =&gt;
+DiskByPoints point -&gt; DiskByPoints point -&gt; Bool
+== :: DiskByPoints point -&gt; DiskByPoints point -&gt; Bool
+$c/= :: forall point.
+Eq point =&gt;
+DiskByPoints point -&gt; DiskByPoints point -&gt; Bool
+/= :: DiskByPoints point -&gt; DiskByPoints point -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679435652"><span id="local-6989586621679435658"><span id="local-6989586621679435668"><span id="local-6989586621679435673"><span id="local-6989586621679435678"><span id="local-6989586621679435681"><span id="local-6989586621679435684"><span id="local-6989586621679435687"><span id="local-6989586621679435690"><span id="local-6989586621679435693"><span id="local-6989586621679435696"><span id="local-6989586621679435701"><span id="local-6989586621679435704"><span id="local-6989586621679435709"><span id="local-6989586621679435714"><span id="local-6989586621679435719"><span id="local-6989586621679435724"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; DiskByPoints m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; DiskByPoints a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; DiskByPoints a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; DiskByPoints a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; DiskByPoints a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; DiskByPoints a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; DiskByPoints a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; DiskByPoints a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; DiskByPoints a -&gt; a)
+-&gt; (forall a. DiskByPoints a -&gt; [a])
+-&gt; (forall a. DiskByPoints a -&gt; Bool)
+-&gt; (forall a. DiskByPoints a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; DiskByPoints a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; DiskByPoints a -&gt; a)
+-&gt; (forall a. Ord a =&gt; DiskByPoints a -&gt; a)
+-&gt; (forall a. Num a =&gt; DiskByPoints a -&gt; a)
+-&gt; (forall a. Num a =&gt; DiskByPoints a -&gt; a)
+-&gt; Foldable DiskByPoints
+forall a. Eq a =&gt; a -&gt; DiskByPoints a -&gt; Bool
+forall a. Num a =&gt; DiskByPoints a -&gt; a
+forall a. Ord a =&gt; DiskByPoints a -&gt; a
+forall m. Monoid m =&gt; DiskByPoints m -&gt; m
+forall a. DiskByPoints a -&gt; Bool
+forall a. DiskByPoints a -&gt; Int
+forall a. DiskByPoints a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; DiskByPoints a -&gt; a
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; DiskByPoints a -&gt; m
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; DiskByPoints a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; DiskByPoints a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+$cfold :: forall m. Monoid m =&gt; DiskByPoints m -&gt; m
+fold :: forall m. Monoid m =&gt; DiskByPoints m -&gt; m
+$cfoldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; DiskByPoints a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; DiskByPoints a -&gt; m
+$cfoldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; DiskByPoints a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; DiskByPoints a -&gt; m
+$cfoldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; DiskByPoints a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; DiskByPoints a -&gt; b
+$cfoldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; DiskByPoints a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; DiskByPoints a -&gt; b
+$cfoldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; DiskByPoints a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; DiskByPoints a -&gt; b
+$cfoldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; DiskByPoints a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; DiskByPoints a -&gt; b
+$cfoldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; DiskByPoints a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; DiskByPoints a -&gt; a
+$cfoldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; DiskByPoints a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; DiskByPoints a -&gt; a
+$ctoList :: forall a. DiskByPoints a -&gt; [a]
+toList :: forall a. DiskByPoints a -&gt; [a]
+$cnull :: forall a. DiskByPoints a -&gt; Bool
+null :: forall a. DiskByPoints a -&gt; Bool
+$clength :: forall a. DiskByPoints a -&gt; Int
+length :: forall a. DiskByPoints a -&gt; Int
+$celem :: forall a. Eq a =&gt; a -&gt; DiskByPoints a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; DiskByPoints a -&gt; Bool
+$cmaximum :: forall a. Ord a =&gt; DiskByPoints a -&gt; a
+maximum :: forall a. Ord a =&gt; DiskByPoints a -&gt; a
+$cminimum :: forall a. Ord a =&gt; DiskByPoints a -&gt; a
+minimum :: forall a. Ord a =&gt; DiskByPoints a -&gt; a
+$csum :: forall a. Num a =&gt; DiskByPoints a -&gt; a
+sum :: forall a. Num a =&gt; DiskByPoints a -&gt; a
+$cproduct :: forall a. Num a =&gt; DiskByPoints a -&gt; a
+product :: forall a. Num a =&gt; DiskByPoints a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679435734"><span id="local-6989586621679435741"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; DiskByPoints a -&gt; DiskByPoints b)
+-&gt; (forall a b. a -&gt; DiskByPoints b -&gt; DiskByPoints a)
+-&gt; Functor DiskByPoints
+forall a b. a -&gt; DiskByPoints b -&gt; DiskByPoints a
+forall a b. (a -&gt; b) -&gt; DiskByPoints a -&gt; DiskByPoints b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall a b. (a -&gt; b) -&gt; DiskByPoints a -&gt; DiskByPoints b
+fmap :: forall a b. (a -&gt; b) -&gt; DiskByPoints a -&gt; DiskByPoints b
+$c&lt;$ :: forall a b. a -&gt; DiskByPoints b -&gt; DiskByPoints a
+&lt;$ :: forall a b. a -&gt; DiskByPoints b -&gt; DiskByPoints a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679435749"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-type">DiskByPoints</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679435749"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679435749"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-comment">-- this better be 2</span><span>
+</span><span id="line-34"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679435750"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-type">DiskByPoints</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679435750"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679435750"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span id="local-6989586621679435406"><span id="_DiametralDisk"><span id="_DiskByPoints"><span class="hs-identifier">makePrisms</span><span> </span><span class="hs-special">''</span><span class="hs-identifier">DiskByPoints</span></span></span></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679435772"><span id="local-6989586621679435779"><span id="local-6989586621679435784"><span id="local-6989586621679435787"><span id="local-6989586621679435792"><span id="local-6989586621679435797"><span id="local-6989586621679435800"><span id="local-6989586621679435803"><span id="local-6989586621679435806"><span id="local-6989586621679435809"><span id="local-6989586621679435812"><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-type">DiskByPoints</span></a></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-40"></span><span>  </span><span id="local-6989586621679435824"><span class="annot"><span class="annottext">foldMap1 :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; DiskByPoints a -&gt; m
+</span><a href="#local-6989586621679435824"><span class="hs-identifier hs-var hs-var hs-var">foldMap1</span></a></span></span><span> </span><span id="local-6989586621679435826"><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679435826"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-41"></span><span>    </span><span class="annot"><a href="HGeometry.Disk.html#DiametralDisk"><span class="hs-identifier hs-type">DiametralDisk</span></a></span><span> </span><span id="local-6989586621679435827"><span class="annot"><span class="annottext">DiametralBall a
+</span><a href="#local-6989586621679435827"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; DiametralBall a -&gt; m
+forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; DiametralBall a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable1 t, Semigroup m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap1</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679435826"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">DiametralBall a
+</span><a href="#local-6989586621679435827"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-42"></span><span>    </span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-type">DiskByPoints</span></a></span><span> </span><span id="local-6989586621679435828"><span class="annot"><span class="annottext">BallByPoints' 3 a
+</span><a href="#local-6989586621679435828"><span class="hs-identifier hs-var">d</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; BallByPoints' 3 a -&gt; m
+forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; BallByPoints' 3 a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable1 t, Semigroup m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap1</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; m
+</span><a href="#local-6989586621679435826"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">BallByPoints' 3 a
+</span><a href="#local-6989586621679435828"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679435835"><span id="local-6989586621679435841"><span id="local-6989586621679435846"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-type">DiskByPoints</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-45"></span><span>  </span><span id="local-6989586621679435864"><span class="annot"><span class="annottext">traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; DiskByPoints a -&gt; f (DiskByPoints b)
+</span><a href="#local-6989586621679435864"><span class="hs-identifier hs-var hs-var hs-var">traverse</span></a></span></span><span> </span><span id="local-6989586621679435866"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679435866"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-46"></span><span>    </span><span class="annot"><a href="HGeometry.Disk.html#DiametralDisk"><span class="hs-identifier hs-type">DiametralDisk</span></a></span><span> </span><span id="local-6989586621679435867"><span class="annot"><span class="annottext">DiametralBall a
+</span><a href="#local-6989586621679435867"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DiametralBall b -&gt; DiskByPoints b
+forall point. DiametralBall point -&gt; DiskByPoints point
+</span><a href="HGeometry.Disk.html#DiametralDisk"><span class="hs-identifier hs-var">DiametralDisk</span></a></span><span> </span><span class="annot"><span class="annottext">(DiametralBall b -&gt; DiskByPoints b)
+-&gt; f (DiametralBall b) -&gt; f (DiskByPoints b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; DiametralBall a -&gt; f (DiametralBall b)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; DiametralBall a -&gt; f (DiametralBall b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679435866"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">DiametralBall a
+</span><a href="#local-6989586621679435867"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-47"></span><span>    </span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-type">DiskByPoints</span></a></span><span> </span><span id="local-6989586621679435869"><span class="annot"><span class="annottext">BallByPoints' 3 a
+</span><a href="#local-6989586621679435869"><span class="hs-identifier hs-var">d</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BallByPoints' 3 b -&gt; DiskByPoints b
+forall point. BallByPoints' 3 point -&gt; DiskByPoints point
+</span><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-var">DiskByPoints</span></a></span><span>  </span><span class="annot"><span class="annottext">(BallByPoints' 3 b -&gt; DiskByPoints b)
+-&gt; f (BallByPoints' 3 b) -&gt; f (DiskByPoints b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; BallByPoints' 3 a -&gt; f (BallByPoints' 3 b)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable t, Applicative f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b) -&gt; BallByPoints' 3 a -&gt; f (BallByPoints' 3 b)
+</span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679435866"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">BallByPoints' 3 a
+</span><a href="#local-6989586621679435869"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679435876"><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/semigroupoids-6.0.1-a8bbfdf809d26cf53d1649155d1175ff37b07769640f0e81bd2ce91845990ef7/share/doc/html/src/Data.Semigroup.Traversable.Class.html/Data.Semigroup.Traversable.Class.html#Traversable1"><span class="hs-identifier hs-type">Traversable1</span></a></span><span> </span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-type">DiskByPoints</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-50"></span><span>  </span><span id="local-6989586621679435895"><span class="annot"><span class="annottext">traverse1 :: forall (f :: * -&gt; *) a b.
+Apply f =&gt;
+(a -&gt; f b) -&gt; DiskByPoints a -&gt; f (DiskByPoints b)
+</span><a href="#local-6989586621679435895"><span class="hs-identifier hs-var hs-var hs-var">traverse1</span></a></span></span><span> </span><span id="local-6989586621679435897"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679435897"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-51"></span><span>    </span><span class="annot"><a href="HGeometry.Disk.html#DiametralDisk"><span class="hs-identifier hs-type">DiametralDisk</span></a></span><span> </span><span id="local-6989586621679435898"><span class="annot"><span class="annottext">DiametralBall a
+</span><a href="#local-6989586621679435898"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DiametralBall b -&gt; DiskByPoints b
+forall point. DiametralBall point -&gt; DiskByPoints point
+</span><a href="HGeometry.Disk.html#DiametralDisk"><span class="hs-identifier hs-var">DiametralDisk</span></a></span><span> </span><span class="annot"><span class="annottext">(DiametralBall b -&gt; DiskByPoints b)
+-&gt; f (DiametralBall b) -&gt; f (DiskByPoints b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; DiametralBall a -&gt; f (DiametralBall b)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable1 t, Apply f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Apply f =&gt;
+(a -&gt; f b) -&gt; DiametralBall a -&gt; f (DiametralBall b)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/semigroupoids-6.0.1-a8bbfdf809d26cf53d1649155d1175ff37b07769640f0e81bd2ce91845990ef7/share/doc/html/src/Data.Semigroup.Traversable.Class.html/Data.Semigroup.Traversable.Class.html#traverse1"><span class="hs-identifier hs-var">traverse1</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679435897"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">DiametralBall a
+</span><a href="#local-6989586621679435898"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-52"></span><span>    </span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-type">DiskByPoints</span></a></span><span> </span><span id="local-6989586621679435899"><span class="annot"><span class="annottext">BallByPoints' 3 a
+</span><a href="#local-6989586621679435899"><span class="hs-identifier hs-var">d</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BallByPoints' 3 b -&gt; DiskByPoints b
+forall point. BallByPoints' 3 point -&gt; DiskByPoints point
+</span><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-var">DiskByPoints</span></a></span><span>  </span><span class="annot"><span class="annottext">(BallByPoints' 3 b -&gt; DiskByPoints b)
+-&gt; f (BallByPoints' 3 b) -&gt; f (DiskByPoints b)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; f b) -&gt; BallByPoints' 3 a -&gt; f (BallByPoints' 3 b)
+forall (t :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable1 t, Apply f) =&gt;
+(a -&gt; f b) -&gt; t a -&gt; f (t b)
+forall (f :: * -&gt; *) a b.
+Apply f =&gt;
+(a -&gt; f b) -&gt; BallByPoints' 3 a -&gt; f (BallByPoints' 3 b)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/semigroupoids-6.0.1-a8bbfdf809d26cf53d1649155d1175ff37b07769640f0e81bd2ce91845990ef7/share/doc/html/src/Data.Semigroup.Traversable.Class.html/Data.Semigroup.Traversable.Class.html#traverse1"><span class="hs-identifier hs-var">traverse1</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679435897"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">BallByPoints' 3 a
+</span><a href="#local-6989586621679435899"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679435514"><span id="local-6989586621679435515"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679435514"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679435515"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679435515"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Ball.Class.html#Ball_"><span class="hs-identifier hs-type">Ball_</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-type">DiskByPoints</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679435514"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679435515"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-56"></span><span>  </span><span id="local-6989586621679436082"><span class="annot"><span class="annottext">squaredRadius :: Getter (DiskByPoints point) (NumType (DiskByPoints point))
+</span><a href="#local-6989586621679436082"><span class="hs-identifier hs-var hs-var hs-var">squaredRadius</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DiskByPoints point -&gt; NumType (DiskByPoints point))
+-&gt; (NumType (DiskByPoints point)
+    -&gt; f (NumType (DiskByPoints point)))
+-&gt; DiskByPoints point
+-&gt; f (DiskByPoints point)
+forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s a.
+(Profunctor p, Contravariant f) =&gt;
+(s -&gt; a) -&gt; Optic' p f s a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#to"><span class="hs-identifier hs-var">to</span></a></span><span> </span><span class="annot"><span class="annottext">((DiskByPoints point -&gt; NumType (DiskByPoints point))
+ -&gt; (NumType (DiskByPoints point)
+     -&gt; f (NumType (DiskByPoints point)))
+ -&gt; DiskByPoints point
+ -&gt; f (DiskByPoints point))
+-&gt; (DiskByPoints point -&gt; NumType (DiskByPoints point))
+-&gt; (NumType (DiskByPoints point)
+    -&gt; f (NumType (DiskByPoints point)))
+-&gt; DiskByPoints point
+-&gt; f (DiskByPoints point)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-57"></span><span>    </span><span class="annot"><a href="HGeometry.Disk.html#DiametralDisk"><span class="hs-identifier hs-type">DiametralDisk</span></a></span><span> </span><span id="local-6989586621679436085"><span class="annot"><span class="annottext">DiametralBall point
+</span><a href="#local-6989586621679436085"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DiametralBall point
+</span><a href="#local-6989586621679436085"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">DiametralBall point -&gt; Getting r (DiametralBall point) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (DiametralBall point) r
+(NumType (DiametralBall point)
+ -&gt; Const r (NumType (DiametralBall point)))
+-&gt; DiametralBall point -&gt; Const r (DiametralBall point)
+forall ball point. Ball_ ball point =&gt; Getter ball (NumType ball)
+Getter (DiametralBall point) (NumType (DiametralBall point))
+</span><a href="HGeometry.Ball.Class.html#squaredRadius"><span class="hs-identifier hs-var">squaredRadius</span></a></span><span>
+</span><span id="line-58"></span><span>    </span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-type">DiskByPoints</span></a></span><span> </span><span id="local-6989586621679436087"><span class="annot"><span class="annottext">BallByPoints' 3 point
+</span><a href="#local-6989586621679436087"><span class="hs-identifier hs-var">d</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BallByPoints' 3 point
+</span><a href="#local-6989586621679436087"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">BallByPoints' 3 point -&gt; Getting r (BallByPoints' 3 point) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (BallByPoints' 3 point) r
+(NumType (BallByPoints' 3 point)
+ -&gt; Const r (NumType (BallByPoints' 3 point)))
+-&gt; BallByPoints' 3 point -&gt; Const r (BallByPoints' 3 point)
+forall ball point. Ball_ ball point =&gt; Getter ball (NumType ball)
+Getter (BallByPoints' 3 point) (NumType (BallByPoints' 3 point))
+</span><a href="HGeometry.Ball.Class.html#squaredRadius"><span class="hs-identifier hs-var">squaredRadius</span></a></span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679435557"><span id="local-6989586621679435558"><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679435557"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679435558"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Ball.Class.html#HasInBall"><span class="hs-identifier hs-type">HasInBall</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-type">DiskByPoints</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679435557"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-63"></span><span>  </span><span id="local-6989586621679436251"><span class="annot"><span class="annottext">inBall :: forall point (d :: Nat) r.
+(Point_ point d r, Ord r, Num r, NumType (DiskByPoints point) ~ r,
+ Dimension (DiskByPoints point) ~ d) =&gt;
+point -&gt; DiskByPoints point -&gt; PointLocationResult
+</span><a href="#local-6989586621679436251"><span class="hs-identifier hs-var hs-var hs-var">inBall</span></a></span></span><span> </span><span id="local-6989586621679436253"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679436253"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-64"></span><span>    </span><span class="annot"><a href="HGeometry.Disk.html#DiametralDisk"><span class="hs-identifier hs-type">DiametralDisk</span></a></span><span> </span><span id="local-6989586621679436254"><span class="annot"><span class="annottext">DiametralBall point
+</span><a href="#local-6989586621679436254"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">point -&gt; DiametralBall point -&gt; PointLocationResult
+forall ball point (d :: Nat) r.
+(HasInBall ball, Point_ point d r, Ord r, Num r, NumType ball ~ r,
+ Dimension ball ~ d) =&gt;
+point -&gt; ball -&gt; PointLocationResult
+forall point (d :: Nat) r.
+(Point_ point d r, Ord r, Num r, NumType (DiametralBall point) ~ r,
+ Dimension (DiametralBall point) ~ d) =&gt;
+point -&gt; DiametralBall point -&gt; PointLocationResult
+</span><a href="HGeometry.Ball.Class.html#inBall"><span class="hs-identifier hs-var">inBall</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679436253"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">DiametralBall point
+</span><a href="#local-6989586621679436254"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-65"></span><span>    </span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-type">DiskByPoints</span></a></span><span> </span><span id="local-6989586621679436255"><span class="annot"><span class="annottext">BallByPoints' 3 point
+</span><a href="#local-6989586621679436255"><span class="hs-identifier hs-var">d</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">point -&gt; BallByPoints' 3 point -&gt; PointLocationResult
+forall ball point (d :: Nat) r.
+(HasInBall ball, Point_ point d r, Ord r, Num r, NumType ball ~ r,
+ Dimension ball ~ d) =&gt;
+point -&gt; ball -&gt; PointLocationResult
+forall point (d :: Nat) r.
+(Point_ point d r, Ord r, Num r,
+ NumType (BallByPoints' 3 point) ~ r,
+ Dimension (BallByPoints' 3 point) ~ d) =&gt;
+point -&gt; BallByPoints' 3 point -&gt; PointLocationResult
+</span><a href="HGeometry.Ball.Class.html#inBall"><span class="hs-identifier hs-var">inBall</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679436253"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">BallByPoints' 3 point
+</span><a href="#local-6989586621679436255"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Intersection"><span class="annot"><a href="HGeometry.Intersection.html#Intersection"><span class="hs-identifier hs-var">Intersection</span></a></span></span><span> </span><span id="local-6989586621679436256"><span id="local-6989586621679436257"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679436256"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-type">DiskByPoints</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679436257"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679436256"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679435572"><span id="local-6989586621679435573"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679435572"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679435573"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679435573"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679435573"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-70"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679435573"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#HasIntersectionWith"><span class="hs-operator hs-type">`HasIntersectionWith`</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-type">DiskByPoints</span></a></span><span>  </span><span class="annot"><a href="#local-6989586621679435572"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-71"></span><span>  </span><span id="local-6989586621679436338"><span class="annot"><span class="annottext">intersects :: Point 2 r -&gt; DiskByPoints point -&gt; Bool
+</span><a href="#local-6989586621679436338"><span class="hs-identifier hs-var hs-var hs-var">intersects</span></a></span></span><span> </span><span id="local-6989586621679436340"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679436340"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679436341"><span class="annot"><span class="annottext">DiskByPoints point
+</span><a href="#local-6989586621679436341"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679436340"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; DiskByPoints point -&gt; PointLocationResult
+forall ball point (d :: Nat) r.
+(HasInBall ball, Point_ point d r, Ord r, Num r, NumType ball ~ r,
+ Dimension ball ~ d) =&gt;
+point -&gt; ball -&gt; PointLocationResult
+forall point (d :: Nat) r.
+(Point_ point d r, Ord r, Num r, NumType (DiskByPoints point) ~ r,
+ Dimension (DiskByPoints point) ~ d) =&gt;
+point -&gt; DiskByPoints point -&gt; PointLocationResult
+</span><a href="HGeometry.Ball.Class.html#inBall"><span class="hs-operator hs-var">`inBall`</span></a></span><span> </span><span class="annot"><span class="annottext">DiskByPoints point
+</span><a href="#local-6989586621679436341"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">PointLocationResult -&gt; PointLocationResult -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">PointLocationResult
+</span><a href="HGeometry.Boundary.html#Outside"><span class="hs-identifier hs-var">Outside</span></a></span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679435580"><span id="local-6989586621679435581"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679435580"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679435581"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679435581"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679435581"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-74"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679435581"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="HGeometry.Intersection.html#IsIntersectableWith"><span class="hs-operator hs-type">`IsIntersectableWith`</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-type">DiskByPoints</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679435580"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-75"></span><span>  </span><span id="local-6989586621679436353"><span class="annot"><span class="annottext">intersect :: Point 2 r
+-&gt; DiskByPoints point
+-&gt; Intersection (Point 2 r) (DiskByPoints point)
+</span><a href="#local-6989586621679436353"><span class="hs-identifier hs-var hs-var hs-var">intersect</span></a></span></span><span> </span><span id="local-6989586621679436355"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679436355"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679436356"><span class="annot"><span class="annottext">DiskByPoints point
+</span><a href="#local-6989586621679436356"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679436355"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; DiskByPoints point -&gt; Bool
+forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
+</span><a href="HGeometry.Intersection.html#intersects"><span class="hs-operator hs-var">`intersects`</span></a></span><span> </span><span class="annot"><span class="annottext">DiskByPoints point
+</span><a href="#local-6989586621679436356"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Maybe (Point 2 r)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679436355"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><span id="line-76"></span><span>                </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>        </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 r)
+Intersection (Point 2 r) (DiskByPoints point)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679436357"><span id="local-6989586621679436358"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679436357"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679436358"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679436358"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Ball.Class.html#HasCenter"><span class="hs-identifier hs-type">HasCenter</span></a></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-type">DiskByPoints</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679436357"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679436358"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-82"></span><span>  </span><span id="local-6989586621679436375"><span class="annot"><span class="annottext">center :: Lens' (DiskByPoints point) (Point 2 r)
+</span><a href="#local-6989586621679436375"><span class="hs-identifier hs-var hs-var hs-var">center</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DiskByPoints point -&gt; Point 2 r)
+-&gt; (DiskByPoints point -&gt; Point 2 r -&gt; DiskByPoints point)
+-&gt; Lens' (DiskByPoints point) (Point 2 r)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-83"></span><span>                    </span><span class="annot"><a href="HGeometry.Disk.html#DiametralDisk"><span class="hs-identifier hs-type">DiametralDisk</span></a></span><span> </span><span id="local-6989586621679436378"><span class="annot"><span class="annottext">DiametralBall point
+</span><a href="#local-6989586621679436378"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DiametralBall point
+</span><a href="#local-6989586621679436378"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">DiametralBall point
+-&gt; Getting (Point 2 r) (DiametralBall point) (Point 2 r)
+-&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) (DiametralBall point) (Point 2 r)
+forall geom point. HasCenter geom point =&gt; Lens' geom point
+Lens' (DiametralBall point) (Point 2 r)
+</span><a href="HGeometry.Ball.Class.html#center"><span class="hs-identifier hs-var">center</span></a></span><span>
+</span><span id="line-84"></span><span>                    </span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-type">DiskByPoints</span></a></span><span> </span><span id="local-6989586621679436379"><span class="annot"><span class="annottext">BallByPoints' 3 point
+</span><a href="#local-6989586621679436379"><span class="hs-identifier hs-var">d</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BallByPoints' 3 point
+</span><a href="#local-6989586621679436379"><span class="hs-identifier hs-var">d</span></a></span><span class="annot"><span class="annottext">BallByPoints' 3 point
+-&gt; Getting (Point 2 r) (BallByPoints' 3 point) (Point 2 r)
+-&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) (BallByPoints' 3 point) (Point 2 r)
+forall geom point. HasCenter geom point =&gt; Lens' geom point
+Lens' (BallByPoints' 3 point) (Point 2 r)
+</span><a href="HGeometry.Ball.Class.html#center"><span class="hs-identifier hs-var">center</span></a></span><span>
+</span><span id="line-85"></span><span>                </span><span class="hs-special">)</span><span>
+</span><span id="line-86"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-87"></span><span>                    </span><span class="annot"><a href="HGeometry.Disk.html#DiametralDisk"><span class="hs-identifier hs-type">DiametralDisk</span></a></span><span> </span><span id="local-6989586621679436380"><span class="annot"><span class="annottext">DiametralBall point
+</span><a href="#local-6989586621679436380"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DiametralBall point -&gt; DiskByPoints point
+forall point. DiametralBall point -&gt; DiskByPoints point
+</span><a href="HGeometry.Disk.html#DiametralDisk"><span class="hs-identifier hs-var">DiametralDisk</span></a></span><span> </span><span class="annot"><span class="annottext">(DiametralBall point -&gt; DiskByPoints point)
+-&gt; (Point 2 r -&gt; DiametralBall point)
+-&gt; Point 2 r
+-&gt; DiskByPoints point
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; DiametralBall point -&gt; DiametralBall point)
+-&gt; DiametralBall point -&gt; Point 2 r -&gt; DiametralBall point
+forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
+</span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ASetter
+  (DiametralBall point) (DiametralBall point) (Point 2 r) (Point 2 r)
+-&gt; Point 2 r -&gt; DiametralBall point -&gt; DiametralBall point
+forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#set"><span class="hs-identifier hs-var">set</span></a></span><span> </span><span class="annot"><span class="annottext">ASetter
+  (DiametralBall point) (DiametralBall point) (Point 2 r) (Point 2 r)
+forall geom point. HasCenter geom point =&gt; Lens' geom point
+Lens' (DiametralBall point) (Point 2 r)
+</span><a href="HGeometry.Ball.Class.html#center"><span class="hs-identifier hs-var">center</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DiametralBall point
+</span><a href="#local-6989586621679436380"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-88"></span><span>                    </span><span class="annot"><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-type">DiskByPoints</span></a></span><span> </span><span id="local-6989586621679436384"><span class="annot"><span class="annottext">BallByPoints' 3 point
+</span><a href="#local-6989586621679436384"><span class="hs-identifier hs-var">d</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">BallByPoints' 3 point -&gt; DiskByPoints point
+forall point. BallByPoints' 3 point -&gt; DiskByPoints point
+</span><a href="HGeometry.Disk.html#DiskByPoints"><span class="hs-identifier hs-var">DiskByPoints</span></a></span><span>  </span><span class="annot"><span class="annottext">(BallByPoints' 3 point -&gt; DiskByPoints point)
+-&gt; (Point 2 r -&gt; BallByPoints' 3 point)
+-&gt; Point 2 r
+-&gt; DiskByPoints point
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; BallByPoints' 3 point -&gt; BallByPoints' 3 point)
+-&gt; BallByPoints' 3 point -&gt; Point 2 r -&gt; BallByPoints' 3 point
+forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
+</span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ASetter
+  (BallByPoints' 3 point)
+  (BallByPoints' 3 point)
+  (Point 2 r)
+  (Point 2 r)
+-&gt; Point 2 r -&gt; BallByPoints' 3 point -&gt; BallByPoints' 3 point
+forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#set"><span class="hs-identifier hs-var">set</span></a></span><span> </span><span class="annot"><span class="annottext">ASetter
+  (BallByPoints' 3 point)
+  (BallByPoints' 3 point)
+  (Point 2 r)
+  (Point 2 r)
+forall geom point. HasCenter geom point =&gt; Lens' geom point
+Lens' (BallByPoints' 3 point) (Point 2 r)
+</span><a href="HGeometry.Ball.Class.html#center"><span class="hs-identifier hs-var">center</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">BallByPoints' 3 point
+</span><a href="#local-6989586621679436384"><span class="hs-identifier hs-var">d</span></a></span><span>
+</span><span id="line-89"></span><span>                </span><span class="hs-special">)</span><span>
+</span><span id="line-90"></span></pre></body></html>
