@@ -54,6 +54,7 @@ common all-setup
       , hiraffe                   >= 0.1           && < 1
       , containers                >= 0.6           && < 1
       , nonempty-containers       >= 0.3.4.5       && < 0.4
+      , monoidal-containers       >= 0.6.6.0       && < 0.7
       , fingertree                >= 0.1.5.0       && < 0.2
       , dlist                     >= 0.7           && < 1.1
       , bytestring                >= 0.11          && < 1
@@ -334,11 +335,14 @@ library kernel
         HGeometry.Ball
         HGeometry.Ball.Class
         HGeometry.Ball.CenterAndRadius
+        HGeometry.Ball.Diametral
+        HGeometry.Ball.BoundaryPoints
 
         HGeometry.Transformation
 
         HGeometry.Direction
         HGeometry.Direction.Cardinal
+        HGeometry.Disk
 
         HGeometry.Viewport
 
@@ -439,8 +443,7 @@ library polygon
 
 
 --------------------------------------------------------------------------------
--- * HGeometry Library
-
+-- * HGeometry Library (main library)
 
 library
     import:           all-setup,hgeometry-setup
@@ -448,9 +451,12 @@ library
     exposed-modules:
         HGeometry
 
-        HGeometry.Graphics.Camera
 
         -- HGeometry.DelaunayTriangulation
+
+        HGeometry.Disk.Smallest.Naive
+
+        HGeometry.Graphics.Camera
 
         HGeometry.PlaneGraph
         HGeometry.PlaneGraph.Class
@@ -844,6 +850,7 @@ test-suite with-ipe-hspec
       Spec
       Paths_hgeometry
       Golden
+      Disk.MinDiskSpec
       Test.Util
       Polygon.Simple.InPolygonSpec
       Polygon.Convex.ConvexSpec

@@ -71,5 +71,5 @@ circle                :: ( Ball_ circle (Point 2 r)
                          , SkCanvas_ skCanvas
                          ) => skCanvas -> circle -> SkPaintRef -> JSM ()
 circle canvas c paint = do Point2 x y <- (c^.center)&coordinates %%~ toJSVal
-                           r          <- toJSVal $ c^.radius
+                           r          <- toJSVal $ radius c
                            void $ canvas ^.js4 ("drawCircle" :: MisoString) x y r paint

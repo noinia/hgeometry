@@ -207,7 +207,8 @@ dCircle (Circle c r) = withAts ellipse_ [ rx_ . ms $ r
                                          ]
 
 -- | Draw a disk
-dDisk             :: (Disk_ disk point, Point_ point 2 r, ToMisoString r, Floating r)
+dDisk             :: ( Disk_ disk point, ConstructableBall_ disk point
+                     , Point_ point 2 r, ToMisoString r, Floating r)
                   => disk -> [Attribute action] -> View action
 dDisk (Disk_ c r) = dCircle (Circle c r)
 
