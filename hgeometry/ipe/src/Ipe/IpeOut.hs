@@ -27,6 +27,7 @@ import           Data.Text (Text)
 import qualified Data.Text as Text
 import           Data.Vector.NonEmpty (NonEmptyVector)
 import           HGeometry.Ball
+import           HGeometry.Disk
 import           HGeometry.BezierSpline
 import           HGeometry.Box
 import           HGeometry.Ellipse (Ellipse, circleToEllipse)
@@ -207,6 +208,21 @@ instance HasDefaultIpeOut (Ellipse r) where
 instance Radical r => HasDefaultIpeOut (Disk (Point 2 r)) where
   type DefaultIpeOut (Disk (Point 2 r)) = Path
   defIO = ipeDisk
+
+instance (Radical r, Fractional r, Point_ point 2 r
+         ) => HasDefaultIpeOut (DiametralBall point) where
+  type DefaultIpeOut (DiametralBall point) = Path
+  defIO disk = ipeDisk $ Disk (disk^.center) (disk^.squaredRadius)
+
+instance (Radical r, Fractional r, Point_ point 2 r
+         ) => HasDefaultIpeOut (BallByPoints' 3 point) where
+  type DefaultIpeOut (BallByPoints' 3 point) = Path
+  defIO disk = ipeDisk $ Disk (disk^.center) (disk^.squaredRadius)
+
+instance (Radical r, Fractional r, Point_ point 2 r
+         ) => HasDefaultIpeOut (DiskByPoints point) where
+  type DefaultIpeOut (DiskByPoints point) = Path
+  defIO disk = ipeDisk $ Disk (disk^.center) (disk^.squaredRadius)
 
 instance Radical r => HasDefaultIpeOut (Circle (Point 2 r)) where
   type DefaultIpeOut (Circle (Point 2 r)) = Path
