@@ -442,8 +442,7 @@ library polygon
 
 
 --------------------------------------------------------------------------------
--- * HGeometry Library
-
+-- * HGeometry Library (main library)
 
 library
     import:           all-setup,hgeometry-setup
@@ -451,9 +450,12 @@ library
     exposed-modules:
         HGeometry
 
-        HGeometry.Graphics.Camera
 
         -- HGeometry.DelaunayTriangulation
+
+        HGeometry.Disk.Smallest.Naive
+
+        HGeometry.Graphics.Camera
 
         HGeometry.PlaneGraph
         HGeometry.PlaneGraph.Class
