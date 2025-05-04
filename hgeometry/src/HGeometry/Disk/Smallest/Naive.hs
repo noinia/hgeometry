@@ -30,7 +30,7 @@ import           HGeometry.Point
 -- enclose all points, and takes the largest one. Basically, this is only useful
 -- to check correctness of the other algorithm(s)
 --
--- pre: the set contains at least 2 points
+-- pre: the set contains at least 2 (distinct) points
 smallestEnclosingDisk     :: (Point_ point 2 r, Ord r, Fractional r, Foldable set)
                           => set point
                           -> DiskByPoints point
@@ -38,6 +38,8 @@ smallestEnclosingDisk pts = minDisk
   where
     Min (Arg _ minDisk) = foldMap1 (\disk -> Min (Arg (disk^.squaredRadius) disk))
                         $ NonEmpty.fromList $ disks2 <> disks3
+                        -- by the precondition, there are at least two distinct points
+                        -- so there is at least one element in disks2
 
     disks2 = mapMaybe (\(Two p q) -> enclosesAll $ DiametralDisk (DiametralPoints p q))
            $ uniquePairs pts
