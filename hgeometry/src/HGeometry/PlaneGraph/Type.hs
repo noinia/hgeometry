@@ -43,6 +43,7 @@ import           HGeometry.Transformation
 import           HGeometry.Vector
 import           Hiraffe.AdjacencyListRep.Map
 import           Hiraffe.Graph.Class
+import           Hiraffe.Graph.Component
 import           Hiraffe.PlanarGraph ( PlanarGraph, World(..)
                                      , DartId, VertexId, FaceId
                                      )
@@ -118,7 +119,7 @@ instance HasFaces (PlaneGraph s v e f) (PlaneGraph s v e f') where
 instance HasConnectedComponents' (PlaneGraph s vertex e f) where
   type ConnectedComponentIx (PlaneGraph s vertex e f) =
     ConnectedComponentIx (PlanarGraph Primal s vertex e f)
-  type ConnectedComponent (PlaneGraph s vertex e f)   = Component Primal s
+  type ConnectedComponent (PlaneGraph s vertex e f)   = PG.Component Primal s
   --
   connectedComponentAt i = _PlanarGraph .> connectedComponentAt i
   numConnectedComponents = numConnectedComponents . view _PlanarGraph
