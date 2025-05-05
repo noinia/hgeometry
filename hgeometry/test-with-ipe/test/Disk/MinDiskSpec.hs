@@ -11,6 +11,7 @@ import           Data.Foldable
 import qualified Data.Map.Monoidal as Map
 import           Data.Maybe
 import qualified Data.Set as Set
+import qualified Data.Set.NonEmpty as NESet
 import           Golden
 import           HGeometry
 import           HGeometry.Ball
@@ -18,6 +19,7 @@ import           HGeometry.Disk
 import           HGeometry.Disk.Smallest
 import qualified HGeometry.Disk.Smallest.Naive as Naive
 import           HGeometry.Ext
+import           HGeometry.Instances ()
 import           HGeometry.Number.Real.Rational
 import           Ipe
 import           System.OsPath
@@ -26,6 +28,7 @@ import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
 import           Test.Util
+
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5

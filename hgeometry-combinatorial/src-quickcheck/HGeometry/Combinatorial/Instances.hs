@@ -24,6 +24,8 @@ import           Test.QuickCheck.Instances ()
 import           GHC.TypeLits
 import           HGeometry.Tree.Binary.Static
 
+import qualified Data.Set.NonEmpty as NESet
+
 --------------------------------------------------------------------------------
 
 instance (Arbitrary c, Arbitrary e) => Arbitrary (c :+ e) where
@@ -90,3 +92,8 @@ instance Arbitrary a => Arbitrary (BinaryTree a) where
                               l <- choose (0,n-1)
                               Internal <$> f l <*> arbitrary <*> f (n-l-1)
   -- shrink = genericShrink
+
+
+-- * Orphan instance
+instance (Arbitrary a, Ord a) => Arbitrary (NESet.NESet a) where
+  arbitrary = NESet.fromList <$> arbitrary

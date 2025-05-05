@@ -64,7 +64,12 @@ import           Witherable
 
 type R = RealNumber 5
 
-lpRecomputeBasis = extendBasis linearProgrammingMinY
+lpRecomputeBasis :: forall r. (Ord r, Fractional r)
+                 => HalfPlane r -> Basis2D r (HalfPlane r) -> Maybe ( Basis2D r (HalfPlane r) )
+lpRecomputeBasis = extendBasis (linearProgrammingMinY @r @[])
+
+lpInitialBasis   :: (Foldable set, Ord r, Fractional r)
+                 => set (HalfPlane r) -> Basis2D r (HalfPlane r)
 lpInitialBasis   = initialBasis linearProgrammingMinY
 
 -- data Basis halfSpace d where
@@ -247,8 +252,6 @@ spec = describe "LPType Spec" $ do
 --                        diskA^.squaredRadius === diskB^.squaredRadius
 
 
-instance (Arbitrary a, Ord a) => Arbitrary (NESet.NESet a) where
-  arbitrary = NESet.fromList <$> arbitrary
 
 
 bruteForceSolutions    :: ( Ord r, Fractional r
