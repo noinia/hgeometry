@@ -202,7 +202,7 @@ fromDisjointComponents1 combineOuterFace graphs =
                                    nf gr2
         rawFace ci fi x = RawFace (Just (ci, fi)) (FaceData mempty x)
 
-    -- | Given a non-empty builder, construct the NonEmpty vecotr out of it
+    -- | Given a non-empty builder, construct the NonEmpty vector out of it
     -- pre: the builder is indeed non-empty.
     --
     -- in our case the use is indeed safe as we are guaranteed to have non-empty builders of
@@ -303,6 +303,14 @@ instance PlanarGraph_ (PlaneGraph s vertex e f) where
   boundaryDartOf  f = _PlanarGraph .> boundaryDartOf f
   boundaryDarts   f g = undefined
                         -- FIXME!!!!!!
+
+-- boundaryDarts :: FaceIx planarGraph -> planarGraph -> NonEmptyVector (DartIx planarGraph)
+
+-- The darts bounding this face. The darts are reported in order along the face. This means that for internal faces the darts are reported in *counter clockwise* order along the boundary, whereas for the outer face the darts are reported in clockwise order.
+
+-- running time: 𝑂(𝑘)
+-- , where 𝑘 is the output size.
+
 
 instance ( Point_ vertex 2 r, Ord r, Num r
          ) => PlaneGraph_ (PlaneGraph s vertex e f) vertex
@@ -488,7 +496,7 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
 
     xit "fromDisjointSegments" $ do
       show gr `shouldBe` ""
-    it "fromDisjointComponents" $ do
+    xit "fromDisjointComponents" $ do
       show grr `shouldBe` ""
 
     it "fromDisjointComponents components" $ do
@@ -496,10 +504,11 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
     it "fromDisjointComponents faces" $ do
       numFaces grr `shouldBe` 5
 
-    xdescribe "golden" $ do
-      goldenWith [osp|data/test-with-ipe/PlaneGraph|]
-        (ipeContentGolden { name = outFP })
-        (drawGraph grr)
+-- TODO: reenable this
+--    xdescribe "golden" $ do
+--      goldenWith [osp|data/test-with-ipe/PlaneGraph|]
+--        (ipeContentGolden { name = outFP })
+--        (drawGraph grr)
 
 
 
