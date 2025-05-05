@@ -49,16 +49,6 @@ import           HGeometry.Transformation
 import           HGeometry.Vector.NonEmpty.Util ()
 --------------------------------------------------------------------------------
 
-instance ( VertexContainer f point
-         ) => HasVertices (SimplePolygonF f point) (SimplePolygonF f point') where
-  vertices = _SimplePolygonF . traversed1
-
-instance ( VertexContainer f point
-         ) => HasVertices' (SimplePolygonF f point) where
-  type Vertex   (SimplePolygonF f point) = point
-  type VertexIx (SimplePolygonF f point) = Int
-  vertexAt i = _SimplePolygonF . iix i
-  numVertices = F.length . view _SimplePolygonF
 
 -- instance VertexContainer f point => HasEdges' (SimplePolygonF f point) where
 --   -- ^ An edge (v_i,v_{i+1})

@@ -414,32 +414,6 @@ testPoly = uncheckedFromCCWPoints $ NonEmpty.fromList
            ]
 
 
-instance VertexContainer f vertex => HasEdges' (SimplePolygonF f vertex) where
-  type Edge   (SimplePolygonF f vertex) = ()
-  type EdgeIx (SimplePolygonF f vertex) = VertexIx (SimplePolygonF f vertex)
-  edgeAt u = \pUnitFUnit poly -> poly <$ indexed pUnitFUnit u ()
-  -- unclear whether we should use conjoined here.
-  numEdges = numVertices
-
-instance VertexContainer f vertex
-         => HasEdges (SimplePolygonF f vertex) (SimplePolygonF f vertex) where
-  edges = conjoined trav (itrav.indexed)
-    where
-      trav        :: Applicative g
-                  => (() -> g ()) -> SimplePolygonF f vertex -> g (SimplePolygonF f vertex)
-      trav f poly = unwrapApplicative $
-                    poly <$ (vertices' (\x -> x <$ WrapApplicative (f ())) poly)
-
-      itrav        :: Applicative g
-                   => (VertexIx (SimplePolygonF f vertex) -> () -> g ())
-                   -> SimplePolygonF f vertex -> g (SimplePolygonF f vertex)
-      itrav f poly = unwrapApplicative $
-                     poly <$ vertices' (Indexed $ \v x -> x <$ WrapApplicative (f v ())) poly
-
-      vertices' :: IndexedTraversal1' (VertexIx (SimplePolygonF f vertex))
-                                      (SimplePolygonF f vertex) vertex
-      vertices' = vertices
-
 spec :: Spec
 spec = describe "Constructing a PlaneGraph from overlapping Polygons" $ do
          it "vertices testPoly ok" $
