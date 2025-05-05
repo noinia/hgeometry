@@ -3,7 +3,6 @@ module HGeometry.HalfSpaceSpec
 
 import HGeometry.HalfSpace
 import HGeometry.HyperPlane
-import HGeometry.HyperPlane.NonVertical
 import HGeometry.Intersection
 import HGeometry.Kernel.Instances ()
 import HGeometry.Line

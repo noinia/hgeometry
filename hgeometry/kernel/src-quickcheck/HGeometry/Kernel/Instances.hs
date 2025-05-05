@@ -13,9 +13,11 @@
 module HGeometry.Kernel.Instances where
 
 import Control.Lens hiding (cons)
+import Data.Maybe (catMaybes)
 import Data.Semialign
 import GHC.TypeLits
 import HGeometry.Ball
+import HGeometry.Disk
 import HGeometry.Box
 import HGeometry.Combinatorial.Instances ()
 import HGeometry.HalfSpace
@@ -103,6 +105,33 @@ instance ( Arbitrary point
                       , r' <- 1 : shrink r
                       , r' > 0
                       ]
+
+instance (Arbitrary point, Eq point, ConstructablePoint_ point d r, Num r
+         ) => Arbitrary (DiametralBall point) where
+  arbitrary = do p <- arbitrary
+                 q <- arbitrary `suchThat` (/= p)
+                 pure $ DiametralPoints p q
+  shrink (DiametralPoints p q) = [ DiametralPoints p' q'
+                                 | p' <- origin : shrink p
+                                 , q' <- shrink q
+                                 , p' /= q'
+                                 ]
+
+instance (Arbitrary point, Point_ point 2 r, Ord r, Num r
+         ) => Arbitrary (BallByPoints' 3 point) where
+  arbitrary = do mDisk <- diskFromPoints <$> arbitrary <*> arbitrary <*> arbitrary
+                 case mDisk of
+                   Just disk -> pure disk
+                   Nothing   -> arbitrary
+
+  shrink (BoundaryPoints (Vector3 a b c)) =
+    catMaybes [ diskFromPoints a' b' c'
+              | a' <- shrink a, b' <- shrink b, c' <- shrink c
+              ]
+
+instance (Arbitrary point, ConstructablePoint_ point 2 r, Ord r, Num r, Eq point
+         ) => Arbitrary (DiskByPoints point) where
+  arbitrary = oneof [DiametralDisk <$> arbitrary, DiskByPoints <$> arbitrary]
 
 instance ( Arbitrary point
          , Point_ point 2 r, Num r, Ord r

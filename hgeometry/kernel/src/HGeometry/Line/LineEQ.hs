@@ -37,7 +37,10 @@ import Text.Read
 
 --------------------------------------------------------------------------------
 
--- | A Line by its equation
+-- | A non-vertical Line represented by its equation \(y = ax + b\)
+--
+-- see 'toLinearFunction' in the PointAndVector module to construct a line from a point
+-- and a vector.
 newtype LineEQ r = MkLineEQ (NonVerticalHyperPlane 2 r)
   deriving newtype (Eq,Ord,NFData)
   deriving stock (Generic)

@@ -68,7 +68,7 @@ instance Point_ vertex 3 r => CanComputeNormalVector (Triangle vertex) r where
 -- unit ball, scale it to be length 1, otherwise, retry.
 uniformDirection     :: ( StatefulGen gen m
                         , Fractional r, Ord r, Radical r, UniformRange r
-                        , Has_ Metric_ d r
+                        , Has_ Metric_ d r, Ord (Vector d r)
                         ) => gen -> m (Vector d r)
 uniformDirection gen = go
   where
@@ -81,7 +81,7 @@ uniformDirection gen = go
 -- at random.
 uniformUpwardDirectionWrt            :: ( StatefulGen gen m
                                         , Fractional r, Ord r, Radical r, UniformRange r
-                                        , Has_ Metric_ d r
+                                        , Has_ Metric_ d r, Ord (Vector d r)
                                         ) => Vector d r -> gen -> m (Vector d r)
 uniformUpwardDirectionWrt normal gen = uniformDirection gen <&> \dir ->
   if (normal `dot` dir) >= 0 then dir else negated dir

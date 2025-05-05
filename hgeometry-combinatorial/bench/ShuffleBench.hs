@@ -50,9 +50,9 @@ main = do
 -- note: this only works if n <= max int size
 unsafeShuffleBySort         :: (RandomGen gen, Foldable f) => gen -> f a -> [a]
 unsafeShuffleBySort gen0 xs = map snd
-                            . List.sortBy (comparing fst)
+                            . List.sortBy (comparing @Int fst)
                             . fst . foldr (\x (res,gen) ->
-                                             let (i,gen') = uniform @_ @Int gen
+                                             let (i,gen') = uniform gen
                                              in ((i,x):res,gen')
                                           ) ([],gen0)
                             $ xs

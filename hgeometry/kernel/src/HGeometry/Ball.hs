@@ -11,7 +11,11 @@
 module HGeometry.Ball
   ( module HGeometry.Ball.CenterAndRadius
   , module HGeometry.Ball.Class
+  , module HGeometry.Ball.BoundaryPoints
+  , module HGeometry.Ball.Diametral
   ) where
 
-import HGeometry.Ball.Class
+import HGeometry.Ball.BoundaryPoints
 import HGeometry.Ball.CenterAndRadius
+import HGeometry.Ball.Class
+import HGeometry.Ball.Diametral
