@@ -16,44 +16,13 @@ module HGeometry.LPType
   , subExp
   ) where
 
-import           Control.Lens
-import           Data.Foldable (toList)
-import           Data.Foldable1
-import qualified Data.List as List
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (fromJust, fromMaybe, isJust)
-import           Data.Proxy
+import           Data.Maybe (isJust)
 import           Data.Semigroup
-import qualified Data.Set as Set
-import qualified Data.Set.NonEmpty as NESet
 import qualified Data.Vector as V
 import qualified Data.Vector.Generic as Vector
-import           Data.Word
-import           Debug.Trace
-import           GHC.TypeLits
-import           HGeometry.Combinatorial.Util
-import           HGeometry.Disk
-import qualified HGeometry.Disk.Smallest.Naive as Naive
-import           HGeometry.Ext
-import           HGeometry.Foldable.Util
-import           HGeometry.HalfLine
-import           HGeometry.HalfSpace
-import           HGeometry.HyperPlane
-import           HGeometry.Intersection
-import           HGeometry.Line
-import           HGeometry.Line.General
-import           HGeometry.Number.Real.Rational
 import           HGeometry.Permutation.Shuffle
-import           HGeometry.Point
-import           HGeometry.Properties
-import           HGeometry.Unbounded
-import           HGeometry.Vector hiding (basis)
 import           Prelude hiding (filter)
 import           System.Random
-import           VectorBuilder.Builder (foldable)
-import           VectorBuilder.Vector (build)
-import           Witherable
 
 --------------------------------------------------------------------------------
 
