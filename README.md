@@ -97,9 +97,19 @@ using the library.
 
 This is a brief overview of some of the main available algorithms in
 HGeometry. Refer to the haddocks for more details. HGeometry contains
-algorithms for computing
+algorithms for
 
-* The *lower envelope* of a set of $n$ planes in $\mathbb{R}^3$. This
+* Solving LP-type Problems in expected linear time. In particular,
+  this we can
+
+  - solve 2D Linear Programming problems, and
+  - compute the smallest enclosing disk of a set of points in
+    $\mathbb{R}^2$.
+
+  It should be fairly easy to extend these algorithms to higher
+  dimensions, and/or implement other LP-type problems.
+
+* Computing the *lower envelope* of a set of $n$ planes in $\mathbb{R}^3$. This
   then also allows us to compute
 
   - the convex hull of a set of $n$ points in $\mathbb{R}^3$,
@@ -111,7 +121,7 @@ algorithms for computing
   this, but work is ongoing to implement $O(n\log n)$ time algorithms
   (both expected and worst case).
 
-* the *convex hull* of $n$ points in $\mathbb{R}^2$. In particular,
+* Computing the *convex hull* of $n$ points in $\mathbb{R}^2$. In particular,
 
   - worst case optimal $O(n\log n)$ time implementations of Graham
     scan and Divide and Conquer,
@@ -121,11 +131,11 @@ algorithms for computing
   Furtheremore, an optimal linear time algorithm for when the points
   are the vertices of a convex polygon.
 
-* the *closest pair* among $n$ points in $\mathbb{R}^2$
+* Computing the *closest pair* among $n$ points in $\mathbb{R}^2$
 
     - $O(n\log n)$ time using divide and conquer
 
-* the *intersections* among a set of $n$ line segments in
+* Computing the *intersections* among a set of $n$ line segments in
   $\mathbb{R}^2$.
 
   - The algorithm runs in $O((n+k)\log n)$ time, where
@@ -133,20 +143,20 @@ algorithms for computing
   - Alternatively, one can of course also compute all intersections in
     $O(n^2)$ time (which may be better if $k$ is large).
 
-* the *Minkowski sum* of two convex polygons. The algorithm runs in
+* Computing the *Minkowski sum* of two convex polygons. The algorithm runs in
   optimal $O(n+m)$ time, where $n$ and $m$ are the sizes of the polygons.
 
-* if a *point lies in a polygon*. In particular,
+* Testing if a *point lies in a polygon*. In particular,
 
     - in linear time for simple polygons, and
     - in $O(\log n)$ time for convex polygons.
 
-* *tangents* and *extremal points* in a polygon In particular,
+* Computing *tangents* and *extremal points* in a polygon In particular,
 
   - in $O(\log n)$ time for convex polygons, and
   - in linear time in simple polygons.
 
-* a *simplification of a polyline*. In particular, an implementation
+* Computing a *simplification of a polyline*. In particular, an implementation
   of
 
   - the Imai-Iri algorithm, and
