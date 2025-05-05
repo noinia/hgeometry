@@ -14,6 +14,7 @@ module HGeometry.Line
   , module HGeometry.Line.LineEQ
   , module HGeometry.Line.PointAndVector
   , LineLineIntersection, LineLineIntersectionG(..)
+  , fromLineEQ
   ) where
 
 import Control.Lens
@@ -47,3 +48,10 @@ instance (Ord r, Fractional r)
                   in Just . Line_x_Line_Point $ Point2 x (evalAt' x l)
                   -- m is vertical, l is not, so they intersect in a point
     Just m'    -> l `intersect` m'
+
+-- | Convert from a LineEQ to a Point and Line
+fromLineEQ              :: Num r => LineEQ r -> LinePV 2 r
+fromLineEQ (LineEQ a b) = fromLinearFunction a b
+
+instance Fractional r => HasSquaredEuclideanDistance (LineEQ r) where
+  pointClosestTo q l = pointClosestTo q (fromLineEQ l)

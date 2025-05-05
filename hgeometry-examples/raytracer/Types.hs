@@ -30,9 +30,11 @@ instance (Radical r, Ord r, Fractional r, AbsoluteTolerance tol)
          => Radical (AbsolutelyApproximateValue tol r) where
   sqrt = AbsolutelyApproximateValue . sqrt . coerce
 
-instance (UniformRange r) => UniformRange (AbsolutelyApproximateValue tol r) where
+instance (UniformRange r, Ord r, Fractional r, AbsoluteTolerance tol
+         ) => UniformRange (AbsolutelyApproximateValue tol r) where
   uniformRM (AbsolutelyApproximateValue low, AbsolutelyApproximateValue high) =
     fmap AbsolutelyApproximateValue . uniformRM (low,high)
+  isInRange = isInRangeOrd
 
 
 --------------------------------------------------------------------------------
