@@ -12,12 +12,14 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.PlaneGraph.Type
-  ( PlaneGraph(..)
+  ( PlaneGraph
+  , fromCPlaneGraph, fromCPlaneGraphWith
   -- , fromAdjacencyRep
   -- , fromConnectedSegments
   -- , VertexData(VertexData), location
 
   -- , E(..)
+  , _PlanarGraph
   ) where
 
 import           Control.Lens hiding (holes, holesOf, (.=))
@@ -34,19 +36,20 @@ import           HGeometry.Foldable.Sort (sortBy )
 import           HGeometry.LineSegment
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.PlaneGraph.Class
+import           HGeometry.PlaneGraph.Connected
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Transformation
 import           HGeometry.Vector
 import           Hiraffe.AdjacencyListRep.Map
 import           Hiraffe.Graph.Class
+import           Hiraffe.Graph.Component
 import           Hiraffe.PlanarGraph ( PlanarGraph, World(..)
                                      , DartId, VertexId, FaceId
                                      )
-import           Hiraffe.PlanarGraph.Class
 import qualified Hiraffe.PlanarGraph as PG
+import           Hiraffe.PlanarGraph.Class
 import qualified Hiraffe.PlanarGraph.Dart as Dart
-
 
 -- import           Data.YAML
 
@@ -62,7 +65,9 @@ newtype PlaneGraph s v e f = PlaneGraph (PlanarGraph Primal s v e f)
 type instance NumType   (PlaneGraph s v e f) = NumType v
 type instance Dimension (PlaneGraph s v e f) = 2
 
--- | Iso to access the graph
+-- | Iso to access the underlying PlanarGraph. Use at your own risk.
+--
+--
 _PlanarGraph :: Iso (PlaneGraph s v e f)         (PlaneGraph s v' e' f')
                     (PlanarGraph Primal s v e f) (PlanarGraph Primal s v' e' f')
 _PlanarGraph = coerced
@@ -110,6 +115,20 @@ instance HasFaces (PlaneGraph s v e f) (PlaneGraph s v e f') where
   faces = _PlanarGraph.faces
 
 ----------------------------------------
+
+instance HasConnectedComponents' (PlaneGraph s vertex e f) where
+  type ConnectedComponentIx (PlaneGraph s vertex e f) =
+    ConnectedComponentIx (PlanarGraph Primal s vertex e f)
+  type ConnectedComponent (PlaneGraph s vertex e f)   = PG.Component Primal s
+  --
+  connectedComponentAt i = _PlanarGraph .> connectedComponentAt i
+  numConnectedComponents = numConnectedComponents . view _PlanarGraph
+
+instance HasConnectedComponents (PlaneGraph s vertex e f)
+                                (PlaneGraph s vertex e f) where
+  connectedComponents = _PlanarGraph .> connectedComponents
+
+----------------------------------------
 instance DiGraph_ (PlaneGraph s v e f) where
   endPoints (PlaneGraph g) = endPoints g
   twinDartOf d = twinOf d . to Just
@@ -128,9 +147,10 @@ instance BidirGraph_ (PlaneGraph s v e f) where
   twinOf d = to $ const (PG.twin d)
   getPositiveDart (PlaneGraph g) e = getPositiveDart g e
 
-instance ( Point_ v 2 (NumType v)
-         , Ord (NumType v), Num (NumType v)
-         ) => Graph_ (PlaneGraph s v e f) where
+-- ( Point_ v 2 (NumType v)
+--          , Ord (NumType v), Num (NumType v)
+--          ) =>
+instance Graph_ (PlaneGraph s v e f) where
   neighboursOf u = _PlanarGraph.neighboursOf u
   neighboursOfByEdge u = _PlanarGraph.neighboursOfByEdge u
   incidentEdgesOf u = _PlanarGraph.incidentEdgesOf u
@@ -243,7 +263,8 @@ fromAdjacencyRep proxy = PlaneGraph . PG.fromAdjacencyRep proxy
 
 -- | Helper type to sort vectors cyclically around the origine
 newtype E r = E (Vector 2 r)
-  deriving newtype (Show)
+
+deriving newtype (Show)
 
 instance (Ord r, Num r) => Eq (E r) where
   a == b = a `compare` b == EQ
@@ -251,3 +272,18 @@ instance (Ord r, Num r) => Ord (E r) where
   (E v) `compare` (E u) = ccwCmpAroundWith (Vector2 0 1) (origin :: Point 2 r) (Point v) (Point u)
 
 -}
+
+
+
+-- | Given a connected Plane graph, constructs a PlaneGraph.
+--
+-- \(O(n)\)
+fromCPlaneGraph   :: ( Point_ vertex 2 r, Ord r, Num r
+                     ) => CPlaneGraph s vertex e f -> PlaneGraph s vertex e f
+fromCPlaneGraph c = fromCPlaneGraphWith (outerFaceDart c) c
+
+-- | Given a dart that thas the outer face on its left, and a Connected Plane Graph,
+-- construct a PlaneGraph.
+fromCPlaneGraphWith                  :: Dart.Dart s -> CPlaneGraph s v e f -> PlaneGraph s v e f
+fromCPlaneGraphWith outerFaceDart' c = review _PlanarGraph
+                                     $ PG.fromConnected' (c^._CPlanarGraph) outerFaceDart'
