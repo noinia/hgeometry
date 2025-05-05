@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Disk.Smallest</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Expected linear time implemenation for smallest enclsoing disk (by phrasing it as an</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- LP-type problem and solving it using clarksons algorithm.).</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Disk.Smallest.html"><span class="hs-identifier">HGeometry.Disk.Smallest</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Disk.Smallest.html#smallestEnclosingDisk"><span class="hs-identifier">smallestEnclosingDisk</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Disk.Smallest.html#minDisk"><span class="hs-identifier">minDisk</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">toList</span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.2.0-66c0c43b6a1c7e682eec5be5849d4cbdf281375d0306ebde2a04ed8c14b07f1d/share/doc/html/src/Data.Vector.html/Data.Vector.html"><span class="hs-identifier">Data.Vector</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">V</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Ball</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Disk</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="HGeometry.Disk.Smallest.Naive.html"><span class="hs-identifier">HGeometry.Disk.Smallest.Naive</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Naive</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Intersection</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.LPType.html"><span class="hs-identifier">HGeometry.LPType</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">filter</span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/random-1.3.1-5d35264c43e04f729abfc5000175090bbd9d64d2a7ed09e21ca3dc3a1e3dc58d/share/doc/html/src/System.Random.html/System.Random.html"><span class="hs-identifier">System.Random</span></a></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-builder-0.3.8.6-f26b4c9259e54b201456dea6554b84866ae8dc90acfcbb414f19d393c9cdc23d/share/doc/html/src/VectorBuilder.Builder.html/VectorBuilder.Builder.html"><span class="hs-identifier">VectorBuilder.Builder</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-builder-0.3.8.6-f26b4c9259e54b201456dea6554b84866ae8dc90acfcbb414f19d393c9cdc23d/share/doc/html/src/VectorBuilder.Core.Builder.html/VectorBuilder.Core.Builder.html#foldable"><span class="hs-identifier">foldable</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-builder-0.3.8.6-f26b4c9259e54b201456dea6554b84866ae8dc90acfcbb414f19d393c9cdc23d/share/doc/html/src/VectorBuilder.Vector.html/VectorBuilder.Vector.html"><span class="hs-identifier">VectorBuilder.Vector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-builder-0.3.8.6-f26b4c9259e54b201456dea6554b84866ae8dc90acfcbb414f19d393c9cdc23d/share/doc/html/src/VectorBuilder.Vector.html/VectorBuilder.Vector.html#build"><span class="hs-identifier">build</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/witherable-0.5-5d85f763e5e8170e826d2554153086f6307c6577afec4b5097a66230893464d4/share/doc/html/src/Witherable.html/Witherable.html"><span class="hs-identifier">Witherable</span></a></span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-35"></span><span class="annot"><span class="hs-comment">-- * Smallest Enclosing disk</span></span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-comment">-- | Given a set of \(n \geq 2\) points, computes the smallest enclosing disk.</span><span>
+</span><span id="line-38"></span><span class="hs-comment">--</span><span>
+</span><span id="line-39"></span><span class="hs-comment">-- pre: the set contains at least 2 (distinct) points</span><span>
+</span><span id="line-40"></span><span class="hs-comment">--</span><span>
+</span><span id="line-41"></span><span class="hs-comment">-- running time: expected \(O(n)\)</span><span>
+</span><span id="line-42"></span><span id="local-6989586621679411656"><span id="local-6989586621679411657"><span id="local-6989586621679411659"><span id="local-6989586621679411663"><span class="annot"><a href="HGeometry.Disk.Smallest.html#smallestEnclosingDisk"><span class="hs-identifier hs-type">smallestEnclosingDisk</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679411656"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679411657"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679411657"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679411657"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679411659"><span class="hs-identifier hs-type">set</span></a></span><span>
+</span><span id="line-43"></span><span>                             </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasIntersectionWith</span></span><span> </span><span class="annot"><a href="#local-6989586621679411656"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DiskByPoints</span></span><span> </span><span class="annot"><a href="#local-6989586621679411656"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679411656"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-44"></span><span>                             </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/random-1.3.1-5d35264c43e04f729abfc5000175090bbd9d64d2a7ed09e21ca3dc3a1e3dc58d/share/doc/html/src/System.Random.Internal.html/System.Random.Internal.html#SplitGen"><span class="hs-identifier hs-type">SplitGen</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679411663"><span class="hs-identifier hs-type">gen</span></a></span><span>
+</span><span id="line-45"></span><span>                             </span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span>                          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679411663"><span class="hs-identifier hs-type">gen</span></a></span><span>
+</span><span id="line-47"></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679411659"><span class="hs-identifier hs-type">set</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679411656"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-48"></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DiskByPoints</span></span><span> </span><span class="annot"><a href="#local-6989586621679411656"><span class="hs-identifier hs-type">point</span></a></span></span></span></span></span><span>
+</span><span id="line-49"></span><span id="smallestEnclosingDisk"><span class="annot"><span class="annottext">smallestEnclosingDisk :: forall point r (set :: * -&gt; *) gen.
+(Point_ point 2 r, Ord r, Fractional r, Foldable1 set,
+ HasIntersectionWith point (DiskByPoints point), Eq point,
+ SplitGen gen) =&gt;
+gen -&gt; set point -&gt; DiskByPoints point
+</span><a href="HGeometry.Disk.Smallest.html#smallestEnclosingDisk"><span class="hs-identifier hs-var hs-var">smallestEnclosingDisk</span></a></span></span><span> </span><span id="local-6989586621679411888"><span class="annot"><span class="annottext">gen
+</span><a href="#local-6989586621679411888"><span class="hs-identifier hs-var">gen</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(r, DiskByPoints point) -&gt; DiskByPoints point
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">((r, DiskByPoints point) -&gt; DiskByPoints point)
+-&gt; (set point -&gt; (r, DiskByPoints point))
+-&gt; set point
+-&gt; DiskByPoints point
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">gen
+-&gt; LPType r DiskByPoints Vector point
+-&gt; Vector point
+-&gt; (r, DiskByPoints point)
+forall (set :: * -&gt; *) a (basis :: * -&gt; *) t gen.
+(Foldable set, Monoid (set a), Vector set a, Foldable basis, Ord t,
+ Eq a, SplitGen gen) =&gt;
+gen -&gt; LPType t basis set a -&gt; set a -&gt; (t, basis a)
+</span><a href="HGeometry.LPType.html#clarkson"><span class="hs-identifier hs-var">clarkson</span></a></span><span> </span><span class="annot"><span class="annottext">gen
+</span><a href="#local-6989586621679411888"><span class="hs-identifier hs-var">gen</span></a></span><span> </span><span class="annot"><span class="annottext">LPType r DiskByPoints Vector point
+forall point r (set :: * -&gt; *).
+(Point_ point 2 r, Foldable set, Ord r, Fractional r,
+ HasIntersectionWith point (DiskByPoints point), Eq point) =&gt;
+LPType r DiskByPoints set point
+</span><a href="HGeometry.Disk.Smallest.html#minDisk"><span class="hs-identifier hs-var">minDisk</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector point -&gt; (r, DiskByPoints point))
+-&gt; (set point -&gt; Vector point)
+-&gt; set point
+-&gt; (r, DiskByPoints point)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">forall (vector :: * -&gt; *) element.
+Vector vector element =&gt;
+Builder element -&gt; vector element
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-builder-0.3.8.6-f26b4c9259e54b201456dea6554b84866ae8dc90acfcbb414f19d393c9cdc23d/share/doc/html/src/VectorBuilder.Vector.html/VectorBuilder.Vector.html#build"><span class="hs-identifier hs-var">build</span></a></span><span> </span><span class="hs-glyph">@</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.2.0-66c0c43b6a1c7e682eec5be5849d4cbdf281375d0306ebde2a04ed8c14b07f1d/share/doc/html/src/Data.Vector.html/Data.Vector.html#Vector"><span class="hs-identifier hs-type">V.Vector</span></a></span><span> </span><span class="annot"><span class="annottext">(Builder point -&gt; Vector point)
+-&gt; (set point -&gt; Builder point) -&gt; set point -&gt; Vector point
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">set point -&gt; Builder point
+forall (foldable :: * -&gt; *) element.
+Foldable foldable =&gt;
+foldable element -&gt; Builder element
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-builder-0.3.8.6-f26b4c9259e54b201456dea6554b84866ae8dc90acfcbb414f19d393c9cdc23d/share/doc/html/src/VectorBuilder.Core.Builder.html/VectorBuilder.Core.Builder.html#foldable"><span class="hs-identifier hs-var">foldable</span></a></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="hs-comment">-- | minimize the y-coordinate. (Lexicographically)</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- set contains at least two points</span><span>
+</span><span id="line-54"></span><span id="local-6989586621679411717"><span id="local-6989586621679411718"><span id="local-6989586621679411719"><span class="annot"><a href="HGeometry.Disk.Smallest.html#minDisk"><span class="hs-identifier hs-type">minDisk</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679411717"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679411718"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679411719"><span class="hs-identifier hs-type">set</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679411718"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679411718"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-55"></span><span>           </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasIntersectionWith</span></span><span> </span><span class="annot"><a href="#local-6989586621679411717"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DiskByPoints</span></span><span> </span><span class="annot"><a href="#local-6989586621679411717"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679411717"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-56"></span><span>           </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.LPType.html#LPType"><span class="hs-identifier hs-type">LPType</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679411718"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">DiskByPoints</span></span><span> </span><span class="annot"><a href="#local-6989586621679411719"><span class="hs-identifier hs-type">set</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679411717"><span class="hs-identifier hs-type">point</span></a></span></span></span></span><span>
+</span><span id="line-57"></span><span id="minDisk"><span class="annot"><span class="annottext">minDisk :: forall point r (set :: * -&gt; *).
+(Point_ point 2 r, Foldable set, Ord r, Fractional r,
+ HasIntersectionWith point (DiskByPoints point), Eq point) =&gt;
+LPType r DiskByPoints set point
+</span><a href="HGeometry.Disk.Smallest.html#minDisk"><span class="hs-identifier hs-var hs-var">minDisk</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.LPType.html#LPType"><span class="hs-identifier hs-type">LPType</span></a></span><span> </span><span class="hs-special">{</span><span>
+</span><span id="line-58"></span><span>    </span><span class="annot"><span class="annottext">costFunction :: DiskByPoints point -&gt; r
+</span><a href="HGeometry.LPType.html#costFunction"><span class="hs-identifier hs-var">costFunction</span></a></span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting r (DiskByPoints point) r -&gt; DiskByPoints point -&gt; r
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting r (DiskByPoints point) r
+(NumType (DiskByPoints point)
+ -&gt; Const r (NumType (DiskByPoints point)))
+-&gt; DiskByPoints point -&gt; Const r (DiskByPoints point)
+forall ball point. Ball_ ball point =&gt; Getter ball (NumType ball)
+Getter (DiskByPoints point) (NumType (DiskByPoints point))
+</span><span class="hs-identifier hs-var">squaredRadius</span></span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">combinatorialDimension :: Int
+</span><a href="HGeometry.LPType.html#combinatorialDimension"><span class="hs-identifier hs-var">combinatorialDimension</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">2</span></span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">extendBasis :: point -&gt; DiskByPoints point -&gt; Maybe (DiskByPoints point)
+</span><a href="HGeometry.LPType.html#extendBasis"><span class="hs-identifier hs-var">extendBasis</span></a></span><span>            </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point -&gt; DiskByPoints point -&gt; Maybe (DiskByPoints point)
+forall point r.
+(Point_ point 2 r, Ord r, Fractional r,
+ HasIntersectionWith point (DiskByPoints point)) =&gt;
+point -&gt; DiskByPoints point -&gt; Maybe (DiskByPoints point)
+</span><a href="HGeometry.Disk.Smallest.html#extendDisk"><span class="hs-identifier hs-var">extendDisk</span></a></span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">initialBasis :: set point -&gt; DiskByPoints point
+</span><a href="HGeometry.LPType.html#initialBasis"><span class="hs-identifier hs-var">initialBasis</span></a></span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">set point -&gt; DiskByPoints point
+forall (set :: * -&gt; *) point r.
+(Foldable set, Point_ point 2 r, Eq point) =&gt;
+set point -&gt; DiskByPoints point
+</span><a href="HGeometry.Disk.Smallest.html#initialDisk"><span class="hs-identifier hs-var">initialDisk</span></a></span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- | pre:</span><span>
+</span><span id="line-65"></span><span class="hs-comment">--  - needs at least 2 distinct points!</span><span>
+</span><span id="line-66"></span><span id="local-6989586621679411747"><span id="local-6989586621679411748"><span id="local-6989586621679411749"><span class="annot"><a href="HGeometry.Disk.Smallest.html#initialDisk"><span class="hs-identifier hs-type">initialDisk</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679411747"><span class="hs-identifier hs-type">set</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679411748"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679411749"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679411748"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-67"></span><span>                </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679411747"><span class="hs-identifier hs-type">set</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679411748"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DiskByPoints</span></span><span> </span><span class="annot"><a href="#local-6989586621679411748"><span class="hs-identifier hs-type">point</span></a></span></span></span></span><span>
+</span><span id="line-68"></span><span id="initialDisk"><span class="annot"><span class="annottext">initialDisk :: forall (set :: * -&gt; *) point r.
+(Foldable set, Point_ point 2 r, Eq point) =&gt;
+set point -&gt; DiskByPoints point
+</span><a href="HGeometry.Disk.Smallest.html#initialDisk"><span class="hs-identifier hs-var hs-var">initialDisk</span></a></span></span><span> </span><span id="local-6989586621679412099"><span class="annot"><span class="annottext">set point
+</span><a href="#local-6989586621679412099"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">set point -&gt; [point]
+forall a. set a -&gt; [a]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">toList</span></span><span> </span><span class="annot"><span class="annottext">set point
+</span><a href="#local-6989586621679412099"><span class="hs-identifier hs-var">pts</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-69"></span><span>                    </span><span id="local-6989586621679412100"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679412100"><span class="hs-identifier hs-var">p</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679412101"><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679412101"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">(point -&gt; Bool) -&gt; [point] -&gt; [point]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+forall (f :: * -&gt; *) a. Filterable f =&gt; (a -&gt; Bool) -&gt; f a -&gt; f a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/witherable-0.5-5d85f763e5e8170e826d2554153086f6307c6577afec4b5097a66230893464d4/share/doc/html/src/Witherable.html/Witherable.html#filter"><span class="hs-identifier hs-var">filter</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point -&gt; point -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">/=</span></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679412100"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[point]
+</span><a href="#local-6989586621679412101"><span class="hs-identifier hs-var">ps</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-70"></span><span>                              </span><span id="local-6989586621679412104"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679412104"><span class="hs-identifier hs-var">q</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">[point]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DiametralBall point -&gt; DiskByPoints point
+forall point. DiametralBall point -&gt; DiskByPoints point
+</span><span class="hs-identifier hs-var">DiametralDisk</span></span><span> </span><span class="annot"><span class="annottext">(DiametralBall point -&gt; DiskByPoints point)
+-&gt; DiametralBall point -&gt; DiskByPoints point
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; DiametralBall point
+forall point. point -&gt; point -&gt; DiametralBall point
+</span><span class="hs-identifier hs-var">DiametralPoints</span></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679412100"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679412104"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><span id="line-71"></span><span>                              </span><span class="annot"><span class="annottext">[point]
+</span><span class="hs-identifier">_</span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; DiskByPoints point
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;initialDisk: Too few distinct points!&quot;</span></span><span>
+</span><span id="line-72"></span><span>                    </span><span class="annot"><span class="annottext">[point]
+</span><span class="hs-identifier">_</span></span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; DiskByPoints point
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;initialDisk: precondition failed; no points!&quot;</span></span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="annot"><span class="hs-comment">-- | Tries to extend the disk into the smallest enclosing disk.</span></span><span>
+</span><span id="line-75"></span><span id="local-6989586621679411745"><span id="local-6989586621679411746"><span class="annot"><a href="HGeometry.Disk.Smallest.html#extendDisk"><span class="hs-identifier hs-type">extendDisk</span></a></span><span>               </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679411745"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679411746"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679411746"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679411746"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-76"></span><span>                            </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasIntersectionWith</span></span><span> </span><span class="annot"><a href="#local-6989586621679411745"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DiskByPoints</span></span><span> </span><span class="annot"><a href="#local-6989586621679411745"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-77"></span><span>                            </span><span class="hs-special">)</span><span>
+</span><span id="line-78"></span><span>                         </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679411745"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DiskByPoints</span></span><span> </span><span class="annot"><a href="#local-6989586621679411745"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DiskByPoints</span></span><span> </span><span class="annot"><a href="#local-6989586621679411745"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-79"></span><span id="extendDisk"><span class="annot"><span class="annottext">extendDisk :: forall point r.
+(Point_ point 2 r, Ord r, Fractional r,
+ HasIntersectionWith point (DiskByPoints point)) =&gt;
+point -&gt; DiskByPoints point -&gt; Maybe (DiskByPoints point)
+</span><a href="HGeometry.Disk.Smallest.html#extendDisk"><span class="hs-identifier hs-var hs-var">extendDisk</span></a></span></span><span> </span><span id="local-6989586621679412185"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679412185"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679412186"><span class="annot"><span class="annottext">DiskByPoints point
+</span><a href="#local-6989586621679412186"><span class="hs-identifier hs-var">disk</span></a></span></span><span>
+</span><span id="line-80"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679412185"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">point -&gt; DiskByPoints point -&gt; Bool
+forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span class="hs-operator hs-var">`intersects`</span></span><span> </span><span class="annot"><span class="annottext">DiskByPoints point
+</span><a href="#local-6989586621679412186"><span class="hs-identifier hs-var">disk</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (DiskByPoints point)
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-81"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DiskByPoints point -&gt; Maybe (DiskByPoints point)
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(DiskByPoints point -&gt; Maybe (DiskByPoints point))
+-&gt; DiskByPoints point -&gt; Maybe (DiskByPoints point)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">point -&gt; DiskByPoints point -&gt; DiskByPoints point
+forall point r (nonEmpty :: * -&gt; *).
+(Point_ point 2 r, Fractional r, Ord r, Foldable1 nonEmpty) =&gt;
+point -&gt; nonEmpty point -&gt; DiskByPoints point
+</span><a href="HGeometry.Disk.Smallest.Naive.html#smallestEnclosingDiskWith"><span class="hs-identifier hs-var">Naive.smallestEnclosingDiskWith</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679412185"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">DiskByPoints point
+</span><a href="#local-6989586621679412186"><span class="hs-identifier hs-var">disk</span></a></span><span>
+</span><span id="line-82"></span><span>    </span><span class="hs-comment">-- since q lies outside the disk, the disk is guaranteed to exist. Hence, the</span><span>
+</span><span id="line-83"></span><span>    </span><span class="hs-comment">-- precondition is satisfied. Furthermore. The existing disk is defined by only O(1)</span><span>
+</span><span id="line-84"></span><span>    </span><span class="hs-comment">-- points; so this runs in O(1) time.</span><span>
+</span><span id="line-85"></span></pre></body></html>

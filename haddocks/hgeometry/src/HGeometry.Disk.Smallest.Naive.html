@@ -11,52 +11,55 @@
 </span><span id="line-11"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Disk.Smallest.Naive.html"><span class="hs-identifier">HGeometry.Disk.Smallest.Naive</span></a></span><span>
 </span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Disk.Smallest.Naive.html#smallestEnclosingDisk"><span class="hs-identifier">smallestEnclosingDisk</span></a></span><span>
-</span><span id="line-14"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-15"></span><span>
-</span><span id="line-16"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
-</span><span id="line-17"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
-</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
-</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">mapMaybe</span></span><span class="hs-special">)</span><span>
-</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Semigroup</span></span><span>
-</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Ball</span></span><span>
-</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html/HGeometry.Combinatorial.Util.html"><span class="hs-identifier">HGeometry.Combinatorial.Util</span></a></span><span>
-</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Disk</span></span><span>
-</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Intersection</span></span><span>
-</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
-</span><span id="line-26"></span><span>
-</span><span id="line-27"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-28"></span><span>
-</span><span id="line-29"></span><span class="hs-comment">-- | Horrible \( O(n^4) \) implementation that simply tries all disks, checks if they</span><span>
-</span><span id="line-30"></span><span class="hs-comment">-- enclose all points, and takes the largest one. Basically, this is only useful</span><span>
-</span><span id="line-31"></span><span class="hs-comment">-- to check correctness of the other algorithm(s)</span><span>
-</span><span id="line-32"></span><span class="hs-comment">--</span><span>
-</span><span id="line-33"></span><span class="hs-comment">-- pre: the set contains at least 2 (distinct) points</span><span>
-</span><span id="line-34"></span><span id="local-6989586621679400595"><span id="local-6989586621679400596"><span id="local-6989586621679400598"><span class="annot"><a href="HGeometry.Disk.Smallest.Naive.html#smallestEnclosingDisk"><span class="hs-identifier hs-type">smallestEnclosingDisk</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679400595"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679400596"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679400596"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679400596"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679400598"><span class="hs-identifier hs-type">set</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-35"></span><span>                          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679400598"><span class="hs-identifier hs-type">set</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679400595"><span class="hs-identifier hs-type">point</span></a></span><span>
-</span><span id="line-36"></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DiskByPoints</span></span><span> </span><span class="annot"><a href="#local-6989586621679400595"><span class="hs-identifier hs-type">point</span></a></span></span></span></span><span>
-</span><span id="line-37"></span><span id="smallestEnclosingDisk"><span class="annot"><span class="annottext">smallestEnclosingDisk :: forall point r (set :: * -&gt; *).
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Disk.Smallest.Naive.html#smallestEnclosingDiskWith"><span class="hs-identifier">smallestEnclosingDiskWith</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Disk.Smallest.Naive.html#enclosesAll"><span class="hs-identifier">enclosesAll</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">toList</span></span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">mapMaybe</span></span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Semigroup</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Ball</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html/HGeometry.Combinatorial.Util.html"><span class="hs-identifier">HGeometry.Combinatorial.Util</span></a></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Disk</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Intersection</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- | Horrible \( O(n^4) \) implementation that simply tries all disks, checks if they</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- enclose all points, and takes the largest one. Basically, this is only useful</span><span>
+</span><span id="line-34"></span><span class="hs-comment">-- to check correctness of the other algorithm(s)</span><span>
+</span><span id="line-35"></span><span class="hs-comment">--</span><span>
+</span><span id="line-36"></span><span class="hs-comment">-- pre: the set contains at least 2 (distinct) points</span><span>
+</span><span id="line-37"></span><span id="local-6989586621679408663"><span id="local-6989586621679408664"><span id="local-6989586621679408666"><span class="annot"><a href="HGeometry.Disk.Smallest.Naive.html#smallestEnclosingDisk"><span class="hs-identifier hs-type">smallestEnclosingDisk</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679408663"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679408664"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679408664"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679408664"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679408666"><span class="hs-identifier hs-type">set</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span>                          </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679408666"><span class="hs-identifier hs-type">set</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679408663"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-39"></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DiskByPoints</span></span><span> </span><span class="annot"><a href="#local-6989586621679408663"><span class="hs-identifier hs-type">point</span></a></span></span></span></span><span>
+</span><span id="line-40"></span><span id="smallestEnclosingDisk"><span class="annot"><span class="annottext">smallestEnclosingDisk :: forall point r (set :: * -&gt; *).
 (Point_ point 2 r, Ord r, Fractional r, Foldable set) =&gt;
 set point -&gt; DiskByPoints point
-</span><a href="HGeometry.Disk.Smallest.Naive.html#smallestEnclosingDisk"><span class="hs-identifier hs-var hs-var">smallestEnclosingDisk</span></a></span></span><span> </span><span id="local-6989586621679400914"><span class="annot"><span class="annottext">set point
-</span><a href="#local-6989586621679400914"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DiskByPoints point
-</span><a href="#local-6989586621679400915"><span class="hs-identifier hs-var">minDisk</span></a></span><span>
-</span><span id="line-38"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-39"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Min</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arg</span></span><span> </span><span class="annot"><span class="annottext">r
-</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679400915"><span class="annot"><span class="annottext">DiskByPoints point
-</span><a href="#local-6989586621679400915"><span class="hs-identifier hs-var">minDisk</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DiskByPoints point -&gt; Min (Arg r (DiskByPoints point)))
+</span><a href="HGeometry.Disk.Smallest.Naive.html#smallestEnclosingDisk"><span class="hs-identifier hs-var hs-var">smallestEnclosingDisk</span></a></span></span><span> </span><span id="local-6989586621679409112"><span class="annot"><span class="annottext">set point
+</span><a href="#local-6989586621679409112"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DiskByPoints point
+</span><a href="#local-6989586621679409113"><span class="hs-identifier hs-var">minDisk</span></a></span><span>
+</span><span id="line-41"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-42"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Min</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arg</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679409113"><span class="annot"><span class="annottext">DiskByPoints point
+</span><a href="#local-6989586621679409113"><span class="hs-identifier hs-var">minDisk</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DiskByPoints point -&gt; Min (Arg r (DiskByPoints point)))
 -&gt; NonEmpty (DiskByPoints point)
 -&gt; Min (Arg r (DiskByPoints point))
 forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; NonEmpty a -&gt; m
 forall (t :: * -&gt; *) m a.
 (Foldable1 t, Semigroup m) =&gt;
 (a -&gt; m) -&gt; t a -&gt; m
-</span><span class="hs-identifier hs-var">foldMap1</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679400919"><span class="annot"><span class="annottext">DiskByPoints point
-</span><a href="#local-6989586621679400919"><span class="hs-identifier hs-var">disk</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Arg r (DiskByPoints point) -&gt; Min (Arg r (DiskByPoints point))
+</span><span class="hs-identifier hs-var">foldMap1</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679409117"><span class="annot"><span class="annottext">DiskByPoints point
+</span><a href="#local-6989586621679409117"><span class="hs-identifier hs-var">disk</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Arg r (DiskByPoints point) -&gt; Min (Arg r (DiskByPoints point))
 forall a. a -&gt; Min a
 </span><span class="hs-identifier hs-var">Min</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; DiskByPoints point -&gt; Arg r (DiskByPoints point)
 forall a b. a -&gt; b -&gt; Arg a b
 </span><span class="hs-identifier hs-var">Arg</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DiskByPoints point
-</span><a href="#local-6989586621679400919"><span class="hs-identifier hs-var">disk</span></a></span><span class="annot"><span class="annottext">DiskByPoints point -&gt; Getting r (DiskByPoints point) r -&gt; r
+</span><a href="#local-6989586621679409117"><span class="hs-identifier hs-var">disk</span></a></span><span class="annot"><span class="annottext">DiskByPoints point -&gt; Getting r (DiskByPoints point) r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (DiskByPoints point) r
 (NumType (DiskByPoints point)
@@ -65,8 +68,8 @@ forall s a. s -&gt; Getting a s a -&gt; a
 forall ball point. Ball_ ball point =&gt; Getter ball (NumType ball)
 Getter (DiskByPoints point) (NumType (DiskByPoints point))
 </span><span class="hs-identifier hs-var">squaredRadius</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DiskByPoints point
-</span><a href="#local-6989586621679400919"><span class="hs-identifier hs-var">disk</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-40"></span><span>                        </span><span class="annot"><span class="annottext">(NonEmpty (DiskByPoints point) -&gt; Min (Arg r (DiskByPoints point)))
+</span><a href="#local-6989586621679409117"><span class="hs-identifier hs-var">disk</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span>                        </span><span class="annot"><span class="annottext">(NonEmpty (DiskByPoints point) -&gt; Min (Arg r (DiskByPoints point)))
 -&gt; NonEmpty (DiskByPoints point)
 -&gt; Min (Arg r (DiskByPoints point))
 forall a b. (a -&gt; b) -&gt; a -&gt; b
@@ -76,22 +79,27 @@ forall a. HasCallStack =&gt; [a] -&gt; NonEmpty a
 -&gt; [DiskByPoints point] -&gt; NonEmpty (DiskByPoints point)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[DiskByPoints point]
-</span><a href="#local-6989586621679400923"><span class="hs-identifier hs-var">disks2</span></a></span><span> </span><span class="annot"><span class="annottext">[DiskByPoints point]
+</span><a href="#local-6989586621679409121"><span class="hs-identifier hs-var">disks2</span></a></span><span> </span><span class="annot"><span class="annottext">[DiskByPoints point]
 -&gt; [DiskByPoints point] -&gt; [DiskByPoints point]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[DiskByPoints point]
-</span><a href="#local-6989586621679400924"><span class="hs-identifier hs-var">disks3</span></a></span><span>
-</span><span id="line-41"></span><span>                        </span><span class="hs-comment">-- by the precondition, there are at least two distinct points</span><span>
-</span><span id="line-42"></span><span>                        </span><span class="hs-comment">-- so there is at least one element in disks2</span><span>
-</span><span id="line-43"></span><span>
-</span><span id="line-44"></span><span>    </span><span id="local-6989586621679400923"><span class="annot"><span class="annottext">disks2 :: [DiskByPoints point]
-</span><a href="#local-6989586621679400923"><span class="hs-identifier hs-var hs-var">disks2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Two point -&gt; Maybe (DiskByPoints point))
+</span><a href="#local-6989586621679409122"><span class="hs-identifier hs-var">disks3</span></a></span><span>
+</span><span id="line-44"></span><span>                        </span><span class="hs-comment">-- by the precondition, there are at least two distinct points</span><span>
+</span><span id="line-45"></span><span>                        </span><span class="hs-comment">-- so there is at least one element in disks2</span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span>    </span><span id="local-6989586621679409121"><span class="annot"><span class="annottext">disks2 :: [DiskByPoints point]
+</span><a href="#local-6989586621679409121"><span class="hs-identifier hs-var hs-var">disks2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Two point -&gt; Maybe (DiskByPoints point))
 -&gt; [Two point] -&gt; [DiskByPoints point]
 forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html/HGeometry.Combinatorial.Util.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679400926"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679400926"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679400927"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679400927"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DiskByPoints point -&gt; Maybe (DiskByPoints point)
-</span><a href="#local-6989586621679400928"><span class="hs-identifier hs-var">enclosesAll</span></a></span><span> </span><span class="annot"><span class="annottext">(DiskByPoints point -&gt; Maybe (DiskByPoints point))
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html/HGeometry.Combinatorial.Util.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679409124"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409124"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679409125"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409125"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">set point -&gt; DiskByPoints point -&gt; Maybe (DiskByPoints point)
+forall (set :: * -&gt; *) point r disk.
+(Foldable set, Point_ point 2 r, HasInBall disk,
+ HasIntersectionWith (Point 2 r) disk) =&gt;
+set point -&gt; disk -&gt; Maybe disk
+</span><a href="HGeometry.Disk.Smallest.Naive.html#enclosesAll"><span class="hs-identifier hs-var">enclosesAll</span></a></span><span> </span><span class="annot"><span class="annottext">set point
+</span><a href="#local-6989586621679409112"><span class="hs-identifier hs-var">pts</span></a></span><span> </span><span class="annot"><span class="annottext">(DiskByPoints point -&gt; Maybe (DiskByPoints point))
 -&gt; DiskByPoints point -&gt; Maybe (DiskByPoints point)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DiametralBall point -&gt; DiskByPoints point
@@ -99,23 +107,23 @@ forall point. DiametralBall point -&gt; DiskByPoints point
 </span><span class="hs-identifier hs-var">DiametralDisk</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point -&gt; point -&gt; DiametralBall point
 forall point. point -&gt; point -&gt; DiametralBall point
 </span><span class="hs-identifier hs-var">DiametralPoints</span></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679400926"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679400927"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-45"></span><span>           </span><span class="annot"><span class="annottext">([Two point] -&gt; [DiskByPoints point])
+</span><a href="#local-6989586621679409124"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409125"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-48"></span><span>           </span><span class="annot"><span class="annottext">([Two point] -&gt; [DiskByPoints point])
 -&gt; [Two point] -&gt; [DiskByPoints point]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">set point -&gt; [Two point]
 forall (f :: * -&gt; *) a. Foldable f =&gt; f a -&gt; [Two a]
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html/HGeometry.Combinatorial.Util.html#uniquePairs"><span class="hs-identifier hs-var">uniquePairs</span></a></span><span> </span><span class="annot"><span class="annottext">set point
-</span><a href="#local-6989586621679400914"><span class="hs-identifier hs-var">pts</span></a></span><span>
-</span><span id="line-46"></span><span>    </span><span id="local-6989586621679400924"><span class="annot"><span class="annottext">disks3 :: [DiskByPoints point]
-</span><a href="#local-6989586621679400924"><span class="hs-identifier hs-var hs-var">disks3</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Three point -&gt; Maybe (DiskByPoints point))
+</span><a href="#local-6989586621679409112"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-49"></span><span>    </span><span id="local-6989586621679409122"><span class="annot"><span class="annottext">disks3 :: [DiskByPoints point]
+</span><a href="#local-6989586621679409122"><span class="hs-identifier hs-var hs-var">disks3</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Three point -&gt; Maybe (DiskByPoints point))
 -&gt; [Three point] -&gt; [DiskByPoints point]
 forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
-</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html/HGeometry.Combinatorial.Util.html#Three"><span class="hs-identifier hs-type">Three</span></a></span><span> </span><span id="local-6989586621679400933"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679400933"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679400934"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679400934"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679400935"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679400935"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BallByPoints' 3 point -&gt; DiskByPoints point
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html/HGeometry.Combinatorial.Util.html#Three"><span class="hs-identifier hs-type">Three</span></a></span><span> </span><span id="local-6989586621679409130"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409130"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679409131"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409131"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679409132"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409132"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BallByPoints' 3 point -&gt; DiskByPoints point
 forall point. BallByPoints' 3 point -&gt; DiskByPoints point
 </span><span class="hs-identifier hs-var">DiskByPoints</span></span><span> </span><span class="annot"><span class="annottext">(BallByPoints' 3 point -&gt; DiskByPoints point)
 -&gt; Maybe (BallByPoints' 3 point) -&gt; Maybe (DiskByPoints point)
@@ -125,84 +133,223 @@ forall point r.
 (Point_ point 2 r, Ord r, Num r) =&gt;
 point -&gt; point -&gt; point -&gt; Maybe (BallByPoints point)
 </span><span class="hs-identifier hs-var">diskFromPoints</span></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679400933"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679400934"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679400935"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe (DiskByPoints point)
+</span><a href="#local-6989586621679409130"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409131"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409132"><span class="hs-identifier hs-var">c</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>                                         </span><span class="annot"><span class="annottext">Maybe (DiskByPoints point)
 -&gt; (DiskByPoints point -&gt; Maybe (DiskByPoints point))
 -&gt; Maybe (DiskByPoints point)
 forall a b. Maybe a -&gt; (a -&gt; Maybe b) -&gt; Maybe b
 forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
-</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">DiskByPoints point -&gt; Maybe (DiskByPoints point)
-</span><a href="#local-6989586621679400928"><span class="hs-identifier hs-var">enclosesAll</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-47"></span><span>           </span><span class="annot"><span class="annottext">([Three point] -&gt; [DiskByPoints point])
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">set point -&gt; DiskByPoints point -&gt; Maybe (DiskByPoints point)
+forall (set :: * -&gt; *) point r disk.
+(Foldable set, Point_ point 2 r, HasInBall disk,
+ HasIntersectionWith (Point 2 r) disk) =&gt;
+set point -&gt; disk -&gt; Maybe disk
+</span><a href="HGeometry.Disk.Smallest.Naive.html#enclosesAll"><span class="hs-identifier hs-var">enclosesAll</span></a></span><span> </span><span class="annot"><span class="annottext">set point
+</span><a href="#local-6989586621679409112"><span class="hs-identifier hs-var">pts</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span>           </span><span class="annot"><span class="annottext">([Three point] -&gt; [DiskByPoints point])
 -&gt; [Three point] -&gt; [DiskByPoints point]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">set point -&gt; [Three point]
 forall (f :: * -&gt; *) a. Foldable f =&gt; f a -&gt; [Three a]
 </span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html/HGeometry.Combinatorial.Util.html#uniqueTriplets"><span class="hs-identifier hs-var">uniqueTriplets</span></a></span><span> </span><span class="annot"><span class="annottext">set point
-</span><a href="#local-6989586621679400914"><span class="hs-identifier hs-var">pts</span></a></span><span>
-</span><span id="line-48"></span><span>
-</span><span id="line-49"></span><span>    </span><span id="local-6989586621679400928"><span class="annot"><span class="annottext">enclosesAll :: DiskByPoints point -&gt; Maybe (DiskByPoints point)
-</span><a href="#local-6989586621679400928"><span class="hs-identifier hs-var hs-var">enclosesAll</span></a></span></span><span> </span><span id="local-6989586621679400940"><span class="annot"><span class="annottext">DiskByPoints point
-</span><a href="#local-6989586621679400940"><span class="hs-identifier hs-var">disk</span></a></span></span><span>
-</span><span id="line-50"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">(point -&gt; Bool) -&gt; set point -&gt; Bool
+</span><a href="#local-6989586621679409112"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="annot"><span class="hs-comment">-- | Test if the given disk encloses all points.</span></span><span>
+</span><span id="line-54"></span><span id="local-6989586621679408746"><span id="local-6989586621679408747"><span id="local-6989586621679408748"><span id="local-6989586621679408749"><span class="annot"><a href="HGeometry.Disk.Smallest.Naive.html#enclosesAll"><span class="hs-identifier hs-type">enclosesAll</span></a></span><span>                                         </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679408746"><span class="hs-identifier hs-type">set</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679408747"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679408748"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-55"></span><span>                                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasInBall</span></span><span> </span><span class="annot"><a href="#local-6989586621679408749"><span class="hs-identifier hs-type">disk</span></a></span><span>
+</span><span id="line-56"></span><span>                                                       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasIntersectionWith</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679408748"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679408749"><span class="hs-identifier hs-type">disk</span></a></span><span>
+</span><span id="line-57"></span><span>                                                       </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679408746"><span class="hs-identifier hs-type">set</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679408747"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679408749"><span class="hs-identifier hs-type">disk</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679408749"><span class="hs-identifier hs-type">disk</span></a></span></span></span></span></span><span>
+</span><span id="line-58"></span><span id="enclosesAll"><span class="annot"><span class="annottext">enclosesAll :: forall (set :: * -&gt; *) point r disk.
+(Foldable set, Point_ point 2 r, HasInBall disk,
+ HasIntersectionWith (Point 2 r) disk) =&gt;
+set point -&gt; disk -&gt; Maybe disk
+</span><a href="HGeometry.Disk.Smallest.Naive.html#enclosesAll"><span class="hs-identifier hs-var hs-var">enclosesAll</span></a></span></span><span> </span><span id="local-6989586621679409208"><span class="annot"><span class="annottext">set point
+</span><a href="#local-6989586621679409208"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span id="local-6989586621679409209"><span class="annot"><span class="annottext">disk
+</span><a href="#local-6989586621679409209"><span class="hs-identifier hs-var">disk</span></a></span></span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">(point -&gt; Bool) -&gt; set point -&gt; Bool
 forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Bool
-</span><span class="hs-identifier hs-var">all</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679400942"><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679400942"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
-</span><a href="#local-6989586621679400942"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Point 2 r) point (Point 2 r) -&gt; Point 2 r
+</span><span class="hs-identifier hs-var">all</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679409211"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409211"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409211"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Point 2 r) point (Point 2 r) -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
 forall point (d :: Nat) r.
 Point_ point d r =&gt;
 Lens' point (Point d r)
 Lens' point (Point 2 r)
-</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; DiskByPoints point -&gt; Bool
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; disk -&gt; Bool
 forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
-</span><span class="hs-operator hs-var">`intersects`</span></span><span> </span><span class="annot"><span class="annottext">DiskByPoints point
-</span><a href="#local-6989586621679400940"><span class="hs-identifier hs-var">disk</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">set point
-</span><a href="#local-6989586621679400914"><span class="hs-identifier hs-var">pts</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DiskByPoints point -&gt; Maybe (DiskByPoints point)
+</span><span class="hs-operator hs-var">`intersects`</span></span><span> </span><span class="annot"><span class="annottext">disk
+</span><a href="#local-6989586621679409209"><span class="hs-identifier hs-var">disk</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">set point
+</span><a href="#local-6989586621679409208"><span class="hs-identifier hs-var">pts</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">disk -&gt; Maybe disk
 forall a. a -&gt; Maybe a
-</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">DiskByPoints point
-</span><a href="#local-6989586621679400940"><span class="hs-identifier hs-var">disk</span></a></span><span>
-</span><span id="line-51"></span><span>      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
-</span><span class="hs-identifier hs-var">otherwise</span></span><span>                                      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe (DiskByPoints point)
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">disk
+</span><a href="#local-6989586621679409209"><span class="hs-identifier hs-var">disk</span></a></span><span>
+</span><span id="line-60"></span><span>  </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>                                      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Maybe disk
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
-</span><span id="line-52"></span><span>
-</span><span id="line-53"></span><span>    </span><span class="hs-comment">-- I think we should be able to avoid the fractional constraint, and get a 'Num' constraint</span><span>
-</span><span id="line-54"></span><span>    </span><span class="hs-comment">-- instead, by comparing against the squaredDiameter.</span><span>
-</span><span id="line-55"></span><span>
-</span><span id="line-56"></span><span>
-</span><span id="line-57"></span><span>
-</span><span id="line-58"></span><span>
-</span><span id="line-59"></span><span class="hs-comment">-- pts@(_:_:_) = smallestEnclosingDisk' pts $</span><span>
-</span><span id="line-60"></span><span class="hs-comment">--                                       pairs pts ++ triplets pts</span><span>
-</span><span id="line-61"></span><span class="hs-comment">-- smallestEnclosingDisk _           = error &quot;smallestEnclosingDisk: Too few points&quot;</span><span>
-</span><span id="line-62"></span><span>
-</span><span id="line-63"></span><span class="hs-comment">-- pairs     :: Fractional r =&gt; [Point 2 r :+ p] -&gt; [DiskResult p r]</span><span>
-</span><span id="line-64"></span><span class="hs-comment">-- pairs pts = [ DiskResult (fromDiameter (a^.core) (b^.core)) (Two a b)</span><span>
-</span><span id="line-65"></span><span class="hs-comment">--             | Util.Two a b &lt;- uniquePairs pts]</span><span>
-</span><span id="line-66"></span><span>
-</span><span id="line-67"></span><span class="hs-comment">-- triplets     :: (Ord r, Fractional r) =&gt; [Point 2 r :+ p] -&gt; [DiskResult p r]</span><span>
-</span><span id="line-68"></span><span class="hs-comment">-- triplets pts = [DiskResult (disk' a b c) (Three a b c)</span><span>
-</span><span id="line-69"></span><span class="hs-comment">--                | Util.Three a b c &lt;- uniqueTriplets pts]</span><span>
-</span><span id="line-70"></span><span>
-</span><span id="line-71"></span><span class="hs-comment">-- {- HLINT ignore disk' -}</span><span>
-</span><span id="line-72"></span><span class="hs-comment">-- disk'       :: (Ord r, Fractional r)</span><span>
-</span><span id="line-73"></span><span class="hs-comment">--             =&gt; Point 2 r :+ p -&gt; Point 2 r :+ p -&gt; Point 2 r :+ p -&gt; Disk () r</span><span>
-</span><span id="line-74"></span><span class="hs-comment">-- disk' a b c = fromMaybe degen $ disk (a^.core) (b^.core) (c^.core)</span><span>
-</span><span id="line-75"></span><span class="hs-comment">--   where</span><span>
-</span><span id="line-76"></span><span class="hs-comment">--     -- if the points are colinear, select the disk by the diametral pair</span><span>
-</span><span id="line-77"></span><span class="hs-comment">--     degen = (smallestEnclosingDisk' [a,b,c] $ pairs [a,b,c])^.enclosingDisk</span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span>    </span><span class="hs-comment">-- I think we should be able to avoid the fractional constraint, and get a 'Num' constraint</span><span>
+</span><span id="line-63"></span><span>    </span><span class="hs-comment">-- instead, by comparing against the squaredDiameter.</span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="hs-comment">-- | Given a point p and a non-empty set of n points, computes the smallest disk that has</span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- p on the boundary and encloses all points.</span><span>
+</span><span id="line-67"></span><span class="hs-comment">--</span><span>
+</span><span id="line-68"></span><span class="hs-comment">-- pre: such a disk exists</span><span>
+</span><span id="line-69"></span><span class="hs-comment">--</span><span>
+</span><span id="line-70"></span><span class="hs-comment">-- running time: \(O(n^2)\)</span><span>
+</span><span id="line-71"></span><span id="local-6989586621679408780"><span id="local-6989586621679408781"><span id="local-6989586621679408782"><span class="annot"><a href="HGeometry.Disk.Smallest.Naive.html#smallestEnclosingDiskWith"><span class="hs-identifier hs-type">smallestEnclosingDiskWith</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679408780"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679408781"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679408781"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679408781"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679408782"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>                                </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679408780"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679408782"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679408780"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DiskByPoints</span></span><span> </span><span class="annot"><a href="#local-6989586621679408780"><span class="hs-identifier hs-type">point</span></a></span></span></span></span><span>
+</span><span id="line-73"></span><span id="smallestEnclosingDiskWith"><span class="annot"><span class="annottext">smallestEnclosingDiskWith :: forall point r (nonEmpty :: * -&gt; *).
+(Point_ point 2 r, Fractional r, Ord r, Foldable1 nonEmpty) =&gt;
+point -&gt; nonEmpty point -&gt; DiskByPoints point
+</span><a href="HGeometry.Disk.Smallest.Naive.html#smallestEnclosingDiskWith"><span class="hs-identifier hs-var hs-var">smallestEnclosingDiskWith</span></a></span></span><span> </span><span id="local-6989586621679409512"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409512"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679409513"><span class="annot"><span class="annottext">nonEmpty point
+</span><a href="#local-6989586621679409513"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DiskByPoints point
+</span><a href="#local-6989586621679409514"><span class="hs-identifier hs-var">minDisk</span></a></span><span>
+</span><span id="line-74"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-75"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Min</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arg</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679409514"><span class="annot"><span class="annottext">DiskByPoints point
+</span><a href="#local-6989586621679409514"><span class="hs-identifier hs-var">minDisk</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DiskByPoints point -&gt; Min (Arg r (DiskByPoints point)))
+-&gt; NonEmpty (DiskByPoints point)
+-&gt; Min (Arg r (DiskByPoints point))
+forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; NonEmpty a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable1 t, Semigroup m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap1</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679409515"><span class="annot"><span class="annottext">DiskByPoints point
+</span><a href="#local-6989586621679409515"><span class="hs-identifier hs-var">disk</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Arg r (DiskByPoints point) -&gt; Min (Arg r (DiskByPoints point))
+forall a. a -&gt; Min a
+</span><span class="hs-identifier hs-var">Min</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; DiskByPoints point -&gt; Arg r (DiskByPoints point)
+forall a b. a -&gt; b -&gt; Arg a b
+</span><span class="hs-identifier hs-var">Arg</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DiskByPoints point
+</span><a href="#local-6989586621679409515"><span class="hs-identifier hs-var">disk</span></a></span><span class="annot"><span class="annottext">DiskByPoints point -&gt; Getting r (DiskByPoints point) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (DiskByPoints point) r
+(NumType (DiskByPoints point)
+ -&gt; Const r (NumType (DiskByPoints point)))
+-&gt; DiskByPoints point -&gt; Const r (DiskByPoints point)
+forall ball point. Ball_ ball point =&gt; Getter ball (NumType ball)
+Getter (DiskByPoints point) (NumType (DiskByPoints point))
+</span><span class="hs-identifier hs-var">squaredRadius</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">DiskByPoints point
+</span><a href="#local-6989586621679409515"><span class="hs-identifier hs-var">disk</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-76"></span><span>                        </span><span class="annot"><span class="annottext">(NonEmpty (DiskByPoints point) -&gt; Min (Arg r (DiskByPoints point)))
+-&gt; NonEmpty (DiskByPoints point)
+-&gt; Min (Arg r (DiskByPoints point))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[DiskByPoints point] -&gt; NonEmpty (DiskByPoints point)
+forall a. HasCallStack =&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-identifier hs-var">NonEmpty.fromList</span></span><span> </span><span class="annot"><span class="annottext">([DiskByPoints point] -&gt; NonEmpty (DiskByPoints point))
+-&gt; [DiskByPoints point] -&gt; NonEmpty (DiskByPoints point)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[DiskByPoints point]
+</span><a href="#local-6989586621679409516"><span class="hs-identifier hs-var">disks2</span></a></span><span> </span><span class="annot"><span class="annottext">[DiskByPoints point]
+-&gt; [DiskByPoints point] -&gt; [DiskByPoints point]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[DiskByPoints point]
+</span><a href="#local-6989586621679409517"><span class="hs-identifier hs-var">disks3</span></a></span><span>
+</span><span id="line-77"></span><span>                        </span><span class="hs-comment">-- by the precondition, such a disk must exist.</span><span>
 </span><span id="line-78"></span><span>
-</span><span id="line-79"></span><span>
-</span><span id="line-80"></span><span class="hs-comment">-- -- | Given a list of canidate enclosing disks, report the smallest one.</span><span>
-</span><span id="line-81"></span><span class="hs-comment">-- smallestEnclosingDisk'     :: (Ord r, Num r)</span><span>
-</span><span id="line-82"></span><span class="hs-comment">--                            =&gt; [Point 2 r :+ p] -&gt; [DiskResult p r] -&gt; DiskResult p r</span><span>
-</span><span id="line-83"></span><span class="hs-comment">-- smallestEnclosingDisk' pts = minimumBy (compare `on` (^.enclosingDisk.squaredRadius))</span><span>
-</span><span id="line-84"></span><span class="hs-comment">--                            . filter (`enclosesAll` pts)</span><span>
+</span><span id="line-79"></span><span>    </span><span id="local-6989586621679409516"><span class="annot"><span class="annottext">disks2 :: [DiskByPoints point]
+</span><a href="#local-6989586621679409516"><span class="hs-identifier hs-var hs-var">disks2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(point -&gt; Maybe (DiskByPoints point))
+-&gt; [point] -&gt; [DiskByPoints point]
+forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679409518"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409518"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">nonEmpty point -&gt; DiskByPoints point -&gt; Maybe (DiskByPoints point)
+forall (set :: * -&gt; *) point r disk.
+(Foldable set, Point_ point 2 r, HasInBall disk,
+ HasIntersectionWith (Point 2 r) disk) =&gt;
+set point -&gt; disk -&gt; Maybe disk
+</span><a href="HGeometry.Disk.Smallest.Naive.html#enclosesAll"><span class="hs-identifier hs-var">enclosesAll</span></a></span><span> </span><span class="annot"><span class="annottext">nonEmpty point
+</span><a href="#local-6989586621679409513"><span class="hs-identifier hs-var">pts</span></a></span><span> </span><span class="annot"><span class="annottext">(DiskByPoints point -&gt; Maybe (DiskByPoints point))
+-&gt; DiskByPoints point -&gt; Maybe (DiskByPoints point)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">DiametralBall point -&gt; DiskByPoints point
+forall point. DiametralBall point -&gt; DiskByPoints point
+</span><span class="hs-identifier hs-var">DiametralDisk</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point -&gt; point -&gt; DiametralBall point
+forall point. point -&gt; point -&gt; DiametralBall point
+</span><span class="hs-identifier hs-var">DiametralPoints</span></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409512"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409518"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">nonEmpty point -&gt; [point]
+forall a. nonEmpty a -&gt; [a]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">toList</span></span><span> </span><span class="annot"><span class="annottext">nonEmpty point
+</span><a href="#local-6989586621679409513"><span class="hs-identifier hs-var">pts</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-80"></span><span>    </span><span id="local-6989586621679409517"><span class="annot"><span class="annottext">disks3 :: [DiskByPoints point]
+</span><a href="#local-6989586621679409517"><span class="hs-identifier hs-var hs-var">disks3</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Two point -&gt; Maybe (DiskByPoints point))
+-&gt; [Two point] -&gt; [DiskByPoints point]
+forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html/HGeometry.Combinatorial.Util.html#Two"><span class="hs-identifier hs-type">Two</span></a></span><span> </span><span id="local-6989586621679409519"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409519"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679409520"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409520"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">BallByPoints' 3 point -&gt; DiskByPoints point
+forall point. BallByPoints' 3 point -&gt; DiskByPoints point
+</span><span class="hs-identifier hs-var">DiskByPoints</span></span><span> </span><span class="annot"><span class="annottext">(BallByPoints' 3 point -&gt; DiskByPoints point)
+-&gt; Maybe (BallByPoints' 3 point) -&gt; Maybe (DiskByPoints point)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; point -&gt; Maybe (BallByPoints point)
+forall point r.
+(Point_ point 2 r, Ord r, Num r) =&gt;
+point -&gt; point -&gt; point -&gt; Maybe (BallByPoints point)
+</span><span class="hs-identifier hs-var">diskFromPoints</span></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409512"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409519"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679409520"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe (DiskByPoints point)
+-&gt; (DiskByPoints point -&gt; Maybe (DiskByPoints point))
+-&gt; Maybe (DiskByPoints point)
+forall a b. Maybe a -&gt; (a -&gt; Maybe b) -&gt; Maybe b
+forall (m :: * -&gt; *) a b. Monad m =&gt; m a -&gt; (a -&gt; m b) -&gt; m b
+</span><span class="hs-operator hs-var">&gt;&gt;=</span></span><span> </span><span class="annot"><span class="annottext">nonEmpty point -&gt; DiskByPoints point -&gt; Maybe (DiskByPoints point)
+forall (set :: * -&gt; *) point r disk.
+(Foldable set, Point_ point 2 r, HasInBall disk,
+ HasIntersectionWith (Point 2 r) disk) =&gt;
+set point -&gt; disk -&gt; Maybe disk
+</span><a href="HGeometry.Disk.Smallest.Naive.html#enclosesAll"><span class="hs-identifier hs-var">enclosesAll</span></a></span><span> </span><span class="annot"><span class="annottext">nonEmpty point
+</span><a href="#local-6989586621679409513"><span class="hs-identifier hs-var">pts</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span>           </span><span class="annot"><span class="annottext">([Two point] -&gt; [DiskByPoints point])
+-&gt; [Two point] -&gt; [DiskByPoints point]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">nonEmpty point -&gt; [Two point]
+forall (f :: * -&gt; *) a. Foldable f =&gt; f a -&gt; [Two a]
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Combinatorial.Util.html/HGeometry.Combinatorial.Util.html#uniquePairs"><span class="hs-identifier hs-var">uniquePairs</span></a></span><span> </span><span class="annot"><span class="annottext">nonEmpty point
+</span><a href="#local-6989586621679409513"><span class="hs-identifier hs-var">pts</span></a></span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span>    </span><span class="hs-comment">-- TODO: As with the Naive solution can we write this without using the fractioanl</span><span>
+</span><span id="line-84"></span><span>    </span><span class="hs-comment">-- constraint?</span><span>
 </span><span id="line-85"></span><span>
-</span><span id="line-86"></span><span class="hs-comment">-- -- | check if a disk encloses all points</span><span>
-</span><span id="line-87"></span><span class="hs-comment">-- enclosesAll   :: (Num r, Ord r) =&gt;  -&gt; [Point 2 r :+ q] -&gt; Bool</span><span>
-</span><span id="line-88"></span><span class="hs-comment">-- enclosesAll d = all (\(p :+ _) -&gt; p `inClosedBall` (d^.enclosingDisk))</span><span>
-</span><span id="line-89"></span></pre></body></html>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span class="hs-comment">-- pts@(_:_:_) = smallestEnclosingDisk' pts $</span><span>
+</span><span id="line-90"></span><span class="hs-comment">--                                       pairs pts ++ triplets pts</span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- smallestEnclosingDisk _           = error &quot;smallestEnclosingDisk: Too few points&quot;</span><span>
+</span><span id="line-92"></span><span>
+</span><span id="line-93"></span><span class="hs-comment">-- pairs     :: Fractional r =&gt; [Point 2 r :+ p] -&gt; [DiskResult p r]</span><span>
+</span><span id="line-94"></span><span class="hs-comment">-- pairs pts = [ DiskResult (fromDiameter (a^.core) (b^.core)) (Two a b)</span><span>
+</span><span id="line-95"></span><span class="hs-comment">--             | Util.Two a b &lt;- uniquePairs pts]</span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span class="hs-comment">-- triplets     :: (Ord r, Fractional r) =&gt; [Point 2 r :+ p] -&gt; [DiskResult p r]</span><span>
+</span><span id="line-98"></span><span class="hs-comment">-- triplets pts = [DiskResult (disk' a b c) (Three a b c)</span><span>
+</span><span id="line-99"></span><span class="hs-comment">--                | Util.Three a b c &lt;- uniqueTriplets pts]</span><span>
+</span><span id="line-100"></span><span>
+</span><span id="line-101"></span><span class="hs-comment">-- {- HLINT ignore disk' -}</span><span>
+</span><span id="line-102"></span><span class="hs-comment">-- disk'       :: (Ord r, Fractional r)</span><span>
+</span><span id="line-103"></span><span class="hs-comment">--             =&gt; Point 2 r :+ p -&gt; Point 2 r :+ p -&gt; Point 2 r :+ p -&gt; Disk () r</span><span>
+</span><span id="line-104"></span><span class="hs-comment">-- disk' a b c = fromMaybe degen $ disk (a^.core) (b^.core) (c^.core)</span><span>
+</span><span id="line-105"></span><span class="hs-comment">--   where</span><span>
+</span><span id="line-106"></span><span class="hs-comment">--     -- if the points are colinear, select the disk by the diametral pair</span><span>
+</span><span id="line-107"></span><span class="hs-comment">--     degen = (smallestEnclosingDisk' [a,b,c] $ pairs [a,b,c])^.enclosingDisk</span><span>
+</span><span id="line-108"></span><span>
+</span><span id="line-109"></span><span>
+</span><span id="line-110"></span><span class="hs-comment">-- -- | Given a list of canidate enclosing disks, report the smallest one.</span><span>
+</span><span id="line-111"></span><span class="hs-comment">-- smallestEnclosingDisk'     :: (Ord r, Num r)</span><span>
+</span><span id="line-112"></span><span class="hs-comment">--                            =&gt; [Point 2 r :+ p] -&gt; [DiskResult p r] -&gt; DiskResult p r</span><span>
+</span><span id="line-113"></span><span class="hs-comment">-- smallestEnclosingDisk' pts = minimumBy (compare `on` (^.enclosingDisk.squaredRadius))</span><span>
+</span><span id="line-114"></span><span class="hs-comment">--                            . filter (`enclosesAll` pts)</span><span>
+</span><span id="line-115"></span><span>
+</span><span id="line-116"></span><span class="hs-comment">-- -- | check if a disk encloses all points</span><span>
+</span><span id="line-117"></span><span class="hs-comment">-- enclosesAll   :: (Num r, Ord r) =&gt;  -&gt; [Point 2 r :+ q] -&gt; Bool</span><span>
+</span><span id="line-118"></span><span class="hs-comment">-- enclosesAll d = all (\(p :+ _) -&gt; p `inClosedBall` (d^.enclosingDisk))</span><span>
+</span><span id="line-119"></span></pre></body></html>

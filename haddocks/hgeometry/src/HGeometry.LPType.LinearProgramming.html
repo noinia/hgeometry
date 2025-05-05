@@ -1,0 +1,1260 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.LPType.LinearProgramming</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Algorithm for solving Low dimensional linear programs.</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html"><span class="hs-identifier">HGeometry.LPType.LinearProgramming</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#lp1D"><span class="hs-identifier">lp1D</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Basis1DLP"><span class="hs-identifier">Basis1DLP</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#linearProgrammingMinY"><span class="hs-identifier">linearProgrammingMinY</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Basis2D"><span class="hs-identifier">Basis2D</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#HalfPlane"><span class="hs-identifier">HalfPlane</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">toList</span></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">List</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Semigroup</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html"><span class="hs-identifier">HGeometry.Ext</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.HalfSpace</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.HyperPlane</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Intersection</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.LPType.html"><span class="hs-identifier">HGeometry.LPType</span></a></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Line</span></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Unbounded.html/HGeometry.Unbounded.html"><span class="hs-identifier">HGeometry.Unbounded</span></a></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">basis</span></span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Prelude</span></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">filter</span></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/witherable-0.5-5d85f763e5e8170e826d2554153086f6307c6577afec4b5097a66230893464d4/share/doc/html/src/Witherable.html/Witherable.html"><span class="hs-identifier">Witherable</span></a></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-36"></span><span class="annot"><span class="hs-comment">-- * Linear programming in 1D:</span></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="annot"><span class="hs-comment">-- | A solution for 1D Linear pgoramming</span></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">data</span><span> </span><span id="Basis1DLP"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Basis1DLP"><span class="hs-identifier hs-var">Basis1DLP</span></a></span></span><span> </span><span id="local-6989586621679412234"><span class="annot"><a href="#local-6989586621679412234"><span class="hs-identifier hs-type">halfSpace</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="InFeasible1"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#InFeasible1"><span class="hs-identifier hs-var">InFeasible1</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679412234"><span class="hs-identifier hs-type">halfSpace</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412234"><span class="hs-identifier hs-type">halfSpace</span></a></span><span>
+</span><span id="line-40"></span><span>                         </span><span class="hs-glyph">|</span><span> </span><span id="Feasible1"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Feasible1"><span class="hs-identifier hs-var">Feasible1</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679412234"><span class="hs-identifier hs-type">halfSpace</span></a></span><span>
+</span><span id="line-41"></span><span>                         </span><span class="hs-glyph">|</span><span> </span><span id="Unbounded"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Unbounded"><span class="hs-identifier hs-var">Unbounded</span></a></span></span><span>
+</span><span id="line-42"></span><span>                         </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679412474"><span id="local-6989586621679412482"><span id="local-6989586621679412486"><span class="annot"><span class="annottext">Int -&gt; Basis1DLP halfSpace -&gt; ShowS
+[Basis1DLP halfSpace] -&gt; ShowS
+Basis1DLP halfSpace -&gt; String
+(Int -&gt; Basis1DLP halfSpace -&gt; ShowS)
+-&gt; (Basis1DLP halfSpace -&gt; String)
+-&gt; ([Basis1DLP halfSpace] -&gt; ShowS)
+-&gt; Show (Basis1DLP halfSpace)
+forall halfSpace.
+Show halfSpace =&gt;
+Int -&gt; Basis1DLP halfSpace -&gt; ShowS
+forall halfSpace. Show halfSpace =&gt; [Basis1DLP halfSpace] -&gt; ShowS
+forall halfSpace. Show halfSpace =&gt; Basis1DLP halfSpace -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: forall halfSpace.
+Show halfSpace =&gt;
+Int -&gt; Basis1DLP halfSpace -&gt; ShowS
+showsPrec :: Int -&gt; Basis1DLP halfSpace -&gt; ShowS
+$cshow :: forall halfSpace. Show halfSpace =&gt; Basis1DLP halfSpace -&gt; String
+show :: Basis1DLP halfSpace -&gt; String
+$cshowList :: forall halfSpace. Show halfSpace =&gt; [Basis1DLP halfSpace] -&gt; ShowS
+showList :: [Basis1DLP halfSpace] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679412492"><span id="local-6989586621679412500"><span class="annot"><span class="annottext">Basis1DLP halfSpace -&gt; Basis1DLP halfSpace -&gt; Bool
+(Basis1DLP halfSpace -&gt; Basis1DLP halfSpace -&gt; Bool)
+-&gt; (Basis1DLP halfSpace -&gt; Basis1DLP halfSpace -&gt; Bool)
+-&gt; Eq (Basis1DLP halfSpace)
+forall halfSpace.
+Eq halfSpace =&gt;
+Basis1DLP halfSpace -&gt; Basis1DLP halfSpace -&gt; Bool
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: forall halfSpace.
+Eq halfSpace =&gt;
+Basis1DLP halfSpace -&gt; Basis1DLP halfSpace -&gt; Bool
+== :: Basis1DLP halfSpace -&gt; Basis1DLP halfSpace -&gt; Bool
+$c/= :: forall halfSpace.
+Eq halfSpace =&gt;
+Basis1DLP halfSpace -&gt; Basis1DLP halfSpace -&gt; Bool
+/= :: Basis1DLP halfSpace -&gt; Basis1DLP halfSpace -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679412505"><span id="local-6989586621679412507"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; Basis1DLP a -&gt; Basis1DLP b)
+-&gt; (forall a b. a -&gt; Basis1DLP b -&gt; Basis1DLP a)
+-&gt; Functor Basis1DLP
+forall a b. a -&gt; Basis1DLP b -&gt; Basis1DLP a
+forall a b. (a -&gt; b) -&gt; Basis1DLP a -&gt; Basis1DLP b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall a b. (a -&gt; b) -&gt; Basis1DLP a -&gt; Basis1DLP b
+fmap :: forall a b. (a -&gt; b) -&gt; Basis1DLP a -&gt; Basis1DLP b
+$c&lt;$ :: forall a b. a -&gt; Basis1DLP b -&gt; Basis1DLP a
+&lt;$ :: forall a b. a -&gt; Basis1DLP b -&gt; Basis1DLP a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- | Linear programming in 1D, minimizes the coordinate values.</span><span>
+</span><span id="line-45"></span><span class="hs-comment">--</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- \(O(n)\).</span><span>
+</span><span id="line-47"></span><span id="local-6989586621679412204"><span id="local-6989586621679412205"><span id="local-6989586621679412207"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#lp1D"><span class="hs-identifier hs-type">lp1D</span></a></span><span>             </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679412204"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679412205"><span class="hs-identifier hs-type">set</span></a></span><span>
+</span><span id="line-48"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HalfSpace_</span></span><span> </span><span class="annot"><a href="#local-6989586621679412207"><span class="hs-identifier hs-type">halfSpace</span></a></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><a href="#local-6989586621679412204"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-49"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">BoundingHyperPlane</span></span><span> </span><span class="annot"><a href="#local-6989586621679412207"><span class="hs-identifier hs-type">halfSpace</span></a></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><a href="#local-6989586621679412204"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><a href="#local-6989586621679412204"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-50"></span><span>                    </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679412205"><span class="hs-identifier hs-type">set</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412207"><span class="hs-identifier hs-type">halfSpace</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Basis1DLP"><span class="hs-identifier hs-type">Basis1DLP</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412207"><span class="hs-identifier hs-type">halfSpace</span></a></span></span></span></span><span>
+</span><span id="line-51"></span><span id="lp1D"><span class="annot"><span class="annottext">lp1D :: forall r (set :: * -&gt; *) halfSpace.
+(Ord r, Foldable1 set, HalfSpace_ halfSpace 1 r,
+ Point_ (BoundingHyperPlane halfSpace 1 r) 1 r) =&gt;
+set halfSpace -&gt; Basis1DLP halfSpace
+</span><a href="HGeometry.LPType.LinearProgramming.html#lp1D"><span class="hs-identifier hs-var hs-var">lp1D</span></a></span></span><span> </span><span id="local-6989586621679412533"><span class="annot"><span class="annottext">set halfSpace
+</span><a href="#local-6989586621679412533"><span class="hs-identifier hs-var">constraints</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">(halfSpace
+ -&gt; (Bottom (Arg r halfSpace), Top (Arg r halfSpace))
+ -&gt; (Bottom (Arg r halfSpace), Top (Arg r halfSpace)))
+-&gt; (Bottom (Arg r halfSpace), Top (Arg r halfSpace))
+-&gt; set halfSpace
+-&gt; (Bottom (Arg r halfSpace), Top (Arg r halfSpace))
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; set a -&gt; b
+forall (t :: * -&gt; *) a b.
+Foldable t =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="annot"><span class="annottext">halfSpace
+-&gt; (Bottom (Arg r halfSpace), Top (Arg r halfSpace))
+-&gt; (Bottom (Arg r halfSpace), Top (Arg r halfSpace))
+halfSpace
+-&gt; (Bottom
+      (Arg
+         (NumType
+            (BoundingHyperPlane
+               halfSpace (Dimension halfSpace) (NumType halfSpace)))
+         halfSpace),
+    Top
+      (Arg
+         (NumType
+            (BoundingHyperPlane
+               halfSpace (Dimension halfSpace) (NumType halfSpace)))
+         halfSpace))
+-&gt; (Bottom
+      (Arg
+         (NumType
+            (BoundingHyperPlane
+               halfSpace (Dimension halfSpace) (NumType halfSpace)))
+         halfSpace),
+    Top
+      (Arg
+         (NumType
+            (BoundingHyperPlane
+               halfSpace (Dimension halfSpace) (NumType halfSpace)))
+         halfSpace))
+forall {b}.
+(Assert
+   (OrdCond (CmpNat 1 (Dimension b)) 'True 'True 'False)
+   (TypeError ...),
+ HalfSpace_ b (Dimension b) (NumType b),
+ Point_
+   (BoundingHyperPlane b (Dimension b) (NumType b))
+   (Dimension b)
+   (NumType b),
+ Ord (NumType b)) =&gt;
+b
+-&gt; (Bottom
+      (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b),
+    Top
+      (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b))
+-&gt; (Bottom
+      (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b),
+    Top
+      (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b))
+</span><a href="#local-6989586621679412535"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bottom (Arg r halfSpace)
+forall a. Bottom a
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Unbounded.html/HGeometry.Unbounded.html#Bottom"><span class="hs-identifier hs-var">Bottom</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Top (Arg r halfSpace)
+forall a. Top a
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Unbounded.html/HGeometry.Unbounded.html#Top"><span class="hs-identifier hs-var">Top</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">set halfSpace
+</span><a href="#local-6989586621679412533"><span class="hs-identifier hs-var">constraints</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-52"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bottom (Arg r halfSpace)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Unbounded.html/HGeometry.Unbounded.html#Bottom"><span class="hs-identifier hs-var">Bottom</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Top (Arg r halfSpace)
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Basis1DLP halfSpace
+forall halfSpace. Basis1DLP halfSpace
+</span><a href="HGeometry.LPType.LinearProgramming.html#Unbounded"><span class="hs-identifier hs-var">Unbounded</span></a></span><span>
+</span><span id="line-53"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Unbounded.html/HGeometry.Unbounded.html#ValB"><span class="hs-identifier hs-type">ValB</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arg</span></span><span> </span><span id="local-6989586621679412540"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679412540"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679412541"><span class="annot"><span class="annottext">halfSpace
+</span><a href="#local-6989586621679412541"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span id="local-6989586621679412542"><span class="annot"><span class="annottext">Top (Arg r halfSpace)
+</span><a href="#local-6989586621679412542"><span class="hs-identifier hs-var">negs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Top (Arg r halfSpace)
+</span><a href="#local-6989586621679412542"><span class="hs-identifier hs-var">negs</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-54"></span><span>      </span><span class="annot"><span class="annottext">Top (Arg r halfSpace)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Unbounded.html/HGeometry.Unbounded.html#Top"><span class="hs-identifier hs-var">Top</span></a></span><span>                         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">halfSpace -&gt; Basis1DLP halfSpace
+forall halfSpace. halfSpace -&gt; Basis1DLP halfSpace
+</span><a href="HGeometry.LPType.LinearProgramming.html#Feasible1"><span class="hs-identifier hs-var">Feasible1</span></a></span><span> </span><span class="annot"><span class="annottext">halfSpace
+</span><a href="#local-6989586621679412541"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-55"></span><span>      </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Unbounded.html/HGeometry.Unbounded.html#ValT"><span class="hs-identifier hs-type">ValT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arg</span></span><span> </span><span id="local-6989586621679412544"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679412544"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span id="local-6989586621679412545"><span class="annot"><span class="annottext">halfSpace
+</span><a href="#local-6989586621679412545"><span class="hs-identifier hs-var">n</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679412540"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679412544"><span class="hs-identifier hs-var">x'</span></a></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">halfSpace -&gt; Basis1DLP halfSpace
+forall halfSpace. halfSpace -&gt; Basis1DLP halfSpace
+</span><a href="HGeometry.LPType.LinearProgramming.html#Feasible1"><span class="hs-identifier hs-var">Feasible1</span></a></span><span> </span><span class="annot"><span class="annottext">halfSpace
+</span><a href="#local-6989586621679412541"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-56"></span><span>                      </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">halfSpace -&gt; halfSpace -&gt; Basis1DLP halfSpace
+forall halfSpace. halfSpace -&gt; halfSpace -&gt; Basis1DLP halfSpace
+</span><a href="HGeometry.LPType.LinearProgramming.html#InFeasible1"><span class="hs-identifier hs-var">InFeasible1</span></a></span><span> </span><span class="annot"><span class="annottext">halfSpace
+</span><a href="#local-6989586621679412541"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">halfSpace
+</span><a href="#local-6989586621679412545"><span class="hs-identifier hs-var">n</span></a></span><span>
+</span><span id="line-57"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-58"></span><span>    </span><span id="local-6989586621679412535"><span class="annot"><span class="annottext">f :: b
+-&gt; (Bottom
+      (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b),
+    Top
+      (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b))
+-&gt; (Bottom
+      (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b),
+    Top
+      (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b))
+</span><a href="#local-6989586621679412535"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679412652"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679412652"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679412653"><span class="annot"><span class="annottext">Bottom
+  (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b)
+</span><a href="#local-6989586621679412653"><span class="hs-identifier hs-var">pos</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679412654"><span class="annot"><span class="annottext">Top
+  (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b)
+</span><a href="#local-6989586621679412654"><span class="hs-identifier hs-var">neg</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679412655"><span class="annot"><span class="annottext">x :: NumType (BoundingHyperPlane b (Dimension b) (NumType b))
+</span><a href="#local-6989586621679412655"><span class="hs-identifier hs-var hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679412652"><span class="hs-identifier hs-var">h</span></a></span><span class="annot"><span class="annottext">b
+-&gt; Getting
+     (NumType (BoundingHyperPlane b (Dimension b) (NumType b)))
+     b
+     (NumType (BoundingHyperPlane b (Dimension b) (NumType b)))
+-&gt; NumType (BoundingHyperPlane b (Dimension b) (NumType b))
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(BoundingHyperPlane b (Dimension b) (NumType b)
+ -&gt; Const
+      (NumType (BoundingHyperPlane b (Dimension b) (NumType b)))
+      (BoundingHyperPlane b (Dimension b) (NumType b)))
+-&gt; b
+-&gt; Const
+     (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b
+forall halfSpace (d :: Natural) r.
+HalfSpace_ halfSpace d r =&gt;
+Lens' halfSpace (BoundingHyperPlane halfSpace d r)
+Lens' b (BoundingHyperPlane b (Dimension b) (NumType b))
+</span><span class="hs-identifier hs-var">boundingHyperPlane</span></span><span class="annot"><span class="annottext">((BoundingHyperPlane b (Dimension b) (NumType b)
+  -&gt; Const
+       (NumType (BoundingHyperPlane b (Dimension b) (NumType b)))
+       (BoundingHyperPlane b (Dimension b) (NumType b)))
+ -&gt; b
+ -&gt; Const
+      (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b)
+-&gt; ((NumType (BoundingHyperPlane b (Dimension b) (NumType b))
+     -&gt; Const
+          (NumType (BoundingHyperPlane b (Dimension b) (NumType b)))
+          (NumType (BoundingHyperPlane b (Dimension b) (NumType b))))
+    -&gt; BoundingHyperPlane b (Dimension b) (NumType b)
+    -&gt; Const
+         (NumType (BoundingHyperPlane b (Dimension b) (NumType b)))
+         (BoundingHyperPlane b (Dimension b) (NumType b)))
+-&gt; Getting
+     (NumType (BoundingHyperPlane b (Dimension b) (NumType b)))
+     b
+     (NumType (BoundingHyperPlane b (Dimension b) (NumType b)))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(NumType (BoundingHyperPlane b (Dimension b) (NumType b))
+ -&gt; Const
+      (NumType (BoundingHyperPlane b (Dimension b) (NumType b)))
+      (NumType (BoundingHyperPlane b (Dimension b) (NumType b))))
+-&gt; BoundingHyperPlane b (Dimension b) (NumType b)
+-&gt; Const
+     (NumType (BoundingHyperPlane b (Dimension b) (NumType b)))
+     (BoundingHyperPlane b (Dimension b) (NumType b))
+forall (d :: Natural) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens'
+  Int
+  (BoundingHyperPlane b (Dimension b) (NumType b))
+  (NumType (BoundingHyperPlane b (Dimension b) (NumType b)))
+</span><span class="hs-identifier hs-var">xCoord</span></span><span>
+</span><span id="line-59"></span><span>                    </span><span class="hs-keyword">in</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679412652"><span class="hs-identifier hs-var">h</span></a></span><span class="annot"><span class="annottext">b -&gt; Getting Sign b Sign -&gt; Sign
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting Sign b Sign
+forall halfSpace (d :: Natural) r.
+HalfSpace_ halfSpace d r =&gt;
+Lens' halfSpace Sign
+Lens' b Sign
+</span><span class="hs-identifier hs-var">halfSpaceSign</span></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-60"></span><span>      </span><span class="annot"><span class="annottext">Sign
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sign.html/HGeometry.Sign.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b
+-&gt; Bottom
+     (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b)
+forall a. a -&gt; Bottom a
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Unbounded.html/HGeometry.Unbounded.html#ValB"><span class="hs-identifier hs-var">ValB</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NumType (BoundingHyperPlane b (Dimension b) (NumType b))
+-&gt; b
+-&gt; Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b
+forall a b. a -&gt; b -&gt; Arg a b
+</span><span class="hs-identifier hs-var">Arg</span></span><span> </span><span class="annot"><span class="annottext">NumType (BoundingHyperPlane b (Dimension b) (NumType b))
+</span><a href="#local-6989586621679412655"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679412652"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Bottom
+  (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b)
+-&gt; Bottom
+     (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b)
+-&gt; Bottom
+     (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b)
+forall a. Ord a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">`max`</span></span><span> </span><span class="annot"><span class="annottext">Bottom
+  (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b)
+</span><a href="#local-6989586621679412653"><span class="hs-identifier hs-var">pos</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Top
+  (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b)
+</span><a href="#local-6989586621679412654"><span class="hs-identifier hs-var">neg</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>      </span><span class="annot"><span class="annottext">Sign
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sign.html/HGeometry.Sign.html#Negative"><span class="hs-identifier hs-var">Negative</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bottom
+  (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b)
+</span><a href="#local-6989586621679412653"><span class="hs-identifier hs-var">pos</span></a></span><span class="hs-special">,</span><span>                      </span><span class="annot"><span class="annottext">Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b
+-&gt; Top
+     (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b)
+forall a. a -&gt; Top a
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Unbounded.html/HGeometry.Unbounded.html#ValT"><span class="hs-identifier hs-var">ValT</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NumType (BoundingHyperPlane b (Dimension b) (NumType b))
+-&gt; b
+-&gt; Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b
+forall a b. a -&gt; b -&gt; Arg a b
+</span><span class="hs-identifier hs-var">Arg</span></span><span> </span><span class="annot"><span class="annottext">NumType (BoundingHyperPlane b (Dimension b) (NumType b))
+</span><a href="#local-6989586621679412655"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679412652"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Top
+  (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b)
+-&gt; Top
+     (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b)
+-&gt; Top
+     (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b)
+forall a. Ord a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">`min`</span></span><span> </span><span class="annot"><span class="annottext">Top
+  (Arg (NumType (BoundingHyperPlane b (Dimension b) (NumType b))) b)
+</span><a href="#local-6989586621679412654"><span class="hs-identifier hs-var">neg</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span>      </span><span class="hs-comment">-- h is bounded by a 1d-hyperplane: i.e. a point</span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-65"></span><span class="annot"><span class="hs-comment">-- * Linear programming in 2D:</span></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span class="annot"><span class="hs-comment">-- | A Basis for 2D Linear programming problems.</span></span><span>
+</span><span id="line-68"></span><span class="hs-keyword">data</span><span> </span><span id="Basis2D"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Basis2D"><span class="hs-identifier hs-var">Basis2D</span></a></span></span><span> </span><span id="local-6989586621679412450"><span class="annot"><a href="#local-6989586621679412450"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679412451"><span class="annot"><a href="#local-6989586621679412451"><span class="hs-identifier hs-type">halfSpace</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="EmptyBasis"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#EmptyBasis"><span class="hs-identifier hs-var">EmptyBasis</span></a></span></span><span>
+</span><span id="line-69"></span><span>                         </span><span class="annot"><span class="hs-comment">-- ^ The solution must be unbounded</span></span><span>
+</span><span id="line-70"></span><span>                         </span><span class="hs-glyph">|</span><span> </span><span id="Basis1"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Basis1"><span class="hs-identifier hs-var">Basis1</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679412450"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412451"><span class="hs-identifier hs-type">halfSpace</span></a></span><span>
+</span><span id="line-71"></span><span>                         </span><span class="hs-comment">-- ^ apparently we have a halfspace perpendicular to the</span><span>
+</span><span id="line-72"></span><span>                         </span><span class="hs-comment">-- optimization direction. So it just has a fixed value r.</span><span>
+</span><span id="line-73"></span><span>                         </span><span class="hs-glyph">|</span><span> </span><span id="Basis2"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Basis2"><span class="hs-identifier hs-var">Basis2</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679412450"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679412451"><span class="hs-identifier hs-type">halfSpace</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412451"><span class="hs-identifier hs-type">halfSpace</span></a></span><span>
+</span><span id="line-74"></span><span>                         </span><span class="annot"><span class="hs-comment">-- ^ The normal case in which a feasible solution (optimum)</span></span><span>
+</span><span id="line-75"></span><span>                         </span><span class="hs-glyph">|</span><span> </span><span id="Infeasible"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Infeasible"><span class="hs-identifier hs-var">Infeasible</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679412451"><span class="hs-identifier hs-type">halfSpace</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-76"></span><span>                         </span><span class="annot"><span class="hs-comment">-- ^ Infeasible</span></span><span>
+</span><span id="line-77"></span><span>                       </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679412672"><span id="local-6989586621679412690"><span id="local-6989586621679412694"><span class="annot"><span class="annottext">Int -&gt; Basis2D r halfSpace -&gt; ShowS
+[Basis2D r halfSpace] -&gt; ShowS
+Basis2D r halfSpace -&gt; String
+(Int -&gt; Basis2D r halfSpace -&gt; ShowS)
+-&gt; (Basis2D r halfSpace -&gt; String)
+-&gt; ([Basis2D r halfSpace] -&gt; ShowS)
+-&gt; Show (Basis2D r halfSpace)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall r halfSpace.
+(Show r, Show halfSpace) =&gt;
+Int -&gt; Basis2D r halfSpace -&gt; ShowS
+forall r halfSpace.
+(Show r, Show halfSpace) =&gt;
+[Basis2D r halfSpace] -&gt; ShowS
+forall r halfSpace.
+(Show r, Show halfSpace) =&gt;
+Basis2D r halfSpace -&gt; String
+$cshowsPrec :: forall r halfSpace.
+(Show r, Show halfSpace) =&gt;
+Int -&gt; Basis2D r halfSpace -&gt; ShowS
+showsPrec :: Int -&gt; Basis2D r halfSpace -&gt; ShowS
+$cshow :: forall r halfSpace.
+(Show r, Show halfSpace) =&gt;
+Basis2D r halfSpace -&gt; String
+show :: Basis2D r halfSpace -&gt; String
+$cshowList :: forall r halfSpace.
+(Show r, Show halfSpace) =&gt;
+[Basis2D r halfSpace] -&gt; ShowS
+showList :: [Basis2D r halfSpace] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679412727"><span id="local-6989586621679412740"><span class="annot"><span class="annottext">Basis2D r halfSpace -&gt; Basis2D r halfSpace -&gt; Bool
+(Basis2D r halfSpace -&gt; Basis2D r halfSpace -&gt; Bool)
+-&gt; (Basis2D r halfSpace -&gt; Basis2D r halfSpace -&gt; Bool)
+-&gt; Eq (Basis2D r halfSpace)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall r halfSpace.
+(Eq r, Eq halfSpace) =&gt;
+Basis2D r halfSpace -&gt; Basis2D r halfSpace -&gt; Bool
+$c== :: forall r halfSpace.
+(Eq r, Eq halfSpace) =&gt;
+Basis2D r halfSpace -&gt; Basis2D r halfSpace -&gt; Bool
+== :: Basis2D r halfSpace -&gt; Basis2D r halfSpace -&gt; Bool
+$c/= :: forall r halfSpace.
+(Eq r, Eq halfSpace) =&gt;
+Basis2D r halfSpace -&gt; Basis2D r halfSpace -&gt; Bool
+/= :: Basis2D r halfSpace -&gt; Basis2D r halfSpace -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679412745"><span id="local-6989586621679412749"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; Basis2D r a -&gt; Basis2D r b)
+-&gt; (forall a b. a -&gt; Basis2D r b -&gt; Basis2D r a)
+-&gt; Functor (Basis2D r)
+forall a b. a -&gt; Basis2D r b -&gt; Basis2D r a
+forall a b. (a -&gt; b) -&gt; Basis2D r a -&gt; Basis2D r b
+forall r a b. a -&gt; Basis2D r b -&gt; Basis2D r a
+forall r a b. (a -&gt; b) -&gt; Basis2D r a -&gt; Basis2D r b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall r a b. (a -&gt; b) -&gt; Basis2D r a -&gt; Basis2D r b
+fmap :: forall a b. (a -&gt; b) -&gt; Basis2D r a -&gt; Basis2D r b
+$c&lt;$ :: forall r a b. a -&gt; Basis2D r b -&gt; Basis2D r a
+&lt;$ :: forall a b. a -&gt; Basis2D r b -&gt; Basis2D r a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679412753"><span id="local-6989586621679412759"><span id="local-6989586621679412767"><span id="local-6989586621679412772"><span id="local-6989586621679412775"><span id="local-6989586621679412778"><span id="local-6989586621679412781"><span id="local-6989586621679412784"><span id="local-6989586621679412787"><span id="local-6989586621679412790"><span id="local-6989586621679412793"><span id="local-6989586621679412796"><span id="local-6989586621679412799"><span id="local-6989586621679412804"><span id="local-6989586621679412809"><span id="local-6989586621679412814"><span id="local-6989586621679412819"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; Basis2D r m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Basis2D r a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Basis2D r a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Basis2D r a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Basis2D r a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Basis2D r a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Basis2D r a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Basis2D r a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; Basis2D r a -&gt; a)
+-&gt; (forall a. Basis2D r a -&gt; [a])
+-&gt; (forall a. Basis2D r a -&gt; Bool)
+-&gt; (forall a. Basis2D r a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; Basis2D r a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; Basis2D r a -&gt; a)
+-&gt; (forall a. Ord a =&gt; Basis2D r a -&gt; a)
+-&gt; (forall a. Num a =&gt; Basis2D r a -&gt; a)
+-&gt; (forall a. Num a =&gt; Basis2D r a -&gt; a)
+-&gt; Foldable (Basis2D r)
+forall a. Eq a =&gt; a -&gt; Basis2D r a -&gt; Bool
+forall a. Num a =&gt; Basis2D r a -&gt; a
+forall a. Ord a =&gt; Basis2D r a -&gt; a
+forall m. Monoid m =&gt; Basis2D r m -&gt; m
+forall a. Basis2D r a -&gt; Bool
+forall a. Basis2D r a -&gt; Int
+forall a. Basis2D r a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; Basis2D r a -&gt; a
+forall r a. Eq a =&gt; a -&gt; Basis2D r a -&gt; Bool
+forall r a. Num a =&gt; Basis2D r a -&gt; a
+forall r a. Ord a =&gt; Basis2D r a -&gt; a
+forall r m. Monoid m =&gt; Basis2D r m -&gt; m
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Basis2D r a -&gt; m
+forall r a. Basis2D r a -&gt; Bool
+forall r a. Basis2D r a -&gt; Int
+forall r a. Basis2D r a -&gt; [a]
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Basis2D r a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Basis2D r a -&gt; b
+forall r a. (a -&gt; a -&gt; a) -&gt; Basis2D r a -&gt; a
+forall r m a. Monoid m =&gt; (a -&gt; m) -&gt; Basis2D r a -&gt; m
+forall r b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Basis2D r a -&gt; b
+forall r a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Basis2D r a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+$cfold :: forall r m. Monoid m =&gt; Basis2D r m -&gt; m
+fold :: forall m. Monoid m =&gt; Basis2D r m -&gt; m
+$cfoldMap :: forall r m a. Monoid m =&gt; (a -&gt; m) -&gt; Basis2D r a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Basis2D r a -&gt; m
+$cfoldMap' :: forall r m a. Monoid m =&gt; (a -&gt; m) -&gt; Basis2D r a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; Basis2D r a -&gt; m
+$cfoldr :: forall r a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Basis2D r a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Basis2D r a -&gt; b
+$cfoldr' :: forall r a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Basis2D r a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; Basis2D r a -&gt; b
+$cfoldl :: forall r b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Basis2D r a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Basis2D r a -&gt; b
+$cfoldl' :: forall r b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Basis2D r a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; Basis2D r a -&gt; b
+$cfoldr1 :: forall r a. (a -&gt; a -&gt; a) -&gt; Basis2D r a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; Basis2D r a -&gt; a
+$cfoldl1 :: forall r a. (a -&gt; a -&gt; a) -&gt; Basis2D r a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; Basis2D r a -&gt; a
+$ctoList :: forall r a. Basis2D r a -&gt; [a]
+toList :: forall a. Basis2D r a -&gt; [a]
+$cnull :: forall r a. Basis2D r a -&gt; Bool
+null :: forall a. Basis2D r a -&gt; Bool
+$clength :: forall r a. Basis2D r a -&gt; Int
+length :: forall a. Basis2D r a -&gt; Int
+$celem :: forall r a. Eq a =&gt; a -&gt; Basis2D r a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; Basis2D r a -&gt; Bool
+$cmaximum :: forall r a. Ord a =&gt; Basis2D r a -&gt; a
+maximum :: forall a. Ord a =&gt; Basis2D r a -&gt; a
+$cminimum :: forall r a. Ord a =&gt; Basis2D r a -&gt; a
+minimum :: forall a. Ord a =&gt; Basis2D r a -&gt; a
+$csum :: forall r a. Num a =&gt; Basis2D r a -&gt; a
+sum :: forall a. Num a =&gt; Basis2D r a -&gt; a
+$cproduct :: forall r a. Num a =&gt; Basis2D r a -&gt; a
+product :: forall a. Num a =&gt; Basis2D r a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span class="hs-keyword">type</span><span> </span><span id="HalfPlane"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#HalfPlane"><span class="hs-identifier hs-var">HalfPlane</span></a></span></span><span> </span><span id="local-6989586621679412826"><span class="annot"><a href="#local-6989586621679412826"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HalfSpaceF</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LineEQ</span></span><span> </span><span class="annot"><a href="#local-6989586621679412826"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-82"></span><span>
+</span><span id="line-83"></span><span class="annot"><span class="hs-comment">-- | Given a basis, compute the cost associated with the basis</span></span><span>
+</span><span id="line-84"></span><span id="local-6989586621679412336"><span id="local-6989586621679412337"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#lpCost"><span class="hs-identifier hs-type">lpCost</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679412336"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679412336"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Basis2D"><span class="hs-identifier hs-type">Basis2D</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412336"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412337"><span class="hs-identifier hs-type">halfPlane</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Unbounded.html/HGeometry.Unbounded.html#UnBounded"><span class="hs-identifier hs-type">UnBounded</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412336"><span class="hs-identifier hs-type">r</span></a></span></span></span><span>
+</span><span id="line-85"></span><span id="lpCost"><span class="annot"><span class="annottext">lpCost :: forall r halfPlane.
+(Eq r, Num r) =&gt;
+Basis2D r halfPlane -&gt; UnBounded r
+</span><a href="HGeometry.LPType.LinearProgramming.html#lpCost"><span class="hs-identifier hs-var hs-var">lpCost</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-86"></span><span>  </span><span class="annot"><span class="annottext">Basis2D r halfPlane
+</span><a href="HGeometry.LPType.LinearProgramming.html#EmptyBasis"><span class="hs-identifier hs-var">EmptyBasis</span></a></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">UnBounded r
+forall a. UnBounded a
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Unbounded.html/HGeometry.Unbounded.html#MinInfinity"><span class="hs-identifier hs-var">MinInfinity</span></a></span><span>
+</span><span id="line-87"></span><span>  </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Basis1"><span class="hs-identifier hs-type">Basis1</span></a></span><span> </span><span id="local-6989586621679412864"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679412864"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="annot"><span class="annottext">halfPlane
+</span><span class="hs-identifier">_</span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r -&gt; UnBounded r
+forall a. a -&gt; UnBounded a
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Unbounded.html/HGeometry.Unbounded.html#Val"><span class="hs-identifier hs-var">Val</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679412864"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-88"></span><span>  </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Basis2"><span class="hs-identifier hs-type">Basis2</span></a></span><span> </span><span id="local-6989586621679412866"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679412866"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="annottext">halfPlane
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">halfPlane
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r -&gt; UnBounded r
+forall a. a -&gt; UnBounded a
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Unbounded.html/HGeometry.Unbounded.html#Val"><span class="hs-identifier hs-var">Val</span></a></span><span> </span><span class="annot"><span class="annottext">(r -&gt; UnBounded r) -&gt; r -&gt; UnBounded r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679412866"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Point 2 r -&gt; Getting r (Point 2 r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
+forall (d :: Natural) point r.
+(2 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int (Point 2 r) r
+</span><span class="hs-identifier hs-var">yCoord</span></span><span>
+</span><span id="line-89"></span><span>  </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Infeasible"><span class="hs-identifier hs-type">Infeasible</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 halfPlane
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">UnBounded r
+forall a. UnBounded a
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Unbounded.html/HGeometry.Unbounded.html#MaxInfinity"><span class="hs-identifier hs-var">MaxInfinity</span></a></span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span class="hs-comment">-- | Let l be some line in R^2, and let h be a halfplane. In general h and l intersect</span><span>
+</span><span id="line-92"></span><span class="hs-comment">-- in a halfline. Halfspace1 represents this halfline, as a 1D halfspace on l.</span><span>
+</span><span id="line-93"></span><span class="hs-keyword">type</span><span> </span><span id="HalfSpace1"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#HalfSpace1"><span class="hs-identifier hs-var">HalfSpace1</span></a></span></span><span> </span><span id="local-6989586621679412869"><span class="annot"><a href="#local-6989586621679412869"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679412870"><span class="annot"><a href="#local-6989586621679412870"><span class="hs-identifier hs-type">halfSpace</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HalfSpaceF</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679412869"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679412869"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679412869"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679412870"><span class="hs-identifier hs-type">halfSpace</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span class="annot"><span class="hs-comment">-- | Represents the intersection of a halfplane with some line</span></span><span>
+</span><span id="line-96"></span><span class="hs-keyword">data</span><span> </span><span id="Extend"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Extend"><span class="hs-identifier hs-var">Extend</span></a></span></span><span> </span><span id="local-6989586621679412414"><span class="annot"><a href="#local-6989586621679412414"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679412413"><span class="annot"><a href="#local-6989586621679412413"><span class="hs-identifier hs-type">halfSpace</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Infeasible2"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Infeasible2"><span class="hs-identifier hs-var">Infeasible2</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679412413"><span class="hs-identifier hs-type">halfSpace</span></a></span><span>
+</span><span id="line-97"></span><span>                        </span><span class="annot"><span class="hs-comment">-- ^ there is no solution</span></span><span>
+</span><span id="line-98"></span><span>                        </span><span class="hs-glyph">|</span><span> </span><span id="Partial"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Partial"><span class="hs-identifier hs-var">Partial</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#HalfSpace1"><span class="hs-identifier hs-type">HalfSpace1</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412414"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412413"><span class="hs-identifier hs-type">halfSpace</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span>                        </span><span class="annot"><span class="hs-comment">-- ^ The halfspace</span></span><span>
+</span><span id="line-100"></span><span>                        </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679412876"><span id="local-6989586621679412885"><span id="local-6989586621679412889"><span class="annot"><span class="annottext">Int -&gt; Extend r halfSpace -&gt; ShowS
+[Extend r halfSpace] -&gt; ShowS
+Extend r halfSpace -&gt; String
+(Int -&gt; Extend r halfSpace -&gt; ShowS)
+-&gt; (Extend r halfSpace -&gt; String)
+-&gt; ([Extend r halfSpace] -&gt; ShowS)
+-&gt; Show (Extend r halfSpace)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall r halfSpace.
+(Show halfSpace, Show r) =&gt;
+Int -&gt; Extend r halfSpace -&gt; ShowS
+forall r halfSpace.
+(Show halfSpace, Show r) =&gt;
+[Extend r halfSpace] -&gt; ShowS
+forall r halfSpace.
+(Show halfSpace, Show r) =&gt;
+Extend r halfSpace -&gt; String
+$cshowsPrec :: forall r halfSpace.
+(Show halfSpace, Show r) =&gt;
+Int -&gt; Extend r halfSpace -&gt; ShowS
+showsPrec :: Int -&gt; Extend r halfSpace -&gt; ShowS
+$cshow :: forall r halfSpace.
+(Show halfSpace, Show r) =&gt;
+Extend r halfSpace -&gt; String
+show :: Extend r halfSpace -&gt; String
+$cshowList :: forall r halfSpace.
+(Show halfSpace, Show r) =&gt;
+[Extend r halfSpace] -&gt; ShowS
+showList :: [Extend r halfSpace] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span class="annot"><span class="hs-comment">-- | Collects the 1d halfspaces. Left signifies that we have an infeasible solution</span></span><span>
+</span><span id="line-103"></span><span id="local-6989586621679412369"><span id="local-6989586621679412370"><span id="local-6989586621679412371"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#collect"><span class="hs-identifier hs-type">collect</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679412369"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679412369"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Extend"><span class="hs-identifier hs-type">Extend</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412370"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412371"><span class="hs-identifier hs-type">halfSpace</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-104"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="#local-6989586621679412371"><span class="hs-identifier hs-type">halfSpace</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">HalfSpaceF</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679412370"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679412370"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679412370"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679412371"><span class="hs-identifier hs-type">halfSpace</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span></span></span></span><span>
+</span><span id="line-105"></span><span id="collect"><span class="annot"><span class="annottext">collect :: forall (f :: * -&gt; *) r halfSpace.
+Foldable f =&gt;
+f (Extend r halfSpace)
+-&gt; Either
+     halfSpace [HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, halfSpace)]
+</span><a href="HGeometry.LPType.LinearProgramming.html#collect"><span class="hs-identifier hs-var hs-var">collect</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Extend r halfSpace
+ -&gt; Either
+      halfSpace [HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, halfSpace)]
+ -&gt; Either
+      halfSpace [HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, halfSpace)])
+-&gt; Either
+     halfSpace [HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, halfSpace)]
+-&gt; [Extend r halfSpace]
+-&gt; Either
+     halfSpace [HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, halfSpace)]
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; [a] -&gt; b
+forall (t :: * -&gt; *) a b.
+Foldable t =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="annot"><span class="annottext">Extend r halfSpace
+-&gt; Either
+     halfSpace [HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, halfSpace)]
+-&gt; Either
+     halfSpace [HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, halfSpace)]
+forall {r} {a}.
+Extend r a
+-&gt; Either a [HalfSpace1 r a] -&gt; Either a [HalfSpace1 r a]
+</span><a href="#local-6989586621679412957"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, halfSpace)]
+-&gt; Either
+     halfSpace [HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, halfSpace)]
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Extend r halfSpace]
+ -&gt; Either
+      halfSpace [HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, halfSpace)])
+-&gt; (f (Extend r halfSpace) -&gt; [Extend r halfSpace])
+-&gt; f (Extend r halfSpace)
+-&gt; Either
+     halfSpace [HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, halfSpace)]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">f (Extend r halfSpace) -&gt; [Extend r halfSpace]
+forall a. f a -&gt; [a]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">toList</span></span><span>
+</span><span id="line-106"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-107"></span><span>    </span><span id="local-6989586621679412957"><span class="annot"><span class="annottext">f :: Extend r a
+-&gt; Either a [HalfSpace1 r a] -&gt; Either a [HalfSpace1 r a]
+</span><a href="#local-6989586621679412957"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Infeasible2"><span class="hs-identifier hs-type">Infeasible2</span></a></span><span> </span><span id="local-6989586621679412958"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679412958"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Either a [HalfSpace1 r a]
+</span><span class="hs-identifier">_</span></span><span>            </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Either a [HalfSpace1 r a]
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679412958"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-108"></span><span>    </span><span class="annot"><a href="#local-6989586621679412957"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Extend r a
+</span><span class="hs-identifier">_</span></span><span>               </span><span id="local-6989586621679412959"><span class="annot"><span class="annottext">acc :: Either a [HalfSpace1 r a]
+</span><a href="#local-6989586621679412959"><span class="hs-identifier hs-var">acc</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Either a [HalfSpace1 r a]
+</span><a href="#local-6989586621679412959"><span class="hs-identifier hs-var">acc</span></a></span><span>
+</span><span id="line-109"></span><span>    </span><span class="annot"><a href="#local-6989586621679412957"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Partial"><span class="hs-identifier hs-type">Partial</span></a></span><span> </span><span id="local-6989586621679412960"><span class="annot"><span class="annottext">HalfSpace1 r a
+</span><a href="#local-6989586621679412960"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span>     </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679412961"><span class="annot"><span class="annottext">[HalfSpace1 r a]
+</span><a href="#local-6989586621679412961"><span class="hs-identifier hs-var">hs</span></a></span></span><span class="hs-special">)</span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[HalfSpace1 r a] -&gt; Either a [HalfSpace1 r a]
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HalfSpace1 r a
+</span><a href="#local-6989586621679412960"><span class="hs-identifier hs-var">h</span></a></span><span class="annot"><span class="annottext">HalfSpace1 r a -&gt; [HalfSpace1 r a] -&gt; [HalfSpace1 r a]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span class="annot"><span class="annottext">[HalfSpace1 r a]
+</span><a href="#local-6989586621679412961"><span class="hs-identifier hs-var">hs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span>
+</span><span id="line-112"></span><span class="annot"><span class="hs-comment">-- | Constructs a 1D halfspace on the bounding line</span></span><span>
+</span><span id="line-113"></span><span id="local-6989586621679412379"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#constructHalfSpaceOn"><span class="hs-identifier hs-type">constructHalfSpaceOn</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679412379"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679412379"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-114"></span><span>                     </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#HalfPlane"><span class="hs-identifier hs-type">HalfPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412379"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-115"></span><span>                     </span><span class="annot"><span class="hs-comment">-- ^ the bounding line of the new halfspace</span></span><span>
+</span><span id="line-116"></span><span>                     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#HalfPlane"><span class="hs-identifier hs-type">HalfPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412379"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-117"></span><span>                     </span><span class="annot"><span class="hs-comment">-- ^ the existing halfplane</span></span><span>
+</span><span id="line-118"></span><span>                     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Extend"><span class="hs-identifier hs-type">Extend</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412379"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#HalfPlane"><span class="hs-identifier hs-type">HalfPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412379"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span>
+</span><span id="line-119"></span><span id="constructHalfSpaceOn"><span class="annot"><span class="annottext">constructHalfSpaceOn :: forall r.
+(Fractional r, Ord r) =&gt;
+HalfPlane r -&gt; HalfPlane r -&gt; Maybe (Extend r (HalfPlane r))
+</span><a href="HGeometry.LPType.LinearProgramming.html#constructHalfSpaceOn"><span class="hs-identifier hs-var hs-var">constructHalfSpaceOn</span></a></span></span><span> </span><span id="local-6989586621679413114"><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413114"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span id="local-6989586621679413115"><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413115"><span class="hs-identifier hs-var">h'</span></a></span></span><span>
+</span><span id="line-120"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413114"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">HalfPlane r -&gt; HalfPlane r -&gt; Bool
+forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span class="hs-operator hs-var">`intersects`</span></span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413115"><span class="hs-identifier hs-var">h'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Extend r (HalfPlane r) -&gt; Maybe (Extend r (HalfPlane r))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Extend r (HalfPlane r) -&gt; Maybe (Extend r (HalfPlane r)))
+-&gt; Extend r (HalfPlane r) -&gt; Maybe (Extend r (HalfPlane r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">HalfPlane r -&gt; Extend r (HalfPlane r)
+forall r halfSpace. halfSpace -&gt; Extend r halfSpace
+</span><a href="HGeometry.LPType.LinearProgramming.html#Infeasible2"><span class="hs-identifier hs-var">Infeasible2</span></a></span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413115"><span class="hs-identifier hs-var">h'</span></a></span><span>
+</span><span id="line-121"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>               </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">LineEQ r
+</span><a href="#local-6989586621679413118"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">LineEQ r -&gt; LineEQ r -&gt; Intersection (LineEQ r) (LineEQ r)
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413115"><span class="hs-identifier hs-var">h'</span></a></span><span class="annot"><span class="annottext">HalfPlane r
+-&gt; Getting (LineEQ r) (HalfPlane r) (LineEQ r) -&gt; LineEQ r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(BoundingHyperPlane (HalfPlane r) 2 r
+ -&gt; Const (LineEQ r) (BoundingHyperPlane (HalfPlane r) 2 r))
+-&gt; HalfPlane r -&gt; Const (LineEQ r) (HalfPlane r)
+Getting (LineEQ r) (HalfPlane r) (LineEQ r)
+forall halfSpace (d :: Natural) r.
+HalfSpace_ halfSpace d r =&gt;
+Lens' halfSpace (BoundingHyperPlane halfSpace d r)
+Lens' (HalfPlane r) (BoundingHyperPlane (HalfPlane r) 2 r)
+</span><span class="hs-identifier hs-var">boundingHyperPlane</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-122"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Line_x_Line_Point</span></span><span> </span><span id="local-6989586621679413121"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679413121"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Extend r (HalfPlane r) -&gt; Maybe (Extend r (HalfPlane r))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Extend r (HalfPlane r) -&gt; Maybe (Extend r (HalfPlane r)))
+-&gt; (HalfSpace1 r (HalfPlane r) -&gt; Extend r (HalfPlane r))
+-&gt; HalfSpace1 r (HalfPlane r)
+-&gt; Maybe (Extend r (HalfPlane r))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">HalfSpace1 r (HalfPlane r) -&gt; Extend r (HalfPlane r)
+forall r halfSpace. HalfSpace1 r halfSpace -&gt; Extend r halfSpace
+</span><a href="HGeometry.LPType.LinearProgramming.html#Partial"><span class="hs-identifier hs-var">Partial</span></a></span><span> </span><span class="annot"><span class="annottext">(HalfSpace1 r (HalfPlane r) -&gt; Maybe (Extend r (HalfPlane r)))
+-&gt; HalfSpace1 r (HalfPlane r) -&gt; Maybe (Extend r (HalfPlane r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; HalfSpaceF (Point 1 (r, r))
+</span><a href="#local-6989586621679413122"><span class="hs-identifier hs-var">halfSpace1D</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679413121"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">HalfSpaceF (Point 1 (r, r))
+-&gt; (Point 2 r, HalfPlane r) -&gt; HalfSpace1 r (HalfPlane r)
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679413121"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413115"><span class="hs-identifier hs-var">h'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-123"></span><span>        </span><span class="annot"><span class="annottext">Intersection (LineEQ r) (LineEQ r)
+</span><span class="hs-identifier">_</span></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Extend r (HalfPlane r))
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-comment">-- constraint is not useful</span><span>
+</span><span id="line-124"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-125"></span><span>    </span><span id="local-6989586621679413118"><span class="annot"><span class="annottext">l :: LineEQ r
+</span><a href="#local-6989586621679413118"><span class="hs-identifier hs-var hs-var">l</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413114"><span class="hs-identifier hs-var">h</span></a></span><span class="annot"><span class="annottext">HalfPlane r
+-&gt; Getting (LineEQ r) (HalfPlane r) (LineEQ r) -&gt; LineEQ r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(BoundingHyperPlane (HalfPlane r) 2 r
+ -&gt; Const (LineEQ r) (BoundingHyperPlane (HalfPlane r) 2 r))
+-&gt; HalfPlane r -&gt; Const (LineEQ r) (HalfPlane r)
+Getting (LineEQ r) (HalfPlane r) (LineEQ r)
+forall halfSpace (d :: Natural) r.
+HalfSpace_ halfSpace d r =&gt;
+Lens' halfSpace (BoundingHyperPlane halfSpace d r)
+Lens' (HalfPlane r) (BoundingHyperPlane (HalfPlane r) 2 r)
+</span><span class="hs-identifier hs-var">boundingHyperPlane</span></span><span>
+</span><span id="line-126"></span><span>    </span><span class="hs-comment">-- the halfpsace of h' on the bounding line of h</span><span>
+</span><span id="line-127"></span><span>    </span><span id="local-6989586621679413122"><span class="annot"><span class="annottext">halfSpace1D :: Point 2 r -&gt; HalfSpaceF (Point 1 (r, r))
+</span><a href="#local-6989586621679413122"><span class="hs-identifier hs-var hs-var">halfSpace1D</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point2</span></span><span> </span><span id="local-6989586621679413125"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679413125"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679413126"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679413126"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sign -&gt; Point 1 (r, r) -&gt; HalfSpaceF (Point 1 (r, r))
+forall boundingHyperPlane.
+Sign -&gt; boundingHyperPlane -&gt; HalfSpaceF boundingHyperPlane
+</span><span class="hs-identifier hs-var">HalfSpace</span></span><span> </span><span class="annot"><span class="annottext">Sign
+</span><a href="#local-6989586621679413128"><span class="hs-identifier hs-var">newSign</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(r, r) -&gt; Point 1 (r, r)
+forall r. r -&gt; Point 1 r
+</span><span class="hs-identifier hs-var">Point1</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679413126"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679413125"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-128"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-129"></span><span>        </span><span id="local-6989586621679413130"><span class="annot"><span class="annottext">x' :: r
+</span><a href="#local-6989586621679413130"><span class="hs-identifier hs-var hs-var">x'</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">LineEQ r
+</span><a href="#local-6989586621679413118"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">LineEQ r -&gt; Getting r (LineEQ r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (LineEQ r) r
+forall line r. NonVerticalHyperPlane_ line 2 r =&gt; Lens' line r
+Lens' (LineEQ r) r
+</span><span class="hs-identifier hs-var">slope</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-keyword">then</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679413125"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">1</span></span><span> </span><span class="hs-keyword">else</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679413125"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-130"></span><span>        </span><span id="local-6989586621679413133"><span class="annot"><span class="annottext">y' :: r
+</span><a href="#local-6989586621679413133"><span class="hs-identifier hs-var hs-var">y'</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point 1 r -&gt; LineEQ r -&gt; r
+forall point.
+(Num r, 1 &lt;= 2, Point_ point (2 - 1) r) =&gt;
+point -&gt; LineEQ r -&gt; r
+forall hyperPlane (d :: Natural) r point.
+(NonVerticalHyperPlane_ hyperPlane d r, Num r, 1 &lt;= d,
+ Point_ point (d - 1) r) =&gt;
+point -&gt; hyperPlane -&gt; r
+</span><span class="hs-identifier hs-var">evalAt</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; Point 1 r
+forall r. r -&gt; Point 1 r
+</span><span class="hs-identifier hs-var">Point1</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679413130"><span class="hs-identifier hs-var">x'</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">LineEQ r
+</span><a href="#local-6989586621679413118"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-131"></span><span>        </span><span id="local-6989586621679413128"><span class="annot"><span class="annottext">newSign :: Sign
+</span><a href="#local-6989586621679413128"><span class="hs-identifier hs-var hs-var">newSign</span></a></span></span><span>
+</span><span id="line-132"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Point 2 r
+forall r. r -&gt; r -&gt; Point 2 r
+</span><span class="hs-identifier hs-var">Point2</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679413130"><span class="hs-identifier hs-var">x'</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679413133"><span class="hs-identifier hs-var">y'</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; HalfPlane r -&gt; Bool
+forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span class="hs-operator hs-var">`intersects`</span></span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413115"><span class="hs-identifier hs-var">h'</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sign
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sign.html/HGeometry.Sign.html#Negative"><span class="hs-identifier hs-var">Negative</span></a></span><span>
+</span><span id="line-133"></span><span>          </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>                    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sign
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sign.html/HGeometry.Sign.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span><span>
+</span><span id="line-134"></span><span>        </span><span class="hs-comment">-- the main idea is to pick a point (x',y') on l that is &quot;better&quot;/lower than the</span><span>
+</span><span id="line-135"></span><span>        </span><span class="hs-comment">-- intersection point p. If this point is contained in h' then h' corresponds to</span><span>
+</span><span id="line-136"></span><span>        </span><span class="hs-comment">-- a 1D halfspace that is bounded from above (i..e by p_y); hence a negative signed</span><span>
+</span><span id="line-137"></span><span>        </span><span class="hs-comment">-- halfspace.</span><span>
+</span><span id="line-138"></span><span>
+</span><span id="line-139"></span><span>
+</span><span id="line-140"></span><span>
+</span><span id="line-141"></span><span class="annot"><span class="hs-comment">-- | Tries to extend the basis with the given halfplane</span></span><span>
+</span><span id="line-142"></span><span id="local-6989586621679412431"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#lpRecomputeBasis"><span class="hs-identifier hs-type">lpRecomputeBasis</span></a></span><span>                            </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679412431"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679412431"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-143"></span><span>                                            </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#HalfPlane"><span class="hs-identifier hs-type">HalfPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412431"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-144"></span><span>                                            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Basis2D"><span class="hs-identifier hs-type">Basis2D</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412431"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#HalfPlane"><span class="hs-identifier hs-type">HalfPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412431"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-145"></span><span>                                            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Basis2D"><span class="hs-identifier hs-type">Basis2D</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412431"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#HalfPlane"><span class="hs-identifier hs-type">HalfPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412431"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">)</span></span><span>
+</span><span id="line-146"></span><span id="lpRecomputeBasis"><span class="annot"><span class="annottext">lpRecomputeBasis :: forall r.
+(Ord r, Fractional r) =&gt;
+HalfPlane r
+-&gt; Basis2D r (HalfPlane r) -&gt; Maybe (Basis2D r (HalfPlane r))
+</span><a href="HGeometry.LPType.LinearProgramming.html#lpRecomputeBasis"><span class="hs-identifier hs-var hs-var">lpRecomputeBasis</span></a></span></span><span> </span><span id="local-6989586621679413244"><span class="annot"><span class="annottext">h :: HalfPlane r
+</span><a href="#local-6989586621679413244"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HalfSpace</span></span><span> </span><span id="local-6989586621679413245"><span class="annot"><span class="annottext">Sign
+</span><a href="#local-6989586621679413245"><span class="hs-identifier hs-var">sign</span></a></span></span><span> </span><span id="local-6989586621679413246"><span class="annot"><span class="annottext">LineEQ r
+</span><a href="#local-6989586621679413246"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679413247"><span class="annot"><span class="annottext">Basis2D r (HalfPlane r)
+</span><a href="#local-6989586621679413247"><span class="hs-identifier hs-var">basis</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Basis2D r (HalfPlane r)
+</span><a href="#local-6989586621679413247"><span class="hs-identifier hs-var">basis</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-147"></span><span>    </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Infeasible"><span class="hs-identifier hs-type">Infeasible</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 3 (HalfPlane r)
+</span><span class="hs-identifier">_</span></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Basis2D r (HalfPlane r))
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-comment">-- already infeasible, so remains infeasible</span><span>
+</span><span id="line-148"></span><span>
+</span><span id="line-149"></span><span>    </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Basis2"><span class="hs-identifier hs-type">Basis2</span></a></span><span> </span><span id="local-6989586621679413248"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679413248"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679413249"><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413249"><span class="hs-identifier hs-var">h1</span></a></span></span><span> </span><span id="local-6989586621679413250"><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413250"><span class="hs-identifier hs-var">h2</span></a></span></span><span>
+</span><span id="line-150"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679413248"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; HalfPlane r -&gt; Bool
+forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span class="hs-operator hs-var">`intersects`</span></span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413244"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Basis2D r (HalfPlane r))
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-comment">-- solution remains the same</span><span>
+</span><span id="line-151"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Basis2D r (HalfPlane r) -&gt; Maybe (Basis2D r (HalfPlane r))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Basis2D r (HalfPlane r) -&gt; Maybe (Basis2D r (HalfPlane r)))
+-&gt; Basis2D r (HalfPlane r) -&gt; Maybe (Basis2D r (HalfPlane r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[Extend r (HalfPlane r)]
+-&gt; Either
+     (HalfPlane r)
+     [HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, HalfPlane r)]
+forall (f :: * -&gt; *) r halfSpace.
+Foldable f =&gt;
+f (Extend r halfSpace)
+-&gt; Either
+     halfSpace [HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, halfSpace)]
+</span><a href="HGeometry.LPType.LinearProgramming.html#collect"><span class="hs-identifier hs-var">collect</span></a></span><span> </span><span class="annot"><span class="annottext">([Extend r (HalfPlane r)]
+ -&gt; Either
+      (HalfPlane r)
+      [HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, HalfPlane r)])
+-&gt; [Extend r (HalfPlane r)]
+-&gt; Either
+     (HalfPlane r)
+     [HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, HalfPlane r)]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(HalfPlane r -&gt; Maybe (Extend r (HalfPlane r)))
+-&gt; [HalfPlane r] -&gt; [Extend r (HalfPlane r)]
+forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+forall (f :: * -&gt; *) a b.
+Filterable f =&gt;
+(a -&gt; Maybe b) -&gt; f a -&gt; f b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/witherable-0.5-5d85f763e5e8170e826d2554153086f6307c6577afec4b5097a66230893464d4/share/doc/html/src/Witherable.html/Witherable.html#mapMaybe"><span class="hs-identifier hs-var">mapMaybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HalfPlane r -&gt; HalfPlane r -&gt; Maybe (Extend r (HalfPlane r))
+forall r.
+(Fractional r, Ord r) =&gt;
+HalfPlane r -&gt; HalfPlane r -&gt; Maybe (Extend r (HalfPlane r))
+</span><a href="HGeometry.LPType.LinearProgramming.html#constructHalfSpaceOn"><span class="hs-identifier hs-var">constructHalfSpaceOn</span></a></span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413244"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413249"><span class="hs-identifier hs-var">h1</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413250"><span class="hs-identifier hs-var">h2</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-152"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><span class="hs-identifier">_</span></span><span>            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Basis2D r (HalfPlane r)
+</span><a href="#local-6989586621679413252"><span class="hs-identifier hs-var">infeasible</span></a></span><span>
+</span><span id="line-153"></span><span>              </span><span class="hs-comment">-- not sure if we removed anything here.</span><span>
+</span><span id="line-154"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span id="local-6989586621679413253"><span class="annot"><span class="annottext">[HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, HalfPlane r)]
+</span><a href="#local-6989586621679413253"><span class="hs-identifier hs-var">constraints</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, HalfPlane r)]
+-&gt; Maybe
+     (NonEmpty
+        (HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, HalfPlane r)))
+forall a. [a] -&gt; Maybe (NonEmpty a)
+</span><span class="hs-identifier hs-var">NonEmpty.nonEmpty</span></span><span> </span><span class="annot"><span class="annottext">[HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, HalfPlane r)]
+</span><a href="#local-6989586621679413253"><span class="hs-identifier hs-var">constraints</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-155"></span><span>              </span><span class="annot"><span class="annottext">Maybe
+  (NonEmpty
+     (HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, HalfPlane r)))
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Basis2D r (HalfPlane r)
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;absurd: lpExtendBasis. No constraints, so unbounded?&quot;</span></span><span>
+</span><span id="line-156"></span><span>              </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679413256"><span class="annot"><span class="annottext">NonEmpty (HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, HalfPlane r))
+</span><a href="#local-6989586621679413256"><span class="hs-identifier hs-var">constraints'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">NonEmpty (HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, HalfPlane r))
+-&gt; Basis1DLP
+     (HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, HalfPlane r))
+forall r (set :: * -&gt; *) halfSpace.
+(Ord r, Foldable1 set, HalfSpace_ halfSpace 1 r,
+ Point_ (BoundingHyperPlane halfSpace 1 r) 1 r) =&gt;
+set halfSpace -&gt; Basis1DLP halfSpace
+</span><a href="HGeometry.LPType.LinearProgramming.html#lp1D"><span class="hs-identifier hs-var">lp1D</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty (HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, HalfPlane r))
+</span><a href="#local-6989586621679413256"><span class="hs-identifier hs-var">constraints'</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-157"></span><span>                </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#InFeasible1"><span class="hs-identifier hs-type">InFeasible1</span></a></span><span> </span><span class="annot"><span class="annottext">HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, HalfPlane r)
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, HalfPlane r)
+</span><span class="hs-identifier">_</span></span><span>         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Basis2D r (HalfPlane r)
+</span><a href="#local-6989586621679413252"><span class="hs-identifier hs-var">infeasible</span></a></span><span>
+</span><span id="line-158"></span><span>                </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Feasible1"><span class="hs-identifier hs-type">Feasible1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HalfSpaceF (Point 1 (r, r))
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679413257"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679413257"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679413258"><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413258"><span class="hs-identifier hs-var">h'</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; HalfPlane r -&gt; HalfPlane r -&gt; Basis2D r (HalfPlane r)
+forall r halfSpace.
+Point 2 r -&gt; halfSpace -&gt; halfSpace -&gt; Basis2D r halfSpace
+</span><a href="HGeometry.LPType.LinearProgramming.html#Basis2"><span class="hs-identifier hs-var">Basis2</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679413257"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413244"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413258"><span class="hs-identifier hs-var">h'</span></a></span><span>
+</span><span id="line-159"></span><span>                </span><span class="annot"><span class="annottext">Basis1DLP (HalfSpaceF (Point 1 (r, r)) :+ (Point 2 r, HalfPlane r))
+</span><a href="HGeometry.LPType.LinearProgramming.html#Unbounded"><span class="hs-identifier hs-var">Unbounded</span></a></span><span>               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Basis2D r (HalfPlane r)
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;absurd: lpExtendBasis. unbounded?&quot;</span></span><span>
+</span><span id="line-160"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-161"></span><span>        </span><span id="local-6989586621679413252"><span class="annot"><span class="annottext">infeasible :: Basis2D r (HalfPlane r)
+</span><a href="#local-6989586621679413252"><span class="hs-identifier hs-var hs-var">infeasible</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 3 (HalfPlane r) -&gt; Basis2D r (HalfPlane r)
+forall r halfSpace. Vector 3 halfSpace -&gt; Basis2D r halfSpace
+</span><a href="HGeometry.LPType.LinearProgramming.html#Infeasible"><span class="hs-identifier hs-var">Infeasible</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HalfPlane r -&gt; HalfPlane r -&gt; HalfPlane r -&gt; Vector 3 (HalfPlane r)
+forall r. r -&gt; r -&gt; r -&gt; Vector 3 r
+</span><span class="hs-identifier hs-var">Vector3</span></span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413244"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413249"><span class="hs-identifier hs-var">h1</span></a></span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413250"><span class="hs-identifier hs-var">h2</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-162"></span><span>
+</span><span id="line-163"></span><span>    </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Basis1"><span class="hs-identifier hs-type">Basis1</span></a></span><span> </span><span id="local-6989586621679413260"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679413260"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span id="local-6989586621679413261"><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413261"><span class="hs-identifier hs-var">h1</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">LineEQ r
+</span><a href="#local-6989586621679413246"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="annot"><span class="annottext">LineEQ r -&gt; LineEQ r -&gt; Intersection (LineEQ r) (LineEQ r)
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413261"><span class="hs-identifier hs-var">h1</span></a></span><span class="annot"><span class="annottext">HalfPlane r
+-&gt; Getting (LineEQ r) (HalfPlane r) (LineEQ r) -&gt; LineEQ r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(BoundingHyperPlane (HalfPlane r) 2 r
+ -&gt; Const (LineEQ r) (BoundingHyperPlane (HalfPlane r) 2 r))
+-&gt; HalfPlane r -&gt; Const (LineEQ r) (HalfPlane r)
+Getting (LineEQ r) (HalfPlane r) (LineEQ r)
+forall halfSpace (d :: Natural) r.
+HalfSpace_ halfSpace d r =&gt;
+Lens' halfSpace (BoundingHyperPlane halfSpace d r)
+Lens' (HalfPlane r) (BoundingHyperPlane (HalfPlane r) 2 r)
+</span><span class="hs-identifier hs-var">boundingHyperPlane</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-164"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Line_x_Line_Line</span></span><span> </span><span class="annot"><span class="annottext">LineEQ r
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Basis2D r (HalfPlane r))
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-comment">-- not useful yet</span><span>
+</span><span id="line-165"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Line_x_Line_Point</span></span><span> </span><span id="local-6989586621679413263"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679413263"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-166"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679413263"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Vector 2 r -&gt; Point 2 r
+forall point (d :: Natural) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; Vector d r -&gt; point
+</span><span class="hs-operator hs-var">.-^</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; Vector 2 r
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><span class="hs-identifier hs-var">Vector2</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">0</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; HalfPlane r -&gt; Bool
+forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span class="hs-operator hs-var">`intersects`</span></span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413244"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Basis2D r (HalfPlane r))
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-167"></span><span>          </span><span class="hs-comment">-- h defines the 1D halfspace (-infty,p_x] on h1. So it's not useful</span><span>
+</span><span id="line-168"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>                            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Basis2D r (HalfPlane r) -&gt; Maybe (Basis2D r (HalfPlane r))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Basis2D r (HalfPlane r) -&gt; Maybe (Basis2D r (HalfPlane r)))
+-&gt; Basis2D r (HalfPlane r) -&gt; Maybe (Basis2D r (HalfPlane r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; HalfPlane r -&gt; HalfPlane r -&gt; Basis2D r (HalfPlane r)
+forall r halfSpace.
+Point 2 r -&gt; halfSpace -&gt; halfSpace -&gt; Basis2D r halfSpace
+</span><a href="HGeometry.LPType.LinearProgramming.html#Basis2"><span class="hs-identifier hs-var">Basis2</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679413263"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413261"><span class="hs-identifier hs-var">h1</span></a></span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413244"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-169"></span><span>      </span><span class="annot"><span class="annottext">Maybe (LineLineIntersectionG r (LineEQ r))
+Intersection (LineEQ r) (LineEQ r)
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-170"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679413266"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679413260"><span class="hs-identifier hs-var">y</span></a></span><span>                                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Basis2D r (HalfPlane r) -&gt; Maybe (Basis2D r (HalfPlane r))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Basis2D r (HalfPlane r) -&gt; Maybe (Basis2D r (HalfPlane r)))
+-&gt; Basis2D r (HalfPlane r) -&gt; Maybe (Basis2D r (HalfPlane r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; HalfPlane r -&gt; Basis2D r (HalfPlane r)
+forall r halfSpace. r -&gt; halfSpace -&gt; Basis2D r halfSpace
+</span><a href="HGeometry.LPType.LinearProgramming.html#Basis1"><span class="hs-identifier hs-var">Basis1</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679413266"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413244"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-171"></span><span>                                                   </span><span class="hs-comment">-- h is more restrictive than h1</span><span>
+</span><span id="line-172"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span>                            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Basis2D r (HalfPlane r))
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-173"></span><span>        </span><span class="hs-keyword">where</span><span>
+</span><span id="line-174"></span><span>          </span><span id="local-6989586621679413266"><span class="annot"><span class="annottext">b :: r
+</span><a href="#local-6989586621679413266"><span class="hs-identifier hs-var hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">LineEQ r
+</span><a href="#local-6989586621679413246"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">LineEQ r -&gt; Getting r (LineEQ r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (LineEQ r) r
+forall line r. NonVerticalHyperPlane_ line 2 r =&gt; Lens' line r
+Lens' (LineEQ r) r
+</span><span class="hs-identifier hs-var">intercept</span></span><span>
+</span><span id="line-175"></span><span>
+</span><span id="line-176"></span><span>    </span><span class="annot"><span class="annottext">Basis2D r (HalfPlane r)
+</span><a href="HGeometry.LPType.LinearProgramming.html#EmptyBasis"><span class="hs-identifier hs-var">EmptyBasis</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Sign
+</span><a href="#local-6989586621679413245"><span class="hs-identifier hs-var">sign</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-177"></span><span>      </span><span class="annot"><span class="annottext">Sign
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sign.html/HGeometry.Sign.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">LineEQ r
+</span><a href="#local-6989586621679413246"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">LineEQ r -&gt; Getting r (LineEQ r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (LineEQ r) r
+forall line r. NonVerticalHyperPlane_ line 2 r =&gt; Lens' line r
+Lens' (LineEQ r) r
+</span><span class="hs-identifier hs-var">slope</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Basis2D r (HalfPlane r) -&gt; Maybe (Basis2D r (HalfPlane r))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Basis2D r (HalfPlane r) -&gt; Maybe (Basis2D r (HalfPlane r)))
+-&gt; Basis2D r (HalfPlane r) -&gt; Maybe (Basis2D r (HalfPlane r))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; HalfPlane r -&gt; Basis2D r (HalfPlane r)
+forall r halfSpace. r -&gt; halfSpace -&gt; Basis2D r halfSpace
+</span><a href="HGeometry.LPType.LinearProgramming.html#Basis1"><span class="hs-identifier hs-var">Basis1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">LineEQ r
+</span><a href="#local-6989586621679413246"><span class="hs-identifier hs-var">l</span></a></span><span class="annot"><span class="annottext">LineEQ r -&gt; Getting r (LineEQ r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (LineEQ r) r
+forall line r. NonVerticalHyperPlane_ line 2 r =&gt; Lens' line r
+Lens' (LineEQ r) r
+</span><span class="hs-identifier hs-var">intercept</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413244"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-178"></span><span>      </span><span class="annot"><span class="annottext">Sign
+</span><span class="hs-identifier">_</span></span><span>                        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (Basis2D r (HalfPlane r))
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-comment">-- basis remains empty</span><span>
+</span><span id="line-179"></span><span>
+</span><span id="line-180"></span><span>
+</span><span id="line-181"></span><span class="annot"><span class="hs-comment">-- | Find an initial basis; i.e. some halfplanes that bound the initial solution from below</span></span><span>
+</span><span id="line-182"></span><span id="local-6989586621679412454"><span id="local-6989586621679412455"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#lpInitialBasis"><span class="hs-identifier hs-type">lpInitialBasis</span></a></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679412454"><span class="hs-identifier hs-type">set</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679412455"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679412455"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-183"></span><span>                  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679412454"><span class="hs-identifier hs-type">set</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#HalfPlane"><span class="hs-identifier hs-type">HalfPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412455"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-184"></span><span>                  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Basis2D"><span class="hs-identifier hs-type">Basis2D</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412455"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#HalfPlane"><span class="hs-identifier hs-type">HalfPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412455"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-185"></span><span id="lpInitialBasis"><span class="annot"><span class="annottext">lpInitialBasis :: forall (set :: * -&gt; *) r.
+(Foldable set, Ord r, Fractional r) =&gt;
+set (HalfPlane r) -&gt; Basis2D r (HalfPlane r)
+</span><a href="HGeometry.LPType.LinearProgramming.html#lpInitialBasis"><span class="hs-identifier hs-var hs-var">lpInitialBasis</span></a></span></span><span> </span><span id="local-6989586621679413400"><span class="annot"><span class="annottext">set (HalfPlane r)
+</span><a href="#local-6989586621679413400"><span class="hs-identifier hs-var">hs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">(HalfPlane r -&gt; Bool)
+-&gt; [HalfPlane r] -&gt; ([HalfPlane r], [HalfPlane r])
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
+</span><span class="hs-identifier hs-var">List.partition</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679413402"><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413402"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413402"><span class="hs-identifier hs-var">h</span></a></span><span class="annot"><span class="annottext">HalfPlane r -&gt; Getting r (HalfPlane r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(BoundingHyperPlane (HalfPlane r) 2 r
+ -&gt; Const r (BoundingHyperPlane (HalfPlane r) 2 r))
+-&gt; HalfPlane r -&gt; Const r (HalfPlane r)
+(LineEQ r -&gt; Const r (LineEQ r))
+-&gt; HalfPlane r -&gt; Const r (HalfPlane r)
+forall halfSpace (d :: Natural) r.
+HalfSpace_ halfSpace d r =&gt;
+Lens' halfSpace (BoundingHyperPlane halfSpace d r)
+Lens' (HalfPlane r) (BoundingHyperPlane (HalfPlane r) 2 r)
+</span><span class="hs-identifier hs-var">boundingHyperPlane</span></span><span class="annot"><span class="annottext">((LineEQ r -&gt; Const r (LineEQ r))
+ -&gt; HalfPlane r -&gt; Const r (HalfPlane r))
+-&gt; ((r -&gt; Const r r) -&gt; LineEQ r -&gt; Const r (LineEQ r))
+-&gt; Getting r (HalfPlane r) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; LineEQ r -&gt; Const r (LineEQ r)
+forall line r. NonVerticalHyperPlane_ line 2 r =&gt; Lens' line r
+Lens' (LineEQ r) r
+</span><span class="hs-identifier hs-var">slope</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;=</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-186"></span><span>                       </span><span class="annot"><span class="annottext">([HalfPlane r] -&gt; ([HalfPlane r], [HalfPlane r]))
+-&gt; (set (HalfPlane r) -&gt; [HalfPlane r])
+-&gt; set (HalfPlane r)
+-&gt; ([HalfPlane r], [HalfPlane r])
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(HalfPlane r -&gt; Bool) -&gt; [HalfPlane r] -&gt; [HalfPlane r]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+forall (f :: * -&gt; *) a. Filterable f =&gt; (a -&gt; Bool) -&gt; f a -&gt; f a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/witherable-0.5-5d85f763e5e8170e826d2554153086f6307c6577afec4b5097a66230893464d4/share/doc/html/src/Witherable.html/Witherable.html#filter"><span class="hs-identifier hs-var">filter</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679413404"><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413404"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413404"><span class="hs-identifier hs-var">h</span></a></span><span class="annot"><span class="annottext">HalfPlane r -&gt; Getting Sign (HalfPlane r) Sign -&gt; Sign
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting Sign (HalfPlane r) Sign
+forall halfSpace (d :: Natural) r.
+HalfSpace_ halfSpace d r =&gt;
+Lens' halfSpace Sign
+Lens' (HalfPlane r) Sign
+</span><span class="hs-identifier hs-var">halfSpaceSign</span></span><span> </span><span class="annot"><span class="annottext">Sign -&gt; Sign -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Sign
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sign.html/HGeometry.Sign.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-187"></span><span>                       </span><span class="annot"><span class="annottext">([HalfPlane r] -&gt; [HalfPlane r])
+-&gt; (set (HalfPlane r) -&gt; [HalfPlane r])
+-&gt; set (HalfPlane r)
+-&gt; [HalfPlane r]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">set (HalfPlane r) -&gt; [HalfPlane r]
+forall a. set a -&gt; [a]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">toList</span></span><span> </span><span class="annot"><span class="annottext">(set (HalfPlane r) -&gt; ([HalfPlane r], [HalfPlane r]))
+-&gt; set (HalfPlane r) -&gt; ([HalfPlane r], [HalfPlane r])
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">set (HalfPlane r)
+</span><a href="#local-6989586621679413400"><span class="hs-identifier hs-var">hs</span></a></span><span>
+</span><span id="line-188"></span><span>                    </span><span class="hs-keyword">of</span><span>
+</span><span id="line-189"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679413405"><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413405"><span class="hs-identifier hs-var">pos</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">[HalfPlane r]
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span id="local-6989586621679413406"><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413406"><span class="hs-identifier hs-var">neg</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">[HalfPlane r]
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413405"><span class="hs-identifier hs-var">pos</span></a></span><span class="annot"><span class="annottext">HalfPlane r
+-&gt; Getting (LineEQ r) (HalfPlane r) (LineEQ r) -&gt; LineEQ r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(BoundingHyperPlane (HalfPlane r) 2 r
+ -&gt; Const (LineEQ r) (BoundingHyperPlane (HalfPlane r) 2 r))
+-&gt; HalfPlane r -&gt; Const (LineEQ r) (HalfPlane r)
+Getting (LineEQ r) (HalfPlane r) (LineEQ r)
+forall halfSpace (d :: Natural) r.
+HalfSpace_ halfSpace d r =&gt;
+Lens' halfSpace (BoundingHyperPlane halfSpace d r)
+Lens' (HalfPlane r) (BoundingHyperPlane (HalfPlane r) 2 r)
+</span><span class="hs-identifier hs-var">boundingHyperPlane</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">LineEQ r -&gt; LineEQ r -&gt; Intersection (LineEQ r) (LineEQ r)
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413406"><span class="hs-identifier hs-var">neg</span></a></span><span class="annot"><span class="annottext">HalfPlane r
+-&gt; Getting (LineEQ r) (HalfPlane r) (LineEQ r) -&gt; LineEQ r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(BoundingHyperPlane (HalfPlane r) 2 r
+ -&gt; Const (LineEQ r) (BoundingHyperPlane (HalfPlane r) 2 r))
+-&gt; HalfPlane r -&gt; Const (LineEQ r) (HalfPlane r)
+Getting (LineEQ r) (HalfPlane r) (LineEQ r)
+forall halfSpace (d :: Natural) r.
+HalfSpace_ halfSpace d r =&gt;
+Lens' halfSpace (BoundingHyperPlane halfSpace d r)
+Lens' (HalfPlane r) (BoundingHyperPlane (HalfPlane r) 2 r)
+</span><span class="hs-identifier hs-var">boundingHyperPlane</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-190"></span><span>                     </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Line_x_Line_Point</span></span><span> </span><span id="local-6989586621679413407"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679413407"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; HalfPlane r -&gt; HalfPlane r -&gt; Basis2D r (HalfPlane r)
+forall r halfSpace.
+Point 2 r -&gt; halfSpace -&gt; halfSpace -&gt; Basis2D r halfSpace
+</span><a href="HGeometry.LPType.LinearProgramming.html#Basis2"><span class="hs-identifier hs-var">Basis2</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679413407"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413405"><span class="hs-identifier hs-var">pos</span></a></span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413406"><span class="hs-identifier hs-var">neg</span></a></span><span>
+</span><span id="line-191"></span><span>                     </span><span class="annot"><span class="annottext">Intersection (LineEQ r) (LineEQ r)
+</span><span class="hs-identifier">_</span></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; Basis2D r (HalfPlane r)
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;lpInitialBasis: absurd&quot;</span></span><span>
+</span><span id="line-192"></span><span>  </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">,</span><span class="annot"><span class="annottext">[HalfPlane r]
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Basis2D r (HalfPlane r)
+forall r halfSpace. Basis2D r halfSpace
+</span><a href="HGeometry.LPType.LinearProgramming.html#EmptyBasis"><span class="hs-identifier hs-var">EmptyBasis</span></a></span><span>
+</span><span id="line-193"></span><span>  </span><span class="hs-special">(</span><span id="local-6989586621679413408"><span class="annot"><span class="annottext">[HalfPlane r]
+</span><a href="#local-6989586621679413408"><span class="hs-identifier hs-var">poss</span></a></span></span><span class="hs-special">,</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">(HalfPlane r -&gt; Bool) -&gt; [HalfPlane r] -&gt; [HalfPlane r]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+forall (f :: * -&gt; *) a. Filterable f =&gt; (a -&gt; Bool) -&gt; f a -&gt; f a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/witherable-0.5-5d85f763e5e8170e826d2554153086f6307c6577afec4b5097a66230893464d4/share/doc/html/src/Witherable.html/Witherable.html#filter"><span class="hs-identifier hs-var">filter</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679413409"><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413409"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413409"><span class="hs-identifier hs-var">h</span></a></span><span class="annot"><span class="annottext">HalfPlane r -&gt; Getting r (HalfPlane r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(BoundingHyperPlane (HalfPlane r) 2 r
+ -&gt; Const r (BoundingHyperPlane (HalfPlane r) 2 r))
+-&gt; HalfPlane r -&gt; Const r (HalfPlane r)
+(LineEQ r -&gt; Const r (LineEQ r))
+-&gt; HalfPlane r -&gt; Const r (HalfPlane r)
+forall halfSpace (d :: Natural) r.
+HalfSpace_ halfSpace d r =&gt;
+Lens' halfSpace (BoundingHyperPlane halfSpace d r)
+Lens' (HalfPlane r) (BoundingHyperPlane (HalfPlane r) 2 r)
+</span><span class="hs-identifier hs-var">boundingHyperPlane</span></span><span class="annot"><span class="annottext">((LineEQ r -&gt; Const r (LineEQ r))
+ -&gt; HalfPlane r -&gt; Const r (HalfPlane r))
+-&gt; ((r -&gt; Const r r) -&gt; LineEQ r -&gt; Const r (LineEQ r))
+-&gt; Getting r (HalfPlane r) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; LineEQ r -&gt; Const r (LineEQ r)
+forall line r. NonVerticalHyperPlane_ line 2 r =&gt; Lens' line r
+Lens' (LineEQ r) r
+</span><span class="hs-identifier hs-var">slope</span></span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">r
+</span><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[HalfPlane r]
+</span><a href="#local-6989586621679413408"><span class="hs-identifier hs-var">poss</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-194"></span><span>                     </span><span class="hs-special">[</span><span class="hs-special">]</span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Basis2D r (HalfPlane r)
+forall r halfSpace. Basis2D r halfSpace
+</span><a href="HGeometry.LPType.LinearProgramming.html#EmptyBasis"><span class="hs-identifier hs-var">EmptyBasis</span></a></span><span>
+</span><span id="line-195"></span><span>                     </span><span class="hs-special">(</span><span id="local-6989586621679413410"><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413410"><span class="hs-identifier hs-var">pos</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">[HalfPlane r]
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">r -&gt; HalfPlane r -&gt; Basis2D r (HalfPlane r)
+forall r halfSpace. r -&gt; halfSpace -&gt; Basis2D r halfSpace
+</span><a href="HGeometry.LPType.LinearProgramming.html#Basis1"><span class="hs-identifier hs-var">Basis1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413410"><span class="hs-identifier hs-var">pos</span></a></span><span class="annot"><span class="annottext">HalfPlane r -&gt; Getting r (HalfPlane r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(BoundingHyperPlane (HalfPlane r) 2 r
+ -&gt; Const r (BoundingHyperPlane (HalfPlane r) 2 r))
+-&gt; HalfPlane r -&gt; Const r (HalfPlane r)
+(LineEQ r -&gt; Const r (LineEQ r))
+-&gt; HalfPlane r -&gt; Const r (HalfPlane r)
+forall halfSpace (d :: Natural) r.
+HalfSpace_ halfSpace d r =&gt;
+Lens' halfSpace (BoundingHyperPlane halfSpace d r)
+Lens' (HalfPlane r) (BoundingHyperPlane (HalfPlane r) 2 r)
+</span><span class="hs-identifier hs-var">boundingHyperPlane</span></span><span class="annot"><span class="annottext">((LineEQ r -&gt; Const r (LineEQ r))
+ -&gt; HalfPlane r -&gt; Const r (HalfPlane r))
+-&gt; ((r -&gt; Const r r) -&gt; LineEQ r -&gt; Const r (LineEQ r))
+-&gt; Getting r (HalfPlane r) r
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(r -&gt; Const r r) -&gt; LineEQ r -&gt; Const r (LineEQ r)
+forall line r. NonVerticalHyperPlane_ line 2 r =&gt; Lens' line r
+Lens' (LineEQ r) r
+</span><span class="hs-identifier hs-var">intercept</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+</span><a href="#local-6989586621679413410"><span class="hs-identifier hs-var">pos</span></a></span><span>
+</span><span id="line-196"></span><span>
+</span><span id="line-197"></span><span class="hs-comment">-- | minimize the y-coordinate. (Lexicographically)</span><span>
+</span><span id="line-198"></span><span class="hs-comment">-- pre: LP is feasible</span><span>
+</span><span id="line-199"></span><span id="local-6989586621679412460"><span id="local-6989586621679412461"><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#linearProgrammingMinY"><span class="hs-identifier hs-type">linearProgrammingMinY</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679412460"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679412460"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679412461"><span class="hs-identifier hs-type">set</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-200"></span><span>                      </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.LPType.html#LPType"><span class="hs-identifier hs-type">LPType</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Unbounded.html/HGeometry.Unbounded.html#UnBounded"><span class="hs-identifier hs-type">UnBounded</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412460"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#Basis2D"><span class="hs-identifier hs-type">Basis2D</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412460"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679412461"><span class="hs-identifier hs-type">set</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LPType.LinearProgramming.html#HalfPlane"><span class="hs-identifier hs-type">HalfPlane</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679412460"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-201"></span><span id="linearProgrammingMinY"><span class="annot"><span class="annottext">linearProgrammingMinY :: forall r (set :: * -&gt; *).
+(Fractional r, Ord r, Foldable set) =&gt;
+LPType (UnBounded r) (Basis2D r) set (HalfPlane r)
+</span><a href="HGeometry.LPType.LinearProgramming.html#linearProgrammingMinY"><span class="hs-identifier hs-var hs-var">linearProgrammingMinY</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.LPType.html#LPType"><span class="hs-identifier hs-type">LPType</span></a></span><span> </span><span class="hs-special">{</span><span>
+</span><span id="line-202"></span><span>    </span><span class="annot"><span class="annottext">costFunction :: Basis2D r (HalfPlane r) -&gt; UnBounded r
+</span><a href="HGeometry.LPType.html#costFunction"><span class="hs-identifier hs-var">costFunction</span></a></span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Basis2D r (HalfPlane r) -&gt; UnBounded r
+forall r halfPlane.
+(Eq r, Num r) =&gt;
+Basis2D r halfPlane -&gt; UnBounded r
+</span><a href="HGeometry.LPType.LinearProgramming.html#lpCost"><span class="hs-identifier hs-var">lpCost</span></a></span><span>
+</span><span id="line-203"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">combinatorialDimension :: Int
+</span><a href="HGeometry.LPType.html#combinatorialDimension"><span class="hs-identifier hs-var">combinatorialDimension</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">3</span></span><span>
+</span><span id="line-204"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">extendBasis :: HalfPlane r
+-&gt; Basis2D r (HalfPlane r) -&gt; Maybe (Basis2D r (HalfPlane r))
+</span><a href="HGeometry.LPType.html#extendBasis"><span class="hs-identifier hs-var">extendBasis</span></a></span><span>            </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">HalfPlane r
+-&gt; Basis2D r (HalfPlane r) -&gt; Maybe (Basis2D r (HalfPlane r))
+forall r.
+(Ord r, Fractional r) =&gt;
+HalfPlane r
+-&gt; Basis2D r (HalfPlane r) -&gt; Maybe (Basis2D r (HalfPlane r))
+</span><a href="HGeometry.LPType.LinearProgramming.html#lpRecomputeBasis"><span class="hs-identifier hs-var">lpRecomputeBasis</span></a></span><span>
+</span><span id="line-205"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">initialBasis :: set (HalfPlane r) -&gt; Basis2D r (HalfPlane r)
+</span><a href="HGeometry.LPType.html#initialBasis"><span class="hs-identifier hs-var">initialBasis</span></a></span><span>           </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">set (HalfPlane r) -&gt; Basis2D r (HalfPlane r)
+forall (set :: * -&gt; *) r.
+(Foldable set, Ord r, Fractional r) =&gt;
+set (HalfPlane r) -&gt; Basis2D r (HalfPlane r)
+</span><a href="HGeometry.LPType.LinearProgramming.html#lpInitialBasis"><span class="hs-identifier hs-var">lpInitialBasis</span></a></span><span>
+</span><span id="line-206"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-207"></span></pre></body></html>
