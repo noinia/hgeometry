@@ -34,6 +34,8 @@ import           HGeometry.HalfSpace
 import           HGeometry.HyperPlane
 import           HGeometry.Instances ()
 import           HGeometry.Intersection
+import           HGeometry.LPType
+import           HGeometry.LPType.LinearProgramming
 import           HGeometry.Line
 import           HGeometry.Line.General
 import           HGeometry.Number.Real.Rational
@@ -62,106 +64,11 @@ import           Witherable
 
 type R = RealNumber 5
 
-
-
---------------------------------------------------------------------------------
--- * 1D Linear Programming
-
--- | A solution for 1D Linear pgoramming
-data Basis1DLP halfSpace = InFeasible1 halfSpace halfSpace
-                         | Feasible1 halfSpace
-                         | Unbounded
-                         deriving (Show,Eq,Functor)
-
--- | Linear programming in 1D, minimizes the coordinate values.
---
--- \(O(n)\).
-lp1D             :: ( Ord r, Foldable1 set
-                    , HalfSpace_ halfSpace 1 r
-                    , Point_ (BoundingHyperPlane halfSpace 1 r) 1 r
-                    ) => set halfSpace -> Basis1DLP halfSpace
-lp1D constraints = case foldr f (Bottom,Top) constraints of
-    (Bottom,_)             -> Unbounded
-    (ValB (Arg x p), negs) -> case negs of
-      Top                         -> Feasible1 p
-      ValT (Arg x' n) | x <= x'   -> Feasible1 p
-                      | otherwise -> InFeasible1 p n
-  where
-    f h (pos,neg) = let x = h^.boundingHyperPlane.xCoord
-                    in case h^.halfSpaceSign of
-      Positive -> (ValB (Arg x h) `max` pos, neg)
-      Negative -> (pos,                      ValT (Arg x h) `min` neg)
-      -- h is bounded by a 1d-hyperplane: i.e. a point
-
-
-
-{-
--- | Linear programming in 1D, minimizes the coordinate values.
---
--- \(O(n)\).
-lp1D             :: (Ord r, Foldable1 set) => set (HalfSpaceF r) -> Basis1DLP r
-lp1D constraints = case foldr f (Bottom,Top) constraints of
-    (Bottom,_)             -> Unbounded
-    (ValB (Arg x p), negs) -> case negs of
-      Top                         -> Feasible1 p
-      ValT (Arg x' n) | x <= x'   -> Feasible1 p
-                      | otherwise -> InFeasible1 p n
-  where
-    f h@(HalfSpace sign x) (pos,neg) = case sign of
-      Positive -> (ValB (Arg x h) `max` pos, neg)
-      Negative -> (pos,                      ValT (Arg x h) `min` neg)
--}
-
-
---------------------------------------------------------------------------------
-
--- subEx :: HalfSpace_ halfSpace d r
---       => Vector d r
---       -- ^ optimization direction
---       -> g halfSpace
---       -- ^ the constraints
---       -> b halfSpace
---       -- ^ the initial basis
---       -> Maybe (Point d r, [halfSpace])
-
-
-
--- | A Description of an LPType problem
-data LPType t basis set a = LPType
-                            { costFunction :: basis a -> t
-                            -- ^ the function we are trying to minimize
-                            , combinatorialDimension :: Int
-                             -- ^ the combinatorial dimension of the problem
-                            , extendBasis :: a
-                                           -> basis a
-                                           -> Maybe (basis a)
-                             -- ^ function to extend the current basis into a new basis.
-                             -- it returns the new basis (if it has changed) and Nothing
-                             -- otherwise.
-
-                            , initialBasis :: set a -> basis a
-                             -- ^ function to construct some initial basis
-                             -- the input may be large.
-                            }
-
---------------------------------------------------------------------------------
-
-
-
+lpRecomputeBasis = extendBasis linearProgrammingMinY
+lpInitialBasis   = initialBasis linearProgrammingMinY
 
 -- data Basis halfSpace d where
 --   Basis :: (i <= d + 1) => Vector i halfSpace
-
-data Basis2D r halfSpace = EmptyBasis
-                         -- ^ The solution must be unbounded
-                         | Basis1 r halfSpace
-                         -- ^ apparently we have a halfspace perpendicular to the
-                         -- optimization direction. So it just has a fixed value r.
-                         | Basis2 (Point 2 r) halfSpace halfSpace
-                         -- ^ The normal case in which a feasible solution (optimum)
-                         | Infeasible (Vector 3 halfSpace)
-                         -- ^ Infeasible
-                       deriving (Show,Eq,Functor,Foldable)
 
 instance (Arbitrary r, Eq r, Fractional r) => Arbitrary (Basis2D r (HalfSpaceF (LineEQ r))) where
   arbitrary = oneof [ pure EmptyBasis
@@ -178,133 +85,6 @@ instance (Arbitrary r, Eq r, Fractional r) => Arbitrary (Basis2D r (HalfSpaceF (
                     ]
 
 
-
-type HalfPlane r = HalfSpaceF (LineEQ r)
-
--- | Given a basis, compute the cost associated with the basis
-lpCost :: (Eq r, Num r) => Basis2D r halfPlane -> UnBounded r
-lpCost = \case
-  EmptyBasis   -> MinInfinity
-  Basis1 y _   -> Val y
-  Basis2 p _ _ -> Val $ p^.yCoord
-  Infeasible _ -> MaxInfinity
-
--- | Let l be some line in R^2, and let h be a halfplane. In general h and l intersect
--- in a halfline. Halfspace1 represents this halfline, as a 1D halfspace on l.
-type HalfSpace1 r halfSpace = HalfSpaceF (Point 1 (r,r)) :+ (Point 2 r, halfSpace)
-
--- | Represents the intersection of a halfplane with some line
-data Extend r halfSpace = Infeasible2 halfSpace
-                        -- ^ there is no solution
-                        | Partial (HalfSpace1 r halfSpace)
-                        -- ^ The halfspace
-                        deriving (Show)
-
--- | Collects the 1d halfspaces. Left signifies that we have an infeasible solution
-collect :: Foldable f => f (Extend r halfSpace)
-        -> Either halfSpace [HalfSpaceF (Point 1 (r,r)) :+ (Point 2 r, halfSpace)]
-collect = foldr f (Right []) . toList
-  where
-    f (Infeasible2 h) _            = Left h
-    f _               acc@(Left _) = acc
-    f (Partial h)     (Right hs)   = Right (h:hs)
-
-
--- | Constructs a 1D halfspace on the bounding line
-constructHalfSpaceOn :: (Fractional r, Ord r)
-                     => HalfPlane r
-                     -- ^ the bounding line of the new halfspace
-                     -> HalfPlane r
-                     -- ^ the existing halfplane
-                     -> Maybe (Extend r (HalfPlane r))
-constructHalfSpaceOn h h'
-    | not (h `intersects` h') = Just $ Infeasible2 h'
-    | otherwise               = case l `intersect` (h'^.boundingHyperPlane) of
-        Just (Line_x_Line_Point p) -> Just . Partial $ halfSpace1D p :+ (p,h')
-        _                          -> Nothing -- constraint is not useful
-  where
-    l = h^.boundingHyperPlane
-    -- the halfpsace of h' on the bounding line of h
-    halfSpace1D (Point2 x y) = HalfSpace newSign (Point1 (y,x))
-      where
-        x'  = if l^.slope >= 0 then x - 1 else x + 1
-        y'  = evalAt (Point1 x') l
-        newSign
-          | Point2 x' y' `intersects` h' = Negative
-          | otherwise                    = Positive
-        -- the main idea is to pick a point (x',y') on l that is "better"/lower than the
-        -- intersection point p. If this point is contained in h' then h' corresponds to
-        -- a 1D halfspace that is bounded from above (i..e by p_y); hence a negative signed
-        -- halfspace.
-
-
-
--- | Tries to extend the basis with the given halfplane
-lpRecomputeBasis                            :: (Ord r, Fractional r)
-                                            => HalfPlane r
-                                            -> Basis2D r (HalfPlane r)
-                                            -> Maybe ( Basis2D r (HalfPlane r) )
-lpRecomputeBasis h@(HalfSpace sign l) basis = case basis of
-    Infeasible _         -> Nothing -- already infeasible, so remains infeasible
-
-    Basis2 p h1 h2
-        | p `intersects` h -> Nothing -- solution remains the same
-        | otherwise        -> Just $ case collect $ mapMaybe (constructHalfSpaceOn h) [h1,h2] of
-            Left _            -> infeasible
-              -- not sure if we removed anything here.
-            Right constraints -> case NonEmpty.nonEmpty constraints of
-              Nothing          -> error "absurd: lpExtendBasis. No constraints, so unbounded?"
-              Just constraints' -> case lp1D constraints' of
-                InFeasible1 _ _         -> infeasible
-                Feasible1 (_ :+ (q,h')) -> Basis2 q h h'
-                Unbounded               -> error "absurd: lpExtendBasis. unbounded?"
-      where
-        infeasible = Infeasible (Vector3 h h1 h2)
-
-    Basis1 y h1 -> case l `intersect` (h1^.boundingHyperPlane) of
-      Just (Line_x_Line_Line _)                -> Nothing -- not useful yet
-      Just (Line_x_Line_Point p)
-        | (p .-^ (Vector2 1 0)) `intersects` h -> Nothing
-          -- h defines the 1D halfspace (-infty,p_x] on h1. So it's not useful
-        | otherwise                            -> Just $ Basis2 p h1 h
-      Nothing
-        | b > y                                -> Just $ Basis1 b h
-                                                   -- h is more restrictive than h1
-        | otherwise                            -> Nothing
-        where
-          b = l^.intercept
-
-    EmptyBasis -> case sign of
-      Positive | l^.slope == 0 -> Just $ Basis1 (l^.intercept) h
-      _                        -> Nothing -- basis remains empty
-
-
--- | Find an initial basis; i.e. some halfplanes that bound the initial solution from below
-lpInitialBasis    :: (Foldable set, Ord r, Fractional r)
-                  => set (HalfPlane r)
-                  -> Basis2D r (HalfPlane r)
-lpInitialBasis hs = case List.partition (\h -> h^.boundingHyperPlane.slope >= 0)
-                       . filter (\h -> h^.halfSpaceSign == Positive)
-                       . toList $ hs
-                    of
-  (pos:_,neg:_) -> case (pos^.boundingHyperPlane) `intersect` (neg^.boundingHyperPlane) of
-                     Just (Line_x_Line_Point p) -> Basis2 p pos neg
-                     _                          -> error "lpInitialBasis: absurd"
-  ([],_)        -> EmptyBasis
-  (poss,[])     -> case filter (\h -> h^.boundingHyperPlane.slope == 0) poss of
-                     []      -> EmptyBasis
-                     (pos:_) -> Basis1 (pos^.boundingHyperPlane.intercept) pos
-
--- | minimize the y-coordinate. (Lexicographically)
--- pre: LP is feasible
-linearProgrammingMinY :: (Fractional r, Ord r, Foldable set)
-                      => LPType (UnBounded r) (Basis2D r) set (HalfPlane r)
-linearProgrammingMinY = LPType {
-    costFunction           = lpCost
-  , combinatorialDimension = 3
-  , extendBasis            = lpRecomputeBasis
-  , initialBasis           = lpInitialBasis
-  }
 
 
 
@@ -324,161 +104,9 @@ linearProgrammingMinY = LPType {
 --   }
 
 
---------------------------------------------------------------------------------
--- * MinDisk
-
--- | Given a set of \(n \geq 2\) points, computes the smallest enclosing disk.
---
--- pre: the set contains at least 2 (distinct) points
---
--- running time: \(O(n)\)
-smallestEnclosingDisk     :: ( Point_ point 2 r, Ord r, Fractional r, Foldable1 set
-                             , HasIntersectionWith point (DiskByPoints point), Eq point
-                             , SplitGen gen
-                             )
-                          => gen
-                          -> set point
-                          -> DiskByPoints point
-smallestEnclosingDisk gen = snd . clarkson gen minDisk . build @V.Vector . foldable
-
-
--- | minimize the y-coordinate. (Lexicographically)
--- set contains at least two points
-minDisk :: ( Point_ point 2 r, Foldable set, Ord r, Fractional r
-           , HasIntersectionWith point (DiskByPoints point), Eq point
-           ) => LPType r DiskByPoints set point
-minDisk = LPType {
-    costFunction           = view squaredRadius
-  , combinatorialDimension = 2
-  , extendBasis            = extendDisk
-  , initialBasis           = initialDisk
-  }
-
--- | pre:
---  - needs at least 2 distinct points!
-initialDisk     :: (Foldable set, Point_ point 2 r, Eq point)
-                => set point -> DiskByPoints point
-initialDisk pts = case toList pts of
-                    p:ps -> case filter (/= p) ps of
-                              q:_ -> DiametralDisk $ DiametralPoints p q
-                              _   -> error "initialDisk: Too few distinct points!"
-                    _     -> error "initialDisk: precondition failed; no points!"
-
--- | Tries to extend the disk into the smallest enclosing disk.
-extendDisk               :: ( Point_ point 2 r, Ord r, Fractional r
-                            , HasIntersectionWith point (DiskByPoints point)
-                            )
-                         => point -> DiskByPoints point -> Maybe (DiskByPoints point)
-extendDisk q disk
-  | q `intersects` disk = Nothing
-  | otherwise           = Just $ Naive.smallestEnclosingDiskWith q disk
-    -- since q lies outside the disk, the disk is guaranteed to exist. Hence, the
-    -- precondition is satisfied. Furthermore. The existing disk is defined by only O(1)
-    -- points; so this runs in O(1) time.
 
 --------------------------------------------------------------------------------
 
-
--- | Solves the LP Type problem. In particular, a minimization problem.
---
--- returns the cost of an optimal solution (if it exists), and the subset of elements
--- realizing it
---
--- expected: O(n) time.
-clarkson            :: ( Foldable set, Monoid (set a), Vector.Vector set a
-                       , Foldable basis, Ord t, Eq a, SplitGen gen
-                       )
-                    => gen
-                    -- ^ random generator
-                    -> LPType t basis set a
-                    -- ^ an LP-type problem
-                    -> set a
-                    -> (t, basis a)
-clarkson gen0 problem@(LPType v dim extendBasis _) hs
-    | n <= 9* (dim*dim) = withOpt v $ clarkson2 gen0 problem hs
-    | otherwise         = withOpt v $ step gen0 mempty
-  where
-    n      = length hs
-    sqrtN' = sqrt . fromIntegral $ n
-    sqrtN  = floor sqrtN'
-    r      = floor $ fromIntegral dim * sqrtN'
-
-    step gen partial = case Vector.filter (isViolated basis) hs of
-        vs | null vs              -> basis  -- no more violated constraints, so we found opt.
-           | length vs <= 2*sqrtN -> step gen2 (vs <> partial) -- extend and continue
-           | otherwise            -> step gen2 partial -- too many violated constraints, retry
-      where
-        basis       = clarkson2 gen1 problem (partial <> sample gen r hs)
-        (gen1,gen2) = splitGen gen
-
-    isViolated basis h = isJust $ extendBasis h basis
-
--- | Take a sample of size r uniformly at random.
---
--- O(n)
---
--- TODO: make sure this is lazy enough to actually get O(r) time instead!
-sample          :: ( Foldable f, Vector.Vector vector a, RandomGen gen)
-                => gen -> Int -> f a -> vector a
-sample gen r hs = Vector.take r $ shuffle gen hs
-
-
--- type Weight = Int
-
--- data Weighted a = Weighted {-# UNPACK #-}!Weight a
---                   deriving (Show,Eq)
-
--- -- | Get the total weight
--- totalWeight :: Foldable f => f (Weighted a) -> Weight
--- totalWeight = getSum . foldMap' (\(Weighted w _) -> Sum w)
-
-
--- -- | double the weight of some element.
--- doubleWeight                :: Weighted a -> Weighted a
--- doubleWeight (Weighted w x) = Weighted (2*w) x
-
-
--- | The clarkson2 algorithm.
-clarkson2      :: ( Foldable set, Semigroup (set a), Vector.Vector set a
-                  , Foldable basis, Ord t, Eq a, SplitGen gen
-                  )
-               => gen
-                  -- ^ random generator
-                -> LPType t basis set a
-                -- ^ an LP-type problem
-                -> set a
-                -> basis a
-clarkson2 gen0 problem@(LPType _ dim extendBasis _) hs
-    | n <= r    = subExp gen0 problem hs
-    | otherwise = step gen0 hs
-  where
-    n = length hs
-    r = 6* (dim*dim)
-
-    treshold hs' = length hs' `div` 3*dim
-
-    step gen hs' = case violated basis hs' of
-        Nothing                       -> basis -- no more violated constraints, so we found opt.
-        Just (vs,rest)
-          | length vs <= treshold hs' -> step gen2 $ (duplicate vs) <> rest
-          | otherwise                 -> step gen2 hs' -- too many violated constraints, retry
-      where
-        basis       = subExp gen1 problem (sample gen r hs')
-        (gen1,gen2) = splitGen gen
-
-    -- Compute the violated, and satisfied constraints
-    violated basis hs' = case Vector.partition (\h -> isJust $ extendBasis h basis) hs' of
-      (vs,rest) | null vs   -> Nothing -- no more violated constraints
-                | otherwise -> Just (vs,rest)
-
-duplicate   :: Vector.Vector set a => set a -> set a
-duplicate v = Vector.fromListN (2*Vector.length v) $ Vector.foldMap (\x -> [x,x]) v
-
--- weightedSample :: gen -> Weight -> f (Weighted a) -> vector a
--- weightedSample = undefined
-
-
---------------------------------------------------------------------------------
 
 
 -- | Runs the subexponential time and returns both the cost and the optimal basis.
@@ -493,63 +121,11 @@ subExpWith                  :: ( Foldable set, Foldable basis
                           -> (t, basis a)
 subExpWith gen problem hs = withOpt (costFunction problem) $ subExp gen problem hs
 
--- | SubExponential time algorithm to solve the LP-type problem
---
--- input: \(n\) constraints, combinatorial dimension \(d\)
---
--- running time: \(O(d^2 + nd) * e^{O(\sqrt{d\ln n})}\)
-subExp        :: ( Foldable set, Foldable basis
-                 , Ord t
-                 , RandomGen gen
-                 , Eq a
-                 )
-                 => gen
-                    -- ^ random generator
-                -> LPType t basis set a
-                -- ^ an LP-type problem
-                -> set a
-                -> basis a
-subExp gen (LPType _ _ extendBasis initialBasis) hs =
-    subExp' (initialBasis hs) (V.toList $ shuffle gen hs)
-  where
-    subExp' basis = \case
-      []     -> basis
-      (h:gs) -> let basis' = subExp' basis gs
-                in case extendBasis h basis' of
-                     Nothing            -> basis'
-                     Just extendedBasis -> subExp' extendedBasis gs
-
 -- | Also return the value of the optimal solution
 withOpt         :: (b -> t) -> b -> (t, b)
 withOpt v basis = (v basis, basis)
 
 
--- -- | Remoevs the items from the basis from the input set.
--- extract           :: (Foldable basis, Eq a, Foldable set) => basis a -> set a -> (basis a, [a])
--- extract basis' gs = (basis', filter (`notElem` basis') $ toList gs)
-
--- no longer needed:
-{-
-extract1            :: (RandomGen gen, Eq a, Foldable1 f, Foldable set)
-                    => gen -> f a -> set a -> (a, [a])
-extract1 gen0 gs bs = go gen0
-  where
-    n  = length gs
-    go gen = let (i,gen')  = uniformR (0,n-1) gen
-                 res@(x,_) = extract i (toNonEmpty gs)
-             in if x `elem` bs then go gen' else res
-
-
-extract            :: Int -> NonEmpty a -> (a,[a])
-extract 0 (x :| xs) = (x,xs)
-extract j (x :| xs) = let (y,rest) = extract (j-1) (NonEmpty.fromList xs)
-                      in (y,x:rest)
--}
-
-
--- instance HyperPlane_ (Point 1 r) 1 r where
-
--- instance NonVerticalHyperPlane_ (Point 1 r) 1 r --
 
 --------------------------------------------------------------------------------
 
@@ -659,11 +235,6 @@ spec = describe "LPType Spec" $ do
          bug2
 
 
-         prop "smallest enclosing disk same as naive" $
-           \gen (pts :: NESet.NESet (Point 2 R)) ->
-             NESet.size pts >= 2 ==>
-               smallestEnclosingDisk (mkStdGen gen) pts `sameDisk`
-               Naive.smallestEnclosingDisk pts
 
 
          -- it "extract" $
@@ -671,9 +242,9 @@ spec = describe "LPType Spec" $ do
          -- prop "extract1" $
          --   extract1 (mkStdGen 42) (NonEmpty.fromList "foobarenzo") "foo" ===  ('n',"foobarezo")
 
-sameDisk             :: DiskByPoints (Point 2 R) -> DiskByPoints (Point 2 R) -> Property
-sameDisk diskA diskB = diskA^.center === diskB^.center .&&.
-                       diskA^.squaredRadius === diskB^.squaredRadius
+-- sameDisk             :: DiskByPoints (Point 2 R) -> DiskByPoints (Point 2 R) -> Property
+-- sameDisk diskA diskB = diskA^.center === diskB^.center .&&.
+--                        diskA^.squaredRadius === diskB^.squaredRadius
 
 
 instance (Arbitrary a, Ord a) => Arbitrary (NESet.NESet a) where
@@ -785,10 +356,6 @@ exampleLP = [ HalfSpace Positive (LineEQ 1    0)
             ]
 
 
-instance HalfSpace_ core d r => HalfSpace_ (core :+ extra) d r where
-  type BoundingHyperPlane (core :+ extra) d r = BoundingHyperPlane core d r
-  boundingHyperPlane = core.boundingHyperPlane
-  halfSpaceSign = core.halfSpaceSign
 
 --------------------------------------------------------------------------------
 

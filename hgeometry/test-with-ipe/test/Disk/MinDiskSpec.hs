@@ -4,18 +4,21 @@ module Disk.MinDiskSpec
   (spec
   ) where
 
-import qualified HGeometry.Disk.Smallest.Naive as Naive
--- import           HGeometry.SmallestEnclosingBall
--- import qualified HGeometry.Disk.SmallestEnclosingBall.RIC as RIC
 import           Control.Lens
 import           Control.Monad (when)
 import           Control.Monad.Random.Strict (evalRand)
-import           HGeometry.Ext
+import           Data.Foldable
+import qualified Data.Map.Monoidal as Map
 import           Data.Maybe
+import qualified Data.Set as Set
+import           Golden
 import           HGeometry
 import           HGeometry.Ball
 import           HGeometry.Disk
-import           Golden
+import           HGeometry.Disk.Smallest
+import qualified HGeometry.Disk.Smallest.Naive as Naive
+import           HGeometry.Ext
+import           HGeometry.Number.Real.Rational
 import           Ipe
 import           System.OsPath
 import           System.Random (mkStdGen)
@@ -23,10 +26,6 @@ import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
 import           Test.Util
-import           HGeometry.Number.Real.Rational
-import qualified Data.Set as Set
-import qualified Data.Map.Monoidal as Map
-import           Data.Foldable
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -35,6 +34,11 @@ type R = RealNumber 5
 spec :: Spec
 spec = describe "Disk.MinDisk" $ do
          testCases [osp|test-with-ipe/Disk/minDisk.ipe|]
+         prop "smallest enclosing disk same as naive" $
+           \gen (pts :: NESet.NESet (Point 2 R)) ->
+             NESet.size pts >= 2 ==>
+               smallestEnclosingDisk (mkStdGen gen) pts `sameDisk`
+               Naive.smallestEnclosingDisk pts
 
 instance HasDefaultFromIpe (IpeSymbol r) where
   type DefaultFromIpe (IpeSymbol r) = IpeSymbol

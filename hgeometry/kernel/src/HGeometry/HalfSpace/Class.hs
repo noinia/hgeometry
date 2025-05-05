@@ -8,13 +8,14 @@
 -- Class for modelling Halfspaces
 --
 --------------------------------------------------------------------------------
+{-# LANGUAGE UndecidableInstances #-}
 module HGeometry.HalfSpace.Class
   ( HalfSpace_(..)
   , HalfPlane_
   ) where
 
 import Control.Lens
--- import HGeometry.HyperPlane.Class
+import HGeometry.Ext
 import HGeometry.Properties (NumType, Dimension)
 import HGeometry.Sign
 
@@ -50,3 +51,8 @@ type HalfPlane_ halfPlane r = HalfSpace_ halfPlane 2 r
 
 --   -- | Get the normal vector into the halfplane
 --   normalIntoHalfPlane :: halfPlane -> Vector 2 r
+
+instance HalfSpace_ core d r => HalfSpace_ (core :+ extra) d r where
+  type BoundingHyperPlane (core :+ extra) d r = BoundingHyperPlane core d r
+  boundingHyperPlane = core.boundingHyperPlane
+  halfSpaceSign = core.halfSpaceSign
