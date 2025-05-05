@@ -12,17 +12,21 @@ import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (fromJust, isJust)
+import           Data.Maybe (fromJust, fromMaybe, isJust)
 import           Data.Proxy
 import           Data.Semigroup
 import qualified Data.Set as Set
+import qualified Data.Set.NonEmpty as NESet
 import qualified Data.Vector as V
 import qualified Data.Vector.Generic as Vector
 import           Data.Word
 import           Debug.Trace
 import           GHC.TypeLits
 import           Golden
+import           HGeometry.Ball
 import           HGeometry.Combinatorial.Util
+import           HGeometry.Disk
+import qualified HGeometry.Disk.Smallest.Naive as Naive
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
 import           HGeometry.HalfLine
@@ -45,11 +49,14 @@ import           System.OsPath
 import           System.Random
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
-import           Test.QuickCheck ( (===),property,Discard(..), counterexample
+import           Test.QuickCheck ( (===), (==>), property,Discard(..), counterexample
                                  , Arbitrary(..), oneof, suchThat
                                  , withDiscardRatio, withMaxSuccess
+                                 , Property, (.&&.)
                                  )
 import           Test.QuickCheck.Instances ()
+import           VectorBuilder.Builder (foldable)
+import           VectorBuilder.Vector (build)
 import           Witherable
 --------------------------------------------------------------------------------
 
@@ -320,15 +327,30 @@ linearProgrammingMinY = LPType {
 --------------------------------------------------------------------------------
 -- * MinDisk
 
-{-
+-- | Given a set of \(n \geq 2\) points, computes the smallest enclosing disk.
+--
+-- pre: the set contains at least 2 (distinct) points
+--
+-- running time: \(O(n)\)
+smallestEnclosingDisk     :: ( Point_ point 2 r, Ord r, Fractional r, Foldable1 set
+                             , HasIntersectionWith point (DiskByPoints point), Eq point
+                             , SplitGen gen
+                             )
+                          => gen
+                          -> set point
+                          -> DiskByPoints point
+smallestEnclosingDisk gen = snd . clarkson gen minDisk . build @V.Vector . foldable
+
+
 -- | minimize the y-coordinate. (Lexicographically)
 -- set contains at least two points
-minDisk :: (Point_ point 2 r, Foldable set, Ord r, Num r)
-        => LPType r (DiskByPoints point) set point
+minDisk :: ( Point_ point 2 r, Foldable set, Ord r, Fractional r
+           , HasIntersectionWith point (DiskByPoints point), Eq point
+           ) => LPType r DiskByPoints set point
 minDisk = LPType {
-    costFunction           = squaredRadius
+    costFunction           = view squaredRadius
   , combinatorialDimension = 2
-  , extendBasis            = recomputeDisk
+  , extendBasis            = extendDisk
   , initialBasis           = initialDisk
   }
 
@@ -337,44 +359,22 @@ minDisk = LPType {
 initialDisk     :: (Foldable set, Point_ point 2 r, Eq point)
                 => set point -> DiskByPoints point
 initialDisk pts = case toList pts of
-                    p:ps -> case filter (/= q) ps of
-                              q:_ -> fromDiametralPair p q
+                    p:ps -> case filter (/= p) ps of
+                              q:_ -> DiametralDisk $ DiametralPoints p q
                               _   -> error "initialDisk: Too few distinct points!"
                     _     -> error "initialDisk: precondition failed; no points!"
 
 -- | Tries to extend the disk into the smallest enclosing disk.
-extendDisk           :: point -> DiskByPoints point -> Maybe (DiskByPoints point)
+extendDisk               :: ( Point_ point 2 r, Ord r, Fractional r
+                            , HasIntersectionWith point (DiskByPoints point)
+                            )
+                         => point -> DiskByPoints point -> Maybe (DiskByPoints point)
 extendDisk q disk
   | q `intersects` disk = Nothing
-  | otherwise           = Just disk'
-    where
-      Min (Arg _ disk') = foldMap1 minDisk' $ uniquePairs' (toNonEmpty disk)
-      minDisk' (Two a b) = let disk = diskByPoints a b q
-                           in Min (Arg (squaredRadius disk) disk)
-      -- if q does not lie in the disk, it is guaranteed to lie on the boundary. To compute the
-      -- new smallest enclosing disk; just try all options with q. There are only O(1)
-      -- such disks anyway.
-
-    -- FIXME: this is incorrect, since it only tries the disks with three points. Not with two
-    -- in particular, I guess "diskByPoints" could fail if the three points are colinear.
-
-
--- | pre: we have at least two elements.
-uniquePairs' :: Foldable1 f => f a -> NonEmpty (Two a)
-uniquePairs' = fromMaybe (error "uniquePairs': precondition failed")
-             . NonEmpty.nonEmpty . uniquePairs
-
-
-
-    -- Just $ case disk of
-    --   DiametralDisk (DiametralPoints a b)            -> diskByPoints a b q
-    --   DiskByPoints
-
-    --   (BoundaryPoints
-
-    --                  (Vector3 a b c)) -> uniquePairs []
-    --   -- just try all combinatoions with q
--}
+  | otherwise           = Just $ Naive.smallestEnclosingDiskWith q disk
+    -- since q lies outside the disk, the disk is guaranteed to exist. Hence, the
+    -- precondition is satisfied. Furthermore. The existing disk is defined by only O(1)
+    -- points; so this runs in O(1) time.
 
 --------------------------------------------------------------------------------
 
@@ -658,10 +658,26 @@ spec = describe "LPType Spec" $ do
          bug
          bug2
 
+
+         prop "smallest enclosing disk same as naive" $
+           \gen (pts :: NESet.NESet (Point 2 R)) ->
+             NESet.size pts >= 2 ==>
+               smallestEnclosingDisk (mkStdGen gen) pts `sameDisk`
+               Naive.smallestEnclosingDisk pts
+
+
          -- it "extract" $
          --   extract 3 (NonEmpty.fromList "foobarenzo") `shouldBe` ('b',"fooarenzo")
          -- prop "extract1" $
          --   extract1 (mkStdGen 42) (NonEmpty.fromList "foobarenzo") "foo" ===  ('n',"foobarezo")
+
+sameDisk             :: DiskByPoints (Point 2 R) -> DiskByPoints (Point 2 R) -> Property
+sameDisk diskA diskB = diskA^.center === diskB^.center .&&.
+                       diskA^.squaredRadius === diskB^.squaredRadius
+
+
+instance (Arbitrary a, Ord a) => Arbitrary (NESet.NESet a) where
+  arbitrary = NESet.fromList <$> arbitrary
 
 
 bruteForceSolutions    :: ( Ord r, Fractional r

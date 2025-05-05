@@ -11,9 +11,12 @@
 --------------------------------------------------------------------------------
 module HGeometry.Disk.Smallest.Naive
   ( smallestEnclosingDisk
+  , smallestEnclosingDiskWith
+  , enclosesAll
   ) where
 
 import           Control.Lens
+import           Data.Foldable (toList)
 import           Data.Foldable1
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (mapMaybe)
@@ -41,17 +44,44 @@ smallestEnclosingDisk pts = minDisk
                         -- by the precondition, there are at least two distinct points
                         -- so there is at least one element in disks2
 
-    disks2 = mapMaybe (\(Two p q) -> enclosesAll $ DiametralDisk (DiametralPoints p q))
+    disks2 = mapMaybe (\(Two p q) -> enclosesAll pts $ DiametralDisk (DiametralPoints p q))
            $ uniquePairs pts
-    disks3 = mapMaybe (\(Three a b c) -> (DiskByPoints <$> diskFromPoints a b c) >>= enclosesAll)
+    disks3 = mapMaybe (\(Three a b c) -> (DiskByPoints <$> diskFromPoints a b c)
+                                         >>= enclosesAll pts)
            $ uniqueTriplets pts
 
-    enclosesAll disk
-      | all (\p -> (p^.asPoint) `intersects` disk) pts = Just disk
-      | otherwise                                      = Nothing
+-- | Test if the given disk encloses all points.
+enclosesAll                                         :: ( Foldable set, Point_ point 2 r
+                                                       , HasInBall disk
+                                                       , HasIntersectionWith (Point 2 r) disk
+                                                       ) => set point -> disk -> Maybe disk
+enclosesAll pts disk
+  | all (\p -> (p^.asPoint) `intersects` disk) pts = Just disk
+  | otherwise                                      = Nothing
 
     -- I think we should be able to avoid the fractional constraint, and get a 'Num' constraint
     -- instead, by comparing against the squaredDiameter.
+
+-- | Given a point p and a non-empty set of n points, computes the smallest disk that has
+-- p on the boundary and encloses all points.
+--
+-- pre: such a disk exists
+--
+-- running time: \(O(n^2)\)
+smallestEnclosingDiskWith       :: (Point_ point 2 r, Fractional r, Ord r, Foldable1 nonEmpty)
+                                => point -> nonEmpty point -> DiskByPoints point
+smallestEnclosingDiskWith p pts = minDisk
+  where
+    Min (Arg _ minDisk) = foldMap1 (\disk -> Min (Arg (disk^.squaredRadius) disk))
+                        $ NonEmpty.fromList $ disks2 <> disks3
+                        -- by the precondition, such a disk must exist.
+
+    disks2 = mapMaybe (\q -> enclosesAll pts $ DiametralDisk (DiametralPoints p q)) (toList pts)
+    disks3 = mapMaybe (\(Two a b) -> (DiskByPoints <$> diskFromPoints p a b) >>= enclosesAll pts)
+           $ uniquePairs pts
+
+    -- TODO: As with the Naive solution can we write this without using the fractioanl
+    -- constraint?
 
 
 
