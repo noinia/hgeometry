@@ -1,0 +1,303 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Map.NonEmpty.Monoidal</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- A NonEmpty Monoidal Map, i.e. combining the monoidal maps combines the elements with</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- their semigroup operation.</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Map.NonEmpty.Monoidal.html"><span class="hs-identifier">HGeometry.Map.NonEmpty.Monoidal</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Map.NonEmpty.Monoidal.html#MonoidalNEMap"><span class="hs-identifier">MonoidalNEMap</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Map.NonEmpty.Monoidal.html#singleton"><span class="hs-identifier">singleton</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Map.NonEmpty.Monoidal.html#unions1WithKey"><span class="hs-identifier">unions1WithKey</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Map.NonEmpty.Monoidal.html#mapWithKeyMerge1"><span class="hs-identifier">mapWithKeyMerge1</span></a></span><span>
+</span><span id="line-17"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-d7c720cf79ffe928298050a0e7f3118f559b6aa80206ecc098154b607f804952/share/doc/html/src/Data.Map.NonEmpty.html/Data.Map.NonEmpty.html"><span class="hs-identifier">Data.Map.NonEmpty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-d7c720cf79ffe928298050a0e7f3118f559b6aa80206ecc098154b607f804952/share/doc/html/src/Data.Map.NonEmpty.Internal.html/Data.Map.NonEmpty.Internal.html#NEMap"><span class="hs-identifier">NEMap</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-d7c720cf79ffe928298050a0e7f3118f559b6aa80206ecc098154b607f804952/share/doc/html/src/Data.Map.NonEmpty.html/Data.Map.NonEmpty.html"><span class="hs-identifier">Data.Map.NonEmpty</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NEMap</span></span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-comment">-- | A NonEmpty Map in which we combine conflicting elements by using their semigroup</span><span>
+</span><span id="line-26"></span><span class="hs-comment">-- operation rather than picking the left value (as is done in the default Data.Map)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">newtype</span><span> </span><span id="MonoidalNEMap"><span class="annot"><a href="HGeometry.Map.NonEmpty.Monoidal.html#MonoidalNEMap"><span class="hs-identifier hs-var">MonoidalNEMap</span></a></span></span><span> </span><span id="local-6989586621679227977"><span class="annot"><a href="#local-6989586621679227977"><span class="hs-identifier hs-type">k</span></a></span></span><span> </span><span id="local-6989586621679227978"><span class="annot"><a href="#local-6989586621679227978"><span class="hs-identifier hs-type">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="MonoidalNEMap"><span class="annot"><a href="HGeometry.Map.NonEmpty.Monoidal.html#MonoidalNEMap"><span class="hs-identifier hs-var">MonoidalNEMap</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="getNEMap"><span class="annot"><span class="annottext">forall k v. MonoidalNEMap k v -&gt; NEMap k v
+</span><a href="HGeometry.Map.NonEmpty.Monoidal.html#getNEMap"><span class="hs-identifier hs-var hs-var">getNEMap</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-d7c720cf79ffe928298050a0e7f3118f559b6aa80206ecc098154b607f804952/share/doc/html/src/Data.Map.NonEmpty.Internal.html/Data.Map.NonEmpty.Internal.html#NEMap"><span class="hs-identifier hs-type">NEMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679227977"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679227978"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679228144"><span id="local-6989586621679228150"><span id="local-6989586621679228154"><span class="annot"><span class="annottext">Int -&gt; MonoidalNEMap k v -&gt; ShowS
+[MonoidalNEMap k v] -&gt; ShowS
+MonoidalNEMap k v -&gt; String
+(Int -&gt; MonoidalNEMap k v -&gt; ShowS)
+-&gt; (MonoidalNEMap k v -&gt; String)
+-&gt; ([MonoidalNEMap k v] -&gt; ShowS)
+-&gt; Show (MonoidalNEMap k v)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall k v. (Show k, Show v) =&gt; Int -&gt; MonoidalNEMap k v -&gt; ShowS
+forall k v. (Show k, Show v) =&gt; [MonoidalNEMap k v] -&gt; ShowS
+forall k v. (Show k, Show v) =&gt; MonoidalNEMap k v -&gt; String
+$cshowsPrec :: forall k v. (Show k, Show v) =&gt; Int -&gt; MonoidalNEMap k v -&gt; ShowS
+showsPrec :: Int -&gt; MonoidalNEMap k v -&gt; ShowS
+$cshow :: forall k v. (Show k, Show v) =&gt; MonoidalNEMap k v -&gt; String
+show :: MonoidalNEMap k v -&gt; String
+$cshowList :: forall k v. (Show k, Show v) =&gt; [MonoidalNEMap k v] -&gt; ShowS
+showList :: [MonoidalNEMap k v] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">newtype</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679228159"><span id="local-6989586621679228164"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; MonoidalNEMap k a -&gt; MonoidalNEMap k b)
+-&gt; (forall a b. a -&gt; MonoidalNEMap k b -&gt; MonoidalNEMap k a)
+-&gt; Functor (MonoidalNEMap k)
+forall a b. a -&gt; MonoidalNEMap k b -&gt; MonoidalNEMap k a
+forall a b. (a -&gt; b) -&gt; MonoidalNEMap k a -&gt; MonoidalNEMap k b
+forall k a b. a -&gt; MonoidalNEMap k b -&gt; MonoidalNEMap k a
+forall k a b. (a -&gt; b) -&gt; MonoidalNEMap k a -&gt; MonoidalNEMap k b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall k a b. (a -&gt; b) -&gt; MonoidalNEMap k a -&gt; MonoidalNEMap k b
+fmap :: forall a b. (a -&gt; b) -&gt; MonoidalNEMap k a -&gt; MonoidalNEMap k b
+$c&lt;$ :: forall k a b. a -&gt; MonoidalNEMap k b -&gt; MonoidalNEMap k a
+&lt;$ :: forall a b. a -&gt; MonoidalNEMap k b -&gt; MonoidalNEMap k a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679228173"><span id="local-6989586621679228182"><span id="local-6989586621679228190"><span id="local-6989586621679228196"><span id="local-6989586621679228200"><span id="local-6989586621679228204"><span id="local-6989586621679228208"><span id="local-6989586621679228212"><span id="local-6989586621679228216"><span id="local-6989586621679228220"><span id="local-6989586621679228224"><span id="local-6989586621679228228"><span id="local-6989586621679228234"><span id="local-6989586621679228242"><span id="local-6989586621679228250"><span id="local-6989586621679228258"><span id="local-6989586621679228266"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; MonoidalNEMap k m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; MonoidalNEMap k a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; MonoidalNEMap k a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MonoidalNEMap k a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MonoidalNEMap k a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MonoidalNEMap k a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MonoidalNEMap k a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; MonoidalNEMap k a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; MonoidalNEMap k a -&gt; a)
+-&gt; (forall a. MonoidalNEMap k a -&gt; [a])
+-&gt; (forall a. MonoidalNEMap k a -&gt; Bool)
+-&gt; (forall a. MonoidalNEMap k a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; MonoidalNEMap k a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; MonoidalNEMap k a -&gt; a)
+-&gt; (forall a. Ord a =&gt; MonoidalNEMap k a -&gt; a)
+-&gt; (forall a. Num a =&gt; MonoidalNEMap k a -&gt; a)
+-&gt; (forall a. Num a =&gt; MonoidalNEMap k a -&gt; a)
+-&gt; Foldable (MonoidalNEMap k)
+forall a. Eq a =&gt; a -&gt; MonoidalNEMap k a -&gt; Bool
+forall a. Num a =&gt; MonoidalNEMap k a -&gt; a
+forall a. Ord a =&gt; MonoidalNEMap k a -&gt; a
+forall m. Monoid m =&gt; MonoidalNEMap k m -&gt; m
+forall a. MonoidalNEMap k a -&gt; Bool
+forall a. MonoidalNEMap k a -&gt; Int
+forall a. MonoidalNEMap k a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; MonoidalNEMap k a -&gt; a
+forall k a. Eq a =&gt; a -&gt; MonoidalNEMap k a -&gt; Bool
+forall k a. Num a =&gt; MonoidalNEMap k a -&gt; a
+forall k a. Ord a =&gt; MonoidalNEMap k a -&gt; a
+forall k m. Monoid m =&gt; MonoidalNEMap k m -&gt; m
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; MonoidalNEMap k a -&gt; m
+forall k a. MonoidalNEMap k a -&gt; Bool
+forall k a. MonoidalNEMap k a -&gt; Int
+forall k a. MonoidalNEMap k a -&gt; [a]
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MonoidalNEMap k a -&gt; b
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MonoidalNEMap k a -&gt; b
+forall k a. (a -&gt; a -&gt; a) -&gt; MonoidalNEMap k a -&gt; a
+forall k m a. Monoid m =&gt; (a -&gt; m) -&gt; MonoidalNEMap k a -&gt; m
+forall k b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MonoidalNEMap k a -&gt; b
+forall k a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MonoidalNEMap k a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+$cfold :: forall k m. Monoid m =&gt; MonoidalNEMap k m -&gt; m
+fold :: forall m. Monoid m =&gt; MonoidalNEMap k m -&gt; m
+$cfoldMap :: forall k m a. Monoid m =&gt; (a -&gt; m) -&gt; MonoidalNEMap k a -&gt; m
+foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; MonoidalNEMap k a -&gt; m
+$cfoldMap' :: forall k m a. Monoid m =&gt; (a -&gt; m) -&gt; MonoidalNEMap k a -&gt; m
+foldMap' :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; MonoidalNEMap k a -&gt; m
+$cfoldr :: forall k a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MonoidalNEMap k a -&gt; b
+foldr :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MonoidalNEMap k a -&gt; b
+$cfoldr' :: forall k a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MonoidalNEMap k a -&gt; b
+foldr' :: forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; MonoidalNEMap k a -&gt; b
+$cfoldl :: forall k b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MonoidalNEMap k a -&gt; b
+foldl :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MonoidalNEMap k a -&gt; b
+$cfoldl' :: forall k b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MonoidalNEMap k a -&gt; b
+foldl' :: forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; MonoidalNEMap k a -&gt; b
+$cfoldr1 :: forall k a. (a -&gt; a -&gt; a) -&gt; MonoidalNEMap k a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; MonoidalNEMap k a -&gt; a
+$cfoldl1 :: forall k a. (a -&gt; a -&gt; a) -&gt; MonoidalNEMap k a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; MonoidalNEMap k a -&gt; a
+$ctoList :: forall k a. MonoidalNEMap k a -&gt; [a]
+toList :: forall a. MonoidalNEMap k a -&gt; [a]
+$cnull :: forall k a. MonoidalNEMap k a -&gt; Bool
+null :: forall a. MonoidalNEMap k a -&gt; Bool
+$clength :: forall k a. MonoidalNEMap k a -&gt; Int
+length :: forall a. MonoidalNEMap k a -&gt; Int
+$celem :: forall k a. Eq a =&gt; a -&gt; MonoidalNEMap k a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; MonoidalNEMap k a -&gt; Bool
+$cmaximum :: forall k a. Ord a =&gt; MonoidalNEMap k a -&gt; a
+maximum :: forall a. Ord a =&gt; MonoidalNEMap k a -&gt; a
+$cminimum :: forall k a. Ord a =&gt; MonoidalNEMap k a -&gt; a
+minimum :: forall a. Ord a =&gt; MonoidalNEMap k a -&gt; a
+$csum :: forall k a. Num a =&gt; MonoidalNEMap k a -&gt; a
+sum :: forall a. Num a =&gt; MonoidalNEMap k a -&gt; a
+$cproduct :: forall k a. Num a =&gt; MonoidalNEMap k a -&gt; a
+product :: forall a. Num a =&gt; MonoidalNEMap k a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679228295"><span id="local-6989586621679228304"><span id="local-6989586621679228312"><span id="local-6989586621679228318"><span id="local-6989586621679228324"><span id="local-6989586621679228332"><span id="local-6989586621679228338"><span id="local-6989586621679228342"><span id="local-6989586621679228346"><span id="local-6989586621679228350"><span id="local-6989586621679228354"><span id="local-6989586621679228358"><span class="annot"><span class="annottext">Foldable (MonoidalNEMap k)
+Foldable (MonoidalNEMap k) =&gt;
+(forall m. Semigroup m =&gt; MonoidalNEMap k m -&gt; m)
+-&gt; (forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; MonoidalNEMap k a -&gt; m)
+-&gt; (forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; MonoidalNEMap k a -&gt; m)
+-&gt; (forall a. MonoidalNEMap k a -&gt; NonEmpty a)
+-&gt; (forall a. Ord a =&gt; MonoidalNEMap k a -&gt; a)
+-&gt; (forall a. Ord a =&gt; MonoidalNEMap k a -&gt; a)
+-&gt; (forall a. MonoidalNEMap k a -&gt; a)
+-&gt; (forall a. MonoidalNEMap k a -&gt; a)
+-&gt; (forall a b.
+    (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; MonoidalNEMap k a -&gt; b)
+-&gt; (forall a b.
+    (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; MonoidalNEMap k a -&gt; b)
+-&gt; (forall a b.
+    (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; MonoidalNEMap k a -&gt; b)
+-&gt; (forall a b.
+    (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; MonoidalNEMap k a -&gt; b)
+-&gt; Foldable1 (MonoidalNEMap k)
+forall k. Foldable (MonoidalNEMap k)
+forall a. Ord a =&gt; MonoidalNEMap k a -&gt; a
+forall m. Semigroup m =&gt; MonoidalNEMap k m -&gt; m
+forall a. MonoidalNEMap k a -&gt; a
+forall a. MonoidalNEMap k a -&gt; NonEmpty a
+forall k a. Ord a =&gt; MonoidalNEMap k a -&gt; a
+forall k m. Semigroup m =&gt; MonoidalNEMap k m -&gt; m
+forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; MonoidalNEMap k a -&gt; m
+forall k a. MonoidalNEMap k a -&gt; a
+forall k a. MonoidalNEMap k a -&gt; NonEmpty a
+forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; MonoidalNEMap k a -&gt; b
+forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; MonoidalNEMap k a -&gt; b
+forall k m a. Semigroup m =&gt; (a -&gt; m) -&gt; MonoidalNEMap k a -&gt; m
+forall k a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; MonoidalNEMap k a -&gt; b
+forall k a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; MonoidalNEMap k a -&gt; b
+forall (t :: * -&gt; *).
+Foldable t =&gt;
+(forall m. Semigroup m =&gt; t m -&gt; m)
+-&gt; (forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a. t a -&gt; NonEmpty a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; a)
+-&gt; (forall a. t a -&gt; a)
+-&gt; (forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; t a -&gt; b)
+-&gt; Foldable1 t
+$cfold1 :: forall k m. Semigroup m =&gt; MonoidalNEMap k m -&gt; m
+fold1 :: forall m. Semigroup m =&gt; MonoidalNEMap k m -&gt; m
+$cfoldMap1 :: forall k m a. Semigroup m =&gt; (a -&gt; m) -&gt; MonoidalNEMap k a -&gt; m
+foldMap1 :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; MonoidalNEMap k a -&gt; m
+$cfoldMap1' :: forall k m a. Semigroup m =&gt; (a -&gt; m) -&gt; MonoidalNEMap k a -&gt; m
+foldMap1' :: forall m a. Semigroup m =&gt; (a -&gt; m) -&gt; MonoidalNEMap k a -&gt; m
+$ctoNonEmpty :: forall k a. MonoidalNEMap k a -&gt; NonEmpty a
+toNonEmpty :: forall a. MonoidalNEMap k a -&gt; NonEmpty a
+$cmaximum :: forall k a. Ord a =&gt; MonoidalNEMap k a -&gt; a
+maximum :: forall a. Ord a =&gt; MonoidalNEMap k a -&gt; a
+$cminimum :: forall k a. Ord a =&gt; MonoidalNEMap k a -&gt; a
+minimum :: forall a. Ord a =&gt; MonoidalNEMap k a -&gt; a
+$chead :: forall k a. MonoidalNEMap k a -&gt; a
+head :: forall a. MonoidalNEMap k a -&gt; a
+$clast :: forall k a. MonoidalNEMap k a -&gt; a
+last :: forall a. MonoidalNEMap k a -&gt; a
+$cfoldrMap1 :: forall k a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; MonoidalNEMap k a -&gt; b
+foldrMap1 :: forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; MonoidalNEMap k a -&gt; b
+$cfoldlMap1' :: forall k a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; MonoidalNEMap k a -&gt; b
+foldlMap1' :: forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; MonoidalNEMap k a -&gt; b
+$cfoldlMap1 :: forall k a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; MonoidalNEMap k a -&gt; b
+foldlMap1 :: forall a b. (a -&gt; b) -&gt; (b -&gt; a -&gt; b) -&gt; MonoidalNEMap k a -&gt; b
+$cfoldrMap1' :: forall k a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; MonoidalNEMap k a -&gt; b
+foldrMap1' :: forall a b. (a -&gt; b) -&gt; (a -&gt; b -&gt; b) -&gt; MonoidalNEMap k a -&gt; b
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable1</span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679228098"><span id="local-6989586621679228099"><span id="local-6989586621679228379"><span id="local-6989586621679228383"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679228098"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="#local-6989586621679228099"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Map.NonEmpty.Monoidal.html#MonoidalNEMap"><span class="hs-identifier hs-type">MonoidalNEMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679228098"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679228099"><span class="hs-identifier hs-type">v</span></a></span><span class="hs-special">)</span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-32"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Map.NonEmpty.Monoidal.html#MonoidalNEMap"><span class="hs-identifier hs-type">MonoidalNEMap</span></a></span><span> </span><span id="local-6989586621679228390"><span class="annot"><span class="annottext">NEMap k v
+</span><a href="#local-6989586621679228390"><span class="hs-identifier hs-var">ma</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679228391"><span class="annot"><span class="annottext">&lt;&gt; :: MonoidalNEMap k v -&gt; MonoidalNEMap k v -&gt; MonoidalNEMap k v
+</span><span class="hs-operator hs-var hs-var hs-var">&lt;&gt;</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Map.NonEmpty.Monoidal.html#MonoidalNEMap"><span class="hs-identifier hs-type">MonoidalNEMap</span></a></span><span> </span><span id="local-6989586621679228392"><span class="annot"><span class="annottext">NEMap k v
+</span><a href="#local-6989586621679228392"><span class="hs-identifier hs-var">mb</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NEMap k v -&gt; MonoidalNEMap k v
+forall k v. NEMap k v -&gt; MonoidalNEMap k v
+</span><a href="HGeometry.Map.NonEmpty.Monoidal.html#MonoidalNEMap"><span class="hs-identifier hs-var">MonoidalNEMap</span></a></span><span> </span><span class="annot"><span class="annottext">(NEMap k v -&gt; MonoidalNEMap k v) -&gt; NEMap k v -&gt; MonoidalNEMap k v
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(v -&gt; v -&gt; v) -&gt; NEMap k v -&gt; NEMap k v -&gt; NEMap k v
+forall k a.
+Ord k =&gt;
+(a -&gt; a -&gt; a) -&gt; NEMap k a -&gt; NEMap k a -&gt; NEMap k a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-d7c720cf79ffe928298050a0e7f3118f559b6aa80206ecc098154b607f804952/share/doc/html/src/Data.Map.NonEmpty.html/Data.Map.NonEmpty.html#unionWith"><span class="hs-identifier hs-var">NEMap.unionWith</span></a></span><span> </span><span class="annot"><span class="annottext">v -&gt; v -&gt; v
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(&lt;&gt;)</span></span><span> </span><span class="annot"><span class="annottext">NEMap k v
+</span><a href="#local-6989586621679228390"><span class="hs-identifier hs-var">ma</span></a></span><span> </span><span class="annot"><span class="annottext">NEMap k v
+</span><a href="#local-6989586621679228392"><span class="hs-identifier hs-var">mb</span></a></span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="annot"><span class="hs-comment">-- | Create a singleton MonoidalNE Map</span></span><span>
+</span><span id="line-35"></span><span id="local-6989586621679228106"><span id="local-6989586621679228107"><span class="annot"><a href="HGeometry.Map.NonEmpty.Monoidal.html#singleton"><span class="hs-identifier hs-type">singleton</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679228106"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679228107"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Map.NonEmpty.Monoidal.html#MonoidalNEMap"><span class="hs-identifier hs-type">MonoidalNEMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679228106"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679228107"><span class="hs-identifier hs-type">v</span></a></span></span></span><span>
+</span><span id="line-36"></span><span id="singleton"><span class="annot"><span class="annottext">singleton :: forall k v. k -&gt; v -&gt; MonoidalNEMap k v
+</span><a href="HGeometry.Map.NonEmpty.Monoidal.html#singleton"><span class="hs-identifier hs-var hs-var">singleton</span></a></span></span><span> </span><span id="local-6989586621679228394"><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679228394"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span id="local-6989586621679228395"><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679228395"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NEMap k v -&gt; MonoidalNEMap k v
+forall k v. NEMap k v -&gt; MonoidalNEMap k v
+</span><a href="HGeometry.Map.NonEmpty.Monoidal.html#MonoidalNEMap"><span class="hs-identifier hs-var">MonoidalNEMap</span></a></span><span> </span><span class="annot"><span class="annottext">(NEMap k v -&gt; MonoidalNEMap k v) -&gt; NEMap k v -&gt; MonoidalNEMap k v
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">k -&gt; v -&gt; NEMap k v
+forall k a. k -&gt; a -&gt; NEMap k a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-d7c720cf79ffe928298050a0e7f3118f559b6aa80206ecc098154b607f804952/share/doc/html/src/Data.Map.NonEmpty.Internal.html/Data.Map.NonEmpty.Internal.html#singleton"><span class="hs-identifier hs-var">NEMap.singleton</span></a></span><span> </span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679228394"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679228395"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="annot"><span class="hs-comment">-- | Merge a bunch of non-empty maps with the given mergin function</span></span><span>
+</span><span id="line-39"></span><span id="local-6989586621679228112"><span id="local-6989586621679228113"><span id="local-6989586621679228114"><span class="annot"><a href="HGeometry.Map.NonEmpty.Monoidal.html#unions1WithKey"><span class="hs-identifier hs-type">unions1WithKey</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679228112"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679228113"><span class="hs-identifier hs-type">k</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679228113"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679228114"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679228114"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span class="annot"><a href="#local-6989586621679228114"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679228112"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-d7c720cf79ffe928298050a0e7f3118f559b6aa80206ecc098154b607f804952/share/doc/html/src/Data.Map.NonEmpty.Internal.html/Data.Map.NonEmpty.Internal.html#NEMap"><span class="hs-identifier hs-type">NEMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679228113"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679228114"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-d7c720cf79ffe928298050a0e7f3118f559b6aa80206ecc098154b607f804952/share/doc/html/src/Data.Map.NonEmpty.Internal.html/Data.Map.NonEmpty.Internal.html#NEMap"><span class="hs-identifier hs-type">NEMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679228113"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679228114"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-40"></span><span id="unions1WithKey"><span class="annot"><span class="annottext">unions1WithKey :: forall (f :: * -&gt; *) k a.
+(Foldable1 f, Ord k) =&gt;
+(k -&gt; a -&gt; a -&gt; a) -&gt; f (NEMap k a) -&gt; NEMap k a
+</span><a href="HGeometry.Map.NonEmpty.Monoidal.html#unions1WithKey"><span class="hs-identifier hs-var hs-var">unions1WithKey</span></a></span></span><span> </span><span id="local-6989586621679228401"><span class="annot"><span class="annottext">k -&gt; a -&gt; a -&gt; a
+</span><a href="#local-6989586621679228401"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(NEMap k a -&gt; NEMap k a -&gt; NEMap k a) -&gt; f (NEMap k a) -&gt; NEMap k a
+forall (t :: * -&gt; *) a. Foldable1 t =&gt; (a -&gt; a -&gt; a) -&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">foldl1'</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(k -&gt; a -&gt; a -&gt; a) -&gt; NEMap k a -&gt; NEMap k a -&gt; NEMap k a
+forall k a.
+Ord k =&gt;
+(k -&gt; a -&gt; a -&gt; a) -&gt; NEMap k a -&gt; NEMap k a -&gt; NEMap k a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-d7c720cf79ffe928298050a0e7f3118f559b6aa80206ecc098154b607f804952/share/doc/html/src/Data.Map.NonEmpty.html/Data.Map.NonEmpty.html#unionWithKey"><span class="hs-identifier hs-var">NEMap.unionWithKey</span></a></span><span> </span><span class="annot"><span class="annottext">k -&gt; a -&gt; a -&gt; a
+</span><a href="#local-6989586621679228401"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="annot"><span class="hs-comment">-- | Merge the maps. When they share a key, combine their values using a semigroup.</span></span><span>
+</span><span id="line-43"></span><span id="local-6989586621679228122"><span id="local-6989586621679228123"><span id="local-6989586621679228124"><span id="local-6989586621679228125"><span class="annot"><a href="HGeometry.Map.NonEmpty.Monoidal.html#mapWithKeyMerge1"><span class="hs-identifier hs-type">mapWithKeyMerge1</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679228122"><span class="hs-identifier hs-type">k'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Semigroup</span></span><span> </span><span class="annot"><a href="#local-6989586621679228123"><span class="hs-identifier hs-type">v'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>                   </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679228124"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679228125"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-d7c720cf79ffe928298050a0e7f3118f559b6aa80206ecc098154b607f804952/share/doc/html/src/Data.Map.NonEmpty.Internal.html/Data.Map.NonEmpty.Internal.html#NEMap"><span class="hs-identifier hs-type">NEMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679228122"><span class="hs-identifier hs-type">k'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679228123"><span class="hs-identifier hs-type">v'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-d7c720cf79ffe928298050a0e7f3118f559b6aa80206ecc098154b607f804952/share/doc/html/src/Data.Map.NonEmpty.Internal.html/Data.Map.NonEmpty.Internal.html#NEMap"><span class="hs-identifier hs-type">NEMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679228124"><span class="hs-identifier hs-type">k</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679228125"><span class="hs-identifier hs-type">v</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-d7c720cf79ffe928298050a0e7f3118f559b6aa80206ecc098154b607f804952/share/doc/html/src/Data.Map.NonEmpty.Internal.html/Data.Map.NonEmpty.Internal.html#NEMap"><span class="hs-identifier hs-type">NEMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679228122"><span class="hs-identifier hs-type">k'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679228123"><span class="hs-identifier hs-type">v'</span></a></span></span></span></span></span><span>
+</span><span id="line-45"></span><span id="mapWithKeyMerge1"><span class="annot"><span class="annottext">mapWithKeyMerge1 :: forall k' v' k v.
+(Ord k', Semigroup v') =&gt;
+(k -&gt; v -&gt; NEMap k' v') -&gt; NEMap k v -&gt; NEMap k' v'
+</span><a href="HGeometry.Map.NonEmpty.Monoidal.html#mapWithKeyMerge1"><span class="hs-identifier hs-var hs-var">mapWithKeyMerge1</span></a></span></span><span> </span><span id="local-6989586621679228407"><span class="annot"><span class="annottext">k -&gt; v -&gt; NEMap k' v'
+</span><a href="#local-6989586621679228407"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">MonoidalNEMap k' v' -&gt; NEMap k' v'
+forall k v. MonoidalNEMap k v -&gt; NEMap k v
+</span><a href="HGeometry.Map.NonEmpty.Monoidal.html#getNEMap"><span class="hs-identifier hs-var">getNEMap</span></a></span><span> </span><span class="annot"><span class="annottext">(MonoidalNEMap k' v' -&gt; NEMap k' v')
+-&gt; (NEMap k v -&gt; MonoidalNEMap k' v') -&gt; NEMap k v -&gt; NEMap k' v'
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(k -&gt; v -&gt; MonoidalNEMap k' v') -&gt; NEMap k v -&gt; MonoidalNEMap k' v'
+forall m k a. Semigroup m =&gt; (k -&gt; a -&gt; m) -&gt; NEMap k a -&gt; m
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.4.5-d7c720cf79ffe928298050a0e7f3118f559b6aa80206ecc098154b607f804952/share/doc/html/src/Data.Map.NonEmpty.Internal.html/Data.Map.NonEmpty.Internal.html#foldMapWithKey"><span class="hs-identifier hs-var">NEMap.foldMapWithKey</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679228410"><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679228410"><span class="hs-identifier hs-var">k</span></a></span></span><span> </span><span id="local-6989586621679228411"><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679228411"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">NEMap k' v' -&gt; MonoidalNEMap k' v'
+forall k v. NEMap k v -&gt; MonoidalNEMap k v
+</span><a href="HGeometry.Map.NonEmpty.Monoidal.html#MonoidalNEMap"><span class="hs-identifier hs-var">MonoidalNEMap</span></a></span><span> </span><span class="annot"><span class="annottext">(NEMap k' v' -&gt; MonoidalNEMap k' v')
+-&gt; NEMap k' v' -&gt; MonoidalNEMap k' v'
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">k -&gt; v -&gt; NEMap k' v'
+</span><a href="#local-6989586621679228407"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">k
+</span><a href="#local-6989586621679228410"><span class="hs-identifier hs-var">k</span></a></span><span> </span><span class="annot"><span class="annottext">v
+</span><a href="#local-6989586621679228411"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span></pre></body></html>
