@@ -15,6 +15,7 @@ module HGeometry.Polygon.Convex.Merge
 
 import HGeometry.Polygon.Convex.Class
 import HGeometry.Polygon.Convex.Internal
+import HGeometry.Polygon.Convex.Tangents
 
 --------------------------------------------------------------------------------
 
@@ -34,9 +35,10 @@ import HGeometry.Polygon.Convex.Internal
 --      - The vertices of the polygons are given in clockwise order
 --
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
-merge       :: (Num r, Ord r) => ConvexPolygon p r  -> ConvexPolygon p r
-            -> (ConvexPolygon p r, LineSegment 2 p r, LineSegment 2 p r)
-merge lp rp = (ConvexPolygon . unsafeFromPoints $ r' ++ l', lt, ut)
+merge       :: (ConvexPolygon_ convexPolygon point r, Num r, Ord r)
+            => convexPolygon -> convexPolygon
+            -> (convexPolygon, LineSegment point, LineSegment point)
+merge lp rp = (uncheckedFromCCWPoints $ r' <> l', lt, ut)
   where
     lt@(ClosedLineSegment a b) = lowerTangent lp rp
     ut@(ClosedLineSegment c d) = upperTangent lp rp
