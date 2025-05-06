@@ -15,6 +15,8 @@ module HGeometry.Polygon.Convex.Merge
 
 import           Control.Lens
 import qualified Data.Foldable as F
+import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import           HGeometry.Cyclic
 import           HGeometry.Ext
 import           HGeometry.LineSegment
@@ -52,25 +54,26 @@ merge       :: (ConvexPolygon_ convexPolygon point r, Num r, Ord r)
                )
 merge lp rp = (uncheckedFromCCWPoints $ r' <> l', lt, ut)
   where
-    lt@(ClosedLineSegment a b) = lowerTangent lp rp
-    ut@(ClosedLineSegment c d) = upperTangent lp rp
+    lt = lowerTangent lp rp
+    ut = upperTangent lp rp
     r' = slice (lt^.start.extra) (ut^.end.extra) rp -- b d rp
     l' = slice (ut^.start.extra) (lt^.end.extra) lp -- c a lp
 
+    slice i j pg = fmap snd . takeUntil ((== j) . fst) $ pg^..ccwOuterBoundaryFrom i.withIndex
+
     -- rightElems  = F.toList . CV.rightElements
     -- takeAndRotate x y = takeUntil (coreEq x) . rightElems . rotateTo' y . getVertices
-
-    slice i j pg = map snd . takeUntil ((== j) . fst) $ pg^..rightElementsFrom i.withIndex
 
 
 -- | pre: predicate is true for at least one element.
 --
 -- >>> takeUntil (== 5) [1..10]
--- [1,2,3,4,5]
+-- 1 :| [2,3,4,5]
 -- >>> takeUntil even [1..10]
--- [1,2]
-takeUntil   :: (a -> Bool) -> [a] -> [a]
-takeUntil p = foldr (\x acc -> if p x then [x] else x:acc)  []
+-- 1 :| [2]
+takeUntil   :: (a -> Bool) -> [a] -> NonEmpty a
+takeUntil p = NonEmpty.fromList . foldr (\x acc -> if p x then [x] else x:acc)  []
+              -- precondition guarantees there is at least one elem in the output
 
 -- takeUntil      :: (a -> Bool) -> [a] -> [a]
 -- takeUntil p xs = let (xs',x:_) = break p xs in xs' <> [x]
