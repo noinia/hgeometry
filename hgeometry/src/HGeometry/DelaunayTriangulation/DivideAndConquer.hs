@@ -18,7 +18,7 @@ import qualified Data.CircularList as CL
 import qualified Data.Foldable as F
 import           Data.Function (on)
 import qualified Data.IntMap.Strict as IM
-import qualified Data.List as L
+import qualified Data.List as List
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
 import           Data.Maybe (fromJust, fromMaybe)
@@ -117,7 +117,7 @@ fromHull (vtxMap,_) p = let vs@(u:v:vs') = map (lookup' vtxMap . (^.core))
                                          -- $ p^.simplePolygon.outerBoundaryVector
 
                             es           = zipWith3 f vs (tail vs ++ [u]) (vs' ++ [u,v])
-                            f prv c nxt  = (c,CL.fromList . L.nub $ [prv, nxt])
+                            f prv c nxt  = (c,CL.fromList . List.nub $ [prv, nxt])
                         in IM.fromList es
 
 
