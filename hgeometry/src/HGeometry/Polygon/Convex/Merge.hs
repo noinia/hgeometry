@@ -13,9 +13,15 @@ module HGeometry.Polygon.Convex.Merge
   ( merge
   ) where
 
-import HGeometry.Polygon.Convex.Class
-import HGeometry.Polygon.Convex.Internal
-import HGeometry.Polygon.Convex.Tangents
+import           Control.Lens
+import qualified Data.Foldable as F
+import           HGeometry.Cyclic
+import           HGeometry.Ext
+import           HGeometry.LineSegment
+import           HGeometry.Polygon.Class
+import           HGeometry.Polygon.Convex.Class
+import           HGeometry.Polygon.Convex.Tangents
+import           HGeometry.Polygon.Simple.Class
 
 --------------------------------------------------------------------------------
 
@@ -35,24 +41,44 @@ import HGeometry.Polygon.Convex.Tangents
 --      - The vertices of the polygons are given in clockwise order
 --
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
+--
+-- FIXME: This currently returns the VertexIx's in the *original* polygons, rather than
+-- in the new polygon.
 merge       :: (ConvexPolygon_ convexPolygon point r, Num r, Ord r)
             => convexPolygon -> convexPolygon
-            -> (convexPolygon, LineSegment point, LineSegment point)
+            -> ( convexPolygon
+               , ClosedLineSegment (point :+ VertexIx convexPolygon)
+               , ClosedLineSegment (point :+ VertexIx convexPolygon)
+               )
 merge lp rp = (uncheckedFromCCWPoints $ r' <> l', lt, ut)
   where
     lt@(ClosedLineSegment a b) = lowerTangent lp rp
     ut@(ClosedLineSegment c d) = upperTangent lp rp
+    r' = slice (lt^.start.extra) (ut^.end.extra) rp -- b d rp
+    l' = slice (ut^.start.extra) (lt^.end.extra) lp -- c a lp
 
-    takeUntil p xs = let (xs',x:_) = break p xs in xs' ++ [x]
-    rightElems  = F.toList . CV.rightElements
-    takeAndRotate x y = takeUntil (coreEq x) . rightElems . rotateTo' y . getVertices
+    -- rightElems  = F.toList . CV.rightElements
+    -- takeAndRotate x y = takeUntil (coreEq x) . rightElems . rotateTo' y . getVertices
 
-    r' = takeAndRotate b d rp
-    l' = takeAndRotate c a lp
+    slice i j pg = map snd . takeUntil ((== j) . fst) $ pg^..rightElementsFrom i.withIndex
 
 
-rotateTo'   :: Eq a => (a :+ b) -> CircularVector (a :+ b) -> CircularVector (a :+ b)
-rotateTo' x = fromJust . CV.findRotateTo (coreEq x)
+-- | pre: predicate is true for at least one element.
+--
+-- >>> takeUntil (== 5) [1..10]
+-- [1,2,3,4,5]
+-- >>> takeUntil even [1..10]
+-- [1,2]
+takeUntil   :: (a -> Bool) -> [a] -> [a]
+takeUntil p = foldr (\x acc -> if p x then [x] else x:acc)  []
 
-coreEq :: Eq a => (a :+ b) -> (a :+ b) -> Bool
-coreEq = (==) `on` (^.core)
+-- takeUntil      :: (a -> Bool) -> [a] -> [a]
+-- takeUntil p xs = let (xs',x:_) = break p xs in xs' <> [x]
+
+
+
+-- rotateTo'   :: Eq a => (a :+ b) -> CircularVector (a :+ b) -> CircularVector (a :+ b)
+-- rotateTo' x = fromJust . CV.findRotateTo (coreEq x)
+
+-- coreEq :: Eq a => (a :+ b) -> (a :+ b) -> Bool
+-- coreEq = (==) `on` (^.core)

@@ -73,11 +73,11 @@ lowerTangent       :: ( Num r, Ord r
                       )
                    => convexPolygon
                    -> convexPolygon
-                   -> ClosedLineSegment point
+                   -> ClosedLineSegment (point :+ VertexIx convexPolygon)
 lowerTangent lp rp = ClosedLineSegment l r
   where
-    lh = toNonEmptyOf (cwOuterBoundaryFrom   (rightMostIdx lp)) lp
-    rh = toNonEmptyOf (ccwOuterBoundaryFrom  (leftMostIdx rp))  rp
+    lh = toNonEmptyOf (cwOuterBoundaryFrom   (rightMostIdx lp).asIndexedExt) lp
+    rh = toNonEmptyOf (ccwOuterBoundaryFrom  (leftMostIdx rp).asIndexedExt)  rp
     (Vector2 (l :+ _) (r :+ _)) = lowerTangent' lh rh
 
 -- | Index of the rightmost vertex. Returns the topmost such vertex if there are multiple
@@ -153,11 +153,11 @@ upperTangent       :: forall convexPolygon point r.
                       , ConvexPolygon_ convexPolygon point r)
                    => convexPolygon
                    -> convexPolygon
-                   -> ClosedLineSegment point
+                   -> ClosedLineSegment (point :+ VertexIx convexPolygon)
 upperTangent lp rp = ClosedLineSegment l r
   where
-    lh = toNonEmptyOf (cwOuterBoundaryFrom  (rightMostIdx lp)) lp
-    rh = toNonEmptyOf (ccwOuterBoundaryFrom (leftMostIdx rp))  rp
+    lh = toNonEmptyOf (cwOuterBoundaryFrom  (rightMostIdx lp).asIndexedExt) lp
+    rh = toNonEmptyOf (ccwOuterBoundaryFrom (leftMostIdx rp).asIndexedExt)  rp
     (Vector2 (l :+ _) (r :+ _)) = upperTangent' lh rh
 
 -- | Compute the upper tangent of the two convex chains lp and rp
