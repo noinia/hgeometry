@@ -23,19 +23,20 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
 import           Data.Maybe (fromJust, fromMaybe)
 import qualified Data.Vector as V
-import qualified HGeometry.Cyclic
 import           HGeometry.Algorithms.DivideAndConquer
 import           HGeometry.Ball
 import qualified HGeometry.CircularList.Util as CU
 import           HGeometry.ConvexHull.GrahamScan as GS
+import qualified HGeometry.Cyclic
 import           HGeometry.DelaunayTriangulation.Types
 import           HGeometry.Ext
 import           HGeometry.LineSegment
 import           HGeometry.Measured.Size
 import           HGeometry.Point
-import           HGeometry.Polygon
-import           HGeometry.Polygon.Convex (ConvexPolygon (..), simplePolygon)
+import           HGeometry.Polygon.Convex
 import qualified HGeometry.Polygon.Convex as Convex
+import           HGeometry.Tree.Binary.Static
+
 
 -------------------------------------------------------------------------------
 -- * Divide & Conqueror Delaunay Triangulation
@@ -77,13 +78,13 @@ delaunayTriangulation pts' = Triangulation vtxMap ptsV adjV
 
 -- : pre: - Input points are sorted lexicographically
 delaunayTriangulation' :: (Ord r, Fractional r)
-                       => BinLeafTree Size (Point 2 r :+ p)
+                       => BinLeafTree Sized (Point 2 r :+ p)
                        -> Mapping p r
-                       -> (Adj, ConvexPolygon (p :+ VertexID) r)
+                       -> (Adj, ConvexPolygon (Point 2 r :+ (p :+ VertexID)) r)
 delaunayTriangulation' pts mapping'@(vtxMap,_)
   | size' pts == 1 = let (Leaf p) = pts
                          i        = lookup' vtxMap (p^.core)
-                     in (IM.singleton i CL.empty, ConvexPolygon $ unsafeFromPoints [withID p i])
+                     in (IM.singleton i CL.empty, uncheckedFromPoints [withID p i])
   | size' pts <= 3 = let pts'  = NonEmpty.fromList
                                . map (\p -> withID p (lookup' vtxMap (p^.core)))
                                . F.toList $ pts
@@ -98,6 +99,8 @@ delaunayTriangulation' pts mapping'@(vtxMap,_)
 --------------------------------------------------------------------------------
 -- * Implementation
 
+
+
 -- | Mapping that says for each vtx in the convex hull what the first entry in
 -- the adj. list should be. The input polygon is given in Clockwise order
 firsts :: ConvexPolygon (p :+ VertexID) r -> IM.IntMap VertexID
@@ -109,8 +112,9 @@ firsts = IM.fromList . map (\s -> (s^.end.extra.extra, s^.start.extra.extra))
 -- pre: at least two elements
 fromHull              :: Ord r => Mapping p r -> ConvexPolygon (p :+ q) r -> Adj
 fromHull (vtxMap,_) p = let vs@(u:v:vs') = map (lookup' vtxMap . (^.core))
-                                         . F.toList . CV.rightElements
-                                         $ p^.simplePolygon.outerBoundaryVector
+                                         $ pg^..vertices
+                                         -- . F.toList . CV.rightElements
+                                         -- $ p^.simplePolygon.outerBoundaryVector
 
                             es           = zipWith3 f vs (tail vs ++ [u]) (vs' ++ [u,v])
                             f prv c nxt  = (c,CL.fromList . L.nub $ [prv, nxt])
@@ -278,7 +282,7 @@ p `isRightOf` (l,r) = asks (withPtMap . snd . fst)
 lookup'     :: Ord k => M.Map k a -> k -> a
 lookup' m x = fromJust $ M.lookup x m
 
-size'              :: BinLeafTree Size a -> Size
+size'              :: BinLeafTree Sized a -> Sized
 size' (Leaf _)     = 1
 size' (Node _ s _) = s
 
