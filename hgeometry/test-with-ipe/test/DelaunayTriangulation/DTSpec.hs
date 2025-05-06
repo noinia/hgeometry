@@ -14,9 +14,7 @@ import qualified HGeometry.DelaunayTriangulation.Naive as Naive
 import           HGeometry.DelaunayTriangulation
 import           HGeometry.Ext
 import           Ipe
--- import           Data.RealNumber.Rational
 import qualified Data.Vector as V
--- import           HGeometry.PlanarSubdivision
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust, mapMaybe)
 import qualified HGeometry.PlaneGraph as PG
@@ -24,10 +22,13 @@ import           HGeometry.Number.Real.Rational
 import qualified Data.Vector as V
 import           Test.Hspec
 import           Test.Util
+import           Data.OsPath
+import           Golden
+-- import           HGeometry.PlanarSubdivision
+--------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
---------------------------------------------------------------------------------
 
 dtEdges :: (Fractional r, Ord r)
         => NonEmpty.NonEmpty (Point 2 r :+ p) -> [(VertexID, VertexID)]
