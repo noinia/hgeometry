@@ -10,7 +10,7 @@
 --------------------------------------------------------------------------------
 module HGeometry.DelaunayTriangulation.Types
   ( VertexID
-  , Vertex
+  , DTVertex
   , Adj
   , Triangulation(..)
   , vertexIds
@@ -20,20 +20,23 @@ module HGeometry.DelaunayTriangulation.Types
   , edgesAsPoints
   , edgesAsVertices
   -- , toPlanarSubdivision
-  -- , toPlaneGraph
+  , toPlaneGraph
   ) where
 
 import           Control.Lens
 import qualified Data.CircularList as C
-import           HGeometry.Ext
+import           Data.Coerce
 import qualified Data.IntMap.Strict as IM
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
+import           HGeometry.Ext
 -- import           HGeometry.PlanarSubdivision
 import           HGeometry.Point
 import           HGeometry.Properties
-import qualified HGeometry.PlaneGraph as PG
+import           HGeometry.PlaneGraph
 import qualified Hiraffe.PlanarGraph as PPG
 import qualified Data.Vector as V
+import qualified Data.Vector.NonEmpty as NonEmptyV
 -- import           HGeometry.PlaneGraph.Core (PlaneGraph(..))
 
 --------------------------------------------------------------------------------
@@ -47,7 +50,7 @@ import qualified Data.Vector as V
 type VertexID = Int
 
 -- | Rotating Right <-> rotate clockwise
-type Vertex    = C.CList VertexID
+type DTVertex    = C.CList VertexID
 
 -- | Neighbours indexed by VertexID.
 type Adj = IM.IntMap (C.CList VertexID)
@@ -122,15 +125,26 @@ toPlanarSubdivision = fromPlaneGraph . toPlaneGraph
 -}
 
 
-{-
 -- | convert the triangulation into a plane graph
 --
 -- running time: \(O(n)\).
-toPlaneGraph    :: forall s p r. Triangulation p r -> PG.PlaneGraph s p () () r
-toPlaneGraph tr = PlaneGraph $ g&PPG.vertexData .~ vtxData
+toPlaneGraph    :: forall s p r.
+                   (Ord r, Num r) => Triangulation p r -> CPlaneGraph s (Point 2 r :+ p) () ()
+toPlaneGraph tr = fromAdjacencyLists
+                . NonEmpty.fromList . V.toList -- TODO: direclty use a NonEmptyVector
+                $ V.izipWith f (tr^.neighbours) (tr^.positions)
+  where
+    f i adj v = (coerce i, v, NonEmpty.fromList . C.leftElements $ (\j -> (coerce j, ())) <$> adj)
+                -- report in CCW order
+
+
+-- nonEmpty (vi, v, h (vi, e)) -> graph
+
+--  undefined
+{-
+  PlaneGraph $ g&PPG.vertexData .~ vtxData
   where
     g       = PPG.fromAdjacencyLists . V.toList . V.imap f $ tr^.neighbours
     f i adj = (VertexId i, C.leftElements $ VertexId <$> adj) -- report in CCW order
     vtxData = (\(loc :+ p) -> VertexData loc p) <$> tr^.positions
-
 -}

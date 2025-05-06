@@ -173,7 +173,7 @@ moveUp ut l r
 -- helps deciding if we merge up by rotating left or rotating right (See
 -- description in the paper for more info)
 rotateR        :: (Ord r, Fractional r)
-               => VertexID -> VertexID -> Vertex -> Merge p r (Vertex, Bool)
+               => VertexID -> VertexID -> DTVertex -> Merge p r (DTVertex, Bool)
 rotateR l r r1 = focus' r1 `isLeftOf` (l, r) >>= \case
                    True  -> (,False) <$> rotateR' l r r1 (pred' r1)
                    False -> pure (r1,True)
@@ -181,7 +181,7 @@ rotateR l r r1 = focus' r1 `isLeftOf` (l, r) >>= \case
 
 -- | The code that does the actual rotating
 rotateR'     :: (Ord r, Fractional r)
-             => VertexID -> VertexID -> Vertex -> Vertex -> Merge p r Vertex
+             => VertexID -> VertexID -> DTVertex -> DTVertex -> Merge p r DTVertex
 rotateR' l r = go
   where
     go r1 r2 = qTest l r r1 r2 >>= \case
@@ -192,14 +192,14 @@ rotateR' l r = go
 
 -- | Symmetric to rotateR
 rotateL     :: (Ord r, Fractional r)
-                     => VertexID -> VertexID -> Vertex -> Merge p r (Vertex, Bool)
+                     => VertexID -> VertexID -> DTVertex -> Merge p r (DTVertex, Bool)
 rotateL l r l1 = focus' l1 `isRightOf` (r, l) >>= \case
                    True  -> (,False) <$> rotateL' l r l1 (succ' l1)
                    False -> pure (l1,True)
 
 -- | The code that does the actual rotating. Symmetric to rotateR'
 rotateL'     :: (Ord r, Fractional r)
-             => VertexID -> VertexID -> Vertex -> Vertex -> Merge p r Vertex
+             => VertexID -> VertexID -> DTVertex -> DTVertex -> Merge p r DTVertex
 rotateL' l r = go
   where
     go l1 l2 = qTest l r l1 l2 >>= \case
@@ -213,7 +213,7 @@ rotateL' l r = go
 -- | returns True if the forth point (vertex) does not lie in the disk defined
 -- by the first three points.
 qTest         :: (Ord r, Fractional r)
-              => VertexID -> VertexID -> Vertex -> Vertex -> Merge p r Bool
+              => VertexID -> VertexID -> DTVertex -> DTVertex -> Merge p r Bool
 qTest h i j k = asks (withPtMap . snd . fst)
   where
     withPtMap ptMap = let h' = ptMap V.! h

@@ -22,7 +22,7 @@ import           HGeometry.Number.Real.Rational
 import qualified Data.Vector as V
 import           Test.Hspec
 import           Test.Util
-import           Data.OsPath
+import           System.OsPath
 import           Golden
 -- import           HGeometry.PlanarSubdivision
 --------------------------------------------------------------------------------
