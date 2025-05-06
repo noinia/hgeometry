@@ -11,7 +11,7 @@ import qualified HGeometry.CircularList.Util as CU
   -- FIXME: use DC
 import qualified HGeometry.DelaunayTriangulation.Naive as DC
 import qualified HGeometry.DelaunayTriangulation.Naive as Naive
-import           HGeometry.DelaunayTriangulation.Types
+import           HGeometry.DelaunayTriangulation
 import           HGeometry.Ext
 import           Ipe
 -- import           Data.RealNumber.Rational
@@ -20,7 +20,7 @@ import qualified Data.Vector as V
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust, mapMaybe)
 import qualified HGeometry.PlaneGraph as PG
-import           HGeometry.RealNumber.Rational
+import           HGeometry.Number.Real.Rational
 import qualified Data.Vector as V
 import           Test.Hspec
 import           Test.Util
