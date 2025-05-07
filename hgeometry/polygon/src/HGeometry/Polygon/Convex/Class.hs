@@ -13,7 +13,14 @@ module HGeometry.Polygon.Convex.Class
   ) where
 
 import HGeometry.Polygon.Simple.Class
+import HGeometry.Ext
+import Data.Default.Class
+
+--------------------------------------------------------------------------------
 
 -- | Class modelling convex polygons.
 class ( SimplePolygon_ convexPolygon point r
       ) => ConvexPolygon_ convexPolygon point r where
+
+instance (ConvexPolygon_ convexPolygon point r, Default extra)
+         => ConvexPolygon_ (convexPolygon :+ extra) point r where
