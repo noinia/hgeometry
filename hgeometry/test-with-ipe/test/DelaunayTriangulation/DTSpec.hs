@@ -1,12 +1,19 @@
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE UnicodeSyntax #-}
 module DelaunayTriangulation.DTSpec (spec) where
 
 import           Control.Lens
+import           Data.Coerce
+import           Data.Function (on)
+import qualified Data.List as List
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import           Data.Maybe (fromJust, mapMaybe)
+import           Data.Singletons (Apply)
+import           Data.Vinyl
 import           HGeometry
 import qualified HGeometry.CircularList.Util as CU
+import           Hiraffe.PlanarGraph.Connected (VertexIdIn(..))
 -- import qualified HGeometry.DelaunayTriangulation.DivideAndConquer as DC
   -- FIXME: use DC
 import qualified HGeometry.DelaunayTriangulation.Naive as DC
@@ -18,6 +25,7 @@ import qualified Data.Vector as V
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust, mapMaybe)
 import qualified HGeometry.PlaneGraph as PG
+import           HGeometry.PlaneGraph
 import           HGeometry.Number.Real.Rational
 import qualified Data.Vector as V
 import           Test.Hspec
@@ -47,8 +55,7 @@ spec = do
     toSpec (TestCase "myPoints" myPoints)
     toSpec (TestCase "myPoints'" myPoints')
     it "testing edges of 9 random pts" $
-      fmap (flip PG.endPoints trianG) (PG.darts' trianG) == edgesPts''
-
+      fmap (\d -> trianG^.endPointsOf d.asIndex) (trianG^..darts.asIndex) == edgesPts''
     -- toSpec (TestCase "maartens points" buggyPoints3)
 
     ipeSpec
@@ -64,7 +71,7 @@ testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
 
 
 -- | Point sets per color, Crosses form the solution
-readInput    :: FilePath -> IO (Either ConversionError [TestCase () R])
+readInput    :: OsPath -> IO (Either ConversionError [TestCase () R])
 readInput fp = fmap f <$> readSinglePageFile fp
   where
     f page = [ TestCase "?" $ fmap (\p -> p^.core.symbolPoint :+ ()) pSet
@@ -73,7 +80,6 @@ readInput fp = fmap f <$> readSinglePageFile fp
       where
         syms = page^..content.traverse._IpeUse
         byStrokeColour' = mapMaybe NonEmpty.nonEmpty . byStrokeColour
-
 
 
 data TestCase p r = TestCase { _color    :: String
@@ -135,14 +141,20 @@ myPoints' = NonEmpty.fromList . map ext $
 
 --------------------------------------------------------------------------------
 
+type GR = PlaneGraph () (Point 2 R :+ ()) () ()
+
 trianG = let dts    = DC.delaunayTriangulation pts''
          in toPlaneGraph @() dts
 
 pts'' :: NonEmpty.NonEmpty (Point 2 R :+ Int)
 pts'' = read "(Point2 (-214) 142 :+ 0) :| [Point2 (-59) 297 :+ 2,Point2 (-135) 141 :+ 1,Point2 193 (-123) :+ 6,Point2 51 (-147) :+ 3,Point2 242 114 :+ 7,Point2 186 290 :+ 5,Point2 262 293 :+ 8,Point2 109 1 :+ 4]"
 
-edgesPts'' :: V.Vector (VertexId' s, VertexId' s)
-edgesPts'' = V.fromList [(VertexId 0,VertexId 3),(VertexId 0,VertexId 1),(VertexId 0,VertexId 2),(VertexId 1,VertexId 0),(VertexId 1,VertexId 3),(VertexId 1,VertexId 4),(VertexId 1,VertexId 2),(VertexId 2,VertexId 0),(VertexId 2,VertexId 1),(VertexId 2,VertexId 4),(VertexId 2,VertexId 5),(VertexId 2,VertexId 8),(VertexId 3,VertexId 6),(VertexId 3,VertexId 4),(VertexId 3,VertexId 1),(VertexId 3,VertexId 0),(VertexId 4,VertexId 6),(VertexId 4,VertexId 7),(VertexId 4,VertexId 5),(VertexId 4,VertexId 2),(VertexId 4,VertexId 1),(VertexId 4,VertexId 3),(VertexId 5,VertexId 2),(VertexId 5,VertexId 4),(VertexId 5,VertexId 7),(VertexId 5,VertexId 8),(VertexId 6,VertexId 7),(VertexId 6,VertexId 4),(VertexId 6,VertexId 3),(VertexId 7,VertexId 8),(VertexId 7,VertexId 5),(VertexId 7,VertexId 4),(VertexId 7,VertexId 6),(VertexId 8,VertexId 2),(VertexId 8,VertexId 5),(VertexId 8,VertexId 7)]
+edgesPts'' :: [(VertexIx GR, VertexIx GR)]
+edgesPts'' = let f = coerce @Int
+             in bimap f f <$>
+  [(0,3),(0,1),(0,2),(1,0),(1,3),(1,4),(1,2),(2,0),(2,1),(2,4),(2,5),(2,8),(3,6),(3,4),(3,1),(3,0),(4,6),(4,7),(4,5),(4,2),(4,1),(4,3),(5,2),(5,4),(5,7),(5,8),(6,7),(6,4),(6,3),(7,8),(7,5),(7,4),(7,6),(8,2),(8,5),(8,7)]
+
+
 
 --------------------------------------------------------------------------------
 -- Issue #28 mentions that these sets loop.
@@ -229,3 +241,11 @@ buggyPoints3 = NonEmpty.fromList
 --             mapM_ print (internalFacePolygons trian)
 
 -- -- internalFaces' = V.tail . faces'
+
+
+byStrokeColour :: (Stroke ∈ ats, Ord (Apply f Stroke))
+               => [a :+ Attributes f ats] -> [[a :+ Attributes f ats]]
+byStrokeColour = map (map fst) . List.groupBy ((==) `on` snd) . List.sortOn snd
+               . map (\x -> (x,lookup' x))
+  where
+    lookup' (_ :+ ats) = lookupAttr SStroke ats
