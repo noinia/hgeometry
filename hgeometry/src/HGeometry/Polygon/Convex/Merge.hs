@@ -14,10 +14,8 @@ module HGeometry.Polygon.Convex.Merge
   ) where
 
 import           Control.Lens
-import qualified Data.Foldable as F
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           HGeometry.Cyclic
 import           HGeometry.Ext
 import           HGeometry.LineSegment
 import           HGeometry.Polygon.Class
@@ -27,20 +25,17 @@ import           HGeometry.Polygon.Simple.Class
 
 --------------------------------------------------------------------------------
 
--- | Rotating Right <-> rotate clockwise
---
--- Merging two convex hulls, based on the paper:
+-- | Merging two convex hulls, based on the paper:
 --
 -- Two Algorithms for Constructing a Delaunay Triangulation
 -- Lee and Schachter
 -- International Journal of Computer and Information Sciences, Vol 9, No. 3, 1980
 --
--- : (combined hull, lower tangent that was added, upper tangent thtat was
+-- : (combined hull, lower tangent that was added, upper tangent that was
 -- added)
 --
 -- pre: - lp and rp are disjoint, and there is a vertical line separating
 --        the two polygons.
---      - The vertices of the polygons are given in clockwise order
 --
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
 --

@@ -180,9 +180,9 @@ mergeTest inFP = describe "Merging disjoint convex polygons" $ do
     runIO (readAllFrom ([osp|data/test-with-ipe/Polygon/Convex/|] <> inFP)) >>= \case
       [pg1,pg2] -> let (out,_,_) = Merge.merge pg1 (pg2 :: ConvexPolygon (Point 2 R) :+ _) in
                    goldenWith [osp|data/test-with-ipe/Polygon/Convex|]
-                              (ipeContentGolden { name = inFP })
-                                [ iO' pg1
+                              (ipeContentGolden { name = inFP <> [osp|.out|]})
+                                [ iO'' out $ attr SFill lightgreen
+                                , iO' pg1
                                 , iO' pg2
-                                , iO'' out $ attr SStroke red
                                 ]
       _         -> pure () --

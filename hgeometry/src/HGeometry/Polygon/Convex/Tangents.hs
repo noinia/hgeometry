@@ -65,7 +65,6 @@ tangentCmp o p q = case ccw o p q of
 --   pre: - polygons lp and rp have at least 1 vertex
 --        - lp and rp are disjoint, and there is a vertical line separating
 --          the two polygons.
---        - The vertices of the polygons are given in clockwise order
 --
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
 lowerTangent       :: ( Num r, Ord r
@@ -145,7 +144,6 @@ lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
 --   pre: - polygons lp and rp have at least 1 vertex
 --        - lp and rp are disjoint, and there is a vertical line separating
 --          the two polygons.
---        - The vertices of the polygons are given in clockwise order
 --
 -- Running time: \( O(n+m) \), where n and m are the sizes of the two polygons respectively
 upperTangent       :: forall convexPolygon point r.
@@ -156,8 +154,8 @@ upperTangent       :: forall convexPolygon point r.
                    -> ClosedLineSegment (point :+ VertexIx convexPolygon)
 upperTangent lp rp = ClosedLineSegment l r
   where
-    lh = toNonEmptyOf (cwOuterBoundaryFrom  (rightMostIdx lp).asIndexedExt) lp
-    rh = toNonEmptyOf (ccwOuterBoundaryFrom (leftMostIdx rp).asIndexedExt)  rp
+    lh = toNonEmptyOf (ccwOuterBoundaryFrom  (rightMostIdx lp).asIndexedExt) lp
+    rh = toNonEmptyOf (cwOuterBoundaryFrom (leftMostIdx rp).asIndexedExt)  rp
     (Vector2 (l :+ _) (r :+ _)) = upperTangent' lh rh
 
 -- | Compute the upper tangent of the two convex chains lp and rp
