@@ -65,7 +65,6 @@ tangentCmp o p q = case ccw o p q of
 --   pre: - polygons lp and rp have at least 1 vertex
 --        - lp and rp are disjoint, and there is a vertical line separating
 --          the two polygons.
---        - The vertices of the polygons are given in clockwise order
 --
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
 lowerTangent       :: ( Num r, Ord r
@@ -73,11 +72,11 @@ lowerTangent       :: ( Num r, Ord r
                       )
                    => convexPolygon
                    -> convexPolygon
-                   -> ClosedLineSegment point
+                   -> ClosedLineSegment (point :+ VertexIx convexPolygon)
 lowerTangent lp rp = ClosedLineSegment l r
   where
-    lh = toNonEmptyOf (cwOuterBoundaryFrom   (rightMostIdx lp)) lp
-    rh = toNonEmptyOf (ccwOuterBoundaryFrom  (leftMostIdx rp))  rp
+    lh = toNonEmptyOf (cwOuterBoundaryFrom   (rightMostIdx lp).asIndexedExt) lp
+    rh = toNonEmptyOf (ccwOuterBoundaryFrom  (leftMostIdx rp).asIndexedExt)  rp
     (Vector2 (l :+ _) (r :+ _)) = lowerTangent' lh rh
 
 -- | Index of the rightmost vertex. Returns the topmost such vertex if there are multiple
@@ -145,7 +144,6 @@ lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
 --   pre: - polygons lp and rp have at least 1 vertex
 --        - lp and rp are disjoint, and there is a vertical line separating
 --          the two polygons.
---        - The vertices of the polygons are given in clockwise order
 --
 -- Running time: \( O(n+m) \), where n and m are the sizes of the two polygons respectively
 upperTangent       :: forall convexPolygon point r.
@@ -153,11 +151,11 @@ upperTangent       :: forall convexPolygon point r.
                       , ConvexPolygon_ convexPolygon point r)
                    => convexPolygon
                    -> convexPolygon
-                   -> ClosedLineSegment point
+                   -> ClosedLineSegment (point :+ VertexIx convexPolygon)
 upperTangent lp rp = ClosedLineSegment l r
   where
-    lh = toNonEmptyOf (cwOuterBoundaryFrom  (rightMostIdx lp)) lp
-    rh = toNonEmptyOf (ccwOuterBoundaryFrom (leftMostIdx rp))  rp
+    lh = toNonEmptyOf (ccwOuterBoundaryFrom  (rightMostIdx lp).asIndexedExt) lp
+    rh = toNonEmptyOf (cwOuterBoundaryFrom (leftMostIdx rp).asIndexedExt)  rp
     (Vector2 (l :+ _) (r :+ _)) = upperTangent' lh rh
 
 -- | Compute the upper tangent of the two convex chains lp and rp
