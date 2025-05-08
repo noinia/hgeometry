@@ -11,19 +11,17 @@ import           Control.Lens
 import qualified Data.CircularList as C
 import           Data.Foldable
 import           Data.Foldable1
-import           Data.Function (on)
-import qualified Data.List as L
+import qualified Data.List as List
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import           HGeometry.Ball
-import           HGeometry.Combinatorial.Util
 import           HGeometry.DelaunayTriangulation.Types
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
-import           HGeometry.Intersection
 import           HGeometry.Point
+import           HGeometry.Boundary
 
 --------------------------------------------------------------------------------
 
@@ -32,19 +30,14 @@ import           HGeometry.Point
 -- other points in the circle defined by p, q, and r.
 --
 -- pre: the input is a *SET*, i.e. contains no duplicate points.
-delaunayTriangulation     :: ( Foldable1 set, Point_ point 2 r, Ord point, Ord r, Num r
-                             , HasIntersectionWith point (BallByPoints point)
-                             )
+delaunayTriangulation     :: ( Foldable1 set, Point_ point 2 r, Ord point, Ord r, Num r)
                           => set point -> Triangulation point
 delaunayTriangulation pts = Triangulation ptIds ptsV adjV
   where
-    -- ptsV   =-- ==V.fromList . F.toList . NonEmpty.nubBy ((==) `on` (^.core)) . toNonEmpty $ pts
     ptsV   = fromFoldable pts
     ptIds  = Map.fromList $ zip (toList pts) [0..]
-      -- Map.fromList $ zip (map (^.core) . V.toList $ ptsV) [0..]
     adjV   = toAdjLists (ptIds,ptsV) . extractEdges $ fs
     n      = V.length ptsV - 1
-
     -- construct the list of faces/triangles in the delaunay triangulation
     fs = [ (p,q,r)
          | p <- [0..n], q <- [p..n], r <- [q..n], isDelaunay (ptIds,ptsV) p q r
@@ -80,21 +73,19 @@ sortAroundMapping (_,ptsV) u vs = reverse . map (^.extra) $ sortAround (f u) (ma
 
 -- | Given a list of faces, construct a list of edges
 extractEdges :: [(VertexID,VertexID,VertexID)] -> [(VertexID,VertexID)]
-extractEdges = map L.head . L.group . L.sort
-               . concatMap (\(p,q,r) -> [(p,q), (q,r), (p,r)])
+extractEdges = map NonEmpty.head . NonEmpty.group . List.sort
+             . concatMap (\(p,q,r) -> [(p,q), (q,r), (p,r)])
                -- we encounter every edge twice. To get rid of the duplicates
                -- we sort, group, and take the head of the lists
 
 
 -- | \( O(n) \) Test if the given three points form a triangle in the delaunay triangulation.
-isDelaunay                :: ( Point_ point 2 r, Num r, Ord r
-                             , HasIntersectionWith point (BallByPoints point)
-                             )
+isDelaunay                :: ( Point_ point 2 r, Num r, Ord r)
                           => Mapping point -> VertexID -> VertexID -> VertexID -> Bool
-isDelaunay (_,ptsV) p q r = case diskFromPoints (pt p) (pt q) (pt r) of
-    Nothing -> False -- if the points are colinear, we interpret this as: all
-                     -- pts in the plane are in the circle.
-    Just d  -> not $ any (`intersects` d)
-               [pt i | i <- [0..(V.length ptsV - 1)], i /= p, i /= q, i /= r]
+isDelaunay (_,ptsV) a b c = case diskFromPoints (pt a) (pt b) (pt c) of
+    Nothing   -> False -- if the points are colinear, we interpret this as: all
+                       -- pts in the plane are in the circle.
+    Just disk -> not $ any (\q -> q `inBall` disk == Inside)
+                 [pt i | i <- [0..(V.length ptsV - 1)], i /= a, i /= b, i /= c]
    where
      pt i = ptsV V.! i

@@ -10,37 +10,31 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import           Data.Maybe (fromJust, mapMaybe)
 import           Data.Singletons (Apply)
+import qualified Data.Vector as V
 import           Data.Vinyl
+import           Golden
 import           HGeometry
 import qualified HGeometry.CircularList.Util as CU
-import           Hiraffe.PlanarGraph.Connected (VertexIdIn(..))
--- import qualified HGeometry.DelaunayTriangulation.DivideAndConquer as DC
-  -- FIXME: use DC
-import qualified HGeometry.DelaunayTriangulation.Naive as DC
-import qualified HGeometry.DelaunayTriangulation.Naive as Naive
 import           HGeometry.DelaunayTriangulation
+import qualified HGeometry.DelaunayTriangulation.DivideAndConquer as DC
+import qualified HGeometry.DelaunayTriangulation.Naive as Naive
 import           HGeometry.Ext
-import           Ipe
-import qualified Data.Vector as V
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (fromJust, mapMaybe)
-import qualified HGeometry.PlaneGraph as PG
-import           HGeometry.PlaneGraph
 import           HGeometry.Intersection
 import           HGeometry.Number.Real.Rational
-import qualified Data.Vector as V
+import           HGeometry.PlaneGraph
+import qualified HGeometry.PlaneGraph as PG
+import           Hiraffe.PlanarGraph.Connected (VertexIdIn(..))
+import           Ipe
+import           System.OsPath
 import           Test.Hspec
 import           Test.Util
-import           System.OsPath
-import           Golden
--- import           HGeometry.PlanarSubdivision
+
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
 
 dtEdges :: (Point_ point 2 r, Ord point, Num r, Ord r
-           , HasIntersectionWith point (BallByPoints point)
            )
         => NonEmpty.NonEmpty point -> [(VertexID, VertexID)]
 dtEdges = edgesAsVertices . DC.delaunayTriangulation
@@ -95,7 +89,6 @@ toSpec (TestCase c pts) = describe ("testing on " ++ c ++ " points") $ do
                             sameAsNaive c pts
 
 sameAsNaive       :: (Point_ point 2 r, Num r, Ord r, Show point, Ord point, Show r
-                     , HasIntersectionWith point (BallByPoints point)
                      )
                   => String -> NonEmpty.NonEmpty point -> Spec
 sameAsNaive s pts = it ("Divide And Conquer same answer as Naive on " ++ s) $

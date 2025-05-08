@@ -16,6 +16,7 @@ import           Control.Monad.Reader
 import           Control.Monad.State
 import qualified Data.CircularList as CL
 import qualified Data.Foldable as F
+import           Data.Foldable1
 import           Data.Function (on)
 import qualified Data.IntMap.Strict as IM
 import qualified Data.List as List
@@ -30,12 +31,16 @@ import           HGeometry.ConvexHull.GrahamScan as GS
 import qualified HGeometry.Cyclic
 import           HGeometry.DelaunayTriangulation.Types
 import           HGeometry.Ext
+import           HGeometry.Foldable.Sort
 import           HGeometry.LineSegment
 import           HGeometry.Measured.Size
 import           HGeometry.Point
+import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
 import qualified HGeometry.Polygon.Convex.Merge as Convex
+import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Tree.Binary.Static
+import           HGeometry.Boundary
 
 
 -------------------------------------------------------------------------------
@@ -56,20 +61,19 @@ import           HGeometry.Tree.Binary.Static
 
 -- | Computes the delaunay triangulation of a set of points.
 --
--- Running time: \(O(n \log n)\)
--- (note: We use an IntMap in the implementation. So maybe actually \(O(n \log^2 n)\))
+-- Running time: \(O(n \log^2 n)\)
+-- (note: the extra \(\log n\) factor is since we use an IntMap in the implementation)
 --
--- pre: the input is a *SET*, i.e. contains no duplicate points. (If the
--- input does contain duplicate points, the implementation throws them away)
-delaunayTriangulation      :: (Ord r, Fractional r)
-                           => NonEmpty.NonEmpty (Point 2 r :+ p) -> Triangulation p r
-delaunayTriangulation pts' = Triangulation vtxMap ptsV adjV
+-- pre: the input is a *SET*, i.e. contains no duplicate points.
+delaunayTriangulation     :: (Foldable1 set, Point_ point 2 r, Ord point, Ord r, Num r)
+                          => set point -> Triangulation point
+delaunayTriangulation pts = Triangulation vtxMap ptsV adjV
   where
-    pts    = nub' . NonEmpty.sortBy (compare `on` (^.core)) $ pts'
-    ptsV   = V.fromList . F.toList $ pts
-    vtxMap = M.fromList $ zip (map (^.core) . V.toList $ ptsV) [0..]
-
-    tr     = _unElem <$> asBalancedBinLeafTree pts
+    -- pts    = nub' . NonEmpty.sortBy (compare `on` (^.core)) $ pts'
+      -- V.fromList . F.toList $ pts
+    ptsV   = sort pts
+    vtxMap = M.fromList $ zip (F.toList ptsV) [0..]
+    tr     = asBalancedBinLeafTree pts
 
     (adj,_) = delaunayTriangulation' tr (vtxMap,ptsV)
     adjV    = V.fromList . IM.elems $ adj
@@ -77,42 +81,42 @@ delaunayTriangulation pts' = Triangulation vtxMap ptsV adjV
 
 
 -- : pre: - Input points are sorted lexicographically
-delaunayTriangulation' :: (Ord r, Fractional r)
-                       => BinLeafTree (Count ) (Point 2 r :+ p)
-                       -> Mapping p r
-                       -> (Adj, ConvexPolygon (Point 2 r :+ (p :+ VertexID)) r)
-delaunayTriangulation' pts mapping'@(vtxMap,_)
-  | size' pts == 1 = let (Leaf p) = pts
-                         i        = lookup' vtxMap (p^.core)
-                     in (IM.singleton i CL.empty, uncheckedFromPoints [withID p i])
-  | size' pts <= 3 = let pts'  = NonEmpty.fromList
-                               . map (\p -> withID p (lookup' vtxMap (p^.core)))
-                               . F.toList $ pts
-                         ch    = GS.convexHull pts'
-                     in (fromHull mapping' ch, ch)
-  | otherwise      = let (Node lt _ rt) = pts
-                         (ld,lch)       = delaunayTriangulation' lt mapping'
-                         (rd,rch)       = delaunayTriangulation' rt mapping'
-                         (ch, bt, ut)   = Convex.merge lch rch
-                     in (merge ld rd bt ut mapping' (firsts ch), ch)
+delaunayTriangulation' :: (Point_ point 2 r, Ord point, Ord r, Num r)
+                       => BinLeafTree (Count point) point
+                       -> Mapping point
+                       -> (Adj, ConvexPolygon (point :+ VertexID))
+delaunayTriangulation' pts mapping'@(vtxMap,_) = case pts of
+  Leaf p        -> let i = lookup' vtxMap p
+                   in ( IM.singleton i CL.empty
+                      , uncheckedFromCCWPoints . NonEmpty.singleton $ p :+ i
+                      )
+                        -- FIXME: this deifnes an invalid polygon..
+  Node lt (Count size) rt
+    | size <= 3 -> let pts'  = (\p -> p :+ lookup' vtxMap p) <$> pts
+                       ch    = GS.convexHull pts'
+                   in (fromHull mapping' ch, ch)
+    | otherwise -> let (ld,lch)       = delaunayTriangulation' lt mapping'
+                       (rd,rch)       = delaunayTriangulation' rt mapping'
+                       (ch, bt, ut)   = Convex.merge lch rch
+                   in ( merge ld rd (view core <$> bt) (view core <$> ut) mapping' (firsts ch)
+                      , ch
+                      )
 
 --------------------------------------------------------------------------------
 -- * Implementation
 
-
-
 -- | Mapping that says for each vtx in the convex hull what the first entry in
 -- the adj. list should be. The input polygon is given in Clockwise order
-firsts :: ConvexPolygon (Point 2 r :+ (p :+ VertexID)) r -> IM.IntMap VertexID
-firsts = IM.fromList . map (\s -> (s^.end.extra.extra, s^.start.extra.extra))
-       . F.toList . outerBoundaryEdges . _simplePolygon
-
+firsts    :: Point_ point 2 r
+          => ConvexPolygon (point :+ VertexID) -> IM.IntMap VertexID
+firsts pg = IM.fromList . map (bimap (^.extra) (^.extra)) $ pg^..outerBoundaryEdges
 
 -- | Given a polygon; construct the adjacency list representation
 -- pre: at least two elements
-fromHull              :: Ord r => Mapping p r -> ConvexPolygon (Point 2 r :+ (p :+ q)) r -> Adj
-fromHull (vtxMap,_) p = let vs@(u:v:vs') = map (lookup' vtxMap . (^.core))
-                                         $ pg^..vertices
+fromHull              :: (Point_ point 2 r, Ord point)
+                      => Mapping point -> ConvexPolygon (point :+ VertexID) -> Adj
+fromHull (vtxMap,_) p = let vs@(u:v:vs') = lookup' vtxMap . (^.core)
+                                        <$> p^..vertices
                                          -- . F.toList . CV.rightElements
                                          -- $ p^.simplePolygon.outerBoundaryVector
 
@@ -124,14 +128,14 @@ fromHull (vtxMap,_) p = let vs@(u:v:vs') = map (lookup' vtxMap . (^.core))
 -- | Merge the two delaunay triangulations.
 --
 -- running time: \(O(n)\) (although we cheat a bit by using a IntMap)
-merge                            :: (Ord r, Fractional r)
+merge                            :: (Point_ point 2 r, Ord point, Ord r, Num r)
                                  => Adj
                                  -> Adj
-                                 -> LineSegment (Point 2 r :+ (p :+ VertexID))
+                                 -> ClosedLineSegment (point :+ VertexID)
                                  -- ^ lower tangent
-                                 -> LineSegment 2 (Point 2 r :+ (p :+ VertexID))
+                                 -> ClosedLineSegment (point:+ VertexID)
                                  -- ^ upper tangent
-                                 -> Mapping p r
+                                 -> Mapping point
                                  -> Firsts
                                  -> Adj
 merge ld rd bt ut mapping'@(vtxMap,_) fsts =
@@ -143,13 +147,13 @@ merge ld rd bt ut mapping'@(vtxMap,_) fsts =
     tr  = lookup' vtxMap (ut^.end.core)
     adj = ld `IM.union` rd
 
-type Merge p r = StateT Adj (Reader (Mapping p r, Firsts))
+type Merge point = StateT Adj (Reader (Mapping point, Firsts))
 
 type Firsts = IM.IntMap VertexID
 
 -- | Merges the two delaunay traingulations.
-moveUp          :: (Ord r, Fractional r)
-                => (VertexID,VertexID) -> VertexID -> VertexID -> Merge p r ()
+moveUp          :: (Point_ point 2 r, Ord r, Num r)
+                => (VertexID,VertexID) -> VertexID -> VertexID -> Merge point ()
 moveUp ut l r
   | (l,r) == ut = insert l r
   | otherwise   = do
@@ -174,16 +178,16 @@ moveUp ut l r
 -- should remain in the Delaunay Triangulation, as well as a boolean A that
 -- helps deciding if we merge up by rotating left or rotating right (See
 -- description in the paper for more info)
-rotateR        :: (Ord r, Fractional r)
-               => VertexID -> VertexID -> DTVertex -> Merge p r (DTVertex, Bool)
+rotateR        :: (Point_ point 2 r, Ord r, Num r)
+               => VertexID -> VertexID -> DTVertex -> Merge point (DTVertex, Bool)
 rotateR l r r1 = focus' r1 `isLeftOf` (l, r) >>= \case
                    True  -> (,False) <$> rotateR' l r r1 (pred' r1)
                    False -> pure (r1,True)
 
 
 -- | The code that does the actual rotating
-rotateR'     :: (Ord r, Fractional r)
-             => VertexID -> VertexID -> DTVertex -> DTVertex -> Merge p r DTVertex
+rotateR'     :: (Point_ point 2 r, Ord r, Num r)
+             => VertexID -> VertexID -> DTVertex -> DTVertex -> Merge point DTVertex
 rotateR' l r = go
   where
     go r1 r2 = qTest l r r1 r2 >>= \case
@@ -193,15 +197,15 @@ rotateR' l r = go
 
 
 -- | Symmetric to rotateR
-rotateL     :: (Ord r, Fractional r)
-                     => VertexID -> VertexID -> DTVertex -> Merge p r (DTVertex, Bool)
+rotateL        :: (Point_ point 2 r, Ord r, Num r)
+               => VertexID -> VertexID -> DTVertex -> Merge point (DTVertex, Bool)
 rotateL l r l1 = focus' l1 `isRightOf` (r, l) >>= \case
                    True  -> (,False) <$> rotateL' l r l1 (succ' l1)
                    False -> pure (l1,True)
 
 -- | The code that does the actual rotating. Symmetric to rotateR'
-rotateL'     :: (Ord r, Fractional r)
-             => VertexID -> VertexID -> DTVertex -> DTVertex -> Merge p r DTVertex
+rotateL'     :: (Point_ point 2 r, Ord r, Num r)
+             => VertexID -> VertexID -> DTVertex -> DTVertex -> Merge point DTVertex
 rotateL' l r = go
   where
     go l1 l2 = qTest l r l1 l2 >>= \case
@@ -214,19 +218,22 @@ rotateL' l r = go
 
 -- | returns True if the forth point (vertex) does not lie in the disk defined
 -- by the first three points.
-qTest         :: (Ord r, Fractional r)
-              => VertexID -> VertexID -> DTVertex -> DTVertex -> Merge p r Bool
+qTest         :: (Point_ point 2 r, Ord r, Num r)
+              => VertexID -> VertexID -> DTVertex -> DTVertex -> Merge point Bool
 qTest h i j k = asks (withPtMap . snd . fst)
   where
     withPtMap ptMap = let h' = ptMap V.! h
                           i' = ptMap V.! i
                           j' = ptMap V.! focus' j
                           k' = ptMap V.! focus' k
-                      in not . maybe True ((k'^.core) `insideBall`) $ disk' h' i' j'
-    disk' p q r = disk (p^.core) (q^.core) (r^.core)
+                      in not . maybe True (k' `insideBall`) $ diskFromPoints h' i' j'
+  -- should be strictly inside the ball
+
+insideBall q b = q `inBall` b == Inside
+
 
 -- | Inserts an edge into the right position.
-insert     :: (Num r, Ord r) => VertexID -> VertexID -> Merge p r ()
+insert     :: (Point_ point 2 r, Num r, Ord r) => VertexID -> VertexID -> Merge point ()
 insert u v = do
                (mapping',fsts) <- ask
                modify $ insert' u v mapping'
@@ -235,7 +242,7 @@ insert u v = do
 
 
 -- | make sure that the first vtx in the adj list of v is its predecessor on the CH
-rotateToFirst        :: VertexID -> Firsts -> Merge p r ()
+rotateToFirst        :: VertexID -> Firsts -> Merge point ()
 rotateToFirst v fsts = modify $ IM.adjust f v
   where
     mfst   = IM.lookup v fsts
@@ -244,14 +251,14 @@ rotateToFirst v fsts = modify $ IM.adjust f v
 
 -- | Inserts an edge (and makes sure that the vertex is inserted in the
 -- correct. pos in the adjacency lists)
-insert'               :: (Num r, Ord r)
-                      => VertexID -> VertexID -> Mapping p r -> Adj -> Adj
+insert'               :: (Point_ point 2 r, Num r, Ord r)
+                      => VertexID -> VertexID -> Mapping point -> Adj -> Adj
 insert' u v (_,ptMap) = IM.adjustWithKey (insert'' v) u
                       . IM.adjustWithKey (insert'' u) v
   where
     -- inserts b into the adjacency list of a
     insert'' bi ai = CU.insertOrdBy (cmp (ptMap V.! ai) `on` (ptMap V.!)) bi
-    cmp c p q = cwCmpAround' c p q <> cmpByDistanceTo' c p q
+    cmp c p q = cwCmpAround c p q <> cmpByDistanceTo c p q
 
 
 -- | Deletes an edge
@@ -262,16 +269,16 @@ delete u v = IM.adjust (delete' v) u . IM.adjust (delete' u) v
 
 
 -- | Lifted version of Convex.IsLeftOf
-isLeftOf           :: (Ord r, Num r)
-                   => VertexID -> (VertexID, VertexID) -> Merge p r Bool
+isLeftOf           :: (Point_ point 2 r, Ord r, Num r)
+                   => VertexID -> (VertexID, VertexID) -> Merge point Bool
 p `isLeftOf` (l,r) = asks (withPtMap . snd . fst)
   where
     withPtMap ptMap = (ptMap V.! p) `isLeftOf'` (ptMap V.! l, ptMap V.! r)
     a `isLeftOf'` (b,c) = ccw b c a == CCW
 
 -- | Lifted version of Convex.IsRightOf
-isRightOf           :: (Ord r, Num r)
-                    => VertexID -> (VertexID, VertexID) -> Merge p r Bool
+isRightOf           :: (Point_ point 2 r, Ord r, Num r)
+                    => VertexID -> (VertexID, VertexID) -> Merge point Bool
 p `isRightOf` (l,r) = asks (withPtMap . snd . fst)
   where
     withPtMap ptMap = (ptMap V.! p) `isRightOf'` (ptMap V.! l, ptMap V.! r)
@@ -284,9 +291,6 @@ p `isRightOf` (l,r) = asks (withPtMap . snd . fst)
 lookup'     :: Ord k => M.Map k a -> k -> a
 lookup' m x = fromJust $ M.lookup x m
 
-size'              :: BinLeafTree (Sized a) a -> Sized a
-size' (Leaf x)     = 1
-size' (Node _ s _) = s
 
 -- | an \'unsafe\' version of rotateTo that assumes the element to rotate to
 -- occurs in the list.
@@ -305,13 +309,13 @@ succ' = CL.rotL
 focus' :: CL.CList a -> a
 focus' = fromJust . CL.focus
 
--- | Removes duplicates from a sorted list
-nub' :: Eq a => NonEmpty.NonEmpty (a :+ b) -> NonEmpty.NonEmpty (a :+ b)
-nub' = fmap NonEmpty.head . NonEmpty.groupBy1 ((==) `on` (^.core))
+-- -- | Removes duplicates from a sorted list
+-- nub' :: Eq a => NonEmpty.NonEmpty (a :+ b) -> NonEmpty.NonEmpty (a :+ b)
+-- nub' = fmap NonEmpty.head . NonEmpty.groupBy1 ((==) `on` (^.core))
 
 
-withID     :: c :+ e -> e' -> c :+ (e :+ e')
-withID p i = p&extra %~ (:+i)
+-- withID     :: c :+ e -> e' -> c :+ (e :+ e')
+-- withID p i = p&extra %~ (:+i)
 
 lookup'' :: Int -> IM.IntMap a -> a
 lookup'' k m = m IM.! k
