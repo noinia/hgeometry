@@ -8,18 +8,20 @@
 module HGeometry.DelaunayTriangulation.Naive where
 
 import           Control.Lens
-import           Control.Monad (forM_)
 import qualified Data.CircularList as C
-import qualified Data.Foldable as F
+import           Data.Foldable
+import           Data.Foldable1
 import           Data.Function (on)
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as M
+import qualified Data.Map as Map
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import           HGeometry.Ball
+import           HGeometry.Combinatorial.Util
 import           HGeometry.DelaunayTriangulation.Types
 import           HGeometry.Ext
+import           HGeometry.Foldable.Util
 import           HGeometry.Intersection
 import           HGeometry.Point
 
@@ -29,14 +31,17 @@ import           HGeometry.Point
 -- tries each triple (p,q,r) and tests if it is delaunay, i.e. if there are no
 -- other points in the circle defined by p, q, and r.
 --
--- pre: the input is a *SET*, i.e. contains no duplicate points. (If the
--- input does contain duplicate points, the implementation throws them away)
-delaunayTriangulation     :: (Ord r, Fractional r)
-                          => NonEmpty.NonEmpty (Point 2 r :+ p) -> Triangulation p r
+-- pre: the input is a *SET*, i.e. contains no duplicate points.
+delaunayTriangulation     :: ( Foldable1 set, Point_ point 2 r, Ord point, Ord r, Num r
+                             , HasIntersectionWith point (BallByPoints point)
+                             )
+                          => set point -> Triangulation point
 delaunayTriangulation pts = Triangulation ptIds ptsV adjV
   where
-    ptsV   = V.fromList . F.toList . NonEmpty.nubBy ((==) `on` (^.core)) $ pts
-    ptIds  = M.fromList $ zip (map (^.core) . V.toList $ ptsV) [0..]
+    -- ptsV   =-- ==V.fromList . F.toList . NonEmpty.nubBy ((==) `on` (^.core)) . toNonEmpty $ pts
+    ptsV   = fromFoldable pts
+    ptIds  = Map.fromList $ zip (toList pts) [0..]
+      -- Map.fromList $ zip (map (^.core) . V.toList $ ptsV) [0..]
     adjV   = toAdjLists (ptIds,ptsV) . extractEdges $ fs
     n      = V.length ptsV - 1
 
@@ -47,11 +52,12 @@ delaunayTriangulation pts = Triangulation ptIds ptsV adjV
 
 -- | Given a list of edges, as vertexId pairs, construct a vector with the
 -- adjacency lists, each in CW sorted order.
-toAdjLists             :: (Num r, Ord r) => Mapping p r -> [(VertexID,VertexID)]
-                       -> V.Vector (C.CList VertexID)
+toAdjLists               :: (Point_ point 2 r, Num r, Ord r)
+                         => Mapping point -> [(VertexID,VertexID)]
+                         -> V.Vector (C.CList VertexID)
 toAdjLists m@(_,ptsV) es = V.imap toCList $ V.create $ do
     v <- MV.replicate (V.length ptsV) []
-    forM_ es $ \(i,j) -> do
+    for_ es $ \(i,j) -> do
       addAt v i j
       addAt v j i
     pure v
@@ -65,11 +71,11 @@ toAdjLists m@(_,ptsV) es = V.imap toCList $ V.create $ do
 -- | Given a particular point u and a list of points vs, sort the points vs in
 -- CW order around u.
 -- running time: \( O(m log m) \), where m=|vs| is the number of vertices to sort.
-sortAroundMapping               :: (Num r, Ord r)
-                                => Mapping p r -> VertexID -> [VertexID] -> [VertexID]
+sortAroundMapping               :: (Point_ point 2 r, Num r, Ord r)
+                                => Mapping point -> VertexID -> [VertexID] -> [VertexID]
 sortAroundMapping (_,ptsV) u vs = reverse . map (^.extra) $ sortAround (f u) (map f vs)
   where
-    f v = (ptsV V.! v)&extra .~ v
+    f v = (ptsV V.! v) :+ v
 
 
 -- | Given a list of faces, construct a list of edges
@@ -81,8 +87,10 @@ extractEdges = map L.head . L.group . L.sort
 
 
 -- | \( O(n) \) Test if the given three points form a triangle in the delaunay triangulation.
-isDelaunay                :: (Fractional r, Ord r)
-                          => Mapping p r -> VertexID -> VertexID -> VertexID -> Bool
+isDelaunay                :: ( Point_ point 2 r, Num r, Ord r
+                             , HasIntersectionWith point (BallByPoints point)
+                             )
+                          => Mapping point -> VertexID -> VertexID -> VertexID -> Bool
 isDelaunay (_,ptsV) p q r = case diskFromPoints (pt p) (pt q) (pt r) of
     Nothing -> False -- if the points are colinear, we interpret this as: all
                      -- pts in the plane are in the circle.

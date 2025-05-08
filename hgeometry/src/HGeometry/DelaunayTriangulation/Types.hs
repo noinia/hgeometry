@@ -28,16 +28,14 @@ import qualified Data.CircularList as C
 import           Data.Coerce
 import qualified Data.IntMap.Strict as IM
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as M
-import           HGeometry.Ext
--- import           HGeometry.PlanarSubdivision
-import           HGeometry.Point
-import           HGeometry.Properties
-import           HGeometry.PlaneGraph
-import qualified Hiraffe.PlanarGraph as PPG
+import qualified Data.Map as Map
 import qualified Data.Vector as V
 import qualified Data.Vector.NonEmpty as NonEmptyV
--- import           HGeometry.PlaneGraph.Core (PlaneGraph(..))
+import           HGeometry.Ext
+import           HGeometry.PlaneGraph
+import           HGeometry.Point
+import           HGeometry.Properties
+import qualified Hiraffe.PlanarGraph as PPG
 
 --------------------------------------------------------------------------------
 
@@ -57,45 +55,50 @@ type Adj = IM.IntMap (C.CList VertexID)
 
 -- | Neighbours are stored in clockwise order: i.e. rotating right moves to the
 -- next clockwise neighbour.
-data Triangulation p r = Triangulation { _vertexIds  :: M.Map (Point 2 r) VertexID
-                                       , _positions  :: V.Vector (Point 2 r :+ p)
-                                       , _neighbours :: V.Vector (C.CList VertexID)
-                                       }
+data Triangulation point = Triangulation { _vertexIds  :: Map.Map point VertexID
+                                         , _positions  :: V.Vector point
+                                         , _neighbours :: V.Vector (C.CList VertexID)
+                                         }
                          deriving (Show,Eq)
 
+-- data Triangulation p r = Triangulation { _vertexIds  :: Map.Map (Point 2 r) VertexID
+--                                        , _positions  :: V.Vector (Point 2 r :+ p)
+--                                        , _neighbours :: V.Vector (C.CList VertexID)
+--                                        }
+--                          deriving (Show,Eq)
+
+
 -- | Mapping between triangulated points and their internal VertexID.
-vertexIds :: Lens' (Triangulation p r) (M.Map (Point 2 r) VertexID)
+vertexIds :: Lens' (Triangulation point) (Map.Map point VertexID)
 vertexIds = lens _vertexIds (\(Triangulation _v p n) v -> Triangulation v p n)
 
 -- | Point positions indexed by VertexID.
-positions :: Lens (Triangulation p1 r) (Triangulation p2 r) (V.Vector (Point 2 r :+ p1)) (V.Vector (Point 2 r :+ p2))
+positions :: Lens' (Triangulation point) (V.Vector point)
 positions = lens _positions (\(Triangulation v _p n) p -> Triangulation v p n)
 
 -- | Point neighbours indexed by VertexID.
-neighbours :: Lens' (Triangulation p r) (V.Vector (C.CList VertexID))
+neighbours :: Lens' (Triangulation point) (V.Vector (C.CList VertexID))
 neighbours = lens _neighbours (\(Triangulation v p _n) n -> Triangulation v p n)
 
 
-type instance NumType   (Triangulation p r) = r
-type instance Dimension (Triangulation p r) = 2
+type instance NumType   (Triangulation point) = NumType point
+type instance Dimension (Triangulation point) = 2
 
 -- | Bidirectional mapping between points and VertexIDs.
-type Mapping p r = (M.Map (Point 2 r) VertexID, V.Vector (Point 2 r :+ p))
+type Mapping point = (Map.Map point VertexID, V.Vector point)
 
 
-
-
--- showDT :: (Show p, Show r)  => Triangulation p r -> IO ()
+-- showDT :: (Show p, Show r)  => Triangulation point -> IO ()
 -- showDT = mapM_ print . edgesAsPoints
 
 
 -- | List add edges as point pairs.
-edgesAsPoints   :: Triangulation p r -> [(Point 2 r :+ p, Point 2 r :+ p)]
+edgesAsPoints   :: Triangulation point -> [(point,point)]
 edgesAsPoints t = let pts = _positions t
-                   in map (bimap (pts V.!) (pts V.!)) . edgesAsVertices $ t
+                  in map (bimap (pts V.!) (pts V.!)) . edgesAsVertices $ t
 
 -- | List add edges as VertexID pairs.
-edgesAsVertices :: Triangulation p r -> [(VertexID,VertexID)]
+edgesAsVertices :: Triangulation point -> [(VertexID,VertexID)]
 edgesAsVertices = concatMap (\(i,ns) -> map (i,) . filter (> i) . C.toList $ ns)
        . zip [0..] . V.toList . _neighbours
 
@@ -120,7 +123,7 @@ edgesAsVertices = concatMap (\(i,ns) -> map (i,) . filter (> i) . C.toList $ ns)
 --
 -- running time: \(O(n)\).
 toPlanarSubdivision :: forall s p r. (Ord r, Fractional r)
-                    => Triangulation p r -> PlanarSubdivision s p () () r
+                    => Triangulation point -> PlanarSubdivision s p () () r
 toPlanarSubdivision = fromPlaneGraph . toPlaneGraph
 -}
 
@@ -128,8 +131,8 @@ toPlanarSubdivision = fromPlaneGraph . toPlaneGraph
 -- | convert the triangulation into a plane graph
 --
 -- running time: \(O(n)\).
-toPlaneGraph    :: forall s p r.
-                   (Ord r, Num r) => Triangulation p r -> CPlaneGraph s (Point 2 r :+ p) () ()
+toPlaneGraph    :: forall s point r. (Point_ point 2 r, Ord r, Num r)
+                => Triangulation point -> CPlaneGraph s point () ()
 toPlaneGraph tr = fromAdjacencyLists
                 . NonEmpty.fromList . V.toList -- TODO: direclty use a NonEmptyVector
                 $ V.izipWith f (tr^.neighbours) (tr^.positions)

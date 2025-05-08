@@ -26,6 +26,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromJust, mapMaybe)
 import qualified HGeometry.PlaneGraph as PG
 import           HGeometry.PlaneGraph
+import           HGeometry.Intersection
 import           HGeometry.Number.Real.Rational
 import qualified Data.Vector as V
 import           Test.Hspec
@@ -38,8 +39,10 @@ import           Golden
 type R = RealNumber 5
 
 
-dtEdges :: (Fractional r, Ord r)
-        => NonEmpty.NonEmpty (Point 2 r :+ p) -> [(VertexID, VertexID)]
+dtEdges :: (Point_ point 2 r, Ord point, Num r, Ord r
+           , HasIntersectionWith point (BallByPoints point)
+           )
+        => NonEmpty.NonEmpty point -> [(VertexID, VertexID)]
 dtEdges = edgesAsVertices . DC.delaunayTriangulation
 
 take'   :: Int -> NonEmpty.NonEmpty a -> NonEmpty.NonEmpty a
@@ -71,10 +74,10 @@ testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
 
 
 -- | Point sets per color, Crosses form the solution
-readInput    :: OsPath -> IO (Either ConversionError [TestCase () R])
+readInput    :: OsPath -> IO (Either ConversionError [TestCase])
 readInput fp = fmap f <$> readSinglePageFile fp
   where
-    f page = [ TestCase "?" $ fmap (\p -> p^.core.symbolPoint :+ ()) pSet
+    f page = [ TestCase "?" $ fmap (\p -> p^.core.symbolPoint) pSet
              | pSet <- byStrokeColour' syms
              ]
       where
@@ -82,24 +85,26 @@ readInput fp = fmap f <$> readSinglePageFile fp
         byStrokeColour' = mapMaybe NonEmpty.nonEmpty . byStrokeColour
 
 
-data TestCase p r = TestCase { _color    :: String
-                             , _pointSet :: NonEmpty.NonEmpty (Point 2 r :+ p)
-                             } deriving (Show,Eq)
+data TestCase = TestCase { _color    :: String
+                         , _pointSet :: NonEmpty.NonEmpty (Point 2 R)
+                         } deriving (Show,Eq)
 
 
-toSpec                    :: (Fractional r, Ord r, Show r, Show p) => TestCase p r -> Spec
+toSpec                  :: TestCase -> Spec
 toSpec (TestCase c pts) = describe ("testing on " ++ c ++ " points") $ do
                             sameAsNaive c pts
 
-sameAsNaive       :: (Fractional r, Ord r, Show p, Show r)
-                  => String -> NonEmpty.NonEmpty (Point 2 r :+ p) -> Spec
+sameAsNaive       :: (Point_ point 2 r, Num r, Ord r, Show point, Ord point, Show r
+                     , HasIntersectionWith point (BallByPoints point)
+                     )
+                  => String -> NonEmpty.NonEmpty point -> Spec
 sameAsNaive s pts = it ("Divide And Conquer same answer as Naive on " ++ s) $
                       (Naive.delaunayTriangulation pts
                        `sameEdges`
                        DC.delaunayTriangulation pts) `shouldBe` True
 
 
-sameEdges             :: Triangulation p r -> Triangulation p r -> Bool
+sameEdges             :: Triangulation point -> Triangulation point -> Bool
 triA `sameEdges` triB = all sameAdj . Map.assocs $ mapping'
   where
     sameAdj (a, b) = (f $ adjA V.! a) `CU.isShiftOf` (adjB V.! b)
@@ -111,8 +116,8 @@ triA `sameEdges` triB = all sameAdj . Map.assocs $ mapping'
 
     f = fmap (fromJust . flip Map.lookup mapping')
 
-myPoints :: NonEmpty.NonEmpty (Point 2 R :+ ())
-myPoints = NonEmpty.fromList . map ext $
+myPoints :: NonEmpty.NonEmpty (Point 2 R)
+myPoints = NonEmpty.fromList $
            [ Point2 1  3
            , Point2 4  26
            , Point2 5  17
@@ -126,8 +131,8 @@ myPoints = NonEmpty.fromList . map ext $
            , Point2 33 5
            ]
 
-myPoints' :: NonEmpty.NonEmpty (Point 2 R :+ ())
-myPoints' = NonEmpty.fromList . map ext $
+myPoints' :: NonEmpty.NonEmpty (Point 2 R)
+myPoints' = NonEmpty.fromList $
             [ Point2 64  736
             , Point2 96 688
             , Point2 128 752
@@ -141,7 +146,7 @@ myPoints' = NonEmpty.fromList . map ext $
 
 --------------------------------------------------------------------------------
 
-type GR = PlaneGraph () (Point 2 R :+ ()) () ()
+type GR = PlaneGraph () (Point 2 R) () ()
 
 trianG = let dts    = DC.delaunayTriangulation pts''
          in toPlaneGraph @() dts

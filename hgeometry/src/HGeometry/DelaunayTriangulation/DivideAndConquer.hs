@@ -34,7 +34,7 @@ import           HGeometry.LineSegment
 import           HGeometry.Measured.Size
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
-import qualified HGeometry.Polygon.Convex as Convex
+import qualified HGeometry.Polygon.Convex.Merge as Convex
 import           HGeometry.Tree.Binary.Static
 
 
@@ -78,7 +78,7 @@ delaunayTriangulation pts' = Triangulation vtxMap ptsV adjV
 
 -- : pre: - Input points are sorted lexicographically
 delaunayTriangulation' :: (Ord r, Fractional r)
-                       => BinLeafTree Sized (Point 2 r :+ p)
+                       => BinLeafTree (Count ) (Point 2 r :+ p)
                        -> Mapping p r
                        -> (Adj, ConvexPolygon (Point 2 r :+ (p :+ VertexID)) r)
 delaunayTriangulation' pts mapping'@(vtxMap,_)
@@ -103,14 +103,14 @@ delaunayTriangulation' pts mapping'@(vtxMap,_)
 
 -- | Mapping that says for each vtx in the convex hull what the first entry in
 -- the adj. list should be. The input polygon is given in Clockwise order
-firsts :: ConvexPolygon (p :+ VertexID) r -> IM.IntMap VertexID
+firsts :: ConvexPolygon (Point 2 r :+ (p :+ VertexID)) r -> IM.IntMap VertexID
 firsts = IM.fromList . map (\s -> (s^.end.extra.extra, s^.start.extra.extra))
        . F.toList . outerBoundaryEdges . _simplePolygon
 
 
 -- | Given a polygon; construct the adjacency list representation
 -- pre: at least two elements
-fromHull              :: Ord r => Mapping p r -> ConvexPolygon (p :+ q) r -> Adj
+fromHull              :: Ord r => Mapping p r -> ConvexPolygon (Point 2 r :+ (p :+ q)) r -> Adj
 fromHull (vtxMap,_) p = let vs@(u:v:vs') = map (lookup' vtxMap . (^.core))
                                          $ pg^..vertices
                                          -- . F.toList . CV.rightElements
@@ -127,8 +127,10 @@ fromHull (vtxMap,_) p = let vs@(u:v:vs') = map (lookup' vtxMap . (^.core))
 merge                            :: (Ord r, Fractional r)
                                  => Adj
                                  -> Adj
-                                 -> LineSegment 2 (p :+ VertexID) r -- ^ lower tangent
-                                 -> LineSegment 2 (p :+ VertexID) r -- ^ upper tangent
+                                 -> LineSegment (Point 2 r :+ (p :+ VertexID))
+                                 -- ^ lower tangent
+                                 -> LineSegment 2 (Point 2 r :+ (p :+ VertexID))
+                                 -- ^ upper tangent
                                  -> Mapping p r
                                  -> Firsts
                                  -> Adj
@@ -282,8 +284,8 @@ p `isRightOf` (l,r) = asks (withPtMap . snd . fst)
 lookup'     :: Ord k => M.Map k a -> k -> a
 lookup' m x = fromJust $ M.lookup x m
 
-size'              :: BinLeafTree Sized a -> Sized
-size' (Leaf _)     = 1
+size'              :: BinLeafTree (Sized a) a -> Sized a
+size' (Leaf x)     = 1
 size' (Node _ s _) = s
 
 -- | an \'unsafe\' version of rotateTo that assumes the element to rotate to
