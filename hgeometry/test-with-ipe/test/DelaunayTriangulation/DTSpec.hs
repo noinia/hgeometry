@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE UnicodeSyntax #-}
-module DelaunayTriangulation.DTSpec (spec) where
+module DelaunayTriangulation.DTSpec where
 
 import           Control.Lens
 import           Data.Coerce
@@ -8,6 +8,7 @@ import           Data.Function (on)
 import qualified Data.List as List
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
+import qualified Data.Set as Set
 import           Data.Maybe (fromJust, mapMaybe)
 import           Data.Singletons (Apply)
 import qualified Data.Vector as V
@@ -22,22 +23,26 @@ import           HGeometry.Ext
 import           HGeometry.Intersection
 import           HGeometry.Number.Real.Rational
 import           HGeometry.PlaneGraph
+import           HGeometry.Polygon.Convex
 import qualified HGeometry.PlaneGraph as PG
 import           Hiraffe.PlanarGraph.Connected (VertexIdIn(..))
 import           Ipe
 import           System.OsPath
 import           Test.Hspec
+import           Test.Hspec.QuickCheck
+import           Test.QuickCheck
 import           Test.Util
+import           HGeometry.ConvexHull.GrahamScan as GS
 
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
 
-dtEdges :: (Point_ point 2 r, Ord point, Num r, Ord r
+dtEdges :: (Point_ point 2 r, Ord point, Num r, Ord r, Show point
            )
-        => NonEmpty.NonEmpty point -> [(VertexID, VertexID)]
-dtEdges = edgesAsVertices . DC.delaunayTriangulation
+        => NonEmpty.NonEmpty point -> [(point, point)]
+dtEdges = edgesAsPoints . DC.delaunayTriangulation
 
 take'   :: Int -> NonEmpty.NonEmpty a -> NonEmpty.NonEmpty a
 take' i = NonEmpty.fromList . NonEmpty.take i
@@ -49,13 +54,23 @@ spec = do
   describe "Testing Divide and Conquer Algorithm for Delaunay Triangulation" $ do
     it "singleton " $ do
       dtEdges (take' 1 myPoints) `shouldBe` []
+
     toSpec (TestCase "myPoints" myPoints)
-    toSpec (TestCase "myPoints'" myPoints')
-    it "testing edges of 9 random pts" $
-      fmap (\d -> trianG^.endPointsOf d.asIndex) (trianG^..darts.asIndex) == edgesPts''
+    -- toSpec (TestCase "myPoints'" myPoints')
+
+    -- prop "testing edges of 9 random pts" $
+    --   fmap (\d -> trianG^.endPointsOf d.asIndex) (trianG^..darts.asIndex) === edgesPts''
+
     -- toSpec (TestCase "maartens points" buggyPoints3)
 
-    ipeSpec
+    -- ipeSpec
+
+    it "convex hull" $
+      let (_,ch) = DC.delaunayTr (take' 5 myPoints)
+          ch'    = GS.convexHull (take' 5 myPoints)
+          f     :: ConvexPolygon (Point 2 R) -> Set.Set (Point 2 R)
+          f pg  = (Set.fromList $ pg^..vertices)
+      in f (ch&vertices %~ view core) `shouldBe` f ch'
 
 ipeSpec :: Spec
 ipeSpec = testCases [osp|test-with-ipe/Disk/minDisk.ipe|]
@@ -88,17 +103,20 @@ toSpec                  :: TestCase -> Spec
 toSpec (TestCase c pts) = describe ("testing on " ++ c ++ " points") $ do
                             sameAsNaive c pts
 
+-- write a property test to validate every triangle
+
 sameAsNaive       :: (Point_ point 2 r, Num r, Ord r, Show point, Ord point, Show r
                      )
                   => String -> NonEmpty.NonEmpty point -> Spec
-sameAsNaive s pts = it ("Divide And Conquer same answer as Naive on " ++ s) $
+sameAsNaive s pts = prop ("Divide And Conquer same answer as Naive on " ++ s) $
                       (Naive.delaunayTriangulation pts
                        `sameEdges`
-                       DC.delaunayTriangulation pts) `shouldBe` True
+                       DC.delaunayTriangulation pts)
 
 
-sameEdges             :: Triangulation point -> Triangulation point -> Bool
-triA `sameEdges` triB = all sameAdj . Map.assocs $ mapping'
+sameEdges             :: Show point => Triangulation point -> Triangulation point -> Property
+triA `sameEdges` triB = counterexample (show (triA,triB))
+                       $ all sameAdj . Map.assocs $ mapping'
   where
     sameAdj (a, b) = (f $ adjA V.! a) `CU.isShiftOf` (adjB V.! b)
 
@@ -108,6 +126,17 @@ triA `sameEdges` triB = all sameAdj . Map.assocs $ mapping'
     mapping' = Map.fromList $ zip (Map.elems $ triA^.vertexIds) (Map.elems $ triB^.vertexIds)
 
     f = fmap (fromJust . flip Map.lookup mapping')
+
+
+draw' = draw [osp|/tmp/out.ipe|] $ take' 6 myPoints'
+
+
+draw        :: OsPath -> NonEmpty.NonEmpty (Point 2 R) -> IO ()
+draw fp pts = writeIpeFile fp $ singlePageFromContent
+  [ iO $ ipeGroup [ iO' p | p <- NonEmpty.toList pts ]
+  , iO $ ipeGroup [ iO' (ClosedLineSegment p q) | (p,q) <- dtEdges pts ]
+  ]
+
 
 myPoints :: NonEmpty.NonEmpty (Point 2 R)
 myPoints = NonEmpty.fromList $

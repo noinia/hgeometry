@@ -9,6 +9,10 @@ module HGeometry.DelaunayTriangulation.DivideAndConquer
   (
     -- * Divide & Conqueror Delaunay Triangulation
     delaunayTriangulation
+
+  , delaunayTr
+
+  , foo
   ) where
 
 import           Control.Lens
@@ -24,12 +28,15 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as M
 import           Data.Maybe (fromJust, fromMaybe)
 import qualified Data.Vector as V
+import qualified Data.Vector.NonEmpty as NV
 import           HGeometry.Algorithms.DivideAndConquer
 import           HGeometry.Ball
+import           HGeometry.Boundary
 import qualified HGeometry.CircularList.Util as CU
 import           HGeometry.ConvexHull.GrahamScan as GS
 import qualified HGeometry.Cyclic
 import           HGeometry.DelaunayTriangulation.Types
+import qualified HGeometry.DelaunayTriangulation.Types as Naive
 import           HGeometry.Ext
 import           HGeometry.Foldable.Sort
 import           HGeometry.LineSegment
@@ -37,13 +44,21 @@ import           HGeometry.Measured.Size
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Convex.Tangents
 import qualified HGeometry.Polygon.Convex.Merge as Convex
 import           HGeometry.Polygon.Simple.Class
+import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Tree.Binary.Static
-import           HGeometry.Boundary
 
+import           HGeometry.Number.Real.Rational
+import           Debug.Trace
 
 -------------------------------------------------------------------------------
+
+type R = RealNumber 5
+
+
+
 -- * Divide & Conqueror Delaunay Triangulation
 --
 -- Implementation of the Divide & Conqueror algorithm as described in:
@@ -55,7 +70,7 @@ import           HGeometry.Boundary
 -- We store all adjacency lists in clockwise order
 --
 -- : If v on the convex hull, then its first entry in the adj. lists is its CCW
--- successor (i.e. its predecessor) on the convex hull
+-- successor on the convex hull
 --
 -- Rotating Right <-> rotate clockwise
 
@@ -65,23 +80,74 @@ import           HGeometry.Boundary
 -- (note: the extra \(\log n\) factor is since we use an IntMap in the implementation)
 --
 -- pre: the input is a *SET*, i.e. contains no duplicate points.
-delaunayTriangulation     :: (Foldable1 set, Point_ point 2 r, Ord point, Ord r, Num r)
+delaunayTriangulation     :: (Foldable1 set, Point_ point 2 r, Ord point, Ord r, Num r
+                             , Show point
+                             )
                           => set point -> Triangulation point
 delaunayTriangulation pts = Triangulation vtxMap ptsV adjV
   where
     -- pts    = nub' . NonEmpty.sortBy (compare `on` (^.core)) $ pts'
       -- V.fromList . F.toList $ pts
     ptsV   = sort pts
-    vtxMap = M.fromList $ zip (F.toList ptsV) [0..]
+    vtxMap = M.fromList . V.toList . V.imap (\i v -> (v,i)) $ ptsV
+
     tr     = asBalancedBinLeafTree pts
 
-    (adj,_) = delaunayTriangulation' tr (vtxMap,ptsV)
+    (adj,_) = traceShowWith ("CH ",) $ delaunayTriangulation' tr (vtxMap,ptsV)
     adjV    = V.fromList . IM.elems $ adj
 
 
 
+
+chByMerge :: (Foldable1 set, Point_ point 2 r, Ord point, Ord r, Num r
+             , Show point
+             )
+          => set point -> ConvexPolygon point
+chByMerge = go . asBalancedBinLeafTree . NV.unsafeFromVector . sort
+  where
+    go pts = case pts of
+      Leaf p -> uncheckedFromCCWPoints . NonEmpty.singleton $ p
+      Node lt (Count size) rt
+        | size <= 3 -> GS.convexHull pts
+        | otherwise -> let lch            = go lt
+                           rch            = go rt
+                           (ch, _bt, _ut) = traceShowWith ("merging",lch,rch,"->",)
+                                          $ Convex.merge lch rch
+                       in ch
+
+
+
+-- mergeConvex      :: PossiblyDegenerateSimplePolygon point (ConvexPolygon point)
+--                  -> PossiblyDegenerateSimplePolygon point (ConvexPolygon point)
+--                  -> PossiblyDegenerateSimplePolygon point (ConvexPolygon point)
+-- mergeConvex l = \case
+--   ActualPolygon rCH -> case l of
+--     ActualPolygon lCH -> Convex.Merge lCH rCH
+--     _                 -> foldr insertVertex rCH l
+--   r                  -> case l of
+--     ActualPolygon lCH -> foldr insertVertex lCH r
+--     _                 -> GS.grahamScan (toNonEmpty l <> toNonEmpty l)
+
+
+-- -- | Given a point outside the convex polygon, insert it into the polygon
+-- insertVertex      :: point -> ConvexPolygon polygon -> ConvexPolygon point
+-- insertVertex q pg = let
+
+
+delaunayTr pts = delaunayTriangulation' tr (vtxMap,ptsV)
+  where
+    -- pts    = nub' . NonEmpty.sortBy (compare `on` (^.core)) $ pts'
+      -- V.fromList . F.toList $ pts
+    ptsV   = sort pts
+    vtxMap = M.fromList $ zip (F.toList ptsV) [0..]
+    tr     = traceShowWith ("tree",) $ asBalancedBinLeafTree pts
+
+    -- (adj,_) = traceShowWith ("CH ",) $
+    -- adjV    = V.fromList . IM.elems $ adj
+
+
 -- : pre: - Input points are sorted lexicographically
-delaunayTriangulation' :: (Point_ point 2 r, Ord point, Ord r, Num r)
+delaunayTriangulation' :: (Point_ point 2 r, Ord point, Ord r, Num r, Show point)
                        => BinLeafTree (Count point) point
                        -> Mapping point
                        -> (Adj, ConvexPolygon (point :+ VertexID))
@@ -92,24 +158,34 @@ delaunayTriangulation' pts mapping'@(vtxMap,_) = case pts of
                       )
                         -- FIXME: this deifnes an invalid polygon..
   Node lt (Count size) rt
-    | size <= 3 -> let pts'  = (\p -> p :+ lookup' vtxMap p) <$> pts
+    | size <= 3 -> traceShowWith ("YYYY",pts,"-------->",) $
+                   let pts'  = (\p -> p :+ lookup' vtxMap p) <$> pts
                        ch    = GS.convexHull pts'
                    in (fromHull mapping' ch, ch)
-    | otherwise -> let (ld,lch)       = delaunayTriangulation' lt mapping'
+    | otherwise -> traceShowWith ("XXX",pts,"-------->",) $
+                   let (ld,lch)       = delaunayTriangulation' lt mapping'
                        (rd,rch)       = delaunayTriangulation' rt mapping'
                        (ch, bt, ut)   = Convex.merge lch rch
                    in ( merge ld rd (view core <$> bt) (view core <$> ut) mapping' (firsts ch)
-                      , ch
+                      , traceShowWith ("CH ",) ch
                       )
 
 --------------------------------------------------------------------------------
 -- * Implementation
 
 -- | Mapping that says for each vtx in the convex hull what the first entry in
--- the adj. list should be. The input polygon is given in Clockwise order
-firsts    :: Point_ point 2 r
+-- the adj. list should be.
+firsts    :: (Point_ point 2 r, Show point)
           => ConvexPolygon (point :+ VertexID) -> IM.IntMap VertexID
-firsts pg = IM.fromList . map (bimap (^.extra) (^.extra)) $ pg^..outerBoundaryEdges
+firsts pg = f . IM.fromList . map (bimap (^.extra) (^.extra)) $ pg^..outerBoundaryEdges
+  -- -- outer boundary edges produces a list of (u,v) pairs where v is the CCW successor of
+  -- -- v. Hence, u is the C
+
+  -- are given in CCW order, so we use "swap" to associate
+  -- -- each vertex
+  where
+    f = traceShowWith (pg^..vertices,)
+
 
 -- | Given a polygon; construct the adjacency list representation
 -- pre: at least two elements
@@ -128,7 +204,7 @@ fromHull (vtxMap,_) p = let vs@(u:v:vs') = lookup' vtxMap . (^.core)
 -- | Merge the two delaunay triangulations.
 --
 -- running time: \(O(n)\) (although we cheat a bit by using a IntMap)
-merge                            :: (Point_ point 2 r, Ord point, Ord r, Num r)
+merge                            :: (Point_ point 2 r, Ord point, Ord r, Num r, Show point)
                                  => Adj
                                  -> Adj
                                  -> ClosedLineSegment (point :+ VertexID)
@@ -138,7 +214,10 @@ merge                            :: (Point_ point 2 r, Ord point, Ord r, Num r)
                                  -> Mapping point
                                  -> Firsts
                                  -> Adj
-merge ld rd bt ut mapping'@(vtxMap,_) fsts =
+merge ld rd bt ut mapping'@(vtxMap,_) fsts
+  | traceShow ("merge",bt,ut) False = undefined
+  | otherwise
+  =
     flip runReader (mapping', fsts) . flip execStateT adj $ moveUp (tl,tr) l r
   where
     l   = lookup' vtxMap (bt^.start.core)
@@ -319,3 +398,42 @@ focus' = fromJust . CL.focus
 
 lookup'' :: Int -> IM.IntMap a -> a
 lookup'' k m = m IM.! k
+
+
+
+
+--------------------------------------------------------------------------------
+
+
+
+foo = do mapM print (asBalancedBinLeafTree myPoints)
+         print $ delaunayTr myPoints
+
+         -- print "dummy"
+         -- let f p = (uncheckedFromCCWPoints . NonEmpty.singleton $ p ) :: ConvexPolygon (Point 2 R)
+         -- print $ Convex.merge (f $ Point2 1  3) (f $ Point2 4  26)
+         -- print "dummy"
+
+         -- print "================================================================================"
+
+         -- let g s = (uncheckedFromCCWPoints . NonEmpty.fromList $ s) :: ConvexPolygon (Point 2 R)
+         -- print $ mergeX (g [Point2 4  26, Point2 1 3]) (g [Point2 6 7, Point2 5 17])
+
+
+         -- print "============"
+
+         -- print $ chByMerge myPoints
+         -- print $ delaunayTr myPoints
+
+myPoints :: NonEmpty.NonEmpty (Point 2 R)
+myPoints = NonEmpty.fromList $
+            [ Point2 64  736
+            , Point2 96 688
+            , Point2 128 752
+            , Point2 160 704
+            , Point2 128 672
+            , Point2 64 656
+            , Point2 192 736
+            -- , Point2 208 704
+            -- , Point2 192 672
+            ]
