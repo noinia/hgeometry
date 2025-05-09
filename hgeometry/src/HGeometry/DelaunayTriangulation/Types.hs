@@ -58,6 +58,7 @@ type Adj = IM.IntMap (C.CList VertexID)
 data Triangulation point = Triangulation { _vertexIds  :: Map.Map point VertexID
                                          , _positions  :: V.Vector point
                                          , _neighbours :: V.Vector (C.CList VertexID)
+                                           -- ^ neighbours are in CW order
                                          }
                          deriving (Show,Eq)
 

@@ -14,14 +14,15 @@ import           Data.Foldable1
 import qualified Data.List as List
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
+import qualified Data.Set as Set
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import           HGeometry.Ball
+import           HGeometry.Boundary
 import           HGeometry.DelaunayTriangulation.Types
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
 import           HGeometry.Point
-import           HGeometry.Boundary
 
 --------------------------------------------------------------------------------
 
@@ -36,17 +37,18 @@ delaunayTriangulation pts = Triangulation ptIds ptsV adjV
   where
     ptsV   = fromFoldable pts
     ptIds  = Map.fromList $ zip (toList pts) [0..]
-    adjV   = toAdjLists (ptIds,ptsV) . extractEdges $ fs
-    n      = V.length ptsV - 1
     -- construct the list of faces/triangles in the delaunay triangulation
     fs = [ (p,q,r)
          | p <- [0..n], q <- [p..n], r <- [q..n], isDelaunay (ptIds,ptsV) p q r
          ]
+    edges  = foldMap (\(p,q,r) -> Set.fromList [(p,q), (q,r), (p,r)]) fs
+    adjV   = toAdjLists (ptIds,ptsV) edges
+    n      = V.length ptsV - 1
 
 -- | Given a list of edges, as vertexId pairs, construct a vector with the
 -- adjacency lists, each in CW sorted order.
 toAdjLists               :: (Point_ point 2 r, Num r, Ord r)
-                         => Mapping point -> [(VertexID,VertexID)]
+                         => Mapping point -> Set.Set (VertexID,VertexID)
                          -> V.Vector (C.CList VertexID)
 toAdjLists m@(_,ptsV) es = V.imap toCList $ V.create $ do
     v <- MV.replicate (V.length ptsV) []
@@ -70,13 +72,6 @@ sortAroundMapping (_,ptsV) u vs = reverse . map (^.extra) $ sortAround (f u) (ma
   where
     f v = (ptsV V.! v) :+ v
 
-
--- | Given a list of faces, construct a list of edges
-extractEdges :: [(VertexID,VertexID,VertexID)] -> [(VertexID,VertexID)]
-extractEdges = map NonEmpty.head . NonEmpty.group . List.sort
-             . concatMap (\(p,q,r) -> [(p,q), (q,r), (p,r)])
-               -- we encounter every edge twice. To get rid of the duplicates
-               -- we sort, group, and take the head of the lists
 
 
 -- | \( O(n) \) Test if the given three points form a triangle in the delaunay triangulation.
