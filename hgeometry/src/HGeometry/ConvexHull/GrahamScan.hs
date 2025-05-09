@@ -29,8 +29,8 @@ import           HGeometry.Polygon.Simple.Class
 -- | \(O(n \log n)\) time ConvexHull using Graham-Scan.
 --
 -- pre: input contains at least three points
-convexHull            :: (Ord r, Num r, Point_ point 2 r)
-                      => NonEmpty point -> ConvexPolygon point
+convexHull            :: (Foldable1 set, Ord r, Num r, Point_ point 2 r)
+                      => set point -> ConvexPolygon point
 convexHull ps        = let ps' = Vector.toList . sortBy incXdecY $ ps
                            uh  = NonEmpty.tail . hull' $         ps'
                            lh  = NonEmpty.tail . hull' $ reverse ps'
@@ -46,8 +46,8 @@ convexHull ps        = let ps' = Vector.toList . sortBy incXdecY $ ps
 -- vertical. Use 'upperHull'' if such an edge should not be reported.
 --
 -- running time: \(O(n\log n)\)
-upperHull  :: (Ord r, Num r, Point_ point 2 r) => NonEmpty point -> NonEmpty point
-upperHull = NonEmpty.reverse . hull id
+upperHull  :: (Foldable1 set, Ord r, Num r, Point_ point 2 r) => set point -> NonEmpty point
+upperHull = NonEmpty.reverse . hull id . toNonEmpty
 -- {-# INLINABLE upperHull#-}
 
 -- | Computes the upper hull, making sure that there are no vertical segments.
@@ -80,8 +80,8 @@ dropVertical = \case
 -- vertical. Use 'lowerHull'' if such an edge should not be reported.
 --
 -- running time: \(O(n\log n)\)
-lowerHull :: (Ord r, Num r, Point_ point 2 r) => NonEmpty point -> NonEmpty point
-lowerHull = hull reverse
+lowerHull :: (Foldable1 set, Ord r, Num r, Point_ point 2 r) => set point -> NonEmpty point
+lowerHull = hull reverse . toNonEmpty
 --{-# INLINABLE lowerHull #-}
 
 -- | Computes the lower hull, making sure there are no vertical
