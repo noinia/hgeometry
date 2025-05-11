@@ -20,19 +20,14 @@ import           HGeometry.DelaunayTriangulation
 import qualified HGeometry.DelaunayTriangulation.DivideAndConquer as DC
 import qualified HGeometry.DelaunayTriangulation.Naive as Naive
 import           HGeometry.Ext
-import           HGeometry.Intersection
 import           HGeometry.Number.Real.Rational
 import           HGeometry.PlaneGraph
-import           HGeometry.Polygon.Convex
-import qualified HGeometry.PlaneGraph as PG
 import           Hiraffe.PlanarGraph.Connected (VertexIdIn(..))
 import           Ipe
 import           System.OsPath
 import           Test.Hspec
 import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
-import           Test.Util
-import           HGeometry.ConvexHull.GrahamScan as GS
 
 --------------------------------------------------------------------------------
 
@@ -56,23 +51,24 @@ spec = do
       dtEdges (take' 1 myPoints) `shouldBe` []
 
     toSpec (TestCase "myPoints" myPoints)
-    -- toSpec (TestCase "myPoints'" myPoints')
+    -- toSpec (TestCase "myPoints'" myPoints') -- TODO: colinear points
 
     prop "testing edges of 9 random pts" $
       Set.fromList (fmap (\d -> trianG^.endPointsOf d.asIndex) (trianG^..darts.asIndex))
       ===
       edgesPts''
 
-    -- toSpec (TestCase "maartens points" buggyPoints3)
+    -- toSpec (TestCase "maartens points" buggyPoints3) -- TODO ??
 
-    -- ipeSpec
+    -- ipeSpec -- ?
 
-    it "convex hull" $
-      let (_,ch) = DC.delaunayTr (take' 5 myPoints)
-          ch'    = GS.convexHull (take' 5 myPoints)
-          f     :: ConvexPolygon (Point 2 R) -> Set.Set (Point 2 R)
-          f pg  = (Set.fromList $ pg^..vertices)
-      in f (ch&vertices %~ view core) `shouldBe` f ch'
+
+    -- it "convex hull" $
+    --   let (_,ch) = DC.delaunayTriangulation (take' 5 myPoints)
+    --       ch'    = GS.convexHull (take' 5 myPoints)
+    --       f     :: ConvexPolygon (Point 2 R) -> Set.Set (Point 2 R)
+    --       f pg  = (Set.fromList $ pg^..vertices)
+    --   in f (ch&vertices %~ view core) `shouldBe` f ch'
 
 ipeSpec :: Spec
 ipeSpec = testCases [osp|test-with-ipe/Disk/minDisk.ipe|]
@@ -88,7 +84,7 @@ testCases fp = (runIO $ readInput =<< getDataFileName fp) >>= \case
 readInput    :: OsPath -> IO (Either ConversionError [TestCase])
 readInput fp = fmap f <$> readSinglePageFile fp
   where
-    f page = [ TestCase "?" $ fmap (\p -> p^.core.symbolPoint) pSet
+    f page = [ TestCase (show fp) $ fmap (\p -> p^.core.symbolPoint) pSet
              | pSet <- byStrokeColour' syms
              ]
       where
@@ -211,17 +207,19 @@ buggyPoints2 = NonEmpty.fromList $ [ Point2 217.44781269876754 249.2474154349827
                                    , Point2 250.55083565080437 93.13205719006257  :+ 'e'
                                    ]
 
+-}
+
+-- this one loops as well it seems
 
 -- | Maarten reported a problem with the EMST of this set
-buggyPoints3 :: NonEmpty.NonEmpty (Point 2 (RealNumber 18) :+ Int)
+buggyPoints3 :: NonEmpty.NonEmpty (Point 2 R)
 buggyPoints3 = NonEmpty.fromList
-             $ [ Point2 (-128) (-16)                                        :+ 1
-               , Point2 (-64) (-80)                                         :+ 2
-               , Point2 (-2097151243 / 32768000) (-2621440757 / 32768000)   :+ 3
-               , Point2 (-16) (-128)                                        :+ 4
-               , Point2 64 96                                               :+ 5
+             $ [ Point2 (-128) (-16)                                        -- :+ 1
+               , Point2 (-64) (-80)                                         -- :+ 2
+               , Point2 (-2097151243 / 32768000) (-2621440757 / 32768000)   -- :+ 3
+               , Point2 (-16) (-128)                                        -- :+ 4
+               , Point2 64 96                                               -- :+ 5
                ]
--}
 
 
 --------------------------------------------------------------------------------
