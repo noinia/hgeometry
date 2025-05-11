@@ -58,8 +58,10 @@ spec = do
     toSpec (TestCase "myPoints" myPoints)
     -- toSpec (TestCase "myPoints'" myPoints')
 
-    -- prop "testing edges of 9 random pts" $
-    --   fmap (\d -> trianG^.endPointsOf d.asIndex) (trianG^..darts.asIndex) === edgesPts''
+    prop "testing edges of 9 random pts" $
+      Set.fromList (fmap (\d -> trianG^.endPointsOf d.asIndex) (trianG^..darts.asIndex))
+      ===
+      edgesPts''
 
     -- toSpec (TestCase "maartens points" buggyPoints3)
 
@@ -176,9 +178,10 @@ trianG = let dts    = DC.delaunayTriangulation pts''
 pts'' :: NonEmpty.NonEmpty (Point 2 R :+ Int)
 pts'' = read "(Point2 (-214) 142 :+ 0) :| [Point2 (-59) 297 :+ 2,Point2 (-135) 141 :+ 1,Point2 193 (-123) :+ 6,Point2 51 (-147) :+ 3,Point2 242 114 :+ 7,Point2 186 290 :+ 5,Point2 262 293 :+ 8,Point2 109 1 :+ 4]"
 
-edgesPts'' :: [(VertexIx GR, VertexIx GR)]
+edgesPts'' :: Set.Set (VertexIx GR, VertexIx GR)
 edgesPts'' = let f = coerce @Int
-             in bimap f f <$>
+             in Set.fromList $
+                bimap f f <$>
   [(0,3),(0,1),(0,2),(1,0),(1,3),(1,4),(1,2),(2,0),(2,1),(2,4),(2,5),(2,8),(3,6),(3,4),(3,1),(3,0),(4,6),(4,7),(4,5),(4,2),(4,1),(4,3),(5,2),(5,4),(5,7),(5,8),(6,7),(6,4),(6,3),(7,8),(7,5),(7,4),(7,6),(8,2),(8,5),(8,7)]
 
 

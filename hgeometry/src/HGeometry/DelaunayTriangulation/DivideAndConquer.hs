@@ -79,19 +79,20 @@ type R = RealNumber 5
 -- Running time: \(O(n \log^2 n)\)
 -- (note: the extra \(\log n\) factor is since we use an IntMap in the implementation)
 --
--- pre: the input is a *SET*, i.e. contains no duplicate points.
+-- pre:
+--      - the input is a *SET*, i.e. contains no duplicate points.
+--      - no three colinear points
+--      - no four cocircular points
 delaunayTriangulation     :: (Foldable1 set, Point_ point 2 r, Ord point, Ord r, Num r
                              , Show point
                              )
                           => set point -> Triangulation point
 delaunayTriangulation pts = Triangulation vtxMap ptsV adjV
   where
-    -- pts    = nub' . NonEmpty.sortBy (compare `on` (^.core)) $ pts'
-      -- V.fromList . F.toList $ pts
-    ptsV   = sort pts
+    ptsV   = sort pts -- sort lexicographically. TODO: make this more explicit
     vtxMap = M.fromList . V.toList . V.imap (\i v -> (v,i)) $ ptsV
 
-    tr     = asBalancedBinLeafTree pts
+    tr     = asBalancedBinLeafTree $ NV.unsafeFromVector ptsV
 
     (adj,_) = traceShowWith ("CH ",) $ delaunayTriangulation' tr (vtxMap,ptsV)
     adjV    = V.fromList . IM.elems $ adj
@@ -99,21 +100,21 @@ delaunayTriangulation pts = Triangulation vtxMap ptsV adjV
 
 
 
-chByMerge :: (Foldable1 set, Point_ point 2 r, Ord point, Ord r, Num r
-             , Show point
-             )
-          => set point -> ConvexPolygon point
-chByMerge = go . asBalancedBinLeafTree . NV.unsafeFromVector . sort
-  where
-    go pts = case pts of
-      Leaf p -> uncheckedFromCCWPoints . NonEmpty.singleton $ p
-      Node lt (Count size) rt
-        | size <= 3 -> GS.convexHull pts
-        | otherwise -> let lch            = go lt
-                           rch            = go rt
-                           (ch, _bt, _ut) = traceShowWith ("merging",lch,rch,"->",)
-                                          $ Convex.merge lch rch
-                       in ch
+-- chByMerge :: (Foldable1 set, Point_ point 2 r, Ord point, Ord r, Num r
+--              , Show point
+--              )
+--           => set point -> ConvexPolygon point
+-- chByMerge = go . asBalancedBinLeafTree . NV.unsafeFromVector . sort
+--   where
+--     go pts = case pts of
+--       Leaf p -> uncheckedFromCCWPoints . NonEmpty.singleton $ p
+--       Node lt (Count size) rt
+--         | size <= 3 -> GS.convexHull pts
+--         | otherwise -> let lch            = go lt
+--                            rch            = go rt
+--                            (ch, _bt, _ut) = traceShowWith ("merging",lch,rch,"->",)
+--                                           $ Convex.merge lch rch
+--                        in ch
 
 
 
