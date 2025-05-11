@@ -51,14 +51,10 @@ merge lp rp = (uncheckedFromCCWPoints $ r' <> l', lt, ut)
   where
     lt = lowerTangent lp rp
     ut = upperTangent lp rp
-    r' = slice (lt^.start.extra) (ut^.end.extra) rp -- b d rp
-    l' = slice (ut^.start.extra) (lt^.end.extra) lp -- c a lp
+    r' = slice (lt^.end.extra)   (ut^.end.extra)   rp
+    l' = slice (ut^.start.extra) (lt^.start.extra) lp
 
     slice i j pg = fmap snd . takeUntil ((== j) . fst) $ pg^..ccwOuterBoundaryFrom i.withIndex
-
-    -- rightElems  = F.toList . CV.rightElements
-    -- takeAndRotate x y = takeUntil (coreEq x) . rightElems . rotateTo' y . getVertices
-
 
 -- | pre: predicate is true for at least one element.
 --

@@ -451,7 +451,9 @@ library
         HGeometry
 
 
-        -- HGeometry.DelaunayTriangulation
+        HGeometry.DelaunayTriangulation
+        HGeometry.DelaunayTriangulation.DivideAndConquer
+        HGeometry.DelaunayTriangulation.Naive
 
         HGeometry.Disk.Smallest
         HGeometry.Disk.Smallest.Naive
@@ -544,6 +546,7 @@ library
     other-modules:
         HGeometry.HalfPlane.CommonIntersection.Chain
 
+        HGeometry.DelaunayTriangulation.Types
 
         HGeometry.Polygon.Triangulation.Types
 
@@ -856,6 +859,7 @@ test-suite with-ipe-hspec
       Golden
       Disk.MinDiskSpec
       Test.Util
+      DelaunayTriangulation.DTSpec
       Polygon.Simple.InPolygonSpec
       Polygon.Convex.ConvexSpec
       Polygon.Convex.ConvexSpec

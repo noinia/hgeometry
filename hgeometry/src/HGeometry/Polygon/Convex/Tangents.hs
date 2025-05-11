@@ -66,6 +66,8 @@ tangentCmp o p q = case ccw o p q of
 --        - lp and rp are disjoint, and there is a vertical line separating
 --          the two polygons.
 --
+-- the tangent segment that is returned has its starting point on lp, and its endpoint on rp.
+--
 -- Running time: O(n+m), where n and m are the sizes of the two polygons respectively
 lowerTangent       :: ( Num r, Ord r
                       , ConvexPolygon_ convexPolygon point r, Point_ point 2 r
@@ -144,6 +146,8 @@ lowerTangent' l0 r0 = go (toNonEmpty l0) (toNonEmpty r0)
 --   pre: - polygons lp and rp have at least 1 vertex
 --        - lp and rp are disjoint, and there is a vertical line separating
 --          the two polygons.
+--
+-- the tangent segment that is returned has its starting point on lp, and its endpoint on rp.
 --
 -- Running time: \( O(n+m) \), where n and m are the sizes of the two polygons respectively
 upperTangent       :: forall convexPolygon point r.
