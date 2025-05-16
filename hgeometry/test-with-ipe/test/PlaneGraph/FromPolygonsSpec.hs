@@ -4,6 +4,7 @@ module PlaneGraph.FromPolygonsSpec where
 
 import           Control.Lens
 import           Data.Coerce
+import           Data.Foldable
 import           Data.Foldable1
 import           Data.Functor.Apply (WrappedApplicative(..))
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -35,13 +36,15 @@ import           Ipe
 import           PlaneGraph.RenderSpec
 import           System.OsPath
 import           Test.Hspec
+import           Test.Hspec.QuickCheck
 import           Test.Hspec.WithTempFile
+import           Test.QuickCheck
 import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.Vector as Builder
 
 -- import HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 
-import Debug.Trace
+import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -414,32 +417,6 @@ testPoly = uncheckedFromCCWPoints $ NonEmpty.fromList
            ]
 
 
-instance VertexContainer f vertex => HasEdges' (SimplePolygonF f vertex) where
-  type Edge   (SimplePolygonF f vertex) = ()
-  type EdgeIx (SimplePolygonF f vertex) = VertexIx (SimplePolygonF f vertex)
-  edgeAt u = \pUnitFUnit poly -> poly <$ indexed pUnitFUnit u ()
-  -- unclear whether we should use conjoined here.
-  numEdges = numVertices
-
-instance VertexContainer f vertex
-         => HasEdges (SimplePolygonF f vertex) (SimplePolygonF f vertex) where
-  edges = conjoined trav (itrav.indexed)
-    where
-      trav        :: Applicative g
-                  => (() -> g ()) -> SimplePolygonF f vertex -> g (SimplePolygonF f vertex)
-      trav f poly = unwrapApplicative $
-                    poly <$ (vertices' (\x -> x <$ WrapApplicative (f ())) poly)
-
-      itrav        :: Applicative g
-                   => (VertexIx (SimplePolygonF f vertex) -> () -> g ())
-                   -> SimplePolygonF f vertex -> g (SimplePolygonF f vertex)
-      itrav f poly = unwrapApplicative $
-                     poly <$ vertices' (Indexed $ \v x -> x <$ WrapApplicative (f v ())) poly
-
-      vertices' :: IndexedTraversal1' (VertexIx (SimplePolygonF f vertex))
-                                      (SimplePolygonF f vertex) vertex
-      vertices' = vertices
-
 spec :: Spec
 spec = describe "Constructing a PlaneGraph from overlapping Polygons" $ do
          it "vertices testPoly ok" $
@@ -454,11 +431,59 @@ spec = describe "Constructing a PlaneGraph from overlapping Polygons" $ do
          testIpe [osp|components.ipe|]
                  [osp|components.out|]
 
+
 --------------------------------------------------------------------------------
 
 readInput      :: OsPath -> IO (NonEmpty (ClosedLineSegment (Point 2 R) :+ IpeAttributes Path R))
 readInput inFP = NonEmpty.fromList <$>
                  readAllFrom ([osp|data/test-with-ipe/PlaneGraph|] </> inFP)
+
+
+bug = describe "bug" $ do
+    segs <- runIO $ readInput [osp|components.ipe|]
+    let (gr :: PlaneGraph () (NonEmpty (Point 2 R))
+                             (ClosedLineSegment (Point 2 R) :+ _)
+                             ()
+          )  = fromDisjointSegments segs
+
+
+        segsbyColor :: MonoidalNEMap (IpeColor R) (NonEmpty (ClosedLineSegment (Point 2 R) :+ _))
+        segsbyColor = foldMap1 (\seg -> MonoidalNEMap.singleton (seg^?!extra._Attr SStroke)
+                                                                (NonEmpty.singleton seg)
+                               ) segs
+
+
+        graphs0 :: MonoidalNEMap _ (CPlaneGraph (Wrap ()) (NonEmpty (Point 2 R)) _ _)
+        graphs0 = fromConnectedSegments <$> segsbyColor
+
+        graphs :: MonoidalNEMap _
+                                (CPlaneGraph (Wrap ())
+                                      (Point 2 R)
+                                      (ClosedLineSegment (Point 2 R) :+ IpeAttributes Path R)
+                                      ()
+                                )
+        graphs = over vertices NonEmpty.head <$> graphs0
+
+        grr :: PlaneGraph ()
+                          (Point 2 R)
+                          (ClosedLineSegment (Point 2 R) :+ IpeAttributes Path R)
+                          ()
+        grr = fromDisjointComponents (const ()) graphs
+
+{-
+    prop "test headOf 5" $  do
+      let (_,d',c) = asLocalD (Dart.Dart (Dart.Arc 5) Dart.Positive) $ grr^._PlanarGraph
+          vi       = c^.headOf d'
+          n        = numVertices grr
+          x        = () --grr^?!vertexAt vi
+      counterexample (show $ (vi, length $ grr^._PlanarGraph.rawVertexData, numVertices c)
+                     )
+       -- somehow the vertexId 10 doesn't make sense                       -- (d',c,vi,n,x
+                      --      ,
+                      --      )) $
+                   $ show x === ""
+-}
+    pure ()
 
 
 testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ do
@@ -492,8 +517,6 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
                           ()
         grr = fromDisjointComponents (const ()) graphs
 
-
-
     xit "fromDisjointSegments" $ do
       show gr `shouldBe` ""
     xit "fromDisjointComponents" $ do
@@ -504,12 +527,34 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
     it "fromDisjointComponents faces" $ do
       numFaces grr `shouldBe` 5
 
--- TODO: reenable this
---    xdescribe "golden" $ do
---      goldenWith [osp|data/test-with-ipe/PlaneGraph|]
---        (ipeContentGolden { name = outFP })
---        (drawGraph grr)
+    -- runIO $ mapM_ print (grr^..)
 
+    -- prop "test headOf 5" $  do
+    --   let (_,d',c) = asLocalD (Dart.Dart (Dart.Arc 5) Dart.Positive) $ grr^._PlanarGraph
+    --       vi       = c^.headOf d'
+    --       n        = numVertices grr
+    --       x        = grr^?!vertexAt vi
+    --   counterexample (show (d',c,vi,n,x)) $ show x === ""
+
+
+  -- headOf d = ito $ \ps -> let (_,d',c) = asLocalD d ps
+  --                             vi       = c^.headOf d'
+  --                             -- vi       = if sameDirection d d'
+  --                             --            then c^.headOf d' else c^.tailOf d'
+  --                         in (vi, ps^?!vertexAt vi)
+
+    describe "all edges ok" $ do
+      for_ (grr^..darts.withIndex) $ \(d, x) ->
+        it ("dart " <> show (d, x)) $  --  grr^.headOf d)) $
+          show (grr^.headOf d) `shouldSatisfy` (/= "") -- somewhat silly test
+   -- The head of Dart 5 is undefined for some reason?
+
+{-
+    describe "golden" $ do
+      goldenWith [osp|data/test-with-ipe/PlaneGraph|]
+                 (ipeContentGolden { name = outFP })
+                 (drawGraph grr)
+-}
 
 
 

@@ -25,6 +25,7 @@ import           Control.Lens
 import           Data.Aeson
 import qualified Data.Aeson as Aeson
 import qualified Data.Foldable as F
+import           Data.Functor.Apply (WrappedApplicative(..))
 import           Data.Functor.Classes
 import           Data.Semigroup.Foldable
 import           Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
@@ -36,6 +37,7 @@ import qualified HGeometry.Foldable.Util as F
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Vector.NonEmpty.Util ()
+import           Hiraffe.Graph.Class
 
 --------------------------------------------------------------------------------
 
@@ -96,6 +98,43 @@ instance ( VertexContainer f point
 instance ( VertexContainer f point
          , Point_ point 2 r
          ) => IsBoxable (SimplePolygonF f point)
+
+instance ( VertexContainer f point
+         ) => HasVertices (SimplePolygonF f point) (SimplePolygonF f point') where
+  vertices = _SimplePolygonF . traversed1
+
+instance ( VertexContainer f point
+         ) => HasVertices' (SimplePolygonF f point) where
+  type Vertex   (SimplePolygonF f point) = point
+  type VertexIx (SimplePolygonF f point) = Int
+  vertexAt i = _SimplePolygonF . iix i
+  numVertices = F.length . view _SimplePolygonF
+
+instance VertexContainer f vertex => HasEdges' (SimplePolygonF f vertex) where
+  type Edge   (SimplePolygonF f vertex) = ()
+  type EdgeIx (SimplePolygonF f vertex) = VertexIx (SimplePolygonF f vertex)
+  edgeAt u = \pUnitFUnit poly -> poly <$ indexed pUnitFUnit u ()
+  -- unclear whether we should use conjoined here.
+  numEdges = numVertices
+
+instance VertexContainer f vertex
+         => HasEdges (SimplePolygonF f vertex) (SimplePolygonF f vertex) where
+  edges = conjoined trav (itrav.indexed)
+    where
+      trav        :: Applicative g
+                  => (() -> g ()) -> SimplePolygonF f vertex -> g (SimplePolygonF f vertex)
+      trav f poly = unwrapApplicative $
+                    poly <$ (vertices' (\x -> x <$ WrapApplicative (f ())) poly)
+
+      itrav        :: Applicative g
+                   => (VertexIx (SimplePolygonF f vertex) -> () -> g ())
+                   -> SimplePolygonF f vertex -> g (SimplePolygonF f vertex)
+      itrav f poly = unwrapApplicative $
+                     poly <$ vertices' (Indexed $ \v x -> x <$ WrapApplicative (f v ())) poly
+
+      vertices' :: IndexedTraversal1' (VertexIx (SimplePolygonF f vertex))
+                                      (SimplePolygonF f vertex) vertex
+      vertices' = vertices
 
 --------------------------------------------------------------------------------
 
