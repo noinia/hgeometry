@@ -17,13 +17,18 @@ module HGeometry.Miso.Svg.Canvas
 
 import           Control.Lens hiding (elements)
 import qualified Data.Map as Map
-import           HGeometry.Miso.Subscription.MouseExtra
+-- import           HGeometry.Miso.Subscription.MouseExtra
 import           HGeometry.Miso.Svg.StaticCanvas
 import           HGeometry.Point
 import           HGeometry.Transformation
 import           HGeometry.Vector
 import           HGeometry.Viewport
-import           Miso (Attribute, View, Effect, height_, width_, noEff, onMouseLeave)
+import           Miso ( Attribute, View, Effect, height_, width_
+                      , onPointerLeave
+                      , onPointerMove
+                      , onPointerEnter
+                      , PointerEvent(..), put
+                      )
 import           Miso.String (MisoString, ms)
 import           Miso.Svg (svg_, g_, rect_, transform_, pointerEvents_, fill_)
 
@@ -83,23 +88,26 @@ blankCanvas w h = let v = Vector2 w h
 -- * The Controller
 
 -- | Actions that CanvasAction will handle itself.
-data InternalCanvasAction = MouseEnter !(Point 2 Int)
-                          | MouseMove  !(Point 2 Int)
-                          | MouseLeave
-                          | TouchStart !(Point 2 Int)
-                          | TouchMove  !(Point 2 Int)
-                          | TouchEnd
+data InternalCanvasAction = PointerEnter PointerEvent
+                          | PointerMove  PointerEvent
+                          | PointerLeave PointerEvent
+                          -- | TouchStart !(Point 2 Int)
+                          -- | TouchMove  !(Point 2 Int)
+                          -- | TouchEnd
                           deriving (Show,Eq)
 
+offset :: PointerEvent -> (Int,Int)
+offset = bimap floor floor . client -- FIXME!!!
+
 -- | Handles InternalCanvas Actions
-handleInternalCanvasAction        :: Canvas r -> InternalCanvasAction -> Effect action (Canvas r)
-handleInternalCanvasAction canvas = noEff . \case
-  MouseEnter p  -> canvas&mousePosition ?~ p
-  MouseMove  p  -> canvas&mousePosition ?~ p
-  MouseLeave    -> canvas&mousePosition .~ Nothing
-  TouchStart p  -> canvas&mousePosition ?~ p
-  TouchMove p   -> canvas&mousePosition ?~ p
-  TouchEnd      -> canvas&mousePosition .~ Nothing
+handleInternalCanvasAction        :: Canvas r -> InternalCanvasAction -> Effect (Canvas r) action
+handleInternalCanvasAction canvas = put . \case
+  PointerEnter pe  -> canvas&mousePosition ?~ uncurry Point2 (offset pe)
+  PointerMove  pe  -> canvas&mousePosition ?~ uncurry Point2 (offset pe)
+  PointerLeave _   -> canvas&mousePosition .~ Nothing
+  -- TouchStart p     -> canvas&mousePosition ?~ p
+  -- TouchMove p     -> canvas&mousePosition ?~ p
+  -- TouchEnd        -> canvas&mousePosition .~ Nothing
 
 --------------------------------------------------------------------------------
 -- * The View
@@ -115,12 +123,12 @@ svgCanvas_ canvas ats vs =
         , pointerEvents_ "all"
         ] <> (fmap Right <$> ats))
        [ svg_ [ width_          "100%"
-              , onMouseLeave   $ Left MouseLeave
-              , onMouseEnterAt $ Left . MouseEnter
-              , onMouseMoveAt  $ Left . MouseMove
-              , onTouchStartAt $ Left . TouchStart
-              , onTouchMoveAt  $ Left . TouchMove
-              , onTouchEnd     $ Left TouchEnd
+              , onPointerLeave $ Left . PointerLeave
+              , onPointerEnter $ Left . PointerEnter
+              , onPointerMove  $ Left . PointerMove
+              -- , onTouchStartAt $ Left . TouchStart
+              -- , onTouchMoveAt  $ Left . TouchMove
+              -- , onTouchEnd     $ Left TouchEnd
               ]
               [ rect_ [width_ "100%", height_ "100%", fill_ "none"] []
               , g_ [transform_ ts] (fmap Right <$> vs)
@@ -171,8 +179,8 @@ withCanvasEvents = Map.union $ Map.fromList
                    [ ("touchstart"  , False)
                    , ("touchmove"   , False)
                    , ("touchend"    , False)
-                   , ("mouseleave"  , True)
-                   , ("mousemove"   , False)
+                   , ("pointerleave"  , True)
+                   , ("pointermove"   , False)
                    , ("contextmenu" , False)
                    ]
 
@@ -181,7 +189,7 @@ withCanvasEvents = Map.union $ Map.fromList
 -- subs     :: MisoString -- ^ The id of the iCanvas
 --                 -> (InternalCanvasAction -> action)
 --                 -> [Sub action]
--- subs i f = [ relativeMouseSub   i (f . MouseMove)
+-- subs i f = [ relativePointerSub   i (f . PointerMove)
 --            , relativeTouchedSub i (f . TouchMove)
 --                   -- , arrowsSub          (f . ArrowPress)
 --            ]
