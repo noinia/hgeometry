@@ -41,7 +41,7 @@ import           HGeometry.Vector
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
 import           Miso hiding (onMouseUp, onMouseDown)
 import           HGeometry.Miso.Event.Extra
-import qualified Miso.Html.Element as Html
+import qualified Miso as Html
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Miso.Svg hiding (height_, id_, style_, width_)
 
@@ -432,7 +432,7 @@ instance ToMisoString Word8 where
 
 main :: IO ()
 main = JSaddle.run 8080 $
-         startApp $
+         startComponent $
             App { model         = initialModel
                 , update        = flip updateModel
                 , view          = viewModel

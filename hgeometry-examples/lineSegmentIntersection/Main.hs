@@ -17,6 +17,7 @@ import           HGeometry.Miso.Svg.Canvas (Canvas, blankCanvas, mouseCoordinate
 import qualified HGeometry.Miso.Svg.Canvas as Canvas
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
+import           Language.Javascript.JSaddle (JSM)
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
 import           Miso
 import           Miso.String (MisoString, ToMisoString(..), ms)
@@ -122,16 +123,16 @@ main = JSaddle.run 8080 $ mainJSM
 
 mainJSM :: JSM ()
 mainJSM = do
-    let myApp = App { model         = initialModel
-                    , update        = flip updateModel
-                    , view          = viewModel
-                    , subs          = mempty
+    let myApp = defaultComponent initialModel
+                                 (flip updateModel)
+                                 viewModel
+                    { subs          = mempty
                     , events        = Canvas.withCanvasEvents defaultEvents
                     , initialAction = Id
                     , mountPoint    = Nothing
                     , logLevel      = Off
                     }
-    startApp myApp
+    startComponent myApp
 
 textAt                    :: ToMisoString r
                           => Point 2 r

@@ -8,7 +8,7 @@ module HGeometry.Miso.Canvas.Zoom
 import Control.Lens
 import Control.Monad.State
 import HGeometry.Interval
-import Miso (Effect, put)
+import Miso (Effect)
 
 
 --------------------------------------------------------------------------------
@@ -26,42 +26,13 @@ class HasZoomLevel canvas r | canvas -> r where
 
 newtype ZoomAction = ZoomAction ZoomDirection deriving (Show,Eq)
 
-
-type instance Zoomed (EffectCore model action) = Zoomed
-
-(Lazy.RWST r w s z) = FocusingWith w z
-deriving newtype instance Zoom (EffectCore model action) (EffectCore a action)
-
-
-
 -- | Update the zoom-level
 update      :: ( Fractional r, Ord r
                , HasZoomLevel canvas r
                )
             => ZoomAction -> Effect canvas action
 update za = zoom zoomLevel $ updateZoom' za
-
-  -- updateZoom' za
-
-  -- zoomLevel <%= updateZoom' za
-
-  -- do zl <- gets (^.zoomLevel)
-
-  --              zl' <- updateZoom' za
-
-
-  -- zoom zoomLevel $ updateZoom' za
-
-  -- do m <- get
-
-  -- modify $ \m -> m&zoomLevel %%~ updateZoom' za
-
-  -- zoom zoomLevel (updateZoom' za)
-
-  -- updateZoom' aza (m^.zoomLevel)
-
-  -- m&zoomLevel %%~ flip updateZoom' za
-
+  -- note: the zoom is the lens version of zoom
 
 updateZoom' :: (Fractional r, Ord r)
             => ZoomAction -> Effect r action
