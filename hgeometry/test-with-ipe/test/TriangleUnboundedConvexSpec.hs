@@ -80,11 +80,11 @@ toBoundedFrom :: (Foldable nonEmpty, Point_ point 2 r, Point_ vertex 2 r, Ord r,
               -> ConvexPolygonF NonEmpty vertex
 toBoundedFrom tri reg@(Unbounded v pts w) = case extremalVertices reg of
     Right (Vector2 p q) -> let l@(LinePV _ u) = lineThrough p q
-                               h              = HalfSpace Negative l
+                               h              = HalfSpace Positive l
                            in compute p q h u
     Left p              -> let bisec = w ^+^ negated v -- note that v is pointing in the wrong dir.
                                u     = rot90 bisec -- perpendicular to bisec
-                               h     = HalfSpace Negative (fromPointAndVec p u)
+                               h     = HalfSpace Positive (fromPointAndVec p u)
                            in compute p p h u
   where
     -- given the halfpsace h that goes through p and q (the extremal vertices),
