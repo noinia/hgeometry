@@ -44,6 +44,7 @@ import           HGeometry.Point
 import           HGeometry.Point.Either
 import           HGeometry.PolyLine
 import           HGeometry.Polygon
+import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Polygon.WithHoles
 import           HGeometry.Properties
@@ -210,6 +211,11 @@ instance ( VertexContainer f (Point 2 r)
          ) => HasDefaultIpeOut (ConvexPolygonF f (Point 2 r)) where
   type DefaultIpeOut (ConvexPolygonF f (Point 2 r)) = Path
   defIO = defIO . toSimplePolygon
+
+instance (Num r, Point_ vertex 2 r, Foldable1 nonEmpty
+         ) => HasDefaultIpeOut (UnboundedConvexRegionF r nonEmpty vertex) where
+  type DefaultIpeOut (UnboundedConvexRegionF r nonEmpty vertex) = Path
+  defIO = renderChain . (:+ mempty)
 
 instance ( HasDefaultIpeOut vertex, HasDefaultIpeOut polygon
          , NumType vertex ~ NumType polygon, Point_ vertex 2 r

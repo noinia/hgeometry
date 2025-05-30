@@ -33,11 +33,17 @@ module Ipe.FromIpe(
 
   -- * Reading all elements of a particular type
   , readAll, readAllDeep, readAllFrom
+
+
+  -- helper function
+  , renderChain
   ) where
 
-import           Control.Lens hiding (Simple)
+import           Control.Lens as Lens hiding (Simple)
 import           Data.Foldable1
 import           Data.Kind (Type)
+import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Sequence as Seq
 import           Data.Vector.NonEmpty (NonEmptyVector)
 import           HGeometry.Ball
@@ -50,13 +56,17 @@ import           HGeometry.Foldable.Util
 import           HGeometry.LineSegment
 import           HGeometry.Number.Radical
 import           HGeometry.Point
+import           HGeometry.PolyLine (_PolyLineF,polyLineFromPoints)
 import qualified HGeometry.PolyLine as PolyLine
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.WithHoles
 import           HGeometry.Properties
 import           HGeometry.Triangle
+import           HGeometry.Vector
+import           Ipe.Attributes
 import           Ipe.Path
 import           Ipe.Reader
 import           Ipe.Types
@@ -77,7 +87,7 @@ import           Witherable
 -- >>> :{
 -- let testPath :: Path Int
 --     testPath = Path . fromSingleton  . PolyLineSegment
---              . PolyLine.polyLineFromPoints . NonEmpty.fromList
+--              . polyLineFromPoints . NonEmpty.fromList
 --              $ [ origin, Point2 10 10, Point2 200 100 ]
 --     testPathAttrs :: IpeAttributes Path Int
 --     testPathAttrs = attr SStroke (IpeColor "red")
@@ -87,7 +97,7 @@ import           Witherable
 
 -- testPath :: Path Int
 -- testPath = Path . fromSingleton  . PolyLineSegment
---              . PolyLine.polyLineFromPoints . NonEmpty.fromList
+--              . polyLineFromPoints . NonEmpty.fromList
 --              $ [ origin, Point2 10 10, Point2 200 100 ]
 -- testPathAttrs :: IpeAttributes Path Int
 -- testPathAttrs = attr SStroke (IpeColor "red")
@@ -314,6 +324,54 @@ instance HasDefaultFromIpe (SimplePolygon (Point 2 r)) where
 instance (Num r, Ord r) => HasDefaultFromIpe (ConvexPolygon (Point 2 r)) where
   type DefaultFromIpe (ConvexPolygon (Point 2 r)) = Path
   defaultFromIpe = _withAttrs _IpePath _asConvexPolygon
+
+instance (Num r, Ord r
+         ) => HasDefaultFromIpe (UnboundedConvexRegionF r NonEmpty (Point 2 r)) where
+  type DefaultFromIpe (UnboundedConvexRegionF r NonEmpty (Point 2 r)) = Path
+  defaultFromIpe = ipeUnboundedConvexPolygon
+
+-- | Prism to convert between ipe objects (Paths) and UnboundedConvex regions.
+ipeUnboundedConvexPolygon :: forall r. (Num r, Ord r)
+                          => Prism' (IpeObject r)
+                                    (UnboundedConvexRegionF r NonEmpty (Point 2 r)
+                                      :+ IpeAttributes Path r
+                                    )
+ipeUnboundedConvexPolygon = prism' (IpePath . renderChain) parse
+  where
+    parse      :: IpeObject r -> Maybe (UnboundedConvexRegionF r NonEmpty (Point 2 r)
+                                        :+ IpeAttributes Path r
+                                       )
+    parse obj = do rawPoly :+ ats  <- obj^?_withAttrs _IpePath _asPolyLine
+                   poly            <- reorient rawPoly
+                   _               <- fromPoints @(ConvexPolygon _) $ poly^._PolyLineF
+                   -- makes sure we are convex.
+                   _            <- lookupAttr SArrow  ats
+                   _            <- lookupAttr SRArrow ats
+                   (a:pts1,b)   <- Lens.unsnoc $ poly^..vertices
+                   pts@(p:|_)   <- NonEmpty.nonEmpty pts1
+                   let q = pts^.last1
+                   pure $ Unbounded (p .-. a) pts (b .-. q) :+ ats
+                     -- should we zero the arrow attrs?
+
+    reorient poly = case toNonEmptyOf vertices poly of
+                      p :| (c:n:_) | ccw p n c == CCW -> Just $ poly
+                                   | otherwise        -> Just $ poly^.reversed
+                      _                               -> Nothing
+
+-- | Renders an unbounded convex region as a Path
+renderChain :: (Foldable1 nonEmpty, Point_ vertex 2 r, Num r)
+            => UnboundedConvexRegionF r nonEmpty vertex :+ IpeAttributes Path r
+            -> IpeObject' Path r
+renderChain (reg@(Unbounded v pts w) :+ ats) =
+    (poly^.re _asPolyLine) :+     attr SArrow  normalArrow
+                               <> attr SRArrow normalArrow
+                               <> ats
+  where
+    poly = case extremalVertices (mapChain toNonEmpty reg) of
+             Left p              -> f p p
+             Right (Vector2 p q) -> f p q
+    f p q = polyLineFromPoints . fmap (^.asPoint)
+          $ p .-^ v NonEmpty.<| toNonEmpty pts <> NonEmpty.singleton (q .+^ w)
 
 -- instance HasDefaultFromIpe (MultiPolygon () r) where
 --   type DefaultFromIpe (MultiPolygon () r) = Path
