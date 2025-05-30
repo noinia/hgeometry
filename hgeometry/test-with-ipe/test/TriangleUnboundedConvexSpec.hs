@@ -16,10 +16,8 @@ import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
-import           HGeometry.Point.Either
 import           HGeometry.PolyLine
 import           HGeometry.Polygon
-import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Properties
 import           HGeometry.Triangle
@@ -233,6 +231,8 @@ spec = describe "triangle x unbounded convex polygon intersection" $ do
                  [osp|triangle_x_unbounded.out|]
          ipeSpec [osp|triangle_x_unbounded1.ipe|]
                  [osp|triangle_x_unbounded1.out|]
+         ipeSpec [osp|triangle_x_unbounded_contained.ipe|]
+                 [osp|triangle_x_unbounded_contained.out|]
          ipeSpec [osp|triangle_x_cone.ipe|]
                  [osp|triangle_x_cone.out|]
          ipeSpec [osp|triangle_x_cone_no.ipe|]
