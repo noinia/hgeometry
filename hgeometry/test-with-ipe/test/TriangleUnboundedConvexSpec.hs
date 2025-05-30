@@ -31,6 +31,8 @@ import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
 
+
+
 import           Debug.Trace
 --------------------------------------------------------------------------------
 
@@ -158,8 +160,9 @@ ipeUnboundedConvexPolygon = prism' (IpePath . renderChain) parse
     parse      :: IpeObject r -> Maybe (UnboundedConvexRegionF r NonEmpty (Point 2 r)
                                         :+ IpeAttributes Path r
                                        )
-    parse obj = do poly :+ ats  <- obj^?_withAttrs _IpePath _asPolyLine
-                   _            <- fromPoints @(ConvexPolygon _) $ poly^._PolyLineF
+    parse obj = do rawPoly :+ ats  <- obj^?_withAttrs _IpePath _asPolyLine
+                   poly            <- reorient rawPoly
+                   _               <- fromPoints @(ConvexPolygon _) $ poly^._PolyLineF
                    -- makes sure we are convex.
                    _            <- lookupAttr SArrow  ats
                    _            <- lookupAttr SRArrow ats
@@ -168,11 +171,11 @@ ipeUnboundedConvexPolygon = prism' (IpePath . renderChain) parse
                    let q = pts^.last1
                    pure $ Unbounded (p .-. a) pts (b .-. q) :+ ats
                      -- should we zero the arrow attrs?
-  -- TODO: I think I may have to reverse the chain; so that the interior is indeed to the left
 
-
-
--- ipeUnboundedConvexPolygon' =
+    reorient poly = case toNonEmptyOf vertices poly of
+                      p :| (c:n:_) | ccw p n c == CCW -> Just $ poly
+                                   | otherwise        -> Just $ poly^.reversed
+                      _                               -> Nothing
 
 instance (Num r, Point_ vertex 2 r, Foldable1 nonEmpty
          ) => HasDefaultIpeOut (UnboundedConvexRegionF r nonEmpty vertex) where

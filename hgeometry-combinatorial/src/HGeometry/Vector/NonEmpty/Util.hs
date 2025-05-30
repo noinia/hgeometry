@@ -17,6 +17,7 @@ module HGeometry.Vector.NonEmpty.Util
   ) where
 
 import           Control.Lens
+import           Data.Coerce (coerce)
 import qualified Data.Foldable as F
 import           Data.Foldable1
 import           Data.Foldable1.WithIndex
@@ -69,3 +70,7 @@ instance FoldableWithIndex Int NonEmptyVector where
 instance TraversableWithIndex Int NonEmptyVector where
   itraverse f (NonEmptyVector v) = NonEmptyVector <$> itraverse f v
   {-# INLINE itraverse #-}
+
+-- this instance belongs in NonEmptyVector, but alas
+instance Reversing (NonEmptyVector a) where
+  reversing = NonEmptyVector . reversing . coerce
