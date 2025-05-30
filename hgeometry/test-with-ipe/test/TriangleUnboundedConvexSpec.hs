@@ -34,15 +34,16 @@ import           Test.QuickCheck.Instances ()
 import           Debug.Trace
 --------------------------------------------------------------------------------
 
-type UnboundedConvexRegion point = UnboundedConvexRegionF (NumType point) NonEmpty point
+-- | An unbounded polygonal Convex Region
+type UnboundedConvexRegion vertex = UnboundedConvexRegionF (NumType vertex) NonEmpty vertex
 
--- | An unbounded ConvexRegion
-data UnboundedConvexRegionF r nonEmpty point =
+-- | An unbounded polygonal ConvexRegion whose vertices are stored in an 'nonEmpty'
+data UnboundedConvexRegionF r nonEmpty vertex =
   Unbounded (Vector 2 r)
             -- ^ vector indicating the direction of the unbounded edge
             -- incident to the first vertex. Note that this vector
             -- thus points INTO vertex v.
-            (nonEmpty point)
+            (nonEmpty vertex)
             -- ^ the vertices in CCW order,
             (Vector 2 r)
             -- ^ the vector indicating the direction of the unbounded
@@ -50,19 +51,19 @@ data UnboundedConvexRegionF r nonEmpty point =
             -- away from the vertex (i.e. towards +infty).
   deriving stock (Show,Eq,Functor,Foldable,Traversable)
 
-type instance NumType   (UnboundedConvexRegionF r nonEmpty point) = r
-type instance Dimension (UnboundedConvexRegionF r nonEmpty point) = 2
+type instance NumType   (UnboundedConvexRegionF r nonEmpty vertex) = r
+type instance Dimension (UnboundedConvexRegionF r nonEmpty vertex) = 2
 
 -- | map a function over the sequence of points
-mapChain                       :: (nonEmpty point -> nonEmpty point')
-                               -> UnboundedConvexRegionF r nonEmpty point
-                               -> UnboundedConvexRegionF r nonEmpty' point'
+mapChain                       :: (nonEmpty vertex -> nonEmpty' vertex')
+                               -> UnboundedConvexRegionF r nonEmpty vertex
+                               -> UnboundedConvexRegionF r nonEmpty' vertex'
 mapChain f (Unbounded v pts w) = Unbounded v (f pts) w
 
 -- | Compute the first and last vertex of the chain. Returns a Left if the first and last
 -- are the same.
-extremalVertices                            :: UnboundedConvexRegionF r NonEmpty point
-                                            -> Either point (Vector 2 point)
+extremalVertices                            :: UnboundedConvexRegionF r NonEmpty vertex
+                                            -> Either vertex (Vector 2 vertex)
 extremalVertices (Unbounded _ (p :| pts) _) = case NonEmpty.nonEmpty pts of
                                                 Nothing   -> Left p
                                                 Just pts' -> Right $ Vector2 p (NonEmpty.last pts')
@@ -71,10 +72,10 @@ extremalVertices (Unbounded _ (p :| pts) _) = case NonEmpty.nonEmpty pts of
 --
 -- note: this creates two new vertices; which are "copies" from the extremal vertices.
 -- this is to avoid having to introduce yet another level of 'OriginalOrExtra''s
-toBoundedFrom :: (Foldable nonEmpty, Point_ point 2 r, Point_ point' 2 r, Ord r, Fractional r
+toBoundedFrom :: (Foldable nonEmpty, Point_ point 2 r, Point_ vertex 2 r, Ord r, Fractional r
                  )
-              => nonEmpty point' -> UnboundedConvexRegionF r NonEmpty point
-              -> ConvexPolygonF NonEmpty point
+              => nonEmpty point -> UnboundedConvexRegionF r NonEmpty vertex
+              -> ConvexPolygonF NonEmpty vertex
 toBoundedFrom tri reg@(Unbounded v pts w) = case extremalVertices reg of
     Right (Vector2 p q) -> let l@(LinePV _ u) = lineThrough p q
                                h              = HalfSpace Negative l
@@ -120,14 +121,14 @@ toBoundedFrom tri reg@(Unbounded v pts w) = case extremalVertices reg of
 
 --------------------------------------------------------------------------------
 
-type instance Intersection (Triangle corner) (UnboundedConvexRegionF r nonEmpty point)
-  = Intersection (Triangle corner) (ConvexPolygonF nonEmpty point)
+type instance Intersection (Triangle corner) (UnboundedConvexRegionF r nonEmpty vertex)
+  = Intersection (Triangle corner) (ConvexPolygonF nonEmpty vertex)
 
-instance (Point_ point 2 r, Point_ corner 2 r, Ord r, Fractional r
-         ) => Triangle corner `HasIntersectionWith` (UnboundedConvexRegionF r NonEmpty point)
+instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
+         ) => Triangle corner `HasIntersectionWith` (UnboundedConvexRegionF r NonEmpty vertex)
 
-instance ( Point_ point 2 r, Point_ corner 2 r, Ord r, Fractional r
-         ) => Triangle corner `IsIntersectableWith` (UnboundedConvexRegionF r NonEmpty point) where
+instance ( Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
+         ) => Triangle corner `IsIntersectableWith` (UnboundedConvexRegionF r NonEmpty vertex) where
   tri `intersect` region = tri `intersect` (toBoundedFrom tri region)
 
 
@@ -173,14 +174,14 @@ ipeUnboundedConvexPolygon = prism' (IpePath . renderChain) parse
 
 -- ipeUnboundedConvexPolygon' =
 
-instance (Num r, Point_ point 2 r, Foldable1 nonEmpty
-         ) => HasDefaultIpeOut (UnboundedConvexRegionF r nonEmpty point) where
-  type DefaultIpeOut (UnboundedConvexRegionF r nonEmpty point) = Path
+instance (Num r, Point_ vertex 2 r, Foldable1 nonEmpty
+         ) => HasDefaultIpeOut (UnboundedConvexRegionF r nonEmpty vertex) where
+  type DefaultIpeOut (UnboundedConvexRegionF r nonEmpty vertex) = Path
   defIO = renderChain . (:+ mempty)
 
 
-renderChain :: (Foldable1 nonEmpty, Point_ point 2 r, Num r)
-            => UnboundedConvexRegionF r nonEmpty point :+ IpeAttributes Path r
+renderChain :: (Foldable1 nonEmpty, Point_ vertex 2 r, Num r)
+            => UnboundedConvexRegionF r nonEmpty vertex :+ IpeAttributes Path r
             -> IpeObject' Path r
 renderChain (reg@(Unbounded v pts w) :+ ats) =
     (poly^.re _asPolyLine) :+     attr SArrow  normalArrow
