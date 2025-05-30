@@ -52,9 +52,9 @@ import           HGeometry.Triangle (Triangle,toCounterClockwiseTriangle)
 import           Ipe.Attributes
 import           Ipe.Color (IpeColor(..), gray)
 import           Ipe.FromIpe
+import           Ipe.FromIpe.UnboundedConvexChain
 import           Ipe.Path (Orientation(..))
 import           Ipe.Types
-
 
 --------------------------------------------------------------------------------
 

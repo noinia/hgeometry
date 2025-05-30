@@ -33,10 +33,6 @@ module Ipe.FromIpe(
 
   -- * Reading all elements of a particular type
   , readAll, readAllDeep, readAllFrom
-
-
-  -- helper function
-  , renderChain
   ) where
 
 import           Control.Lens as Lens hiding (Simple)
@@ -56,7 +52,7 @@ import           HGeometry.Foldable.Util
 import           HGeometry.LineSegment
 import           HGeometry.Number.Radical
 import           HGeometry.Point
-import           HGeometry.PolyLine (_PolyLineF,polyLineFromPoints)
+import           HGeometry.PolyLine (_PolyLineF)
 import qualified HGeometry.PolyLine as PolyLine
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
@@ -65,8 +61,8 @@ import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.WithHoles
 import           HGeometry.Properties
 import           HGeometry.Triangle
-import           HGeometry.Vector
 import           Ipe.Attributes
+import           Ipe.FromIpe.UnboundedConvexChain
 import           Ipe.Path
 import           Ipe.Reader
 import           Ipe.Types
@@ -126,18 +122,6 @@ _asLineSegment = _asPolyLine.PolyLine._PolyLineLineSegment
 _asClosedLineSegment :: Prism' (Path r) (ClosedLineSegment (Point 2 r))
 _asClosedLineSegment = _asPolyLine.PolyLine._PolyLineLineSegment
 
-
--- | Convert to a polyline. Ignores all non-polyline parts
---
--- >>> testPath ^? _asPolyLine
--- Just (PolyLine [Point2 0 0,Point2 10 10,Point2 200 100])
-_asPolyLine :: Prism' (Path r) (PolyLine.PolyLine (Point 2 r))
-_asPolyLine = prism' poly2path path2poly
-  where
-    poly2path = Path . fromSingleton  . PolyLineSegment
-    path2poly = preview (pathSegments.traverse._PolyLineSegment)
-    -- TODO: Check that the path actually is a polyline, rather
-    -- than ignoring everything that does not fit
 
 -- | Convert to a simple polygon
 _asSimplePolygon :: Foldable1 f
@@ -358,21 +342,6 @@ ipeUnboundedConvexPolygon = prism' (IpePath . renderChain) parse
                                    | otherwise        -> Just $ poly^.reversed
                       _                               -> Nothing
 
--- | Renders an unbounded convex region as a Path
-renderChain :: (Foldable1 nonEmpty, Point_ vertex 2 r, Num r)
-            => UnboundedConvexRegionF r nonEmpty vertex :+ IpeAttributes Path r
-            -> IpeObject' Path r
-renderChain (reg@(Unbounded v pts w) :+ ats) =
-    (poly^.re _asPolyLine) :+     attr SArrow  normalArrow
-                               <> attr SRArrow normalArrow
-                               <> ats
-  where
-    poly = case extremalVertices (mapChain toNonEmpty reg) of
-             Left p              -> f p p
-             Right (Vector2 p q) -> f p q
-    f p q = polyLineFromPoints . fmap (^.asPoint)
-          $ p .-^ v NonEmpty.<| toNonEmpty pts <> NonEmpty.singleton (q .+^ w)
-
 -- instance HasDefaultFromIpe (MultiPolygon () r) where
 --   type DefaultFromIpe (MultiPolygon () r) = Path
 --   defaultFromIpe = _withAttrs _IpePath _asMultiPolygon
@@ -400,10 +369,6 @@ readAllDeep p = p^..content.to flattenContent.traverse.defaultFromIpe
 readAllFrom    :: forall g r. (HasDefaultFromIpe g, r ~ NumType g, Coordinate r, Eq r)
                => OsPath -> IO [g :+ IpeAttributes (DefaultFromIpe g) r]
 readAllFrom fp = foldMap readAll <$> readSinglePageFile fp
-
--- | Helper to produce a singleton sequence
-fromSingleton :: a -> Seq.Seq a
-fromSingleton = Seq.singleton
 
 -- | recursively flatten all groups into one big list
 flattenContent :: [IpeObject r] -> [IpeObject r]
