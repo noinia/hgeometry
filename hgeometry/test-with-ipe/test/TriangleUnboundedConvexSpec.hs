@@ -1,28 +1,35 @@
 {-# LANGUAGE  UndecidableInstances  #-}
+{-# LANGUAGE QuasiQuotes #-}
 module TriangleUnboundedConvexSpec where
 
-import           Control.Lens
+import           Control.Lens as Lens
+import qualified Data.Foldable as F
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Ord (comparing)
 import           Golden
+import           HGeometry.Ext
 import           HGeometry.HalfSpace
 import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Point.Either
+import           HGeometry.PolyLine
 import           HGeometry.Polygon
-import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Properties
 import           HGeometry.Triangle
 import           HGeometry.Vector
+import           Ipe
+import           System.OsPath
 import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 type UnboundedConvexRegion point = UnboundedConvexRegionF (NumType point) NonEmpty point
@@ -41,23 +48,24 @@ data UnboundedConvexRegionF r nonEmpty point =
             -- away from the vertex (i.e. towards +infty).
   deriving stock (Show,Eq,Functor,Foldable,Traversable)
 
-
 type instance NumType   (UnboundedConvexRegionF r nonEmpty point) = r
 type instance Dimension (UnboundedConvexRegionF r nonEmpty point) = 2
 
+mapChain f (Unbounded v pts w) = Unbounded v (f pts) w
+
 -- | Compute the first and last vertex of the chain. Returns a Left if the first and last
 -- are the same.
-extremalVertices :: UnboundedConvexRegionF r NonEmpty point -> Either point (Vector 2 point)
-extremalVertices = \case
-  Unbounded _ (p :| pts) _ -> case NonEmpty.nonEmpty pts of
-                                Nothing   -> Left p
-                                Just pts' -> Right $ Vector2 p (NonEmpty.last pts')
+extremalVertices                            :: UnboundedConvexRegionF r NonEmpty point
+                                            -> Either point (Vector 2 point)
+extremalVertices (Unbounded _ (p :| pts) _) = case NonEmpty.nonEmpty pts of
+                                                Nothing   -> Left p
+                                                Just pts' -> Right $ Vector2 p (NonEmpty.last pts')
 
---
+-- | convert to a bounded polygon that contains the points given as the first argument.
 --
 -- note: this creates two new vertices; which are "copies" from the extremal vertices.
 -- this is to avoid having to introduce yet another level of 'OriginalOrExtra''s
-toBoundedFrom :: (Foldable1 nonEmpty, Point_ point 2 r, Point_ point' 2 r, Ord r, Fractional r
+toBoundedFrom :: (Foldable nonEmpty, Point_ point 2 r, Point_ point' 2 r, Ord r, Fractional r
                  )
               => nonEmpty point' -> UnboundedConvexRegionF r NonEmpty point
               -> ConvexPolygonF NonEmpty point
@@ -77,10 +85,15 @@ toBoundedFrom tri reg@(Unbounded v pts w) = case extremalVertices reg of
     -- defined by a and b (that contains p and q).
     --
     -- it returns a clipped version of the bounded region with a and b as vertices.
-    compute p q h u = let s = view asPoint $ maximumOn (`squaredEuclideanDistTo` h) tri
+    compute p q h u = let s    = view asPoint $ maximumOn (`squaredEuclideanDistTo` h) tri'
                           -- distance to the point furthest from this halfspace.
                           -- we then create two additional on the halflines
                           -- that are at least that distance away.
+
+                          tri' = (q .+^ w)^.asPoint :| ((^.asPoint) <$> F.toList tri)
+                          -- make sure that there is at least one point outside h,
+                          -- so that s lies stricly outside h as well
+
                           a = case (fromPointAndVec @(LinePV 2 _) p v) `intersect` (LinePV s u) of
                                 Just (Line_x_Line_Point a') -> p&xCoord .~ a'^.xCoord
                                                                 &yCoord .~ a'^.yCoord
@@ -94,6 +107,10 @@ toBoundedFrom tri reg@(Unbounded v pts w) = case extremalVertices reg of
 
     maximumOn f = maximumBy (comparing f)
     rot90 (Vector2 x y) = Vector2 (-y) x
+
+
+-- TODO: this would make for a good property test: test if the points all lie inside the reegion
+
 
 instance ( HasSquaredEuclideanDistance boundingHyperPlane
          , HasIntersectionWith (Point d r) (HalfSpaceF boundingHyperPlane)
@@ -130,15 +147,115 @@ type R = RealNumber 5
 
 
 
+instance (Num r, Ord r
+         ) => HasDefaultFromIpe (UnboundedConvexRegionF r NonEmpty (Point 2 r)) where
+  type DefaultFromIpe (UnboundedConvexRegionF r NonEmpty (Point 2 r)) = Path
+  defaultFromIpe = ipeUnboundedConvexPolygon
+
+-- | Prism to convert between ipe objects (Paths) and UnboundedConvex regions.
+ipeUnboundedConvexPolygon :: forall r. (Num r, Ord r)
+                          => Prism' (IpeObject r)
+                                    (UnboundedConvexRegionF r NonEmpty (Point 2 r)
+                                      :+ IpeAttributes Path r
+                                    )
+ipeUnboundedConvexPolygon = prism' (IpePath . renderChain) parse
+  where
+    parse      :: IpeObject r -> Maybe (UnboundedConvexRegionF r NonEmpty (Point 2 r)
+                                        :+ IpeAttributes Path r
+                                       )
+    parse obj = do poly :+ ats  <- obj^?_withAttrs _IpePath _asPolyLine
+                   _            <- fromPoints @(ConvexPolygon _) $ poly^._PolyLineF
+                   -- makes sure we are convex.
+                   _            <- lookupAttr SArrow  ats
+                   _            <- lookupAttr SRArrow ats
+                   (a:pts1,b)   <- Lens.unsnoc $ poly^..vertices
+                   pts@(p:|_)   <- NonEmpty.nonEmpty pts1
+                   let q = pts^.last1
+                   pure $ Unbounded (p .-. a) pts (b .-. q) :+ ats
+                     -- should we zero the arrow attrs?
+
+-- ipeUnboundedConvexPolygon' =
+
+instance (Num r, Point_ point 2 r, Foldable1 nonEmpty
+         ) => HasDefaultIpeOut (UnboundedConvexRegionF r nonEmpty point) where
+  type DefaultIpeOut (UnboundedConvexRegionF r nonEmpty point) = Path
+  defIO = renderChain . (:+ mempty)
+
+
+renderChain :: (Foldable1 nonEmpty, Point_ point 2 r, Num r)
+            => UnboundedConvexRegionF r nonEmpty point :+ IpeAttributes Path r
+            -> IpeObject' Path r
+renderChain (reg@(Unbounded v pts w) :+ ats) =
+    (poly^.re _asPolyLine) :+     attr SArrow  normalArrow
+                               <> attr SRArrow normalArrow
+                               <> ats
+  where
+    poly = case extremalVertices (mapChain toNonEmpty reg) of
+             Left p              -> f p p
+             Right (Vector2 p q) -> f p q
+    f p q = polyLineFromPoints . fmap (^.asPoint)
+          $ p .-^ v NonEmpty.<| toNonEmpty pts <> NonEmpty.singleton (q .+^ w)
+
+ipeSpec inFp outFP = do (chain,tri) <- runIO go
+                        goldenWith dataPath
+                                   (ipeContentGolden { name = outFP })
+                                   [ case tri `intersect` chain of
+                                       Nothing -> iO' $ ipeGroup [] :+ mempty
+                                       Just x  -> iO' $ fmap (^.asPoint) <$> x
+                                   , iO' chain
+                                   , iO' tri
+                                   ]
+  where
+    dataPath = [osp|data/test-with-ipe/Triangle/|]
+    go = do [chain :+ _] <- readAllFrom $ dataPath <> inFp
+            [tri   :+ _] <- readAllFrom $ dataPath <> inFp
+            pure ( chain :: UnboundedConvexRegionF R NonEmpty (Point 2 R)
+                 , tri   :: Triangle (Point 2 R)
+                 )
 
 spec :: Spec
 spec = describe "triangle x unbounde convex polygon intersection" $ do
-         it "manu al test" $
+         it "manual test" $
            (myTriangle `intersects` upperQuadrant) `shouldBe` True
+         it "manual test" $
+           (touchingTriangle `intersects` upperQuadrant) `shouldBe` True
+         it "outside test" $
+           (outsideTriangle `intersects` upperQuadrant) `shouldBe` False
+         ipeSpec [osp|triangle_x_unbounded.ipe|]
+                 [osp|triangle_x_unbounded.ipe.out|]
+         ipeSpec [osp|triangle_x_unbounded1.ipe|]
+                 [osp|triangle_x_unbounded1.ipe.out|]
+
+
+instance ( HasDefaultIpeOut original, HasDefaultIpeOut extra
+         , DefaultIpeOut original ~ DefaultIpeOut extra
+         , NumType original ~ NumType extra
+         ) => HasDefaultIpeOut (OriginalOrExtra original extra) where
+  type DefaultIpeOut (OriginalOrExtra original extra) = DefaultIpeOut original
+  defIO = \case
+    Original o -> defIO o
+    Extra e    -> defIO e
+
+instance ( HasDefaultIpeOut vertex, HasDefaultIpeOut polygon
+         , NumType vertex ~ NumType polygon, Point_ vertex 2 r
+         ) => HasDefaultIpeOut (PossiblyDegenerateSimplePolygon vertex polygon) where
+  type DefaultIpeOut (PossiblyDegenerateSimplePolygon vertex polygon) = Group
+  -- use the default renderer for the various options, and then wrap them in a group
+  -- (since they will return things of different types)
+  defIO = (:+ mempty) . Group . (:[]) . \case
+    DegenerateVertex v -> iO' v
+    DegenerateEdge e   -> iO' $ (^.asPoint) <$> e
+    ActualPolygon pg   -> iO' pg
 
 
 myTriangle :: Triangle (Point 2 R)
-myTriangle = Triangle origin (Point2 100 0) (Point2 0 100)
+myTriangle = Triangle (Point2 1 1) (Point2 100 0) (Point2 0 100)
+
+outsideTriangle :: Triangle (Point 2 R)
+outsideTriangle = Triangle (Point2 (-1) (-10)) (Point2 (-100) (-4)) (Point2 (-1) (-100))
+
+touchingTriangle :: Triangle (Point 2 R)
+touchingTriangle = Triangle (Point2 (-1) (-1)) (Point2 100 0) (Point2 0 (-1100))
 
 
 upperQuadrant :: UnboundedConvexRegion (Point 2 R)
