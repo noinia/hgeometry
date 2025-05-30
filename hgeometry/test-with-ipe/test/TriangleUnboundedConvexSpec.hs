@@ -53,6 +53,10 @@ data UnboundedConvexRegionF r nonEmpty point =
 type instance NumType   (UnboundedConvexRegionF r nonEmpty point) = r
 type instance Dimension (UnboundedConvexRegionF r nonEmpty point) = 2
 
+-- | map a function over the sequence of points
+mapChain                       :: (nonEmpty point -> nonEmpty point')
+                               -> UnboundedConvexRegionF r nonEmpty point
+                               -> UnboundedConvexRegionF r nonEmpty' point'
 mapChain f (Unbounded v pts w) = Unbounded v (f pts) w
 
 -- | Compute the first and last vertex of the chain. Returns a Left if the first and last
@@ -114,19 +118,7 @@ toBoundedFrom tri reg@(Unbounded v pts w) = case extremalVertices reg of
 -- TODO: this would make for a good property test: test if the points all lie inside the reegion
 
 
-instance ( HasSquaredEuclideanDistance boundingHyperPlane
-         , HasIntersectionWith (Point d r) (HalfSpaceF boundingHyperPlane)
-         , d ~ Dimension boundingHyperPlane, r ~ NumType boundingHyperPlane
-         )
-         => HasSquaredEuclideanDistance (HalfSpaceF boundingHyperPlane) where
-  pointClosestTo (view asPoint -> q) h
-    | q `intersects` h = q
-    | otherwise        = pointClosestTo q (h^.boundingHyperPlane)
-
 --------------------------------------------------------------------------------
-
-
-
 
 type instance Intersection (Triangle corner) (UnboundedConvexRegionF r nonEmpty point)
   = Intersection (Triangle corner) (ConvexPolygonF nonEmpty point)
@@ -175,6 +167,9 @@ ipeUnboundedConvexPolygon = prism' (IpePath . renderChain) parse
                    let q = pts^.last1
                    pure $ Unbounded (p .-. a) pts (b .-. q) :+ ats
                      -- should we zero the arrow attrs?
+  -- TODO: I think I may have to reverse the chain; so that the interior is indeed to the left
+
+
 
 -- ipeUnboundedConvexPolygon' =
 
@@ -238,28 +233,6 @@ spec = describe "triangle x unbounded convex polygon intersection" $ do
                  [osp|triangle_x_cone.out|]
          ipeSpec [osp|triangle_x_cone_no.ipe|]
                  [osp|triangle_x_cone_no.out|]
-
-
-instance ( HasDefaultIpeOut original, HasDefaultIpeOut extra
-         , DefaultIpeOut original ~ DefaultIpeOut extra
-         , NumType original ~ NumType extra
-         ) => HasDefaultIpeOut (OriginalOrExtra original extra) where
-  type DefaultIpeOut (OriginalOrExtra original extra) = DefaultIpeOut original
-  defIO = \case
-    Original o -> defIO o
-    Extra e    -> defIO e
-
-instance ( HasDefaultIpeOut vertex, HasDefaultIpeOut polygon
-         , NumType vertex ~ NumType polygon, Point_ vertex 2 r
-         ) => HasDefaultIpeOut (PossiblyDegenerateSimplePolygon vertex polygon) where
-  type DefaultIpeOut (PossiblyDegenerateSimplePolygon vertex polygon) = Group
-  -- use the default renderer for the various options, and then wrap them in a group
-  -- (since they will return things of different types)
-  defIO = (:+ mempty) . Group . (:[]) . \case
-    DegenerateVertex v -> iO' v
-    DegenerateEdge e   -> iO' $ (^.asPoint) <$> e
-    ActualPolygon pg   -> iO' pg
-
 
 myTriangle :: Triangle (Point 2 R)
 myTriangle = Triangle (Point2 1 1) (Point2 100 0) (Point2 0 100)

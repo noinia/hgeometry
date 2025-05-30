@@ -121,6 +121,16 @@ instance ( HyperPlane_ boudingHyperPlane d r, Ord r, Num r
                   EQ -> Just $ Point_x_HalfSpace_OnBoundary q
                   GT -> Nothing
 
+instance ( HasSquaredEuclideanDistance boundingHyperPlane
+         , HasIntersectionWith (Point d r) (HalfSpaceF boundingHyperPlane)
+         , d ~ Dimension boundingHyperPlane, r ~ NumType boundingHyperPlane
+         )
+         => HasSquaredEuclideanDistance (HalfSpaceF boundingHyperPlane) where
+  pointClosestTo (view asPoint -> q) h
+    | q `intersects` h = q
+    | otherwise        = pointClosestTo q (h^.boundingHyperPlane)
+
+
 --------------------------------------------------------------------------------
 
 
