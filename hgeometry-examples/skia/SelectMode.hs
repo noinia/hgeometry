@@ -69,7 +69,7 @@ instance HasAsRectangleWith SelectModeData R where
 updateSelection                                 :: (Rectangle' R -> computeSelectionAction)
                                                 -> Maybe (Point 2 R)
                                                 -> SelectModeData
-                                                -> Effect computeSelectionAction SelectModeData
+                                                -> Effect SelectModeData computeSelectionAction
 updateSelection computeSelection mousePos mData = case mousePos of
     Nothing -> noEff mData
     Just p  -> case mData^.selectionRange of

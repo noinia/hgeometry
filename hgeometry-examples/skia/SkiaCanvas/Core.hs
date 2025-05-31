@@ -36,14 +36,15 @@ module SkiaCanvas.Core
 import           Control.Lens
 import qualified Data.Map as Map
 import           GHCJS.Marshal (fromJSVal)
-import           HGeometry.Miso.Subscription.MouseExtra
+-- import           HGeometry.Miso.Subscription.MouseExtra
 import           HGeometry.Miso.Svg.Canvas (HasMousePosition(..))
 import           HGeometry.Miso.Svg.StaticCanvas (HasDimensions(..))
 import           HGeometry.Point
 import           HGeometry.Vector
 import           HGeometry.Viewport
 import qualified Language.Javascript.JSaddle.Object as JS
-import           Miso (Attribute, View, Effect, noEff, onMouseLeave, canvas_, id_, getElementById, JSM)
+import           Language.Javascript.JSaddle (JSM)
+import           Miso (Attribute, View, Effect, noEff, put, canvas_, id_, getElementById, PointerEvent(..), onPointerMove, onPointerEnter, onPointerLeave)
 import           Miso.String (MisoString)
 import           SkiaCanvas.CanvasKit
 import           SkiaCanvas.CanvasKit.Initialize
@@ -114,33 +115,33 @@ mouseCoordinates = to $ \m -> toWorldIn' (m^.theViewport) <$> m^.mousePosition
 -- * The Controller
 
 -- | Actions that CanvasAction will handle itself.
-data InternalCanvasAction = MouseEnter !(Point 2 Int)
-                          | MouseMove  !(Point 2 Int)
-                          | MouseLeave
-                          | TouchStart !(Point 2 Int)
-                          | TouchMove  !(Point 2 Int)
-                          | TouchEnd
+-- | Actions that CanvasAction will handle itself.
+data InternalCanvasAction = PointerEnter PointerEvent
+                          | PointerMove  PointerEvent
+                          | PointerLeave PointerEvent
+                          -- | TouchStart !(Point 2 Int)
+                          -- | TouchMove  !(Point 2 Int)
+                          -- | TouchEnd
                           deriving (Show,Eq)
 
+offset :: PointerEvent -> (Int,Int)
+offset = bimap floor floor . client -- FIXME!!!
+
 -- | Handles InternalCanvas Actions
-handleInternalCanvasAction        :: Canvas r -> InternalCanvasAction -> Effect action (Canvas r)
-handleInternalCanvasAction canvas = noEff . \case
-  MouseEnter p             -> canvas&mousePosition ?~ p
-  MouseMove  p             -> canvas&mousePosition ?~ p
-  MouseLeave               -> canvas&mousePosition .~ Nothing
-  TouchStart p             -> canvas&mousePosition ?~ p
-  TouchMove p              -> canvas&mousePosition ?~ p
-  TouchEnd                 -> canvas&mousePosition .~ Nothing
+handleInternalCanvasAction        :: Canvas r -> InternalCanvasAction -> Effect (Canvas r) action
+handleInternalCanvasAction canvas = put . \case
+  PointerEnter pe  -> canvas&mousePosition ?~ uncurry Point2 (offset pe)
+  PointerMove  pe  -> canvas&mousePosition ?~ uncurry Point2 (offset pe)
+  PointerLeave _   -> canvas&mousePosition .~ Nothing
 
-
-handleCanvasKitAction        :: Canvas r -> InitializeSkCanvasAction -> Effect action (Canvas r)
+handleCanvasKitAction        :: Canvas r -> InitializeSkCanvasAction -> Effect (Canvas r) action
 handleCanvasKitAction canvas = noEff . \case
   InitializeRefs refs -> canvas&canvasKitRefs  ?~ refs
 
 newtype CanvasResizeAction = SetCanvasSize (Vector 2 Int )
   deriving (Show,Read,Eq)
 
-handleCanvasResize        :: Canvas r -> CanvasResizeAction -> Effect action (Canvas r)
+handleCanvasResize        :: Canvas r -> CanvasResizeAction -> Effect (Canvas r) action
 handleCanvasResize canvas = noEff . \case
   SetCanvasSize v -> canvas&dimensions    .~ v
 
@@ -175,9 +176,9 @@ skiaCanvas_           :: MisoString
                       -> [Attribute action]
                       -> View (Either InternalCanvasAction action)
 skiaCanvas_ theId ats = canvas_ ([ id_ theId
-                                 , onMouseEnterAt $ Left . MouseEnter
-                                 , onMouseMoveAt  $ Left . MouseMove
-                                 , onMouseLeave   $ Left MouseLeave
+                                 , onPointerEnter $ Left . PointerEnter
+                                 , onPointerMove  $ Left . PointerMove
+                                 , onPointerLeave  $ Left . PointerLeave
                                  ] <> (fmap Right <$> ats))
                                 []
 

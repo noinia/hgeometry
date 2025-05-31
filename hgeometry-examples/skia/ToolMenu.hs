@@ -11,10 +11,11 @@ import Color
 import Control.Lens hiding (view, element)
 import Data.Default.Class
 import HGeometry.Viewport (currentLevel)
-import Miso
+import Miso hiding (style_)
 import Miso.Bulma.Generic
 import Miso.Bulma.Modal
 import Miso.String (MisoString)
+import Miso.Style ((=:), style_, styleInline_)
 import Model
 import Modes
 import SelectMode
@@ -44,7 +45,7 @@ menuButtons_ m =
                              ]
 
     strokeButton = menuButton_  "fas fa-paint-brush"
-                                [ styleM_ ["color" =: rgba (m^.stroke.color)]
+                                [ style_ ["color" =: rgba (m^.stroke.color)]
                                 ]
                                 (m^.stroke.status)
                                 NotSelected
@@ -52,7 +53,7 @@ menuButtons_ m =
                                 , title_ "Stroke color"
                                 ]
     fillButton   = menuButton_  "fas fa-fill"
-                                [ styleM_ ["color" =: rgba (m^.fill.color)]
+                                [ style_ ["color" =: rgba (m^.fill.color)]
                                 ]
                                 (m^.fill.status)
                                 NotSelected
@@ -181,7 +182,7 @@ colorModal_ modalStatus current title = either (const ToggleModal) id <$>
                 , class_ $ case current^.status of
                              InActive -> ""
                              Active   -> "is-active"
-                , styleM_ ["background-color" =: rgba (current^.color) ]
+                , style_ ["background-color" =: rgba (current^.color) ]
                 , onClick $ ToggleColor
                 ]
                 [ icon theIcon []
@@ -193,7 +194,7 @@ colorModal_ modalStatus current title = either (const ToggleModal) id <$>
                 ]
       , div_ [class_ "buttons"]
              (foldMap (\c -> [button_ [ class_ "button"
-                                      , styleM_ ["background-color" =: rgba c]
+                                      , style_ ["background-color" =: rgba c]
                                       , onClick $ SetColor c
                                       ]
                                       [ ]

@@ -23,6 +23,7 @@ import           JavaScript.TypedArray.Internal.Types ( SomeTypedArray(..)
                                                       , IOUint8Array
                                                       , Uint8Array
                                                       )
+import           Language.Javascript.JSaddle (JSM)
 import qualified Language.Javascript.JSaddle as JSAddle
 import           Language.Javascript.JSaddle.Object (js0, js1, js2, jsg)
 import qualified Language.Javascript.JSaddle.Object as JS
@@ -101,14 +102,14 @@ encodeToBytes                   :: CanvasKit
                                 -> EncodedImageFormat -> Quality -> JSM Lazy.ByteString
 encodeToBytes canvasKit image fmt quality = do
   fmtRef <- getEncodedImageFormat canvasKit fmt
-  consoleLog' image
+  consoleLogX image
   someArray' <- image ^.js2 ("encodeToBytes" :: MisoString) fmtRef quality
-  consoleLog' someArray'
+  consoleLogX someArray'
   let someArray = SomeTypedArray someArray'
   uint8ArrayToByteString $ coerce someArray
 
-consoleLog'   :: ToJSVal a => a -> JSM ()
-consoleLog' x = void $ jsg ("console" :: MisoString) ^.js1 ("log" :: MisoString) x
+consoleLogX   :: ToJSVal a => a -> JSM ()
+consoleLogX x = void $ jsg ("console" :: MisoString) ^.js1 ("log" :: MisoString) x
 
 
 --------------------------------------------------------------------------------
