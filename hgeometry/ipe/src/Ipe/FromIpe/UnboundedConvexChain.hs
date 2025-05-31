@@ -2,7 +2,6 @@ module Ipe.FromIpe.UnboundedConvexChain where
 
 import           Control.Lens
 import           Data.Foldable1
-import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Sequence as Seq
 import           HGeometry.Ext
@@ -15,6 +14,23 @@ import           Ipe.Path
 import           Ipe.Types
 
 -------------------------------------------------------------------------------
+
+-- $setup
+-- >>> :set -XOverloadedStrings
+-- >>> import Ipe.Attributes
+-- >>> import Ipe.Color(IpeColor(..))
+-- >>> import qualified HGeometry.PolyLine as PolyLine
+-- >>> :{
+-- let testPath :: Path Int
+--     testPath = Path . fromSingleton  . PolyLineSegment
+--              . PolyLine.polyLineFromPoints . NonEmpty.fromList
+--              $ [ origin, Point2 10 10, Point2 200 100 ]
+--     testPathAttrs :: IpeAttributes Path Int
+--     testPathAttrs = attr SStroke (IpeColor "red")
+--     testObject :: IpeObject Int
+--     testObject = IpePath (testPath :+ testPathAttrs)
+-- :}
+
 
 -- | Renders an unbounded convex region as a Path
 renderChain :: (Foldable1 nonEmpty, Point_ vertex 2 r, Num r)
