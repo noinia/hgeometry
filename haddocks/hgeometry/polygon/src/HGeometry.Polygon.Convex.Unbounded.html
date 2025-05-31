@@ -1,0 +1,874 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Polygon.Convex.Unbounded</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- A type for representing unbounded, Convex, polygonal regions.</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html"><span class="hs-identifier">HGeometry.Polygon.Convex.Unbounded</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#UnboundedConvexRegion"><span class="hs-identifier">UnboundedConvexRegion</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#UnboundedConvexRegionF"><span class="hs-identifier">UnboundedConvexRegionF</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#extremalVertices"><span class="hs-identifier">extremalVertices</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#mapChain"><span class="hs-identifier">mapChain</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">comparing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.HalfSpace</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Intersection</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Line</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Polygon.html"><span class="hs-identifier">HGeometry.Polygon</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Triangle</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="annot"><span class="hs-comment">-- | An unbounded polygonal Convex Region</span></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">type</span><span> </span><span id="UnboundedConvexRegion"><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#UnboundedConvexRegion"><span class="hs-identifier hs-var">UnboundedConvexRegion</span></a></span></span><span> </span><span id="local-6989586621679294444"><span class="annot"><a href="#local-6989586621679294444"><span class="hs-identifier hs-type">vertex</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#UnboundedConvexRegionF"><span class="hs-identifier hs-type">UnboundedConvexRegionF</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679294444"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679294444"><span class="hs-identifier hs-type">vertex</span></a></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="annot"><span class="hs-comment">-- | An unbounded polygonal ConvexRegion whose vertices are stored in an 'nonEmpty'</span></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">data</span><span> </span><span id="UnboundedConvexRegionF"><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#UnboundedConvexRegionF"><span class="hs-identifier hs-var">UnboundedConvexRegionF</span></a></span></span><span> </span><span id="local-6989586621679294235"><span class="annot"><a href="#local-6989586621679294235"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679294236"><span class="annot"><a href="#local-6989586621679294236"><span class="hs-identifier hs-type">nonEmpty</span></a></span></span><span> </span><span id="local-6989586621679294237"><span class="annot"><a href="#local-6989586621679294237"><span class="hs-identifier hs-type">vertex</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-40"></span><span>  </span><span id="Unbounded"><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#Unbounded"><span class="hs-identifier hs-var">Unbounded</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679294235"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>            </span><span class="hs-comment">-- ^ vector indicating the direction of the unbounded edge</span><span>
+</span><span id="line-42"></span><span>            </span><span class="hs-comment">-- incident to the first vertex. Note that this vector</span><span>
+</span><span id="line-43"></span><span>            </span><span class="hs-comment">-- thus points INTO vertex v.</span><span>
+</span><span id="line-44"></span><span>            </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679294236"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294237"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>            </span><span class="annot"><span class="hs-comment">-- ^ the vertices in CCW order,</span></span><span>
+</span><span id="line-46"></span><span>            </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679294235"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>            </span><span class="hs-comment">-- ^ the vector indicating the direction of the unbounded</span><span>
+</span><span id="line-48"></span><span>            </span><span class="hs-comment">-- edge incident to the last vertex. The vector points</span><span>
+</span><span id="line-49"></span><span>            </span><span class="hs-comment">-- away from the vertex (i.e. towards +infty).</span><span>
+</span><span id="line-50"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679294449"><span id="local-6989586621679294459"><span id="local-6989586621679294463"><span class="annot"><span class="annottext">Int -&gt; UnboundedConvexRegionF r nonEmpty vertex -&gt; ShowS
+[UnboundedConvexRegionF r nonEmpty vertex] -&gt; ShowS
+UnboundedConvexRegionF r nonEmpty vertex -&gt; String
+(Int -&gt; UnboundedConvexRegionF r nonEmpty vertex -&gt; ShowS)
+-&gt; (UnboundedConvexRegionF r nonEmpty vertex -&gt; String)
+-&gt; ([UnboundedConvexRegionF r nonEmpty vertex] -&gt; ShowS)
+-&gt; Show (UnboundedConvexRegionF r nonEmpty vertex)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall r k (nonEmpty :: k -&gt; *) (vertex :: k).
+(Show r, Show (nonEmpty vertex)) =&gt;
+Int -&gt; UnboundedConvexRegionF r nonEmpty vertex -&gt; ShowS
+forall r k (nonEmpty :: k -&gt; *) (vertex :: k).
+(Show r, Show (nonEmpty vertex)) =&gt;
+[UnboundedConvexRegionF r nonEmpty vertex] -&gt; ShowS
+forall r k (nonEmpty :: k -&gt; *) (vertex :: k).
+(Show r, Show (nonEmpty vertex)) =&gt;
+UnboundedConvexRegionF r nonEmpty vertex -&gt; String
+$cshowsPrec :: forall r k (nonEmpty :: k -&gt; *) (vertex :: k).
+(Show r, Show (nonEmpty vertex)) =&gt;
+Int -&gt; UnboundedConvexRegionF r nonEmpty vertex -&gt; ShowS
+showsPrec :: Int -&gt; UnboundedConvexRegionF r nonEmpty vertex -&gt; ShowS
+$cshow :: forall r k (nonEmpty :: k -&gt; *) (vertex :: k).
+(Show r, Show (nonEmpty vertex)) =&gt;
+UnboundedConvexRegionF r nonEmpty vertex -&gt; String
+show :: UnboundedConvexRegionF r nonEmpty vertex -&gt; String
+$cshowList :: forall r k (nonEmpty :: k -&gt; *) (vertex :: k).
+(Show r, Show (nonEmpty vertex)) =&gt;
+[UnboundedConvexRegionF r nonEmpty vertex] -&gt; ShowS
+showList :: [UnboundedConvexRegionF r nonEmpty vertex] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679294471"><span id="local-6989586621679294477"><span class="annot"><span class="annottext">UnboundedConvexRegionF r nonEmpty vertex
+-&gt; UnboundedConvexRegionF r nonEmpty vertex -&gt; Bool
+(UnboundedConvexRegionF r nonEmpty vertex
+ -&gt; UnboundedConvexRegionF r nonEmpty vertex -&gt; Bool)
+-&gt; (UnboundedConvexRegionF r nonEmpty vertex
+    -&gt; UnboundedConvexRegionF r nonEmpty vertex -&gt; Bool)
+-&gt; Eq (UnboundedConvexRegionF r nonEmpty vertex)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall r k (nonEmpty :: k -&gt; *) (vertex :: k).
+(Eq r, Eq (nonEmpty vertex)) =&gt;
+UnboundedConvexRegionF r nonEmpty vertex
+-&gt; UnboundedConvexRegionF r nonEmpty vertex -&gt; Bool
+$c== :: forall r k (nonEmpty :: k -&gt; *) (vertex :: k).
+(Eq r, Eq (nonEmpty vertex)) =&gt;
+UnboundedConvexRegionF r nonEmpty vertex
+-&gt; UnboundedConvexRegionF r nonEmpty vertex -&gt; Bool
+== :: UnboundedConvexRegionF r nonEmpty vertex
+-&gt; UnboundedConvexRegionF r nonEmpty vertex -&gt; Bool
+$c/= :: forall r k (nonEmpty :: k -&gt; *) (vertex :: k).
+(Eq r, Eq (nonEmpty vertex)) =&gt;
+UnboundedConvexRegionF r nonEmpty vertex
+-&gt; UnboundedConvexRegionF r nonEmpty vertex -&gt; Bool
+/= :: UnboundedConvexRegionF r nonEmpty vertex
+-&gt; UnboundedConvexRegionF r nonEmpty vertex -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679294483"><span id="local-6989586621679294486"><span class="annot"><span class="annottext">(forall a b.
+ (a -&gt; b)
+ -&gt; UnboundedConvexRegionF r nonEmpty a
+ -&gt; UnboundedConvexRegionF r nonEmpty b)
+-&gt; (forall a b.
+    a
+    -&gt; UnboundedConvexRegionF r nonEmpty b
+    -&gt; UnboundedConvexRegionF r nonEmpty a)
+-&gt; Functor (UnboundedConvexRegionF r nonEmpty)
+forall a b.
+a
+-&gt; UnboundedConvexRegionF r nonEmpty b
+-&gt; UnboundedConvexRegionF r nonEmpty a
+forall a b.
+(a -&gt; b)
+-&gt; UnboundedConvexRegionF r nonEmpty a
+-&gt; UnboundedConvexRegionF r nonEmpty b
+forall r (nonEmpty :: * -&gt; *) a b.
+Functor nonEmpty =&gt;
+a
+-&gt; UnboundedConvexRegionF r nonEmpty b
+-&gt; UnboundedConvexRegionF r nonEmpty a
+forall r (nonEmpty :: * -&gt; *) a b.
+Functor nonEmpty =&gt;
+(a -&gt; b)
+-&gt; UnboundedConvexRegionF r nonEmpty a
+-&gt; UnboundedConvexRegionF r nonEmpty b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall r (nonEmpty :: * -&gt; *) a b.
+Functor nonEmpty =&gt;
+(a -&gt; b)
+-&gt; UnboundedConvexRegionF r nonEmpty a
+-&gt; UnboundedConvexRegionF r nonEmpty b
+fmap :: forall a b.
+(a -&gt; b)
+-&gt; UnboundedConvexRegionF r nonEmpty a
+-&gt; UnboundedConvexRegionF r nonEmpty b
+$c&lt;$ :: forall r (nonEmpty :: * -&gt; *) a b.
+Functor nonEmpty =&gt;
+a
+-&gt; UnboundedConvexRegionF r nonEmpty b
+-&gt; UnboundedConvexRegionF r nonEmpty a
+&lt;$ :: forall a b.
+a
+-&gt; UnboundedConvexRegionF r nonEmpty b
+-&gt; UnboundedConvexRegionF r nonEmpty a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679294493"><span id="local-6989586621679294499"><span id="local-6989586621679294504"><span id="local-6989586621679294509"><span id="local-6989586621679294512"><span id="local-6989586621679294515"><span id="local-6989586621679294518"><span id="local-6989586621679294521"><span id="local-6989586621679294524"><span id="local-6989586621679294527"><span id="local-6989586621679294530"><span id="local-6989586621679294533"><span id="local-6989586621679294536"><span id="local-6989586621679294541"><span id="local-6989586621679294546"><span id="local-6989586621679294551"><span id="local-6989586621679294556"><span class="annot"><span class="annottext">(forall m. Monoid m =&gt; UnboundedConvexRegionF r nonEmpty m -&gt; m)
+-&gt; (forall m a.
+    Monoid m =&gt;
+    (a -&gt; m) -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; m)
+-&gt; (forall m a.
+    Monoid m =&gt;
+    (a -&gt; m) -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; m)
+-&gt; (forall a b.
+    (a -&gt; b -&gt; b) -&gt; b -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; b)
+-&gt; (forall a b.
+    (a -&gt; b -&gt; b) -&gt; b -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; b)
+-&gt; (forall b a.
+    (b -&gt; a -&gt; b) -&gt; b -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; b)
+-&gt; (forall b a.
+    (b -&gt; a -&gt; b) -&gt; b -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; b)
+-&gt; (forall a.
+    (a -&gt; a -&gt; a) -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; a)
+-&gt; (forall a.
+    (a -&gt; a -&gt; a) -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; a)
+-&gt; (forall a. UnboundedConvexRegionF r nonEmpty a -&gt; [a])
+-&gt; (forall a. UnboundedConvexRegionF r nonEmpty a -&gt; Bool)
+-&gt; (forall a. UnboundedConvexRegionF r nonEmpty a -&gt; Int)
+-&gt; (forall a.
+    Eq a =&gt;
+    a -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; UnboundedConvexRegionF r nonEmpty a -&gt; a)
+-&gt; (forall a. Ord a =&gt; UnboundedConvexRegionF r nonEmpty a -&gt; a)
+-&gt; (forall a. Num a =&gt; UnboundedConvexRegionF r nonEmpty a -&gt; a)
+-&gt; (forall a. Num a =&gt; UnboundedConvexRegionF r nonEmpty a -&gt; a)
+-&gt; Foldable (UnboundedConvexRegionF r nonEmpty)
+forall a. Eq a =&gt; a -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; Bool
+forall a. Num a =&gt; UnboundedConvexRegionF r nonEmpty a -&gt; a
+forall a. Ord a =&gt; UnboundedConvexRegionF r nonEmpty a -&gt; a
+forall m. Monoid m =&gt; UnboundedConvexRegionF r nonEmpty m -&gt; m
+forall a. UnboundedConvexRegionF r nonEmpty a -&gt; Bool
+forall a. UnboundedConvexRegionF r nonEmpty a -&gt; Int
+forall a. UnboundedConvexRegionF r nonEmpty a -&gt; [a]
+forall a. (a -&gt; a -&gt; a) -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; a
+forall m a.
+Monoid m =&gt;
+(a -&gt; m) -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; m
+forall b a.
+(b -&gt; a -&gt; b) -&gt; b -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; b
+forall a b.
+(a -&gt; b -&gt; b) -&gt; b -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; b
+forall r (nonEmpty :: * -&gt; *) a.
+(Foldable nonEmpty, Eq a) =&gt;
+a -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; Bool
+forall r (nonEmpty :: * -&gt; *) a.
+(Foldable nonEmpty, Num a) =&gt;
+UnboundedConvexRegionF r nonEmpty a -&gt; a
+forall r (nonEmpty :: * -&gt; *) a.
+(Foldable nonEmpty, Ord a) =&gt;
+UnboundedConvexRegionF r nonEmpty a -&gt; a
+forall r (nonEmpty :: * -&gt; *) m.
+(Foldable nonEmpty, Monoid m) =&gt;
+UnboundedConvexRegionF r nonEmpty m -&gt; m
+forall r (nonEmpty :: * -&gt; *) a.
+Foldable nonEmpty =&gt;
+UnboundedConvexRegionF r nonEmpty a -&gt; Bool
+forall r (nonEmpty :: * -&gt; *) a.
+Foldable nonEmpty =&gt;
+UnboundedConvexRegionF r nonEmpty a -&gt; Int
+forall r (nonEmpty :: * -&gt; *) a.
+Foldable nonEmpty =&gt;
+UnboundedConvexRegionF r nonEmpty a -&gt; [a]
+forall r (nonEmpty :: * -&gt; *) a.
+Foldable nonEmpty =&gt;
+(a -&gt; a -&gt; a) -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; a
+forall r (nonEmpty :: * -&gt; *) m a.
+(Foldable nonEmpty, Monoid m) =&gt;
+(a -&gt; m) -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; m
+forall r (nonEmpty :: * -&gt; *) b a.
+Foldable nonEmpty =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; b
+forall r (nonEmpty :: * -&gt; *) a b.
+Foldable nonEmpty =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; b
+forall (t :: * -&gt; *).
+(forall m. Monoid m =&gt; t m -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall m a. Monoid m =&gt; (a -&gt; m) -&gt; t a -&gt; m)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; t a -&gt; b)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. (a -&gt; a -&gt; a) -&gt; t a -&gt; a)
+-&gt; (forall a. t a -&gt; [a])
+-&gt; (forall a. t a -&gt; Bool)
+-&gt; (forall a. t a -&gt; Int)
+-&gt; (forall a. Eq a =&gt; a -&gt; t a -&gt; Bool)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Ord a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; (forall a. Num a =&gt; t a -&gt; a)
+-&gt; Foldable t
+$cfold :: forall r (nonEmpty :: * -&gt; *) m.
+(Foldable nonEmpty, Monoid m) =&gt;
+UnboundedConvexRegionF r nonEmpty m -&gt; m
+fold :: forall m. Monoid m =&gt; UnboundedConvexRegionF r nonEmpty m -&gt; m
+$cfoldMap :: forall r (nonEmpty :: * -&gt; *) m a.
+(Foldable nonEmpty, Monoid m) =&gt;
+(a -&gt; m) -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; m
+foldMap :: forall m a.
+Monoid m =&gt;
+(a -&gt; m) -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; m
+$cfoldMap' :: forall r (nonEmpty :: * -&gt; *) m a.
+(Foldable nonEmpty, Monoid m) =&gt;
+(a -&gt; m) -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; m
+foldMap' :: forall m a.
+Monoid m =&gt;
+(a -&gt; m) -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; m
+$cfoldr :: forall r (nonEmpty :: * -&gt; *) a b.
+Foldable nonEmpty =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; b
+foldr :: forall a b.
+(a -&gt; b -&gt; b) -&gt; b -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; b
+$cfoldr' :: forall r (nonEmpty :: * -&gt; *) a b.
+Foldable nonEmpty =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; b
+foldr' :: forall a b.
+(a -&gt; b -&gt; b) -&gt; b -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; b
+$cfoldl :: forall r (nonEmpty :: * -&gt; *) b a.
+Foldable nonEmpty =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; b
+foldl :: forall b a.
+(b -&gt; a -&gt; b) -&gt; b -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; b
+$cfoldl' :: forall r (nonEmpty :: * -&gt; *) b a.
+Foldable nonEmpty =&gt;
+(b -&gt; a -&gt; b) -&gt; b -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; b
+foldl' :: forall b a.
+(b -&gt; a -&gt; b) -&gt; b -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; b
+$cfoldr1 :: forall r (nonEmpty :: * -&gt; *) a.
+Foldable nonEmpty =&gt;
+(a -&gt; a -&gt; a) -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; a
+foldr1 :: forall a. (a -&gt; a -&gt; a) -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; a
+$cfoldl1 :: forall r (nonEmpty :: * -&gt; *) a.
+Foldable nonEmpty =&gt;
+(a -&gt; a -&gt; a) -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; a
+foldl1 :: forall a. (a -&gt; a -&gt; a) -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; a
+$ctoList :: forall r (nonEmpty :: * -&gt; *) a.
+Foldable nonEmpty =&gt;
+UnboundedConvexRegionF r nonEmpty a -&gt; [a]
+toList :: forall a. UnboundedConvexRegionF r nonEmpty a -&gt; [a]
+$cnull :: forall r (nonEmpty :: * -&gt; *) a.
+Foldable nonEmpty =&gt;
+UnboundedConvexRegionF r nonEmpty a -&gt; Bool
+null :: forall a. UnboundedConvexRegionF r nonEmpty a -&gt; Bool
+$clength :: forall r (nonEmpty :: * -&gt; *) a.
+Foldable nonEmpty =&gt;
+UnboundedConvexRegionF r nonEmpty a -&gt; Int
+length :: forall a. UnboundedConvexRegionF r nonEmpty a -&gt; Int
+$celem :: forall r (nonEmpty :: * -&gt; *) a.
+(Foldable nonEmpty, Eq a) =&gt;
+a -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; Bool
+elem :: forall a. Eq a =&gt; a -&gt; UnboundedConvexRegionF r nonEmpty a -&gt; Bool
+$cmaximum :: forall r (nonEmpty :: * -&gt; *) a.
+(Foldable nonEmpty, Ord a) =&gt;
+UnboundedConvexRegionF r nonEmpty a -&gt; a
+maximum :: forall a. Ord a =&gt; UnboundedConvexRegionF r nonEmpty a -&gt; a
+$cminimum :: forall r (nonEmpty :: * -&gt; *) a.
+(Foldable nonEmpty, Ord a) =&gt;
+UnboundedConvexRegionF r nonEmpty a -&gt; a
+minimum :: forall a. Ord a =&gt; UnboundedConvexRegionF r nonEmpty a -&gt; a
+$csum :: forall r (nonEmpty :: * -&gt; *) a.
+(Foldable nonEmpty, Num a) =&gt;
+UnboundedConvexRegionF r nonEmpty a -&gt; a
+sum :: forall a. Num a =&gt; UnboundedConvexRegionF r nonEmpty a -&gt; a
+$cproduct :: forall r (nonEmpty :: * -&gt; *) a.
+(Foldable nonEmpty, Num a) =&gt;
+UnboundedConvexRegionF r nonEmpty a -&gt; a
+product :: forall a. Num a =&gt; UnboundedConvexRegionF r nonEmpty a -&gt; a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Foldable</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679294572"><span id="local-6989586621679294579"><span id="local-6989586621679294585"><span id="local-6989586621679294590"><span class="annot"><span class="annottext">Functor (UnboundedConvexRegionF r nonEmpty)
+Foldable (UnboundedConvexRegionF r nonEmpty)
+(Functor (UnboundedConvexRegionF r nonEmpty),
+ Foldable (UnboundedConvexRegionF r nonEmpty)) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b)
+ -&gt; UnboundedConvexRegionF r nonEmpty a
+ -&gt; f (UnboundedConvexRegionF r nonEmpty b))
+-&gt; (forall (f :: * -&gt; *) a.
+    Applicative f =&gt;
+    UnboundedConvexRegionF r nonEmpty (f a)
+    -&gt; f (UnboundedConvexRegionF r nonEmpty a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b)
+    -&gt; UnboundedConvexRegionF r nonEmpty a
+    -&gt; m (UnboundedConvexRegionF r nonEmpty b))
+-&gt; (forall (m :: * -&gt; *) a.
+    Monad m =&gt;
+    UnboundedConvexRegionF r nonEmpty (m a)
+    -&gt; m (UnboundedConvexRegionF r nonEmpty a))
+-&gt; Traversable (UnboundedConvexRegionF r nonEmpty)
+forall r (nonEmpty :: * -&gt; *).
+Traversable nonEmpty =&gt;
+Functor (UnboundedConvexRegionF r nonEmpty)
+forall r (nonEmpty :: * -&gt; *).
+Traversable nonEmpty =&gt;
+Foldable (UnboundedConvexRegionF r nonEmpty)
+forall r (nonEmpty :: * -&gt; *) (m :: * -&gt; *) a.
+(Traversable nonEmpty, Monad m) =&gt;
+UnboundedConvexRegionF r nonEmpty (m a)
+-&gt; m (UnboundedConvexRegionF r nonEmpty a)
+forall r (nonEmpty :: * -&gt; *) (f :: * -&gt; *) a.
+(Traversable nonEmpty, Applicative f) =&gt;
+UnboundedConvexRegionF r nonEmpty (f a)
+-&gt; f (UnboundedConvexRegionF r nonEmpty a)
+forall r (nonEmpty :: * -&gt; *) (m :: * -&gt; *) a b.
+(Traversable nonEmpty, Monad m) =&gt;
+(a -&gt; m b)
+-&gt; UnboundedConvexRegionF r nonEmpty a
+-&gt; m (UnboundedConvexRegionF r nonEmpty b)
+forall r (nonEmpty :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable nonEmpty, Applicative f) =&gt;
+(a -&gt; f b)
+-&gt; UnboundedConvexRegionF r nonEmpty a
+-&gt; f (UnboundedConvexRegionF r nonEmpty b)
+forall (t :: * -&gt; *).
+(Functor t, Foldable t) =&gt;
+(forall (f :: * -&gt; *) a b.
+ Applicative f =&gt;
+ (a -&gt; f b) -&gt; t a -&gt; f (t b))
+-&gt; (forall (f :: * -&gt; *) a. Applicative f =&gt; t (f a) -&gt; f (t a))
+-&gt; (forall (m :: * -&gt; *) a b.
+    Monad m =&gt;
+    (a -&gt; m b) -&gt; t a -&gt; m (t b))
+-&gt; (forall (m :: * -&gt; *) a. Monad m =&gt; t (m a) -&gt; m (t a))
+-&gt; Traversable t
+forall (m :: * -&gt; *) a.
+Monad m =&gt;
+UnboundedConvexRegionF r nonEmpty (m a)
+-&gt; m (UnboundedConvexRegionF r nonEmpty a)
+forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+UnboundedConvexRegionF r nonEmpty (f a)
+-&gt; f (UnboundedConvexRegionF r nonEmpty a)
+forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b)
+-&gt; UnboundedConvexRegionF r nonEmpty a
+-&gt; m (UnboundedConvexRegionF r nonEmpty b)
+forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b)
+-&gt; UnboundedConvexRegionF r nonEmpty a
+-&gt; f (UnboundedConvexRegionF r nonEmpty b)
+$ctraverse :: forall r (nonEmpty :: * -&gt; *) (f :: * -&gt; *) a b.
+(Traversable nonEmpty, Applicative f) =&gt;
+(a -&gt; f b)
+-&gt; UnboundedConvexRegionF r nonEmpty a
+-&gt; f (UnboundedConvexRegionF r nonEmpty b)
+traverse :: forall (f :: * -&gt; *) a b.
+Applicative f =&gt;
+(a -&gt; f b)
+-&gt; UnboundedConvexRegionF r nonEmpty a
+-&gt; f (UnboundedConvexRegionF r nonEmpty b)
+$csequenceA :: forall r (nonEmpty :: * -&gt; *) (f :: * -&gt; *) a.
+(Traversable nonEmpty, Applicative f) =&gt;
+UnboundedConvexRegionF r nonEmpty (f a)
+-&gt; f (UnboundedConvexRegionF r nonEmpty a)
+sequenceA :: forall (f :: * -&gt; *) a.
+Applicative f =&gt;
+UnboundedConvexRegionF r nonEmpty (f a)
+-&gt; f (UnboundedConvexRegionF r nonEmpty a)
+$cmapM :: forall r (nonEmpty :: * -&gt; *) (m :: * -&gt; *) a b.
+(Traversable nonEmpty, Monad m) =&gt;
+(a -&gt; m b)
+-&gt; UnboundedConvexRegionF r nonEmpty a
+-&gt; m (UnboundedConvexRegionF r nonEmpty b)
+mapM :: forall (m :: * -&gt; *) a b.
+Monad m =&gt;
+(a -&gt; m b)
+-&gt; UnboundedConvexRegionF r nonEmpty a
+-&gt; m (UnboundedConvexRegionF r nonEmpty b)
+$csequence :: forall r (nonEmpty :: * -&gt; *) (m :: * -&gt; *) a.
+(Traversable nonEmpty, Monad m) =&gt;
+UnboundedConvexRegionF r nonEmpty (m a)
+-&gt; m (UnboundedConvexRegionF r nonEmpty a)
+sequence :: forall (m :: * -&gt; *) a.
+Monad m =&gt;
+UnboundedConvexRegionF r nonEmpty (m a)
+-&gt; m (UnboundedConvexRegionF r nonEmpty a)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Traversable</span></span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-51"></span><span>
+</span><span id="line-52"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679294599"><span id="local-6989586621679294600"><span id="local-6989586621679294601"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#UnboundedConvexRegionF"><span class="hs-identifier hs-type">UnboundedConvexRegionF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294599"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294600"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294601"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679294599"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-53"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679294602"><span id="local-6989586621679294603"><span id="local-6989586621679294604"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#UnboundedConvexRegionF"><span class="hs-identifier hs-type">UnboundedConvexRegionF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294602"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294603"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294604"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span class="annot"><span class="hs-comment">-- | map a function over the sequence of points</span></span><span>
+</span><span id="line-56"></span><span id="local-6989586621679294222"><span id="local-6989586621679294223"><span id="local-6989586621679294224"><span id="local-6989586621679294225"><span id="local-6989586621679294226"><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#mapChain"><span class="hs-identifier hs-type">mapChain</span></a></span><span>                       </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679294222"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294223"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679294224"><span class="hs-identifier hs-type">nonEmpty'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294225"><span class="hs-identifier hs-type">vertex'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span>                               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#UnboundedConvexRegionF"><span class="hs-identifier hs-type">UnboundedConvexRegionF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294226"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294222"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294223"><span class="hs-identifier hs-type">vertex</span></a></span><span>
+</span><span id="line-58"></span><span>                               </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#UnboundedConvexRegionF"><span class="hs-identifier hs-type">UnboundedConvexRegionF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294226"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294224"><span class="hs-identifier hs-type">nonEmpty'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294225"><span class="hs-identifier hs-type">vertex'</span></a></span></span></span></span></span></span><span>
+</span><span id="line-59"></span><span id="mapChain"><span class="annot"><span class="annottext">mapChain :: forall {k} {k} (nonEmpty :: k -&gt; *) (vertex :: k)
+       (nonEmpty' :: k -&gt; *) (vertex' :: k) r.
+(nonEmpty vertex -&gt; nonEmpty' vertex')
+-&gt; UnboundedConvexRegionF r nonEmpty vertex
+-&gt; UnboundedConvexRegionF r nonEmpty' vertex'
+</span><a href="HGeometry.Polygon.Convex.Unbounded.html#mapChain"><span class="hs-identifier hs-var hs-var">mapChain</span></a></span></span><span> </span><span id="local-6989586621679294605"><span class="annot"><span class="annottext">nonEmpty vertex -&gt; nonEmpty' vertex'
+</span><a href="#local-6989586621679294605"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#Unbounded"><span class="hs-identifier hs-type">Unbounded</span></a></span><span> </span><span id="local-6989586621679294606"><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679294606"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679294607"><span class="annot"><span class="annottext">nonEmpty vertex
+</span><a href="#local-6989586621679294607"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span id="local-6989586621679294608"><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679294608"><span class="hs-identifier hs-var">w</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+-&gt; nonEmpty' vertex'
+-&gt; Vector 2 r
+-&gt; UnboundedConvexRegionF r nonEmpty' vertex'
+forall {k} r (nonEmpty :: k -&gt; *) (vertex :: k).
+Vector 2 r
+-&gt; nonEmpty vertex
+-&gt; Vector 2 r
+-&gt; UnboundedConvexRegionF r nonEmpty vertex
+</span><a href="HGeometry.Polygon.Convex.Unbounded.html#Unbounded"><span class="hs-identifier hs-var">Unbounded</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679294606"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">nonEmpty vertex -&gt; nonEmpty' vertex'
+</span><a href="#local-6989586621679294605"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">nonEmpty vertex
+</span><a href="#local-6989586621679294607"><span class="hs-identifier hs-var">pts</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679294608"><span class="hs-identifier hs-var">w</span></a></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- | Compute the first and last vertex of the chain. Returns a Left if the first and last</span><span>
+</span><span id="line-62"></span><span class="hs-comment">-- are the same.</span><span>
+</span><span id="line-63"></span><span id="local-6989586621679294238"><span id="local-6989586621679294239"><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#extremalVertices"><span class="hs-identifier hs-type">extremalVertices</span></a></span><span>                            </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#UnboundedConvexRegionF"><span class="hs-identifier hs-type">UnboundedConvexRegionF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294238"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679294239"><span class="hs-identifier hs-type">vertex</span></a></span><span>
+</span><span id="line-64"></span><span>                                            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="#local-6989586621679294239"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679294239"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-65"></span><span id="extremalVertices"><span class="annot"><span class="annottext">extremalVertices :: forall r vertex.
+UnboundedConvexRegionF r NonEmpty vertex
+-&gt; Either vertex (Vector 2 vertex)
+</span><a href="HGeometry.Polygon.Convex.Unbounded.html#extremalVertices"><span class="hs-identifier hs-var hs-var">extremalVertices</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#Unbounded"><span class="hs-identifier hs-type">Unbounded</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679294609"><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679294609"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:|</span></span><span> </span><span id="local-6989586621679294611"><span class="annot"><span class="annottext">[vertex]
+</span><a href="#local-6989586621679294611"><span class="hs-identifier hs-var">pts</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[vertex] -&gt; Maybe (NonEmpty vertex)
+forall a. [a] -&gt; Maybe (NonEmpty a)
+</span><span class="hs-identifier hs-var">NonEmpty.nonEmpty</span></span><span> </span><span class="annot"><span class="annottext">[vertex]
+</span><a href="#local-6989586621679294611"><span class="hs-identifier hs-var">pts</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-66"></span><span>                                                </span><span class="annot"><span class="annottext">Maybe (NonEmpty vertex)
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">vertex -&gt; Either vertex (Vector 2 vertex)
+forall a b. a -&gt; Either a b
+</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679294609"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-67"></span><span>                                                </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679294613"><span class="annot"><span class="annottext">NonEmpty vertex
+</span><a href="#local-6989586621679294613"><span class="hs-identifier hs-var">pts'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Vector 2 vertex -&gt; Either vertex (Vector 2 vertex)
+forall a b. b -&gt; Either a b
+</span><span class="hs-identifier hs-var">Right</span></span><span> </span><span class="annot"><span class="annottext">(Vector 2 vertex -&gt; Either vertex (Vector 2 vertex))
+-&gt; Vector 2 vertex -&gt; Either vertex (Vector 2 vertex)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">vertex -&gt; vertex -&gt; Vector 2 vertex
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><span class="hs-identifier hs-var">Vector2</span></span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679294609"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">NonEmpty vertex -&gt; vertex
+forall a. NonEmpty a -&gt; a
+</span><span class="hs-identifier hs-var">NonEmpty.last</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty vertex
+</span><a href="#local-6989586621679294613"><span class="hs-identifier hs-var">pts'</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span>
+</span><span id="line-70"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-71"></span><span>
+</span><span id="line-72"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Intersection"><span class="annot"><span class="hs-identifier hs-var">Intersection</span></span></span><span> </span><span id="local-6989586621679294616"><span id="local-6989586621679294617"><span id="local-6989586621679294618"><span id="local-6989586621679294619"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Triangle</span></span><span> </span><span class="annot"><a href="#local-6989586621679294616"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#UnboundedConvexRegionF"><span class="hs-identifier hs-type">UnboundedConvexRegionF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294617"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294618"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294619"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Intersection</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Triangle</span></span><span> </span><span class="annot"><a href="#local-6989586621679294616"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Convex.Internal.html#ConvexPolygonF"><span class="hs-identifier hs-type">ConvexPolygonF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294618"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294619"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679294280"><span id="local-6989586621679294281"><span id="local-6989586621679294282"><span id="local-6989586621679294625"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679294280"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679294281"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679294282"><span class="hs-identifier hs-type">corner</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679294281"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679294281"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679294281"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-76"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Triangle</span></span><span> </span><span class="annot"><a href="#local-6989586621679294282"><span class="hs-identifier hs-type">corner</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">`HasIntersectionWith`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#UnboundedConvexRegionF"><span class="hs-identifier hs-type">UnboundedConvexRegionF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294281"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679294280"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679294277"><span id="local-6989586621679294278"><span id="local-6989586621679294279"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679294277"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679294278"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679294279"><span class="hs-identifier hs-type">corner</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679294278"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679294278"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679294278"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-79"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Triangle</span></span><span> </span><span class="annot"><a href="#local-6989586621679294279"><span class="hs-identifier hs-type">corner</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">`IsIntersectableWith`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#UnboundedConvexRegionF"><span class="hs-identifier hs-type">UnboundedConvexRegionF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294278"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679294277"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-80"></span><span>  </span><span id="local-6989586621679294825"><span class="annot"><span class="annottext">Triangle corner
+</span><a href="#local-6989586621679294825"><span class="hs-identifier hs-var">tri</span></a></span></span><span> </span><span id="local-6989586621679294826"><span class="annot"><span class="annottext">intersect :: Triangle corner
+-&gt; UnboundedConvexRegionF r NonEmpty vertex
+-&gt; Intersection
+     (Triangle corner) (UnboundedConvexRegionF r NonEmpty vertex)
+</span><a href="#local-6989586621679294826"><span class="hs-operator hs-var hs-var hs-var">`intersect`</span></a></span></span><span> </span><span id="local-6989586621679294828"><span class="annot"><span class="annottext">UnboundedConvexRegionF r NonEmpty vertex
+</span><a href="#local-6989586621679294828"><span class="hs-identifier hs-var">region</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Triangle corner
+</span><a href="#local-6989586621679294825"><span class="hs-identifier hs-var">tri</span></a></span><span> </span><span class="annot"><span class="annottext">Triangle corner
+-&gt; ConvexPolygonF NonEmpty vertex
+-&gt; Intersection (Triangle corner) (ConvexPolygonF NonEmpty vertex)
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Triangle corner
+-&gt; UnboundedConvexRegionF r NonEmpty vertex
+-&gt; ConvexPolygonF NonEmpty vertex
+forall (nonEmpty :: * -&gt; *) point r vertex.
+(Foldable nonEmpty, Point_ point 2 r, Point_ vertex 2 r, Ord r,
+ Fractional r) =&gt;
+nonEmpty point
+-&gt; UnboundedConvexRegionF r NonEmpty vertex
+-&gt; ConvexPolygonF NonEmpty vertex
+</span><a href="HGeometry.Polygon.Convex.Unbounded.html#toBoundedFrom"><span class="hs-identifier hs-var">toBoundedFrom</span></a></span><span> </span><span class="annot"><span class="annottext">Triangle corner
+</span><a href="#local-6989586621679294825"><span class="hs-identifier hs-var">tri</span></a></span><span> </span><span class="annot"><span class="annottext">UnboundedConvexRegionF r NonEmpty vertex
+</span><a href="#local-6989586621679294828"><span class="hs-identifier hs-var">region</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- | convert to a bounded polygon that contains the points given as the first argument.</span><span>
+</span><span id="line-83"></span><span class="hs-comment">--</span><span>
+</span><span id="line-84"></span><span class="hs-comment">-- note: this creates two new vertices; which are &quot;copies&quot; from the extremal vertices.</span><span>
+</span><span id="line-85"></span><span class="hs-comment">-- this is to avoid having to introduce yet another level of 'OriginalOrExtra''s</span><span>
+</span><span id="line-86"></span><span id="local-6989586621679294321"><span id="local-6989586621679294322"><span id="local-6989586621679294323"><span id="local-6989586621679294324"><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#toBoundedFrom"><span class="hs-identifier hs-type">toBoundedFrom</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679294321"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679294322"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679294323"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679294324"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679294323"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679294323"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679294323"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-87"></span><span>                 </span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span>              </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679294321"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294322"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#UnboundedConvexRegionF"><span class="hs-identifier hs-type">UnboundedConvexRegionF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679294323"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679294324"><span class="hs-identifier hs-type">vertex</span></a></span><span>
+</span><span id="line-89"></span><span>              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Convex.Internal.html#ConvexPolygonF"><span class="hs-identifier hs-type">ConvexPolygonF</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NonEmpty</span></span><span> </span><span class="annot"><a href="#local-6989586621679294324"><span class="hs-identifier hs-type">vertex</span></a></span></span></span></span></span><span>
+</span><span id="line-90"></span><span id="toBoundedFrom"><span class="annot"><span class="annottext">toBoundedFrom :: forall (nonEmpty :: * -&gt; *) point r vertex.
+(Foldable nonEmpty, Point_ point 2 r, Point_ vertex 2 r, Ord r,
+ Fractional r) =&gt;
+nonEmpty point
+-&gt; UnboundedConvexRegionF r NonEmpty vertex
+-&gt; ConvexPolygonF NonEmpty vertex
+</span><a href="HGeometry.Polygon.Convex.Unbounded.html#toBoundedFrom"><span class="hs-identifier hs-var hs-var">toBoundedFrom</span></a></span></span><span> </span><span id="local-6989586621679295462"><span class="annot"><span class="annottext">nonEmpty point
+</span><a href="#local-6989586621679295462"><span class="hs-identifier hs-var">tri</span></a></span></span><span> </span><span id="local-6989586621679295463"><span class="annot"><span class="annottext">reg :: UnboundedConvexRegionF r NonEmpty vertex
+</span><a href="#local-6989586621679295463"><span class="hs-identifier hs-var">reg</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Convex.Unbounded.html#Unbounded"><span class="hs-identifier hs-type">Unbounded</span></a></span><span> </span><span id="local-6989586621679295464"><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679295464"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679295465"><span class="annot"><span class="annottext">NonEmpty vertex
+</span><a href="#local-6989586621679295465"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span id="local-6989586621679295466"><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679295466"><span class="hs-identifier hs-var">w</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">UnboundedConvexRegionF r NonEmpty vertex
+-&gt; Either vertex (Vector 2 vertex)
+forall r vertex.
+UnboundedConvexRegionF r NonEmpty vertex
+-&gt; Either vertex (Vector 2 vertex)
+</span><a href="HGeometry.Polygon.Convex.Unbounded.html#extremalVertices"><span class="hs-identifier hs-var">extremalVertices</span></a></span><span> </span><span class="annot"><span class="annottext">UnboundedConvexRegionF r NonEmpty vertex
+</span><a href="#local-6989586621679295463"><span class="hs-identifier hs-var">reg</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-91"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector2</span></span><span> </span><span id="local-6989586621679295467"><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295467"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679295468"><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295468"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679295469"><span class="annot"><span class="annottext">l :: LinePV 2 r
+</span><a href="#local-6989586621679295469"><span class="hs-identifier hs-var">l</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LinePV</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679295471"><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679295471"><span class="hs-identifier hs-var">u</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">vertex -&gt; vertex -&gt; LinePV 2 r
+forall line point (d :: Nat) r.
+(Line_ line d r, Point_ point d r, Num r) =&gt;
+point -&gt; point -&gt; line
+</span><span class="hs-identifier hs-var">lineThrough</span></span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295467"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295468"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><span id="line-92"></span><span>                               </span><span id="local-6989586621679295473"><span class="annot"><span class="annottext">h :: HalfSpaceF (LinePV 2 r)
+</span><a href="#local-6989586621679295473"><span class="hs-identifier hs-var hs-var">h</span></a></span></span><span>              </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sign -&gt; LinePV 2 r -&gt; HalfSpaceF (LinePV 2 r)
+forall boundingHyperPlane.
+Sign -&gt; boundingHyperPlane -&gt; HalfSpaceF boundingHyperPlane
+</span><span class="hs-identifier hs-var">HalfSpace</span></span><span> </span><span class="annot"><span class="annottext">Sign
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sign.html/HGeometry.Sign.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV 2 r
+</span><a href="#local-6989586621679295469"><span class="hs-identifier hs-var">l</span></a></span><span>
+</span><span id="line-93"></span><span>                           </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">vertex
+-&gt; vertex
+-&gt; HalfSpaceF (LinePV 2 r)
+-&gt; Vector 2 r
+-&gt; ConvexPolygonF NonEmpty vertex
+</span><a href="#local-6989586621679295476"><span class="hs-identifier hs-var">compute</span></a></span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295467"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295468"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">HalfSpaceF (LinePV 2 r)
+</span><a href="#local-6989586621679295473"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679295471"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><span id="line-94"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679295477"><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295477"><span class="hs-identifier hs-var">p</span></a></span></span><span>              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679295478"><span class="annot"><span class="annottext">bisec :: Vector 2 r
+</span><a href="#local-6989586621679295478"><span class="hs-identifier hs-var hs-var">bisec</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679295466"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; Vector 2 r -&gt; Vector 2 r
+forall r vector (d :: Nat).
+(Num r, Additive_ vector d r) =&gt;
+vector -&gt; vector -&gt; vector
+</span><span class="hs-operator hs-var">^+^</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; Vector 2 r
+forall r vector (d :: Nat).
+(Num r, Vector_ vector d r) =&gt;
+vector -&gt; vector
+</span><span class="hs-identifier hs-var">negated</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679295464"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-comment">-- note that v is pointing in the wrong dir.</span><span>
+</span><span id="line-95"></span><span>                               </span><span id="local-6989586621679295481"><span class="annot"><span class="annottext">u :: Vector 2 r
+</span><a href="#local-6989586621679295481"><span class="hs-identifier hs-var hs-var">u</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; Vector 2 r
+forall {r}. Num r =&gt; Vector 2 r -&gt; Vector 2 r
+</span><a href="#local-6989586621679295482"><span class="hs-identifier hs-var">rot90</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679295478"><span class="hs-identifier hs-var">bisec</span></a></span><span> </span><span class="hs-comment">-- perpendicular to bisec</span><span>
+</span><span id="line-96"></span><span>                               </span><span id="local-6989586621679295483"><span class="annot"><span class="annottext">h :: HalfSpaceF (LinePV 2 r)
+</span><a href="#local-6989586621679295483"><span class="hs-identifier hs-var hs-var">h</span></a></span></span><span>     </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Sign -&gt; LinePV 2 r -&gt; HalfSpaceF (LinePV 2 r)
+forall boundingHyperPlane.
+Sign -&gt; boundingHyperPlane -&gt; HalfSpaceF boundingHyperPlane
+</span><span class="hs-identifier hs-var">HalfSpace</span></span><span> </span><span class="annot"><span class="annottext">Sign
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Sign.html/HGeometry.Sign.html#Positive"><span class="hs-identifier hs-var">Positive</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">vertex -&gt; Vector 2 r -&gt; LinePV 2 r
+forall point.
+(Point_ point 2 r, Line_ (LinePV 2 r) 2 r, Num r) =&gt;
+point -&gt; Vector 2 r -&gt; LinePV 2 r
+forall line (d :: Nat) r point.
+(Line_ line d r, Point_ point d r, Line_ line d r, Num r) =&gt;
+point -&gt; Vector d r -&gt; line
+</span><span class="hs-identifier hs-var">fromPointAndVec</span></span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295477"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679295481"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-97"></span><span>                           </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">vertex
+-&gt; vertex
+-&gt; HalfSpaceF (LinePV 2 r)
+-&gt; Vector 2 r
+-&gt; ConvexPolygonF NonEmpty vertex
+</span><a href="#local-6989586621679295476"><span class="hs-identifier hs-var">compute</span></a></span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295477"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295477"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">HalfSpaceF (LinePV 2 r)
+</span><a href="#local-6989586621679295483"><span class="hs-identifier hs-var">h</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679295481"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><span id="line-98"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-99"></span><span>    </span><span class="hs-comment">-- given the halfpsace h that goes through p and q (the extremal vertices),</span><span>
+</span><span id="line-100"></span><span>    </span><span class="hs-comment">-- and the direction u of its bounding line.</span><span>
+</span><span id="line-101"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-102"></span><span>    </span><span class="hs-comment">-- computes two points a and b on the halflines so that tri is contained in the halfspace</span><span>
+</span><span id="line-103"></span><span>    </span><span class="hs-comment">-- defined by a and b (that contains p and q).</span><span>
+</span><span id="line-104"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-105"></span><span>    </span><span class="hs-comment">-- it returns a clipped version of the bounded region with a and b as vertices.</span><span>
+</span><span id="line-106"></span><span>    </span><span id="local-6989586621679295476"><span class="annot"><span class="annottext">compute :: vertex
+-&gt; vertex
+-&gt; HalfSpaceF (LinePV 2 r)
+-&gt; Vector 2 r
+-&gt; ConvexPolygonF NonEmpty vertex
+</span><a href="#local-6989586621679295476"><span class="hs-identifier hs-var hs-var">compute</span></a></span></span><span> </span><span id="local-6989586621679295485"><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295485"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679295486"><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295486"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span id="local-6989586621679295487"><span class="annot"><span class="annottext">HalfSpaceF (LinePV 2 r)
+</span><a href="#local-6989586621679295487"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span id="local-6989586621679295488"><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679295488"><span class="hs-identifier hs-var">u</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679295489"><span class="annot"><span class="annottext">s :: Point 2 r
+</span><a href="#local-6989586621679295489"><span class="hs-identifier hs-var hs-var">s</span></a></span></span><span>    </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r) (Point 2 r)
+-&gt; Point 2 r -&gt; Point 2 r
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) (Point 2 r) (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' (Point 2 r) (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; Point 2 r) -&gt; Point 2 r -&gt; Point 2 r
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; r) -&gt; NonEmpty (Point 2 r) -&gt; Point 2 r
+forall {t :: * -&gt; *} {a} {a}.
+(Foldable1 t, Ord a) =&gt;
+(a -&gt; a) -&gt; t a -&gt; a
+</span><a href="#local-6989586621679295492"><span class="hs-identifier hs-var">maximumOn</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; HalfSpaceF (LinePV 2 r) -&gt; r
+forall g r (d :: Nat) point.
+(HasSquaredEuclideanDistance g, r ~ NumType g, d ~ Dimension g,
+ Num r, Point_ point d r) =&gt;
+point -&gt; g -&gt; r
+forall r (d :: Nat) point.
+(r ~ NumType (HalfSpaceF (LinePV 2 r)),
+ d ~ Dimension (HalfSpaceF (LinePV 2 r)), Num r,
+ Point_ point d r) =&gt;
+point -&gt; HalfSpaceF (LinePV 2 r) -&gt; r
+</span><span class="hs-operator hs-var">`squaredEuclideanDistTo`</span></span><span> </span><span class="annot"><span class="annottext">HalfSpaceF (LinePV 2 r)
+</span><a href="#local-6989586621679295487"><span class="hs-identifier hs-var">h</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r)
+</span><a href="#local-6989586621679295494"><span class="hs-identifier hs-var">tri'</span></a></span><span>
+</span><span id="line-107"></span><span>                          </span><span class="hs-comment">-- distance to the point furthest from this halfspace.</span><span>
+</span><span id="line-108"></span><span>                          </span><span class="hs-comment">-- we then create two additional on the halflines</span><span>
+</span><span id="line-109"></span><span>                          </span><span class="hs-comment">-- that are at least that distance away.</span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span>                          </span><span id="local-6989586621679295494"><span class="annot"><span class="annottext">tri' :: NonEmpty (Point 2 r)
+</span><a href="#local-6989586621679295494"><span class="hs-identifier hs-var hs-var">tri'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295486"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">vertex -&gt; Vector 2 r -&gt; vertex
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; Vector d r -&gt; point
+</span><span class="hs-operator hs-var">.+^</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679295466"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">vertex -&gt; Getting (Point 2 r) vertex (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) vertex (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' vertex (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; [Point 2 r] -&gt; NonEmpty (Point 2 r)
+forall a. a -&gt; [a] -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">:|</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">point -&gt; Getting (Point 2 r) point (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' point (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(point -&gt; Point 2 r) -&gt; [point] -&gt; [Point 2 r]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">nonEmpty point -&gt; [point]
+forall a. nonEmpty a -&gt; [a]
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; [a]
+</span><span class="hs-identifier hs-var">F.toList</span></span><span> </span><span class="annot"><span class="annottext">nonEmpty point
+</span><a href="#local-6989586621679295462"><span class="hs-identifier hs-var">tri</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span>                          </span><span class="hs-comment">-- make sure that there is at least one point outside h,</span><span>
+</span><span id="line-113"></span><span>                          </span><span class="hs-comment">-- so that s lies stricly outside h as well</span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span>                          </span><span id="local-6989586621679295499"><span class="annot"><span class="annottext">a :: vertex
+</span><a href="#local-6989586621679295499"><span class="hs-identifier hs-var hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall line (d :: Nat) r point.
+(Line_ line d r, Point_ point d r, Line_ line d r, Num r) =&gt;
+point -&gt; Vector d r -&gt; line
+</span><span class="hs-identifier hs-var">fromPointAndVec</span></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LinePV</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295485"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679295464"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">LinePV 2 r -&gt; LinePV 2 r -&gt; Intersection (LinePV 2 r) (LinePV 2 r)
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Vector 2 r -&gt; LinePV 2 r
+forall (d :: Nat) r. Point d r -&gt; Vector d r -&gt; LinePV d r
+</span><span class="hs-identifier hs-var">LinePV</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679295489"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679295488"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-116"></span><span>                                </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Line_x_Line_Point</span></span><span> </span><span id="local-6989586621679295501"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679295501"><span class="hs-identifier hs-var">a'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295485"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">vertex -&gt; (vertex -&gt; vertex) -&gt; vertex
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(r -&gt; Identity r) -&gt; vertex -&gt; Identity vertex
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int vertex r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span> </span><span class="annot"><span class="annottext">((r -&gt; Identity r) -&gt; vertex -&gt; Identity vertex)
+-&gt; r -&gt; vertex -&gt; vertex
+forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679295501"><span class="hs-identifier hs-var">a'</span></a></span><span class="annot"><span class="annottext">Point 2 r -&gt; Getting r (Point 2 r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int (Point 2 r) r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span>
+</span><span id="line-117"></span><span>                                                                </span><span class="annot"><span class="annottext">vertex -&gt; (vertex -&gt; vertex) -&gt; vertex
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(r -&gt; Identity r) -&gt; vertex -&gt; Identity vertex
+forall (d :: Nat) point r.
+(2 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int vertex r
+</span><span class="hs-identifier hs-var">yCoord</span></span><span> </span><span class="annot"><span class="annottext">((r -&gt; Identity r) -&gt; vertex -&gt; Identity vertex)
+-&gt; r -&gt; vertex -&gt; vertex
+forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679295501"><span class="hs-identifier hs-var">a'</span></a></span><span class="annot"><span class="annottext">Point 2 r -&gt; Getting r (Point 2 r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
+forall (d :: Nat) point r.
+(2 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int (Point 2 r) r
+</span><span class="hs-identifier hs-var">yCoord</span></span><span>
+</span><span id="line-118"></span><span>                                </span><span class="annot"><span class="annottext">Intersection (LinePV 2 r) (LinePV 2 r)
+</span><span class="hs-identifier">_</span></span><span>                           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; vertex
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;absurd; a'&quot;</span></span><span>
+</span><span id="line-119"></span><span>                          </span><span id="local-6989586621679295507"><span class="annot"><span class="annottext">b :: vertex
+</span><a href="#local-6989586621679295507"><span class="hs-identifier hs-var hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall line (d :: Nat) r point.
+(Line_ line d r, Point_ point d r, Line_ line d r, Num r) =&gt;
+point -&gt; Vector d r -&gt; line
+</span><span class="hs-identifier hs-var">fromPointAndVec</span></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LinePV</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295486"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679295466"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">LinePV 2 r -&gt; LinePV 2 r -&gt; Intersection (LinePV 2 r) (LinePV 2 r)
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Vector 2 r -&gt; LinePV 2 r
+forall (d :: Nat) r. Point d r -&gt; Vector d r -&gt; LinePV d r
+</span><span class="hs-identifier hs-var">LinePV</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679295489"><span class="hs-identifier hs-var">s</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679295488"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-120"></span><span>                                </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Line_x_Line_Point</span></span><span> </span><span id="local-6989586621679295508"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679295508"><span class="hs-identifier hs-var">b'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295486"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">vertex -&gt; (vertex -&gt; vertex) -&gt; vertex
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(r -&gt; Identity r) -&gt; vertex -&gt; Identity vertex
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int vertex r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span> </span><span class="annot"><span class="annottext">((r -&gt; Identity r) -&gt; vertex -&gt; Identity vertex)
+-&gt; r -&gt; vertex -&gt; vertex
+forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679295508"><span class="hs-identifier hs-var">b'</span></a></span><span class="annot"><span class="annottext">Point 2 r -&gt; Getting r (Point 2 r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int (Point 2 r) r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span>
+</span><span id="line-121"></span><span>                                                                </span><span class="annot"><span class="annottext">vertex -&gt; (vertex -&gt; vertex) -&gt; vertex
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(r -&gt; Identity r) -&gt; vertex -&gt; Identity vertex
+forall (d :: Nat) point r.
+(2 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int vertex r
+</span><span class="hs-identifier hs-var">yCoord</span></span><span> </span><span class="annot"><span class="annottext">((r -&gt; Identity r) -&gt; vertex -&gt; Identity vertex)
+-&gt; r -&gt; vertex -&gt; vertex
+forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679295508"><span class="hs-identifier hs-var">b'</span></a></span><span class="annot"><span class="annottext">Point 2 r -&gt; Getting r (Point 2 r) r -&gt; r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
+forall (d :: Nat) point r.
+(2 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int (Point 2 r) r
+</span><span class="hs-identifier hs-var">yCoord</span></span><span>
+</span><span id="line-122"></span><span>                                </span><span class="annot"><span class="annottext">Intersection (LinePV 2 r) (LinePV 2 r)
+</span><span class="hs-identifier">_</span></span><span>                           </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">String -&gt; vertex
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;absurd; b'&quot;</span></span><span>
+</span><span id="line-123"></span><span>                      </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">NonEmpty vertex -&gt; ConvexPolygonF NonEmpty vertex
+forall simplePolygon point r (f :: * -&gt; *).
+(SimplePolygon_ simplePolygon point r, Foldable1 f) =&gt;
+f point -&gt; simplePolygon
+forall (f :: * -&gt; *).
+Foldable1 f =&gt;
+f vertex -&gt; ConvexPolygonF NonEmpty vertex
+</span><a href="HGeometry.Polygon.Simple.Class.html#uncheckedFromCCWPoints"><span class="hs-identifier hs-var">uncheckedFromCCWPoints</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295507"><span class="hs-identifier hs-var">b</span></a></span><span> </span><span class="annot"><span class="annottext">vertex -&gt; NonEmpty vertex -&gt; NonEmpty vertex
+forall a. a -&gt; NonEmpty a -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">NonEmpty.&lt;|</span></span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679295499"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">vertex -&gt; NonEmpty vertex -&gt; NonEmpty vertex
+forall a. a -&gt; NonEmpty a -&gt; NonEmpty a
+</span><span class="hs-operator hs-var">NonEmpty.&lt;|</span></span><span> </span><span class="annot"><span class="annottext">NonEmpty vertex
+</span><a href="#local-6989586621679295465"><span class="hs-identifier hs-var">pts</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span>
+</span><span id="line-126"></span><span>    </span><span id="local-6989586621679295492"><span class="annot"><span class="annottext">maximumOn :: (a -&gt; a) -&gt; t a -&gt; a
+</span><a href="#local-6989586621679295492"><span class="hs-identifier hs-var hs-var">maximumOn</span></a></span></span><span> </span><span id="local-6989586621679295520"><span class="annot"><span class="annottext">a -&gt; a
+</span><a href="#local-6989586621679295520"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; Ordering) -&gt; t a -&gt; a
+forall (t :: * -&gt; *) a.
+Foldable1 t =&gt;
+(a -&gt; a -&gt; Ordering) -&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">maximumBy</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a -&gt; a) -&gt; a -&gt; a -&gt; Ordering
+forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
+</span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a
+</span><a href="#local-6989586621679295520"><span class="hs-identifier hs-var">f</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-127"></span><span>    </span><span id="local-6989586621679295482"><span class="annot"><span class="annottext">rot90 :: Vector 2 r -&gt; Vector 2 r
+</span><a href="#local-6989586621679295482"><span class="hs-identifier hs-var hs-var">rot90</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector2</span></span><span> </span><span id="local-6989586621679295524"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679295524"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679295525"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679295525"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; Vector 2 r
+forall r. r -&gt; r -&gt; Vector 2 r
+</span><span class="hs-identifier hs-var">Vector2</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679295525"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679295524"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-128"></span><span>
+</span><span id="line-129"></span><span class="hs-comment">-- TODO: this would make for a good property test: test if the points all lie inside the reegion</span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-132"></span></pre></body></html>
