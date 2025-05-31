@@ -14,6 +14,7 @@ import           Data.Colour.SRGB
 import           Data.Word (Word8)
 import           GHCJS.Marshal (ToJSVal(..))
 import           GHCJS.Types
+import           Language.Javascript.JSaddle (JSM)
 import qualified Language.Javascript.JSaddle as JSAddle
 import           Language.Javascript.JSaddle.Object (js4)
 import           Miso

@@ -39,12 +39,12 @@ import           HGeometry.PolyLine
 import           HGeometry.Sequence.NonEmpty
 import           HGeometry.Vector
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
-import           Miso hiding (onMouseUp, onMouseDown)
+import           Miso hiding (onMouseUp, onMouseDown, style_)
 import           HGeometry.Miso.Event.Extra
 import qualified Miso as Html
 import           Miso.String (MisoString,ToMisoString(..), ms)
-import           Miso.Svg hiding (height_, id_, style_, width_)
-
+import           Miso.Svg hiding (height_, style_, id_, width_)
+import           Miso.Style ((=:),style_)
 import           Debug.Trace
 --------------------------------------------------------------------------------
 
@@ -162,8 +162,7 @@ initialModel = Model { _canvas       = blankCanvas 400 400
 --------------------------------------------------------------------------------
 
 
-data Action = Id
-            | CanvasAction !Canvas.InternalCanvasAction
+data Action = CanvasAction !Canvas.InternalCanvasAction
             | WindowResize !(Vector 2 Int)
             | SwitchMode
             | CanvasClicked
@@ -183,14 +182,15 @@ windowDeltas :: Vector 2 Int
 windowDeltas = Vector2 50 200
 
 
+wrap       :: (model -> action -> Effect model action') -> action -> Effect model action'
+wrap f act = get >>= flip f act
 
 
-
-updateModel   :: Model -> Action -> Effect Action Model
+updateModel   :: Model -> Action -> Effect Model Action
 updateModel m = \case
-    Id                 -> noEff m
     CanvasAction ca    -> traceShow ("canvas act: ",ca) $
-      m&canvas %%~ flip Canvas.handleInternalCanvasAction ca
+      zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
+      -- m&canvas %%~ flip
     WindowResize dims -> noEff $ m&canvas.dimensions .~ (dims ^-^ windowDeltas)
     SwitchMode         -> noEff $ m&mode %~ switchMode
     CanvasClicked      -> case m^.mode of
@@ -264,9 +264,9 @@ insertPoly p m = let k = case IntMap.lookupMax m of
 
 viewModel  :: Model -> View Action
 viewModel m =
-    div_ [ styleM_ [ "display" =: "flex"
-                   , "flex-direction" =: "column"
-                   ]
+    div_ [ style_ [ "display" =: "flex"
+                  , "flex-direction" =: "column"
+                  ]
          ]
          [ theToolbar m
          , theCanvas m
@@ -291,9 +291,9 @@ buttonGroup buttons =
 theToolbar   :: Model -> View Action
 theToolbar m =
       div_ [ id_    "toolBar"
-           , styleM_ [ "border"  =: "1px solid black"
-                     , "display" =: "flex"
-                     ]
+           , style_ [ "border"  =: "1px solid black"
+                    , "display" =: "flex"
+                    ]
            ]
            [ tools
            , penProperties
@@ -301,9 +301,9 @@ theToolbar m =
            ]
   where
     tools =
-      div_ [ styleM_ [ "width" =: "30%"
-                     , "margin" =: "auto"
-                     ]
+      div_ [ style_ [ "width" =: "30%"
+                    , "margin" =: "auto"
+                    ]
            ]
            [ buttonGroup [ ("pen", "fas fa-pencil-alt")
                          , ("poly", "fas fa-pencil-ruler")
@@ -311,17 +311,17 @@ theToolbar m =
                          ]
            ]
     penProperties =
-      div_ [ styleM_ [ "width" =: "30%"
-                     , "margin" =: "auto"
-                     ]
+      div_ [ style_ [ "width" =: "30%"
+                    , "margin" =: "auto"
+                    ]
            ]
            [ toolGroup [ tool "pen-width"
                        ]
            ]
     colorSelectors =
-      div_ [ styleM_ [ "width" =: "30%"
-                     , "margin" =: "auto"
-                     ]
+      div_ [ style_ [ "width" =: "30%"
+                    , "margin" =: "auto"
+                    ]
            ]
            [ toolGroup $ colorPickers (m^.currentAttrs.color)
                                       (m^.currentAttrs.colorIndex) (m^.quickColors)
@@ -339,19 +339,19 @@ colorPickers selected i = ifoldMap (\j c -> [colorPickerButton (i == j && select
 
 colorPickerButton              :: Bool -> Int -> Color -> View Action
 colorPickerButton selected i c =
-  button_ [ styleM_ [ "background-color" =: ms c
-                    , "width"            =: (ms size <> "px")
-                    , "height"           =: (ms size <> "px")
-                    , "display"          =: "display"
-                    , "margin"           =: "3px"
-                    , "cursor"           =: "pointer"
-                    , "border"           =: "none"
-                    , "border-radius"    =: (ms (size `div` 2) <> "px")
-                    , "outline"          =: if selected then "3px solid " <> ms selectedColor
-                                                        else "none"
-                    ]
-                  , onClick $ SelectColor i c
-                  ] []
+  button_ [ style_ [ "background-color" =: ms c
+                   , "width"            =: (ms size <> "px")
+                   , "height"           =: (ms size <> "px")
+                   , "display"          =: "display"
+                   , "margin"           =: "3px"
+                   , "cursor"           =: "pointer"
+                   , "border"           =: "none"
+                   , "border-radius"    =: (ms (size `div` 2) <> "px")
+                   , "outline"          =: if selected then "3px solid " <> ms selectedColor
+                                           else "none"
+                   ]
+          , onClick $ SelectColor i c
+          ] []
   where
     size = 30 :: Int
 
@@ -362,9 +362,9 @@ colorPickerButton selected i c =
 theCanvas   :: Model -> View Action
 theCanvas m =
       div_ [ id_ "canvas"
-           , styleM_ [ "margin-left"  =: "auto"
-                     , "margin-right" =: "auto"
-                     ]
+           , style_ [ "margin-left"  =: "auto"
+                    , "margin-right" =: "auto"
+                    ]
            ]
            [ either CanvasAction id <$>
              Canvas.svgCanvas_ (m^.canvas)
@@ -376,9 +376,9 @@ theCanvas m =
                                , onTouchMove  TouchMove
                                , onTouchEnd   EndTouch
                                , onMouseMove  MouseMove
-                               , styleM_ [ "border"           =: "1px solid black"
-                                         , "background-color" =: "white"
-                                         ]
+                               , style_ [ "border"           =: "1px solid black"
+                                        , "background-color" =: "white"
+                                        ]
 
                                ]
                                canvasBody
@@ -432,14 +432,15 @@ instance ToMisoString Word8 where
 
 main :: IO ()
 main = JSaddle.run 8080 $
-         startComponent $
-            App { model         = initialModel
-                , update        = flip updateModel
+         startComponent $ Component
+                { model         = initialModel
+                , update        = wrap updateModel
                 , view          = viewModel
                 , subs          = [ windowDimensionsSub WindowResize
                                   ]
                 , events        = Canvas.withCanvasEvents defaultEvents
-                , initialAction = Id
+                , styles        = mempty
+                , initialAction = Nothing
                 , mountPoint    = Nothing
                 , logLevel      = Off
                 }
@@ -460,12 +461,6 @@ windowDimensionsSub f = windowCoordsSub (\(h,w) -> f $ Vector2 w h)
 
 
 --------------------------------------------------------------------------------
-
-styleM_    :: [Map.Map MisoString MisoString] -> Attribute action
-styleM_ xs = style_ $ mconcat xs
-
-
-
 
 -- | Produce an icon
 icon    :: MisoString -> View action
