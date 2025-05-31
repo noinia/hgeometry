@@ -2,12 +2,14 @@ module HGeometry.HalfSpace.Intersection
   ( HalfPlaneIntersection(..)
   ) where
 
+import Control.Lens
+import HGeometry.HalfSpace.Type
+import HGeometry.HyperPlane
 import HGeometry.Intersection
+import HGeometry.Line
 import HGeometry.Point
 import HGeometry.Properties (NumType,Dimension)
 import HGeometry.Vector
-import HGeometry.Line.LineEQ
-import HGeometry.Line.PointAndVector
 
 --------------------------------------------------------------------------------
 

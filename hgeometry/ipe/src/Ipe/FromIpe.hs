@@ -83,7 +83,7 @@ import           Witherable
 -- >>> :{
 -- let testPath :: Path Int
 --     testPath = Path . fromSingleton  . PolyLineSegment
---              . polyLineFromPoints . NonEmpty.fromList
+--              . PolyLine.polyLineFromPoints . NonEmpty.fromList
 --              $ [ origin, Point2 10 10, Point2 200 100 ]
 --     testPathAttrs :: IpeAttributes Path Int
 --     testPathAttrs = attr SStroke (IpeColor "red")
