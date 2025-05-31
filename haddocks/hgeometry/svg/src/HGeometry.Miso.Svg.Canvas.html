@@ -17,32 +17,37 @@
 </span><span id="line-17"></span><span>
 </span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Traversal.html/Control.Lens.Traversal.html#elements"><span class="hs-identifier">elements</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Map</span></span><span>
-</span><span id="line-20"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Miso.Subscription.MouseExtra</span></span><span>
+</span><span id="line-20"></span><span class="hs-comment">-- import           HGeometry.Miso.Subscription.MouseExtra</span><span>
 </span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Miso.Svg.StaticCanvas.html"><span class="hs-identifier">HGeometry.Miso.Svg.StaticCanvas</span></a></span><span>
 </span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
 </span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Transformation</span></span><span>
 </span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span>
 </span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Viewport</span></span><span>
-</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.html/Miso.html"><span class="hs-identifier">Miso</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Html.Types.html/Miso.Html.Types.html#Attribute"><span class="hs-identifier">Attribute</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Html.Types.html/Miso.Html.Types.html#View"><span class="hs-identifier">View</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Effect.html/Miso.Effect.html#Effect"><span class="hs-identifier">Effect</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Html.Property.html/Miso.Html.Property.html#height_"><span class="hs-identifier">height_</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Html.Property.html/Miso.Html.Property.html#width_"><span class="hs-identifier">width_</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Effect.html/Miso.Effect.html#noEff"><span class="hs-identifier">noEff</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Html.Event.html/Miso.Html.Event.html#onMouseLeave"><span class="hs-identifier">onMouseLeave</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-27"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.String.html/Miso.String.html"><span class="hs-identifier">Miso.String</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.String.html/Miso.String.html#MisoString"><span class="hs-identifier">MisoString</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.String.html/Miso.String.html#ms"><span class="hs-identifier">ms</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-28"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Svg.html/Miso.Svg.html"><span class="hs-identifier">Miso.Svg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Svg.Element.html/Miso.Svg.Element.html#svg_"><span class="hs-identifier">svg_</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Svg.Element.html/Miso.Svg.Element.html#g_"><span class="hs-identifier">g_</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Svg.Element.html/Miso.Svg.Element.html#rect_"><span class="hs-identifier">rect_</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Svg.Attribute.html/Miso.Svg.Attribute.html#transform_"><span class="hs-identifier">transform_</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Svg.Attribute.html/Miso.Svg.Attribute.html#pointerEvents_"><span class="hs-identifier">pointerEvents_</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Svg.Attribute.html/Miso.Svg.Attribute.html#fill_"><span class="hs-identifier">fill_</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-29"></span><span>
-</span><span id="line-30"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-31"></span><span class="annot"><span class="hs-comment">-- *A Canvas</span></span><span>
-</span><span id="line-32"></span><span>
-</span><span id="line-33"></span><span class="annot"><span class="hs-comment">-- | Svg Canvas that has a &quot;proper&quot; Coordinate system whose origin is in the bottom left.</span></span><span>
-</span><span id="line-34"></span><span class="hs-keyword">data</span><span> </span><span id="Canvas"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-var">Canvas</span></a></span></span><span> </span><span id="local-6989586621679253602"><span class="annot"><a href="#local-6989586621679253602"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-35"></span><span>  </span><span id="Canvas"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-var">Canvas</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_theViewport"><span class="annot"><span class="annottext">forall r. Canvas r -&gt; Viewport r
-</span><a href="HGeometry.Miso.Svg.Canvas.html#_theViewport"><span class="hs-identifier hs-var hs-var">_theViewport</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Viewport</span></span><span> </span><span class="annot"><a href="#local-6989586621679253602"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-36"></span><span>         </span><span class="annot"><span class="hs-comment">-- ^ the viewport</span></span><span>
-</span><span id="line-37"></span><span>         </span><span class="hs-special">,</span><span> </span><span id="_dimensions"><span class="annot"><span class="annottext">forall r. Canvas r -&gt; Vector 2 Int
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.html/Miso.html"><span class="hs-identifier">Miso</span></a></span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Types.html/Miso.Types.html#Attribute"><span class="hs-identifier">Attribute</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Types.html/Miso.Types.html#View"><span class="hs-identifier">View</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Effect.html/Miso.Effect.html#Effect"><span class="hs-identifier">Effect</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Html.Property.html/Miso.Html.Property.html#height_"><span class="hs-identifier">height_</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Html.Property.html/Miso.Html.Property.html#width_"><span class="hs-identifier">width_</span></a></span><span>
+</span><span id="line-27"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Html.Event.html/Miso.Html.Event.html#onPointerLeave"><span class="hs-identifier">onPointerLeave</span></a></span><span>
+</span><span id="line-28"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Html.Event.html/Miso.Html.Event.html#onPointerMove"><span class="hs-identifier">onPointerMove</span></a></span><span>
+</span><span id="line-29"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Html.Event.html/Miso.Html.Event.html#onPointerEnter"><span class="hs-identifier">onPointerEnter</span></a></span><span>
+</span><span id="line-30"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Event.Types.html/Miso.Event.Types.html#PointerEvent"><span class="hs-identifier">PointerEvent</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">put</span></span><span>
+</span><span id="line-31"></span><span>                      </span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.String.html/Miso.String.html"><span class="hs-identifier">Miso.String</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.String.html/Miso.String.html#MisoString"><span class="hs-identifier">MisoString</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.String.html/Miso.String.html#ms"><span class="hs-identifier">ms</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Svg.html/Miso.Svg.html"><span class="hs-identifier">Miso.Svg</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Svg.Element.html/Miso.Svg.Element.html#svg_"><span class="hs-identifier">svg_</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Svg.Element.html/Miso.Svg.Element.html#g_"><span class="hs-identifier">g_</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Svg.Element.html/Miso.Svg.Element.html#rect_"><span class="hs-identifier">rect_</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Svg.Property.html/Miso.Svg.Property.html#transform_"><span class="hs-identifier">transform_</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Svg.Property.html/Miso.Svg.Property.html#pointerEvents_"><span class="hs-identifier">pointerEvents_</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Svg.Property.html/Miso.Svg.Property.html#fill_"><span class="hs-identifier">fill_</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-36"></span><span class="annot"><span class="hs-comment">-- *A Canvas</span></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span class="annot"><span class="hs-comment">-- | Svg Canvas that has a &quot;proper&quot; Coordinate system whose origin is in the bottom left.</span></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">data</span><span> </span><span id="Canvas"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-var">Canvas</span></a></span></span><span> </span><span id="local-6989586621679270077"><span class="annot"><a href="#local-6989586621679270077"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-40"></span><span>  </span><span id="Canvas"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-var">Canvas</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="_theViewport"><span class="annot"><span class="annottext">forall r. Canvas r -&gt; Viewport r
+</span><a href="HGeometry.Miso.Svg.Canvas.html#_theViewport"><span class="hs-identifier hs-var hs-var">_theViewport</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Viewport</span></span><span> </span><span class="annot"><a href="#local-6989586621679270077"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>         </span><span class="annot"><span class="hs-comment">-- ^ the viewport</span></span><span>
+</span><span id="line-42"></span><span>         </span><span class="hs-special">,</span><span> </span><span id="_dimensions"><span class="annot"><span class="annottext">forall r. Canvas r -&gt; Vector 2 Int
 </span><a href="HGeometry.Miso.Svg.Canvas.html#_dimensions"><span class="hs-identifier hs-var hs-var">_dimensions</span></a></span></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span>
-</span><span id="line-38"></span><span>         </span><span class="annot"><span class="hs-comment">-- ^ dimensions (width,height) in pixels, of the canvas</span></span><span>
-</span><span id="line-39"></span><span>         </span><span class="hs-special">,</span><span> </span><span id="_mousePosition"><span class="annot"><span class="annottext">forall r. Canvas r -&gt; Maybe (Point 2 Int)
+</span><span id="line-43"></span><span>         </span><span class="annot"><span class="hs-comment">-- ^ dimensions (width,height) in pixels, of the canvas</span></span><span>
+</span><span id="line-44"></span><span>         </span><span class="hs-special">,</span><span> </span><span id="_mousePosition"><span class="annot"><span class="annottext">forall r. Canvas r -&gt; Maybe (Point 2 Int)
 </span><a href="HGeometry.Miso.Svg.Canvas.html#_mousePosition"><span class="hs-identifier hs-var hs-var">_mousePosition</span></a></span></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span>
-</span><span id="line-40"></span><span>         </span><span class="annot"><span class="hs-comment">-- ^ the mouse position, in raw pixel coordinates</span></span><span>
-</span><span id="line-41"></span><span>         </span><span class="hs-special">}</span><span>
-</span><span id="line-42"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679253835"><span id="local-6989586621679253845"><span class="annot"><span class="annottext">Canvas r -&gt; Canvas r -&gt; Bool
+</span><span id="line-45"></span><span>         </span><span class="annot"><span class="hs-comment">-- ^ the mouse position, in raw pixel coordinates</span></span><span>
+</span><span id="line-46"></span><span>         </span><span class="hs-special">}</span><span>
+</span><span id="line-47"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679270340"><span id="local-6989586621679270350"><span class="annot"><span class="annottext">Canvas r -&gt; Canvas r -&gt; Bool
 (Canvas r -&gt; Canvas r -&gt; Bool)
 -&gt; (Canvas r -&gt; Canvas r -&gt; Bool) -&gt; Eq (Canvas r)
 forall r. Eq r =&gt; Canvas r -&gt; Canvas r -&gt; Bool
@@ -51,7 +56,7 @@ $c== :: forall r. Eq r =&gt; Canvas r -&gt; Canvas r -&gt; Bool
 == :: Canvas r -&gt; Canvas r -&gt; Bool
 $c/= :: forall r. Eq r =&gt; Canvas r -&gt; Canvas r -&gt; Bool
 /= :: Canvas r -&gt; Canvas r -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679253853"><span id="local-6989586621679253867"><span id="local-6989586621679253871"><span class="annot"><span class="annottext">Int -&gt; Canvas r -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679270358"><span id="local-6989586621679270372"><span id="local-6989586621679270376"><span class="annot"><span class="annottext">Int -&gt; Canvas r -&gt; ShowS
 [Canvas r] -&gt; ShowS
 Canvas r -&gt; String
 (Int -&gt; Canvas r -&gt; ShowS)
@@ -68,10 +73,10 @@ show :: Canvas r -&gt; String
 $cshowList :: forall r. Show r =&gt; [Canvas r] -&gt; ShowS
 showList :: [Canvas r] -&gt; ShowS
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-43"></span><span>
-</span><span id="line-44"></span><span class="annot"><span class="hs-comment">-- | Lens to access the viewport</span></span><span>
-</span><span id="line-45"></span><span id="local-6989586621679253647"><span id="local-6989586621679253648"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#theViewport"><span class="hs-identifier hs-type">theViewport</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Lens"><span class="hs-identifier hs-type">Lens</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-type">Canvas</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679253647"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-type">Canvas</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679253648"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Viewport</span></span><span> </span><span class="annot"><a href="#local-6989586621679253647"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Viewport</span></span><span> </span><span class="annot"><a href="#local-6989586621679253648"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span></span><span>
-</span><span id="line-46"></span><span id="theViewport"><span class="annot"><span class="annottext">theViewport :: forall r s (f :: * -&gt; *).
+</span><span id="line-48"></span><span>
+</span><span id="line-49"></span><span class="annot"><span class="hs-comment">-- | Lens to access the viewport</span></span><span>
+</span><span id="line-50"></span><span id="local-6989586621679270122"><span id="local-6989586621679270123"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#theViewport"><span class="hs-identifier hs-type">theViewport</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Lens"><span class="hs-identifier hs-type">Lens</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-type">Canvas</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270122"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-type">Canvas</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270123"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Viewport</span></span><span> </span><span class="annot"><a href="#local-6989586621679270122"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Viewport</span></span><span> </span><span class="annot"><a href="#local-6989586621679270123"><span class="hs-identifier hs-type">s</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-51"></span><span id="theViewport"><span class="annot"><span class="annottext">theViewport :: forall r s (f :: * -&gt; *).
 Functor f =&gt;
 (Viewport r -&gt; f (Viewport s)) -&gt; Canvas r -&gt; f (Canvas s)
 </span><a href="HGeometry.Miso.Svg.Canvas.html#theViewport"><span class="hs-identifier hs-var hs-var">theViewport</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Canvas r -&gt; Viewport r)
@@ -80,48 +85,48 @@ Functor f =&gt;
 forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">Canvas r -&gt; Viewport r
 forall r. Canvas r -&gt; Viewport r
-</span><a href="HGeometry.Miso.Svg.Canvas.html#_theViewport"><span class="hs-identifier hs-var">_theViewport</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679253911"><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679253911"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679253912"><span class="annot"><span class="annottext">Viewport s
-</span><a href="#local-6989586621679253912"><span class="hs-identifier hs-var">vp</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679253911"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#_theViewport"><span class="hs-identifier hs-var">_theViewport</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679253912"><span class="hs-identifier hs-type">vp</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-47"></span><span>
-</span><span id="line-48"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679253662"><span class="annot"><a href="HGeometry.Miso.Svg.StaticCanvas.html#HasDimensions"><span class="hs-identifier hs-type">HasDimensions</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-type">Canvas</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679253662"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-49"></span><span>  </span><span id="local-6989586621679253918"><span class="annot"><span class="annottext">dimensions :: Lens' (Canvas r) (Vector 2 Int)
-</span><a href="#local-6989586621679253918"><span class="hs-identifier hs-var hs-var hs-var">dimensions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Canvas r -&gt; Vector 2 Int)
+</span><a href="HGeometry.Miso.Svg.Canvas.html#_theViewport"><span class="hs-identifier hs-var">_theViewport</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679270416"><span class="annot"><span class="annottext">Canvas r
+</span><a href="#local-6989586621679270416"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679270417"><span class="annot"><span class="annottext">Viewport s
+</span><a href="#local-6989586621679270417"><span class="hs-identifier hs-var">vp</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Canvas r
+</span><a href="#local-6989586621679270416"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#_theViewport"><span class="hs-identifier hs-var">_theViewport</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679270417"><span class="hs-identifier hs-type">vp</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679270137"><span class="annot"><a href="HGeometry.Miso.Svg.StaticCanvas.html#HasDimensions"><span class="hs-identifier hs-type">HasDimensions</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-type">Canvas</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270137"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-54"></span><span>  </span><span id="local-6989586621679270423"><span class="annot"><span class="annottext">dimensions :: Lens' (Canvas r) (Vector 2 Int)
+</span><a href="#local-6989586621679270423"><span class="hs-identifier hs-var hs-var hs-var">dimensions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Canvas r -&gt; Vector 2 Int)
 -&gt; (Canvas r -&gt; Vector 2 Int -&gt; Canvas r)
 -&gt; Lens' (Canvas r) (Vector 2 Int)
 forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">Canvas r -&gt; Vector 2 Int
 forall r. Canvas r -&gt; Vector 2 Int
-</span><a href="HGeometry.Miso.Svg.Canvas.html#_dimensions"><span class="hs-identifier hs-var">_dimensions</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679253920"><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679253920"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679253921"><span class="annot"><span class="annottext">Vector 2 Int
-</span><a href="#local-6989586621679253921"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679253920"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#_dimensions"><span class="hs-identifier hs-var">_dimensions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679253921"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-50"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.StaticCanvas.html#dimensions"><span class="hs-pragma hs-type">dimensions</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
-</span><span id="line-51"></span><span>
-</span><span id="line-52"></span><span class="annot"><span class="hs-comment">-- | Class for types that have a mouse position</span></span><span>
-</span><span id="line-53"></span><span class="hs-keyword">class</span><span> </span><span id="HasMousePosition"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#HasMousePosition"><span class="hs-identifier hs-var">HasMousePosition</span></a></span></span><span> </span><span id="local-6989586621679253666"><span class="annot"><a href="#local-6989586621679253666"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679253667"><span class="annot"><a href="#local-6989586621679253667"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="#local-6989586621679253666"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679253667"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-54"></span><span>  </span><span class="hs-comment">-- | Lens to access the raw mouse position</span><span>
-</span><span id="line-55"></span><span>  </span><span id="mousePosition"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#mousePosition"><span class="hs-identifier hs-type">mousePosition</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679253666"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679253667"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><a href="HGeometry.Miso.Svg.Canvas.html#_dimensions"><span class="hs-identifier hs-var">_dimensions</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679270425"><span class="annot"><span class="annottext">Canvas r
+</span><a href="#local-6989586621679270425"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679270426"><span class="annot"><span class="annottext">Vector 2 Int
+</span><a href="#local-6989586621679270426"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Canvas r
+</span><a href="#local-6989586621679270425"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#_dimensions"><span class="hs-identifier hs-var">_dimensions</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679270426"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.StaticCanvas.html#dimensions"><span class="hs-pragma hs-type">dimensions</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
 </span><span id="line-56"></span><span>
-</span><span id="line-57"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679253668"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#HasMousePosition"><span class="hs-identifier hs-type">HasMousePosition</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-type">Canvas</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679253668"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-58"></span><span>  </span><span id="local-6989586621679253928"><span class="annot"><span class="annottext">mousePosition :: Lens' (Canvas r) (Maybe (Point 2 Int))
+</span><span id="line-57"></span><span class="annot"><span class="hs-comment">-- | Class for types that have a mouse position</span></span><span>
+</span><span id="line-58"></span><span class="hs-keyword">class</span><span> </span><span id="HasMousePosition"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#HasMousePosition"><span class="hs-identifier hs-var">HasMousePosition</span></a></span></span><span> </span><span id="local-6989586621679270141"><span class="annot"><a href="#local-6989586621679270141"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span id="local-6989586621679270142"><span class="annot"><a href="#local-6989586621679270142"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><a href="#local-6989586621679270141"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679270142"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-59"></span><span>  </span><span class="hs-comment">-- | Lens to access the raw mouse position</span><span>
+</span><span id="line-60"></span><span>  </span><span id="mousePosition"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#mousePosition"><span class="hs-identifier hs-type">mousePosition</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270141"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270142"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><span id="line-61"></span><span>
+</span><span id="line-62"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679270143"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#HasMousePosition"><span class="hs-identifier hs-type">HasMousePosition</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-type">Canvas</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270143"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-63"></span><span>  </span><span id="local-6989586621679270433"><span class="annot"><span class="annottext">mousePosition :: Lens' (Canvas r) (Maybe (Point 2 Int))
 </span><a href="HGeometry.Miso.Svg.Canvas.html#mousePosition"><span class="hs-identifier hs-var hs-var hs-var">mousePosition</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Canvas r -&gt; Maybe (Point 2 Int))
 -&gt; (Canvas r -&gt; Maybe (Point 2 Int) -&gt; Canvas r)
 -&gt; Lens' (Canvas r) (Maybe (Point 2 Int))
 forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">Canvas r -&gt; Maybe (Point 2 Int)
 forall r. Canvas r -&gt; Maybe (Point 2 Int)
-</span><a href="HGeometry.Miso.Svg.Canvas.html#_mousePosition"><span class="hs-identifier hs-var">_mousePosition</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679253929"><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679253929"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679253930"><span class="annot"><span class="annottext">Maybe (Point 2 Int)
-</span><a href="#local-6989586621679253930"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679253929"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#_mousePosition"><span class="hs-identifier hs-var">_mousePosition</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679253930"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-59"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#mousePosition"><span class="hs-pragma hs-type">mousePosition</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
-</span><span id="line-60"></span><span>
-</span><span id="line-61"></span><span class="hs-comment">-- | Getter to access the mouse coordinates (in terms of the coordinate system as used by</span><span>
-</span><span id="line-62"></span><span class="hs-comment">-- the canvas). Returns a Nothing if the mouse is not currently on/over the canvas.</span><span>
-</span><span id="line-63"></span><span id="local-6989586621679253670"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#mouseCoordinates"><span class="hs-identifier hs-type">mouseCoordinates</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679253670"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Getter"><span class="hs-identifier hs-type">Getter</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-type">Canvas</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679253670"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679253670"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span>
-</span><span id="line-64"></span><span id="mouseCoordinates"><span class="annot"><span class="annottext">mouseCoordinates :: forall r. Fractional r =&gt; Getter (Canvas r) (Maybe (Point 2 r))
+</span><a href="HGeometry.Miso.Svg.Canvas.html#_mousePosition"><span class="hs-identifier hs-var">_mousePosition</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679270434"><span class="annot"><span class="annottext">Canvas r
+</span><a href="#local-6989586621679270434"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span id="local-6989586621679270435"><span class="annot"><span class="annottext">Maybe (Point 2 Int)
+</span><a href="#local-6989586621679270435"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Canvas r
+</span><a href="#local-6989586621679270434"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">{</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#_mousePosition"><span class="hs-identifier hs-var">_mousePosition</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679270435"><span class="hs-identifier hs-type">m</span></a></span><span> </span><span class="hs-special">}</span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#mousePosition"><span class="hs-pragma hs-type">mousePosition</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- | Getter to access the mouse coordinates (in terms of the coordinate system as used by</span><span>
+</span><span id="line-67"></span><span class="hs-comment">-- the canvas). Returns a Nothing if the mouse is not currently on/over the canvas.</span><span>
+</span><span id="line-68"></span><span id="local-6989586621679270145"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#mouseCoordinates"><span class="hs-identifier hs-type">mouseCoordinates</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679270145"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Getter"><span class="hs-identifier hs-type">Getter</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-type">Canvas</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270145"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679270145"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span>
+</span><span id="line-69"></span><span id="mouseCoordinates"><span class="annot"><span class="annottext">mouseCoordinates :: forall r. Fractional r =&gt; Getter (Canvas r) (Maybe (Point 2 r))
 </span><a href="HGeometry.Miso.Svg.Canvas.html#mouseCoordinates"><span class="hs-identifier hs-var hs-var">mouseCoordinates</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Canvas r -&gt; Maybe (Point 2 r))
 -&gt; (Maybe (Point 2 r) -&gt; f (Maybe (Point 2 r)))
 -&gt; Canvas r
@@ -138,15 +143,15 @@ forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s a.
 -&gt; Canvas r
 -&gt; f (Canvas r)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679253975"><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679253975"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Viewport (NumType (Point 2 r)) -&gt; Point 2 Int -&gt; Point 2 r
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679270478"><span class="annot"><span class="annottext">Canvas r
+</span><a href="#local-6989586621679270478"><span class="hs-identifier hs-var">m</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Viewport (NumType (Point 2 r)) -&gt; Point 2 Int -&gt; Point 2 r
 forall {g} {a}.
 (Dimension g ~ 2, Dimension a ~ 2, IsTransformable g,
  Fractional (NumType g), HasCoordinates a g,
  Integral (NumType a)) =&gt;
 Viewport (NumType g) -&gt; a -&gt; g
-</span><a href="#local-6989586621679253976"><span class="hs-identifier hs-var">toWorldIn'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679253975"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">Canvas r
+</span><a href="#local-6989586621679270479"><span class="hs-identifier hs-var">toWorldIn'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Canvas r
+</span><a href="#local-6989586621679270478"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">Canvas r
 -&gt; Getting (Viewport r) (Canvas r) (Viewport r) -&gt; Viewport r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Viewport r) (Canvas r) (Viewport r)
@@ -157,7 +162,7 @@ Functor f =&gt;
 -&gt; Maybe (Point 2 Int) -&gt; Maybe (Point 2 r)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679253975"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">Canvas r
+</span><a href="#local-6989586621679270478"><span class="hs-identifier hs-var">m</span></a></span><span class="annot"><span class="annottext">Canvas r
 -&gt; Getting (Maybe (Point 2 Int)) (Canvas r) (Maybe (Point 2 Int))
 -&gt; Maybe (Point 2 Int)
 forall s a. s -&gt; Getting a s a -&gt; a
@@ -165,18 +170,18 @@ forall s a. s -&gt; Getting a s a -&gt; a
 forall s a. HasMousePosition s a =&gt; Lens' s a
 Lens' (Canvas r) (Maybe (Point 2 Int))
 </span><a href="HGeometry.Miso.Svg.Canvas.html#mousePosition"><span class="hs-identifier hs-var">mousePosition</span></a></span><span>
-</span><span id="line-65"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-66"></span><span>    </span><span id="local-6989586621679253976"><span class="annot"><span class="annottext">toWorldIn' :: Viewport (NumType g) -&gt; a -&gt; g
-</span><a href="#local-6989586621679253976"><span class="hs-identifier hs-var hs-var">toWorldIn'</span></a></span></span><span> </span><span id="local-6989586621679254054"><span class="annot"><span class="annottext">Viewport (NumType g)
-</span><a href="#local-6989586621679254054"><span class="hs-identifier hs-var">vp</span></a></span></span><span> </span><span id="local-6989586621679254055"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679254055"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Viewport (NumType g) -&gt; g -&gt; g
+</span><span id="line-70"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-71"></span><span>    </span><span id="local-6989586621679270479"><span class="annot"><span class="annottext">toWorldIn' :: Viewport (NumType g) -&gt; a -&gt; g
+</span><a href="#local-6989586621679270479"><span class="hs-identifier hs-var hs-var">toWorldIn'</span></a></span></span><span> </span><span id="local-6989586621679270557"><span class="annot"><span class="annottext">Viewport (NumType g)
+</span><a href="#local-6989586621679270557"><span class="hs-identifier hs-var">vp</span></a></span></span><span> </span><span id="local-6989586621679270558"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679270558"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Viewport (NumType g) -&gt; g -&gt; g
 forall g r.
 (IsTransformable g, NumType g ~ r, Dimension g ~ 2,
  Fractional r) =&gt;
 Viewport r -&gt; g -&gt; g
 </span><span class="hs-identifier hs-var">toWorldIn</span></span><span> </span><span class="annot"><span class="annottext">Viewport (NumType g)
-</span><a href="#local-6989586621679254054"><span class="hs-identifier hs-var">vp</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679254055"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">a -&gt; (a -&gt; g) -&gt; g
+</span><a href="#local-6989586621679270557"><span class="hs-identifier hs-var">vp</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679270558"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">a -&gt; (a -&gt; g) -&gt; g
 forall a b. a -&gt; (a -&gt; b) -&gt; b
 </span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(NumType a -&gt; Identity (NumType g)) -&gt; a -&gt; Identity g
 forall point point'.
@@ -189,28 +194,28 @@ forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="annot"><span class="annottext">NumType a -&gt; NumType g
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span class="hs-special">)</span><span>
-</span><span id="line-67"></span><span>
-</span><span id="line-68"></span><span class="hs-comment">-- center     :: Lens' (Canvas r) (Point 2 r)</span><span>
-</span><span id="line-69"></span><span class="hs-comment">-- center     = lens _center     (\cv c -&gt; cv { _center     = c } )</span><span>
-</span><span id="line-70"></span><span>
-</span><span id="line-71"></span><span class="hs-comment">-- zoomLevel  :: Lens' (Canvas r) r</span><span>
-</span><span id="line-72"></span><span class="hs-comment">-- zoomLevel  = lens _zoomLevel      (\cv c -&gt; cv { _zoomLevel      = c } )</span><span>
-</span><span id="line-73"></span><span>
-</span><span id="line-74"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- center     :: Lens' (Canvas r) (Point 2 r)</span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- center     = lens _center     (\cv c -&gt; cv { _center     = c } )</span><span>
 </span><span id="line-75"></span><span>
-</span><span id="line-76"></span><span class="annot"><span class="hs-comment">-- | Crate a blank canvas, that has the origin in the bottom-left.</span></span><span>
-</span><span id="line-77"></span><span id="local-6989586621679253739"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#blankCanvas"><span class="hs-identifier hs-type">blankCanvas</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679253739"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-78"></span><span>                 </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-type">Canvas</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679253739"><span class="hs-identifier hs-type">r</span></a></span></span><span>
-</span><span id="line-79"></span><span id="blankCanvas"><span class="annot"><span class="annottext">blankCanvas :: forall r. Num r =&gt; Int -&gt; Int -&gt; Canvas r
-</span><a href="HGeometry.Miso.Svg.Canvas.html#blankCanvas"><span class="hs-identifier hs-var hs-var">blankCanvas</span></a></span></span><span> </span><span id="local-6989586621679254078"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254078"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span id="local-6989586621679254079"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254079"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679254080"><span class="annot"><span class="annottext">v :: Vector 2 Int
-</span><a href="#local-6989586621679254080"><span class="hs-identifier hs-var hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Vector 2 Int
+</span><span id="line-76"></span><span class="hs-comment">-- zoomLevel  :: Lens' (Canvas r) r</span><span>
+</span><span id="line-77"></span><span class="hs-comment">-- zoomLevel  = lens _zoomLevel      (\cv c -&gt; cv { _zoomLevel      = c } )</span><span>
+</span><span id="line-78"></span><span>
+</span><span id="line-79"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-80"></span><span>
+</span><span id="line-81"></span><span class="annot"><span class="hs-comment">-- | Crate a blank canvas, that has the origin in the bottom-left.</span></span><span>
+</span><span id="line-82"></span><span id="local-6989586621679270214"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#blankCanvas"><span class="hs-identifier hs-type">blankCanvas</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679270214"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-83"></span><span>                 </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-type">Canvas</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270214"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-84"></span><span id="blankCanvas"><span class="annot"><span class="annottext">blankCanvas :: forall r. Num r =&gt; Int -&gt; Int -&gt; Canvas r
+</span><a href="HGeometry.Miso.Svg.Canvas.html#blankCanvas"><span class="hs-identifier hs-var hs-var">blankCanvas</span></a></span></span><span> </span><span id="local-6989586621679270581"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679270581"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span id="local-6989586621679270582"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679270582"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679270583"><span class="annot"><span class="annottext">v :: Vector 2 Int
+</span><a href="#local-6989586621679270583"><span class="hs-identifier hs-var hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Vector 2 Int
 forall r. r -&gt; r -&gt; Vector 2 r
 </span><span class="hs-identifier hs-var">Vector2</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254078"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254079"><span class="hs-identifier hs-var">h</span></a></span><span>
-</span><span id="line-80"></span><span>                  </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Viewport r -&gt; Vector 2 Int -&gt; Maybe (Point 2 Int) -&gt; Canvas r
+</span><a href="#local-6989586621679270581"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679270582"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-85"></span><span>                  </span><span class="hs-keyword">in</span><span> </span><span class="annot"><span class="annottext">Viewport r -&gt; Vector 2 Int -&gt; Maybe (Point 2 Int) -&gt; Canvas r
 forall r.
 Viewport r -&gt; Vector 2 Int -&gt; Maybe (Point 2 Int) -&gt; Canvas r
 </span><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-var">Canvas</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Vector 2 r -&gt; Viewport r
@@ -222,22 +227,22 @@ forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; r) -&gt; Vector 2 Int -&gt; Vector 2 r
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 Int
-</span><a href="#local-6989586621679254080"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector 2 Int
-</span><a href="#local-6989586621679254080"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 Int)
+</span><a href="#local-6989586621679270583"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector 2 Int
+</span><a href="#local-6989586621679270583"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 Int)
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
-</span><span id="line-81"></span><span>
-</span><span id="line-82"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-83"></span><span class="annot"><span class="hs-comment">-- * The Controller</span></span><span>
-</span><span id="line-84"></span><span>
-</span><span id="line-85"></span><span class="annot"><span class="hs-comment">-- | Actions that CanvasAction will handle itself.</span></span><span>
-</span><span id="line-86"></span><span class="hs-keyword">data</span><span> </span><span id="InternalCanvasAction"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#InternalCanvasAction"><span class="hs-identifier hs-var">InternalCanvasAction</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="MouseEnter"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#MouseEnter"><span class="hs-identifier hs-var">MouseEnter</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span>
-</span><span id="line-87"></span><span>                          </span><span class="hs-glyph">|</span><span> </span><span id="MouseMove"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#MouseMove"><span class="hs-identifier hs-var">MouseMove</span></a></span></span><span>  </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span>
-</span><span id="line-88"></span><span>                          </span><span class="hs-glyph">|</span><span> </span><span id="MouseLeave"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#MouseLeave"><span class="hs-identifier hs-var">MouseLeave</span></a></span></span><span>
-</span><span id="line-89"></span><span>                          </span><span class="hs-glyph">|</span><span> </span><span id="TouchStart"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#TouchStart"><span class="hs-identifier hs-var">TouchStart</span></a></span></span><span> </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span>
-</span><span id="line-90"></span><span>                          </span><span class="hs-glyph">|</span><span> </span><span id="TouchMove"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#TouchMove"><span class="hs-identifier hs-var">TouchMove</span></a></span></span><span>  </span><span class="hs-glyph">!</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span>
-</span><span id="line-91"></span><span>                          </span><span class="hs-glyph">|</span><span> </span><span id="TouchEnd"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#TouchEnd"><span class="hs-identifier hs-var">TouchEnd</span></a></span></span><span>
-</span><span id="line-92"></span><span>                          </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679254090"><span id="local-6989586621679254103"><span id="local-6989586621679254107"><span class="annot"><span class="annottext">Int -&gt; InternalCanvasAction -&gt; ShowS
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-88"></span><span class="annot"><span class="hs-comment">-- * The Controller</span></span><span>
+</span><span id="line-89"></span><span>
+</span><span id="line-90"></span><span class="annot"><span class="hs-comment">-- | Actions that CanvasAction will handle itself.</span></span><span>
+</span><span id="line-91"></span><span class="hs-keyword">data</span><span> </span><span id="InternalCanvasAction"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#InternalCanvasAction"><span class="hs-identifier hs-var">InternalCanvasAction</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PointerEnter"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#PointerEnter"><span class="hs-identifier hs-var">PointerEnter</span></a></span></span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Event.Types.html/Miso.Event.Types.html#PointerEvent"><span class="hs-identifier hs-type">PointerEvent</span></a></span><span>
+</span><span id="line-92"></span><span>                          </span><span class="hs-glyph">|</span><span> </span><span id="PointerMove"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#PointerMove"><span class="hs-identifier hs-var">PointerMove</span></a></span></span><span>  </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Event.Types.html/Miso.Event.Types.html#PointerEvent"><span class="hs-identifier hs-type">PointerEvent</span></a></span><span>
+</span><span id="line-93"></span><span>                          </span><span class="hs-glyph">|</span><span> </span><span id="PointerLeave"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#PointerLeave"><span class="hs-identifier hs-var">PointerLeave</span></a></span></span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Event.Types.html/Miso.Event.Types.html#PointerEvent"><span class="hs-identifier hs-type">PointerEvent</span></a></span><span>
+</span><span id="line-94"></span><span>                          </span><span class="hs-comment">-- | TouchStart !(Point 2 Int)</span><span>
+</span><span id="line-95"></span><span>                          </span><span class="hs-comment">-- | TouchMove  !(Point 2 Int)</span><span>
+</span><span id="line-96"></span><span>                          </span><span class="hs-comment">-- | TouchEnd</span><span>
+</span><span id="line-97"></span><span>                          </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679270590"><span id="local-6989586621679270599"><span id="local-6989586621679270603"><span class="annot"><span class="annottext">Int -&gt; InternalCanvasAction -&gt; ShowS
 [InternalCanvasAction] -&gt; ShowS
 InternalCanvasAction -&gt; String
 (Int -&gt; InternalCanvasAction -&gt; ShowS)
@@ -252,7 +257,7 @@ $cshow :: InternalCanvasAction -&gt; String
 show :: InternalCanvasAction -&gt; String
 $cshowList :: [InternalCanvasAction] -&gt; ShowS
 showList :: [InternalCanvasAction] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679254134"><span id="local-6989586621679254144"><span class="annot"><span class="annottext">InternalCanvasAction -&gt; InternalCanvasAction -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679270606"><span id="local-6989586621679270615"><span class="annot"><span class="annottext">InternalCanvasAction -&gt; InternalCanvasAction -&gt; Bool
 (InternalCanvasAction -&gt; InternalCanvasAction -&gt; Bool)
 -&gt; (InternalCanvasAction -&gt; InternalCanvasAction -&gt; Bool)
 -&gt; Eq InternalCanvasAction
@@ -262,23 +267,45 @@ $c== :: InternalCanvasAction -&gt; InternalCanvasAction -&gt; Bool
 $c/= :: InternalCanvasAction -&gt; InternalCanvasAction -&gt; Bool
 /= :: InternalCanvasAction -&gt; InternalCanvasAction -&gt; Bool
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-93"></span><span>
-</span><span id="line-94"></span><span class="annot"><span class="hs-comment">-- | Handles InternalCanvas Actions</span></span><span>
-</span><span id="line-95"></span><span id="local-6989586621679253747"><span id="local-6989586621679253748"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#handleInternalCanvasAction"><span class="hs-identifier hs-type">handleInternalCanvasAction</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-type">Canvas</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679253747"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#InternalCanvasAction"><span class="hs-identifier hs-type">InternalCanvasAction</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Effect.html/Miso.Effect.html#Effect"><span class="hs-identifier hs-type">Effect</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679253748"><span class="hs-identifier hs-type">action</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-type">Canvas</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679253747"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
-</span><span id="line-96"></span><span id="handleInternalCanvasAction"><span class="annot"><span class="annottext">handleInternalCanvasAction :: forall r action.
-Canvas r -&gt; InternalCanvasAction -&gt; Effect action (Canvas r)
-</span><a href="HGeometry.Miso.Svg.Canvas.html#handleInternalCanvasAction"><span class="hs-identifier hs-var hs-var">handleInternalCanvasAction</span></a></span></span><span> </span><span id="local-6989586621679254161"><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679254161"><span class="hs-identifier hs-var">canvas</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Canvas r -&gt; Effect action (Canvas r)
-forall model action. model -&gt; Effect action model
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Effect.html/Miso.Effect.html#noEff"><span class="hs-identifier hs-var">noEff</span></a></span><span> </span><span class="annot"><span class="annottext">(Canvas r -&gt; Effect action (Canvas r))
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#offset"><span class="hs-identifier hs-type">offset</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Event.Types.html/Miso.Event.Types.html#PointerEvent"><span class="hs-identifier hs-type">PointerEvent</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">,</span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span class="hs-special">)</span><span>
+</span><span id="line-100"></span><span id="offset"><span class="annot"><span class="annottext">offset :: PointerEvent -&gt; (Int, Int)
+</span><a href="HGeometry.Miso.Svg.Canvas.html#offset"><span class="hs-identifier hs-var hs-var">offset</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Double -&gt; Int)
+-&gt; (Double -&gt; Int) -&gt; (Double, Double) -&gt; (Int, Int)
+forall a b c d. (a -&gt; b) -&gt; (c -&gt; d) -&gt; (a, c) -&gt; (b, d)
+forall (p :: * -&gt; * -&gt; *) a b c d.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
+</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Int
+forall b. Integral b =&gt; Double -&gt; b
+forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">floor</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Int
+forall b. Integral b =&gt; Double -&gt; b
+forall a b. (RealFrac a, Integral b) =&gt; a -&gt; b
+</span><span class="hs-identifier hs-var">floor</span></span><span> </span><span class="annot"><span class="annottext">((Double, Double) -&gt; (Int, Int))
+-&gt; (PointerEvent -&gt; (Double, Double)) -&gt; PointerEvent -&gt; (Int, Int)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PointerEvent -&gt; (Double, Double)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Event.Types.html/Miso.Event.Types.html#client"><span class="hs-identifier hs-var">client</span></a></span><span> </span><span class="hs-comment">-- FIXME!!!</span><span>
+</span><span id="line-101"></span><span>
+</span><span id="line-102"></span><span class="annot"><span class="hs-comment">-- | Handles InternalCanvas Actions</span></span><span>
+</span><span id="line-103"></span><span id="local-6989586621679270233"><span id="local-6989586621679270234"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#handleInternalCanvasAction"><span class="hs-identifier hs-type">handleInternalCanvasAction</span></a></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-type">Canvas</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270233"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#InternalCanvasAction"><span class="hs-identifier hs-type">InternalCanvasAction</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Effect.html/Miso.Effect.html#Effect"><span class="hs-identifier hs-type">Effect</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-type">Canvas</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270233"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679270234"><span class="hs-identifier hs-type">action</span></a></span></span></span><span>
+</span><span id="line-104"></span><span id="handleInternalCanvasAction"><span class="annot"><span class="annottext">handleInternalCanvasAction :: forall r action.
+Canvas r -&gt; InternalCanvasAction -&gt; Effect (Canvas r) action
+</span><a href="HGeometry.Miso.Svg.Canvas.html#handleInternalCanvasAction"><span class="hs-identifier hs-var hs-var">handleInternalCanvasAction</span></a></span></span><span> </span><span id="local-6989586621679270636"><span class="annot"><span class="annottext">Canvas r
+</span><a href="#local-6989586621679270636"><span class="hs-identifier hs-var">canvas</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Canvas r
+-&gt; RWST MisoString [Sink action -&gt; JSM ()] (Canvas r) Identity ()
+forall s (m :: * -&gt; *). MonadState s m =&gt; s -&gt; m ()
+</span><span class="hs-identifier hs-var">put</span></span><span> </span><span class="annot"><span class="annottext">(Canvas r
+ -&gt; RWST MisoString [Sink action -&gt; JSM ()] (Canvas r) Identity ())
 -&gt; (InternalCanvasAction -&gt; Canvas r)
 -&gt; InternalCanvasAction
--&gt; Effect action (Canvas r)
+-&gt; RWST MisoString [Sink action -&gt; JSM ()] (Canvas r) Identity ()
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
-</span><span id="line-97"></span><span>  </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#MouseEnter"><span class="hs-identifier hs-type">MouseEnter</span></a></span><span> </span><span id="local-6989586621679254163"><span class="annot"><span class="annottext">Point 2 Int
-</span><a href="#local-6989586621679254163"><span class="hs-identifier hs-var">p</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679254161"><span class="hs-identifier hs-var">canvas</span></a></span><span class="annot"><span class="annottext">Canvas r -&gt; (Canvas r -&gt; Canvas r) -&gt; Canvas r
+</span><span id="line-105"></span><span>  </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#PointerEnter"><span class="hs-identifier hs-type">PointerEnter</span></a></span><span> </span><span id="local-6989586621679270637"><span class="annot"><span class="annottext">PointerEvent
+</span><a href="#local-6989586621679270637"><span class="hs-identifier hs-var">pe</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Canvas r
+</span><a href="#local-6989586621679270636"><span class="hs-identifier hs-var">canvas</span></a></span><span class="annot"><span class="annottext">Canvas r -&gt; (Canvas r -&gt; Canvas r) -&gt; Canvas r
 forall a b. a -&gt; (a -&gt; b) -&gt; b
 </span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Maybe (Point 2 Int) -&gt; Identity (Maybe (Point 2 Int)))
 -&gt; Canvas r -&gt; Identity (Canvas r)
@@ -288,11 +315,16 @@ Lens' (Canvas r) (Maybe (Point 2 Int))
  -&gt; Canvas r -&gt; Identity (Canvas r))
 -&gt; Point 2 Int -&gt; Canvas r -&gt; Canvas r
 forall s t a b. ASetter s t a (Maybe b) -&gt; b -&gt; s -&gt; t
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#%3F~"><span class="hs-operator hs-var">?~</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Int
-</span><a href="#local-6989586621679254163"><span class="hs-identifier hs-var">p</span></a></span><span>
-</span><span id="line-98"></span><span>  </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#MouseMove"><span class="hs-identifier hs-type">MouseMove</span></a></span><span>  </span><span id="local-6989586621679254165"><span class="annot"><span class="annottext">Point 2 Int
-</span><a href="#local-6989586621679254165"><span class="hs-identifier hs-var">p</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679254161"><span class="hs-identifier hs-var">canvas</span></a></span><span class="annot"><span class="annottext">Canvas r -&gt; (Canvas r -&gt; Canvas r) -&gt; Canvas r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#%3F~"><span class="hs-operator hs-var">?~</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Int -&gt; Point 2 Int) -&gt; (Int, Int) -&gt; Point 2 Int
+forall a b c. (a -&gt; b -&gt; c) -&gt; (a, b) -&gt; c
+</span><span class="hs-identifier hs-var">uncurry</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Point 2 Int
+forall r. r -&gt; r -&gt; Point 2 r
+</span><span class="hs-identifier hs-var">Point2</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PointerEvent -&gt; (Int, Int)
+</span><a href="HGeometry.Miso.Svg.Canvas.html#offset"><span class="hs-identifier hs-var">offset</span></a></span><span> </span><span class="annot"><span class="annottext">PointerEvent
+</span><a href="#local-6989586621679270637"><span class="hs-identifier hs-var">pe</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-106"></span><span>  </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#PointerMove"><span class="hs-identifier hs-type">PointerMove</span></a></span><span>  </span><span id="local-6989586621679270641"><span class="annot"><span class="annottext">PointerEvent
+</span><a href="#local-6989586621679270641"><span class="hs-identifier hs-var">pe</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Canvas r
+</span><a href="#local-6989586621679270636"><span class="hs-identifier hs-var">canvas</span></a></span><span class="annot"><span class="annottext">Canvas r -&gt; (Canvas r -&gt; Canvas r) -&gt; Canvas r
 forall a b. a -&gt; (a -&gt; b) -&gt; b
 </span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Maybe (Point 2 Int) -&gt; Identity (Maybe (Point 2 Int)))
 -&gt; Canvas r -&gt; Identity (Canvas r)
@@ -302,11 +334,16 @@ Lens' (Canvas r) (Maybe (Point 2 Int))
  -&gt; Canvas r -&gt; Identity (Canvas r))
 -&gt; Point 2 Int -&gt; Canvas r -&gt; Canvas r
 forall s t a b. ASetter s t a (Maybe b) -&gt; b -&gt; s -&gt; t
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#%3F~"><span class="hs-operator hs-var">?~</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Int
-</span><a href="#local-6989586621679254165"><span class="hs-identifier hs-var">p</span></a></span><span>
-</span><span id="line-99"></span><span>  </span><span class="annot"><span class="annottext">InternalCanvasAction
-</span><a href="HGeometry.Miso.Svg.Canvas.html#MouseLeave"><span class="hs-identifier hs-var">MouseLeave</span></a></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679254161"><span class="hs-identifier hs-var">canvas</span></a></span><span class="annot"><span class="annottext">Canvas r -&gt; (Canvas r -&gt; Canvas r) -&gt; Canvas r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#%3F~"><span class="hs-operator hs-var">?~</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Int -&gt; Point 2 Int) -&gt; (Int, Int) -&gt; Point 2 Int
+forall a b c. (a -&gt; b -&gt; c) -&gt; (a, b) -&gt; c
+</span><span class="hs-identifier hs-var">uncurry</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Point 2 Int
+forall r. r -&gt; r -&gt; Point 2 r
+</span><span class="hs-identifier hs-var">Point2</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PointerEvent -&gt; (Int, Int)
+</span><a href="HGeometry.Miso.Svg.Canvas.html#offset"><span class="hs-identifier hs-var">offset</span></a></span><span> </span><span class="annot"><span class="annottext">PointerEvent
+</span><a href="#local-6989586621679270641"><span class="hs-identifier hs-var">pe</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-107"></span><span>  </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#PointerLeave"><span class="hs-identifier hs-type">PointerLeave</span></a></span><span> </span><span class="annot"><span class="annottext">PointerEvent
+</span><span class="hs-identifier">_</span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Canvas r
+</span><a href="#local-6989586621679270636"><span class="hs-identifier hs-var">canvas</span></a></span><span class="annot"><span class="annottext">Canvas r -&gt; (Canvas r -&gt; Canvas r) -&gt; Canvas r
 forall a b. a -&gt; (a -&gt; b) -&gt; b
 </span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Maybe (Point 2 Int) -&gt; Identity (Maybe (Point 2 Int)))
 -&gt; Canvas r -&gt; Identity (Canvas r)
@@ -319,105 +356,65 @@ forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 Int)
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
-</span><span id="line-100"></span><span>  </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#TouchStart"><span class="hs-identifier hs-type">TouchStart</span></a></span><span> </span><span id="local-6989586621679254167"><span class="annot"><span class="annottext">Point 2 Int
-</span><a href="#local-6989586621679254167"><span class="hs-identifier hs-var">p</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679254161"><span class="hs-identifier hs-var">canvas</span></a></span><span class="annot"><span class="annottext">Canvas r -&gt; (Canvas r -&gt; Canvas r) -&gt; Canvas r
-forall a b. a -&gt; (a -&gt; b) -&gt; b
-</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Maybe (Point 2 Int) -&gt; Identity (Maybe (Point 2 Int)))
--&gt; Canvas r -&gt; Identity (Canvas r)
-forall s a. HasMousePosition s a =&gt; Lens' s a
-Lens' (Canvas r) (Maybe (Point 2 Int))
-</span><a href="HGeometry.Miso.Svg.Canvas.html#mousePosition"><span class="hs-identifier hs-var">mousePosition</span></a></span><span> </span><span class="annot"><span class="annottext">((Maybe (Point 2 Int) -&gt; Identity (Maybe (Point 2 Int)))
- -&gt; Canvas r -&gt; Identity (Canvas r))
--&gt; Point 2 Int -&gt; Canvas r -&gt; Canvas r
-forall s t a b. ASetter s t a (Maybe b) -&gt; b -&gt; s -&gt; t
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#%3F~"><span class="hs-operator hs-var">?~</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Int
-</span><a href="#local-6989586621679254167"><span class="hs-identifier hs-var">p</span></a></span><span>
-</span><span id="line-101"></span><span>  </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#TouchMove"><span class="hs-identifier hs-type">TouchMove</span></a></span><span> </span><span id="local-6989586621679254168"><span class="annot"><span class="annottext">Point 2 Int
-</span><a href="#local-6989586621679254168"><span class="hs-identifier hs-var">p</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679254161"><span class="hs-identifier hs-var">canvas</span></a></span><span class="annot"><span class="annottext">Canvas r -&gt; (Canvas r -&gt; Canvas r) -&gt; Canvas r
-forall a b. a -&gt; (a -&gt; b) -&gt; b
-</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Maybe (Point 2 Int) -&gt; Identity (Maybe (Point 2 Int)))
--&gt; Canvas r -&gt; Identity (Canvas r)
-forall s a. HasMousePosition s a =&gt; Lens' s a
-Lens' (Canvas r) (Maybe (Point 2 Int))
-</span><a href="HGeometry.Miso.Svg.Canvas.html#mousePosition"><span class="hs-identifier hs-var">mousePosition</span></a></span><span> </span><span class="annot"><span class="annottext">((Maybe (Point 2 Int) -&gt; Identity (Maybe (Point 2 Int)))
- -&gt; Canvas r -&gt; Identity (Canvas r))
--&gt; Point 2 Int -&gt; Canvas r -&gt; Canvas r
-forall s t a b. ASetter s t a (Maybe b) -&gt; b -&gt; s -&gt; t
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#%3F~"><span class="hs-operator hs-var">?~</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 Int
-</span><a href="#local-6989586621679254168"><span class="hs-identifier hs-var">p</span></a></span><span>
-</span><span id="line-102"></span><span>  </span><span class="annot"><span class="annottext">InternalCanvasAction
-</span><a href="HGeometry.Miso.Svg.Canvas.html#TouchEnd"><span class="hs-identifier hs-var">TouchEnd</span></a></span><span>      </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679254161"><span class="hs-identifier hs-var">canvas</span></a></span><span class="annot"><span class="annottext">Canvas r -&gt; (Canvas r -&gt; Canvas r) -&gt; Canvas r
-forall a b. a -&gt; (a -&gt; b) -&gt; b
-</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(Maybe (Point 2 Int) -&gt; Identity (Maybe (Point 2 Int)))
--&gt; Canvas r -&gt; Identity (Canvas r)
-forall s a. HasMousePosition s a =&gt; Lens' s a
-Lens' (Canvas r) (Maybe (Point 2 Int))
-</span><a href="HGeometry.Miso.Svg.Canvas.html#mousePosition"><span class="hs-identifier hs-var">mousePosition</span></a></span><span> </span><span class="annot"><span class="annottext">((Maybe (Point 2 Int) -&gt; Identity (Maybe (Point 2 Int)))
- -&gt; Canvas r -&gt; Identity (Canvas r))
--&gt; Maybe (Point 2 Int) -&gt; Canvas r -&gt; Canvas r
-forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="annot"><span class="annottext">Maybe (Point 2 Int)
-forall a. Maybe a
-</span><span class="hs-identifier hs-var">Nothing</span></span><span>
-</span><span id="line-103"></span><span>
-</span><span id="line-104"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-105"></span><span class="annot"><span class="hs-comment">-- * The View</span></span><span>
-</span><span id="line-106"></span><span>
-</span><span id="line-107"></span><span class="annot"><span class="hs-comment">-- | Draws the actual canvas using an svg tag</span></span><span>
-</span><span id="line-108"></span><span id="local-6989586621679253765"><span id="local-6989586621679253767"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#svgCanvas_"><span class="hs-identifier hs-type">svgCanvas_</span></a></span><span>               </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RealFrac</span></span><span> </span><span class="annot"><a href="#local-6989586621679253765"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.StaticCanvas.html#ToSvgCoordinate"><span class="hs-identifier hs-type">ToSvgCoordinate</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679253765"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-109"></span><span>                         </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-type">Canvas</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679253765"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-110"></span><span>                         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Html.Types.html/Miso.Html.Types.html#Attribute"><span class="hs-identifier hs-type">Attribute</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679253767"><span class="hs-identifier hs-type">action</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Html.Types.html/Miso.Html.Types.html#View"><span class="hs-identifier hs-type">View</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679253767"><span class="hs-identifier hs-type">action</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-111"></span><span>                         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Html.Types.html/Miso.Html.Types.html#View"><span class="hs-identifier hs-type">View</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#InternalCanvasAction"><span class="hs-identifier hs-type">InternalCanvasAction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679253767"><span class="hs-identifier hs-type">action</span></a></span><span class="hs-special">)</span></span></span><span>
-</span><span id="line-112"></span><span id="svgCanvas_"><span class="annot"><span class="annottext">svgCanvas_ :: forall r action.
+</span><span id="line-108"></span><span>  </span><span class="hs-comment">-- TouchStart p     -&gt; canvas&amp;mousePosition ?~ p</span><span>
+</span><span id="line-109"></span><span>  </span><span class="hs-comment">-- TouchMove p     -&gt; canvas&amp;mousePosition ?~ p</span><span>
+</span><span id="line-110"></span><span>  </span><span class="hs-comment">-- TouchEnd        -&gt; canvas&amp;mousePosition .~ Nothing</span><span>
+</span><span id="line-111"></span><span>
+</span><span id="line-112"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-113"></span><span class="annot"><span class="hs-comment">-- * The View</span></span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span class="annot"><span class="hs-comment">-- | Draws the actual canvas using an svg tag</span></span><span>
+</span><span id="line-116"></span><span id="local-6989586621679270261"><span id="local-6989586621679270263"><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#svgCanvas_"><span class="hs-identifier hs-type">svgCanvas_</span></a></span><span>               </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">RealFrac</span></span><span> </span><span class="annot"><a href="#local-6989586621679270261"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.StaticCanvas.html#ToSvgCoordinate"><span class="hs-identifier hs-type">ToSvgCoordinate</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270261"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-117"></span><span>                         </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#Canvas"><span class="hs-identifier hs-type">Canvas</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270261"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-118"></span><span>                         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Types.html/Miso.Types.html#Attribute"><span class="hs-identifier hs-type">Attribute</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270263"><span class="hs-identifier hs-type">action</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Types.html/Miso.Types.html#View"><span class="hs-identifier hs-type">View</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270263"><span class="hs-identifier hs-type">action</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-119"></span><span>                         </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Types.html/Miso.Types.html#View"><span class="hs-identifier hs-type">View</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#InternalCanvasAction"><span class="hs-identifier hs-type">InternalCanvasAction</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679270263"><span class="hs-identifier hs-type">action</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-120"></span><span id="svgCanvas_"><span class="annot"><span class="annottext">svgCanvas_ :: forall r action.
 (RealFrac r, ToSvgCoordinate r) =&gt;
 Canvas r
 -&gt; [Attribute action]
 -&gt; [View action]
 -&gt; View (Either InternalCanvasAction action)
-</span><a href="HGeometry.Miso.Svg.Canvas.html#svgCanvas_"><span class="hs-identifier hs-var hs-var">svgCanvas_</span></a></span></span><span> </span><span id="local-6989586621679254195"><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679254195"><span class="hs-identifier hs-var">canvas</span></a></span></span><span> </span><span id="local-6989586621679254196"><span class="annot"><span class="annottext">[Attribute action]
-</span><a href="#local-6989586621679254196"><span class="hs-identifier hs-var">ats</span></a></span></span><span> </span><span id="local-6989586621679254197"><span class="annot"><span class="annottext">[View action]
-</span><a href="#local-6989586621679254197"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-113"></span><span>  </span><span class="annot"><span class="annottext">[Attribute (Either InternalCanvasAction action)]
+</span><a href="HGeometry.Miso.Svg.Canvas.html#svgCanvas_"><span class="hs-identifier hs-var hs-var">svgCanvas_</span></a></span></span><span> </span><span id="local-6989586621679270669"><span class="annot"><span class="annottext">Canvas r
+</span><a href="#local-6989586621679270669"><span class="hs-identifier hs-var">canvas</span></a></span></span><span> </span><span id="local-6989586621679270670"><span class="annot"><span class="annottext">[Attribute action]
+</span><a href="#local-6989586621679270670"><span class="hs-identifier hs-var">ats</span></a></span></span><span> </span><span id="local-6989586621679270671"><span class="annot"><span class="annottext">[View action]
+</span><a href="#local-6989586621679270671"><span class="hs-identifier hs-var">vs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-121"></span><span>  </span><span class="annot"><span class="annottext">[Attribute (Either InternalCanvasAction action)]
 -&gt; [View (Either InternalCanvasAction action)]
 -&gt; View (Either InternalCanvasAction action)
 forall action. [Attribute action] -&gt; [View action] -&gt; View action
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Svg.Element.html/Miso.Svg.Element.html#svg_"><span class="hs-identifier hs-var">svg_</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">MisoString -&gt; Attribute (Either InternalCanvasAction action)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Svg.Element.html/Miso.Svg.Element.html#svg_"><span class="hs-identifier hs-var">svg_</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">MisoString -&gt; Attribute (Either InternalCanvasAction action)
 forall action. MisoString -&gt; Attribute action
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Html.Property.html/Miso.Html.Property.html#width_"><span class="hs-identifier hs-var">width_</span></a></span><span>    </span><span class="annot"><span class="annottext">(MisoString -&gt; Attribute (Either InternalCanvasAction action))
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Html.Property.html/Miso.Html.Property.html#width_"><span class="hs-identifier hs-var">width_</span></a></span><span>    </span><span class="annot"><span class="annottext">(MisoString -&gt; Attribute (Either InternalCanvasAction action))
 -&gt; (Int -&gt; MisoString)
 -&gt; Int
 -&gt; Attribute (Either InternalCanvasAction action)
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; MisoString
 forall str. ToMisoString str =&gt; str -&gt; MisoString
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.String.html/Miso.String.html#ms"><span class="hs-identifier hs-var">ms</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Attribute (Either InternalCanvasAction action))
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.String.html/Miso.String.html#ms"><span class="hs-identifier hs-var">ms</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Attribute (Either InternalCanvasAction action))
 -&gt; Int -&gt; Attribute (Either InternalCanvasAction action)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254198"><span class="hs-identifier hs-var">w</span></a></span><span>
-</span><span id="line-114"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">MisoString -&gt; Attribute (Either InternalCanvasAction action)
+</span><a href="#local-6989586621679270672"><span class="hs-identifier hs-var">w</span></a></span><span>
+</span><span id="line-122"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">MisoString -&gt; Attribute (Either InternalCanvasAction action)
 forall action. MisoString -&gt; Attribute action
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Html.Property.html/Miso.Html.Property.html#height_"><span class="hs-identifier hs-var">height_</span></a></span><span>   </span><span class="annot"><span class="annottext">(MisoString -&gt; Attribute (Either InternalCanvasAction action))
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Html.Property.html/Miso.Html.Property.html#height_"><span class="hs-identifier hs-var">height_</span></a></span><span>   </span><span class="annot"><span class="annottext">(MisoString -&gt; Attribute (Either InternalCanvasAction action))
 -&gt; (Int -&gt; MisoString)
 -&gt; Int
 -&gt; Attribute (Either InternalCanvasAction action)
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; MisoString
 forall str. ToMisoString str =&gt; str -&gt; MisoString
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.String.html/Miso.String.html#ms"><span class="hs-identifier hs-var">ms</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Attribute (Either InternalCanvasAction action))
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.String.html/Miso.String.html#ms"><span class="hs-identifier hs-var">ms</span></a></span><span> </span><span class="annot"><span class="annottext">(Int -&gt; Attribute (Either InternalCanvasAction action))
 -&gt; Int -&gt; Attribute (Either InternalCanvasAction action)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254199"><span class="hs-identifier hs-var">h</span></a></span><span>
-</span><span id="line-115"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">MisoString -&gt; Attribute (Either InternalCanvasAction action)
+</span><a href="#local-6989586621679270673"><span class="hs-identifier hs-var">h</span></a></span><span>
+</span><span id="line-123"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">MisoString -&gt; Attribute (Either InternalCanvasAction action)
 forall action. MisoString -&gt; Attribute action
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Svg.Attribute.html/Miso.Svg.Attribute.html#pointerEvents_"><span class="hs-identifier hs-var">pointerEvents_</span></a></span><span> </span><span class="annot"><span class="annottext">MisoString
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Svg.Property.html/Miso.Svg.Property.html#pointerEvents_"><span class="hs-identifier hs-var">pointerEvents_</span></a></span><span> </span><span class="annot"><span class="annottext">MisoString
 </span><span class="hs-string">&quot;all&quot;</span></span><span>
-</span><span id="line-116"></span><span>        </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[Attribute (Either InternalCanvasAction action)]
+</span><span id="line-124"></span><span>        </span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">[Attribute (Either InternalCanvasAction action)]
 -&gt; [Attribute (Either InternalCanvasAction action)]
 -&gt; [Attribute (Either InternalCanvasAction action)]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
@@ -434,130 +431,92 @@ forall a b. b -&gt; Either a b
 -&gt; [Attribute (Either InternalCanvasAction action)]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">[Attribute action]
-</span><a href="#local-6989586621679254196"><span class="hs-identifier hs-var">ats</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-117"></span><span>       </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">[Attribute (Either InternalCanvasAction action)]
+</span><a href="#local-6989586621679270670"><span class="hs-identifier hs-var">ats</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-125"></span><span>       </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">[Attribute (Either InternalCanvasAction action)]
 -&gt; [View (Either InternalCanvasAction action)]
 -&gt; View (Either InternalCanvasAction action)
 forall action. [Attribute action] -&gt; [View action] -&gt; View action
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Svg.Element.html/Miso.Svg.Element.html#svg_"><span class="hs-identifier hs-var">svg_</span></a></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">MisoString -&gt; Attribute (Either InternalCanvasAction action)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Svg.Element.html/Miso.Svg.Element.html#svg_"><span class="hs-identifier hs-var">svg_</span></a></span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">MisoString -&gt; Attribute (Either InternalCanvasAction action)
 forall action. MisoString -&gt; Attribute action
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Html.Property.html/Miso.Html.Property.html#width_"><span class="hs-identifier hs-var">width_</span></a></span><span>          </span><span class="annot"><span class="annottext">MisoString
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Html.Property.html/Miso.Html.Property.html#width_"><span class="hs-identifier hs-var">width_</span></a></span><span>          </span><span class="annot"><span class="annottext">MisoString
 </span><span class="hs-string">&quot;100%&quot;</span></span><span>
-</span><span id="line-118"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Either InternalCanvasAction action
+</span><span id="line-126"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(PointerEvent -&gt; Either InternalCanvasAction action)
 -&gt; Attribute (Either InternalCanvasAction action)
-forall action. action -&gt; Attribute action
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Html.Event.html/Miso.Html.Event.html#onMouseLeave"><span class="hs-identifier hs-var">onMouseLeave</span></a></span><span>   </span><span class="annot"><span class="annottext">(Either InternalCanvasAction action
+forall action. (PointerEvent -&gt; action) -&gt; Attribute action
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Html.Event.html/Miso.Html.Event.html#onPointerLeave"><span class="hs-identifier hs-var">onPointerLeave</span></a></span><span> </span><span class="annot"><span class="annottext">((PointerEvent -&gt; Either InternalCanvasAction action)
  -&gt; Attribute (Either InternalCanvasAction action))
--&gt; Either InternalCanvasAction action
--&gt; Attribute (Either InternalCanvasAction action)
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">InternalCanvasAction -&gt; Either InternalCanvasAction action
-forall a b. a -&gt; Either a b
-</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">InternalCanvasAction
-</span><a href="HGeometry.Miso.Svg.Canvas.html#MouseLeave"><span class="hs-identifier hs-var">MouseLeave</span></a></span><span>
-</span><span id="line-119"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(Point 2 Int -&gt; Either InternalCanvasAction action)
--&gt; Attribute (Either InternalCanvasAction action)
-forall action. (Point 2 Int -&gt; action) -&gt; Attribute action
-</span><span class="hs-identifier hs-var">onMouseEnterAt</span></span><span> </span><span class="annot"><span class="annottext">((Point 2 Int -&gt; Either InternalCanvasAction action)
- -&gt; Attribute (Either InternalCanvasAction action))
--&gt; (Point 2 Int -&gt; Either InternalCanvasAction action)
+-&gt; (PointerEvent -&gt; Either InternalCanvasAction action)
 -&gt; Attribute (Either InternalCanvasAction action)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">InternalCanvasAction -&gt; Either InternalCanvasAction action
 forall a b. a -&gt; Either a b
 </span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">(InternalCanvasAction -&gt; Either InternalCanvasAction action)
--&gt; (Point 2 Int -&gt; InternalCanvasAction)
--&gt; Point 2 Int
+-&gt; (PointerEvent -&gt; InternalCanvasAction)
+-&gt; PointerEvent
 -&gt; Either InternalCanvasAction action
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Point 2 Int -&gt; InternalCanvasAction
-</span><a href="HGeometry.Miso.Svg.Canvas.html#MouseEnter"><span class="hs-identifier hs-var">MouseEnter</span></a></span><span>
-</span><span id="line-120"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(Point 2 Int -&gt; Either InternalCanvasAction action)
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PointerEvent -&gt; InternalCanvasAction
+</span><a href="HGeometry.Miso.Svg.Canvas.html#PointerLeave"><span class="hs-identifier hs-var">PointerLeave</span></a></span><span>
+</span><span id="line-127"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(PointerEvent -&gt; Either InternalCanvasAction action)
 -&gt; Attribute (Either InternalCanvasAction action)
-forall action. (Point 2 Int -&gt; action) -&gt; Attribute action
-</span><span class="hs-identifier hs-var">onMouseMoveAt</span></span><span>  </span><span class="annot"><span class="annottext">((Point 2 Int -&gt; Either InternalCanvasAction action)
+forall action. (PointerEvent -&gt; action) -&gt; Attribute action
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Html.Event.html/Miso.Html.Event.html#onPointerEnter"><span class="hs-identifier hs-var">onPointerEnter</span></a></span><span> </span><span class="annot"><span class="annottext">((PointerEvent -&gt; Either InternalCanvasAction action)
  -&gt; Attribute (Either InternalCanvasAction action))
--&gt; (Point 2 Int -&gt; Either InternalCanvasAction action)
+-&gt; (PointerEvent -&gt; Either InternalCanvasAction action)
 -&gt; Attribute (Either InternalCanvasAction action)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">InternalCanvasAction -&gt; Either InternalCanvasAction action
 forall a b. a -&gt; Either a b
 </span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">(InternalCanvasAction -&gt; Either InternalCanvasAction action)
--&gt; (Point 2 Int -&gt; InternalCanvasAction)
--&gt; Point 2 Int
+-&gt; (PointerEvent -&gt; InternalCanvasAction)
+-&gt; PointerEvent
 -&gt; Either InternalCanvasAction action
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Point 2 Int -&gt; InternalCanvasAction
-</span><a href="HGeometry.Miso.Svg.Canvas.html#MouseMove"><span class="hs-identifier hs-var">MouseMove</span></a></span><span>
-</span><span id="line-121"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(Point 2 Int -&gt; Either InternalCanvasAction action)
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PointerEvent -&gt; InternalCanvasAction
+</span><a href="HGeometry.Miso.Svg.Canvas.html#PointerEnter"><span class="hs-identifier hs-var">PointerEnter</span></a></span><span>
+</span><span id="line-128"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(PointerEvent -&gt; Either InternalCanvasAction action)
 -&gt; Attribute (Either InternalCanvasAction action)
-forall action. (Point 2 Int -&gt; action) -&gt; Attribute action
-</span><span class="hs-identifier hs-var">onTouchStartAt</span></span><span> </span><span class="annot"><span class="annottext">((Point 2 Int -&gt; Either InternalCanvasAction action)
+forall action. (PointerEvent -&gt; action) -&gt; Attribute action
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Html.Event.html/Miso.Html.Event.html#onPointerMove"><span class="hs-identifier hs-var">onPointerMove</span></a></span><span>  </span><span class="annot"><span class="annottext">((PointerEvent -&gt; Either InternalCanvasAction action)
  -&gt; Attribute (Either InternalCanvasAction action))
--&gt; (Point 2 Int -&gt; Either InternalCanvasAction action)
+-&gt; (PointerEvent -&gt; Either InternalCanvasAction action)
 -&gt; Attribute (Either InternalCanvasAction action)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">InternalCanvasAction -&gt; Either InternalCanvasAction action
 forall a b. a -&gt; Either a b
 </span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">(InternalCanvasAction -&gt; Either InternalCanvasAction action)
--&gt; (Point 2 Int -&gt; InternalCanvasAction)
--&gt; Point 2 Int
+-&gt; (PointerEvent -&gt; InternalCanvasAction)
+-&gt; PointerEvent
 -&gt; Either InternalCanvasAction action
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Point 2 Int -&gt; InternalCanvasAction
-</span><a href="HGeometry.Miso.Svg.Canvas.html#TouchStart"><span class="hs-identifier hs-var">TouchStart</span></a></span><span>
-</span><span id="line-122"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(Point 2 Int -&gt; Either InternalCanvasAction action)
--&gt; Attribute (Either InternalCanvasAction action)
-forall action. (Point 2 Int -&gt; action) -&gt; Attribute action
-</span><span class="hs-identifier hs-var">onTouchMoveAt</span></span><span>  </span><span class="annot"><span class="annottext">((Point 2 Int -&gt; Either InternalCanvasAction action)
- -&gt; Attribute (Either InternalCanvasAction action))
--&gt; (Point 2 Int -&gt; Either InternalCanvasAction action)
--&gt; Attribute (Either InternalCanvasAction action)
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">InternalCanvasAction -&gt; Either InternalCanvasAction action
-forall a b. a -&gt; Either a b
-</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">(InternalCanvasAction -&gt; Either InternalCanvasAction action)
--&gt; (Point 2 Int -&gt; InternalCanvasAction)
--&gt; Point 2 Int
--&gt; Either InternalCanvasAction action
-forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
-</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Point 2 Int -&gt; InternalCanvasAction
-</span><a href="HGeometry.Miso.Svg.Canvas.html#TouchMove"><span class="hs-identifier hs-var">TouchMove</span></a></span><span>
-</span><span id="line-123"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Either InternalCanvasAction action
--&gt; Attribute (Either InternalCanvasAction action)
-forall action. action -&gt; Attribute action
-</span><span class="hs-identifier hs-var">onTouchEnd</span></span><span>     </span><span class="annot"><span class="annottext">(Either InternalCanvasAction action
- -&gt; Attribute (Either InternalCanvasAction action))
--&gt; Either InternalCanvasAction action
--&gt; Attribute (Either InternalCanvasAction action)
-forall a b. (a -&gt; b) -&gt; a -&gt; b
-</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">InternalCanvasAction -&gt; Either InternalCanvasAction action
-forall a b. a -&gt; Either a b
-</span><span class="hs-identifier hs-var">Left</span></span><span> </span><span class="annot"><span class="annottext">InternalCanvasAction
-</span><a href="HGeometry.Miso.Svg.Canvas.html#TouchEnd"><span class="hs-identifier hs-var">TouchEnd</span></a></span><span>
-</span><span id="line-124"></span><span>              </span><span class="hs-special">]</span><span>
-</span><span id="line-125"></span><span>              </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">[Attribute (Either InternalCanvasAction action)]
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PointerEvent -&gt; InternalCanvasAction
+</span><a href="HGeometry.Miso.Svg.Canvas.html#PointerMove"><span class="hs-identifier hs-var">PointerMove</span></a></span><span>
+</span><span id="line-129"></span><span>              </span><span class="hs-comment">-- , onTouchStartAt $ Left . TouchStart</span><span>
+</span><span id="line-130"></span><span>              </span><span class="hs-comment">-- , onTouchMoveAt  $ Left . TouchMove</span><span>
+</span><span id="line-131"></span><span>              </span><span class="hs-comment">-- , onTouchEnd     $ Left TouchEnd</span><span>
+</span><span id="line-132"></span><span>              </span><span class="hs-special">]</span><span>
+</span><span id="line-133"></span><span>              </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">[Attribute (Either InternalCanvasAction action)]
 -&gt; [View (Either InternalCanvasAction action)]
 -&gt; View (Either InternalCanvasAction action)
 forall action. [Attribute action] -&gt; [View action] -&gt; View action
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Svg.Element.html/Miso.Svg.Element.html#rect_"><span class="hs-identifier hs-var">rect_</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">MisoString -&gt; Attribute (Either InternalCanvasAction action)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Svg.Element.html/Miso.Svg.Element.html#rect_"><span class="hs-identifier hs-var">rect_</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">MisoString -&gt; Attribute (Either InternalCanvasAction action)
 forall action. MisoString -&gt; Attribute action
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Html.Property.html/Miso.Html.Property.html#width_"><span class="hs-identifier hs-var">width_</span></a></span><span> </span><span class="annot"><span class="annottext">MisoString
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Html.Property.html/Miso.Html.Property.html#width_"><span class="hs-identifier hs-var">width_</span></a></span><span> </span><span class="annot"><span class="annottext">MisoString
 </span><span class="hs-string">&quot;100%&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">MisoString -&gt; Attribute (Either InternalCanvasAction action)
 forall action. MisoString -&gt; Attribute action
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Html.Property.html/Miso.Html.Property.html#height_"><span class="hs-identifier hs-var">height_</span></a></span><span> </span><span class="annot"><span class="annottext">MisoString
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Html.Property.html/Miso.Html.Property.html#height_"><span class="hs-identifier hs-var">height_</span></a></span><span> </span><span class="annot"><span class="annottext">MisoString
 </span><span class="hs-string">&quot;100%&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">MisoString -&gt; Attribute (Either InternalCanvasAction action)
 forall action. MisoString -&gt; Attribute action
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Svg.Attribute.html/Miso.Svg.Attribute.html#fill_"><span class="hs-identifier hs-var">fill_</span></a></span><span> </span><span class="annot"><span class="annottext">MisoString
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Svg.Property.html/Miso.Svg.Property.html#fill_"><span class="hs-identifier hs-var">fill_</span></a></span><span> </span><span class="annot"><span class="annottext">MisoString
 </span><span class="hs-string">&quot;none&quot;</span></span><span class="hs-special">]</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-126"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Attribute (Either InternalCanvasAction action)]
+</span><span id="line-134"></span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">[Attribute (Either InternalCanvasAction action)]
 -&gt; [View (Either InternalCanvasAction action)]
 -&gt; View (Either InternalCanvasAction action)
 forall action. [Attribute action] -&gt; [View action] -&gt; View action
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Svg.Element.html/Miso.Svg.Element.html#g_"><span class="hs-identifier hs-var">g_</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">MisoString -&gt; Attribute (Either InternalCanvasAction action)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Svg.Element.html/Miso.Svg.Element.html#g_"><span class="hs-identifier hs-var">g_</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">MisoString -&gt; Attribute (Either InternalCanvasAction action)
 forall action. MisoString -&gt; Attribute action
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.Svg.Attribute.html/Miso.Svg.Attribute.html#transform_"><span class="hs-identifier hs-var">transform_</span></a></span><span> </span><span class="annot"><span class="annottext">MisoString
-</span><a href="#local-6989586621679254205"><span class="hs-identifier hs-var">ts</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(action -&gt; Either InternalCanvasAction action)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.Svg.Property.html/Miso.Svg.Property.html#transform_"><span class="hs-identifier hs-var">transform_</span></a></span><span> </span><span class="annot"><span class="annottext">MisoString
+</span><a href="#local-6989586621679270674"><span class="hs-identifier hs-var">ts</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(action -&gt; Either InternalCanvasAction action)
 -&gt; View action -&gt; View (Either InternalCanvasAction action)
 forall a b. (a -&gt; b) -&gt; View a -&gt; View b
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
@@ -567,31 +526,31 @@ forall a b. b -&gt; Either a b
 -&gt; [View action] -&gt; [View (Either InternalCanvasAction action)]
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">[View action]
-</span><a href="#local-6989586621679254197"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-127"></span><span>              </span><span class="hs-special">]</span><span>
-</span><span id="line-128"></span><span>       </span><span class="hs-special">]</span><span>
-</span><span id="line-129"></span><span>    </span><span class="hs-comment">-- note; we use the two nested svgs so that we can handle additional mouseMove, Enter,</span><span>
-</span><span id="line-130"></span><span>    </span><span class="hs-comment">-- and leave events specified in ats. The pointerEvents=all in the outer svg is needed</span><span>
-</span><span id="line-131"></span><span>    </span><span class="hs-comment">-- so that we can also capture the mousemove etc events in the inner svg. The rect</span><span>
-</span><span id="line-132"></span><span>    </span><span class="hs-comment">-- is so that the inner svg is actually forced to be the full size.</span><span>
-</span><span id="line-133"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-134"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector2</span></span><span> </span><span id="local-6989586621679254198"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254198"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span id="local-6989586621679254199"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679254199"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679254195"><span class="hs-identifier hs-var">canvas</span></a></span><span class="annot"><span class="annottext">Canvas r
+</span><a href="#local-6989586621679270671"><span class="hs-identifier hs-var">vs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span>              </span><span class="hs-special">]</span><span>
+</span><span id="line-136"></span><span>       </span><span class="hs-special">]</span><span>
+</span><span id="line-137"></span><span>    </span><span class="hs-comment">-- note; we use the two nested svgs so that we can handle additional mouseMove, Enter,</span><span>
+</span><span id="line-138"></span><span>    </span><span class="hs-comment">-- and leave events specified in ats. The pointerEvents=all in the outer svg is needed</span><span>
+</span><span id="line-139"></span><span>    </span><span class="hs-comment">-- so that we can also capture the mousemove etc events in the inner svg. The rect</span><span>
+</span><span id="line-140"></span><span>    </span><span class="hs-comment">-- is so that the inner svg is actually forced to be the full size.</span><span>
+</span><span id="line-141"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-142"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector2</span></span><span> </span><span id="local-6989586621679270672"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679270672"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span id="local-6989586621679270673"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679270673"><span class="hs-identifier hs-var">h</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Canvas r
+</span><a href="#local-6989586621679270669"><span class="hs-identifier hs-var">canvas</span></a></span><span class="annot"><span class="annottext">Canvas r
 -&gt; Getting (Vector 2 Int) (Canvas r) (Vector 2 Int) -&gt; Vector 2 Int
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector 2 Int) (Canvas r) (Vector 2 Int)
 forall s a. HasDimensions s a =&gt; Lens' s a
 Lens' (Canvas r) (Vector 2 Int)
 </span><a href="HGeometry.Miso.Svg.StaticCanvas.html#dimensions"><span class="hs-identifier hs-var">dimensions</span></a></span><span>
-</span><span id="line-135"></span><span>    </span><span id="local-6989586621679254205"><span class="annot"><span class="annottext">ts :: MisoString
-</span><a href="#local-6989586621679254205"><span class="hs-identifier hs-var hs-var">ts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Matrix 3 3 r -&gt; MisoString
+</span><span id="line-143"></span><span>    </span><span id="local-6989586621679270674"><span class="annot"><span class="annottext">ts :: MisoString
+</span><a href="#local-6989586621679270674"><span class="hs-identifier hs-var hs-var">ts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Matrix 3 3 r -&gt; MisoString
 forall r. ToSvgCoordinate r =&gt; Matrix 3 3 r -&gt; MisoString
 </span><a href="HGeometry.Miso.Svg.StaticCanvas.html#matrixToMisoString"><span class="hs-identifier hs-var">matrixToMisoString</span></a></span><span> </span><span class="annot"><span class="annottext">(Matrix 3 3 r -&gt; MisoString) -&gt; Matrix 3 3 r -&gt; MisoString
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Canvas r
-</span><a href="#local-6989586621679254195"><span class="hs-identifier hs-var">canvas</span></a></span><span class="annot"><span class="annottext">Canvas r
+</span><a href="#local-6989586621679270669"><span class="hs-identifier hs-var">canvas</span></a></span><span class="annot"><span class="annottext">Canvas r
 -&gt; Getting (Matrix 3 3 r) (Canvas r) (Matrix 3 3 r) -&gt; Matrix 3 3 r
 forall s a. s -&gt; Getting a s a -&gt; a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(Viewport r -&gt; Const (Matrix 3 3 r) (Viewport r))
@@ -629,41 +588,41 @@ forall (d :: Nat) r s (p :: * -&gt; * -&gt; *) (f :: * -&gt; *).
 p (Matrix (d + 1) (d + 1) r) (f (Matrix (d + 1) (d + 1) s))
 -&gt; p (Transformation d r) (f (Transformation d s))
 </span><span class="hs-identifier hs-var">transformationMatrix</span></span><span>
-</span><span id="line-136"></span><span>
-</span><span id="line-137"></span><span>
-</span><span id="line-138"></span><span class="hs-comment">-- | To be used instead of the text_ combinator in Miso</span><span>
-</span><span id="line-139"></span><span class="hs-comment">-- textAt                     :: ToSvgCoordinate r</span><span>
-</span><span id="line-140"></span><span class="hs-comment">--                            =&gt; Point 2 r -- ^ position where to draw (in world coordinates)</span><span>
-</span><span id="line-141"></span><span class="hs-comment">--                            -&gt; [Attribute action]</span><span>
-</span><span id="line-142"></span><span class="hs-comment">--                            -&gt; MisoString -&gt; View action</span><span>
-</span><span id="line-143"></span><span class="hs-comment">-- textAt (Point2 x y) ats t = g_ [ transform_ $ mconcat [ &quot;translate(&quot;</span><span>
-</span><span id="line-144"></span><span class="hs-comment">--                                                        , ms x</span><span>
-</span><span id="line-145"></span><span class="hs-comment">--                                                        , &quot;, &quot;</span><span>
-</span><span id="line-146"></span><span class="hs-comment">--                                                        , ms y</span><span>
-</span><span id="line-147"></span><span class="hs-comment">--                                                        , &quot;)scale(1,-1)&quot;</span><span>
-</span><span id="line-148"></span><span class="hs-comment">--                                                        ]</span><span>
-</span><span id="line-149"></span><span class="hs-comment">--                                 ] [ Miso.text_ ats [text t] ]</span><span>
-</span><span id="line-150"></span><span>
-</span><span id="line-151"></span><span>
-</span><span id="line-152"></span><span>
-</span><span id="line-153"></span><span class="hs-comment">-- class RenderWebSvg t where</span><span>
-</span><span id="line-154"></span><span class="hs-comment">--   renderWith :: t -&gt; [Attribute action] -&gt; [View action] -&gt; View action</span><span>
-</span><span id="line-155"></span><span>
-</span><span id="line-156"></span><span class="hs-comment">-- render       :: RenderWebSvg t =&gt; t -&gt; [Attribute action] -&gt; View action</span><span>
-</span><span id="line-157"></span><span class="hs-comment">-- render x ats = renderWith x ats []</span><span>
+</span><span id="line-144"></span><span>
+</span><span id="line-145"></span><span>
+</span><span id="line-146"></span><span class="hs-comment">-- | To be used instead of the text_ combinator in Miso</span><span>
+</span><span id="line-147"></span><span class="hs-comment">-- textAt                     :: ToSvgCoordinate r</span><span>
+</span><span id="line-148"></span><span class="hs-comment">--                            =&gt; Point 2 r -- ^ position where to draw (in world coordinates)</span><span>
+</span><span id="line-149"></span><span class="hs-comment">--                            -&gt; [Attribute action]</span><span>
+</span><span id="line-150"></span><span class="hs-comment">--                            -&gt; MisoString -&gt; View action</span><span>
+</span><span id="line-151"></span><span class="hs-comment">-- textAt (Point2 x y) ats t = g_ [ transform_ $ mconcat [ &quot;translate(&quot;</span><span>
+</span><span id="line-152"></span><span class="hs-comment">--                                                        , ms x</span><span>
+</span><span id="line-153"></span><span class="hs-comment">--                                                        , &quot;, &quot;</span><span>
+</span><span id="line-154"></span><span class="hs-comment">--                                                        , ms y</span><span>
+</span><span id="line-155"></span><span class="hs-comment">--                                                        , &quot;)scale(1,-1)&quot;</span><span>
+</span><span id="line-156"></span><span class="hs-comment">--                                                        ]</span><span>
+</span><span id="line-157"></span><span class="hs-comment">--                                 ] [ Miso.text_ ats [text t] ]</span><span>
 </span><span id="line-158"></span><span>
-</span><span id="line-159"></span><span class="hs-comment">-- instance ToSvgCoordinate r =&gt; RenderWebSvg (Point 2 r) where</span><span>
-</span><span id="line-160"></span><span class="hs-comment">--   renderWith (Point2 x y) ats = ellipse_ $ [ cx_ $ ms x, cy_ $ ms y</span><span>
-</span><span id="line-161"></span><span class="hs-comment">--                                            , rx_ &quot;5&quot;, ry_ &quot;5&quot;</span><span>
-</span><span id="line-162"></span><span class="hs-comment">--                                            , fill_ &quot;black&quot;</span><span>
-</span><span id="line-163"></span><span class="hs-comment">--                                            ] &lt;&gt; ats</span><span>
-</span><span id="line-164"></span><span>
-</span><span id="line-165"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-166"></span><span class="annot"><span class="hs-comment">-- * Canvas events that we should isten to</span></span><span>
-</span><span id="line-167"></span><span>
-</span><span id="line-168"></span><span class="annot"><span class="hs-comment">-- | Events a canvas wants to listen to</span></span><span>
-</span><span id="line-169"></span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#withCanvasEvents"><span class="hs-identifier hs-type">withCanvasEvents</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map.Map</span></span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.String.html/Miso.String.html#MisoString"><span class="hs-identifier hs-type">MisoString</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map.Map</span></span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.8.7.0-a3858eacf7eb2cc3e558ea7deda0a35649e5a23a3f1057fedb829f3a4a1b1124/share/doc/html/src/Miso.String.html/Miso.String.html#MisoString"><span class="hs-identifier hs-type">MisoString</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
-</span><span id="line-170"></span><span id="withCanvasEvents"><span class="annot"><span class="annottext">withCanvasEvents :: Map MisoString Bool -&gt; Map MisoString Bool
+</span><span id="line-159"></span><span>
+</span><span id="line-160"></span><span>
+</span><span id="line-161"></span><span class="hs-comment">-- class RenderWebSvg t where</span><span>
+</span><span id="line-162"></span><span class="hs-comment">--   renderWith :: t -&gt; [Attribute action] -&gt; [View action] -&gt; View action</span><span>
+</span><span id="line-163"></span><span>
+</span><span id="line-164"></span><span class="hs-comment">-- render       :: RenderWebSvg t =&gt; t -&gt; [Attribute action] -&gt; View action</span><span>
+</span><span id="line-165"></span><span class="hs-comment">-- render x ats = renderWith x ats []</span><span>
+</span><span id="line-166"></span><span>
+</span><span id="line-167"></span><span class="hs-comment">-- instance ToSvgCoordinate r =&gt; RenderWebSvg (Point 2 r) where</span><span>
+</span><span id="line-168"></span><span class="hs-comment">--   renderWith (Point2 x y) ats = ellipse_ $ [ cx_ $ ms x, cy_ $ ms y</span><span>
+</span><span id="line-169"></span><span class="hs-comment">--                                            , rx_ &quot;5&quot;, ry_ &quot;5&quot;</span><span>
+</span><span id="line-170"></span><span class="hs-comment">--                                            , fill_ &quot;black&quot;</span><span>
+</span><span id="line-171"></span><span class="hs-comment">--                                            ] &lt;&gt; ats</span><span>
+</span><span id="line-172"></span><span>
+</span><span id="line-173"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-174"></span><span class="annot"><span class="hs-comment">-- * Canvas events that we should isten to</span></span><span>
+</span><span id="line-175"></span><span>
+</span><span id="line-176"></span><span class="annot"><span class="hs-comment">-- | Events a canvas wants to listen to</span></span><span>
+</span><span id="line-177"></span><span class="annot"><a href="HGeometry.Miso.Svg.Canvas.html#withCanvasEvents"><span class="hs-identifier hs-type">withCanvasEvents</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map.Map</span></span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.String.html/Miso.String.html#MisoString"><span class="hs-identifier hs-type">MisoString</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Map.Map</span></span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/miso-1.9.0.0-620fe427c31d68789c6d7fc55a528f59946dd548a36518d3925d2a91ee6909c4/share/doc/html/src/Miso.String.html/Miso.String.html#MisoString"><span class="hs-identifier hs-type">MisoString</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-178"></span><span id="withCanvasEvents"><span class="annot"><span class="annottext">withCanvasEvents :: Map MisoString Bool -&gt; Map MisoString Bool
 </span><a href="HGeometry.Miso.Svg.Canvas.html#withCanvasEvents"><span class="hs-identifier hs-var hs-var">withCanvasEvents</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Map MisoString Bool -&gt; Map MisoString Bool -&gt; Map MisoString Bool
 forall k a. Ord k =&gt; Map k a -&gt; Map k a -&gt; Map k a
 </span><span class="hs-identifier hs-var">Map.union</span></span><span> </span><span class="annot"><span class="annottext">(Map MisoString Bool -&gt; Map MisoString Bool -&gt; Map MisoString Bool)
@@ -674,33 +633,33 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[(MisoString, Bool)] -&gt; Map MisoString Bool
 forall k a. Ord k =&gt; [(k, a)] -&gt; Map k a
 </span><span class="hs-identifier hs-var">Map.fromList</span></span><span>
-</span><span id="line-171"></span><span>                   </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MisoString
+</span><span id="line-179"></span><span>                   </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MisoString
 </span><span class="hs-string">&quot;touchstart&quot;</span></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">)</span><span>
-</span><span id="line-172"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MisoString
+</span><span id="line-180"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MisoString
 </span><span class="hs-string">&quot;touchmove&quot;</span></span><span>   </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">)</span><span>
-</span><span id="line-173"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MisoString
+</span><span id="line-181"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MisoString
 </span><span class="hs-string">&quot;touchend&quot;</span></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">)</span><span>
-</span><span id="line-174"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MisoString
-</span><span class="hs-string">&quot;mouseleave&quot;</span></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span id="line-182"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MisoString
+</span><span class="hs-string">&quot;pointerleave&quot;</span></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">)</span><span>
-</span><span id="line-175"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MisoString
-</span><span class="hs-string">&quot;mousemove&quot;</span></span><span>   </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span id="line-183"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MisoString
+</span><span class="hs-string">&quot;pointermove&quot;</span></span><span>   </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">)</span><span>
-</span><span id="line-176"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MisoString
+</span><span id="line-184"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">MisoString
 </span><span class="hs-string">&quot;contextmenu&quot;</span></span><span> </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">)</span><span>
-</span><span id="line-177"></span><span>                   </span><span class="hs-special">]</span><span>
-</span><span id="line-178"></span><span>
-</span><span id="line-179"></span><span class="hs-comment">-- -- | Subscription needed for the iCanvas. In particular, captures the</span><span>
-</span><span id="line-180"></span><span class="hs-comment">-- -- mouse position</span><span>
-</span><span id="line-181"></span><span class="hs-comment">-- subs     :: MisoString -- ^ The id of the iCanvas</span><span>
-</span><span id="line-182"></span><span class="hs-comment">--                 -&gt; (InternalCanvasAction -&gt; action)</span><span>
-</span><span id="line-183"></span><span class="hs-comment">--                 -&gt; [Sub action]</span><span>
-</span><span id="line-184"></span><span class="hs-comment">-- subs i f = [ relativeMouseSub   i (f . MouseMove)</span><span>
-</span><span id="line-185"></span><span class="hs-comment">--            , relativeTouchedSub i (f . TouchMove)</span><span>
-</span><span id="line-186"></span><span class="hs-comment">--                   -- , arrowsSub          (f . ArrowPress)</span><span>
-</span><span id="line-187"></span><span class="hs-comment">--            ]</span><span>
-</span><span id="line-188"></span></pre></body></html>
+</span><span id="line-185"></span><span>                   </span><span class="hs-special">]</span><span>
+</span><span id="line-186"></span><span>
+</span><span id="line-187"></span><span class="hs-comment">-- -- | Subscription needed for the iCanvas. In particular, captures the</span><span>
+</span><span id="line-188"></span><span class="hs-comment">-- -- mouse position</span><span>
+</span><span id="line-189"></span><span class="hs-comment">-- subs     :: MisoString -- ^ The id of the iCanvas</span><span>
+</span><span id="line-190"></span><span class="hs-comment">--                 -&gt; (InternalCanvasAction -&gt; action)</span><span>
+</span><span id="line-191"></span><span class="hs-comment">--                 -&gt; [Sub action]</span><span>
+</span><span id="line-192"></span><span class="hs-comment">-- subs i f = [ relativePointerSub   i (f . PointerMove)</span><span>
+</span><span id="line-193"></span><span class="hs-comment">--            , relativeTouchedSub i (f . TouchMove)</span><span>
+</span><span id="line-194"></span><span class="hs-comment">--                   -- , arrowsSub          (f . ArrowPress)</span><span>
+</span><span id="line-195"></span><span class="hs-comment">--            ]</span><span>
+</span><span id="line-196"></span></pre></body></html>
