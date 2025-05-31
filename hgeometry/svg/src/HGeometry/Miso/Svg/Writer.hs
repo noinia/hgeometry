@@ -307,6 +307,9 @@ instance ToMisoString r => Drawable (Ipe.PathSegment r) where
     Ipe.PolygonPath _ pg   -> dSimplePolygon pg -- TODO: maybe don't ignore the orientation
     _                      -> error "toValue: not implemented yet"
 
+
+
+
 --------------------------------------------------------------------------------
 -- * Dealing with attributes
 
@@ -384,3 +387,11 @@ instance IpeToMisoAttr IA.Gradient   where attrSvg _ = Nothing
 
 -- GroupAttributeUniverse
 instance IpeToMisoAttr IA.Clip     where attrSvg _ = Nothing -- Just clipPath_
+
+-- Text attributes
+instance IpeToMisoAttr IA.Width    where attrSvg _ = Nothing
+instance IpeToMisoAttr IA.Height   where attrSvg _ = Nothing
+instance IpeToMisoAttr IA.Depth    where attrSvg _ = Nothing
+instance IpeToMisoAttr IA.VAlign   where attrSvg _ = Nothing
+instance IpeToMisoAttr IA.HAlign   where attrSvg _ = Nothing
+instance IpeToMisoAttr IA.Style    where attrSvg _ = Nothing

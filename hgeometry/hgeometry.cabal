@@ -356,6 +356,9 @@ library kernel
         HGeometry.Box.Corners
         HGeometry.Box.Sides
         HGeometry.Box.Intersection
+
+        HGeometry.HalfSpace.Type
+
         HGeometry.HyperPlane.Internal
         HGeometry.Matrix.Internal
         HGeometry.Matrix.ByRows
@@ -427,6 +430,7 @@ library polygon
         HGeometry.Polygon.Convex
         HGeometry.Polygon.Convex.Class
         HGeometry.Polygon.Convex.Internal
+        HGeometry.Polygon.Convex.Unbounded
 
         HGeometry.Polygon.Simple
         HGeometry.Polygon.Simple.Class
@@ -601,8 +605,9 @@ library ipe
 
     other-modules:
           Ipe.ParserPrimitives
+          Ipe.FromIpe.UnboundedConvexChain
 
---------------------------------------------------------------------------------
+----------g----------------------------------------------------------------------
 -- * svg
 
 library svg
@@ -883,6 +888,7 @@ test-suite with-ipe-hspec
       Line.LowerEnvelopeSpec
       Paths_hgeometry
       BallSpec
+      TriangleUnboundedConvexSpec
 
   autogen-modules:
       Paths_hgeometry

@@ -263,7 +263,8 @@ data VerticalAlignment = AlignTop | AlignVCenter | AlignBottom | AlignBaseline
 type TeXStyle = Text
 
 -- | size of text in points
-type TextSizeUnit r = r
+newtype TextSizeUnit r = TextSizeUnit r
+                       deriving stock (Show,Read,Eq,Ord,Functor,Foldable,Traversable)
 
 --------------------------------------------------------------------------------
 -- * Symbol Attributes

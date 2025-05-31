@@ -193,6 +193,10 @@ instance IpeReadText VerticalAlignment where
     _          -> Left "invalid VerticalAlignment"
 
 
+instance Coordinate r => IpeReadText (TextSizeUnit r) where
+  ipeReadText = fmap TextSizeUnit . readCoordinate
+
+
 ipeReadTextWith     :: (Text -> Either t v) -> Text -> Either ConversionError (IpeValue v)
 ipeReadTextWith f t = case f t of
                         Right v -> Right (Valued v)

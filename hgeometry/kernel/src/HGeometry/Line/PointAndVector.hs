@@ -267,7 +267,7 @@ instance (Fractional r, Has_ Metric_ d r
          ) => HasSquaredEuclideanDistance (LinePV d r) where
   pointClosestTo (view asPoint -> p) (LinePV a m) = a .+^ (t0 *^ m)
     where
-      -- see https://monkeyproofsolutions.nl/wordpress/how-to-calculate-the-shortest-distance-between-a-point-and-a-line/
+      -- see https://web.archive.org/web/20210924073744/https://monkeyproofsolutions.nl/wordpress/how-to-calculate-the-shortest-distance-between-a-point-and-a-line/
       t0 = numerator / divisor
       numerator = (p .-. a) `dot` m
       divisor  = m `dot` m

@@ -27,9 +27,9 @@ import           Data.Text (Text)
 import qualified Data.Text as Text
 import           Data.Vector.NonEmpty (NonEmptyVector)
 import           HGeometry.Ball
-import           HGeometry.Disk
 import           HGeometry.BezierSpline
 import           HGeometry.Box
+import           HGeometry.Disk
 import           HGeometry.Ellipse (Ellipse, circleToEllipse)
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
@@ -41,8 +41,10 @@ import           HGeometry.Line.General
 import           HGeometry.LineSegment
 import           HGeometry.Number.Radical
 import           HGeometry.Point
+import           HGeometry.Point.Either
 import           HGeometry.PolyLine
 import           HGeometry.Polygon
+import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Polygon.WithHoles
 import           HGeometry.Properties
@@ -50,9 +52,9 @@ import           HGeometry.Triangle (Triangle,toCounterClockwiseTriangle)
 import           Ipe.Attributes
 import           Ipe.Color (IpeColor(..), gray)
 import           Ipe.FromIpe
+import           Ipe.FromIpe.UnboundedConvexChain
 import           Ipe.Path (Orientation(..))
 import           Ipe.Types
-
 
 --------------------------------------------------------------------------------
 
@@ -150,6 +152,15 @@ instance HasDefaultIpeOut (Point 2 r) where
   type DefaultIpeOut (Point 2 r) = IpeSymbol
   defIO = ipeDiskMark
 
+instance ( HasDefaultIpeOut original, HasDefaultIpeOut extra
+         , DefaultIpeOut original ~ DefaultIpeOut extra
+         , NumType original ~ NumType extra
+         ) => HasDefaultIpeOut (OriginalOrExtra original extra) where
+  type DefaultIpeOut (OriginalOrExtra original extra) = DefaultIpeOut original
+  defIO = \case
+    Original o -> defIO o
+    Extra e    -> defIO e
+
 instance ( IxValue (endPoint (Point 2 r)) ~ Point 2 r
          , EndPoint_ (endPoint (Point 2 r))
          ) => HasDefaultIpeOut (LineSegment endPoint (Point 2 r)) where
@@ -200,6 +211,22 @@ instance ( VertexContainer f (Point 2 r)
          ) => HasDefaultIpeOut (ConvexPolygonF f (Point 2 r)) where
   type DefaultIpeOut (ConvexPolygonF f (Point 2 r)) = Path
   defIO = defIO . toSimplePolygon
+
+instance (Num r, Point_ vertex 2 r, Foldable1 nonEmpty
+         ) => HasDefaultIpeOut (UnboundedConvexRegionF r nonEmpty vertex) where
+  type DefaultIpeOut (UnboundedConvexRegionF r nonEmpty vertex) = Path
+  defIO = renderChain . (:+ mempty)
+
+instance ( HasDefaultIpeOut vertex, HasDefaultIpeOut polygon
+         , NumType vertex ~ NumType polygon, Point_ vertex 2 r
+         ) => HasDefaultIpeOut (PossiblyDegenerateSimplePolygon vertex polygon) where
+  type DefaultIpeOut (PossiblyDegenerateSimplePolygon vertex polygon) = Group
+  -- use the default renderer for the various options, and then wrap them in a group
+  -- (since they will return things of different types)
+  defIO = (:+ mempty) . Group . (:[]) . \case
+    DegenerateVertex v -> iO' v
+    DegenerateEdge e   -> iO' $ (^.asPoint) <$> e
+    ActualPolygon pg   -> iO' pg
 
 instance HasDefaultIpeOut (Ellipse r) where
   type DefaultIpeOut (Ellipse r) = Path
