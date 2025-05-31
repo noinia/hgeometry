@@ -6,8 +6,9 @@ module HGeometry.Miso.Canvas.Zoom
   ) where
 
 import Control.Lens
+import Control.Monad.State
 import HGeometry.Interval
-import Miso (Effect, noEff)
+import Miso (Effect)
 
 
 --------------------------------------------------------------------------------
@@ -29,14 +30,14 @@ newtype ZoomAction = ZoomAction ZoomDirection deriving (Show,Eq)
 update      :: ( Fractional r, Ord r
                , HasZoomLevel canvas r
                )
-            => canvas -> ZoomAction -> Effect action canvas
-update m za = m&zoomLevel %%~ flip updateZoom' za
+            => ZoomAction -> Effect canvas action
+update za = zoom zoomLevel $ updateZoom' za
+  -- note: the zoom is the lens version of zoom
 
-
-updateZoom'   :: (Fractional r, Ord r)
-             => r -> ZoomAction -> Effect action r
-updateZoom' z = \case
-    ZoomAction dir                -> noEff $ applyZoom dir z
+updateZoom' :: (Fractional r, Ord r)
+            => ZoomAction -> Effect r action
+updateZoom' = \case
+    ZoomAction dir  -> modify $ applyZoom dir
 
 
 applyZoom       :: forall r.(Fractional r, Ord r) => ZoomDirection -> r -> r

@@ -15,6 +15,7 @@ import           Control.Lens
 import           Control.Monad (void)
 import           GHCJS.Marshal (ToJSVal(..))
 import           GHCJS.Types
+import           Language.Javascript.JSaddle (JSM)
 import qualified Language.Javascript.JSaddle as JSAddle
 import           Language.Javascript.JSaddle.Object (js1)
 import qualified Language.Javascript.JSaddle.Object as JS

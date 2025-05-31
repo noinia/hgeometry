@@ -23,7 +23,8 @@ import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Vector
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
-import           Miso
+import           Miso hiding (style_)
+import           Miso.Style(style_,(=:))
 import           Miso.String (MisoString,ToMisoString(..), ms)
 import           Miso.Svg hiding (height_, id_, style_, width_)
 
@@ -68,19 +69,17 @@ initialModel = Model canvas canvas mempty mempty Nothing
 
 --------------------------------------------------------------------------------
 
-data Action = Id
-            | PrimalCanvasAction Canvas.InternalCanvasAction
+data Action = PrimalCanvasAction Canvas.InternalCanvasAction
             | DualCanvasAction Canvas.InternalCanvasAction
             | PrimalClick
             | DualClick
             deriving (Show,Eq)
 
 
-updateModel   :: Model -> Action -> Effect Action Model
+updateModel   :: Model -> Action -> Effect Model Action
 updateModel m = \case
-    Id                    -> noEff m
-    PrimalCanvasAction ca -> m&primalCanvas %%~ flip Canvas.handleInternalCanvasAction ca
-    DualCanvasAction ca   -> m&dualCanvas   %%~ flip Canvas.handleInternalCanvasAction ca
+    PrimalCanvasAction ca -> zoom primalCanvas $ wrap Canvas.handleInternalCanvasAction ca
+    DualCanvasAction ca   -> zoom dualCanvas   $ wrap Canvas.handleInternalCanvasAction ca
     PrimalClick           -> noEff addPrimalPoint
     DualClick             -> noEff addDualPoint
   where
@@ -106,13 +105,13 @@ viewModel m = div_ [ ]
                    [ either PrimalCanvasAction id <$>
                      Canvas.svgCanvas_ (m^.primalCanvas)
                                        [ onClick PrimalClick
-                                       , styleInline_ "border: 1px solid black"
+                                       , style_ ["border" =: "1px solid black"]
                                        ]
                                        primalBody
                    , either DualCanvasAction id <$>
                      Canvas.svgCanvas_ (m^.dualCanvas)
                                        [ onClick DualClick
-                                       , styleInline_ "border: 1px solid black"
+                                       , style_ ["border" =: "1px solid black"]
                                        ]
                                        dualBody
                    , div_ []
@@ -155,13 +154,15 @@ large = 100000
 
 main :: IO ()
 main = JSaddle.run 8080 $
-         startApp $
-            App { model         = initialModel
-                , update        = flip updateModel
+         startComponent $
+            Component
+                { model         = initialModel
+                , update        = wrap updateModel
                 , view          = viewModel
                 , subs          = mempty
                 , events        = Canvas.withCanvasEvents defaultEvents
-                , initialAction = Id
+                , styles        = []
+                , initialAction = Nothing
                 , mountPoint    = Nothing
                 , logLevel      = Off
                 }
@@ -173,3 +174,6 @@ textAt (Point2 x y) ats t = text_ ([ x_ $ ms x
                                   , y_ $ ms y
                                   ] <> ats
                                   ) [text t]
+
+wrap       :: (model -> action -> Effect model action') -> action -> Effect model action'
+wrap f act = get >>= flip f act

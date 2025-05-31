@@ -24,7 +24,7 @@ import           HGeometry.Polygon.Simple
 import           HGeometry.Properties
 import           HGeometry.Transformation
 import           HGeometry.Viewport
-import           Miso (JSM)
+import           Language.Javascript.JSaddle (JSM)
 import           SkiaCanvas.CanvasKit
 import           SkiaCanvas.CanvasKit.Initialize (CanvasKitRefs(..), theSurface, strokeOnly, fillOnly, theCanvasKit, theCanvas, HasCanvasKitRef(..), pictureRecorder)
 import           SkiaCanvas.CanvasKit.Paint (SkPaintRef)

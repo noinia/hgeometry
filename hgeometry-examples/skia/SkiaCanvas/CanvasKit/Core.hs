@@ -30,11 +30,11 @@ import           Data.Text (Text)
 import           GHCJS.Marshal (ToJSVal(..))
 import           GHCJS.Types
 import qualified Language.Javascript.JSaddle as JSAddle
+import           Language.Javascript.JSaddle (JSM)
 import           Language.Javascript.JSaddle.Object (js0, js1)
 import qualified Language.Javascript.JSaddle.Object as JS
 import           Miso
 import           Miso.String (MisoString)
-
 
 --------------------------------------------------------------------------------
 -- * The CanvasKit object

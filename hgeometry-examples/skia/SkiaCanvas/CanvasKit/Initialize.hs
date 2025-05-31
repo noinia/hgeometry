@@ -13,6 +13,7 @@ module SkiaCanvas.CanvasKit.Initialize
 
 import           Control.Lens
 import           Control.Monad.IO.Class
+import           Language.Javascript.JSaddle (JSM)
 import           Language.Javascript.JSaddle.Object (js1, jsg)
 import qualified Language.Javascript.JSaddle.Object as JS
 import           Miso
@@ -20,6 +21,7 @@ import           Miso.String (MisoString)
 import           SkiaCanvas.CanvasKit.Core
 import           SkiaCanvas.CanvasKit.Paint (SkPaintStyle, mkPaintStyle, Style(..))
 import           SkiaCanvas.CanvasKit.PictureRecorder
+
 --------------------------------------------------------------------------------
 
 -- | References to CanvasKit objects we maintain
@@ -83,6 +85,6 @@ storeCanvasKitAndSurface theCanvasId sink _fObj _this = \case
                   picRec      <- createPictureRecorder canvasKit
                   let refs = CanvasKitRefs canvasKit surface' () strokeOnly' fillOnly' picRec
                   -- someshow store the refs
-                  liftIO . sink $ InitializeRefs refs
+                  sink $ InitializeRefs refs
                   requestAnimationFrame canvasKit surface' clear
   _         -> pure () -- TODO this should probably be some error?

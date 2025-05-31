@@ -28,7 +28,7 @@ import qualified Data.Aeson.KeyMap as Aeson
 import           Data.Aeson.Types
 -- import           HGeometry.Point
 import           Miso
-import qualified Miso.Html.Event as Event
+import qualified Miso as Event
 
 --------------------------------------------------------------------------------
 
