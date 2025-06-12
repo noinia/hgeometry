@@ -27,6 +27,7 @@ import           HGeometry.Point.Either
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple
+import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Properties
 import           HGeometry.Sequence.Alternating (separators)
 import           HGeometry.Triangle
@@ -46,17 +47,27 @@ import           Test.QuickCheck.Instances ()
 
 type R = RealNumber 5
 
+type instance Intersection (Triangle corner) (Region r vertex) = Maybe (MDCell' r vertex)
 
-type instance Intersection (Triangle corner) (Region r vertex) =
-  Maybe (ClippedBoundedRegion r vertex corner)
+-- | Cells in the Minimization diagram (i.e. the projected lower envelope of planes)
+type MDCell r plane = MDCell' r (MDVertex r plane)
 
--- instance Triangle corner `HasIntersectionWith` (Region r vertex)
--- instance Triangle corner `IsIntersectableWith` (Region r vertex) where
---   tri `intersect` reg = case reg of
---     Bounded   convex -> tri `intersect` convex
---     Unbounded convex -> tri `intersect` convex
+-- | Helper type for representing cells in a minimzation diagram. These cells are possibly
+-- degenerate convex polygons, whose vertices are either of type 'vertex' or of type
+-- 'Point 2 r'.
+type MDCell' r vertex = PossiblyDegenerateSimplePolygon (OriginalOrExtra vertex (Point 2 r))
+                                                        (ClippedBoundedRegion r vertex (Point 2 r))
 
-{-
+
+instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
+         ) => Triangle corner `HasIntersectionWith` (Region r vertex)
+instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
+         ) => Triangle corner `IsIntersectableWith` (Region r vertex) where
+  tri `intersect` reg = case reg of
+    BoundedRegion   convex -> tri `intersect` convex
+    UnboundedRegion convex -> tri `intersect` convex
+
+
 -- |
 bruteForceLowerEnvelopeIn     :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                                  -- , HasDefiners vertexData plane
@@ -68,7 +79,7 @@ bruteForceLowerEnvelopeIn     :: ( Plane_ plane r, Ord plane, Ord r, Fractional 
                                  )
                               => Triangle corner
                               -> set plane
-                              -> NEMap plane (BoundedRegion r (MDVertex r plane) (Point 2 r))
+                              -> NEMap plane (MDCell r (MDVertex r plane))
 bruteForceLowerEnvelopeIn tri planes = case bruteForceLowerEnvelope planes of
     Nothing      -> lowestPlane
     Just diagram -> case NEMap.mapMaybe (tri `intersect`) (asMap diagram) of
@@ -83,7 +94,7 @@ bruteForceLowerEnvelopeIn tri planes = case bruteForceLowerEnvelope planes of
             $ fromPoints (Extra <$> tri')
 
 
--}
+
 
 
 spec :: Spec
