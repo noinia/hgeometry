@@ -22,6 +22,7 @@ import           HGeometry.Plane.LowerEnvelope
 import qualified HGeometry.Plane.LowerEnvelope.Connected.Randomized as Randomized
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Sequence.Alternating (separators)
 import           HGeometry.VoronoiDiagram
 import qualified HGeometry.VoronoiDiagram as VD
@@ -29,10 +30,10 @@ import           Hiraffe.Graph.Class
 import           Ipe
 import           Ipe.Color
 import           System.OsPath
+import           System.Random
 import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
-import           System.Random
 
 --------------------------------------------------------------------------------
 
@@ -63,8 +64,8 @@ instance ( Point_ point 2 r, Fractional r, Ord r
 instance (Point_ point 2 r, Ord r, Num r, IsBoxable point
          ) => IsBoxable (Region r point) where
   boundingBox = \case
-    Bounded pts       -> boundingBox $ toNonEmpty pts
-    Unbounded _ pts _ -> boundingBox pts
+    BoundedRegion convex                -> boundingBox convex
+    UnboundedRegion (Unbounded _ pts _) -> boundingBox pts
 
 grow             :: (Num r, Point_ point d r) => r -> Box point -> Box point
 grow d (Box p q) = Box (p&coordinates %~ subtract d)

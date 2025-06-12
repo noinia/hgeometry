@@ -1,8 +1,9 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE UndecidableInstances  #-}
 module HGeometry.Plane.LowerEnvelope.Connected.Region
   ( Region(..)
   , MDVertex(MDVertex), location
-  , BoundedRegion
+  , ClippedBoundedRegion
   ) where
 
 import           Control.Lens
@@ -18,6 +19,7 @@ import           HGeometry.Point
 import           HGeometry.Point.Either
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Polygon.Simple
 import           HGeometry.Properties
 import           HGeometry.Sequence.Alternating (separators)
@@ -54,25 +56,20 @@ instance Num r => Point_ (MDVertex r plane) 2 r where
 
 --------------------------------------------------------------------------------
 
-type BoundedRegion r vertex corner =
+-- | A Convex bounded region, which may be clipped using vertices of type 'corner'.
+type ClippedBoundedRegion r vertex corner =
   ConvexPolygonF NonEmpty (OriginalOrExtra vertex corner)
 
 --------------------------------------------------------------------------------
 
 -- | A region in the minimization diagram. The boundary is given in CCW order; i.e. the
 -- region is to the left of the boundary.
-data Region r point = Bounded   (Cyclic NonEmpty point)
-                    | Unbounded (Vector 2 r)
-                                -- ^ vector indicating the direction of the unbounded edge
-                                -- incident to the first vertex. Note that this vector
-                                -- thus points INTO vertex v.
-                                (NonEmpty point)
-                                -- ^ the vertices in CCW order,
-                                (Vector 2 r)
-                                -- ^ the vector indicating the direction of the unbounded
-                                -- edge incident to the last vertex. The vector points
-                                -- away from the vertex (i.e. towards +infty).
-                      deriving stock (Show,Eq,Functor,Foldable,Traversable)
+data Region r vertex = BoundedRegion   (ConvexPolygonF NonEmpty vertex)
+                     | UnboundedRegion (UnboundedConvexRegionF r NonEmpty vertex)
+                     deriving stock (Functor,Foldable,Traversable)
 
 type instance NumType   (Region r point) = r
 type instance Dimension (Region r point) = Dimension point
+
+deriving instance (Show r, Show vertex, Point_ vertex 2 r) => Show (Region r vertex)
+deriving instance (Eq r, Eq vertex) => Eq (Region r vertex)

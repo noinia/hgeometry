@@ -43,6 +43,8 @@ import qualified HGeometry.Plane.LowerEnvelope as LowerEnvelope
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Sequence.Alternating (Alternating(..))
+import           HGeometry.Polygon.Convex.Unbounded
+
 
 --------------------------------------------------------------------------------
 
@@ -51,7 +53,9 @@ data VoronoiDiagram point =
     AllColinear !(Alternating Vector.Vector (VerticalOrLineEQ (NumType point)) point)
   | ConnectedVD !(VoronoiDiagram' (Point 2 (NumType point)) point)
 
-deriving instance (Show point, Show (NumType point)) => Show (VoronoiDiagram point)
+deriving instance (Show point, Show (NumType point)
+                  , Point_ point 2 (NumType point)
+                  ) => Show (VoronoiDiagram point)
 deriving instance (Eq point, Eq (NumType point))     => Eq   (VoronoiDiagram point)
 
 type instance NumType   (VoronoiDiagram point) = NumType point
@@ -64,7 +68,10 @@ type instance Dimension (VoronoiDiagram point) = 2 -- Dimension point
 newtype VoronoiDiagram' vertex point =
   VoronoiDiagram (MinimizationDiagram (NumType point) vertex point)
 
-deriving instance (Show point, Show vertex, Show (NumType point)) => Show (VoronoiDiagram' vertex point)
+deriving instance ( Show point, Show vertex, Show (NumType point)
+                  , Point_ point 2 (NumType point)
+                  , Point_ vertex 2 (NumType point)
+                  ) => Show (VoronoiDiagram' vertex point)
 deriving instance (Eq point, Eq vertex, Eq (NumType point))     => Eq   (VoronoiDiagram' vertex point)
 
 type instance NumType   (VoronoiDiagram' vertex point) = NumType point
@@ -128,8 +135,8 @@ voronoiVertices    :: ( Point_ point 2 r, Functor f, Ord point
 voronoiVertices pts = case voronoiDiagram pts of
     AllColinear _  -> mempty
     ConnectedVD vd -> foldMap (\case
-                                  Bounded vs       -> foldMap Set.singleton vs
-                                  Unbounded _ vs _ -> Set.fromList (NonEmpty.toList vs)
+                                  BoundedRegion vs       -> foldMap Set.singleton vs
+                                  UnboundedRegion (Unbounded _ vs _) -> Set.fromList (NonEmpty.toList vs)
                               ) (asMap vd)
 
 --------------------------------------------------------------------------------

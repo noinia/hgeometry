@@ -51,7 +51,7 @@ import           Data.Map.NonEmpty (NEMap)
 import qualified Data.Map.NonEmpty as NEMap
 import           Data.Monoid (First(..))
 import           HGeometry.Box
-import           HGeometry.Cyclic
+-- import           HGeometry.Cyclic
 import           HGeometry.Direction
 import           HGeometry.HalfLine
 import           HGeometry.Intersection
@@ -60,6 +60,7 @@ import           HGeometry.Plane.LowerEnvelope.Connected.Region
 import           HGeometry.Point
 import           HGeometry.Point.Either
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Properties
 import           HGeometry.Vector
@@ -118,8 +119,9 @@ toConvexPolygonIn      :: ( Rectangle_ rectangle corner, Point_ corner 2 r
                        -> Either (ConvexPolygonF NonEmpty point)
                                  (ConvexPolygonF NonEmpty (OriginalOrExtra point (Point 2 r)))
 toConvexPolygonIn rect = \case
-    Bounded vertices  -> Left $ uncheckedFromCCWPoints vertices
-    Unbounded u pts v -> let p        = NonEmpty.head pts
+    BoundedRegion convex                -> Left convex
+    UnboundedRegion (Unbounded u pts v) ->
+                         let p        = NonEmpty.head pts
                              q        = NonEmpty.last pts
                              hp       = HalfLine (p^.asPoint) ((-1) *^ u)
                              hq       = HalfLine (q^.asPoint) v

@@ -23,7 +23,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
 
 
   , fromVertexFormIn
-  , BoundedRegion
+  , ClippedBoundedRegion
 
 
   , extraPoints
@@ -64,6 +64,8 @@ import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Triangle
 import           HGeometry.Vector
+import           HGeometry.Polygon.Convex.Unbounded
+
 
 import           Debug.Trace
 
@@ -162,7 +164,7 @@ fromVertexFormIn     :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r
                         )
                      => Triangle corner
                      -> NEMap (Point 3 r) vertexData
-                     -> NEMap plane (BoundedRegion r (Point 2 r :+ vertexData) (Point 2 r))
+                     -> NEMap plane (ClippedBoundedRegion r (Point 2 r :+ vertexData) (Point 2 r))
 fromVertexFormIn tri = case fromPoints $ (Extra . (^.asPoint)) <$> tri of
   Just tri' -> fmap (fromMaybe tri' . clipTo tri) . asMap . fromVertexForm
   Nothing   -> error "absurd: fromVertexFormIn"
@@ -171,19 +173,20 @@ clipTo     :: (Point_ corner 2 r, Fractional r, Ord r
               , Show r, Show corner
               )
            => Triangle corner -> Region r (Point 2 r :+ vertexData)
-           -> Maybe (BoundedRegion r (Point 2 r :+ vertexData) (Point 2 r))
+           -> Maybe (ClippedBoundedRegion r (Point 2 r :+ vertexData) (Point 2 r))
 clipTo tri = \case
-  Bounded vs          -> Just $ uncheckedFromCCWPoints $ Original <$> vs
+  BoundedRegion vs          -> Just $ Original <$> vs
     --todo ; fix clip this as well
-  Unbounded u chain v -> do (u',chain0) <- trimChain  tri u chain
-                            (v',chain') <- trimRChain tri v chain0
-                            let p        = NonEmpty.head chain
-                                q        = NonEmpty.last chain
-                                hp       = HalfLine (p^.asPoint) ((-1) *^ u')
-                                hq       = HalfLine (q^.asPoint) v'
-                                extras   = extraPoints hp hq (view asPoint <$> tri)
-                            pure . uncheckedFromCCWPoints $
-                              (Extra <$> extras) <> (Original <$> chain')
+  UnboundedRegion (Unbounded u chain v)
+                            -> do (u',chain0) <- trimChain  tri u chain
+                                  (v',chain') <- trimRChain tri v chain0
+                                  let p        = NonEmpty.head chain
+                                      q        = NonEmpty.last chain
+                                      hp       = HalfLine (p^.asPoint) ((-1) *^ u')
+                                      hq       = HalfLine (q^.asPoint) v'
+                                      extras   = extraPoints hp hq (view asPoint <$> tri)
+                                  pure . uncheckedFromCCWPoints $
+                                    (Extra <$> extras) <> (Original <$> chain')
 
 
 trimChain     :: (Point_ corner 2 r, Point_ point 2 r, Num r, Ord r)
@@ -303,7 +306,8 @@ sortAroundBoundary             :: ( Plane_ plane r, Ord r, Fractional r, Ord pla
                                => plane -> NESet (Point 3 r, vertex)
                                -> Region r (Point 2 r :+ vertex)
 sortAroundBoundary h vertices' = case NonEmpty.nonEmpty rest of
-    Nothing     -> let (u,p,w) = singleVertex h v0 in Unbounded u (NonEmpty.singleton p) w
+    Nothing     -> let (u,p,w) = singleVertex h v0
+                   in UnboundedRegion $ Unbounded u (NonEmpty.singleton p) w
     Just rest'  -> let edges' = NonEmpty.zip vertices'' (rest' <> vertices'')
                    in case NonEmpty.break (isInvalid h) edges' of
                         (_,  [])         -> boundedRegion $ uncurry (:+) <$> vertices''
@@ -313,7 +317,7 @@ sortAroundBoundary h vertices' = case NonEmpty.nonEmpty rest of
                                             in unboundedRegion h chain v u
   where
     vertices''@(v0 :| rest) = inCCWOrder . fmap project . Set.toList $ vertices'
-    boundedRegion = Bounded . fromNonEmpty
+    boundedRegion = BoundedRegion . uncheckedFromCCWPoints
     -- The main idea is to test if the region is unbounded; i.e. containing an "edge"
     -- that is not really an edge. If so, we break open the edges there, and
     -- construct an appropriate chain from it.
@@ -351,7 +355,8 @@ unboundedRegion              :: forall plane r vertexData.
                              -> NonEmpty (Point 2 r :+ vertexData)
                              -> (Point 2 r, vertexData) -> (Point 2 r, vertexData)
                              -> Region r (Point 2 r :+ vertexData)
-unboundedRegion h chain v@(v',_) u@(u',_)  = Unbounded wv chain wu
+unboundedRegion h chain v@(v',_) u@(u',_)  = UnboundedRegion $ Unbounded wv chain wu
+  -- mabye this should really return an 'UnboundedConvexRegion' instead?
   where
     (v1,_,v2) = singleVertex h v
     (u1,_,u2) = singleVertex h u

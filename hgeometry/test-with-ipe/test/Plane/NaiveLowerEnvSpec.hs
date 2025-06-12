@@ -48,7 +48,7 @@ type R = RealNumber 5
 
 
 type instance Intersection (Triangle corner) (Region r vertex) =
-  Maybe (BoundedRegion r vertex corner)
+  Maybe (ClippedBoundedRegion r vertex corner)
 
 -- instance Triangle corner `HasIntersectionWith` (Region r vertex)
 -- instance Triangle corner `IsIntersectableWith` (Region r vertex) where
