@@ -56,6 +56,7 @@ import           HGeometry.Direction
 import           HGeometry.HalfLine
 import           HGeometry.Intersection
 import           HGeometry.LineSegment
+import           HGeometry.Plane.LowerEnvelope.Connected.Region
 import           HGeometry.Point
 import           HGeometry.Point.Either
 import           HGeometry.Polygon.Convex
@@ -105,26 +106,7 @@ mapVertices f (MinimizationDiagram m) = MinimizationDiagram $ fmap (fmap f) m
 
 
 
-
-
--- | A region in the minimization diagram. The boundary is given in CCW order; i.e. the
--- region is to the left of the boundary.
-data Region r point = Bounded   (Cyclic NonEmpty point)
-                    | Unbounded (Vector 2 r)
-                                -- ^ vector indicating the direction of the unbounded edge
-                                -- incident to the first vertex. Note that this vector
-                                -- thus points INTO vertex v.
-                                (NonEmpty point)
-                                -- ^ the vertices in CCW order,
-                                (Vector 2 r)
-                                -- ^ the vector indicating the direction of the unbounded
-                                -- edge incident to the last vertex. The vector points
-                                -- away from the vertex (i.e. towards +infty).
-                      deriving stock (Show,Eq,Functor,Foldable,Traversable)
-
-type instance NumType   (Region r point) = r
-type instance Dimension (Region r point) = Dimension point
-
+--------------------------------------------------------------------------------
 
 -- | Computes a convex polygon corresponding to the region.
 --

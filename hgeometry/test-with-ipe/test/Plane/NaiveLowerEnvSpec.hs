@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 module Plane.NaiveLowerEnvSpec
   ( spec
   ) where
@@ -47,27 +46,6 @@ import           Test.QuickCheck.Instances ()
 
 type R = RealNumber 5
 
--- | A vertex of the minimzation Diagram that is defined by the intersection of a number
--- of planes.
-data MDVertex r plane = MDVertex { _location :: Point 3 r
-                                 , _definers :: Definers plane
-                                 -- ^ the definers of the vertex
-                                 } deriving (Show,Eq,Functor,Foldable)
-makeLenses ''MDVertex
-
-type instance Dimension (MDVertex r plane) = 2
-type instance NumType   (MDVertex r plane) = r
-
-instance Affine_ (MDVertex r plane) 2 r where
-instance HasVector (MDVertex r plane) (MDVertex r plane) where
-  vector = lens (^.location.vector.to prefix)
-                (\v (Vector2 x y) -> v&location %~ \(Point3 _ _ z) -> Point3 x y z)
-
-instance HasCoordinates (MDVertex r plane) (MDVertex r plane) where
-  -- ^ Note that this only traverses the x and y coordinates of the vertex!
-  coordinates = vector.traversed1
-
-instance Num r => Point_ (MDVertex r plane) 2 r where
 
 type instance Intersection (Triangle corner) (Region r vertex) =
   Maybe (BoundedRegion r vertex corner)

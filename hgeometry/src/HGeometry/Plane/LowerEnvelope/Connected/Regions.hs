@@ -17,6 +17,8 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
   , definers
   , mergeDefiners
 
+
+
   , VertexForm
 
 
@@ -52,6 +54,7 @@ import           HGeometry.LineSegment
 import           HGeometry.Map.NonEmpty.Monoidal
 import           HGeometry.NonEmpty.Util
 import           HGeometry.Plane.LowerEnvelope.Connected.Primitives (intersectionVector)
+import           HGeometry.Plane.LowerEnvelope.Connected.Region
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm
 import           HGeometry.Point
@@ -63,6 +66,14 @@ import           HGeometry.Triangle
 import           HGeometry.Vector
 
 import           Debug.Trace
+
+--------------------------------------------------------------------------------
+
+
+
+
+
+
 
 ----------------------------------------
 
@@ -141,8 +152,6 @@ mergeDefiners v defs0 defs1 = case extractH0 v (coerce defs0 <> coerce defs1) of
 --------------------------------------------------------------------------------
 -- * Converting into a minimization diagram
 
-type BoundedRegion r vertex corner =
-  ConvexPolygonF NonEmpty (OriginalOrExtra vertex corner)
 
 -- | Pre: the triangle is big enough to contain all vertices of the lower envelope
 fromVertexFormIn     :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show plane
