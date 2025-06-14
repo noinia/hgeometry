@@ -4,10 +4,10 @@ module Plane.NaiveLowerEnvSpec
   ( spec
   ) where
 
-
 import           Control.Lens hiding (IsEmpty, IsNonEmpty)
 import           Control.Subcategory.Functor
 import           Data.Bifunctor
+import           Data.Coerce
 import           Data.Foldable
 import           Data.Foldable1 as F1
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -30,13 +30,13 @@ import           HGeometry.Point
 import           HGeometry.Point.Either
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Properties
 import           HGeometry.Sequence.Alternating (separators)
 import           HGeometry.Triangle
 import           HGeometry.Vector
--- import           HGeometry.VoronoiDiagram
 import qualified HGeometry.VoronoiDiagram as VD
 import           HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
 import           Hiraffe.Graph.Class
@@ -47,8 +47,9 @@ import           System.Random
 import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
-import qualified HGeometry.VoronoiDiagram as VD
 
+
+import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -77,33 +78,18 @@ instance Functor (ClippedMDCell' r) where
   fmap f (ClippedMDCell poly) = ClippedMDCell $ bimap (first f) (fmap (first f)) poly
 
 
-
-instance ( Point_ vertex 2 r, Fractional r, Ord r
-         , Show r
-         )
-         => HasDefaultIpeOut (ClippedMDCell' r vertex) where
-  type DefaultIpeOut (ClippedMDCell' r vertex) = Group
-  defIO (ClippedMDCell cell) = case cell of
-    ActualPolygon cell' -> ipeGroup [iO $ defIO $ (cell'&vertices %~ (^.asPoint)
-                                                  :: ConvexPolygonF NonEmpty (Point 2 r)
-                                                  )
-                                    ]
-    _                   -> ipeGroup []
-
-
-instance ( Fractional r, Ord r
-         , Show r
-         )
-         => HasDefaultIpeOut (ClippedLowerEnvelope' r plane) where
-  type DefaultIpeOut (ClippedLowerEnvelope' r plane) = Group
-  defIO (ClippedLowerEnvelope env) = ipeGroup $ foldMap ((:[]) . iO . defIO) env
-
-
 instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
+
+         , Show vertex, Show corner, Show r
          ) => Triangle corner `HasIntersectionWith` (Region r vertex)
+
 instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
+
+         , Show vertex, Show corner, Show r
          ) => Triangle corner `IsIntersectableWith` (Region r vertex) where
-  tri `intersect` reg = ClippedMDCell <$> case reg of
+
+
+  tri `intersect` reg = traceShowWith ("intersect",tri,reg,"->",) $ ClippedMDCell <$> case reg of
     BoundedRegion   convex -> tri `intersect` convex
     UnboundedRegion convex -> tri `intersect` convex
 
@@ -112,31 +98,48 @@ instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
 -- rename to minimization diagram
 
 -- | A clipped lower envelope
-type ClippedLowerEnvelope plane  = ClippedLowerEnvelope' (NumType plane) plane
+type ClippedMinimizationDiagram plane  = ClippedMinimizationDiagram' (NumType plane) plane
 
 -- | A clipped lower envelope
-newtype ClippedLowerEnvelope' r plane =
-  ClippedLowerEnvelope (NEMap plane (ClippedMDCell r plane))
+newtype ClippedMinimizationDiagram' r plane =
+  ClippedMinimizationDiagram (NEMap plane (ClippedMDCell r plane))
 
-type instance NumType   (ClippedLowerEnvelope' r plane) = r
-type instance Dimension (ClippedLowerEnvelope' r plane) = 2
+type instance NumType   (ClippedMinimizationDiagram' r plane) = r
+type instance Dimension (ClippedMinimizationDiagram' r plane) = 2
 
 
-deriving instance (Show r, Num r, Show plane) => Show (ClippedLowerEnvelope' r plane)
+deriving instance (Show r, Num r, Show plane) => Show (ClippedMinimizationDiagram' r plane)
 
-instance Constrained (ClippedLowerEnvelope' r) where
-  type Dom (ClippedLowerEnvelope' r) plane = Ord plane
+instance Constrained (ClippedMinimizationDiagram' r) where
+  type Dom (ClippedMinimizationDiagram' r) plane = Ord plane
 
-instance CFunctor (ClippedLowerEnvelope' r) where
+instance CFunctor (ClippedMinimizationDiagram' r) where
   -- cmap   :: Ord plane'
-  --        => (plane -> plane') -> ClippedLowerEnvelope' r plane -> ClippedLowerEnvelope' r plane'
-  cmap f (ClippedLowerEnvelope m) = ClippedLowerEnvelope $
+  --        => (plane -> plane') -> ClippedMinimizationDiagram' r plane -> ClippedMinimizationDiagram' r plane'
+  cmap f (ClippedMinimizationDiagram m) = ClippedMinimizationDiagram $
     NEMap.foldMapWithKey (\plane cell -> NEMap.singleton (f plane) (fmap f <$> cell)) m
 
 
 -- | A clipped Voronoi diagram
-type ClippedVoronoiDiagram point = ClippedLowerEnvelope point
--- which as the same representation as a clipped lower envelope
+newtype ClippedVoronoiDiagram point = ClippedVoronoiDiagram (ClippedMinimizationDiagram point)
+
+deriving instance (Show r, Num r, Show point, r ~ NumType point
+                  ) => Show (ClippedVoronoiDiagram point)
+
+
+-- instance Constrained ClippedVoronoiDiagram where
+--   type Dom ClippedVoronoiDiagram point = Ord point
+
+-- instance CFunctor ClippedVoronoiDiagram where
+--   cmap f (ClippedVoronoiDiagram m) = ClippedVoronoiDiagram $ cmap f m
+-- -- not sure why I can't derive this
+
+
+type instance NumType   (ClippedVoronoiDiagram point) = NumType point
+type instance Dimension (ClippedVoronoiDiagram point) = 2
+
+
+
 
 
 -- | Use a navive O(n^4) time algorithm to compute the lower envelope inside a given
@@ -150,8 +153,8 @@ bruteForceLowerEnvelopeIn     :: forall plane r corner set.
                                  )
                               => Triangle corner
                               -> set plane
-                              -> ClippedLowerEnvelope plane
-bruteForceLowerEnvelopeIn tri planes = ClippedLowerEnvelope
+                              -> ClippedMinimizationDiagram plane
+bruteForceLowerEnvelopeIn tri planes = ClippedMinimizationDiagram
                                      $ case bruteForceLowerEnvelope planes of
     Nothing      -> lowestPlane
     Just diagram -> case NEMap.mapMaybe (tri `intersect`) (asMap diagram) of
@@ -173,12 +176,12 @@ bruteForceLowerEnvelopeIn tri planes = ClippedLowerEnvelope
 voronoiDiagramInWith :: ( Point_ point 2 r, Functor nonEmpty, Ord point
                         , Ord r, Fractional r, Foldable1 nonEmpty
                         )
-                     => (Triangle corner -> nonEmpty (Plane r :+ point) -> ClippedLowerEnvelope (Plane r :+ point))
+                     => (Triangle corner -> nonEmpty (Plane r :+ point) -> ClippedMinimizationDiagram (Plane r :+ point))
                      -> Triangle corner
                      -> nonEmpty point
                      -> ClippedVoronoiDiagram point
-voronoiDiagramInWith lowerEnv tri =
-  cmap (^.extra) . lowerEnv tri . fmap (\p -> pointToPlane p :+ p)
+voronoiDiagramInWith lowerEnv tri = ClippedVoronoiDiagram
+                                  . cmap (^.extra) . lowerEnv tri . fmap (\p -> pointToPlane p :+ p)
 
 
 -- | Computes the Voronoi inside the given triangle.
@@ -190,7 +193,7 @@ voronoiDiagramIn :: ( Point_ point 2 r, Point_ corner 2 r, Functor nonEmpty, Ord
                  => Triangle corner -> nonEmpty point -> ClippedVoronoiDiagram point
 voronoiDiagramIn = voronoiDiagramInWith bruteForceLowerEnvelopeIn
 
--- type ClippedLowerEnvelope' r plane = NEMap plane (ClippedMDCell r (MDVertex r plane))
+-- type ClippedMinimizationDiagram' r plane = NEMap plane (ClippedMDCell r (MDVertex r plane))
 
 -- type ClippedMDCell' r vertex =
 --   PossiblyDegenerateSimplePolygon (OriginalOrExtra vertex (Point 2 r))
@@ -202,6 +205,8 @@ voronoiDiagramIn = voronoiDiagramInWith bruteForceLowerEnvelopeIn
 
 spec :: Spec
 spec = describe "lower envelope in bounded region" $ do
+         myTest
+
          testIpe [osp|trivial.ipe|]
                  [osp|trivial_clipped_out|]
          -- testIpe [osp|simplest.ipe|]
@@ -228,13 +233,82 @@ testIpe inFp outFp = do
     (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
       inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
       NonEmpty.fromList <$> readAllFrom inFp'
-    let tri = Triangle origin (Point2 100 0) (Point2 0 100)
+    let tri = Triangle origin (Point2 1000 0) (Point2 0 500)
         vd = voronoiDiagramIn tri $ view core <$> points
         -- vd = rVoronoiDiagram $ view core <$> points
         vv = VD.voronoiVertices $ view core <$> points
         out = [ iO' points
               , iO' vd
+              , iO $ defIO tri
               ] <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
+    runIO $ print vd
     goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
                (ipeFileGolden { name = outFp })
                (addStyleSheet opacitiesStyle $ singlePageFromContent out)
+
+
+
+
+instance ( Point_ vertex 2 r, Fractional r, Ord r
+         , Show r
+         )
+         => HasDefaultIpeOut (ClippedMDCell' r vertex) where
+  type DefaultIpeOut (ClippedMDCell' r vertex) = Group
+  defIO (ClippedMDCell cell) = case cell of
+    ActualPolygon cell' -> ipeGroup [iO $ defIO $ (cell'&vertices %~ (^.asPoint)
+                                                  :: ConvexPolygonF NonEmpty (Point 2 r)
+                                                  )
+                                    ]
+    _                   -> ipeGroup []
+
+
+instance ( Fractional r, Ord r
+         , Show r
+         )
+         => HasDefaultIpeOut (ClippedMinimizationDiagram' r plane) where
+  type DefaultIpeOut (ClippedMinimizationDiagram' r plane) = Group
+  defIO (ClippedMinimizationDiagram env) = ipeGroup $ foldMap ((:[]) . iO . defIO) env
+
+
+instance ( Fractional r, Ord r, Point_ point 2 r
+         , Show r
+         )
+         => HasDefaultIpeOut (ClippedVoronoiDiagram point) where
+  type DefaultIpeOut (ClippedVoronoiDiagram point) = Group
+  defIO (ClippedVoronoiDiagram (ClippedMinimizationDiagram m)) = ipeGroup $
+    NEMap.foldMapWithKey (\p cell -> [ iO $ defIO (p^.asPoint)
+                                     , iO $ defIO cell
+                                     ]
+                         ) m
+
+
+
+myTest = describe "intersection tests" $ do
+    let tri = Triangle origin (Point2 1000 0) (Point2 0 500)
+    it "triangle conex poly intersection "  $
+      (tri `intersects` convexPoly) `shouldBe` True
+    it "triangle unbounded conex poly intersection "  $
+      (tri `intersects` unboundedPoly) `shouldBe` True
+    it "unbounded try should be" $
+      ((toBoundedFrom tri unboundedPoly)^..vertices)
+      `shouldBe` (convexPoly^..vertices) -- not quite true but whatever
+
+-- convexPoly :: ConvexPolygonF NonEmpty (Point 2 R) -- FIXME!!!
+-- apparently something goes wrong using NonEmpty rather than NonEmptyVector
+
+convexPoly :: ConvexPolygon (Point 2 R)
+convexPoly = fromMaybe (error "absurd") $ fromPoints $ NonEmpty.fromList
+  [ Point2 281.99      1636.18
+  , Point2 (-662.455) 1636.18
+  , Point2 (-662.455) (-363.818)
+  , Point2 (-305.312) (-363.818)
+  , Point2 337.545    636.182
+  ]
+
+
+unboundedPoly :: UnboundedConvexRegion (Point 2 R)
+unboundedPoly = Unbounded (Vector2 1 1.55555)
+                          (NonEmpty.fromList [(Point2 337.54545 636.18181)])
+                          (Vector2 (-1) 18)
+
+-- (MDVertex {_location = Point3 337.54545~ 636.18181~ (-497088), _definers = Definers ((NonVerticalHyperPlane [-960,-1344,681984] :+ Point2 480 672) :| [NonVerticalHyperPlane [-384,-1312,467200] :+ Point2 192 656,NonVerticalHyperPlane [-832,-1024,435200] :+ Point2 416 512])} :| []) (Vector2 (-1) 18);
