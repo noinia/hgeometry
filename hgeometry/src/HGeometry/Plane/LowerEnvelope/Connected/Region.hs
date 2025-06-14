@@ -6,27 +6,27 @@ module HGeometry.Plane.LowerEnvelope.Connected.Region
   , ClippedBoundedRegion
   ) where
 
-import           Control.Lens
-import           Data.List.NonEmpty (NonEmpty(..))
+import Control.Lens
+import Data.List.NonEmpty (NonEmpty(..))
 -- import qualified Data.List.NonEmpty as NonEmpty
-import           HGeometry.Box
-import           HGeometry.Ext
-import           HGeometry.HyperPlane
-import           HGeometry.Intersection
-import           HGeometry.Number.Real.Rational
-import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm (Definers)
-import           HGeometry.Point
-import           HGeometry.Point.Either
-import           HGeometry.Polygon
-import           HGeometry.Polygon.Convex
-import           HGeometry.Polygon.Convex.Unbounded
-import           HGeometry.Polygon.Simple
-import           HGeometry.Properties
-import           HGeometry.Sequence.Alternating (separators)
-import           HGeometry.Triangle
-import           HGeometry.Vector
+import HGeometry.Box
+import HGeometry.Ext
+import HGeometry.HyperPlane
+import HGeometry.Intersection
+import HGeometry.Number.Real.Rational
+import HGeometry.Plane.LowerEnvelope.Connected.VertexForm (Definers, HasDefiners(..))
+import HGeometry.Point
+import HGeometry.Point.Either
+import HGeometry.Polygon
+import HGeometry.Polygon.Convex
+import HGeometry.Polygon.Convex.Unbounded
+import HGeometry.Polygon.Simple
+import HGeometry.Properties
+import HGeometry.Sequence.Alternating (separators)
+import HGeometry.Triangle
+import HGeometry.Vector
 
-import           HGeometry.Cyclic
+import HGeometry.Cyclic
 
 --------------------------------------------------------------------------------
 
@@ -37,16 +37,23 @@ import           HGeometry.Cyclic
 data MDVertex r plane = MDVertex { _location :: Point 3 r
                                  , _definers :: Definers plane
                                  -- ^ the definers of the vertex
-                                 } deriving (Show,Eq,Functor,Foldable)
+                                 } deriving (Show,Eq,Ord,Functor,Foldable)
 makeLenses ''MDVertex
 
 type instance Dimension (MDVertex r plane) = 2
 type instance NumType   (MDVertex r plane) = r
 
+instance Num r => IsBoxable (MDVertex r plane) where
+  boundingBox = boundingBox . view asPoint
+
+
 instance Affine_ (MDVertex r plane) 2 r where
 instance HasVector (MDVertex r plane) (MDVertex r plane) where
   vector = lens (^.location.vector.to prefix)
                 (\v (Vector2 x y) -> v&location %~ \(Point3 _ _ z) -> Point3 x y z)
+
+instance HasDefiners (MDVertex r plane) plane where
+  definersOf = view definers
 
 instance HasCoordinates (MDVertex r plane) (MDVertex r plane) where
   -- ^ Note that this only traverses the x and y coordinates of the vertex!

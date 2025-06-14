@@ -81,6 +81,8 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
       -- three planes). Moreover since we actually include the definers of the corners
       -- of a triangle we may get 4 planes in any case.
 
+    lowerEnvelopeIn = undefined
+{-
     lowerEnvelopeIn   :: (Foldable set)
                       => Triangle (Point 2 r)
                       -> set plane
@@ -98,8 +100,8 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
                                        <>
                                        foldMap lowerEnvelopeIn' triangulatedEnv
              where
-               env :: NEMap plane (ClippedBoundedRegion r  (Point 2 r :+ (Definers plane, Set plane))
-                                                    (Point 2 r :+ Set plane))
+               env :: NEMap plane (ClippedBoundedRegion r (MDVertex r plane :+ Set plane)
+                                                          (Point 2 r :+ Set plane))
                env = withExtraConflictLists remaining
                    . fromVertexFormIn tri $ verticesRNet'
                -- also compute the conflicts of the extra vertices
@@ -113,6 +115,7 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
                          -> Map (Point 3 r) (Definers plane)
     lowerEnvelopeIn' tri = lowerEnvelopeIn (view core <$> tri) (conflictListOf tri)
 
+-}
 
 
 -- | Given a size r; take a sample of the planes from the given size (essentially by just

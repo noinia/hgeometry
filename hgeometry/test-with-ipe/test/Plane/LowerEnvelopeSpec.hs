@@ -107,8 +107,8 @@ grow d (Box p q) = Box (p&coordinates %~ subtract d)
 instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
          , Show point, Show r
          )
-         => HasDefaultIpeOut (VoronoiDiagram point) where
-  type DefaultIpeOut (VoronoiDiagram point) = Group
+         => HasDefaultIpeOut (VoronoiDiagram_ r point) where
+  type DefaultIpeOut (VoronoiDiagram_ r point) = Group
   defIO = \case
     AllColinear colinearPts -> let sites     = toList colinearPts
                                    bisectors = toList $ separators colinearPts

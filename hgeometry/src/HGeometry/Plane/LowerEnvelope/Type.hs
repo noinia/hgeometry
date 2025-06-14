@@ -22,10 +22,11 @@ import           HGeometry.Sequence.Alternating (Alternating(..))
 -- | The lower enevelope of planes in R^3. (Or rather, its minimization diagram)
 data LowerEnvelope plane =
     ParallelStrips    !(Alternating Vector.Vector (VerticalOrLineEQ (NumType plane)) plane)
-  | ConnectedEnvelope
-    !(MinimizationDiagram (NumType plane) (Point 2 (NumType plane) :+ Definers plane) plane)
+  | ConnectedEnvelope !(MinimizationDiagram (NumType plane) (MDVertex (NumType plane) plane) plane)
 
-deriving instance (Show plane, Show (NumType plane)) => Show (LowerEnvelope plane)
+deriving instance (Show plane, Show (NumType plane)
+                  , Num (NumType plane)
+                  ) => Show (LowerEnvelope plane)
 deriving instance (Eq plane, Eq (NumType plane))     => Eq (LowerEnvelope plane)
 
 
