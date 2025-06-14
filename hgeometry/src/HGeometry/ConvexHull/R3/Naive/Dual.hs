@@ -19,6 +19,7 @@ import           HGeometry.HyperPlane
 import           HGeometry.Map.NonEmpty.Monoidal (mapWithKeyMerge1)
 import           HGeometry.Plane.LowerEnvelope
 import           HGeometry.Point
+import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Properties
 
 --------------------------------------------------------------------------------
@@ -53,8 +54,8 @@ facets = \case
                                                   (,NonEmpty.singleton h) <$> verticesOf reg
                                        ) (asMap env)
         verticesOf = \case
-          Bounded vertices       -> toNonEmpty vertices
-          Unbounded _ vertices _ -> vertices
+          BoundedRegion vertices                   -> toNonEmpty vertices
+          UnboundedRegion (Unbounded _ vertices _) -> vertices
 
         toFacet hv = (^.extra) <$> hv
   -- We want all vertices v of the lower envelope; let H_v denote all planes that

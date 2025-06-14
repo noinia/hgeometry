@@ -53,8 +53,7 @@ lowerEnvelopeWith  :: forall nonEmpty plane r.
                       ( Plane_ plane r
                       , Ord r, Fractional r, Foldable1 nonEmpty
                       )
-                   => (nonEmpty plane ->
-                        Maybe (MinimizationDiagram r  (Point 2 r :+ Definers plane) plane))
+                   => (nonEmpty plane -> Maybe (MinimizationDiagram r (MDVertex r plane) plane))
                    -> nonEmpty plane -> LowerEnvelope plane
 lowerEnvelopeWith minimizationDiagram hs = case minimizationDiagram hs of
     Just env -> ConnectedEnvelope env

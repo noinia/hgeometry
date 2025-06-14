@@ -29,6 +29,7 @@ import           HGeometry.Map.NonEmpty.Monoidal
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.PlaneGraph.Connected.Type (E(..))
 import           HGeometry.Point
+import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Vector
 import           Hiraffe.AdjacencyListRep.Map
 --------------------------------------------------------------------------------
@@ -80,10 +81,10 @@ toTriangulatedGr   :: (Plane_ plane r, Num r, Ord r)
                    -> PlaneGraphMap (Point 2 r) (First r) (E r)
 toTriangulatedGr h = NEMap.unsafeFromMap
                    . Map.mapWithKey (\v adjs -> (adjs, First $ evalAt v h)) . \case
-  Bounded vertices       -> case toNonEmpty vertices of
+  BoundedRegion vertices       -> case toNonEmpty vertices of
     (v0:|v1:vs) -> triangulate v0 v1 vs
     _           -> error "triangulate: absurd, <2 vertices"
-  Unbounded _ vertices _ -> case vertices of
+  UnboundedRegion (Unbounded _ vertices _) -> case vertices of
     _  :| []     -> Map.empty
     u  :| [v]    -> Map.fromList [ (u, (uncurry NEMap.singleton $ edge u v))
                                  , (v, (uncurry NEMap.singleton $ edge v u))
@@ -115,10 +116,11 @@ toGr   :: (Plane_ plane r, Num r, Ord r)
        -> PlaneGraphMap (Point 2 r) (First r) (E r)
 toGr h = NEMap.unsafeFromMap
        . Map.mapWithKey (\v adjs -> (adjs, First $ evalAt v h)) . \case
-  Bounded vertices       -> case toNonEmpty vertices of
+  BoundedRegion vertices       -> case toNonEmpty vertices of
     verts@(_:|v1:vs) -> Map.unionsWith (<>) $ NonEmpty.zipWith mkEdge verts (v1:|vs)
     _                -> error "toGR: absurd, <2 vertices"
-  Unbounded _ vertices _ -> case vertices of
+
+  UnboundedRegion (Unbounded _ vertices _) -> case vertices of
     _  :| []  -> Map.empty
     u  :| vs  -> Map.unionsWith (<>) $ zipWith mkEdge (u:vs) vs
   where

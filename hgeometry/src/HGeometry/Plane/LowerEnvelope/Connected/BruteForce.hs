@@ -26,6 +26,7 @@ import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
+import           HGeometry.Plane.LowerEnvelope.Connected.Region
 import           HGeometry.Plane.LowerEnvelope.Connected.Regions
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Point
@@ -42,7 +43,7 @@ bruteForceLowerEnvelope :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                            , Show r, Show plane
                            )
                         => set plane
-                        -> Maybe (MinimizationDiagram r (Point 2 r :+ Definers plane) plane)
+                        -> Maybe (MinimizationDiagram r (MDVertex r plane) plane)
 bruteForceLowerEnvelope = connectedLowerEnvelopeWith computeVertexForm
 
 -- | Given an algorithm to compute the vertices of the lower envelope, computes
@@ -53,7 +54,7 @@ connectedLowerEnvelopeWith :: (Plane_ plane r, Ord r, Fractional r, Foldable set
                               )
                            => (set plane -> VertexForm Map r plane)
                            -> set plane
-                           -> Maybe (MinimizationDiagram r (Point 2 r :+ Definers plane) plane)
+                           -> Maybe (MinimizationDiagram r (MDVertex r plane) plane)
 connectedLowerEnvelopeWith computeVertexForm' planes = case computeVertexForm' planes of
   IsNonEmpty vertices -> Just $ fromVertexForm vertices
   IsEmpty             -> Nothing

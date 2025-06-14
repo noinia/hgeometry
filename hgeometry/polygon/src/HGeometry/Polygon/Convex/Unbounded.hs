@@ -13,6 +13,9 @@ module HGeometry.Polygon.Convex.Unbounded
   , UnboundedConvexRegionF(..)
   , extremalVertices
   , mapChain
+
+
+  , toBoundedFrom -- TODO; remove
   ) where
 
 import           Control.Lens
@@ -96,13 +99,15 @@ toBoundedFrom tri reg@(Unbounded v pts w) = case extremalVertices reg of
                                h     = HalfSpace Positive (fromPointAndVec p u)
                            in compute p p h u
   where
-    -- given the halfpsace h that goes through p and q (the extremal vertices),
-    -- and the direction u of its bounding line.
-    --
-    -- computes two points a and b on the halflines so that tri is contained in the halfspace
-    -- defined by a and b (that contains p and q).
+    -- given the halfpsace h that goes through p and q (the extremal vertices) and
+    -- contains all other vertices and the direction u of its bounding line, this function
+    -- computes two points a and b on the halflines so that tri is contained in the
+    -- halfspace defined by a and b (that contains p and q).
     --
     -- it returns a clipped version of the bounded region with a and b as vertices.
+    --
+    -- In case the unbounded reigon is a cone with p as apex. The halfspace h that we get
+    -- as input should go through p, and otherwise not contain/intersect the cone.
     compute p q h u = let s    = view asPoint $ maximumOn (`squaredEuclideanDistTo` h) tri'
                           -- distance to the point furthest from this halfspace.
                           -- we then create two additional on the halflines
@@ -124,7 +129,7 @@ toBoundedFrom tri reg@(Unbounded v pts w) = case extremalVertices reg of
 
 
     maximumOn f = maximumBy (comparing f)
-    rot90 (Vector2 x y) = Vector2 (-y) x
+    rot90 (Vector2 x y) = Vector2 (-y) x -- rotates clockwise 90 degrees
 
 -- TODO: this would make for a good property test: test if the points all lie inside the reegion
 

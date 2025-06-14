@@ -11,7 +11,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.VoronoiDiagram.ViaLowerEnvelope
-  ( VoronoiDiagram(..)
+  ( VoronoiDiagram, VoronoiDiagram_(..)
   , VoronoiDiagram'(..)
   , asMap
   , voronoiDiagram
@@ -37,25 +37,35 @@ import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line.General
 import           HGeometry.Plane.LowerEnvelope ( MinimizationDiagram, Region(..)
                                                , lowerEnvelope, LowerEnvelope(..)
-                                               , mapVertices
+                                               , MDVertex(..), mapVertices
                                                )
 import qualified HGeometry.Plane.LowerEnvelope as LowerEnvelope
 import           HGeometry.Point
 import           HGeometry.Properties
 import           HGeometry.Sequence.Alternating (Alternating(..))
+import           HGeometry.Polygon.Convex.Unbounded
+
 
 --------------------------------------------------------------------------------
 
 -- | A Voronoi diagram
-data VoronoiDiagram point =
-    AllColinear !(Alternating Vector.Vector (VerticalOrLineEQ (NumType point)) point)
-  | ConnectedVD !(VoronoiDiagram' (Point 2 (NumType point)) point)
+type VoronoiDiagram point = VoronoiDiagram_ (NumType point) point
 
-deriving instance (Show point, Show (NumType point)) => Show (VoronoiDiagram point)
-deriving instance (Eq point, Eq (NumType point))     => Eq   (VoronoiDiagram point)
+data VoronoiDiagram_ r point =
+    AllColinear !(Alternating Vector.Vector (VerticalOrLineEQ r) point)
+  | ConnectedVD !(VoronoiDiagram' (MDVertex r point) point)
+                     --               (NumType point) (Point 2 (NumType point))
 
-type instance NumType   (VoronoiDiagram point) = NumType point
-type instance Dimension (VoronoiDiagram point) = 2 -- Dimension point
+    -- Point 2 (NumType point)) )
+
+
+deriving instance (Show point, Show r, Num r
+                  , Point_ point 2 r
+                  ) => Show (VoronoiDiagram_ r point)
+deriving instance (Eq point, Eq (NumType point), Eq r) => Eq   (VoronoiDiagram_ r point)
+
+type instance NumType   (VoronoiDiagram_ r point) = r
+type instance Dimension (VoronoiDiagram_ r point) = 2 -- Dimension point
 
 
 --------------------------------------------------------------------------------
@@ -64,7 +74,10 @@ type instance Dimension (VoronoiDiagram point) = 2 -- Dimension point
 newtype VoronoiDiagram' vertex point =
   VoronoiDiagram (MinimizationDiagram (NumType point) vertex point)
 
-deriving instance (Show point, Show vertex, Show (NumType point)) => Show (VoronoiDiagram' vertex point)
+deriving instance ( Show point, Show vertex, Show (NumType point)
+                  , Point_ point 2 (NumType point)
+                  , Point_ vertex 2 (NumType point)
+                  ) => Show (VoronoiDiagram' vertex point)
 deriving instance (Eq point, Eq vertex, Eq (NumType point))     => Eq   (VoronoiDiagram' vertex point)
 
 type instance NumType   (VoronoiDiagram' vertex point) = NumType point
@@ -109,7 +122,7 @@ voronoiDiagramWith :: ( Point_ point 2 r, Functor nonEmpty, Ord point
 voronoiDiagramWith lowerEnv pts = case lowerEnv . fmap (\p -> pointToPlane p :+ p) $ pts of
     ParallelStrips strips -> AllColinear $ fmap (^.extra) strips
     ConnectedEnvelope env ->
-      ConnectedVD . VoronoiDiagram . mapVertices (^.core) . cmap (^.extra) $ env
+      ConnectedVD . VoronoiDiagram . mapVertices (fmap (^.extra)) . cmap (^.extra) $ env
 
 -- | lifts the point to a plane; so that the lower envelope corresponds to the VD
 pointToPlane :: (Point_ point 2 r, Num r) => point -> Plane r
@@ -127,10 +140,10 @@ voronoiVertices    :: ( Point_ point 2 r, Functor f, Ord point
                       ) => f point -> Set (Point 2 r)
 voronoiVertices pts = case voronoiDiagram pts of
     AllColinear _  -> mempty
-    ConnectedVD vd -> foldMap (\case
-                                  Bounded vs       -> foldMap Set.singleton vs
-                                  Unbounded _ vs _ -> Set.fromList (NonEmpty.toList vs)
-                              ) (asMap vd)
+    ConnectedVD vd -> let vd' = vd&coerced %~ mapVertices (^.asPoint)
+                      in flip foldMap (asMap vd') $ \case
+      BoundedRegion vs       -> foldMap Set.singleton vs
+      UnboundedRegion (Unbounded _ vs _) -> Set.fromList (NonEmpty.toList vs)
 
 --------------------------------------------------------------------------------
 

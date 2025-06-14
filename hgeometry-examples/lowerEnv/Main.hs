@@ -25,6 +25,7 @@ import           HGeometry.PlaneGraph.Instances
 import           HGeometry.Point
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Triangulation
 import           HGeometry.Transformation
@@ -220,8 +221,8 @@ verifyOnPlane (h,pg) = allOf vertices onPlane pg
 
 -- boundedVertices   :: Fold (MinimizationDiagram r plane) (Point 2 r)
 boundedVertices f = foldMap (\case
-                                Bounded   pts     -> foldMap f pts
-                                Unbounded _ pts _ -> foldMap f pts
+                                BoundedRegion   pts                 -> foldMap f pts
+                                UnboundedRegion (Unbounded _ pts _) -> foldMap f pts
                             ) . asMap
 
 

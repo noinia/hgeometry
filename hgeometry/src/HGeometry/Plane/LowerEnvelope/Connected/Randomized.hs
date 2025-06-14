@@ -81,6 +81,8 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
       -- three planes). Moreover since we actually include the definers of the corners
       -- of a triangle we may get 4 planes in any case.
 
+    lowerEnvelopeIn = undefined
+{-
     lowerEnvelopeIn   :: (Foldable set)
                       => Triangle (Point 2 r)
                       -> set plane
@@ -98,8 +100,8 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
                                        <>
                                        foldMap lowerEnvelopeIn' triangulatedEnv
              where
-               env :: NEMap plane (BoundedRegion r  (Point 2 r :+ (Definers plane, Set plane))
-                                                    (Point 2 r :+ Set plane))
+               env :: NEMap plane (ClippedBoundedRegion r (MDVertex r plane :+ Set plane)
+                                                          (Point 2 r :+ Set plane))
                env = withExtraConflictLists remaining
                    . fromVertexFormIn tri $ verticesRNet'
                -- also compute the conflicts of the extra vertices
@@ -113,6 +115,7 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
                          -> Map (Point 3 r) (Definers plane)
     lowerEnvelopeIn' tri = lowerEnvelopeIn (view core <$> tri) (conflictListOf tri)
 
+-}
 
 
 -- | Given a size r; take a sample of the planes from the given size (essentially by just
@@ -192,8 +195,8 @@ withConflictLists planes = imap (\v defs -> (defs
 withExtraConflictLists        :: (Plane_ plane r, Ord r, Num r, Point_ corner 2 r
                                  )
                               => Set plane
-                              -> NEMap plane (BoundedRegion r vertex corner)
-                              -> NEMap plane (BoundedRegion r vertex (corner :+ Set plane))
+                              -> NEMap plane (ClippedBoundedRegion r vertex corner)
+                              -> NEMap plane (ClippedBoundedRegion r vertex (corner :+ Set plane))
 withExtraConflictLists planes = NEMap.mapWithKey (\h -> fmap (second $ withPolygonVertex h))
   where
     withPolygonVertex h v = v :+ Set.filter (below (evalAt v h) v) planes
@@ -232,7 +235,7 @@ withExtraConflictLists planes = NEMap.mapWithKey (\h -> fmap (second $ withPolyg
 --                                   p :| (q:rest) -> let z = last $ q:|rest in
 --                                                    UnboundedTwo u p z v :| triangulate' p q rest
 
-triangulate      :: BoundedRegion r (vertex :+ (a, conflictList)) (vertex :+ conflictList)
+triangulate      :: ClippedBoundedRegion r (vertex :+ (a, conflictList)) (vertex :+ conflictList)
                  -> NonEmpty (Triangle (vertex :+ conflictList))
 triangulate poly = case flatten <$> toNonEmptyOf vertices poly of
     u :| (v : vs) -> NonEmpty.zipWith (Triangle u) (v :| vs) (NonEmpty.fromList vs)
