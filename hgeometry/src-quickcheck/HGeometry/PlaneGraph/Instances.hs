@@ -32,7 +32,7 @@ import HGeometry.Ext
 import HGeometry.Foldable.Util
 import HGeometry.HyperPlane.NonVertical
 import HGeometry.Instances ()
-import HGeometry.Plane.LowerEnvelope.Connected(MinimizationDiagram(..))
+import HGeometry.Plane.LowerEnvelope.Connected(MinimizationDiagram(..), mapVertices)
 import HGeometry.Plane.LowerEnvelope.Connected.Graph
 import HGeometry.PlaneGraph
 import HGeometry.Point
@@ -80,7 +80,8 @@ arbitraryPlaneGraph proxy = do
     -- need at least a few vertices so that we generate at least a triangle in the planar graph
     case voronoiDiagram pts of
       AllColinear _  -> arbitraryPlaneGraph proxy -- retry
-      ConnectedVD vd -> do let triGr = toTriangulatedPlaneGraph' . asMD $ vd
+      ConnectedVD vd -> do let vd'   = vd&coerced %~ mapVertices (^.asPoint)
+                               triGr = toTriangulatedPlaneGraph' . asMD $ vd'
                            gr <- markWitherableEdges (mapNeighbourOrder NEMap.toMap triGr)
                            case traverseNeighbourOrder NEMap.nonEmptyMap $ largestComponent gr of
                              Nothing  -> arbitraryPlaneGraph proxy -- retry

@@ -10,7 +10,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.HalfSpace.Type
-  ( HalfSpaceF(..)
+  ( HalfSpaceF(..), HalfPlaneF
   , HalfSpace
   , Sign(..)
   , module HGeometry.HalfSpace.Class
@@ -64,8 +64,13 @@ boundingHyperPlaneLens :: Lens (HalfSpaceF boundingHyperPlane) (HalfSpaceF bound
 boundingHyperPlaneLens = lens (\(HalfSpace _ h) -> h) (\(HalfSpace s _) h -> HalfSpace s h)
 {-# INLINE boundingHyperPlaneLens #-}
 
+
+
 -- | Arbitrary halfspaces in r^d.
 type HalfSpace d r = HalfSpaceF (HyperPlane d r)
+
+-- | A Halfplane (which is just a Halfspace in R^2)
+type HalfPlaneF line = HalfSpaceF line
 
 type instance Dimension (HalfSpaceF boundingHyperPlane) = Dimension boundingHyperPlane
 type instance NumType   (HalfSpaceF boundingHyperPlane) = NumType boundingHyperPlane
