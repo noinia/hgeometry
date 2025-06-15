@@ -17,8 +17,12 @@ module HGeometry.Direction.Cardinal
     -- , _NorthWest, _NorthEast, _SouthEast, _SouthWest
 
   , interCardinalsOf
+
+  , classifyDirection
+  , classifyDirection'
   ) where
 
+import Data.Maybe (fromMaybe)
 import GHC.Generics (Generic)
 import HGeometry.Vector
 

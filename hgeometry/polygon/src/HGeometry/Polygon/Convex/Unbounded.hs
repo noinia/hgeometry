@@ -15,14 +15,16 @@ module HGeometry.Polygon.Convex.Unbounded
   , mapChain
 
 
-  , toBoundedFrom -- TODO; remove
+  , toBoundedFrom
   ) where
 
 import           Control.Lens
 import qualified Data.Foldable as F
+import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           HGeometry.Direction.Cardinal
+import           Data.Maybe (fromMaybe)
+import           Data.Ord (comparing)
 import           HGeometry.HalfLine
 import           HGeometry.HalfSpace
 import           HGeometry.HyperPlane.Class
@@ -34,12 +36,8 @@ import           HGeometry.Point.Either
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Properties
-import           HGeometry.Small.AtMostTwo
 import           HGeometry.Triangle
 import           HGeometry.Vector
-import Data.Maybe (fromMaybe)
-import Data.Foldable1
-import Data.Ord (comparing)
 
 --------------------------------------------------------------------------------
 
@@ -272,13 +270,9 @@ type instance Intersection (Triangle corner) (UnboundedConvexRegionF r nonEmpty 
   = Intersection (Triangle corner) (ConvexPolygonF nonEmpty vertex)
 
 instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
-
-         , Show r, Show corner, Show vertex
          ) => Triangle corner `HasIntersectionWith` (UnboundedConvexRegionF r NonEmpty vertex)
 
 instance ( Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
-
-         , Show r, Show corner, Show vertex
          ) => Triangle corner `IsIntersectableWith` (UnboundedConvexRegionF r NonEmpty vertex) where
   tri `intersect` region = tri `intersect` (toBoundedFrom tri region)
 
@@ -288,10 +282,7 @@ instance ( Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
 --
 -- note: this creates some new vertices; which are "copies" from the extremal vertices.
 -- this is to avoid having to introduce yet another level of 'OriginalOrExtra''s
-toBoundedFrom :: (Foldable nonEmpty, Point_ point 2 r, Point_ vertex 2 r, Ord r, Fractional r
-
-                 , Show r, Show point, Show vertex
-                 )
+toBoundedFrom :: (Foldable nonEmpty, Point_ point 2 r, Point_ vertex 2 r, Ord r, Fractional r)
               => nonEmpty point -> UnboundedConvexRegionF r NonEmpty vertex
               -> ConvexPolygonF NonEmpty vertex
 toBoundedFrom tri reg@(Unbounded v pts w) = go $ case extremalVertices reg of
@@ -328,31 +319,6 @@ toBoundedFrom tri reg@(Unbounded v pts w) = go $ case extremalVertices reg of
                                  Just (Line_x_Line_Point a) -> p&xCoord .~ a^.xCoord
                                                                 &yCoord .~ a^.yCoord
                                  _                          -> error "intersectionPoint: absurd'"
-
--- | Classfiy the direction of the given vector
---
--- pre: the vector is non-zero
-classifyDirection               :: (Ord r, Num r) => Vector 2 r
-                                -> Either CardinalDirection InterCardinalDirection
-classifyDirection = fromMaybe (error "classifyDirection: Direction vector is zero!")
-                  . classifyDirection'
-
--- | Classfiy the direction of the given vector. Returns nothing if the vector is zero
-classifyDirection'               :: (Ord r, Num r) => Vector 2 r
-                                -> Maybe (Either CardinalDirection InterCardinalDirection)
-classifyDirection' (Vector2 x y) = case x `compare` 0 of
-  LT -> Just $ case y `compare` 0 of
-                 LT -> Right SouthWest
-                 EQ -> Left West
-                 GT -> Right NorthWest
-  EQ -> case y `compare` 0 of
-          LT -> Just $ Left South
-          EQ -> Nothing
-          GT -> Just $ Left North
-  GT -> Just $ case y `compare` 0 of
-                 LT -> Right SouthEast
-                 EQ -> Left East
-                 GT -> Right NorthEast
 
 -- -- TODO: this would make for a good property test: test if the points all lie inside the reegion
 

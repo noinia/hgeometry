@@ -209,22 +209,22 @@ spec = describe "lower envelope in bounded region" $ do
 
          testIpe [osp|trivial.ipe|]
                  [osp|trivial_clipped_out|]
-         -- testIpe [osp|simplest.ipe|]
-         --         [osp|simplest_clipped_out|]
-         -- testIpe [osp|simpler.ipe|]
-         --         [osp|simpler_clipped_out|]
-         -- testIpe [osp|simple.ipe|]
-         --         [osp|simple_clipped_out|]
-         -- testIpe [osp|simple1.ipe|]
-         --         [osp|simple1_clipped_out|]
-         -- testIpe [osp|foo.ipe|]
-         --         [osp|foo_clipped_out|]
-         -- testIpe [osp|degenerate.ipe|]
-         --         [osp|degenerate_clipped_out|]
-         -- testIpe [osp|degenerate1.ipe|]
-         --         [osp|degenerate1_clipped_out|]
-         -- testIpe [osp|degenerate2.ipe|]
-         --         [osp|degenerate2_clipped_out|]
+         testIpe [osp|simplest.ipe|]
+                 [osp|simplest_clipped_out|]
+         testIpe [osp|simpler.ipe|]
+                 [osp|simpler_clipped_out|]
+         testIpe [osp|simple.ipe|]
+                 [osp|simple_clipped_out|]
+         testIpe [osp|simple1.ipe|]
+                 [osp|simple1_clipped_out|]
+         testIpe [osp|foo.ipe|]
+                 [osp|foo_clipped_out|]
+         testIpe [osp|degenerate.ipe|]
+                 [osp|degenerate_clipped_out|]
+         testIpe [osp|degenerate1.ipe|]
+                 [osp|degenerate1_clipped_out|]
+         testIpe [osp|degenerate2.ipe|]
+                 [osp|degenerate2_clipped_out|]
 
 
 -- | Build voronoi diagrams on the input points
@@ -253,13 +253,12 @@ instance ( Point_ vertex 2 r, Fractional r, Ord r
          , Show r
          )
          => HasDefaultIpeOut (ClippedMDCell' r vertex) where
-  type DefaultIpeOut (ClippedMDCell' r vertex) = Group
+  type DefaultIpeOut (ClippedMDCell' r vertex) = Path
   defIO (ClippedMDCell cell) = case cell of
-    ActualPolygon cell' -> ipeGroup [iO $ defIO $ (cell'&vertices %~ (^.asPoint)
-                                                  :: ConvexPolygonF NonEmpty (Point 2 r)
-                                                  )
-                                    ]
-    _                   -> ipeGroup []
+    ActualPolygon cell' -> defIO $ (cell'&vertices %~ (^.asPoint)
+                                     :: ConvexPolygonF NonEmpty (Point 2 r)
+                                   )
+    _                   -> error "defIO for clippedMDCell rendering segment or point not defined"
 
 
 instance ( Fractional r, Ord r
@@ -275,11 +274,24 @@ instance ( Fractional r, Ord r, Point_ point 2 r
          )
          => HasDefaultIpeOut (ClippedVoronoiDiagram point) where
   type DefaultIpeOut (ClippedVoronoiDiagram point) = Group
-  defIO (ClippedVoronoiDiagram (ClippedMinimizationDiagram m)) = ipeGroup $
-    NEMap.foldMapWithKey (\p cell -> [ iO $ defIO (p^.asPoint)
-                                     , iO $ defIO cell
-                                     ]
-                         ) m
+  defIO (ClippedVoronoiDiagram (ClippedMinimizationDiagram m)) =
+      ipeGroup . zipWith render (cycle $ drop 3 basicNamedColors)
+               . toList . NEMap.assocs $ m
+    where
+      render color (site, voronoiRegion) = iO' $ ipeGroup
+                 [ iO $ defIO (site^.asPoint) ! attr SStroke  color
+                                              ! attr SSize    large
+                 , iO $ defIO voronoiRegion   ! attr SFill    color
+                                              ! attr SOpacity (Text.pack "10%")
+                 ]
+
+large :: IpeSize r
+large = IpeSize $ Named (Text.pack "large")
+
+    -- NEMap.foldMapWithKey (\p cell -> [ iO $ defIO (p^.asPoint)
+    --                                  , iO $ defIO cell
+    --                                  ]
+    --                      ) m
 
 
 
@@ -289,9 +301,6 @@ myTest = describe "intersection tests" $ do
       (tri `intersects` convexPoly) `shouldBe` True
     it "triangle unbounded conex poly intersection "  $
       (tri `intersects` unboundedPoly) `shouldBe` True
-    -- it "unbounded try should be" $
-    --   ((toBoundedFrom tri unboundedPoly)^..vertices)
-    --   `shouldBe` (convexPoly^..vertices) -- not quite true but whatever
 
 -- convexPoly :: ConvexPolygonF NonEmpty (Point 2 R) -- FIXME!!!
 -- apparently something goes wrong using NonEmpty rather than NonEmptyVector
