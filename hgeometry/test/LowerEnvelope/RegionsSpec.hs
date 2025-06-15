@@ -47,7 +47,7 @@ spec = describe "lowerEnvelope tests" $ do
          it "singleton diagram" $ do
            let v = Point2 10 10 :: Point 2 R
            [h1,h2,h3] <- pure $ toList inputs
-           (asMap $ mapVertices (^.core) $ fromJust $ bruteForceLowerEnvelope inputs) `shouldBe`
+           (asMap $ mapVertices (^.asPoint) $ fromJust $ bruteForceLowerEnvelope inputs) `shouldBe`
              mkNEMap
                [ (h1, UnboundedRegion $ Unbounded (Vector2 1 1)    (NonEmpty.singleton v) (Vector2 0 1))
                , (h2, UnboundedRegion $ Unbounded (Vector2 (-1) 0) (NonEmpty.singleton v) (Vector2 (-1) (-1)))
