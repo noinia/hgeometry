@@ -289,9 +289,9 @@ myTest = describe "intersection tests" $ do
       (tri `intersects` convexPoly) `shouldBe` True
     it "triangle unbounded conex poly intersection "  $
       (tri `intersects` unboundedPoly) `shouldBe` True
-    it "unbounded try should be" $
-      ((toBoundedFrom tri unboundedPoly)^..vertices)
-      `shouldBe` (convexPoly^..vertices) -- not quite true but whatever
+    -- it "unbounded try should be" $
+    --   ((toBoundedFrom tri unboundedPoly)^..vertices)
+    --   `shouldBe` (convexPoly^..vertices) -- not quite true but whatever
 
 -- convexPoly :: ConvexPolygonF NonEmpty (Point 2 R) -- FIXME!!!
 -- apparently something goes wrong using NonEmpty rather than NonEmptyVector

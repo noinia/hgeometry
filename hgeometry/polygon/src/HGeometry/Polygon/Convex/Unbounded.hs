@@ -242,10 +242,6 @@ instance ( Point_ vertex 2 r, Num r, Ord r
 --                                   (v',chain') <- trimRChain tri v chain0
 
 
-
--- | A Halfplane (which is just a Halfspace in R^2)
-type HalfPlaneF line = HalfSpaceF line
-
 instance ( Point_ vertex 2 r, Num r, Ord r
          , HyperPlane_ line 2 r
          , HalfLine vertex `HasIntersectionWith` HalfPlaneF line
@@ -333,35 +329,6 @@ toBoundedFrom tri reg@(Unbounded v pts w) = go $ case extremalVertices reg of
                                                                 &yCoord .~ a^.yCoord
                                  _                          -> error "intersectionPoint: absurd'"
 
-
-
-    -- rot90 (Vector2 x y) = Vector2 (-y) x -- rotates clockwise 90 degrees
-
-
---     u  = rot90 v
---     p' = p^.asPoint
---     q  = p' .+^ v
---     h' = HalfSpace Positive (LinePV p' u)
---     h  = if q `intersects` h' then h'&halfSpaceSign .~ Negative else h'
---     -- halfplane perpendicular to v that does not contain the point q
---     a' = maximumOn (`squaredEuclideanDistTo` h) (q :| pts)
---       -- a' is the point furthest from our halfplane; and thus essentially defines the slab.
---       -- we add the q point so that there is at least one point in the slab
-
-
-
-
-
-  -- case classifyDirection w of
-  -- where
-  --   box = boundingBox $ boxRay r1 <> boxRay r2 <> toNonEmptyOf folded tri
-  --   rays@(Vector2 r1 r2) = boundingRays reg
-
-  --   boxRay r = NonEmpty.fromList [ r^.start, r^.start .+^ r^.direction ]
-
-
-
-
 -- | Classfiy the direction of the given vector
 --
 -- pre: the vector is non-zero
@@ -387,6 +354,7 @@ classifyDirection' (Vector2 x y) = case x `compare` 0 of
                  EQ -> Left East
                  GT -> Right NorthEast
 
+-- -- TODO: this would make for a good property test: test if the points all lie inside the reegion
 
 
   -- case traverse (`intersect` box) rays of
@@ -458,121 +426,5 @@ classifyDirection' (Vector2 x y) = case x `compare` 0 of
 
 
 
-  -- case extremalVertices reg of
-  --   Right (Vector2 p q) -> go p q $ maximumOn (\a -> max (squaredEuclideanDist p a)
-  --                                                        (squaredEuclideanDist q a)
-  --                                         ) tri
-  --   Left p              -> go p p $ maximumOn (squaredEuclideanDist p) tri
-  -- where
-  --   go p q d = let dv = quadrance v
-  --                  a  = if da < 1 then ((1/dv) * (1/dv) * d) *^ v
-
-  --     a = if quadrance v < 1 then (1/)
-
-  --                    furthest p (negated v) tri'
-  --                  b = furthest q w           tri'
-  --              in uncheckedFromCCWPoints (q .+^ b NonEmpty.<|
-  --                                            p .+^ a NonEmpty.<| pts)
-
-
-
-    -- compute (Vector2 p q) = let d = maximumOn (\a -> max (squaredEuclideanDist p a)
-    --                                                      (squaredEuclideanDist q a)
-    --                                           )
-
-    --   d1 = maximumOn (`squaredEuclideanDistTo` p) tri
-    --                             d2 = maximumOn (`squaredEuclideanDistTo` p) tri
-    --                             d  = d1 `max` d2
-
-    -- (q :| pts)
-    --   -- a' is the point furthest from our halfplane; and thus essentially defines the slab.
-    --   -- we add the q point so that there is at least one point in the slab
-
-
-    -- maximumOn f = maximumBy (comparing f)
-
-  -- just compute a big enough ball around
-
-
-
-
-
-
-
---     -- TODO: I think i should just clip the region using the bounding box of
---     -- all points in tri and pts
-
-
---     -- | We compute two points a and b thare on the halfedges bounding the region that are
---     -- far enough away.
---     compute p q = let a = furthest p (negated v) tri'
---                       b = furthest q w           tri'
---                       c = a ^+^ b
---                   in uncheckedFromCCWPoints (q .+^ b NonEmpty.<|
---                                              q .+^ c NonEmpty.<|
---                                              p .+^ a NonEmpty.<| pts)
---     tri' = tri^..folded.asPoint
---     -- I think we should probably
-
-
---     -- -- given the halfpsace h that goes through p and q (the extremal vertices) and
---     -- -- contains all other vertices and the direction u of its bounding line, this function
---     -- -- computes two points a and b on the halflines so that tri is contained in the
---     -- -- halfspace defined by a and b (that contains p and q).
---     -- --
---     -- -- it returns a clipped version of the bounded region with a and b as vertices.
---     -- --
---     -- -- In case the unbounded reigon is a cone with p as apex. The halfspace h that we get
---     -- -- as input should go through p, and otherwise not contain/intersect the cone.
---     -- compute p q h u = let s    = view asPoint $ maximumOn (`squaredEuclideanDistTo` h) tri'
---     --                       -- distance to the point furthest from this halfspace.
---     --                       -- we then create two additional on the halflines
---     --                       -- that are at least that distance away.
-
---     --                       tri' = (q .+^ w)^.asPoint :| ((^.asPoint) <$> F.toList tri)
---     --                       -- make sure that there is at least one point outside h,
---     --                       -- so that s lies stricly outside h as well
-
---     --                       a = case (fromPointAndVec @(LinePV 2 _) p v) `intersect` (LinePV s u) of
---     --                             Just (Line_x_Line_Point a') -> p&xCoord .~ a'^.xCoord
---     --                                                             &yCoord .~ a'^.yCoord
---     --                             _                           -> error "absurd; a'"
---     --                       b = case (fromPointAndVec @(LinePV 2 _) q w) `intersect` (LinePV s u) of
---     --                             Just (Line_x_Line_Point b') -> q&xCoord .~ b'^.xCoord
---     --                                                             &yCoord .~ b'^.yCoord
---     --                             _                           -> error "absurd; b'"
---     --                   in uncheckedFromCCWPoints (b NonEmpty.<| a NonEmpty.<| pts)
-
-
--- -- | Given a point p and a vector v, describing a ray, computes a vector z so that the
--- -- point 'a = p + z' that lies on the ray so that all given points lie in the slab
--- -- perpendicular to v whose bounding lines go trhough p and a.
--- furthest         :: ( Point_ point 2 r, Fractional r, Ord r
-
---                     , Show r, Show point
---                     )
---                  => point -> Vector 2 r -> [Point 2 r] -> Vector 2 r
--- furthest p v pts = traceShowWith ("vec,",v,h,q,"a'",a',) $
---   case (LinePV p' v) `intersect` (LinePV a' u) of
---                      Just (Line_x_Line_Point a) -> a .-. p'
---                        -- p&xCoord .~ a^.xCoord
---                        --                              &yCoord .~ a^.yCoord
---                      _                          -> error "furtest: absurd'"
---   where
---     u  = rot90 v
---     p' = p^.asPoint
---     q  = p' .+^ v
---     h' = HalfSpace Positive (LinePV p' u)
---     h  = if q `intersects` h' then h'&halfSpaceSign .~ Negative else h'
---     -- halfplane perpendicular to v that does not contain the point q
---     a' = maximumOn (`squaredEuclideanDistTo` h) (q :| pts)
---       -- a' is the point furthest from our halfplane; and thus essentially defines the slab.
---       -- we add the q point so that there is at least one point in the slab
-
-
---     maximumOn f = maximumBy (comparing f)
---     rot90 (Vector2 x y) = Vector2 (-y) x -- rotates clockwise 90 degrees
-
--- -- TODO: this would make for a good property test: test if the points all lie inside the reegion
 
 --------------------------------------------------------------------------------
