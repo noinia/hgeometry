@@ -66,8 +66,8 @@ ipeSpec' outFP (chain,tri) = traceShow chain $
                                    ! attr SFill red
     , iO' chain
     , iO' tri
-    , iO $ defIO ((toBoundedFrom tri chain)&vertices %~ (^.asPoint)  :: ConvexPolygonF NonEmpty (Point 2 R)
-                 ) ! attr SFill blue
+--     , iO $ defIO ((toBoundedFrom tri chain)&vertices %~ (^.asPoint)  :: ConvexPolygonF NonEmpty (Point 2 R)
+--                 ) ! attr SFill blue
     ]
 
 
@@ -99,7 +99,6 @@ spec = describe "triangle x unbounded convex polygon intersection" $ do
          ipeSpec' [osp|bug_out|] ( unboundedPoly
                                  , Triangle origin (Point2 1000 0) (Point2 0 500)
                                  )
-{-
          ipeSpec [osp|triangle_x_unbounded.ipe|]
                  [osp|triangle_x_unbounded.out|]
          ipeSpec [osp|triangle_x_unbounded1.ipe|]
@@ -110,7 +109,7 @@ spec = describe "triangle x unbounded convex polygon intersection" $ do
                  [osp|triangle_x_cone.out|]
          ipeSpec [osp|triangle_x_cone_no.ipe|]
                  [osp|triangle_x_cone_no.out|]
--}
+
 
 myTriangle :: Triangle (Point 2 R)
 myTriangle = Triangle (Point2 1 1) (Point2 100 0) (Point2 0 100)
