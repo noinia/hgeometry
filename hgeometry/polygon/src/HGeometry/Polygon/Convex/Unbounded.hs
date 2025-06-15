@@ -315,7 +315,8 @@ toBoundedFrom tri reg@(Unbounded v pts w) = go $ case extremalVertices reg of
     go (Vector2 p q) = uncheckedFromCCWPoints $ b NonEmpty.<| a NonEmpty.<| pts
       where
       l  = lineThrough (p .+^ negated v) (q .+^ w) :: LinePV 2 _
-      h  = HalfSpace Negative l
+      h' = HalfSpace Negative l
+      h  = if q' `intersects` h' then h'&halfSpaceSign .~ Positive else h'
       q' = (q .+^ (w ^+^ w))^.asPoint
         -- make sure that there is at least one point outside the halfplane
       pt = maximumOn (`squaredEuclideanDistTo` h) (q' :| tri^..folded.asPoint)
