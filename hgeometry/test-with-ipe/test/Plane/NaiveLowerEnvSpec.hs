@@ -25,6 +25,7 @@ import           HGeometry.HyperPlane
 import           HGeometry.Intersection
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope
+import           HGeometry.Plane.LowerEnvelope.Clipped
 import qualified HGeometry.Plane.LowerEnvelope.Connected.Randomized as Randomized
 import           HGeometry.Point
 import           HGeometry.Point.Either
@@ -48,34 +49,15 @@ import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
 
-
 import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
+
+--
 type instance Intersection (Triangle corner) (Region r vertex) = Maybe (ClippedMDCell' r vertex)
 
-
-
--- | Cells in the Minimization diagram (i.e. the projected lower envelope of planes)
-type ClippedMDCell r plane = ClippedMDCell' r (MDVertex r plane)
-
--- | Helper type for representing cells in a minimzation diagram. These cells are possibly
--- degenerate convex polygons, whose vertices are either of type 'vertex' or of type
--- 'Point 2 r'.
-newtype ClippedMDCell' r vertex = ClippedMDCell
-  (PossiblyDegenerateSimplePolygon (OriginalOrExtra vertex (Point 2 r))
-                                   (ClippedBoundedRegion r vertex (Point 2 r)))
-
-type instance NumType   (ClippedMDCell' r vertex) = r
-type instance Dimension (ClippedMDCell' r vertex) = 2
-
-deriving instance (Show vertex, Point_ vertex 2 r, Show r) => Show (ClippedMDCell' r vertex)
-deriving instance (Eq vertex, Eq r)     => Eq (ClippedMDCell' r vertex)
-
-instance Functor (ClippedMDCell' r) where
-  fmap f (ClippedMDCell poly) = ClippedMDCell $ bimap (first f) (fmap (first f)) poly
 
 
 instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
@@ -92,32 +74,6 @@ instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
   tri `intersect` reg = traceShowWith ("intersect",tri,reg,"->",) $ ClippedMDCell <$> case reg of
     BoundedRegion   convex -> tri `intersect` convex
     UnboundedRegion convex -> tri `intersect` convex
-
-
-
--- rename to minimization diagram
-
--- | A clipped lower envelope
-type ClippedMinimizationDiagram plane  = ClippedMinimizationDiagram' (NumType plane) plane
-
--- | A clipped lower envelope
-newtype ClippedMinimizationDiagram' r plane =
-  ClippedMinimizationDiagram (NEMap plane (ClippedMDCell r plane))
-
-type instance NumType   (ClippedMinimizationDiagram' r plane) = r
-type instance Dimension (ClippedMinimizationDiagram' r plane) = 2
-
-
-deriving instance (Show r, Num r, Show plane) => Show (ClippedMinimizationDiagram' r plane)
-
-instance Constrained (ClippedMinimizationDiagram' r) where
-  type Dom (ClippedMinimizationDiagram' r) plane = Ord plane
-
-instance CFunctor (ClippedMinimizationDiagram' r) where
-  -- cmap   :: Ord plane'
-  --        => (plane -> plane') -> ClippedMinimizationDiagram' r plane -> ClippedMinimizationDiagram' r plane'
-  cmap f (ClippedMinimizationDiagram m) = ClippedMinimizationDiagram $
-    NEMap.foldMapWithKey (\plane cell -> NEMap.singleton (f plane) (fmap f <$> cell)) m
 
 
 -- | A clipped Voronoi diagram
@@ -154,7 +110,7 @@ bruteForceLowerEnvelopeIn     :: forall plane r corner set.
                               => Triangle corner
                               -> set plane
                               -> ClippedMinimizationDiagram plane
-bruteForceLowerEnvelopeIn tri planes = ClippedMinimizationDiagram
+bruteForceLowerEnvelopeIn tri planes = review _ClippedMinimizationDiagramMap
                                      $ case bruteForceLowerEnvelope planes of
     Nothing      -> lowestPlane
     Just diagram -> case NEMap.mapMaybe (tri `intersect`) (asMap diagram) of
@@ -261,12 +217,12 @@ instance ( Point_ vertex 2 r, Fractional r, Ord r
     _                   -> error "defIO for clippedMDCell rendering segment or point not defined"
 
 
-instance ( Fractional r, Ord r
-         , Show r
-         )
-         => HasDefaultIpeOut (ClippedMinimizationDiagram' r plane) where
-  type DefaultIpeOut (ClippedMinimizationDiagram' r plane) = Group
-  defIO (ClippedMinimizationDiagram env) = ipeGroup $ foldMap ((:[]) . iO . defIO) env
+-- instance ( Fractional r, Ord r
+--          , Show r
+--          )
+--          => HasDefaultIpeOut (ClippedMinimizationDiagram' r plane) where
+--   type DefaultIpeOut (ClippedMinimizationDiagram' r plane) = Group
+--   defIO (ClippedMinimizationDiagram env) = ipeGroup $ foldMap ((:[]) . iO . defIO) env
 
 
 instance ( Fractional r, Ord r, Point_ point 2 r
@@ -274,9 +230,9 @@ instance ( Fractional r, Ord r, Point_ point 2 r
          )
          => HasDefaultIpeOut (ClippedVoronoiDiagram point) where
   type DefaultIpeOut (ClippedVoronoiDiagram point) = Group
-  defIO (ClippedVoronoiDiagram (ClippedMinimizationDiagram m)) =
+  defIO (ClippedVoronoiDiagram env) =
       ipeGroup . zipWith render (cycle $ drop 3 basicNamedColors)
-               . toList . NEMap.assocs $ m
+               . toList . NEMap.assocs $ env^._ClippedMinimizationDiagramMap
     where
       render color (site, voronoiRegion) = iO' $ ipeGroup
                  [ iO $ defIO (site^.asPoint) ! attr SStroke  color
