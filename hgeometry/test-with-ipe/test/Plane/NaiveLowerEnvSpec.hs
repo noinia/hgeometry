@@ -39,6 +39,7 @@ import           HGeometry.Sequence.Alternating (separators)
 import           HGeometry.Triangle
 import           HGeometry.Vector
 import qualified HGeometry.VoronoiDiagram as VD
+import           HGeometry.VoronoiDiagram.Clipped
 import           HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
 import           Hiraffe.Graph.Class
 import           Ipe
@@ -141,9 +142,8 @@ instance ( Fractional r, Ord r, Point_ point 2 r
          )
          => HasDefaultIpeOut (ClippedVoronoiDiagram point) where
   type DefaultIpeOut (ClippedVoronoiDiagram point) = Group
-  defIO (ClippedVoronoiDiagram env) =
-      ipeGroup . zipWith render (cycle $ drop 3 basicNamedColors)
-               . toList . NEMap.assocs $ env^._ClippedMinimizationDiagramMap
+  defIO = ipeGroup . zipWith render (cycle $ drop 3 basicNamedColors)
+        . toList . NEMap.assocs . view _ClippedVoronoiDiagram
     where
       render color (site, voronoiRegion) = iO' $ ipeGroup
                  [ iO $ defIO (site^.asPoint) ! attr SStroke  color

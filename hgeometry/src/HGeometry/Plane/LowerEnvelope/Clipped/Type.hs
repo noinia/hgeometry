@@ -75,7 +75,7 @@ _ClippedMinimizationDiagramMap :: (NumType plane ~ r)
                                => Iso' (ClippedMinimizationDiagram plane)
                                        (NEMap plane (ClippedMDCell r plane))
 _ClippedMinimizationDiagramMap = coerced
-
+{-# INLINE _ClippedMinimizationDiagramMap #-}
 
 instance Constrained (ClippedMinimizationDiagram' r) where
   type Dom (ClippedMinimizationDiagram' r) plane = Ord plane
