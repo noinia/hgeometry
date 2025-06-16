@@ -80,3 +80,6 @@ type instance Dimension (Region r point) = Dimension point
 
 deriving instance (Show r, Show vertex, Point_ vertex 2 r) => Show (Region r vertex)
 deriving instance (Eq r, Eq vertex) => Eq (Region r vertex)
+
+
+--------------------------------------------------------------------------------
