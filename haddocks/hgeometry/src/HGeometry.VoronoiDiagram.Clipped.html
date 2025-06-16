@@ -1,0 +1,217 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE UndecidableInstances  #-}</span><span>
+</span><span id="line-2"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Module      :  HGeometry.VoronoiDiagram.Clipped</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-7"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-8"></span><span class="hs-comment">--</span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- Representing a Voronoi Diagram of a set of points in R^2 that is clipped to some</span><span>
+</span><span id="line-10"></span><span class="hs-comment">-- triangle, this means all cells are bounded convex polygons. (The points may be outside</span><span>
+</span><span id="line-11"></span><span class="hs-comment">-- the triangle).</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.VoronoiDiagram.Clipped.html"><span class="hs-identifier">HGeometry.VoronoiDiagram.Clipped</span></a></span><span>
+</span><span id="line-15"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.VoronoiDiagram.Clipped.html#ClippedVoronoiDiagram"><span class="hs-identifier">ClippedVoronoiDiagram</span></a></span><span>
+</span><span id="line-16"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.VoronoiDiagram.Clipped.html#_ClippedVoronoiDiagram"><span class="hs-identifier">_ClippedVoronoiDiagram</span></a></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.VoronoiDiagram.Clipped.html#voronoiDiagramIn"><span class="hs-identifier">voronoiDiagramIn</span></a></span><span>
+</span><span id="line-19"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.VoronoiDiagram.Clipped.html#voronoiDiagramInWith"><span class="hs-identifier">voronoiDiagramInWith</span></a></span><span>
+</span><span id="line-20"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/subcategories-0.2.1.1-3bec1250e4f8586dc3166a9d147d96a8778596970313fdaa78c484c693c50dc4/share/doc/html/src/Control.Subcategory.Functor.html/Control.Subcategory.Functor.html"><span class="hs-identifier">Control.Subcategory.Functor</span></a></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.5.0-fd0d5b6c1926d902399214660f830e56c6f93128c3fb0eab509cd444b1e6b8a0/share/doc/html/src/Data.Map.NonEmpty.html/Data.Map.NonEmpty.html"><span class="hs-identifier">Data.Map.NonEmpty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.5.0-fd0d5b6c1926d902399214660f830e56c6f93128c3fb0eab509cd444b1e6b8a0/share/doc/html/src/Data.Map.NonEmpty.Internal.html/Data.Map.NonEmpty.Internal.html#NEMap"><span class="hs-identifier">NEMap</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html"><span class="hs-identifier">HGeometry.Ext</span></a></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.HyperPlane</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Clipped.html"><span class="hs-identifier">HGeometry.Plane.LowerEnvelope.Clipped</span></a></span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span>
+</span><span id="line-31"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Triangle</span></span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.VoronoiDiagram.ViaLowerEnvelope.html"><span class="hs-identifier">HGeometry.VoronoiDiagram.ViaLowerEnvelope</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.VoronoiDiagram.ViaLowerEnvelope.html#pointToPlane"><span class="hs-identifier">pointToPlane</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="annot"><span class="hs-comment">-- | A Voronoi diagram clipped to a triangle</span></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">newtype</span><span> </span><span id="ClippedVoronoiDiagram"><span class="annot"><a href="HGeometry.VoronoiDiagram.Clipped.html#ClippedVoronoiDiagram"><span class="hs-identifier hs-var">ClippedVoronoiDiagram</span></a></span></span><span> </span><span id="local-6989586621679496155"><span class="annot"><a href="#local-6989586621679496155"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ClippedVoronoiDiagram"><span class="annot"><a href="HGeometry.VoronoiDiagram.Clipped.html#ClippedVoronoiDiagram"><span class="hs-identifier hs-var">ClippedVoronoiDiagram</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Clipped.Type.html#ClippedMinimizationDiagram"><span class="hs-identifier hs-type">ClippedMinimizationDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679496155"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-38"></span><span>
+</span><span id="line-39"></span><span id="local-6989586621679496035"><span id="local-6989586621679496036"><span id="local-6989586621679496183"><span id="local-6989586621679496189"><span id="local-6989586621679496196"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">instance</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679496035"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679496035"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679496036"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679496035"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679496036"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-40"></span><span>                  </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.VoronoiDiagram.Clipped.html#ClippedVoronoiDiagram"><span class="hs-identifier hs-type">ClippedVoronoiDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679496036"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="annot"><span class="hs-comment">-- | Get access to the underling nonEmpty Map</span></span><span>
+</span><span id="line-43"></span><span id="local-6989586621679496037"><span id="local-6989586621679496038"><span class="annot"><a href="HGeometry.VoronoiDiagram.Clipped.html#_ClippedVoronoiDiagram"><span class="hs-identifier hs-type">_ClippedVoronoiDiagram</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679496037"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="#local-6989586621679496038"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>                       </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Iso%27"><span class="hs-identifier hs-type">Iso'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.VoronoiDiagram.Clipped.html#ClippedVoronoiDiagram"><span class="hs-identifier hs-type">ClippedVoronoiDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679496037"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/nonempty-containers-0.3.5.0-fd0d5b6c1926d902399214660f830e56c6f93128c3fb0eab509cd444b1e6b8a0/share/doc/html/src/Data.Map.NonEmpty.Internal.html/Data.Map.NonEmpty.Internal.html#NEMap"><span class="hs-identifier hs-type">NEMap</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679496037"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Clipped.Type.html#ClippedMDCell"><span class="hs-identifier hs-type">ClippedMDCell</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679496038"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679496037"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-45"></span><span id="_ClippedVoronoiDiagram"><span class="annot"><span class="annottext">_ClippedVoronoiDiagram :: forall point r.
+(NumType point ~ r) =&gt;
+Iso'
+  (ClippedVoronoiDiagram point) (NEMap point (ClippedMDCell r point))
+</span><a href="HGeometry.VoronoiDiagram.Clipped.html#_ClippedVoronoiDiagram"><span class="hs-identifier hs-var hs-var">_ClippedVoronoiDiagram</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">p (ClippedMinimizationDiagram' r point)
+  (f (ClippedMinimizationDiagram' r point))
+-&gt; p (ClippedVoronoiDiagram point)
+     (f (ClippedVoronoiDiagram point))
+forall s t a b. (Coercible s a, Coercible t b) =&gt; Iso s t a b
+Iso
+  (ClippedVoronoiDiagram point)
+  (ClippedVoronoiDiagram point)
+  (ClippedMinimizationDiagram' r point)
+  (ClippedMinimizationDiagram' r point)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Iso.html/Control.Lens.Iso.html#coerced"><span class="hs-identifier hs-var">coerced</span></a></span><span> </span><span class="annot"><span class="annottext">(p (ClippedMinimizationDiagram' r point)
+   (f (ClippedMinimizationDiagram' r point))
+ -&gt; p (ClippedVoronoiDiagram point)
+      (f (ClippedVoronoiDiagram point)))
+-&gt; (p (NEMap point (ClippedMDCell r point))
+      (f (NEMap point (ClippedMDCell r point)))
+    -&gt; p (ClippedMinimizationDiagram' r point)
+         (f (ClippedMinimizationDiagram' r point)))
+-&gt; p (NEMap point (ClippedMDCell r point))
+     (f (NEMap point (ClippedMDCell r point)))
+-&gt; p (ClippedVoronoiDiagram point)
+     (f (ClippedVoronoiDiagram point))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">p (NEMap point (ClippedMDCell r point))
+  (f (NEMap point (ClippedMDCell r point)))
+-&gt; p (ClippedMinimizationDiagram' r point)
+     (f (ClippedMinimizationDiagram' r point))
+p (NEMap point (ClippedMDCell r point))
+  (f (NEMap point (ClippedMDCell r point)))
+-&gt; p (ClippedMinimizationDiagram point)
+     (f (ClippedMinimizationDiagram point))
+forall plane r.
+(NumType plane ~ r) =&gt;
+Iso'
+  (ClippedMinimizationDiagram plane)
+  (NEMap plane (ClippedMDCell r plane))
+Iso'
+  (ClippedMinimizationDiagram point)
+  (NEMap point (ClippedMDCell r point))
+</span><a href="HGeometry.Plane.LowerEnvelope.Clipped.Type.html#_ClippedMinimizationDiagramMap"><span class="hs-identifier hs-var">_ClippedMinimizationDiagramMap</span></a></span><span>
+</span><span id="line-46"></span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.VoronoiDiagram.Clipped.html#_ClippedVoronoiDiagram"><span class="hs-pragma hs-type">_ClippedVoronoiDiagram</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-47"></span><span>
+</span><span id="line-48"></span><span class="hs-comment">-- instance Constrained ClippedVoronoiDiagram where</span><span>
+</span><span id="line-49"></span><span class="hs-comment">--   type Dom ClippedVoronoiDiagram point = Ord point</span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- instance CFunctor ClippedVoronoiDiagram where</span><span>
+</span><span id="line-52"></span><span class="hs-comment">--   cmap f (ClippedVoronoiDiagram m) = ClippedVoronoiDiagram $ cmap f m</span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- -- not sure why I can't derive this</span><span>
+</span><span id="line-54"></span><span>
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679496222"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.VoronoiDiagram.Clipped.html#ClippedVoronoiDiagram"><span class="hs-identifier hs-type">ClippedVoronoiDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679496222"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679496222"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-57"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679496223"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.VoronoiDiagram.Clipped.html#ClippedVoronoiDiagram"><span class="hs-identifier hs-type">ClippedVoronoiDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679496223"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="hs-comment">-- | Computes the Voronoi inside the given triangle.</span><span>
+</span><span id="line-62"></span><span class="hs-comment">--</span><span>
+</span><span id="line-63"></span><span class="hs-comment">-- O(n^4) (for now).</span><span>
+</span><span id="line-64"></span><span id="local-6989586621679496058"><span id="local-6989586621679496059"><span id="local-6989586621679496061"><span id="local-6989586621679496062"><span class="annot"><a href="HGeometry.VoronoiDiagram.Clipped.html#voronoiDiagramIn"><span class="hs-identifier hs-type">voronoiDiagramIn</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679496058"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679496059"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679496061"><span class="hs-identifier hs-type">corner</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679496059"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679496062"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679496058"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-65"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679496059"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679496059"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679496062"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span>                    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679496059"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679496061"><span class="hs-identifier hs-type">corner</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="annot"><a href="#local-6989586621679496058"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-comment">-- TODO: remove these</span><span>
+</span><span id="line-68"></span><span>                    </span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span>                 </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Triangle</span></span><span> </span><span class="annot"><a href="#local-6989586621679496061"><span class="hs-identifier hs-type">corner</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679496062"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679496058"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.VoronoiDiagram.Clipped.html#ClippedVoronoiDiagram"><span class="hs-identifier hs-type">ClippedVoronoiDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679496058"><span class="hs-identifier hs-type">point</span></a></span></span></span></span></span><span>
+</span><span id="line-70"></span><span id="voronoiDiagramIn"><span class="annot"><span class="annottext">voronoiDiagramIn :: forall point r corner (nonEmpty :: * -&gt; *).
+(Point_ point 2 r, Point_ corner 2 r, Functor nonEmpty, Ord point,
+ Ord r, Fractional r, Foldable1 nonEmpty, Show r, Show corner,
+ Show point) =&gt;
+Triangle corner -&gt; nonEmpty point -&gt; ClippedVoronoiDiagram point
+</span><a href="HGeometry.VoronoiDiagram.Clipped.html#voronoiDiagramIn"><span class="hs-identifier hs-var hs-var">voronoiDiagramIn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Triangle corner
+ -&gt; nonEmpty (Plane r :+ point)
+ -&gt; ClippedMinimizationDiagram (Plane r :+ point))
+-&gt; Triangle corner -&gt; nonEmpty point -&gt; ClippedVoronoiDiagram point
+forall point r (nonEmpty :: * -&gt; *) corner.
+(Point_ point 2 r, Functor nonEmpty, Ord point, Ord r,
+ Fractional r, Foldable1 nonEmpty) =&gt;
+(Triangle corner
+ -&gt; nonEmpty (Plane r :+ point)
+ -&gt; ClippedMinimizationDiagram (Plane r :+ point))
+-&gt; Triangle corner -&gt; nonEmpty point -&gt; ClippedVoronoiDiagram point
+</span><a href="HGeometry.VoronoiDiagram.Clipped.html#voronoiDiagramInWith"><span class="hs-identifier hs-var">voronoiDiagramInWith</span></a></span><span> </span><span class="annot"><span class="annottext">Triangle corner
+-&gt; nonEmpty (Plane r :+ point)
+-&gt; ClippedMinimizationDiagram (Plane r :+ point)
+forall plane r corner (set :: * -&gt; *).
+(Plane_ plane r, Ord plane, Ord r, Fractional r, Point_ corner 2 r,
+ Foldable1 set, Show r, Show corner, Show plane) =&gt;
+Triangle corner -&gt; set plane -&gt; ClippedMinimizationDiagram plane
+</span><a href="HGeometry.Plane.LowerEnvelope.Clipped.html#lowerEnvelopeIn"><span class="hs-identifier hs-var">lowerEnvelopeIn</span></a></span><span>
+</span><span id="line-71"></span><span>
+</span><span id="line-72"></span><span class="hs-comment">-- | Given a function to compute a lower envelope; construct use it to construct the</span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- Voronoi diagram inside the given triangle.</span><span>
+</span><span id="line-74"></span><span id="local-6989586621679496138"><span id="local-6989586621679496139"><span id="local-6989586621679496140"><span id="local-6989586621679496141"><span class="annot"><a href="HGeometry.VoronoiDiagram.Clipped.html#voronoiDiagramInWith"><span class="hs-identifier hs-type">voronoiDiagramInWith</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679496138"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679496139"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="#local-6989586621679496140"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679496138"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-75"></span><span>                        </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679496139"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679496139"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679496140"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span>
+</span><span id="line-76"></span><span>                        </span><span class="hs-special">)</span><span>
+</span><span id="line-77"></span><span>                     </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Triangle</span></span><span> </span><span class="annot"><a href="#local-6989586621679496141"><span class="hs-identifier hs-type">corner</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679496140"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Plane</span></span><span> </span><span class="annot"><a href="#local-6989586621679496139"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679496138"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Plane.LowerEnvelope.Clipped.Type.html#ClippedMinimizationDiagram"><span class="hs-identifier hs-type">ClippedMinimizationDiagram</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Plane</span></span><span> </span><span class="annot"><a href="#local-6989586621679496139"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679496138"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-78"></span><span>                     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Triangle</span></span><span> </span><span class="annot"><a href="#local-6989586621679496141"><span class="hs-identifier hs-type">corner</span></a></span><span>
+</span><span id="line-79"></span><span>                     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679496140"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679496138"><span class="hs-identifier hs-type">point</span></a></span><span>
+</span><span id="line-80"></span><span>                     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.VoronoiDiagram.Clipped.html#ClippedVoronoiDiagram"><span class="hs-identifier hs-type">ClippedVoronoiDiagram</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679496138"><span class="hs-identifier hs-type">point</span></a></span></span></span></span></span><span>
+</span><span id="line-81"></span><span id="voronoiDiagramInWith"><span class="annot"><span class="annottext">voronoiDiagramInWith :: forall point r (nonEmpty :: * -&gt; *) corner.
+(Point_ point 2 r, Functor nonEmpty, Ord point, Ord r,
+ Fractional r, Foldable1 nonEmpty) =&gt;
+(Triangle corner
+ -&gt; nonEmpty (Plane r :+ point)
+ -&gt; ClippedMinimizationDiagram (Plane r :+ point))
+-&gt; Triangle corner -&gt; nonEmpty point -&gt; ClippedVoronoiDiagram point
+</span><a href="HGeometry.VoronoiDiagram.Clipped.html#voronoiDiagramInWith"><span class="hs-identifier hs-var hs-var">voronoiDiagramInWith</span></a></span></span><span> </span><span id="local-6989586621679496480"><span class="annot"><span class="annottext">Triangle corner
+-&gt; nonEmpty (Plane r :+ point)
+-&gt; ClippedMinimizationDiagram (Plane r :+ point)
+</span><a href="#local-6989586621679496480"><span class="hs-identifier hs-var">lowerEnv</span></a></span></span><span> </span><span id="local-6989586621679496481"><span class="annot"><span class="annottext">Triangle corner
+</span><a href="#local-6989586621679496481"><span class="hs-identifier hs-var">tri</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ClippedMinimizationDiagram' r point -&gt; ClippedVoronoiDiagram point
+ClippedMinimizationDiagram point -&gt; ClippedVoronoiDiagram point
+forall point.
+ClippedMinimizationDiagram point -&gt; ClippedVoronoiDiagram point
+</span><a href="HGeometry.VoronoiDiagram.Clipped.html#ClippedVoronoiDiagram"><span class="hs-identifier hs-var">ClippedVoronoiDiagram</span></a></span><span>
+</span><span id="line-82"></span><span>                                  </span><span class="annot"><span class="annottext">(ClippedMinimizationDiagram' r point
+ -&gt; ClippedVoronoiDiagram point)
+-&gt; (nonEmpty point -&gt; ClippedMinimizationDiagram' r point)
+-&gt; nonEmpty point
+-&gt; ClippedVoronoiDiagram point
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">((Plane r :+ point) -&gt; point)
+-&gt; ClippedMinimizationDiagram' r (Plane r :+ point)
+-&gt; ClippedMinimizationDiagram' r point
+forall a b.
+(Dom (ClippedMinimizationDiagram' r) a,
+ Dom (ClippedMinimizationDiagram' r) b) =&gt;
+(a -&gt; b)
+-&gt; ClippedMinimizationDiagram' r a
+-&gt; ClippedMinimizationDiagram' r b
+forall (f :: * -&gt; *) a b.
+(CFunctor f, Dom f a, Dom f b) =&gt;
+(a -&gt; b) -&gt; f a -&gt; f b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/subcategories-0.2.1.1-3bec1250e4f8586dc3166a9d147d96a8778596970313fdaa78c484c693c50dc4/share/doc/html/src/Control.Subcategory.Functor.html/Control.Subcategory.Functor.html#cmap"><span class="hs-identifier hs-var">cmap</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Plane r :+ point)
+-&gt; Getting point (Plane r :+ point) point -&gt; point
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point (Plane r :+ point) point
+forall core extra extra' (f :: * -&gt; *).
+Functor f =&gt;
+(extra -&gt; f extra') -&gt; (core :+ extra) -&gt; f (core :+ extra')
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#extra"><span class="hs-identifier hs-var">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ClippedMinimizationDiagram' r (Plane r :+ point)
+ -&gt; ClippedMinimizationDiagram' r point)
+-&gt; (nonEmpty point
+    -&gt; ClippedMinimizationDiagram' r (Plane r :+ point))
+-&gt; nonEmpty point
+-&gt; ClippedMinimizationDiagram' r point
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Triangle corner
+-&gt; nonEmpty (Plane r :+ point)
+-&gt; ClippedMinimizationDiagram (Plane r :+ point)
+</span><a href="#local-6989586621679496480"><span class="hs-identifier hs-var">lowerEnv</span></a></span><span> </span><span class="annot"><span class="annottext">Triangle corner
+</span><a href="#local-6989586621679496481"><span class="hs-identifier hs-var">tri</span></a></span><span> </span><span class="annot"><span class="annottext">(nonEmpty (Plane r :+ point)
+ -&gt; ClippedMinimizationDiagram' r (Plane r :+ point))
+-&gt; (nonEmpty point -&gt; nonEmpty (Plane r :+ point))
+-&gt; nonEmpty point
+-&gt; ClippedMinimizationDiagram' r (Plane r :+ point)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(point -&gt; Plane r :+ point)
+-&gt; nonEmpty point -&gt; nonEmpty (Plane r :+ point)
+forall a b. (a -&gt; b) -&gt; nonEmpty a -&gt; nonEmpty b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679496485"><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679496485"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">point -&gt; Plane r
+forall point r. (Point_ point 2 r, Num r) =&gt; point -&gt; Plane r
+</span><a href="HGeometry.VoronoiDiagram.ViaLowerEnvelope.html#pointToPlane"><span class="hs-identifier hs-var">pointToPlane</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679496485"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Plane r -&gt; point -&gt; Plane r :+ point
+forall core extra. core -&gt; extra -&gt; core :+ extra
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-var">:+</span></a></span><span> </span><span class="annot"><span class="annottext">point
+</span><a href="#local-6989586621679496485"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-83"></span></pre></body></html>
