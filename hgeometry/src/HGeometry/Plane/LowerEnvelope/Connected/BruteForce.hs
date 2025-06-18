@@ -59,7 +59,7 @@ bruteForceLowerEnvelope :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                            , Show r, Show plane
                            )
                         => set plane
-                        -> Maybe (MinimizationDiagram r (MDVertex r plane) plane)
+                        -> Maybe (MinimizationDiagram r (MDVertex r plane ()) plane)
 bruteForceLowerEnvelope = connectedLowerEnvelopeWith computeVertexForm
 
 -- | Given an algorithm to compute the vertices of the lower envelope, computes
@@ -70,7 +70,7 @@ connectedLowerEnvelopeWith :: (Plane_ plane r, Ord r, Fractional r, Foldable set
                               )
                            => (set plane -> VertexForm Map r plane)
                            -> set plane
-                           -> Maybe (MinimizationDiagram r (MDVertex r plane) plane)
+                           -> Maybe (MinimizationDiagram r (MDVertex r plane ()) plane)
 connectedLowerEnvelopeWith computeVertexForm' planes = case computeVertexForm' planes of
   IsNonEmpty vertices -> Just $ fromVertexForm vertices
   IsEmpty             -> Nothing

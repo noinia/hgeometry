@@ -43,7 +43,7 @@ type R = RealNumber 5
 rVoronoiDiagram :: ( Point_ point 2 r, Functor f, Ord point
                    , Ord r, Fractional r, Foldable1 f
                    , Show point, Show r
-                   ) => f point -> VoronoiDiagram point
+                   ) => f point -> VoronoiDiagram point ()
 rVoronoiDiagram = voronoiDiagramWith (lowerEnvelopeWith . connectedLowerEnvelopeWith $
                                        Randomized.computeVertexForm (mkStdGen 1))
 
@@ -73,9 +73,6 @@ grow d (Box p q) = Box (p&coordinates %~ subtract d)
 
 
 
-    -- $ ((uncheckedFromCCWPoints $ map (^.asPoint) vertices)
-    --                      :: ConvexPolygon (Point 2 r)
-    --                      )
 
     -- case fromPoints $ map (^.asPoint) vertices of
     --   Nothing -> error $ "could not create convex polygon?" <> show vertices
@@ -105,10 +102,10 @@ grow d (Box p q) = Box (p&coordinates %~ subtract d)
 -- h
 
 instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
-         , Show point, Show r
+         , Show point, Show r, Show vtxData
          )
-         => HasDefaultIpeOut (VoronoiDiagram_ r point) where
-  type DefaultIpeOut (VoronoiDiagram_ r point) = Group
+         => HasDefaultIpeOut (VoronoiDiagram_ r point vtxData) where
+  type DefaultIpeOut (VoronoiDiagram_ r point vtxData) = Group
   defIO = \case
     AllColinear colinearPts -> let sites     = toList colinearPts
                                    bisectors = toList $ separators colinearPts

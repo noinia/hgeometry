@@ -30,6 +30,7 @@ import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Intersection
 import           HGeometry.Permutation.Shuffle
 import qualified HGeometry.Plane.LowerEnvelope.Connected.BruteForce as BruteForce
+import           HGeometry.Plane.LowerEnvelope.Connected.Region
 import           HGeometry.Plane.LowerEnvelope.Connected.Regions
 import           HGeometry.Point
 import           HGeometry.Point.Either
@@ -37,7 +38,6 @@ import           HGeometry.Polygon
 import           HGeometry.Triangle
 import           Prelude hiding (filter, head, last)
 import           System.Random
-
 
 import           Debug.Trace
 --------------------------------------------------------------------------------
@@ -81,13 +81,12 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
       -- three planes). Moreover since we actually include the definers of the corners
       -- of a triangle we may get 4 planes in any case.
 
-    lowerEnvelopeIn = undefined
-{-
     lowerEnvelopeIn   :: (Foldable set)
                       => Triangle (Point 2 r)
                       -> set plane
                       -> Map (Point 3 r) (Definers plane)
     lowerEnvelopeIn tri planes | traceShow ("LE",toList planes) False = undefined
+{-
     lowerEnvelopeIn tri planes =
       let
           (rNet,remaining) = takeSample r' planes

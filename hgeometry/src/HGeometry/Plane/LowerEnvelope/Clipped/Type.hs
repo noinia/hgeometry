@@ -63,7 +63,9 @@ type ClippedMinimizationDiagram plane  = ClippedMinimizationDiagram' (NumType pl
 -- | Implementatino of the ClippedMinimizationDiagram type; r is the numeric type of the
 -- planes
 newtype ClippedMinimizationDiagram' r plane =
-  ClippedMinimizationDiagram (NEMap plane (ClippedMDCell r plane))
+  ClippedMinimizationDiagram (NEMap plane (ClippedMDCell r plane ()))
+
+-- TODO: expose the a type instead of ()
 
 deriving instance (Show r, Num r, Show plane) => Show (ClippedMinimizationDiagram' r plane)
 
@@ -73,7 +75,7 @@ type instance Dimension (ClippedMinimizationDiagram' r plane) = 2
 -- | Get access to the underlying NonEmpty Map
 _ClippedMinimizationDiagramMap :: (NumType plane ~ r)
                                => Iso' (ClippedMinimizationDiagram plane)
-                                       (NEMap plane (ClippedMDCell r plane))
+                                       (NEMap plane (ClippedMDCell r plane ()))
 _ClippedMinimizationDiagramMap = coerced
 {-# INLINE _ClippedMinimizationDiagramMap #-}
 
@@ -82,14 +84,14 @@ instance Constrained (ClippedMinimizationDiagram' r) where
 
 instance CFunctor (ClippedMinimizationDiagram' r) where
   cmap f (ClippedMinimizationDiagram m) = ClippedMinimizationDiagram $
-    NEMap.foldMapWithKey (\plane cell -> NEMap.singleton (f plane) (fmap f <$> cell)) m
+    NEMap.foldMapWithKey (\plane cell -> NEMap.singleton (f plane) (first f <$> cell)) m
 
 --------------------------------------------------------------------------------
 -- * Representing Cells in a Clipped MinimizationDiagram
 
 -- | Cells in the Minimization diagram (i.e. the projected lower envelope of planes)
 -- parameterized by the numeric type and the planes
-type ClippedMDCell r plane = ClippedMDCell' r (MDVertex r plane)
+type ClippedMDCell r plane a = ClippedMDCell' r (MDVertex r plane a)
 
 -- | Helper type for representing cells in a minimzation diagram. These cells are possibly
 -- degenerate convex polygons, whose vertices are either of type 'vertex' or of type

@@ -31,6 +31,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
 
 import           Control.Lens
 import           Data.Coerce
+import           Data.Default.Class
 import qualified Data.Foldable as F
 import           Data.Foldable1
 import qualified Data.List as List
@@ -61,10 +62,10 @@ import           HGeometry.Point
 import           HGeometry.Point.Either
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Triangle
 import           HGeometry.Vector
-import           HGeometry.Polygon.Convex.Unbounded
 
 
 import           Debug.Trace
@@ -159,10 +160,11 @@ mergeDefiners v defs0 defs1 = case extractH0 v (coerce defs0 <> coerce defs1) of
 fromVertexFormIn     :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show plane
                         , Point_ corner 2 r
                         , Show r, Show corner
+                        , Default vtxData, Ord vtxData
                         )
                      => Triangle corner
                      -> NEMap (Point 3 r) (Definers plane)
-                     -> NEMap plane (ClippedBoundedRegion r (MDVertex r plane) (Point 2 r))
+                     -> NEMap plane (ClippedBoundedRegion r (MDVertex r plane vtxData) (Point 2 r))
 fromVertexFormIn tri = case fromPoints $ (Extra . (^.asPoint)) <$> tri of
   Just tri' -> fmap (fromMaybe tri' . clipTo tri) . asMap . fromVertexForm
   Nothing   -> error "absurd: fromVertexFormIn"
@@ -170,8 +172,8 @@ fromVertexFormIn tri = case fromPoints $ (Extra . (^.asPoint)) <$> tri of
 clipTo     :: (Point_ corner 2 r, Fractional r, Ord r
               , Show r, Show corner
               )
-           => Triangle corner -> Region r (MDVertex r plane)
-           -> Maybe (ClippedBoundedRegion r (MDVertex r plane) (Point 2 r))
+           => Triangle corner -> Region r (MDVertex r plane vtxData)
+           -> Maybe (ClippedBoundedRegion r (MDVertex r plane vtxData) (Point 2 r))
 clipTo tri = \case
   BoundedRegion vs          -> Just $ Original <$> vs
     --todo ; fix clip this as well
@@ -276,13 +278,14 @@ cornersInBetween s e tri = map (^._2.asPoint)
 --
 -- \(O(h\log h)\) assuming that the input is non-degenerate.
 fromVertexForm :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show plane
+                  , Default vtxData, Ord vtxData
                   )
                => NEMap (Point 3 r) (Definers plane)
-               -> MinimizationDiagram r (MDVertex r plane) plane
+               -> MinimizationDiagram r (MDVertex r plane vtxData) plane
 fromVertexForm = MinimizationDiagram
                . Map.mapWithKey sortAroundBoundary
                . mapWithKeyMerge1 (\v definers ->
-                    foldMap1 (\h -> Map.singleton h (Set.singleton (MDVertex v definers))) definers)
+                    foldMap1 (\h -> Map.singleton h (Set.singleton (MDVertex v definers def))) definers)
 -- for each vertex v, we go through its definers defs; and for each such plane h, we
 -- associate it with with the set {(v,defs)}. the foldMapWithKey part thus collects all
 -- vertices (together with their definers) incident to h. i.e. it combines these sets {(v,
@@ -296,8 +299,8 @@ fromVertexForm = MinimizationDiagram
 -- region in the minimization diagram.
 sortAroundBoundary             :: ( Plane_ plane r, Ord r, Fractional r, Ord plane
                                   )
-                               => plane -> NESet (MDVertex r plane)
-                               -> Region r (MDVertex r plane)
+                               => plane -> NESet (MDVertex r plane vtxData)
+                               -> Region r (MDVertex r plane vtxData)
 sortAroundBoundary h vertices' = case NonEmpty.nonEmpty rest of
     Nothing     -> let (u,p,w) = singleVertex h v0
                    in UnboundedRegion $ Unbounded u (NonEmpty.singleton p) w
@@ -321,8 +324,8 @@ sortAroundBoundary h vertices' = case NonEmpty.nonEmpty rest of
 -- In particular, returns the triple (u,p,w). h is the region to the left of u, and also the
 -- left of w.
 singleVertex           :: ( Plane_ plane r, Ord r, Fractional r, Ord plane)
-                       => plane -> MDVertex r plane
-                       -> (Vector 2 r, MDVertex r plane, Vector 2 r)
+                       => plane -> MDVertex r plane vtxData
+                       -> (Vector 2 r, MDVertex r plane vtxData, Vector 2 r)
 singleVertex h v = fromMaybe (error "singleVertex: absurd") $
     do (hPred,hSucc) <- findNeighbours h (definersOf v)
        u             <- intersectionVector h hPred
@@ -338,13 +341,13 @@ singleVertex h v = fromMaybe (error "singleVertex: absurd") $
 --
 -- computes the actual region R. In particular, we compute the direction that the
 -- unbounded edges have.
-unboundedRegion              :: forall plane r vertexData.
+unboundedRegion              :: forall plane r vtxData.
                                 ( Plane_ plane r, Ord r, Fractional r, Ord plane
                                 )
                              => plane
-                             -> NonEmpty (MDVertex r plane)
-                             -> MDVertex r plane -> MDVertex r plane
-                             -> Region r (MDVertex r plane)
+                             -> NonEmpty (MDVertex r plane vtxData)
+                             -> MDVertex r plane vtxData -> MDVertex r plane vtxData
+                             -> Region r (MDVertex r plane vtxData)
 unboundedRegion h chain v u = UnboundedRegion $ Unbounded wv chain wu
   -- mabye this should really return an 'UnboundedConvexRegion' instead?
   where
@@ -384,7 +387,7 @@ unboundedRegion h chain v u = UnboundedRegion $ Unbounded wv chain wu
 -- either (u,v) is not an actual edge (i.e. u and v) are connected to the vertex at
 -- infinity. Or that the edge is in the wrong orientation
 isInvalid         :: ( Plane_ plane r, Eq plane, Ord r, Fractional r)
-                  => plane -> ( MDVertex r plane, MDVertex r plane) -> Bool
+                  => plane -> ( MDVertex r plane vtxData, MDVertex r plane vtxData) -> Bool
 isInvalid h (u,v) =
   fromMaybe (error "isInvalid: h not found in the definers!?") $ do
       (hPredU,_) <- findNeighbours h (definersOf u)
@@ -401,7 +404,7 @@ project (Point3 x y _, loc) = (Point2 x y, loc)
 -- | Given a list of vertices of a (possibly unbounded) convex polygonal region (in
 -- arbitrary orientation), sort the vertices so that they are listed in CCW order.
 inCCWOrder     :: (Ord r, Fractional r)
-               => NonEmpty (MDVertex r plane) -> NonEmpty (MDVertex r plane)
+               => NonEmpty (MDVertex r plane vtxData) -> NonEmpty (MDVertex r plane vtxData)
 inCCWOrder pts = case pts of
   (p :| q:_) -> let c       = p .+^ ((q .-. p) ^/ 2)
                     cmp a b = ccwCmpAround c a b <> cmpByDistanceTo c a b
