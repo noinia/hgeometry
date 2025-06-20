@@ -32,7 +32,7 @@
 </span><span id="line-32"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-33"></span><span>
 </span><span id="line-34"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Control.DeepSeq</span></span><span>
-</span><span id="line-35"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-35"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
 </span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
 </span><span id="line-37"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">comparing</span></span><span class="hs-special">)</span><span>
 </span><span id="line-38"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
@@ -82,7 +82,7 @@ to :: forall x. Rep (LinePV d r) x -&gt; LinePV d r
 </span><span id="line-67"></span><span class="annot"><span class="hs-comment">-- | Types that have a Direction field</span></span><span>
 </span><span id="line-68"></span><span class="hs-keyword">class</span><span> </span><span id="HasDirection"><span class="annot"><a href="HGeometry.Line.PointAndVector.html#HasDirection"><span class="hs-identifier hs-var">HasDirection</span></a></span></span><span> </span><span id="local-6989586621679430708"><span class="annot"><a href="#local-6989586621679430708"><span class="hs-identifier hs-type">t</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-69"></span><span>  </span><span class="hs-comment">-- | Lens to access the direction field</span><span>
-</span><span id="line-70"></span><span>  </span><span id="direction"><span class="annot"><a href="HGeometry.Line.PointAndVector.html#direction"><span class="hs-identifier hs-type">direction</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679430703"><span id="local-6989586621679430705"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679430708"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="#local-6989586621679430703"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679430708"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="#local-6989586621679430705"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679430708"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679430703"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679430705"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-70"></span><span>  </span><span id="direction"><span class="annot"><a href="HGeometry.Line.PointAndVector.html#direction"><span class="hs-identifier hs-type">direction</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679430703"><span id="local-6989586621679430705"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Dimension</span></span><span> </span><span class="annot"><a href="#local-6989586621679430708"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="#local-6989586621679430703"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679430708"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><a href="#local-6989586621679430705"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679430708"><span class="hs-identifier hs-type">t</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679430703"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679430705"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-71"></span><span>
 </span><span id="line-72"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679430709"><span id="local-6989586621679430710"><span class="annot"><a href="HGeometry.Line.PointAndVector.html#HasDirection"><span class="hs-identifier hs-type">HasDirection</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-type">LinePV</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679430709"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679430710"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-73"></span><span>  </span><span id="local-6989586621679431134"><span class="annot"><span class="annottext">direction :: forall (d :: Nat) r.
@@ -92,7 +92,7 @@ Lens' (LinePV d r) (Vector d r)
 -&gt; (LinePV d r -&gt; Vector d r -&gt; LinePV d r)
 -&gt; Lens (LinePV d r) (LinePV d r) (Vector d r) (Vector d r)
 forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV d r -&gt; Vector d r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV d r -&gt; Vector d r
 LinePV d r -&gt; Vector d r
 forall (d :: Nat) r. LinePV d r -&gt; Vector d r
 </span><a href="HGeometry.Line.PointAndVector.html#_direction"><span class="hs-identifier hs-var">_direction</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679431136"><span class="annot"><span class="annottext">LinePV d r
@@ -102,7 +102,7 @@ forall (d :: Nat) r. LinePV d r -&gt; Vector d r
 </span><span id="line-74"></span><span>  </span><span class="hs-pragma">{-# INLINE</span><span> </span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#direction"><span class="hs-pragma hs-type">direction</span></a></span><span> </span><span class="hs-pragma">#-}</span><span>
 </span><span id="line-75"></span><span>
 </span><span id="line-76"></span><span class="annot"><span class="hs-comment">-- | Lens to access the anchor point of the line</span></span><span>
-</span><span id="line-77"></span><span id="local-6989586621679430723"><span id="local-6989586621679430724"><span class="annot"><a href="HGeometry.Line.PointAndVector.html#anchorPoint"><span class="hs-identifier hs-type">anchorPoint</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-type">LinePV</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679430723"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679430724"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><a href="#local-6989586621679430723"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679430724"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-77"></span><span id="local-6989586621679430723"><span id="local-6989586621679430724"><span class="annot"><a href="HGeometry.Line.PointAndVector.html#anchorPoint"><span class="hs-identifier hs-type">anchorPoint</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-type">LinePV</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679430723"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679430724"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><a href="#local-6989586621679430723"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679430724"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-78"></span><span id="anchorPoint"><span class="annot"><span class="annottext">anchorPoint :: forall (d :: Nat) r (f :: * -&gt; *).
 Functor f =&gt;
 (Point d r -&gt; f (Point d r)) -&gt; LinePV d r -&gt; f (LinePV d r)
@@ -110,7 +110,7 @@ Functor f =&gt;
 -&gt; (LinePV d r -&gt; Point d r -&gt; LinePV d r)
 -&gt; Lens (LinePV d r) (LinePV d r) (Point d r) (Point d r)
 forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV d r -&gt; Point d r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV d r -&gt; Point d r
 forall (d :: Nat) r. LinePV d r -&gt; Point d r
 </span><a href="HGeometry.Line.PointAndVector.html#_anchorPoint"><span class="hs-identifier hs-var">_anchorPoint</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679431140"><span class="annot"><span class="annottext">LinePV d r
 </span><a href="#local-6989586621679431140"><span class="hs-identifier hs-var">l</span></a></span></span><span> </span><span id="local-6989586621679431141"><span class="annot"><span class="annottext">Point d r
@@ -129,7 +129,7 @@ forall (d :: Nat) r. Point d r -&gt; Vector d r -&gt; LinePV d r
 </span><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-var">LinePV</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
 </span><a href="#local-6989586621679431164"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Point d r) point (Point d r) -&gt; Point d r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point d r) point (Point d r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point d r) point (Point d r)
 forall point (d :: Nat) r.
 Point_ point d r =&gt;
 Lens' point (Point d r)
@@ -138,7 +138,7 @@ Lens' point (Point d r)
 </span><a href="#local-6989586621679431165"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">Vector d r
 -&gt; Getting (Vector d r) (Vector d r) (Vector d r) -&gt; Vector d r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) (Vector d r) (Vector d r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) (Vector d r) (Vector d r)
 forall vector vector' (d :: Nat) r s.
 AsVector_ vector vector' d r s =&gt;
 Iso vector vector' (Vector d r) (Vector d s)
@@ -204,7 +204,7 @@ forall (d :: Nat) r. Point d r -&gt; Vector d r -&gt; LinePV d r
 </span><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-var">LinePV</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
 </span><a href="#local-6989586621679431207"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Point 2 r) point (Point 2 r) -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
 forall point (d :: Nat) r.
 Point_ point d r =&gt;
 Lens' point (Point d r)
@@ -227,7 +227,7 @@ forall (d :: Nat) r. Point d r -&gt; Vector d r -&gt; LinePV d r
 </span><a href="HGeometry.Line.PointAndVector.html#LinePV"><span class="hs-identifier hs-var">LinePV</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
 </span><a href="#local-6989586621679431237"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Point 2 r) point (Point 2 r) -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
 forall point (d :: Nat) r.
 Point_ point d r =&gt;
 Lens' point (Point d r)
@@ -453,7 +453,7 @@ point -&gt; LinePV d r -&gt; Bool
 </span><a href="#local-6989586621679431586"><span class="hs-identifier hs-var hs-var">q'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point
 </span><a href="#local-6989586621679431583"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Point d r) point (Point d r) -&gt; Point d r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point d r) point (Point d r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point d r) point (Point d r)
 forall point (d :: Nat) r.
 Point_ point d r =&gt;
 Lens' point (Point d r)
@@ -569,7 +569,7 @@ point -&gt; point' -&gt; point'' -&gt; CCW
 </span><span class="hs-identifier hs-var">ccw</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
 </span><a href="#local-6989586621679431745"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Point 2 r) point (Point 2 r) -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
 forall point (d :: Nat) r.
 Point_ point d r =&gt;
 Lens' point (Point d r)
@@ -753,7 +753,7 @@ t -&gt; LinePV (Dimension t) (NumType t)
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting t (t :+ extra) t -&gt; (t :+ extra) -&gt; t
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting t (t :+ extra) t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting t (t :+ extra) t
 forall core extra core' (f :: * -&gt; *).
 Functor f =&gt;
 (core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
@@ -796,7 +796,7 @@ forall r. r -&gt; r -&gt; Vector 2 r
 point -&gt; LinePV d r -&gt; Point d r
 </span><a href="#local-6989586621679432026"><span class="hs-identifier hs-var hs-var hs-var">pointClosestTo</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Getting (Point d r) point (Point d r) -&gt; point -&gt; Point d r
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point d r) point (Point d r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point d r) point (Point d r)
 forall point (d :: Nat) r.
 Point_ point d r =&gt;
 Lens' point (Point d r)
@@ -971,7 +971,7 @@ point -&gt; Vector d r -&gt; point
 </span><a href="#local-6989586621679432364"><span class="hs-identifier hs-var">z</span></a></span></span><span>         </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s
 </span><a href="#local-6989586621679432364"><span class="hs-identifier hs-var">z</span></a></span><span class="annot"><span class="annottext">s -&gt; Getting (NumType s) s (NumType s) -&gt; NumType s
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (NumType s) s (NumType s)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (NumType s) s (NumType s)
 forall (d :: Nat) point r.
 (1 &lt;= d, Point_ point d r) =&gt;
 IndexedLens' Int point r
@@ -979,7 +979,7 @@ IndexedLens' Int s (NumType s)
 </span><span class="hs-identifier hs-var">xCoord</span></span><span class="hs-special">,</span><span> </span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">s
 </span><a href="#local-6989586621679432364"><span class="hs-identifier hs-var">z</span></a></span><span class="annot"><span class="annottext">s -&gt; Getting (NumType s) s (NumType s) -&gt; NumType s
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (NumType s) s (NumType s)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (NumType s) s (NumType s)
 forall (d :: Nat) point r.
 (2 &lt;= d, Point_ point d r) =&gt;
 IndexedLens' Int point r
@@ -1051,7 +1051,7 @@ s -&gt; (NumType s, NumType s)
 </span><a href="#local-6989586621679432249"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
 </span><a href="#local-6989586621679432245"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Point 2 r) point (Point 2 r) -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
 forall point (d :: Nat) r.
 Point_ point d r =&gt;
 Lens' point (Point d r)
@@ -1190,7 +1190,7 @@ point -&gt; point' -&gt; point'' -&gt; CCW
 </span><a href="#local-6989586621679432570"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
 </span><a href="#local-6989586621679432567"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Point 2 r) point (Point 2 r) -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
 forall point (d :: Nat) r.
 Point_ point d r =&gt;
 Lens' point (Point d r)
@@ -1277,7 +1277,7 @@ point -&gt; point -&gt; Vector d r
 </span><span id="line-353"></span><span>                   </span><span id="local-6989586621679432646"><span class="annot"><span class="annottext">h :: Point 2 r
 </span><a href="#local-6989586621679432646"><span class="hs-identifier hs-var hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r) -&gt; point -&gt; Point 2 r
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
 forall point (d :: Nat) r.
 Point_ point d r =&gt;
 Lens' point (Point d r)
@@ -1330,7 +1330,7 @@ Lens' (LinePV 2 r) (Vector 2 r)
  -&gt; LinePV 2 r -&gt; Identity (LinePV 2 r))
 -&gt; (Vector 2 r -&gt; Vector 2 r) -&gt; LinePV 2 r -&gt; LinePV 2 r
 forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; Vector 2 r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="annot"><span class="annottext">Vector 2 r -&gt; Vector 2 r
 forall {r}. Num r =&gt; Vector 2 r -&gt; Vector 2 r
 </span><a href="#local-6989586621679432660"><span class="hs-identifier hs-var">rot90cw</span></a></span><span>
 </span><span id="line-365"></span><span>  </span><span class="hs-keyword">where</span><span>

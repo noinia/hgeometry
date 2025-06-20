@@ -17,7 +17,7 @@
 </span><span id="line-17"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#LineTriangleIntersection"><span class="hs-identifier">LineTriangleIntersection</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
 </span><span id="line-18"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-19"></span><span>
-</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
 </span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
 </span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.Generics</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Generic</span></span><span class="hs-special">)</span><span>
 </span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Box.Boxable.html"><span class="hs-identifier">HGeometry.Box.Boxable</span></a></span><span>
@@ -151,7 +151,7 @@ forall point. Triangle point -&gt; Triangle point
 forall t. (t -&gt; t) -&gt; Reversing t
 $creversing :: forall point. Triangle point -&gt; Triangle point
 reversing :: Triangle point -&gt; Triangle point
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Internal.Iso.html/Control.Lens.Internal.Iso.html#Reversing"><span class="hs-identifier hs-var hs-var hs-var hs-var">Reversing</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Internal.Iso.html/Control.Lens.Internal.Iso.html#Reversing"><span class="hs-identifier hs-var hs-var hs-var hs-var">Reversing</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-43"></span><span>
 </span><span id="line-44"></span><span class="annot"><span class="hs-comment">-- | Construct a triangle from its three points</span></span><span>
 </span><span id="line-45"></span><span class="hs-keyword">pattern</span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span>       </span><span class="hs-glyph">::</span><span> </span><span id="local-6989586621679453935"><span class="annot"><a href="#local-6989586621679453935"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679453935"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679453935"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679453935"><span class="hs-identifier hs-type">point</span></a></span></span><span>
@@ -225,7 +225,7 @@ Apply f =&gt;
 </span><span id="line-63"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span>   </span><span id="local-6989586621679454663"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454663"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679454663"><span class="hs-identifier hs-type">point</span></a></span><span>
 </span><span id="line-64"></span><span>
 </span><span id="line-65"></span><span class="annot"><span class="hs-comment">-- | Iso between a triangle and a vector of three points</span></span><span>
-</span><span id="line-66"></span><span id="local-6989586621679454001"><span id="local-6989586621679454002"><span class="annot"><a href="HGeometry.Triangle.html#_TriangleVector"><span class="hs-identifier hs-type">_TriangleVector</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Iso"><span class="hs-identifier hs-type">Iso</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454001"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454002"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679454001"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679454002"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-66"></span><span id="local-6989586621679454001"><span id="local-6989586621679454002"><span class="annot"><a href="HGeometry.Triangle.html#_TriangleVector"><span class="hs-identifier hs-type">_TriangleVector</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Iso"><span class="hs-identifier hs-type">Iso</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454001"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#Triangle"><span class="hs-identifier hs-type">Triangle</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679454002"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679454001"><span class="hs-identifier hs-type">point</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><span class="hs-number">3</span></span><span> </span><span class="annot"><a href="#local-6989586621679454002"><span class="hs-identifier hs-type">point'</span></a></span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-67"></span><span id="_TriangleVector"><span class="annot"><span class="annottext">_TriangleVector :: forall point point' (p :: * -&gt; * -&gt; *) (f :: * -&gt; *).
 (Profunctor p, Functor f) =&gt;
 p (Vector 3 point) (f (Vector 3 point'))
@@ -238,7 +238,7 @@ p (Vector 3 point) (f (Vector 3 point'))
      (Vector 3 point)
      (Vector 3 point')
 forall s a b t. (s -&gt; a) -&gt; (b -&gt; t) -&gt; Iso s t a b
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Iso.html/Control.Lens.Iso.html#iso"><span class="hs-identifier hs-var">iso</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#MkTriangle"><span class="hs-identifier hs-type">MkTriangle</span></a></span><span> </span><span id="local-6989586621679454670"><span class="annot"><span class="annottext">Vector 3 point
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Iso.html/Control.Lens.Iso.html#iso"><span class="hs-identifier hs-var">iso</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Triangle.html#MkTriangle"><span class="hs-identifier hs-type">MkTriangle</span></a></span><span> </span><span id="local-6989586621679454670"><span class="annot"><span class="annottext">Vector 3 point
 </span><a href="#local-6989586621679454670"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Vector 3 point
 </span><a href="#local-6989586621679454670"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Vector 3 point' -&gt; Triangle point'
 forall point. Vector 3 point -&gt; Triangle point
@@ -289,7 +289,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 forall m.
 Ixed m =&gt;
 Index m -&gt; IndexedTraversal' (Index m) m (IxValue m)
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.At.html/Control.Lens.At.html#iix"><span class="hs-identifier hs-var">iix</span></a></span><span> </span><span class="annot"><span class="annottext">VertexIx (Triangle point)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.At.html/Control.Lens.At.html#iix"><span class="hs-identifier hs-var">iix</span></a></span><span> </span><span class="annot"><span class="annottext">VertexIx (Triangle point)
 Index (Vector 3 point)
 </span><a href="#local-6989586621679454708"><span class="hs-identifier hs-var">i</span></a></span><span>
 </span><span id="line-78"></span><span>  </span><span id="local-6989586621679454713"><span class="annot"><span class="annottext">numVertices :: Triangle point -&gt; Int
@@ -311,7 +311,7 @@ forall a b. a -&gt; b -&gt; a
      Int (Triangle point) (Triangle point') point point'
 forall i s t a b.
 AnIndexedTraversal1 i s t a b -&gt; IndexedTraversal1 i s t a b
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Traversal.html/Control.Lens.Traversal.html#cloneIndexedTraversal1"><span class="hs-identifier hs-var">cloneIndexedTraversal1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Vector 3 point
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Traversal.html/Control.Lens.Traversal.html#cloneIndexedTraversal1"><span class="hs-identifier hs-var">cloneIndexedTraversal1</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Vector 3 point
  -&gt; Bazaar1 (Indexed Int) point point' (Vector 3 point'))
 -&gt; Triangle point
 -&gt; Bazaar1 (Indexed Int) point point' (Triangle point')
@@ -502,7 +502,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 -&gt; Vector 3 (HalfSpaceF (LinePV 2 r))
 -&gt; Bool
 forall s a. Getting All s a -&gt; (a -&gt; Bool) -&gt; s -&gt; Bool
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#allOf"><span class="hs-identifier hs-var">allOf</span></a></span><span> </span><span class="annot"><span class="annottext">(IxValue (Vector 3 (HalfSpaceF (LinePV 2 r)))
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#allOf"><span class="hs-identifier hs-var">allOf</span></a></span><span> </span><span class="annot"><span class="annottext">(IxValue (Vector 3 (HalfSpaceF (LinePV 2 r)))
  -&gt; Const All (IxValue (Vector 3 (HalfSpaceF (LinePV 2 r)))))
 -&gt; Vector 3 (HalfSpaceF (LinePV 2 r))
 -&gt; Const All (Vector 3 (HalfSpaceF (LinePV 2 r)))
@@ -797,7 +797,7 @@ LinePV 3 r
 </span><a href="HGeometry.Triangle.html#directedLineTriangleIntersect"><span class="hs-identifier hs-var">directedLineTriangleIntersect</span></a></span><span> </span><span class="annot"><span class="annottext">LinePV 3 r
 </span><a href="#local-6989586621679455109"><span class="hs-identifier hs-var">l</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Getting (Point 3 r) point (Point 3 r) -&gt; point -&gt; Point 3 r
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 3 r) point (Point 3 r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 3 r) point (Point 3 r)
 forall point (d :: Nat) r.
 Point_ point d r =&gt;
 Lens' point (Point d r)
@@ -1057,7 +1057,7 @@ HalfLine s -&gt; LinePV (Dimension s) (NumType s)
 </span><a href="#local-6989586621679455649"><span class="hs-identifier hs-var">toLine</span></a></span><span> </span><span class="annot"><span class="annottext">HalfLine point
 </span><a href="#local-6989586621679455646"><span class="hs-identifier hs-var">ray</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Getting (Point 3 r) point' (Point 3 r) -&gt; point' -&gt; Point 3 r
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 3 r) point' (Point 3 r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 3 r) point' (Point 3 r)
 forall point (d :: Nat) r.
 Point_ point d r =&gt;
 Lens' point (Point d r)
@@ -1070,7 +1070,7 @@ forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><a href="#local-6989586621679455650"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Point 3 r :+ r
 </span><a href="#local-6989586621679455650"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(Point 3 r :+ r) -&gt; Getting r (Point 3 r :+ r) r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Point 3 r :+ r) r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Point 3 r :+ r) r
 forall core extra extra' (f :: * -&gt; *).
 Functor f =&gt;
 (extra -&gt; f extra') -&gt; (core :+ extra) -&gt; f (core :+ extra')
@@ -1135,7 +1135,7 @@ forall (d :: Nat) r. Point d r -&gt; Vector d r -&gt; LinePV d r
      (Point (Dimension s) (NumType s))
 -&gt; Point (Dimension s) (NumType s)
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
   (Point (Dimension s) (NumType s))
   s
   (Point (Dimension s) (NumType s))
@@ -1158,7 +1158,7 @@ Lens' s (Point (Dimension s) (NumType s))
 -&gt; Getting (Point 2 r) (ClosedLineSegment (Point 2 r)) (Point 2 r)
 -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) (ClosedLineSegment (Point 2 r)) (Point 2 r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) (ClosedLineSegment (Point 2 r)) (Point 2 r)
 forall seg p. HasStart seg p =&gt; Lens' seg p
 Lens' (ClosedLineSegment (Point 2 r)) (Point 2 r)
 </span><a href="HGeometry.Interval.Class.html#start"><span class="hs-identifier hs-var">start</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Triangle (Point 2 r) -&gt; Bool
@@ -1170,7 +1170,7 @@ forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
 -&gt; Getting (Point 2 r) (ClosedLineSegment (Point 2 r)) (Point 2 r)
 -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) (ClosedLineSegment (Point 2 r)) (Point 2 r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) (ClosedLineSegment (Point 2 r)) (Point 2 r)
 forall seg p. HasEnd seg p =&gt; Lens' seg p
 Lens' (ClosedLineSegment (Point 2 r)) (Point 2 r)
 </span><a href="HGeometry.Interval.Class.html#end"><span class="hs-identifier hs-var">end</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Triangle (Point 2 r) -&gt; Bool
@@ -1195,7 +1195,7 @@ forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
 </span><a href="#local-6989586621679455834"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span id="local-6989586621679455835"><span class="annot"><span class="annottext">Point 2 r
 </span><a href="#local-6989586621679455835"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) vertex (Point 2 r) -&gt; vertex -&gt; Point 2 r
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) vertex (Point 2 r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) vertex (Point 2 r)
 forall point (d :: Nat) r.
 Point_ point d r =&gt;
 Lens' point (Point d r)
@@ -1241,9 +1241,9 @@ Traversal1
 -&gt; ClosedLineSegment point
 -&gt; ClosedLineSegment (Point 2 r)
 forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r) -&gt; point -&gt; Point 2 r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r) -&gt; point -&gt; Point 2 r
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
 forall point (d :: Nat) r.
 Point_ point d r =&gt;
 Lens' point (Point d r)

@@ -15,7 +15,7 @@
 </span><span id="line-15"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Box.Boxable.html#IsBoxable"><span class="hs-identifier">IsBoxable</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
 </span><span id="line-16"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-17"></span><span>
-</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
 </span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/semigroupoids-6.0.1-a8bbfdf809d26cf53d1649155d1175ff37b07769640f0e81bd2ce91845990ef7/share/doc/html/src/Data.Semigroup.Foldable.html/Data.Semigroup.Foldable.html"><span class="hs-identifier">Data.Semigroup.Foldable</span></a></span><span>
 </span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Box.Class.html"><span class="hs-identifier">HGeometry.Box.Class</span></a></span><span>
@@ -79,7 +79,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting (NonEmptyDList (Point d r)) g (Point d r)
 -&gt; g -&gt; NonEmpty (Point d r)
 forall a s. Getting (NonEmptyDList a) s a -&gt; s -&gt; NonEmpty a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#toNonEmptyOf"><span class="hs-identifier hs-var">toNonEmptyOf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(point -&gt; Const (NonEmptyDList (Point d r)) point)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#toNonEmptyOf"><span class="hs-identifier hs-var">toNonEmptyOf</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(point -&gt; Const (NonEmptyDList (Point d r)) point)
 -&gt; g -&gt; Const (NonEmptyDList (Point d r)) g
 forall (d :: Nat) r r'.
 (Point_ point d r, Point_ point d r', NumType g ~ r,
@@ -131,7 +131,7 @@ forall a b. (a -&gt; b) -&gt; Box a -&gt; Box b
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Getting (Point d r) point (Point d r) -&gt; point -&gt; Point d r
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point d r) point (Point d r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point d r) point (Point d r)
 forall point (d :: Nat) r.
 Point_ point d r =&gt;
 Lens' point (Point d r)
@@ -155,7 +155,7 @@ g -&gt; Box (Point d r)
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting g (g :+ extra) g -&gt; (g :+ extra) -&gt; g
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting g (g :+ extra) g
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting g (g :+ extra) g
 forall core extra core' (f :: * -&gt; *).
 Functor f =&gt;
 (core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
@@ -238,7 +238,7 @@ Lens
 -&gt; a
 -&gt; b
 forall s t a b. ASetter s t a b -&gt; (a -&gt; b) -&gt; s -&gt; t
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="annot"><span class="annottext">(NumType a -&gt; NumType a -&gt; NumType a)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#%25~"><span class="hs-operator hs-var">%~</span></a></span><span> </span><span class="annot"><span class="annottext">(NumType a -&gt; NumType a -&gt; NumType a)
 -&gt; Vector (Dimension a) (NumType a)
 -&gt; Vector (Dimension a) (NumType a)
 -&gt; Vector (Dimension a) (NumType a)
@@ -254,7 +254,7 @@ Additive_ vector d r =&gt;
      (Vector (Dimension a) (NumType a))
 -&gt; Vector (Dimension a) (NumType a)
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
   (Vector (Dimension a) (NumType a))
   s
   (Vector (Dimension a) (NumType a))

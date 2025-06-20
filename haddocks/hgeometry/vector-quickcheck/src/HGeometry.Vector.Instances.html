@@ -13,7 +13,7 @@
 </span><span id="line-13"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-14"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Vector.Instances.html"><span class="hs-identifier">HGeometry.Vector.Instances</span></a></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-15"></span><span>
-</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
 </span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span>
 </span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/QuickCheck-2.15.0.1-a91e74f046e7fde8427cdb0eb2bc9f9a58af018bbab22995f3e65bdb7599666d/share/doc/html/src/Test.QuickCheck.html/Test.QuickCheck.html"><span class="hs-identifier">Test.QuickCheck</span></a></span><span>
 </span><span id="line-19"></span><span>
@@ -46,7 +46,7 @@ Int -&gt; IndexedTraversal' Int vector r
 </span><a href="#local-6989586621679134689"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">((r -&gt; Identity r) -&gt; Vector d r -&gt; Identity (Vector d r))
 -&gt; r -&gt; Vector d r -&gt; Vector d r
 forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="annot"><span class="annottext">r
 </span><a href="#local-6989586621679134691"><span class="hs-identifier hs-var">x'</span></a></span><span>
 </span><span id="line-25"></span><span>             </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679134689"><span class="annot"><span class="annottext">Int
 </span><a href="#local-6989586621679134689"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679134692"><span class="annot"><span class="annottext">r
@@ -54,7 +54,7 @@ forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
 </span><a href="#local-6989586621679134686"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">Vector d r
 -&gt; Getting (Endo [(Int, r)]) (Vector d r) (Int, r) -&gt; [(Int, r)]
 forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#%5E.."><span class="hs-operator hs-var">^..</span></a></span><span class="annot"><span class="annottext">Indexed Int r (Const (Endo [(Int, r)]) r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#%5E.."><span class="hs-operator hs-var">^..</span></a></span><span class="annot"><span class="annottext">Indexed Int r (Const (Endo [(Int, r)]) r)
 -&gt; Vector d r -&gt; Const (Endo [(Int, r)]) (Vector d r)
 Indexed
   Int
@@ -82,7 +82,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 forall i (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s j t.
 (Indexable i p, Functor f) =&gt;
 p (i, s) (f (j, t)) -&gt; Indexed i s (f t)
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Internal.Indexed.html/Control.Lens.Internal.Indexed.html#withIndex"><span class="hs-identifier hs-var">withIndex</span></a></span><span>
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Internal.Indexed.html/Control.Lens.Internal.Indexed.html#withIndex"><span class="hs-identifier hs-var">withIndex</span></a></span><span>
 </span><span id="line-26"></span><span>             </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679134691"><span class="annot"><span class="annottext">r
 </span><a href="#local-6989586621679134691"><span class="hs-identifier hs-var">x'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">r -&gt; [r]
 forall a. Arbitrary a =&gt; a -&gt; [a]

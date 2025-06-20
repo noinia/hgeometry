@@ -27,7 +27,7 @@
 </span><span id="line-27"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Transformation.html#fitToBoxTransform"><span class="hs-identifier">fitToBoxTransform</span></a></span><span>
 </span><span id="line-28"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-29"></span><span>
-</span><span id="line-30"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Indexed.html/Control.Lens.Indexed.html#%3C.%3E"><span class="hs-operator">(&lt;.&gt;)</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Indexed.html/Control.Lens.Indexed.html#%3C.%3E"><span class="hs-operator">(&lt;.&gt;)</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-31"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/semialign-1.3.1-72db639a2cfea09880c19dcdce13c1316d93597de069a28dd2ce5f17dd184a2a/share/doc/html/src/Data.Semialign.html/Data.Semialign.html"><span class="hs-identifier">Data.Semialign</span></a></span><span>
 </span><span id="line-32"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Box.Boxable.html"><span class="hs-identifier">HGeometry.Box.Boxable</span></a></span><span>
 </span><span id="line-33"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="HGeometry.Box.Class.html"><span class="hs-identifier">HGeometry.Box.Class</span></a></span><span>
@@ -145,7 +145,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 -&gt; Getting (Vector d r) (Box (Point d r)) (Vector d r)
 -&gt; Vector d r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(Point d r -&gt; Const (Vector d r) (Point d r))
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(Point d r -&gt; Const (Vector d r) (Point d r))
 -&gt; Box (Point d r) -&gt; Const (Vector d r) (Box (Point d r))
 forall box point. HasMinPoint box point =&gt; Lens' box point
 Lens' (Box (Point d r)) (Point d r)
@@ -176,7 +176,7 @@ Lens (Point d r) (Point d r) (Vector d r) (Vector d r)
      (Vector (Dimension point) (NumType point))
 -&gt; Vector (Dimension point) (NumType point)
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const (Vector (Dimension point) (NumType point)) point)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const (Vector (Dimension point) (NumType point)) point)
 -&gt; box -&gt; Const (Vector (Dimension point) (NumType point)) box
 forall box point. HasMinPoint box point =&gt; Lens' box point
 Lens' box point
@@ -214,7 +214,7 @@ Lens
 </span><span id="line-76"></span><span>    </span><span id="local-6989586621679440558"><span class="annot"><span class="annottext">lam :: r
 </span><a href="#local-6989586621679440558"><span class="hs-identifier hs-var hs-var">lam</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting (Min r) (Vector d r) r -&gt; Vector d r -&gt; r
 forall a s. Ord a =&gt; Getting (Min a) s a -&gt; s -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#minimum1Of"><span class="hs-identifier hs-var">minimum1Of</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Min r) (Vector d r) r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#minimum1Of"><span class="hs-identifier hs-var">minimum1Of</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Min r) (Vector d r) r
 (IxValue (Vector d r) -&gt; Const (Min r) (IxValue (Vector d r)))
 -&gt; Vector d r -&gt; Const (Min r) (Vector d r)
 forall vector vector'.

@@ -31,7 +31,7 @@
 </span><span id="line-31"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.LineSegment.Intersection.Types.html#OrdArounds"><span class="hs-identifier">OrdArounds</span></a></span><span>
 </span><span id="line-32"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-33"></span><span>
-</span><span id="line-34"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.At.html/Control.Lens.At.html#contains"><span class="hs-identifier">contains</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.At.html/Control.Lens.At.html#contains"><span class="hs-identifier">contains</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-35"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Coerce</span></span><span>
 </span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">F</span></span><span>
 </span><span id="line-37"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Function</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">on</span></span><span class="hs-special">)</span><span>
@@ -274,7 +274,7 @@ Point 2 r -&gt; EventType lineSegment -&gt; Event r lineSegment
 </span><a href="#local-6989586621679229758"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">lineSegment
 -&gt; Getting (Point 2 r) lineSegment (Point 2 r) -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const (Point 2 r) point)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const (Point 2 r) point)
 -&gt; lineSegment -&gt; Const (Point 2 r) lineSegment
 forall seg p. HasStart seg p =&gt; Lens' seg p
 Lens' lineSegment point
@@ -306,7 +306,7 @@ Point 2 r -&gt; EventType lineSegment -&gt; Event r lineSegment
 </span><a href="#local-6989586621679229758"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">lineSegment
 -&gt; Getting (Point 2 r) lineSegment (Point 2 r) -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const (Point 2 r) point)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const (Point 2 r) point)
 -&gt; lineSegment -&gt; Const (Point 2 r) lineSegment
 forall seg p. HasEnd seg p =&gt; Lens' seg p
 Lens' lineSegment point
@@ -352,7 +352,7 @@ forall k a. k -&gt; a -&gt; Map k a
      (Point 2 r) (IntersectionPoint (Point 2 r) lineSegment) (Point 2 r)
 -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
   (Point 2 r) (IntersectionPoint (Point 2 r) lineSegment) (Point 2 r)
 forall point lineSegment point' (f :: * -&gt; *).
 Functor f =&gt;
@@ -367,7 +367,7 @@ Functor f =&gt;
      (Associated lineSegment)
 -&gt; Associated lineSegment
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
   (Associated lineSegment)
   (IntersectionPoint (Point 2 r) lineSegment)
   (Associated lineSegment)
@@ -822,7 +822,7 @@ forall endPoint. EndPoint_ endPoint =&gt; endPoint -&gt; Bool
      (StartPointOf lineSegment) lineSegment (StartPointOf lineSegment)
 -&gt; StartPointOf lineSegment
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
   (StartPointOf lineSegment) lineSegment (StartPointOf lineSegment)
 forall seg p. HasStartPoint seg p =&gt; Lens' seg p
 Lens' lineSegment (StartPointOf lineSegment)
@@ -834,7 +834,7 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><a href="#local-6989586621679230270"><span class="hs-identifier hs-var">seg</span></a></span><span class="annot"><span class="annottext">lineSegment
 -&gt; Getting (Point 2 r) lineSegment (Point 2 r) -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const (Point 2 r) point)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const (Point 2 r) point)
 -&gt; lineSegment -&gt; Const (Point 2 r) lineSegment
 forall seg p. HasStart seg p =&gt; Lens' seg p
 Lens' lineSegment point
@@ -866,7 +866,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
   (EndPointOf lineSegment) lineSegment (EndPointOf lineSegment)
 -&gt; lineSegment -&gt; EndPointOf lineSegment
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting
   (EndPointOf lineSegment) lineSegment (EndPointOf lineSegment)
 forall seg p. HasEndPoint seg p =&gt; Lens' seg p
 Lens' lineSegment (EndPointOf lineSegment)
@@ -1088,7 +1088,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
   (StartPointOf lineSegment) lineSegment (StartPointOf lineSegment)
 -&gt; lineSegment -&gt; StartPointOf lineSegment
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting
   (StartPointOf lineSegment) lineSegment (StartPointOf lineSegment)
 forall seg p. HasStartPoint seg p =&gt; Lens' seg p
 Lens' lineSegment (StartPointOf lineSegment)
@@ -1149,7 +1149,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
 </span><a href="#local-6989586621679230483"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Point 2 r -&gt; Getting r (Point 2 r) r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
 forall (d :: Nat) point r.
 (2 &lt;= d, Point_ point d r) =&gt;
 IndexedLens' Int point r
@@ -1157,7 +1157,7 @@ IndexedLens' Int (Point 2 r) r
 </span><span class="hs-identifier hs-var">yCoord</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
 </span><a href="#local-6989586621679230483"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Point 2 r -&gt; Getting r (Point 2 r) r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
 forall (d :: Nat) point r.
 (1 &lt;= d, Point_ point d r) =&gt;
 IndexedLens' Int point r
@@ -1257,7 +1257,7 @@ lineSegment -&gt; r
 </span><a href="#local-6989586621679230933"><span class="hs-identifier hs-var">s</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">s
 </span><a href="#local-6989586621679230933"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">s -&gt; Getting (NumType p) s (NumType p) -&gt; NumType p
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(p -&gt; Const (NumType p) p) -&gt; s -&gt; Const (NumType p) s
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(p -&gt; Const (NumType p) p) -&gt; s -&gt; Const (NumType p) s
 forall seg p. HasStart seg p =&gt; Lens' seg p
 Lens' s p
 </span><span class="hs-identifier hs-var">start</span></span><span class="annot"><span class="annottext">((p -&gt; Const (NumType p) p) -&gt; s -&gt; Const (NumType p) s)
@@ -1276,7 +1276,7 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">s
 </span><a href="#local-6989586621679230933"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">s -&gt; Getting (NumType p) s (NumType p) -&gt; NumType p
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(p -&gt; Const (NumType p) p) -&gt; s -&gt; Const (NumType p) s
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(p -&gt; Const (NumType p) p) -&gt; s -&gt; Const (NumType p) s
 forall seg p. HasEnd seg p =&gt; Lens' seg p
 Lens' s p
 </span><span class="hs-identifier hs-var">end</span></span><span class="annot"><span class="annottext">((p -&gt; Const (NumType p) p) -&gt; s -&gt; Const (NumType p) s)
@@ -1309,7 +1309,7 @@ forall (t :: * -&gt; *) a. (Foldable t, Ord a) =&gt; t a -&gt; a
 </span><a href="#local-6989586621679230936"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">lineSegment
 </span><a href="#local-6989586621679230937"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">lineSegment -&gt; Getting r lineSegment r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const r point) -&gt; lineSegment -&gt; Const r lineSegment
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const r point) -&gt; lineSegment -&gt; Const r lineSegment
 forall seg p. HasStart seg p =&gt; Lens' seg p
 Lens' lineSegment point
 </span><span class="hs-identifier hs-var">start</span></span><span class="annot"><span class="annottext">((point -&gt; Const r point) -&gt; lineSegment -&gt; Const r lineSegment)
@@ -1324,7 +1324,7 @@ IndexedLens' Int point r
 </span><span class="hs-identifier hs-var">yCoord</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">lineSegment
 </span><a href="#local-6989586621679230937"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">lineSegment -&gt; Getting r lineSegment r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const r point) -&gt; lineSegment -&gt; Const r lineSegment
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const r point) -&gt; lineSegment -&gt; Const r lineSegment
 forall seg p. HasEnd seg p =&gt; Lens' seg p
 Lens' lineSegment point
 </span><span class="hs-identifier hs-var">end</span></span><span class="annot"><span class="annottext">((point -&gt; Const r point) -&gt; lineSegment -&gt; Const r lineSegment)
@@ -1342,7 +1342,7 @@ forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
 </span><a href="#local-6989586621679230780"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">Point 2 r -&gt; Getting r (Point 2 r) r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Point 2 r) r
 forall (d :: Nat) point r.
 (2 &lt;= d, Point_ point d r) =&gt;
 IndexedLens' Int point r
@@ -1360,7 +1360,7 @@ lineSegment -&gt; r
 </span><a href="#local-6989586621679231072"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">lineSegment
 </span><a href="#local-6989586621679231072"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">lineSegment -&gt; Getting r lineSegment r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const r point) -&gt; lineSegment -&gt; Const r lineSegment
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const r point) -&gt; lineSegment -&gt; Const r lineSegment
 forall seg p. HasStart seg p =&gt; Lens' seg p
 Lens' lineSegment point
 </span><span class="hs-identifier hs-var">start</span></span><span class="annot"><span class="annottext">((point -&gt; Const r point) -&gt; lineSegment -&gt; Const r lineSegment)
@@ -1377,7 +1377,7 @@ forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">`max`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">lineSegment
 </span><a href="#local-6989586621679231072"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">lineSegment -&gt; Getting r lineSegment r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const r point) -&gt; lineSegment -&gt; Const r lineSegment
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const r point) -&gt; lineSegment -&gt; Const r lineSegment
 forall seg p. HasEnd seg p =&gt; Lens' seg p
 Lens' lineSegment point
 </span><span class="hs-identifier hs-var">end</span></span><span class="annot"><span class="annottext">((point -&gt; Const r point) -&gt; lineSegment -&gt; Const r lineSegment)
@@ -1405,7 +1405,7 @@ Point 2 r -&gt; lineSegment -&gt; Bool
 </span><a href="#local-6989586621679231086"><span class="hs-identifier hs-var">seg</span></a></span><span class="annot"><span class="annottext">lineSegment
 -&gt; Getting (Point 2 r) lineSegment (Point 2 r) -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const (Point 2 r) point)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const (Point 2 r) point)
 -&gt; lineSegment -&gt; Const (Point 2 r) lineSegment
 forall seg p. HasEnd seg p =&gt; Lens' seg p
 Lens' lineSegment point
@@ -1660,7 +1660,7 @@ $c&lt;$ :: forall a b. a -&gt; Flipped b -&gt; Flipped a
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-391"></span><span>
 </span><span id="line-392"></span><span class="annot"><span class="hs-comment">-- | Access the underlying segment</span></span><span>
-</span><span id="line-393"></span><span id="local-6989586621679229204"><span class="annot"><a href="HGeometry.LineSegment.Intersection.BentleyOttmann.html#rawSegment"><span class="hs-identifier hs-type">rawSegment</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LineSegment.Intersection.BentleyOttmann.html#Flipped"><span class="hs-identifier hs-type">Flipped</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679229204"><span class="hs-identifier hs-type">segment</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679229204"><span class="hs-identifier hs-type">segment</span></a></span></span><span>
+</span><span id="line-393"></span><span id="local-6989586621679229204"><span class="annot"><a href="HGeometry.LineSegment.Intersection.BentleyOttmann.html#rawSegment"><span class="hs-identifier hs-type">rawSegment</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.LineSegment.Intersection.BentleyOttmann.html#Flipped"><span class="hs-identifier hs-type">Flipped</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679229204"><span class="hs-identifier hs-type">segment</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679229204"><span class="hs-identifier hs-type">segment</span></a></span></span><span>
 </span><span id="line-394"></span><span id="rawSegment"><span class="annot"><span class="annottext">rawSegment :: forall segment (f :: * -&gt; *).
 Functor f =&gt;
 (segment -&gt; f segment) -&gt; Flipped segment -&gt; f (Flipped segment)
@@ -1668,7 +1668,7 @@ Functor f =&gt;
 -&gt; (Flipped segment -&gt; segment -&gt; Flipped segment)
 -&gt; Lens (Flipped segment) (Flipped segment) segment segment
 forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
 </span><span id="line-395"></span><span>                      </span><span class="annot"><a href="HGeometry.LineSegment.Intersection.BentleyOttmann.html#NotFlipped"><span class="hs-identifier hs-type">NotFlipped</span></a></span><span> </span><span id="local-6989586621679231212"><span class="annot"><span class="annottext">segment
 </span><a href="#local-6989586621679231212"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">segment
 </span><a href="#local-6989586621679231212"><span class="hs-identifier hs-var">s</span></a></span><span>
@@ -1800,7 +1800,7 @@ point -&gt; point -&gt; lineSegment
 </span><a href="#local-6989586621679231331"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">Flipped segment
 -&gt; Getting segment (Flipped segment) segment -&gt; segment
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting segment (Flipped segment) segment
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting segment (Flipped segment) segment
 forall segment (f :: * -&gt; *).
 Functor f =&gt;
 (segment -&gt; f segment) -&gt; Flipped segment -&gt; f (Flipped segment)
@@ -1810,7 +1810,7 @@ forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
 </span><a href="#local-6989586621679231333"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">Flipped segment
 -&gt; Getting segment (Flipped segment) segment -&gt; segment
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting segment (Flipped segment) segment
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting segment (Flipped segment) segment
 forall segment (f :: * -&gt; *).
 Functor f =&gt;
 (segment -&gt; f segment) -&gt; Flipped segment -&gt; f (Flipped segment)
@@ -1837,7 +1837,7 @@ point -&gt; segment -&gt; Bool
 </span><a href="#local-6989586621679231357"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">Flipped segment
 -&gt; Getting segment (Flipped segment) segment -&gt; segment
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting segment (Flipped segment) segment
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting segment (Flipped segment) segment
 forall segment (f :: * -&gt; *).
 Functor f =&gt;
 (segment -&gt; f segment) -&gt; Flipped segment -&gt; f (Flipped segment)
@@ -1857,7 +1857,7 @@ forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
 </span><a href="#local-6989586621679231371"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">Flipped segment
 -&gt; Getting segment (Flipped segment) segment -&gt; segment
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting segment (Flipped segment) segment
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting segment (Flipped segment) segment
 forall segment (f :: * -&gt; *).
 Functor f =&gt;
 (segment -&gt; f segment) -&gt; Flipped segment -&gt; f (Flipped segment)
@@ -1865,7 +1865,7 @@ Functor f =&gt;
 </span><a href="#local-6989586621679231373"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">Flipped segment
 -&gt; Getting segment (Flipped segment) segment -&gt; segment
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting segment (Flipped segment) segment
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting segment (Flipped segment) segment
 forall segment (f :: * -&gt; *).
 Functor f =&gt;
 (segment -&gt; f segment) -&gt; Flipped segment -&gt; f (Flipped segment)
@@ -1925,7 +1925,7 @@ lineSegment -&gt; Flipped lineSegment
 </span><a href="#local-6989586621679231459"><span class="hs-identifier hs-var">s</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">lineSegment
 </span><a href="#local-6989586621679231459"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">lineSegment -&gt; Getting point lineSegment point -&gt; point
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point lineSegment point
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point lineSegment point
 forall seg p. HasStart seg p =&gt; Lens' seg p
 Lens' lineSegment point
 </span><span class="hs-identifier hs-var">start</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">point -&gt; point -&gt; Ordering
@@ -1935,7 +1935,7 @@ point -&gt; point -&gt; Ordering
 </span><a href="HGeometry.LineSegment.Intersection.Types.html#ordPoints"><span class="hs-operator hs-var">`ordPoints`</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">lineSegment
 </span><a href="#local-6989586621679231459"><span class="hs-identifier hs-var">s</span></a></span><span class="annot"><span class="annottext">lineSegment -&gt; Getting point lineSegment point -&gt; point
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point lineSegment point
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting point lineSegment point
 forall seg p. HasEnd seg p =&gt; Lens' seg p
 Lens' lineSegment point
 </span><span class="hs-identifier hs-var">end</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
@@ -1978,13 +1978,13 @@ Lens' lineSegment (EndPointOf lineSegment)
  -&gt; lineSegment -&gt; Identity lineSegment)
 -&gt; EndPointOf lineSegment -&gt; lineSegment -&gt; lineSegment
 forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">lineSegment
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">lineSegment
 </span><a href="#local-6989586621679231477"><span class="hs-identifier hs-var">seg</span></a></span><span class="annot"><span class="annottext">lineSegment
 -&gt; Getting
      (EndPointOf lineSegment) lineSegment (EndPointOf lineSegment)
 -&gt; EndPointOf lineSegment
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
   (EndPointOf lineSegment) lineSegment (EndPointOf lineSegment)
 forall seg p. HasEndPoint seg p =&gt; Lens' seg p
 Lens' lineSegment (EndPointOf lineSegment)
@@ -1999,13 +1999,13 @@ Lens' lineSegment (EndPointOf lineSegment)
  -&gt; lineSegment -&gt; Identity lineSegment)
 -&gt; EndPointOf lineSegment -&gt; lineSegment -&gt; lineSegment
 forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">lineSegment
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">lineSegment
 </span><a href="#local-6989586621679231477"><span class="hs-identifier hs-var">seg</span></a></span><span class="annot"><span class="annottext">lineSegment
 -&gt; Getting
      (EndPointOf lineSegment) lineSegment (EndPointOf lineSegment)
 -&gt; EndPointOf lineSegment
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
   (EndPointOf lineSegment) lineSegment (EndPointOf lineSegment)
 forall seg p. HasStartPoint seg p =&gt; Lens' seg p
 Lens' lineSegment (EndPointOf lineSegment)
@@ -2141,7 +2141,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
      (Set (AroundStart (Flipped lineSegment)))
 -&gt; Set (AroundStart (Flipped lineSegment))
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
   (Set (AroundStart (Flipped lineSegment)))
   (Associated (Flipped lineSegment))
   (Set (AroundStart (Flipped lineSegment)))
@@ -2177,7 +2177,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
      (Set (AroundEnd (Flipped lineSegment)))
 -&gt; Set (AroundEnd (Flipped lineSegment))
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
   (Set (AroundEnd (Flipped lineSegment)))
   (Associated (Flipped lineSegment))
   (Set (AroundEnd (Flipped lineSegment)))
@@ -2212,7 +2212,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
      (Set (AroundIntersection (Flipped lineSegment)))
 -&gt; Set (AroundIntersection (Flipped lineSegment))
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
   (Set (AroundIntersection (Flipped lineSegment)))
   (Associated (Flipped lineSegment))
   (Set (AroundIntersection (Flipped lineSegment)))
@@ -2245,7 +2245,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Getting lineSegment (Flipped lineSegment) lineSegment
 -&gt; Flipped lineSegment -&gt; lineSegment
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting lineSegment (Flipped lineSegment) lineSegment
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting lineSegment (Flipped lineSegment) lineSegment
 forall segment (f :: * -&gt; *).
 Functor f =&gt;
 (segment -&gt; f segment) -&gt; Flipped segment -&gt; f (Flipped segment)
@@ -2291,7 +2291,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting lineSegment (Flipped lineSegment) lineSegment
 -&gt; Flipped lineSegment -&gt; lineSegment
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting lineSegment (Flipped lineSegment) lineSegment
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting lineSegment (Flipped lineSegment) lineSegment
 forall segment (f :: * -&gt; *).
 Functor f =&gt;
 (segment -&gt; f segment) -&gt; Flipped segment -&gt; f (Flipped segment)

@@ -23,7 +23,7 @@
 </span><span id="line-23"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.HyperPlane.Class.html#HyperPlaneFromPoints"><span class="hs-identifier">HyperPlaneFromPoints</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
 </span><span id="line-24"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-25"></span><span>
-</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Cons.html/Control.Lens.Cons.html#snoc"><span class="hs-identifier">snoc</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Cons.html/Control.Lens.Cons.html#cons"><span class="hs-identifier">cons</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Cons.html/Control.Lens.Cons.html#uncons"><span class="hs-identifier">uncons</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Cons.html/Control.Lens.Cons.html#unsnoc"><span class="hs-identifier">unsnoc</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Cons.html/Control.Lens.Cons.html#snoc"><span class="hs-identifier">snoc</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Cons.html/Control.Lens.Cons.html#cons"><span class="hs-identifier">cons</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Cons.html/Control.Lens.Cons.html#uncons"><span class="hs-identifier">uncons</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Cons.html/Control.Lens.Cons.html#unsnoc"><span class="hs-identifier">unsnoc</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/data-default-class-0.1.2.2-9185eb0aa55f99f191be3586b1b58b308eb6ae659d38483435d98792575f79ef/share/doc/html/src/Data.Default.Class.html/Data.Default.Class.html"><span class="hs-identifier">Data.Default.Class</span></a></span><span>
 </span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Kind</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Constraint</span></span><span class="hs-special">)</span><span>
 </span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Type.Ord</span></span><span>
@@ -103,7 +103,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">point
 </span><a href="#local-6989586621679416281"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Vector d r) point (Vector d r) -&gt; Vector d r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
 forall (d :: Natural) r s.
 (Dimension point ~ d, NumType point ~ r, Dimension point ~ d,
  NumType point ~ s) =&gt;
@@ -157,7 +157,7 @@ r -&gt; vector -&gt; vector'
 </span><a href="#local-6989586621679416396"><span class="hs-identifier hs-var">h</span></a></span><span class="annot"><span class="annottext">hyperPlane
 -&gt; Getting (Vector d r) hyperPlane (Vector d r) -&gt; Vector d r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) hyperPlane (Vector d r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) hyperPlane (Vector d r)
 forall hyperPlane (d :: Natural) r.
 NonVerticalHyperPlane_ hyperPlane d r =&gt;
 Lens' hyperPlane (Vector d r)
@@ -175,13 +175,13 @@ IndexedLens' Int (Vector d r) r
 </span><a href="HGeometry.HyperPlane.Class.html#last"><span class="hs-identifier hs-var">last</span></a></span><span> </span><span class="annot"><span class="annottext">((r -&gt; Identity r) -&gt; Vector d r -&gt; Identity (Vector d r))
 -&gt; r -&gt; Vector d r -&gt; Vector d r
 forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="hs-glyph">-</span><span class="annot"><span class="annottext">r
 </span><span class="hs-number">1</span></span><span>
 </span><span id="line-119"></span><span>      </span><span id="local-6989586621679416397"><span class="annot"><span class="annottext">a0 :: r
 </span><a href="#local-6989586621679416397"><span class="hs-identifier hs-var hs-var">a0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Vector d r
 </span><a href="#local-6989586621679416399"><span class="hs-identifier hs-var">a'</span></a></span><span class="annot"><span class="annottext">Vector d r -&gt; Getting r (Vector d r) r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Vector d r) r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r (Vector d r) r
 forall vector (d :: Natural) r.
 (Vector_ vector d r, 1 &lt;= d) =&gt;
 IndexedLens' Int vector r
@@ -396,7 +396,7 @@ Int -&gt; IndexedTraversal' Int vector r
 </span><a href="#local-6989586621679416641"><span class="hs-identifier hs-var">i</span></a></span><span> </span><span class="annot"><span class="annottext">((r -&gt; Identity r) -&gt; Point d r -&gt; Identity (Point d r))
 -&gt; r -&gt; Point d r -&gt; Point d r
 forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r
 forall a. Num a =&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">negate</span></span><span> </span><span class="annot"><span class="annottext">r
 </span><a href="#local-6989586621679416635"><span class="hs-identifier hs-var">a0</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">r -&gt; r -&gt; r
@@ -480,7 +480,7 @@ vector -&gt; vector
 </span><a href="#local-6989586621679416776"><span class="hs-identifier hs-var hs-var">a0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
 </span><a href="#local-6989586621679416774"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Vector d r) point (Vector d r) -&gt; Vector d r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
 forall (d :: Natural) r s.
 (Dimension point ~ d, NumType point ~ r, Dimension point ~ d,
  NumType point ~ s) =&gt;
@@ -533,7 +533,7 @@ vector -&gt; vector -&gt; r
 </span><a href="#local-6989586621679416904"><span class="hs-identifier hs-var">h</span></a></span><span class="annot"><span class="annottext">hyperPlane
 -&gt; Getting (Vector d r) hyperPlane (Vector d r) -&gt; Vector d r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) hyperPlane (Vector d r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) hyperPlane (Vector d r)
 forall hyperPlane (d :: Natural) r.
 NonVerticalHyperPlane_ hyperPlane d r =&gt;
 Lens' hyperPlane (Vector d r)
@@ -552,7 +552,7 @@ vector -&gt; r -&gt; vector'
      (Vector (Dimension point) r) point (Vector (Dimension point) r)
 -&gt; Vector (Dimension point) r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting
   (Vector (Dimension point) r) point (Vector (Dimension point) r)
 forall (d :: Natural) r s.
 (Dimension point ~ d, NumType point ~ r, Dimension point ~ d,
@@ -586,7 +586,7 @@ Lens
 </span><span id="line-310"></span><span>  </span><span class="hs-comment">-- Vector3 1 2 3</span><span>
 </span><span id="line-311"></span><span>  </span><span class="hs-comment">-- &gt;&gt;&gt; asNonVerticalHyperPlane myOtherLine ^?_Just.hyperPlaneCoefficients</span><span>
 </span><span id="line-312"></span><span>  </span><span class="hs-comment">-- Just (Vector2 (-1.5) (-2.0))</span><span>
-</span><span id="line-313"></span><span>  </span><span id="hyperPlaneCoefficients"><span class="annot"><a href="HGeometry.HyperPlane.Class.html#hyperPlaneCoefficients"><span class="hs-identifier hs-type">hyperPlaneCoefficients</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679416003"><span class="hs-identifier hs-type">hyperPlane</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679416004"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679416005"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-313"></span><span>  </span><span id="hyperPlaneCoefficients"><span class="annot"><a href="HGeometry.HyperPlane.Class.html#hyperPlaneCoefficients"><span class="hs-identifier hs-type">hyperPlaneCoefficients</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679416003"><span class="hs-identifier hs-type">hyperPlane</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector</span></span><span> </span><span class="annot"><a href="#local-6989586621679416004"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679416005"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-314"></span><span>
 </span><span id="line-315"></span><span>  </span><span class="hs-comment">-- | Test if a point q lies above a non-vertical hyperplane h (i.e. verticalSideTest q h</span><span>
 </span><span id="line-316"></span><span>  </span><span class="hs-comment">-- == GT), on the hyperplane (== EQ), or below (LT).</span><span>
@@ -622,7 +622,7 @@ Lens
 </span><a href="#local-6989586621679417114"><span class="hs-identifier hs-var">h</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
 </span><a href="#local-6989586621679417113"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting r point r -&gt; r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting r point r
 forall point (d :: Natural) r.
 (1 &lt;= d, Point_ point d r) =&gt;
 IndexedLens' Int point r
@@ -702,7 +702,7 @@ hyperPlane -&gt; point -&gt; r
 -&gt; Getting hyperPlane (hyperPlane :+ extra) hyperPlane
 -&gt; hyperPlane
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
 forall core extra core' (f :: * -&gt; *).
 Functor f =&gt;
 (core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
@@ -721,7 +721,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
 -&gt; (hyperPlane :+ extra) -&gt; hyperPlane
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
 forall core extra core' (f :: * -&gt; *).
 Functor f =&gt;
 (core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
@@ -740,7 +740,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
 -&gt; (hyperPlane :+ extra) -&gt; hyperPlane
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
 forall core extra core' (f :: * -&gt; *).
 Functor f =&gt;
 (core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
@@ -766,7 +766,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
 -&gt; (hyperPlane :+ extra) -&gt; hyperPlane
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
 forall core extra core' (f :: * -&gt; *).
 Functor f =&gt;
 (core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
@@ -792,7 +792,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
 -&gt; (hyperPlane :+ extra) -&gt; hyperPlane
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
 forall core extra core' (f :: * -&gt; *).
 Functor f =&gt;
 (core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
@@ -863,7 +863,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
 -&gt; (hyperPlane :+ extra) -&gt; hyperPlane
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
 forall core extra core' (f :: * -&gt; *).
 Functor f =&gt;
 (core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
@@ -910,7 +910,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
 -&gt; (hyperPlane :+ extra) -&gt; hyperPlane
 forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting hyperPlane (hyperPlane :+ extra) hyperPlane
 forall core extra core' (f :: * -&gt; *).
 Functor f =&gt;
 (core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
@@ -919,7 +919,7 @@ Functor f =&gt;
 </span><span id="line-397"></span><span>
 </span><span id="line-398"></span><span>
 </span><span id="line-399"></span><span class="annot"><span class="hs-comment">-- | Access the last element of a vector</span></span><span>
-</span><span id="line-400"></span><span class="annot"><a href="HGeometry.HyperPlane.Class.html#last"><span class="hs-identifier hs-type">last</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679416010"><span class="annot"><a href="#local-6989586621679416010"><span class="hs-identifier hs-type">vector</span></a></span></span><span> </span><span id="local-6989586621679416011"><span class="annot"><a href="#local-6989586621679416011"><span class="hs-identifier hs-type">d</span></a></span></span><span> </span><span id="local-6989586621679416012"><span class="annot"><a href="#local-6989586621679416012"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector_</span></span><span> </span><span class="annot"><a href="#local-6989586621679416010"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679416011"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679416012"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;=</span></span><span> </span><span class="annot"><a href="#local-6989586621679416011"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#IndexedLens%27"><span class="hs-identifier hs-type">IndexedLens'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="annot"><a href="#local-6989586621679416010"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679416012"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-400"></span><span class="annot"><a href="HGeometry.HyperPlane.Class.html#last"><span class="hs-identifier hs-type">last</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679416010"><span class="annot"><a href="#local-6989586621679416010"><span class="hs-identifier hs-type">vector</span></a></span></span><span> </span><span id="local-6989586621679416011"><span class="annot"><a href="#local-6989586621679416011"><span class="hs-identifier hs-type">d</span></a></span></span><span> </span><span id="local-6989586621679416012"><span class="annot"><a href="#local-6989586621679416012"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector_</span></span><span> </span><span class="annot"><a href="#local-6989586621679416010"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679416011"><span class="hs-identifier hs-type">d</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679416012"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">&lt;=</span></span><span> </span><span class="annot"><a href="#local-6989586621679416011"><span class="hs-identifier hs-type">d</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#IndexedLens%27"><span class="hs-identifier hs-type">IndexedLens'</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="annot"><a href="#local-6989586621679416010"><span class="hs-identifier hs-type">vector</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679416012"><span class="hs-identifier hs-type">r</span></a></span><span>
 </span><span id="line-401"></span><span id="last"><span class="annot"><span class="annottext">last :: forall vector (d :: Natural) r.
 (Vector_ vector d r, 1 &lt;= d) =&gt;
 IndexedLens' Int vector r

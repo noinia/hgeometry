@@ -13,7 +13,7 @@
 </span><span id="line-13"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralBall"><span class="hs-identifier">DiametralBall</span></a></span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Ball.Diametral.html#MkDiametralBall"><span class="hs-identifier">MkDiametralBall</span></a></span><span class="hs-special">,</span><span class="annot"><a href="HGeometry.Ball.Diametral.html#DiametralPoints"><span class="hs-identifier">DiametralPoints</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-14"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-15"></span><span>
-</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
 </span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
 </span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Ball.Class.html"><span class="hs-identifier">HGeometry.Ball.Class</span></a></span><span>
 </span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Boundary.html"><span class="hs-identifier">HGeometry.Boundary</span></a></span><span>
@@ -326,7 +326,7 @@ Apply f =&gt;
 forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s a.
 (Profunctor p, Contravariant f) =&gt;
 (s -&gt; a) -&gt; Optic' p f s a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#to"><span class="hs-identifier hs-var">to</span></a></span><span> </span><span class="annot"><span class="annottext">((DiametralBall point -&gt; NumType (DiametralBall point))
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#to"><span class="hs-identifier hs-var">to</span></a></span><span> </span><span class="annot"><span class="annottext">((DiametralBall point -&gt; NumType (DiametralBall point))
  -&gt; (NumType (DiametralBall point)
      -&gt; f (NumType (DiametralBall point)))
  -&gt; DiametralBall point
@@ -374,7 +374,7 @@ point -&gt; DiametralBall point -&gt; PointLocationResult
 </span><a href="#local-6989586621679419994"><span class="hs-identifier hs-var hs-var">a'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point
 </span><a href="#local-6989586621679419992"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Vector d r) point (Vector d r) -&gt; Vector d r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
 forall (d :: Nat) r s.
 (Dimension point ~ d, NumType point ~ r, Dimension point ~ d,
  NumType point ~ s) =&gt;
@@ -389,7 +389,7 @@ Lens point point (Vector d r) (Vector d r)
 </span><a href="#local-6989586621679419997"><span class="hs-identifier hs-var hs-var">b'</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">point
 </span><a href="#local-6989586621679419993"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Vector d r) point (Vector d r) -&gt; Vector d r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
 forall (d :: Nat) r s.
 (Dimension point ~ d, NumType point ~ r, Dimension point ~ d,
  NumType point ~ s) =&gt;
@@ -409,7 +409,7 @@ r -&gt; vector -&gt; vector
 </span><span class="hs-operator hs-var">*^</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
 </span><a href="#local-6989586621679419991"><span class="hs-identifier hs-var">q</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Vector d r) point (Vector d r) -&gt; Vector d r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
 forall (d :: Nat) r s.
 (Dimension point ~ d, NumType point ~ r, Dimension point ~ d,
  NumType point ~ s) =&gt;
@@ -522,7 +522,7 @@ forall a. Maybe a
 -&gt; (DiametralBall point -&gt; Point d r -&gt; DiametralBall point)
 -&gt; Lens' (DiametralBall point) (Point d r)
 forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">DiametralBall point -&gt; Point d r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">DiametralBall point -&gt; Point d r
 forall point (d :: Nat) r.
 (Point_ point d r, Fractional r) =&gt;
 DiametralBall point -&gt; Point d r
@@ -569,7 +569,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">point
 </span><a href="#local-6989586621679420223"><span class="hs-identifier hs-var">a</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Vector d r) point (Vector d r) -&gt; Vector d r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
 forall (d :: Nat) r s.
 (Dimension point ~ d, NumType point ~ r, Dimension point ~ d,
  NumType point ~ s) =&gt;
@@ -586,7 +586,7 @@ vector -&gt; vector -&gt; vector
 </span><span class="hs-operator hs-var">^+^</span></span><span> </span><span class="annot"><span class="annottext">point
 </span><a href="#local-6989586621679420224"><span class="hs-identifier hs-var">b</span></a></span><span class="annot"><span class="annottext">point -&gt; Getting (Vector d r) point (Vector d r) -&gt; Vector d r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Vector d r) point (Vector d r)
 forall (d :: Nat) r s.
 (Dimension point ~ d, NumType point ~ r, Dimension point ~ d,
  NumType point ~ s) =&gt;

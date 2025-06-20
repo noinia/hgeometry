@@ -14,7 +14,7 @@
 </span><span id="line-14"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Ball.BoundaryPoints.html#diskFromPoints"><span class="hs-identifier">diskFromPoints</span></a></span><span>
 </span><span id="line-15"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-16"></span><span>
-</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
 </span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
 </span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">GHC.TypeLits</span></span><span>
 </span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="HGeometry.Ball.Class.html"><span class="hs-identifier">HGeometry.Ball.Class</span></a></span><span>
@@ -24,8 +24,8 @@
 </span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
 </span><span id="line-25"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span>
 </span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">HGeometry.Vector</span></span><span>
-</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.1-8fc8c547eee32c44ead0c7ba1a7208afe442aded4305e6a88380cd57e7479005/share/doc/html/src/Linear.Matrix.html/Linear.Matrix.html"><span class="hs-identifier">Linear.Matrix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.1-8fc8c547eee32c44ead0c7ba1a7208afe442aded4305e6a88380cd57e7479005/share/doc/html/src/Linear.Matrix.html/Linear.Matrix.html#det33"><span class="hs-identifier">det33</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.1-8fc8c547eee32c44ead0c7ba1a7208afe442aded4305e6a88380cd57e7479005/share/doc/html/src/Linear.V3.html/Linear.V3.html"><span class="hs-identifier">Linear.V3</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.1-8fc8c547eee32c44ead0c7ba1a7208afe442aded4305e6a88380cd57e7479005/share/doc/html/src/Linear.V3.html/Linear.V3.html#V3"><span class="hs-identifier">V3</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.2-1babde535e434f42c9e299a0853d775a572bbdb536c639c8687cfe53585679b5/share/doc/html/src/Linear.Matrix.html/Linear.Matrix.html"><span class="hs-identifier">Linear.Matrix</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.2-1babde535e434f42c9e299a0853d775a572bbdb536c639c8687cfe53585679b5/share/doc/html/src/Linear.Matrix.html/Linear.Matrix.html#det33"><span class="hs-identifier">det33</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.2-1babde535e434f42c9e299a0853d775a572bbdb536c639c8687cfe53585679b5/share/doc/html/src/Linear.V3.html/Linear.V3.html"><span class="hs-identifier">Linear.V3</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.2-1babde535e434f42c9e299a0853d775a572bbdb536c639c8687cfe53585679b5/share/doc/html/src/Linear.V3.html/Linear.V3.html#V3"><span class="hs-identifier">V3</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-29"></span><span>
 </span><span id="line-30"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-31"></span><span>
@@ -170,7 +170,7 @@ forall a. Maybe a
 forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s a.
 (Profunctor p, Contravariant f) =&gt;
 (s -&gt; a) -&gt; Optic' p f s a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#to"><span class="hs-identifier hs-var">to</span></a></span><span> </span><span class="annot"><span class="annottext">((BallByPoints' k point -&gt; NumType (BallByPoints' k point))
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#to"><span class="hs-identifier hs-var">to</span></a></span><span> </span><span class="annot"><span class="annottext">((BallByPoints' k point -&gt; NumType (BallByPoints' k point))
  -&gt; (NumType (BallByPoints' k point)
      -&gt; f (NumType (BallByPoints' k point)))
  -&gt; BallByPoints' k point
@@ -189,7 +189,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><a href="#local-6989586621679437689"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">Vector k point
 -&gt; Getting (Point d r) (Vector k point) (Point d r) -&gt; Point d r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const (Point d r) point)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(point -&gt; Const (Point d r) point)
 -&gt; Vector k point -&gt; Const (Point d r) (Vector k point)
 forall vector (d :: Nat) r.
 (Vector_ vector d r, 1 &lt;= d) =&gt;
@@ -218,7 +218,7 @@ point -&gt; point' -&gt; r
 -&gt; Getting (Point d r) (BallByPoints' k point) (Point d r)
 -&gt; Point d r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point d r) (BallByPoints' k point) (Point d r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point d r) (BallByPoints' k point) (Point d r)
 forall geom point. HasCenter geom point =&gt; Lens' geom point
 Lens' (BallByPoints' k point) (Point d r)
 </span><a href="HGeometry.Ball.Class.html#center"><span class="hs-identifier hs-var">center</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point d r
@@ -376,7 +376,7 @@ forall a. Maybe a
 -&gt; (BallByPoints' 3 point -&gt; Point 2 r -&gt; BallByPoints' 3 point)
 -&gt; Lens' (BallByPoints' 3 point) (Point 2 r)
 forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.4-c8eddd7fe276d1ed0463318676323ee32ff6011e688fc492e49b427c85e39e9d/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">BallByPoints' 3 point -&gt; Point 2 r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="annot"><span class="annottext">BallByPoints' 3 point -&gt; Point 2 r
 BallByPoints point -&gt; Point 2 r
 forall point r.
 (Point_ point 2 r, Fractional r) =&gt;
@@ -443,7 +443,7 @@ forall a b. (Num a, Integral b) =&gt; a -&gt; b -&gt; a
 </span><a href="#local-6989586621679437986"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679437987"><span class="annot"><span class="annottext">a
 </span><a href="#local-6989586621679437987"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a -&gt; V3 a
 forall a. a -&gt; a -&gt; a -&gt; V3 a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.1-8fc8c547eee32c44ead0c7ba1a7208afe442aded4305e6a88380cd57e7479005/share/doc/html/src/Linear.V3.html/Linear.V3.html#V3"><span class="hs-identifier hs-var">V3</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.2-1babde535e434f42c9e299a0853d775a572bbdb536c639c8687cfe53585679b5/share/doc/html/src/Linear.V3.html/Linear.V3.html#V3"><span class="hs-identifier hs-var">V3</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><a href="#local-6989586621679437978"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
 </span><a href="#local-6989586621679437986"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
@@ -455,7 +455,7 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><a href="#local-6989586621679437993"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679437994"><span class="annot"><span class="annottext">a
 </span><a href="#local-6989586621679437994"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a -&gt; V3 a
 forall a. a -&gt; a -&gt; a -&gt; V3 a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.1-8fc8c547eee32c44ead0c7ba1a7208afe442aded4305e6a88380cd57e7479005/share/doc/html/src/Linear.V3.html/Linear.V3.html#V3"><span class="hs-identifier hs-var">V3</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.2-1babde535e434f42c9e299a0853d775a572bbdb536c639c8687cfe53585679b5/share/doc/html/src/Linear.V3.html/Linear.V3.html#V3"><span class="hs-identifier hs-var">V3</span></a></span><span> </span><span class="annot"><span class="annottext">a
 </span><a href="#local-6989586621679437993"><span class="hs-identifier hs-var">x</span></a></span><span>       </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><a href="#local-6989586621679437978"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
@@ -466,11 +466,11 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span id="line-120"></span><span>    </span><span id="local-6989586621679437995"><span class="annot"><span class="annottext">xnom :: r
 </span><a href="#local-6989586621679437995"><span class="hs-identifier hs-var hs-var">xnom</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">M33 r -&gt; r
 forall a. Num a =&gt; M33 a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.1-8fc8c547eee32c44ead0c7ba1a7208afe442aded4305e6a88380cd57e7479005/share/doc/html/src/Linear.Matrix.html/Linear.Matrix.html#det33"><span class="hs-identifier hs-var">det33</span></a></span><span> </span><span class="annot"><span class="annottext">(M33 r -&gt; r) -&gt; M33 r -&gt; r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.2-1babde535e434f42c9e299a0853d775a572bbdb536c639c8687cfe53585679b5/share/doc/html/src/Linear.Matrix.html/Linear.Matrix.html#det33"><span class="hs-identifier hs-var">det33</span></a></span><span> </span><span class="annot"><span class="annottext">(M33 r -&gt; r) -&gt; M33 r -&gt; r
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">V3 r -&gt; V3 r -&gt; V3 r -&gt; M33 r
 forall a. a -&gt; a -&gt; a -&gt; V3 a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.1-8fc8c547eee32c44ead0c7ba1a7208afe442aded4305e6a88380cd57e7479005/share/doc/html/src/Linear.V3.html/Linear.V3.html#V3"><span class="hs-identifier hs-var">V3</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; V3 r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.2-1babde535e434f42c9e299a0853d775a572bbdb536c639c8687cfe53585679b5/share/doc/html/src/Linear.V3.html/Linear.V3.html#V3"><span class="hs-identifier hs-var">V3</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; V3 r
 forall {a}. Num a =&gt; a -&gt; a -&gt; V3 a
 </span><a href="#local-6989586621679437985"><span class="hs-identifier hs-var">fx</span></a></span><span> </span><span class="annot"><span class="annottext">r
 </span><a href="#local-6989586621679437947"><span class="hs-identifier hs-var">px</span></a></span><span> </span><span class="annot"><span class="annottext">r
@@ -486,11 +486,11 @@ forall {a}. Num a =&gt; a -&gt; a -&gt; V3 a
 </span><span id="line-121"></span><span>    </span><span id="local-6989586621679437996"><span class="annot"><span class="annottext">ynom :: r
 </span><a href="#local-6989586621679437996"><span class="hs-identifier hs-var hs-var">ynom</span></a></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">M33 r -&gt; r
 forall a. Num a =&gt; M33 a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.1-8fc8c547eee32c44ead0c7ba1a7208afe442aded4305e6a88380cd57e7479005/share/doc/html/src/Linear.Matrix.html/Linear.Matrix.html#det33"><span class="hs-identifier hs-var">det33</span></a></span><span> </span><span class="annot"><span class="annottext">(M33 r -&gt; r) -&gt; M33 r -&gt; r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.2-1babde535e434f42c9e299a0853d775a572bbdb536c639c8687cfe53585679b5/share/doc/html/src/Linear.Matrix.html/Linear.Matrix.html#det33"><span class="hs-identifier hs-var">det33</span></a></span><span> </span><span class="annot"><span class="annottext">(M33 r -&gt; r) -&gt; M33 r -&gt; r
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">V3 r -&gt; V3 r -&gt; V3 r -&gt; M33 r
 forall a. a -&gt; a -&gt; a -&gt; V3 a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.1-8fc8c547eee32c44ead0c7ba1a7208afe442aded4305e6a88380cd57e7479005/share/doc/html/src/Linear.V3.html/Linear.V3.html#V3"><span class="hs-identifier hs-var">V3</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; V3 r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.2-1babde535e434f42c9e299a0853d775a572bbdb536c639c8687cfe53585679b5/share/doc/html/src/Linear.V3.html/Linear.V3.html#V3"><span class="hs-identifier hs-var">V3</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; V3 r
 forall {a}. Num a =&gt; a -&gt; a -&gt; V3 a
 </span><a href="#local-6989586621679437992"><span class="hs-identifier hs-var">fy</span></a></span><span> </span><span class="annot"><span class="annottext">r
 </span><a href="#local-6989586621679437947"><span class="hs-identifier hs-var">px</span></a></span><span> </span><span class="annot"><span class="annottext">r
@@ -512,23 +512,23 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">M33 r -&gt; r
 forall a. Num a =&gt; M33 a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.1-8fc8c547eee32c44ead0c7ba1a7208afe442aded4305e6a88380cd57e7479005/share/doc/html/src/Linear.Matrix.html/Linear.Matrix.html#det33"><span class="hs-identifier hs-var">det33</span></a></span><span> </span><span class="annot"><span class="annottext">(M33 r -&gt; r) -&gt; M33 r -&gt; r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.2-1babde535e434f42c9e299a0853d775a572bbdb536c639c8687cfe53585679b5/share/doc/html/src/Linear.Matrix.html/Linear.Matrix.html#det33"><span class="hs-identifier hs-var">det33</span></a></span><span> </span><span class="annot"><span class="annottext">(M33 r -&gt; r) -&gt; M33 r -&gt; r
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">V3 r -&gt; V3 r -&gt; V3 r -&gt; M33 r
 forall a. a -&gt; a -&gt; a -&gt; V3 a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.1-8fc8c547eee32c44ead0c7ba1a7208afe442aded4305e6a88380cd57e7479005/share/doc/html/src/Linear.V3.html/Linear.V3.html#V3"><span class="hs-identifier hs-var">V3</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; V3 r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.2-1babde535e434f42c9e299a0853d775a572bbdb536c639c8687cfe53585679b5/share/doc/html/src/Linear.V3.html/Linear.V3.html#V3"><span class="hs-identifier hs-var">V3</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; V3 r
 forall a. a -&gt; a -&gt; a -&gt; V3 a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.1-8fc8c547eee32c44ead0c7ba1a7208afe442aded4305e6a88380cd57e7479005/share/doc/html/src/Linear.V3.html/Linear.V3.html#V3"><span class="hs-identifier hs-var">V3</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.2-1babde535e434f42c9e299a0853d775a572bbdb536c639c8687cfe53585679b5/share/doc/html/src/Linear.V3.html/Linear.V3.html#V3"><span class="hs-identifier hs-var">V3</span></a></span><span> </span><span class="annot"><span class="annottext">r
 </span><a href="#local-6989586621679437947"><span class="hs-identifier hs-var">px</span></a></span><span> </span><span class="annot"><span class="annottext">r
 </span><a href="#local-6989586621679437948"><span class="hs-identifier hs-var">py</span></a></span><span> </span><span class="annot"><span class="annottext">r
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; V3 r
 forall a. a -&gt; a -&gt; a -&gt; V3 a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.1-8fc8c547eee32c44ead0c7ba1a7208afe442aded4305e6a88380cd57e7479005/share/doc/html/src/Linear.V3.html/Linear.V3.html#V3"><span class="hs-identifier hs-var">V3</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.2-1babde535e434f42c9e299a0853d775a572bbdb536c639c8687cfe53585679b5/share/doc/html/src/Linear.V3.html/Linear.V3.html#V3"><span class="hs-identifier hs-var">V3</span></a></span><span> </span><span class="annot"><span class="annottext">r
 </span><a href="#local-6989586621679437949"><span class="hs-identifier hs-var">qx</span></a></span><span> </span><span class="annot"><span class="annottext">r
 </span><a href="#local-6989586621679437950"><span class="hs-identifier hs-var">qy</span></a></span><span> </span><span class="annot"><span class="annottext">r
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">r -&gt; r -&gt; r -&gt; V3 r
 forall a. a -&gt; a -&gt; a -&gt; V3 a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.1-8fc8c547eee32c44ead0c7ba1a7208afe442aded4305e6a88380cd57e7479005/share/doc/html/src/Linear.V3.html/Linear.V3.html#V3"><span class="hs-identifier hs-var">V3</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/linear-1.23.2-1babde535e434f42c9e299a0853d775a572bbdb536c639c8687cfe53585679b5/share/doc/html/src/Linear.V3.html/Linear.V3.html#V3"><span class="hs-identifier hs-var">V3</span></a></span><span> </span><span class="annot"><span class="annottext">r
 </span><a href="#local-6989586621679437951"><span class="hs-identifier hs-var">sx</span></a></span><span> </span><span class="annot"><span class="annottext">r
 </span><a href="#local-6989586621679437952"><span class="hs-identifier hs-var">sy</span></a></span><span> </span><span class="annot"><span class="annottext">r
 </span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
