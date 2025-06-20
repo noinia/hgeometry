@@ -66,7 +66,7 @@ ipeSpec' outFP (chain,tri) = traceShow chain $
                                    ! attr SFill red
     , iO' chain
     , iO' tri
---     , iO $ defIO ((toBoundedFrom tri chain)&vertices %~ (^.asPoint)  :: ConvexPolygonF NonEmpty (Point 2 R)
+--     , iO $ defIO ((toBoundedFrom tri chain)&vertices %~ (^.asPoint)  :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 R)
 --                 ) ! attr SFill blue
     ]
 

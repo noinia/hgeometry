@@ -4,6 +4,8 @@ module Plane.NaiveLowerEnvSpec
   ( spec
   ) where
 
+import           HGeometry.Cyclic
+-- import HGeometry.Polygon.Simple
 import           Control.Lens hiding (IsEmpty, IsNonEmpty)
 import           Control.Subcategory.Functor
 import           Data.Bifunctor
@@ -124,7 +126,7 @@ instance ( Point_ vertex 2 r, Fractional r, Ord r
   type DefaultIpeOut (ClippedMDCell' r vertex) = Path
   defIO (ClippedMDCell cell) = case cell of
     ActualPolygon cell' -> defIO $ (cell'&vertices %~ (^.asPoint)
-                                     :: ConvexPolygonF NonEmpty (Point 2 r)
+                                     :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 r)
                                    )
     _                   -> error "defIO for clippedMDCell rendering segment or point not defined"
 
@@ -169,10 +171,8 @@ myTest = describe "intersection tests" $ do
     it "triangle unbounded conex poly intersection "  $
       (tri `intersects` unboundedPoly) `shouldBe` True
 
--- convexPoly :: ConvexPolygonF NonEmpty (Point 2 R) -- FIXME!!!
--- apparently something goes wrong using NonEmpty rather than NonEmptyVector
-
-convexPoly :: ConvexPolygon (Point 2 R)
+-- convexPoly :: ConvexPolygon (Point 2 R)
+convexPoly :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 R)
 convexPoly = fromMaybe (error "absurd") $ fromPoints $ NonEmpty.fromList
   [ Point2 281.99      1636.18
   , Point2 (-662.455) 1636.18
@@ -180,7 +180,6 @@ convexPoly = fromMaybe (error "absurd") $ fromPoints $ NonEmpty.fromList
   , Point2 (-305.312) (-363.818)
   , Point2 337.545    636.182
   ]
-
 
 unboundedPoly :: UnboundedConvexRegion (Point 2 R)
 unboundedPoly = Unbounded (Vector2 1 1.55555)
