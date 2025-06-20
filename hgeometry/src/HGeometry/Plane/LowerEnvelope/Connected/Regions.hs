@@ -21,7 +21,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
 
   , VertexForm
 
-
+  , fromMinimizationDiagramIn
   , fromVertexFormIn
   , ClippedBoundedRegion
 
@@ -34,10 +34,11 @@ import           Data.Coerce
 import           Data.Default.Class
 import qualified Data.Foldable as F
 import           Data.Foldable1
+import           Data.Foldable1 as F1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Map.NonEmpty (NEMap)
+import           Data.Map.NonEmpty (NEMap, pattern IsEmpty, pattern IsNonEmpty)
 import qualified Data.Map.NonEmpty as Map
 import           Data.Maybe (fromMaybe)
 import           Data.Monoid (First(..))
@@ -54,6 +55,7 @@ import           HGeometry.Intersection
 import           HGeometry.LineSegment
 import           HGeometry.Map.NonEmpty.Monoidal
 import           HGeometry.NonEmpty.Util
+import           HGeometry.Plane.LowerEnvelope.Clipped.Type
 import           HGeometry.Plane.LowerEnvelope.Connected.Primitives (intersectionVector)
 import           HGeometry.Plane.LowerEnvelope.Connected.Region
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
@@ -64,6 +66,7 @@ import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Polygon.Simple.Class
+import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Triangle
 import           HGeometry.Vector
 
@@ -151,6 +154,36 @@ mergeDefiners v defs0 defs1 = case extractH0 v (coerce defs0 <> coerce defs1) of
 
 
 
+--------------------------------------------------------------------------------
+-- * Constructing a Clipped Diagram
+
+-- | Compute a clipped minimization diagram within the given triangle
+--
+-- The result is essentially a 'ClippedMinimizationDiagram'.
+fromMinimizationDiagramIn                :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
+                                            , Point_ corner 2 r
+                                            , Foldable1 set
+                                            , Default vtxData, Ord vtxData
+                                            , Show r, Show corner, Show plane
+                                            )
+                                         => Triangle corner
+                                         -> set plane
+                                         -> Maybe (MinimizationDiagram r (MDVertex r plane vtxData) plane)
+                                         -> NEMap plane (ClippedMDCell r plane vtxData)
+fromMinimizationDiagramIn tri planes env = case env of
+    Nothing      -> lowestPlane
+    Just diagram -> case Map.mapMaybe (tri `intersect`) (asMap diagram) of
+                      IsEmpty                   -> lowestPlane
+                      IsNonEmpty clippedDiagram -> clippedDiagram
+  where
+    lowestPlane = let h = F1.minimumBy (comparing $ evalAt (tri'^.head1)) planes
+                  in Map.singleton h (ClippedMDCell . ActualPolygon $ polyTri)
+
+    tri'    = (^.asPoint) <$> tri
+
+
+    polyTri = fromMaybe (error "absurd: bruteForceLowerEnvelopeIn illegal triangle")
+            $ fromPoints (Extra <$> tri')
 
 --------------------------------------------------------------------------------
 -- * Converting into a minimization diagram

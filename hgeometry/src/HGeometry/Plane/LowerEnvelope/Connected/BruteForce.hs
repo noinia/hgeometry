@@ -18,6 +18,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.BruteForce
   ) where
 
 import           Control.Lens
+import           Data.Default.Class
 import qualified Data.Foldable as F
 import           Data.Foldable1
 import           Data.Foldable1 as F1
@@ -44,7 +45,6 @@ import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Triangle
-
 
 import           Debug.Trace
 
@@ -81,31 +81,19 @@ connectedLowerEnvelopeWith computeVertexForm' planes = case computeVertexForm' p
 
 -- | Use a navive O(n^4) time algorithm to compute the lower envelope inside a given
 -- triangle.
-bruteForceLowerEnvelopeIn     :: forall plane r corner set.
-                                 ( Plane_ plane r, Ord plane, Ord r, Fractional r
-                                 , Point_ corner 2 r
-                                 , Foldable1 set
+bruteForceLowerEnvelopeIn            :: forall plane r corner set.
+                                        ( Plane_ plane r, Ord plane, Ord r, Fractional r
+                                        , Point_ corner 2 r
+                                        , Foldable1 set
 
-                                 , Show r, Show corner, Show plane -- TODO: remove these
-                                 )
-                              => Triangle corner
-                              -> set plane
-                              -> ClippedMinimizationDiagram plane
+                                        , Show r, Show corner, Show plane -- TODO: remove these
+                                        )
+                                     => Triangle corner
+                                     -> set plane
+                                     -> ClippedMinimizationDiagram plane
 bruteForceLowerEnvelopeIn tri planes = review _ClippedMinimizationDiagramMap
-                                     $ case bruteForceLowerEnvelope planes of
-    Nothing      -> lowestPlane
-    Just diagram -> case NEMap.mapMaybe (tri `intersect`) (asMap diagram) of
-                      IsEmpty                   -> lowestPlane
-                      IsNonEmpty clippedDiagram -> clippedDiagram
-  where
-    lowestPlane = let h = F1.minimumBy (comparing $ evalAt (tri'^.head1)) planes
-                  in NEMap.singleton h (ClippedMDCell . ActualPolygon $ polyTri)
-
-    tri'    = (^.asPoint) <$> tri
-
-
-    polyTri = fromMaybe (error "absurd: bruteForceLowerEnvelopeIn illegal triangle")
-            $ fromPoints (Extra <$> tri')
+                                     . fromMinimizationDiagramIn tri planes
+                                     $ bruteForceLowerEnvelope planes
 
 --------------------------------------------------------------------------------
 -- * Computing the vertices of the lower envelope

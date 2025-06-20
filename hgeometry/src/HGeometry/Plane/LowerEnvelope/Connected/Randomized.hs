@@ -86,7 +86,6 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
                       -> set plane
                       -> Map (Point 3 r) (Definers plane)
     lowerEnvelopeIn tri planes | traceShow ("LE",toList planes) False = undefined
-{-
     lowerEnvelopeIn tri planes =
       let
           (rNet,remaining) = takeSample r' planes
@@ -108,6 +107,7 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
                triangulatedEnv :: NonEmpty (Triangle (Point 2 r :+ Set plane))
                triangulatedEnv = foldMap1 triangulate env
 
+{-
 
     lowerEnvelopeIn'     :: (Foldable set, Monoid (set plane))
                          => Triangle (Point 2 r :+ set plane)
