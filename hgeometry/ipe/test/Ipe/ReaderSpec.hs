@@ -11,7 +11,6 @@ import           HGeometry.Ext
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Polygon
-import           HGeometry.Polygon.Simple
 import           Ipe
 import           Ipe.Path
 import           Ipe.Reader

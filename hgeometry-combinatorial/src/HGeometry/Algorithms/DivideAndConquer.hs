@@ -10,16 +10,19 @@ module HGeometry.Algorithms.DivideAndConquer(
   , divideAndConquer1
   , divideAndConquer1With
 
+  , chunksOf, chunksOf'
+
   , mergeSorted, mergeSortedLists
   , mergeSortedBy
   , mergeSortedListsBy
   ) where
 
+import           Data.Bifunctor
 import qualified Data.Foldable as F
 import           Data.Foldable1
+import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..),(<|))
 import qualified Data.List.NonEmpty as NonEmpty
--- import           Data.Semigroup.Foldable
 
 --------------------------------------------------------------------------------
 
@@ -54,6 +57,31 @@ divideAndConquer1With (<.>) g = repeatedly merge . fmap g . toNonEmpty
     merge (l :| r : []) = l <.> r :| []
     merge (l :| r : ts) = l <.> r <| merge (NonEmpty.fromList ts)
 
+
+--------------------------------------------------------------------------------
+
+-- | Creates chunks of the given size. The last one may be shorter
+--
+-- pre: n > 0
+--
+-- >>> chunksOf 3 (0 :| [1..10])
+-- (0 :| [1,2]) :| [3 :| [4,5],6 :| [7,8],9 :| [10]]
+chunksOf   :: Foldable1 f => Int -> f a -> NonEmpty.NonEmpty (NonEmpty.NonEmpty a)
+chunksOf n = NonEmpty.fromList . chunksOf' n
+-- note: the fromList is safe, since there must be at least one chunk
+
+-- | Creates chunks of the given size. The last one may be shorter
+--
+-- pre: n > 0
+--
+-- >>> chunksOf' 3 [1..10]
+--[1 :| [2,3],4 :| [5,6],7 :| [8,9],10 :| []]
+chunksOf'   :: Foldable f => Int -> f a -> [NonEmpty.NonEmpty a]
+chunksOf' n = go . F.toList
+  where
+    go xs = case first NonEmpty.nonEmpty (List.splitAt n xs) of
+              (Nothing, _)       -> []
+              (Just chunk, rest) -> chunk : go rest
 
 --------------------------------------------------------------------------------
 -- * Merging NonEmpties/Sorted lists

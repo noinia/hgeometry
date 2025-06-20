@@ -237,12 +237,13 @@ instance TraverseIpeAttr Tiling     where traverseIpeAttr _ = pureAttr
 instance TraverseIpeAttr Gradient   where traverseIpeAttr _ = pureAttr
 
 -- TextAttibuteUniverse
-instance TraverseIpeAttr Width   where traverseIpeAttr f = traverseAttr f
-instance TraverseIpeAttr Height  where traverseIpeAttr f = traverseAttr f
-instance TraverseIpeAttr Depth   where traverseIpeAttr f = traverseAttr f
+instance TraverseIpeAttr Width   where traverseIpeAttr f = traverseAttr (traverse f)
+instance TraverseIpeAttr Height  where traverseIpeAttr f = traverseAttr (traverse f)
+instance TraverseIpeAttr Depth   where traverseIpeAttr f = traverseAttr (traverse f)
 instance TraverseIpeAttr VAlign  where traverseIpeAttr _ = pureAttr
 instance TraverseIpeAttr HAlign  where traverseIpeAttr _ = pureAttr
 instance TraverseIpeAttr Style   where traverseIpeAttr _ = pureAttr
+
 
 -- GroupAttributeUniverse
 instance TraverseIpeAttr Clip     where traverseIpeAttr f = traverseAttr (traverse f)
@@ -284,9 +285,9 @@ instance (Fractional r, Eq r) => IsTransformable (Group r) where
 
 type family AttributesOf (t :: Type -> Type) :: [AttributeUniverse] where
   AttributesOf Group     = GroupAttributes
-  AttributesOf Image     = CommonAttributes
-  AttributesOf TextLabel = CommonAttributes
-  AttributesOf MiniPage  = CommonAttributes
+  AttributesOf Image     = ImageAttributes
+  AttributesOf TextLabel = TextLabelAttributes
+  AttributesOf MiniPage  = MiniPageAttributes
   AttributesOf IpeSymbol = SymbolAttributes
   AttributesOf Path      = PathAttributes
 

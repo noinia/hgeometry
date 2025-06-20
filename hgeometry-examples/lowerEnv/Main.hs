@@ -15,6 +15,7 @@ import qualified Data.Map.NonEmpty as NEMap
 import           Data.Maybe (fromMaybe)
 import           Data.Ord (comparing)
 import           HGeometry.Box
+import           HGeometry.Cyclic
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Number.Real.Rational
@@ -25,6 +26,7 @@ import           HGeometry.PlaneGraph.Instances
 import           HGeometry.Point
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Triangulation
 import           HGeometry.Transformation
@@ -87,9 +89,10 @@ myPoints = NonEmpty.zipWith (flip (:+)) myColors $
 
 
 -- | Renders the a plane
-renderPlaneIn             :: (Plane_ plane r, Point_ corner 2 r, Num r, Ord r
-                             , Show corner, Show r)
-                          => Rectangle corner -> plane -> ConvexPolygonF NonEmpty (corner :+ r)
+renderPlaneIn         :: (Plane_ plane r, Point_ corner 2 r, Num r, Ord r
+                         , Show corner, Show r)
+                      => Rectangle corner -> plane
+                      -> ConvexPolygonF (Cyclic NonEmpty) (corner :+ r)
 renderPlaneIn rect' h = uncheckedFromCCWPoints
                       . NonEmpty.reverse . toNonEmpty -- the corners are listed in CW order
                       . fmap eval
@@ -99,7 +102,7 @@ renderPlaneIn rect' h = uncheckedFromCCWPoints
 
 toPolygons :: (Plane_ plane r, Ord r, Fractional r, Point_ vertex 2 r)
            => MinimizationDiagram r vertex plane
-           -> NonEmpty (plane, ConvexPolygonF NonEmpty (Point 2 r :+ r))
+           -> NonEmpty (plane, ConvexPolygonF (Cyclic NonEmpty) (Point 2 r :+ r))
 toPolygons = fmap render . NEMap.toAscList . asMap
   where
     render (h,reg) = (h, case toConvexPolygonIn myRect reg of
@@ -213,15 +216,15 @@ main = do
 
 -- | make sure that all vertices lie on the plane
 verifyOnPlane        :: (Plane_ plane r, Ord r, Fractional r)
-                     => (plane, ConvexPolygonF NonEmpty (Point 2 r :+ r)) -> Bool
+                     => (plane, ConvexPolygonF (Cyclic NonEmpty) (Point 2 r :+ r)) -> Bool
 verifyOnPlane (h,pg) = allOf vertices onPlane pg
   where
     onPlane (Point2 x y :+ z) = onHyperPlane (Point3 x y z) h
 
 -- boundedVertices   :: Fold (MinimizationDiagram r plane) (Point 2 r)
 boundedVertices f = foldMap (\case
-                                Bounded   pts     -> foldMap f pts
-                                Unbounded _ pts _ -> foldMap f pts
+                                BoundedRegion   pts                 -> foldMap f pts
+                                UnboundedRegion (Unbounded _ pts _) -> foldMap f pts
                             ) . asMap
 
 

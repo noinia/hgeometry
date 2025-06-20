@@ -16,12 +16,14 @@ import qualified Data.Set as Set
 import qualified Data.Text as Text
 import           Golden
 import           HGeometry.Box
+import           HGeometry.Cyclic
 import           HGeometry.Ext
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope
 import qualified HGeometry.Plane.LowerEnvelope.Connected.Randomized as Randomized
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Sequence.Alternating (separators)
 import           HGeometry.VoronoiDiagram
 import qualified HGeometry.VoronoiDiagram as VD
@@ -29,10 +31,10 @@ import           Hiraffe.Graph.Class
 import           Ipe
 import           Ipe.Color
 import           System.OsPath
+import           System.Random
 import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
-import           System.Random
 
 --------------------------------------------------------------------------------
 
@@ -55,7 +57,7 @@ instance ( Point_ point 2 r, Fractional r, Ord r
          => HasDefaultIpeOut (Region r point) where
   type DefaultIpeOut (Region r point) = Path
   defIO region = defIO $ case toConvexPolygonIn rect' region of
-                   Left pg  -> (pg&vertices %~ view asPoint :: ConvexPolygonF NonEmpty (Point 2 r))
+                   Left pg  -> (pg&vertices %~ view asPoint :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 r))
                    Right pg -> pg&vertices %~ view asPoint
     where
       rect' = grow 1000 $ boundingBox region
@@ -63,8 +65,8 @@ instance ( Point_ point 2 r, Fractional r, Ord r
 instance (Point_ point 2 r, Ord r, Num r, IsBoxable point
          ) => IsBoxable (Region r point) where
   boundingBox = \case
-    Bounded pts       -> boundingBox $ toNonEmpty pts
-    Unbounded _ pts _ -> boundingBox pts
+    BoundedRegion convex                -> boundingBox convex
+    UnboundedRegion (Unbounded _ pts _) -> boundingBox pts
 
 grow             :: (Num r, Point_ point d r) => r -> Box point -> Box point
 grow d (Box p q) = Box (p&coordinates %~ subtract d)
@@ -106,8 +108,8 @@ grow d (Box p q) = Box (p&coordinates %~ subtract d)
 instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
          , Show point, Show r
          )
-         => HasDefaultIpeOut (VoronoiDiagram point) where
-  type DefaultIpeOut (VoronoiDiagram point) = Group
+         => HasDefaultIpeOut (VoronoiDiagram_ r point) where
+  type DefaultIpeOut (VoronoiDiagram_ r point) = Group
   defIO = \case
     AllColinear colinearPts -> let sites     = toList colinearPts
                                    bisectors = toList $ separators colinearPts

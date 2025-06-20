@@ -24,7 +24,7 @@ import           HGeometry.LineSegment.Class
 import           HGeometry.Point
 import           HGeometry.PolyLine
 import           HGeometry.Polygon.Simple
-import           Miso (JSM)
+import           Language.Javascript.JSaddle (JSM)
 import           SkiaCanvas.CanvasKit.Core (SkCanvas_)
 import qualified SkiaCanvas.CanvasKit.Core as CKCore
 import qualified SkiaCanvas.CanvasKit.GeomPrims as CKCore

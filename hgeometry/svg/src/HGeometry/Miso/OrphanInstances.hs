@@ -96,3 +96,20 @@ instance ToMisoString Ipe.LayerName where
 
 instance FromMisoString Ipe.LayerName where
   fromMisoStringEither = fmap Ipe.LayerName . fromMisoStringEither
+
+
+instance ToMisoString r => ToMisoString (IA.TextSizeUnit r) where
+  toMisoString (IA.TextSizeUnit x) = toMisoString x
+
+instance ToMisoString IA.VerticalAlignment where
+  toMisoString = \case
+    IA.AlignTop      -> "top"
+    IA.AlignVCenter  -> "center"
+    IA.AlignBottom   -> "bottom"
+    IA.AlignBaseline -> "baseline"
+
+instance ToMisoString IA.HorizontalAlignment where
+  toMisoString = \case
+    IA.AlignLeft    -> "left"
+    IA.AlignHCenter -> "center"
+    IA.AlignRight   -> "right"

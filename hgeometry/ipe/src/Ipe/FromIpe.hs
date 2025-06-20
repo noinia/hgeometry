@@ -35,9 +35,11 @@ module Ipe.FromIpe(
   , readAll, readAllDeep, readAllFrom
   ) where
 
-import           Control.Lens hiding (Simple)
+import           Control.Lens as Lens hiding (Simple)
 import           Data.Foldable1
 import           Data.Kind (Type)
+import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Sequence as Seq
 import           Data.Vector.NonEmpty (NonEmptyVector)
 import           HGeometry.Ball
@@ -50,13 +52,17 @@ import           HGeometry.Foldable.Util
 import           HGeometry.LineSegment
 import           HGeometry.Number.Radical
 import           HGeometry.Point
+import           HGeometry.PolyLine (_PolyLineF)
 import qualified HGeometry.PolyLine as PolyLine
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.WithHoles
 import           HGeometry.Properties
 import           HGeometry.Triangle
+import           Ipe.Attributes
+import           Ipe.FromIpe.UnboundedConvexChain
 import           Ipe.Path
 import           Ipe.Reader
 import           Ipe.Types
@@ -87,7 +93,7 @@ import           Witherable
 
 -- testPath :: Path Int
 -- testPath = Path . fromSingleton  . PolyLineSegment
---              . PolyLine.polyLineFromPoints . NonEmpty.fromList
+--              . polyLineFromPoints . NonEmpty.fromList
 --              $ [ origin, Point2 10 10, Point2 200 100 ]
 -- testPathAttrs :: IpeAttributes Path Int
 -- testPathAttrs = attr SStroke (IpeColor "red")
@@ -116,18 +122,6 @@ _asLineSegment = _asPolyLine.PolyLine._PolyLineLineSegment
 _asClosedLineSegment :: Prism' (Path r) (ClosedLineSegment (Point 2 r))
 _asClosedLineSegment = _asPolyLine.PolyLine._PolyLineLineSegment
 
-
--- | Convert to a polyline. Ignores all non-polyline parts
---
--- >>> testPath ^? _asPolyLine
--- Just (PolyLine [Point2 0 0,Point2 10 10,Point2 200 100])
-_asPolyLine :: Prism' (Path r) (PolyLine.PolyLine (Point 2 r))
-_asPolyLine = prism' poly2path path2poly
-  where
-    poly2path = Path . fromSingleton  . PolyLineSegment
-    path2poly = preview (pathSegments.traverse._PolyLineSegment)
-    -- TODO: Check that the path actually is a polyline, rather
-    -- than ignoring everything that does not fit
 
 -- | Convert to a simple polygon
 _asSimplePolygon :: Foldable1 f
@@ -315,6 +309,39 @@ instance (Num r, Ord r) => HasDefaultFromIpe (ConvexPolygon (Point 2 r)) where
   type DefaultFromIpe (ConvexPolygon (Point 2 r)) = Path
   defaultFromIpe = _withAttrs _IpePath _asConvexPolygon
 
+instance (Num r, Ord r
+         ) => HasDefaultFromIpe (UnboundedConvexRegionF r NonEmpty (Point 2 r)) where
+  type DefaultFromIpe (UnboundedConvexRegionF r NonEmpty (Point 2 r)) = Path
+  defaultFromIpe = ipeUnboundedConvexPolygon
+
+-- | Prism to convert between ipe objects (Paths) and UnboundedConvex regions.
+ipeUnboundedConvexPolygon :: forall r. (Num r, Ord r)
+                          => Prism' (IpeObject r)
+                                    (UnboundedConvexRegionF r NonEmpty (Point 2 r)
+                                      :+ IpeAttributes Path r
+                                    )
+ipeUnboundedConvexPolygon = prism' (IpePath . renderChain) parse
+  where
+    parse      :: IpeObject r -> Maybe (UnboundedConvexRegionF r NonEmpty (Point 2 r)
+                                        :+ IpeAttributes Path r
+                                       )
+    parse obj = do rawPoly :+ ats  <- obj^?_withAttrs _IpePath _asPolyLine
+                   poly            <- reorient rawPoly
+                   _               <- fromPoints @(ConvexPolygon _) $ poly^._PolyLineF
+                   -- makes sure we are convex.
+                   _            <- lookupAttr SArrow  ats
+                   _            <- lookupAttr SRArrow ats
+                   (a:pts1,b)   <- Lens.unsnoc $ poly^..vertices
+                   pts@(p:|_)   <- NonEmpty.nonEmpty pts1
+                   let q = pts^.last1
+                   pure $ Unbounded (p .-. a) pts (b .-. q) :+ ats
+                     -- should we zero the arrow attrs?
+
+    reorient poly = case toNonEmptyOf vertices poly of
+                      p :| (c:n:_) | ccw p n c == CCW -> Just $ poly
+                                   | otherwise        -> Just $ poly^.reversed
+                      _                               -> Nothing
+
 -- instance HasDefaultFromIpe (MultiPolygon () r) where
 --   type DefaultFromIpe (MultiPolygon () r) = Path
 --   defaultFromIpe = _withAttrs _IpePath _asMultiPolygon
@@ -342,10 +369,6 @@ readAllDeep p = p^..content.to flattenContent.traverse.defaultFromIpe
 readAllFrom    :: forall g r. (HasDefaultFromIpe g, r ~ NumType g, Coordinate r, Eq r)
                => OsPath -> IO [g :+ IpeAttributes (DefaultFromIpe g) r]
 readAllFrom fp = foldMap readAll <$> readSinglePageFile fp
-
--- | Helper to produce a singleton sequence
-fromSingleton :: a -> Seq.Seq a
-fromSingleton = Seq.singleton
 
 -- | recursively flatten all groups into one big list
 flattenContent :: [IpeObject r] -> [IpeObject r]

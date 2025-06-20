@@ -15,6 +15,7 @@ import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
+import qualified HGeometry.Polygon.Convex.Merge as Merge
 import           HGeometry.Polygon.Convex.MinkowskiSum
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Transformation
@@ -38,6 +39,7 @@ spec = do
     ( minkowskiSum polyP polyQ
     , naiveMinkowski polyP polyQ
     ) `shouldSatisfy` (uncurry isShiftOf)
+  mergeTest [osp|merge.ipe|]
 
   -- runIO foo
 
@@ -170,3 +172,17 @@ naiveMinkowski p q = convexHull . NonEmpty.fromList
 -- instance (Arbitrary r, Fractional r, Ord r) => Arbitrary (CP r) where
 --   arbitrary =  CP <$> suchThat (convexHull <$> arbitrary)
 --                                (\p -> numVertices p > 2)
+
+--------------------------------------------------------------------------------
+
+mergeTest      :: OsPath -> Spec
+mergeTest inFP = describe "Merging disjoint convex polygons" $ do
+    runIO (readAllFrom ([osp|data/test-with-ipe/Polygon/Convex/|] <> inFP)) >>= \case
+      [pg1,pg2] -> let (out,_,_) = Merge.merge pg1 (pg2 :: ConvexPolygon (Point 2 R) :+ _) in
+                   goldenWith [osp|data/test-with-ipe/Polygon/Convex|]
+                              (ipeContentGolden { name = inFP <> [osp|.out|]})
+                                [ iO'' out $ attr SFill lightgreen
+                                , iO' pg1
+                                , iO' pg2
+                                ]
+      _         -> pure () --

@@ -369,13 +369,15 @@ instance IpeWriteText r => IpeWrite (Image r) where
 instance IpeWriteText () where
   ipeWriteText () = Nothing
 
+instance IpeWriteText r => IpeWriteText (TextSizeUnit r) where
+  ipeWriteText (TextSizeUnit x) = ipeWriteText x
+
 instance IpeWriteText r => IpeWrite (TextLabel r) where
   ipeWrite (Label t p) = (\pt ->
                          Element "text" [("pos", pt)
                                         ,("type", "label")
                                         ] [Text t]
                          ) <$> ipeWriteText p
-
 
 instance (IpeWriteText r) => IpeWrite (IpeObject r) where
     ipeWrite (IpeGroup     g) = ipeWrite g

@@ -20,6 +20,7 @@ module HGeometry.PolyLine
 
 import Control.DeepSeq (NFData)
 import Control.Lens
+import Data.Coerce (coerce)
 import Data.Functor.Classes
 import Data.Semigroup.Foldable
 import Data.Vector.NonEmpty.Internal (NonEmptyVector(..))
@@ -129,3 +130,6 @@ instance ( Traversable1 f
          , TraversableWithIndex Int f
          ) => ConstructablePolyLine_ (PolyLineF f point) point where
   polyLineFromPoints = PolyLine . fromFoldable1
+
+instance Reversing (f point) => Reversing (PolyLineF f point) where
+  reversing = PolyLine . reversing . coerce

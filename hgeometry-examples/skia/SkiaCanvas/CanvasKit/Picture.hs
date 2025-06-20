@@ -25,6 +25,7 @@ import           JavaScript.TypedArray.Internal.Types ( SomeTypedArray(..)
                                                       , IOUint8Array
                                                       , Uint8Array
                                                       )
+import           Language.Javascript.JSaddle (JSM, ghcjsPure)
 import qualified Language.Javascript.JSaddle as JSAddle
 import           Language.Javascript.JSaddle.Object (js0, js1)
 import qualified Language.Javascript.JSaddle.Object as JS

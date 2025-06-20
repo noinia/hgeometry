@@ -17,6 +17,7 @@ import           HGeometry.Ball
 import           HGeometry.Box
 import           HGeometry.Number.Radical (Radical)
 import           HGeometry.Point
+import           Language.Javascript.JSaddle (JSM)
 import qualified Language.Javascript.JSaddle as JSAddle
 import           Language.Javascript.JSaddle.Object (js4)
 import qualified Language.Javascript.JSaddle.Object as JS

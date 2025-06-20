@@ -27,7 +27,7 @@ import           HGeometry.Point
 import           HGeometry.Vector
 import           Miso hiding (update, view)
 import           Miso.String (MisoString)
-import           Miso.Subscription.MouseExtra
+-- import           Miso.Subscription.MouseExtra
 
 --------------------------------------------------------------------------------
 -- * Model

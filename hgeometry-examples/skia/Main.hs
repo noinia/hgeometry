@@ -30,8 +30,9 @@ import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Triangulation
 import           HGeometry.Vector
 import           HGeometry.VoronoiDiagram
+import           Language.Javascript.JSaddle (JSM)
 import           Layers
-import           Miso
+import           Miso hiding (style_)
 import           Miso.Bulma.Color
 import           Miso.Bulma.Columns
 import           Miso.Bulma.Generic
@@ -40,6 +41,7 @@ import           Miso.Bulma.Modal
 import           Miso.Bulma.NavBar
 import           Miso.Bulma.Panel
 import           Miso.String (MisoString, ms)
+import           Miso.Style (style_, (=:), styleInline_)
 import           Model
 import           Modes
 import           Options
@@ -94,10 +96,14 @@ handleDraw m = do canvasKit <- maybeToM "Loading CanvasKit failed"
                     Render.renderWith refs (myDraw m)
                   pure Id
 
-onLoad   :: Model -> Effect Action Model
-onLoad m = Effect m [ initializeCanvas
-                    , initializeCanvasKit
-                    ]
+onLoad   :: Model -> Effect Model Action
+onLoad m = pure m -- FIXME: TODO!!
+
+  -- do schedule
+
+  -- Effect m [ initializeCanvas
+  --                   , initializeCanvasKit
+  --                   ]
   where
     initializeCanvas :: Sub Action
     initializeCanvas = \sink -> acquireCanvasSize >>= liftIO . sink
@@ -114,7 +120,7 @@ onLoad m = Effect m [ initializeCanvas
 --------------------------------------------------------------------------------
 
 -- | Handles a left click action on the canvas.
-handleClick   :: Model -> Effect Action Model
+handleClick   :: Model -> Effect Model Action
 handleClick m = case m^.mode of
     SelectMode{}           ->
         do m' <- m&mode._SelectMode %%~ updateSelection ComputeSelection
@@ -145,7 +151,7 @@ handleClick m = case m^.mode of
                           in m&points %~ insert (p :+ ats)
 
 -- | Handles a right click action on the canvas
-handleRightClick    :: Model -> Effect Action Model
+handleRightClick    :: Model -> Effect Model Action
 handleRightClick m = case m^.mode of
     PenMode             -> noEff m
     PolyLineMode mData  -> addPoly mData
@@ -193,22 +199,20 @@ handleRightClick m = case m^.mode of
 
 
 -- | The main entry point of our controller.
-updateModel   :: Model -> Action -> Effect Action Model
+updateModel   :: Model -> Action -> Effect Model Action
 updateModel m = \case
     Id                     -> noEff m
     OnLoad                 -> onLoad m
-    CanvasKitAction act    -> m&canvas %%~ flip SkiaCanvas.handleCanvasKitAction act
-    CanvasResizeAction act -> do m' <- m&canvas %%~ flip SkiaCanvas.handleCanvasResize act
-                                 m' <# pure ReDraw -- draw the initial items if there are any
-
+    CanvasKitAction act    -> zoom canvas $ wrap SkiaCanvas.handleCanvasKitAction act
+    CanvasResizeAction act -> do zoom canvas $ wrap SkiaCanvas.handleCanvasResize act
+                                 pure ReDraw -- draw the initial items if there are any
     CanvasAction ca       -> do
-                               m' <- m&canvas %%~ flip SkiaCanvas.handleInternalCanvasAction ca
+                               zoom canvas # wrap SkiaCanvas.handleInternalCanvasAction ca
                                -- if we moved the mouse, also redraw
                                case ca of
-                                 SkiaCanvas.MouseMove _ -> () <# notifyOnError (handleDraw m)
+                                 SkiaCanvas.PointerMove _ -> () <# notifyOnError (handleDraw m)
                                                            -- run the draw handler directly
-                                 _                      -> noEff () -- otherwise just return
-                               pure m'
+                                 _                        -> noEff () -- otherwise just return
 
     CanvasClicked      -> handleClick m
     CanvasRightClicked -> handleRightClick m
@@ -386,7 +390,7 @@ viewModel m =
                       [ either CanvasAction id <$>
                         SkiaCanvas.skiaCanvas_
                                     theMainCanvasId
-                                    [ styleM_ [ "width"      =: "100%"
+                                    [ style_ [ "width"      =: "100%"
                                               , "height"     =: "100%"
                                               , "min-width"  =: (w <> "px" :: MisoString)
                                               , "min-height" =: (h <> "px" :: MisoString)
@@ -409,7 +413,7 @@ viewModel m =
                        [ overviewPanel
                        , layersPanel m
                        ]
-    overviewPanel = panel [ styleM_ [ "height"   =: "60%"
+    overviewPanel = panel [ style_ [ "height"   =: "60%"
                                     , "overflow" =: "scroll"
                                     ]
                           ]
@@ -459,7 +463,7 @@ hero_ chs = section_ [ class_ "hero"
                      , styleInline_ "height: calc(100vh - 92px)"
                      ]
                      [ div_ [ class_ "hero-body"
-                            , styleM_ [ "padding-top"    =: "1rem"
+                            , style_ [ "padding-top"    =: "1rem"
                                       , "padding-bottom" =: "1rem"
                                       ]
                             ]
@@ -487,9 +491,9 @@ menuBar_ _ = navBar_
 -- | Renders the Layers panel
 layersPanel   :: Model -> View Action
 layersPanel m =
-      panel [ styleM_ [ "height"   =: "35%"
-                      , "overflow" =: "scroll"
-                      ]
+      panel [ style_ [ "height"   =: "35%"
+                     , "overflow" =: "scroll"
+                     ]
             ]
             [text "Layers"]
             (  (map (layer_ InActive) $ m^..layers.beforeActive.traverse)
@@ -527,13 +531,15 @@ main :: IO ()
 main = Run.runWith Options.jsAddleOptions 8080 mainJSM
 
 mainJSM :: JSM ()
-mainJSM = startApp $
-            App { model         = initialModel
-                , update        = flip updateModel
+mainJSM = startComponent $
+            Component
+                { model         = initialModel
+                , update        = wrap updateModel
                 , view          = viewModel
                 , subs          = mempty
                 , events        = SkiaCanvas.withCanvasEvents defaultEvents
-                , initialAction = OnLoad
+                , styles        = []
+                , initialAction = Just OnLoad
                 , mountPoint    = Nothing
                 , logLevel      = Off
                 }
@@ -862,3 +868,6 @@ renderPartialPolygon canvas' mpp = case mpp >>= completePolygon of
     ats = def :: Attributes (SimplePolygon' R)
 
 --------------------------------------------------------------------------------
+
+wrap       :: (model -> action -> Effect model action') -> action -> Effect model action'
+wrap f act = get >>= flip f act

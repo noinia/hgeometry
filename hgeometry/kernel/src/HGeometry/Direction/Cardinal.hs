@@ -17,8 +17,12 @@ module HGeometry.Direction.Cardinal
     -- , _NorthWest, _NorthEast, _SouthEast, _SouthWest
 
   , interCardinalsOf
+
+  , classifyDirection
+  , classifyDirection'
   ) where
 
+import Data.Maybe (fromMaybe)
 import GHC.Generics (Generic)
 import HGeometry.Vector
 
@@ -57,3 +61,32 @@ interCardinalsOf = \case
   East  -> Vector2 NorthEast SouthEast
   South -> Vector2 SouthEast SouthWest
   West  -> Vector2 SouthWest NorthWest
+
+
+
+--------------------------------------------------------------------------------
+
+-- | Classfiy the direction of the given vector
+--
+-- pre: the vector is non-zero
+classifyDirection               :: (Ord r, Num r) => Vector 2 r
+                                -> Either CardinalDirection InterCardinalDirection
+classifyDirection = fromMaybe (error "classifyDirection: Direction vector is zero!")
+                  . classifyDirection'
+
+-- | Classfiy the direction of the given vector. Returns nothing if the vector is zero
+classifyDirection'               :: (Ord r, Num r) => Vector 2 r
+                                -> Maybe (Either CardinalDirection InterCardinalDirection)
+classifyDirection' (Vector2 x y) = case x `compare` 0 of
+  LT -> Just $ case y `compare` 0 of
+                 LT -> Right SouthWest
+                 EQ -> Left West
+                 GT -> Right NorthWest
+  EQ -> case y `compare` 0 of
+          LT -> Just $ Left South
+          EQ -> Nothing
+          GT -> Just $ Left North
+  GT -> Just $ case y `compare` 0 of
+                 LT -> Right SouthEast
+                 EQ -> Left East
+                 GT -> Right NorthEast

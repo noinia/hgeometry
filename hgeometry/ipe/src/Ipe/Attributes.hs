@@ -20,6 +20,7 @@ module Ipe.Attributes
   where
 
 import Control.Lens hiding (rmap, Const)
+import Data.Default.Class
 import Data.Kind (Type)
 import Data.Singletons
 import Data.Singletons.TH
@@ -178,6 +179,9 @@ instance RecApplicative ats => Monoid (Attributes f ats) where
 instance Semigroup (Attributes f ats) where
   (Attrs as) <> (Attrs bs) = Attrs $ zipRecsWith (<>) as bs
 
+instance RecApplicative ats => Default (Attributes f ats) where
+  def = mempty
+
 -- | Traverse implementation for Attrs
 traverseAttrs               :: Applicative h
                             => (forall label. Attr f label -> h (Attr g label))
@@ -259,7 +263,8 @@ data VerticalAlignment = AlignTop | AlignVCenter | AlignBottom | AlignBaseline
 type TeXStyle = Text
 
 -- | size of text in points
-type TextSizeUnit r = r
+newtype TextSizeUnit r = TextSizeUnit r
+                       deriving stock (Show,Read,Eq,Ord,Functor,Foldable,Traversable)
 
 --------------------------------------------------------------------------------
 -- * Symbol Attributes

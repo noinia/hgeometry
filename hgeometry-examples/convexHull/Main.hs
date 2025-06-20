@@ -17,8 +17,9 @@ import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
 import qualified Language.Javascript.JSaddle.Warp as JSaddle
-import           Miso
+import           Miso hiding (style_)
 import           Miso.String (MisoString,ToMisoString(..), ms)
+import           Miso.Style (style_,(=:))
 import           Miso.Svg hiding (height_, id_, style_, width_)
 
 --------------------------------------------------------------------------------
@@ -44,17 +45,15 @@ initialModel = Model (blankCanvas 1024  576) mempty Nothing Nothing
 
 --------------------------------------------------------------------------------
 
-data Action = Id
-            | CanvasAction Canvas.InternalCanvasAction
+data Action = CanvasAction Canvas.InternalCanvasAction
             | AddPoint
             | Select (Point 2 R :+ Int)
             deriving (Show,Eq)
 
 
-updateModel   :: Model -> Action -> Effect Action Model
+updateModel   :: Model -> Action -> Effect Model Action
 updateModel m = \case
-    Id               -> noEff m
-    CanvasAction ca  -> m&canvas %%~ flip Canvas.handleInternalCanvasAction ca
+    CanvasAction ca  -> zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
     AddPoint         -> addPoint
     Select p         -> noEff $ m&selected ?~ p
   where
@@ -84,7 +83,7 @@ viewModel m = div_ [ ]
                    [ either CanvasAction id <$>
                      Canvas.svgCanvas_ (m^.canvas)
                                        [ onClick AddPoint
-                                       , styleInline_ "border: 1px solid black"
+                                       , style_ ["border" =: "1px solid black"]
                                        ]
                                        canvasBody
                    , div_ [ onClick AddPoint ]
@@ -114,13 +113,15 @@ viewModel m = div_ [ ]
 
 main :: IO ()
 main = JSaddle.run 8080 $
-         startApp $
-            App { model         = initialModel
-                , update        = flip updateModel
+         startComponent $
+            Component
+                { model         = initialModel
+                , update        = wrap updateModel
                 , view          = viewModel
                 , subs          = mempty
                 , events        = Canvas.withCanvasEvents defaultEvents
-                , initialAction = Id
+                , initialAction = Nothing
+                , styles        = []
                 , mountPoint    = Nothing
                 , logLevel      = Off
                 }
@@ -132,3 +133,7 @@ textAt (Point2 x y) ats t = text_ ([ x_ $ ms x
                                   , y_ $ ms y
                                   ] <> ats
                                   ) [text t]
+
+
+wrap       :: (model -> action -> Effect model action') -> action -> Effect model action'
+wrap f act = get >>= flip f act

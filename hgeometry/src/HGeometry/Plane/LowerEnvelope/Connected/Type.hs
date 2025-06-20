@@ -52,13 +52,16 @@ import qualified Data.Map.NonEmpty as NEMap
 import           Data.Monoid (First(..))
 import           HGeometry.Box
 import           HGeometry.Cyclic
+-- import           HGeometry.Cyclic
 import           HGeometry.Direction
 import           HGeometry.HalfLine
 import           HGeometry.Intersection
 import           HGeometry.LineSegment
+import           HGeometry.Plane.LowerEnvelope.Connected.Region
 import           HGeometry.Point
 import           HGeometry.Point.Either
 import           HGeometry.Polygon.Convex
+import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Properties
 import           HGeometry.Vector
@@ -105,26 +108,7 @@ mapVertices f (MinimizationDiagram m) = MinimizationDiagram $ fmap (fmap f) m
 
 
 
-
-
--- | A region in the minimization diagram. The boundary is given in CCW order; i.e. the
--- region is to the left of the boundary.
-data Region r point = Bounded   (Cyclic NonEmpty point)
-                    | Unbounded (Vector 2 r)
-                                -- ^ vector indicating the direction of the unbounded edge
-                                -- incident to the first vertex. Note that this vector
-                                -- thus points INTO vertex v.
-                                (NonEmpty point)
-                                -- ^ the vertices in CCW order,
-                                (Vector 2 r)
-                                -- ^ the vector indicating the direction of the unbounded
-                                -- edge incident to the last vertex. The vector points
-                                -- away from the vertex (i.e. towards +infty).
-                      deriving stock (Show,Eq,Functor,Foldable,Traversable)
-
-type instance NumType   (Region r point) = r
-type instance Dimension (Region r point) = Dimension point
-
+--------------------------------------------------------------------------------
 
 -- | Computes a convex polygon corresponding to the region.
 --
@@ -133,11 +117,12 @@ toConvexPolygonIn      :: ( Rectangle_ rectangle corner, Point_ corner 2 r
                           , Point_ point 2 r, Ord r, Fractional r
                           )
                        => rectangle -> Region r point
-                       -> Either (ConvexPolygonF NonEmpty point)
-                                 (ConvexPolygonF NonEmpty (OriginalOrExtra point (Point 2 r)))
+                       -> Either (ConvexPolygonF (Cyclic NonEmpty) point)
+                                 (ConvexPolygonF (Cyclic NonEmpty) (OriginalOrExtra point (Point 2 r)))
 toConvexPolygonIn rect = \case
-    Bounded vertices  -> Left $ uncheckedFromCCWPoints vertices
-    Unbounded u pts v -> let p        = NonEmpty.head pts
+    BoundedRegion convex                -> Left convex
+    UnboundedRegion (Unbounded u pts v) ->
+                         let p        = NonEmpty.head pts
                              q        = NonEmpty.last pts
                              hp       = HalfLine (p^.asPoint) ((-1) *^ u)
                              hq       = HalfLine (q^.asPoint) v

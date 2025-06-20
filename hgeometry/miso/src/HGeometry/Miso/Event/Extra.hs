@@ -28,7 +28,7 @@ import qualified Data.Aeson.KeyMap as Aeson
 import           Data.Aeson.Types
 -- import           HGeometry.Point
 import           Miso
-import qualified Miso.Html.Event as Event
+import qualified Miso as Event
 
 --------------------------------------------------------------------------------
 
@@ -42,8 +42,8 @@ data Button = LeftButton
             deriving (Show,Eq)
 
 -- | on wheel events
-onWheel :: (WheelDirection -> action) -> Attribute action
-onWheel = on "wheel" (Decoder dec dt)
+onWheel          :: (WheelDirection -> action) -> Attribute action
+onWheel toAction = on "wheel" (Decoder dec dt) (\res _ -> toAction res)
   where
     dt = DecodeTarget mempty
     dec = withObject "event" $ \o -> (f <$> (o .: "deltaY"))
@@ -51,8 +51,8 @@ onWheel = on "wheel" (Decoder dec dt)
     f x = if x < 0 then Up else Down
 
 -- | get the mouse button that was clicked
-onClickWithButton :: (Button -> action) -> Attribute action
-onClickWithButton = on "click" (Decoder dec dt)
+onClickWithButton          :: (Button -> action) -> Attribute action
+onClickWithButton toAction = on "click" (Decoder dec dt) (\res _ -> toAction res)
   where
     dt  = DecodeTarget mempty
     dec :: Value -> Parser Button
@@ -71,7 +71,7 @@ onRightClick = onContextMenu
 
 -- | prevent onContextMenu events
 onContextMenu     :: action -> Attribute action
-onContextMenu act = onWithOptions disabled "contextmenu" emptyDecoder (const act)
+onContextMenu act = onWithOptions disabled "contextmenu" emptyDecoder (\_ _ -> act)
   where
     disabled = Event.defaultOptions { preventDefault  = True
                                     , stopPropagation = False
@@ -127,10 +127,10 @@ onContextMenu act = onWithOptions disabled "contextmenu" emptyDecoder (const act
 
 
 onTouchEnd     :: action -> Attribute action
-onTouchEnd act = on "touchend" emptyDecoder (const act)
+onTouchEnd act = on "touchend" emptyDecoder (\_ _ -> act)
 
 onTouchStart     :: action -> Attribute action
-onTouchStart act = on "touchstart" emptyDecoder (const act)
+onTouchStart act = on "touchstart" emptyDecoder (\_ _ -> act)
 
 onTouchMove     :: action -> Attribute action
-onTouchMove act = on "touchmove" emptyDecoder (const act)
+onTouchMove act = on "touchmove" emptyDecoder (\_ _ -> act)

@@ -121,26 +121,28 @@ touchDecoder = Decoder dec dt
 onRelativeTo :: MisoString -> Decoder (Point 2 Int) -> (Point 2 Int -> action)
                 -> Attribute action
 onRelativeTo eventName Decoder{..} toAction =
-    E $ \sink n -> do
+    Event $ \sink n _logLevel _events -> do
      eventObj <- getProp "events" n
      eventHandlerObject@(Object eo) <- create
      jsOptions <- toJSVal options
      decodeAtVal <- toJSVal decodeAt
-     cb <- callbackToJSVal <=< asyncCallback1 $ \event -> do
+     cb <- FFI.asyncCallback1 $ \event -> do
          Just target <- fromJSVal =<< unsafeGetProp "target" (Object event)
          rect        <- Object <$> getBoundingClientRect target
          Just l      <- fromJSVal =<< unsafeGetProp "left"    rect
          Just t      <- fromJSVal =<< unsafeGetProp "top"     rect
          Just cl     <- fromJSVal =<< unsafeGetProp "clientLeft" (Object target)
          Just ct     <- fromJSVal =<< unsafeGetProp "clientTop"  (Object target)
-         Just v      <- fromJSVal =<< objectToJSON decodeAtVal event
+         Just v      <- fromJSVal =<< FFI.eventJSON decodeAtVal event
+
+           objectToJSON decodeAtVal event
          case parseEither decoder v of
            Left s  -> error $ "Parse error on " <> unpack eventName <> ": " <> s
            Right p -> do let p' = p .-^ Vector2 (l+cl) (t+ct)
                          liftIO $ print $ show eventName <> show (l,t,cl,ct,p, p')
-                         liftIO $ sink (toAction p')
+                         sink (toAction p')
      set "runEvent" cb eventHandlerObject
-     registerCallback cb
+     -- registerCallback cb -- this doesn't really seem to do anything anyway?
      set "options" jsOptions eventHandlerObject
      set eventName eo (Object eventObj)
   where

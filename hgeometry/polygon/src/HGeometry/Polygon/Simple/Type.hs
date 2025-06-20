@@ -41,7 +41,7 @@ import           Hiraffe.Graph.Class
 
 --------------------------------------------------------------------------------
 
--- | Simple polygons just store their vertices in CCCW order
+-- | Simple polygons just store their vertices in CCW order
 newtype SimplePolygonF f point = MkSimplePolygon (f point)
   deriving stock (Generic)
   deriving newtype (NFData,Functor,Foldable,Foldable1,Eq,Ord,Eq1,Ord1)

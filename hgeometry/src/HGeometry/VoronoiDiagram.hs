@@ -9,7 +9,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.VoronoiDiagram
-  ( VoronoiDiagram(..)
+  ( VoronoiDiagram, VoronoiDiagram_(..)
   , VoronoiDiagram'(..)
   , voronoiDiagram
   , voronoiVertices

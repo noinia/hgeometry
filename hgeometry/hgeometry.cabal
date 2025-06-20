@@ -215,7 +215,7 @@ common svg-setup
       , hgeometry:polygon
       , hgeometry:ipe
 
-      , miso                      >= 1.8.4         && < 2
+      , miso                      >= 1.9           && < 2
       , lucid                     >= 2             && < 3
       , lucid-svg                 >= 0.7           && < 1
       , jsaddle                   >= 0.9.9         && < 0.10
@@ -356,6 +356,9 @@ library kernel
         HGeometry.Box.Corners
         HGeometry.Box.Sides
         HGeometry.Box.Intersection
+
+        HGeometry.HalfSpace.Type
+
         HGeometry.HyperPlane.Internal
         HGeometry.Matrix.Internal
         HGeometry.Matrix.ByRows
@@ -427,6 +430,7 @@ library polygon
         HGeometry.Polygon.Convex
         HGeometry.Polygon.Convex.Class
         HGeometry.Polygon.Convex.Internal
+        HGeometry.Polygon.Convex.Unbounded
 
         HGeometry.Polygon.Simple
         HGeometry.Polygon.Simple.Class
@@ -441,7 +445,6 @@ library polygon
         HGeometry.Polygon.Simple.InPolygon
 
 
-
 --------------------------------------------------------------------------------
 -- * HGeometry Library (main library)
 
@@ -452,7 +455,9 @@ library
         HGeometry
 
 
-        -- HGeometry.DelaunayTriangulation
+        HGeometry.DelaunayTriangulation
+        HGeometry.DelaunayTriangulation.DivideAndConquer
+        HGeometry.DelaunayTriangulation.Naive
 
         HGeometry.Disk.Smallest
         HGeometry.Disk.Smallest.Naive
@@ -472,6 +477,7 @@ library
 
 --
         HGeometry.Polygon.Convex.Tangents
+        HGeometry.Polygon.Convex.Merge
         HGeometry.Polygon.Convex.Random
         HGeometry.Polygon.Convex.MinkowskiSum
 
@@ -516,6 +522,8 @@ library
 
         HGeometry.Plane.LowerEnvelope
         HGeometry.Plane.LowerEnvelope.Naive
+        HGeometry.Plane.LowerEnvelope.Clipped
+
         HGeometry.Plane.LowerEnvelope.Connected
         HGeometry.Plane.LowerEnvelope.Connected.Graph
 
@@ -524,6 +532,7 @@ library
         HGeometry.Plane.LowerEnvelope.Connected.Randomized
 
         HGeometry.VoronoiDiagram
+        HGeometry.VoronoiDiagram.Clipped
         HGeometry.VoronoiDiagram.ViaLowerEnvelope
 
         HGeometry.SegmentTree
@@ -544,6 +553,7 @@ library
     other-modules:
         HGeometry.HalfPlane.CommonIntersection.Chain
 
+        HGeometry.DelaunayTriangulation.Types
 
         HGeometry.Polygon.Triangulation.Types
 
@@ -552,9 +562,12 @@ library
 
         HGeometry.Plane.LowerEnvelope.Type
         -- HGeometry.Plane.LowerEnvelope.Sample
+        HGeometry.Plane.LowerEnvelope.Clipped.Type
+
         HGeometry.Plane.LowerEnvelope.Connected.Type
         HGeometry.Plane.LowerEnvelope.Connected.Primitives
         HGeometry.Plane.LowerEnvelope.Connected.VertexForm
+        HGeometry.Plane.LowerEnvelope.Connected.Region
         HGeometry.Plane.LowerEnvelope.Connected.Regions
         HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
         HGeometry.Plane.LowerEnvelope.Connected.Separator
@@ -598,8 +611,9 @@ library ipe
 
     other-modules:
           Ipe.ParserPrimitives
+          Ipe.FromIpe.UnboundedConvexChain
 
---------------------------------------------------------------------------------
+----------g----------------------------------------------------------------------
 -- * svg
 
 library svg
@@ -631,7 +645,7 @@ library miso
     exposed-modules:
         HGeometry.Miso.Event.Extra
         HGeometry.Miso.FFI.Extra
-        HGeometry.Miso.Subscription.MouseExtra
+        -- HGeometry.Miso.Subscription.MouseExtra
 
     -- other-modules:
     --     Miso.String.Util
@@ -856,13 +870,17 @@ test-suite with-ipe-hspec
       Golden
       Disk.MinDiskSpec
       Test.Util
+      DelaunayTriangulation.DTSpec
       Polygon.Simple.InPolygonSpec
       Polygon.Convex.ConvexSpec
       Polygon.Convex.ConvexSpec
       Polygon.Convex.IntersectTriangleSpec
       Polygon.VisibilitySpec
       VoronoiDiagram.VoronoiSpec
+
       Plane.LowerEnvelopeSpec
+      Plane.NaiveLowerEnvSpec
+
       LineSegmentSpec
       LineSegment.Intersection.WithHalfSpaceSpec
       LPTypeSpec
@@ -879,6 +897,7 @@ test-suite with-ipe-hspec
       Line.LowerEnvelopeSpec
       Paths_hgeometry
       BallSpec
+      TriangleUnboundedConvexSpec
 
   autogen-modules:
       Paths_hgeometry
