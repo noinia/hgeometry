@@ -51,6 +51,7 @@ import           Data.Map.NonEmpty (NEMap)
 import qualified Data.Map.NonEmpty as NEMap
 import           Data.Monoid (First(..))
 import           HGeometry.Box
+import           HGeometry.Cyclic
 -- import           HGeometry.Cyclic
 import           HGeometry.Direction
 import           HGeometry.HalfLine
@@ -116,8 +117,8 @@ toConvexPolygonIn      :: ( Rectangle_ rectangle corner, Point_ corner 2 r
                           , Point_ point 2 r, Ord r, Fractional r
                           )
                        => rectangle -> Region r point
-                       -> Either (ConvexPolygonF NonEmpty point)
-                                 (ConvexPolygonF NonEmpty (OriginalOrExtra point (Point 2 r)))
+                       -> Either (ConvexPolygonF (Cyclic NonEmpty) point)
+                                 (ConvexPolygonF (Cyclic NonEmpty) (OriginalOrExtra point (Point 2 r)))
 toConvexPolygonIn rect = \case
     BoundedRegion convex                -> Left convex
     UnboundedRegion (Unbounded u pts v) ->

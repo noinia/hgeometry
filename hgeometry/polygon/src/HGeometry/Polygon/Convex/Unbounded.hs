@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances  #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Polygon.Convex.Unbounded
@@ -25,6 +26,7 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromMaybe)
 import           Data.Ord (comparing)
+import           HGeometry.Cyclic
 import           HGeometry.HalfLine
 import           HGeometry.HalfSpace
 import           HGeometry.HyperPlane.Class
@@ -258,7 +260,7 @@ instance ( Point_ vertex 2 r, Num r, Ord r
 -- -- intersect the convex region with the left halfplane of l.
 -- intersectVerticalLeft :: r -> UnboundedConvexRegionF r nonEmpty vertex
 --                            -> Either (UnboundedConvexRegionF r nonEmpty vertex)
---                                      (ConvexPolygonF NonEmpty vertex)
+--                                      (ConvexPolygonF (Cyclic NonEmpty) vertex)
 -- intersectVerticalLeft x chain@(Chain v pts w) =
 --   case (verticalLine x `intersect`) <$> boundingRays chain of
 --     Vector2 Nothing Nothing
@@ -267,7 +269,7 @@ instance ( Point_ vertex 2 r, Num r, Ord r
 --------------------------------------------------------------------------------
 
 type instance Intersection (Triangle corner) (UnboundedConvexRegionF r nonEmpty vertex)
-  = Intersection (Triangle corner) (ConvexPolygonF nonEmpty vertex)
+  = Intersection (Triangle corner) (ConvexPolygonF (Cyclic nonEmpty) vertex)
 
 instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
          ) => Triangle corner `HasIntersectionWith` (UnboundedConvexRegionF r NonEmpty vertex)
@@ -284,7 +286,7 @@ instance ( Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
 -- this is to avoid having to introduce yet another level of 'OriginalOrExtra''s
 toBoundedFrom :: (Foldable nonEmpty, Point_ point 2 r, Point_ vertex 2 r, Ord r, Fractional r)
               => nonEmpty point -> UnboundedConvexRegionF r NonEmpty vertex
-              -> ConvexPolygonF NonEmpty vertex
+              -> ConvexPolygonF (Cyclic NonEmpty) vertex
 toBoundedFrom tri reg@(Unbounded v pts w) = go $ case extremalVertices reg of
                                                    Left p    -> Vector2 p p
                                                    Right vec -> vec

@@ -65,13 +65,13 @@ instance Num r => Point_ (MDVertex r plane) 2 r where
 
 -- | A Convex bounded region, which may be clipped using vertices of type 'corner'.
 type ClippedBoundedRegion r vertex corner =
-  ConvexPolygonF NonEmpty (OriginalOrExtra vertex corner)
+  ConvexPolygonF (Cyclic NonEmpty) (OriginalOrExtra vertex corner)
 
 --------------------------------------------------------------------------------
 
 -- | A region in the minimization diagram. The boundary is given in CCW order; i.e. the
 -- region is to the left of the boundary.
-data Region r vertex = BoundedRegion   (ConvexPolygonF NonEmpty vertex)
+data Region r vertex = BoundedRegion   (ConvexPolygonF (Cyclic NonEmpty) vertex)
                      | UnboundedRegion (UnboundedConvexRegionF r NonEmpty vertex)
                      deriving stock (Functor,Foldable,Traversable)
 

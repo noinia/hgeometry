@@ -16,6 +16,7 @@ import qualified Data.Set as Set
 import qualified Data.Text as Text
 import           Golden
 import           HGeometry.Box
+import           HGeometry.Cyclic
 import           HGeometry.Ext
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope
@@ -56,7 +57,7 @@ instance ( Point_ point 2 r, Fractional r, Ord r
          => HasDefaultIpeOut (Region r point) where
   type DefaultIpeOut (Region r point) = Path
   defIO region = defIO $ case toConvexPolygonIn rect' region of
-                   Left pg  -> (pg&vertices %~ view asPoint :: ConvexPolygonF NonEmpty (Point 2 r))
+                   Left pg  -> (pg&vertices %~ view asPoint :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 r))
                    Right pg -> pg&vertices %~ view asPoint
     where
       rect' = grow 1000 $ boundingBox region
