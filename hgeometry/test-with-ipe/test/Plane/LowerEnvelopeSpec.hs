@@ -160,8 +160,8 @@ testIpe inFp outFp = do
     (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
       inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
       NonEmpty.fromList <$> readAllFrom inFp'
-    let vd = voronoiDiagram $ view core <$> points
-        -- vd = rVoronoiDiagram $ view core <$> points
+    let --vd = voronoiDiagram $ view core <$> points
+        vd = rVoronoiDiagram $ view core <$> points
         vv = voronoiVertices $ view core <$> points
         out = [ iO' points
               , iO' vd

@@ -125,3 +125,15 @@ instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
   tri `intersect` reg = ClippedMDCell <$> case reg of
     BoundedRegion   convex -> tri `intersect` convex
     UnboundedRegion convex -> tri `intersect` convex
+
+-- | Intersecting Rectangle and Region in a MinimizationDiagram yields a clipped cell.
+type instance Intersection (Rectangle corner) (Region r vertex) = Maybe (ClippedMDCell' r vertex)
+
+instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
+         ) => Rectangle corner `HasIntersectionWith` (Region r vertex)
+
+instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
+         ) => Rectangle corner `IsIntersectableWith` (Region r vertex) where
+  rect `intersect` reg = ClippedMDCell <$> case reg of
+    BoundedRegion   convex -> rect `intersect` convex
+    UnboundedRegion convex -> rect `intersect` convex

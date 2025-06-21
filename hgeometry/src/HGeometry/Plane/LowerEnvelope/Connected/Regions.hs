@@ -26,7 +26,7 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
   , ClippedBoundedRegion
 
 
-  , extraPoints
+  -- , extraPoints
   ) where
 
 import           Control.Lens
@@ -190,18 +190,26 @@ fromMinimizationDiagramIn tri planes env = case env of
 
 
 -- | Pre: the triangle is big enough to contain all vertices of the lower envelope
-fromVertexFormIn     :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show plane
-                        , Point_ corner 2 r
-                        , Show r, Show corner
-                        , Ord vertexData
-                        , HasDefiners vertexData plane
-                        )
-                     => Triangle corner
-                     -> NEMap (Point 3 r) vertexData
-                     -> NEMap plane (ClippedBoundedRegion r (MDVertex r plane vertexData) (Point 2 r))
-fromVertexFormIn tri = case fromPoints $ (Extra . (^.asPoint)) <$> tri of
+fromVertexFormIn            :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show plane
+                               , Point_ corner 2 r, Foldable1 set
+                               , Show r, Show corner
+                               , Ord vertexData
+                               , HasDefiners vertexData plane
+                               )
+                            => Triangle corner
+                            -> set planes
+                            -> NEMap (Point 3 r) vertexData
+                            -> NEMap plane (ClippedBoundedRegion r (MDVertex r plane vertexData) (Point 2 r))
+fromVertexFormIn tri planes = fromMinimizationDiagramIn tri planes . fromVertexForm
+
+{-
+  case fromPoints $ (Extra . (^.asPoint)) <$> tri of
   Just tri' -> fmap (fromMaybe tri' . clipTo tri) . asMap . fromVertexForm
   Nothing   -> error "absurd: fromVertexFormIn"
+
+
+
+
 
 clipTo     :: (Point_ corner 2 r, Fractional r, Ord r
               , Show r, Show corner
@@ -302,6 +310,7 @@ cornersInBetween s e tri = map (^._2.asPoint)
 
 -- TODO: there is a bunch of code duplication here with intersecting a rectangle in Type
 
+-}
 ----------------------------------------
 
 

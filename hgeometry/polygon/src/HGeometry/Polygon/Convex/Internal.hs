@@ -467,11 +467,13 @@ type instance Intersection (Triangle corner) (ConvexPolygonF f vertex) =
 instance ( Point_ point 2 r, Point_ point' 2 r, Num r, Ord r, VertexContainer f point
          , VertexContainer f (Point 2 r)
          ) => HasIntersectionWith (Triangle point') (ConvexPolygonF f point) where
-  triangle `intersects` poly = let  poly' :: ConvexPolygonF f (Point 2 r)
-                                    poly' = poly&vertices %~ view asPoint
-                                    tri   = view asPoint <$> triangle
-                               in anyOf vertices                  (`intersects` tri) poly'
-                               || anyOf outerBoundaryEdgeSegments (`intersects` tri) poly'
+  triangle `intersects` poly = anyOf vertices                  (`intersects` tri) poly'
+                              || anyOf outerBoundaryEdgeSegments (`intersects` tri) poly'
+    where
+      poly' :: ConvexPolygonF f (Point 2 r)
+      poly' = poly&vertices %~ view asPoint
+      tri = (^.asPoint) <$> triangle
+
 
 type V vertex r = OriginalOrExtra vertex (Point 2 r)
 
@@ -482,15 +484,22 @@ instance ( Point_ vertex 2 r, Point_ corner 2 r, Fractional r, Ord r, VertexCont
          , HasFromFoldable1 f
          ) => IsIntersectableWith (Triangle corner) (ConvexPolygonF f vertex) where
   triangle `intersect` poly = foldr intersect' (Just $ ActualPolygon $ poly&vertices %~ Original)
-                                               (intersectingHalfPlanes triangle)
-    where
-      intersect'      :: HalfSpaceF (LinePV 2 r)
-                      -> Maybe (PossiblyDegenerateSimplePolygon (V vertex r)
-                                                                (ConvexPolygonF f (V vertex r)))
-                      -> Maybe (PossiblyDegenerateSimplePolygon (V vertex r)
-                                                                (ConvexPolygonF f (V vertex r)))
-      intersect' h mp = do p <- mp
-                           bimap flatten (fmap flatten) <$> h `intersect` p
+                                               (Triangle.intersectingHalfPlanes triangle)
+
+-- | Helper to repeatedly intersect a halfplane and a convex polygon
+intersect'      :: ( Point_ vertex 2 r, Fractional r, Ord r, VertexContainer f vertex
+                   , VertexContainer f (Point 2 r)
+                   , VertexContainer f (OriginalOrCanonical vertex)
+                   , VertexContainer f (OriginalOrExtra (OriginalOrCanonical vertex) (Point 2 r))
+                   , HasFromFoldable1 f
+                   )
+                => HalfSpaceF (LinePV 2 r)
+                -> Maybe (PossiblyDegenerateSimplePolygon (V vertex r)
+                                                          (ConvexPolygonF f (V vertex r)))
+                -> Maybe (PossiblyDegenerateSimplePolygon (V vertex r)
+                                                          (ConvexPolygonF f (V vertex r)))
+intersect' h mp = do p <- mp
+                     bimap flatten (fmap flatten) <$> h `intersect` p
 
 -- | Flatten two nested originals
 flatten :: OriginalOrExtra (OriginalOrExtra vertex extra) extra -> OriginalOrExtra vertex extra
@@ -498,6 +507,34 @@ flatten = \case
   Extra e    -> Extra e
   Original o -> o
 
+
+-- * Intersection of Rectangle and ConvexPolygon
+
+type instance Intersection (Rectangle corner) (ConvexPolygonF f vertex) =
+  Maybe (PossiblyDegenerateSimplePolygon (OriginalOrCanonical vertex)
+                                         (ConvexPolygonF f (OriginalOrCanonical vertex))
+        )
+
+instance ( Point_ point 2 r, Point_ point' 2 r, Num r, Ord r, VertexContainer f point
+         , VertexContainer f (Point 2 r)
+         ) => HasIntersectionWith (Rectangle point') (ConvexPolygonF f point) where
+  rectangle `intersects` poly =
+       anyOf vertices                  (`intersects` rect) poly'
+    || anyOf outerBoundaryEdgeSegments (`intersects` rect) poly'
+    where
+      poly' :: ConvexPolygonF f (Point 2 r)
+      poly' = poly&vertices %~ view asPoint
+      rect  = (^.asPoint) <$> rectangle
+
+
+instance ( Point_ vertex 2 r, Point_ corner 2 r, Fractional r, Ord r, VertexContainer f vertex
+         , VertexContainer f (Point 2 r)
+         , VertexContainer f (OriginalOrCanonical vertex)
+         , VertexContainer f (OriginalOrExtra (OriginalOrCanonical vertex) (Point 2 r))
+         , HasFromFoldable1 f
+         ) => IsIntersectableWith (Rectangle corner) (ConvexPolygonF f vertex) where
+  rect `intersect` poly = foldr intersect' (Just $ ActualPolygon $ poly&vertices %~ Original)
+                                           (Box.intersectingHalfPlanes rect)
 
 --------------------------------------------------------------------------------
 -- * Halfspace x Rectangle Intersection
