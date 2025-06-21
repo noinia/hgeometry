@@ -98,7 +98,7 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
                                        <>
                                        foldMap lowerEnvelopeIn' triangulatedEnv
              where
-               env :: NEMap plane (ClippedBoundedRegion r (MDVertex r plane :+ Set plane)
+               env :: NEMap plane (ClippedBoundedRegion r (MDVertex r plane (_, Set plane))
                                                           (Point 2 r :+ Set plane))
                env = withExtraConflictLists remaining
                    . fromVertexFormIn tri $ verticesRNet'
@@ -107,15 +107,17 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
                triangulatedEnv :: NonEmpty (Triangle (Point 2 r :+ Set plane))
                triangulatedEnv = foldMap1 triangulate env
 
-{-
+
 
     lowerEnvelopeIn'     :: (Foldable set, Monoid (set plane))
                          => Triangle (Point 2 r :+ set plane)
                          -> Map (Point 3 r) (Definers plane)
     lowerEnvelopeIn' tri = lowerEnvelopeIn (view core <$> tri) (conflictListOf tri)
 
--}
 
+-- dropVertexData :: ClippedBoundedRegion r (MDVertex r plane (a,b)) x
+--                -> ClippedBoundedRegion r (MDVertex r plane b) x
+-- dropVertexData = fmap $ first (fmap snd)
 
 -- | Given a size r; take a sample of the planes from the given size (essentially by just
 -- taking the first r planes.)
@@ -234,15 +236,17 @@ withExtraConflictLists planes = NEMap.mapWithKey (\h -> fmap (second $ withPolyg
 --                                   p :| (q:rest) -> let z = last $ q:|rest in
 --                                                    UnboundedTwo u p z v :| triangulate' p q rest
 
-triangulate      :: ClippedBoundedRegion r (vertex :+ (a, conflictList)) (vertex :+ conflictList)
-                 -> NonEmpty (Triangle (vertex :+ conflictList))
+triangulate      :: Num r
+                 => ClippedBoundedRegion r (MDVertex r plane (a, conflictList))
+                                           (Point 2 r :+ conflictList)
+                 -> NonEmpty (Triangle (Point 2 r :+ conflictList))
 triangulate poly = case flatten <$> toNonEmptyOf vertices poly of
     u :| (v : vs) -> NonEmpty.zipWith (Triangle u) (v :| vs) (NonEmpty.fromList vs)
     _             -> error "absurd. trianglulate; impossible"
   where
     flatten = \case
-      Original (p :+ (_,cl)) -> p :+ cl
-      Extra    p             -> p
+      Original v -> v^.asPoint :+ (v^.vertexData._2)
+      Extra    p -> p
 
 
 ----------------------------------------

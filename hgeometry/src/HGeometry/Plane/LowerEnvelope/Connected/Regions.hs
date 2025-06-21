@@ -193,11 +193,12 @@ fromMinimizationDiagramIn tri planes env = case env of
 fromVertexFormIn     :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show plane
                         , Point_ corner 2 r
                         , Show r, Show corner
-                        , Default vtxData, Ord vtxData
+                        , Ord vertexData
+                        , HasDefiners vertexData plane
                         )
                      => Triangle corner
-                     -> NEMap (Point 3 r) (Definers plane)
-                     -> NEMap plane (ClippedBoundedRegion r (MDVertex r plane vtxData) (Point 2 r))
+                     -> NEMap (Point 3 r) vertexData
+                     -> NEMap plane (ClippedBoundedRegion r (MDVertex r plane vertexData) (Point 2 r))
 fromVertexFormIn tri = case fromPoints $ (Extra . (^.asPoint)) <$> tri of
   Just tri' -> fmap (fromMaybe tri' . clipTo tri) . asMap . fromVertexForm
   Nothing   -> error "absurd: fromVertexFormIn"
@@ -311,14 +312,15 @@ cornersInBetween s e tri = map (^._2.asPoint)
 --
 -- \(O(h\log h)\) assuming that the input is non-degenerate.
 fromVertexForm :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show plane
-                  , Default vtxData, Ord vtxData
+                  , Ord vtxData, HasDefiners vtxData plane
                   )
-               => NEMap (Point 3 r) (Definers plane)
+               => NEMap (Point 3 r) vtxData
                -> MinimizationDiagram r (MDVertex r plane vtxData) plane
 fromVertexForm = MinimizationDiagram
-               . Map.mapWithKey sortAroundBoundary
-               . mapWithKeyMerge1 (\v definers ->
-                    foldMap1 (\h -> Map.singleton h (Set.singleton (MDVertex v definers def))) definers)
+               . Map.mapWithKey sortAroundBoundary . mapWithKeyMerge1 collect
+  where
+    collect v vtxData = let definers' = definersOf vtxData in
+      foldMap1 (\h -> Map.singleton h (Set.singleton (MDVertex v definers' vtxData))) definers'
 -- for each vertex v, we go through its definers defs; and for each such plane h, we
 -- associate it with with the set {(v,defs)}. the foldMapWithKey part thus collects all
 -- vertices (together with their definers) incident to h. i.e. it combines these sets {(v,
