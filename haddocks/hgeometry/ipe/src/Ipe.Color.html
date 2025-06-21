@@ -20,7 +20,7 @@
 </span><span id="line-20"></span><span>
 </span><span id="line-21"></span><span class="hs-comment">-- | Defines a color in Ipe. Colors are either RGB Values or Named</span><span>
 </span><span id="line-22"></span><span class="hs-comment">-- values.</span><span>
-</span><span id="line-23"></span><span class="hs-keyword">newtype</span><span> </span><span id="IpeColor"><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-var">IpeColor</span></a></span></span><span> </span><span id="local-6989586621679466183"><span class="annot"><a href="#local-6989586621679466183"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="IpeColor"><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-var">IpeColor</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Value.html#IpeValue"><span class="hs-identifier hs-type">IpeValue</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/colour-2.3.6-37930b5325d42d494607d1978c265fbddb55f78b0860295f3c906f22fef1ec56/share/doc/html/src/Data.Colour.RGB.html/Data.Colour.RGB.html#RGB"><span class="hs-identifier hs-type">RGB</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466183"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679466232"><span id="local-6989586621679466239"><span id="local-6989586621679466243"><span class="annot"><span class="annottext">Int -&gt; IpeColor r -&gt; ShowS
+</span><span id="line-23"></span><span class="hs-keyword">newtype</span><span> </span><span id="IpeColor"><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-var">IpeColor</span></a></span></span><span> </span><span id="local-6989586621679466198"><span class="annot"><a href="#local-6989586621679466198"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="IpeColor"><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-var">IpeColor</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Value.html#IpeValue"><span class="hs-identifier hs-type">IpeValue</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/colour-2.3.6-37930b5325d42d494607d1978c265fbddb55f78b0860295f3c906f22fef1ec56/share/doc/html/src/Data.Colour.RGB.html/Data.Colour.RGB.html#RGB"><span class="hs-identifier hs-type">RGB</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466198"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679466247"><span id="local-6989586621679466254"><span id="local-6989586621679466258"><span class="annot"><span class="annottext">Int -&gt; IpeColor r -&gt; ShowS
 [IpeColor r] -&gt; ShowS
 IpeColor r -&gt; String
 (Int -&gt; IpeColor r -&gt; ShowS)
@@ -38,7 +38,7 @@ $cshow :: forall r. Show r =&gt; IpeColor r -&gt; String
 show :: IpeColor r -&gt; String
 $cshowList :: forall r. Show r =&gt; [IpeColor r] -&gt; ShowS
 showList :: [IpeColor r] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679466250"><span id="local-6989586621679466254"><span id="local-6989586621679466257"><span id="local-6989586621679466266"><span class="annot"><span class="annottext">ReadPrec [IpeColor r]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679466265"><span id="local-6989586621679466269"><span id="local-6989586621679466272"><span id="local-6989586621679466281"><span class="annot"><span class="annottext">ReadPrec [IpeColor r]
 ReadPrec (IpeColor r)
 Int -&gt; ReadS (IpeColor r)
 ReadS [IpeColor r]
@@ -62,7 +62,7 @@ $creadPrec :: forall r. Read r =&gt; ReadPrec (IpeColor r)
 readPrec :: ReadPrec (IpeColor r)
 $creadListPrec :: forall r. Read r =&gt; ReadPrec [IpeColor r]
 readListPrec :: ReadPrec [IpeColor r]
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679466275"><span id="local-6989586621679466281"><span class="annot"><span class="annottext">IpeColor r -&gt; IpeColor r -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Read</span></span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679466290"><span id="local-6989586621679466296"><span class="annot"><span class="annottext">IpeColor r -&gt; IpeColor r -&gt; Bool
 (IpeColor r -&gt; IpeColor r -&gt; Bool)
 -&gt; (IpeColor r -&gt; IpeColor r -&gt; Bool) -&gt; Eq (IpeColor r)
 forall r. Eq r =&gt; IpeColor r -&gt; IpeColor r -&gt; Bool
@@ -73,54 +73,54 @@ $c/= :: forall r. Eq r =&gt; IpeColor r -&gt; IpeColor r -&gt; Bool
 /= :: IpeColor r -&gt; IpeColor r -&gt; Bool
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-24"></span><span>
-</span><span id="line-25"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679466122"><span id="local-6989586621679466295"><span id="local-6989586621679466299"><span id="local-6989586621679466302"><span id="local-6989586621679466305"><span id="local-6989586621679466308"><span id="local-6989586621679466311"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679466122"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466122"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-26"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span id="local-6989586621679466322"><span class="annot"><span class="annottext">IpeValue (RGB r)
-</span><a href="#local-6989586621679466322"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679466323"><span class="annot"><span class="annottext">compare :: IpeColor r -&gt; IpeColor r -&gt; Ordering
-</span><a href="#local-6989586621679466323"><span class="hs-operator hs-var hs-var hs-var">`compare`</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span id="local-6989586621679466325"><span class="annot"><span class="annottext">IpeValue (RGB r)
-</span><a href="#local-6989586621679466325"><span class="hs-identifier hs-var">c'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RGB r -&gt; (r, r, r)) -&gt; IpeValue (RGB r) -&gt; IpeValue (r, r, r)
+</span><span id="line-25"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679466137"><span id="local-6989586621679466310"><span id="local-6989586621679466314"><span id="local-6989586621679466317"><span id="local-6989586621679466320"><span id="local-6989586621679466323"><span id="local-6989586621679466326"><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679466137"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466137"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-26"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span id="local-6989586621679466337"><span class="annot"><span class="annottext">IpeValue (RGB r)
+</span><a href="#local-6989586621679466337"><span class="hs-identifier hs-var">c</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679466338"><span class="annot"><span class="annottext">compare :: IpeColor r -&gt; IpeColor r -&gt; Ordering
+</span><a href="#local-6989586621679466338"><span class="hs-operator hs-var hs-var hs-var">`compare`</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span id="local-6989586621679466340"><span class="annot"><span class="annottext">IpeValue (RGB r)
+</span><a href="#local-6989586621679466340"><span class="hs-identifier hs-var">c'</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(RGB r -&gt; (r, r, r)) -&gt; IpeValue (RGB r) -&gt; IpeValue (r, r, r)
 forall a b. (a -&gt; b) -&gt; IpeValue a -&gt; IpeValue b
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">RGB r -&gt; (r, r, r)
 forall {c}. RGB c -&gt; (c, c, c)
-</span><a href="#local-6989586621679466326"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">IpeValue (RGB r)
-</span><a href="#local-6989586621679466322"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">IpeValue (r, r, r) -&gt; IpeValue (r, r, r) -&gt; Ordering
+</span><a href="#local-6989586621679466341"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">IpeValue (RGB r)
+</span><a href="#local-6989586621679466337"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="annot"><span class="annottext">IpeValue (r, r, r) -&gt; IpeValue (r, r, r) -&gt; Ordering
 forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
 </span><span class="hs-operator hs-var">`compare`</span></span><span> </span><span class="annot"><span class="annottext">(RGB r -&gt; (r, r, r)) -&gt; IpeValue (RGB r) -&gt; IpeValue (r, r, r)
 forall a b. (a -&gt; b) -&gt; IpeValue a -&gt; IpeValue b
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">RGB r -&gt; (r, r, r)
 forall {c}. RGB c -&gt; (c, c, c)
-</span><a href="#local-6989586621679466326"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">IpeValue (RGB r)
-</span><a href="#local-6989586621679466325"><span class="hs-identifier hs-var">c'</span></a></span><span>
+</span><a href="#local-6989586621679466341"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">IpeValue (RGB r)
+</span><a href="#local-6989586621679466340"><span class="hs-identifier hs-var">c'</span></a></span><span>
 </span><span id="line-27"></span><span>    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-28"></span><span>      </span><span id="local-6989586621679466326"><span class="annot"><span class="annottext">f :: RGB c -&gt; (c, c, c)
-</span><a href="#local-6989586621679466326"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/colour-2.3.6-37930b5325d42d494607d1978c265fbddb55f78b0860295f3c906f22fef1ec56/share/doc/html/src/Data.Colour.RGB.html/Data.Colour.RGB.html#RGB"><span class="hs-identifier hs-type">RGB</span></a></span><span> </span><span id="local-6989586621679466328"><span class="annot"><span class="annottext">c
-</span><a href="#local-6989586621679466328"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679466329"><span class="annot"><span class="annottext">c
-</span><a href="#local-6989586621679466329"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621679466330"><span class="annot"><span class="annottext">c
-</span><a href="#local-6989586621679466330"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">c
-</span><a href="#local-6989586621679466328"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">c
-</span><a href="#local-6989586621679466329"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">c
-</span><a href="#local-6989586621679466330"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>      </span><span id="local-6989586621679466341"><span class="annot"><span class="annottext">f :: RGB c -&gt; (c, c, c)
+</span><a href="#local-6989586621679466341"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/colour-2.3.6-37930b5325d42d494607d1978c265fbddb55f78b0860295f3c906f22fef1ec56/share/doc/html/src/Data.Colour.RGB.html/Data.Colour.RGB.html#RGB"><span class="hs-identifier hs-type">RGB</span></a></span><span> </span><span id="local-6989586621679466343"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679466343"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679466344"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679466344"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621679466345"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679466345"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679466343"><span class="hs-identifier hs-var">r</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679466344"><span class="hs-identifier hs-var">g</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679466345"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-29"></span><span>
-</span><span id="line-30"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679466333"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-31"></span><span>  </span><span id="local-6989586621679466339"><span class="annot"><span class="annottext">fmap :: forall a b. (a -&gt; b) -&gt; IpeColor a -&gt; IpeColor b
+</span><span id="line-30"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679466348"><span class="annot"><span class="hs-identifier hs-type">Functor</span></span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-31"></span><span>  </span><span id="local-6989586621679466354"><span class="annot"><span class="annottext">fmap :: forall a b. (a -&gt; b) -&gt; IpeColor a -&gt; IpeColor b
 </span><span class="hs-identifier hs-var hs-var hs-var">fmap</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; b) -&gt; IpeColor a -&gt; IpeColor b
 forall (t :: * -&gt; *) a b. Traversable t =&gt; (a -&gt; b) -&gt; t a -&gt; t b
 </span><span class="hs-identifier hs-var">fmapDefault</span></span><span>
-</span><span id="line-32"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679466342"><span id="local-6989586621679466349"><span id="local-6989586621679466354"><span id="local-6989586621679466357"><span id="local-6989586621679466360"><span id="local-6989586621679466363"><span id="local-6989586621679466366"><span id="local-6989586621679466369"><span id="local-6989586621679466372"><span id="local-6989586621679466375"><span id="local-6989586621679466378"><span id="local-6989586621679466381"><span id="local-6989586621679466386"><span id="local-6989586621679466391"><span id="local-6989586621679466396"><span id="local-6989586621679466401"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-33"></span><span>  </span><span id="local-6989586621679466409"><span class="annot"><span class="annottext">foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; IpeColor a -&gt; m
-</span><a href="#local-6989586621679466409"><span class="hs-identifier hs-var hs-var hs-var">foldMap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; IpeColor a -&gt; m
+</span><span id="line-32"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679466357"><span id="local-6989586621679466364"><span id="local-6989586621679466369"><span id="local-6989586621679466372"><span id="local-6989586621679466375"><span id="local-6989586621679466378"><span id="local-6989586621679466381"><span id="local-6989586621679466384"><span id="local-6989586621679466387"><span id="local-6989586621679466390"><span id="local-6989586621679466393"><span id="local-6989586621679466396"><span id="local-6989586621679466401"><span id="local-6989586621679466406"><span id="local-6989586621679466411"><span id="local-6989586621679466416"><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-33"></span><span>  </span><span id="local-6989586621679466424"><span class="annot"><span class="annottext">foldMap :: forall m a. Monoid m =&gt; (a -&gt; m) -&gt; IpeColor a -&gt; m
+</span><a href="#local-6989586621679466424"><span class="hs-identifier hs-var hs-var hs-var">foldMap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a -&gt; m) -&gt; IpeColor a -&gt; m
 forall (t :: * -&gt; *) m a.
 (Traversable t, Monoid m) =&gt;
 (a -&gt; m) -&gt; t a -&gt; m
 </span><span class="hs-identifier hs-var">foldMapDefault</span></span><span>
-</span><span id="line-34"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679466418"><span id="local-6989586621679466423"><span id="local-6989586621679466428"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-35"></span><span>  </span><span id="local-6989586621679466443"><span class="annot"><span class="annottext">traverse :: forall (f :: * -&gt; *) a b.
+</span><span id="line-34"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679466433"><span id="local-6989586621679466438"><span id="local-6989586621679466443"><span class="annot"><span class="hs-identifier hs-type">Traversable</span></span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-35"></span><span>  </span><span id="local-6989586621679466458"><span class="annot"><span class="annottext">traverse :: forall (f :: * -&gt; *) a b.
 Applicative f =&gt;
 (a -&gt; f b) -&gt; IpeColor a -&gt; f (IpeColor b)
-</span><a href="#local-6989586621679466443"><span class="hs-identifier hs-var hs-var hs-var">traverse</span></a></span></span><span> </span><span id="local-6989586621679466445"><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679466445"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span id="local-6989586621679466446"><span class="annot"><span class="annottext">IpeValue (RGB a)
-</span><a href="#local-6989586621679466446"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpeValue (RGB b) -&gt; IpeColor b
+</span><a href="#local-6989586621679466458"><span class="hs-identifier hs-var hs-var hs-var">traverse</span></a></span></span><span> </span><span id="local-6989586621679466460"><span class="annot"><span class="annottext">a -&gt; f b
+</span><a href="#local-6989586621679466460"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span id="local-6989586621679466461"><span class="annot"><span class="annottext">IpeValue (RGB a)
+</span><a href="#local-6989586621679466461"><span class="hs-identifier hs-var">v</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpeValue (RGB b) -&gt; IpeColor b
 forall r. IpeValue (RGB r) -&gt; IpeColor r
 </span><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-var">IpeColor</span></a></span><span> </span><span class="annot"><span class="annottext">(IpeValue (RGB b) -&gt; IpeColor b)
 -&gt; f (IpeValue (RGB b)) -&gt; f (IpeColor b)
@@ -133,33 +133,33 @@ forall (f :: * -&gt; *) a b.
 Applicative f =&gt;
 (a -&gt; f b) -&gt; IpeValue a -&gt; f (IpeValue b)
 </span><span class="hs-identifier hs-var">traverse</span></span><span> </span><span class="annot"><span class="annottext">RGB a -&gt; f (RGB b)
-</span><a href="#local-6989586621679466448"><span class="hs-identifier hs-var">traverseRGB</span></a></span><span> </span><span class="annot"><span class="annottext">IpeValue (RGB a)
-</span><a href="#local-6989586621679466446"><span class="hs-identifier hs-var">v</span></a></span><span>
+</span><a href="#local-6989586621679466463"><span class="hs-identifier hs-var">traverseRGB</span></a></span><span> </span><span class="annot"><span class="annottext">IpeValue (RGB a)
+</span><a href="#local-6989586621679466461"><span class="hs-identifier hs-var">v</span></a></span><span>
 </span><span id="line-36"></span><span>    </span><span class="hs-keyword">where</span><span>
-</span><span id="line-37"></span><span>      </span><span id="local-6989586621679466448"><span class="annot"><span class="annottext">traverseRGB :: RGB a -&gt; f (RGB b)
-</span><a href="#local-6989586621679466448"><span class="hs-identifier hs-var hs-var">traverseRGB</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/colour-2.3.6-37930b5325d42d494607d1978c265fbddb55f78b0860295f3c906f22fef1ec56/share/doc/html/src/Data.Colour.RGB.html/Data.Colour.RGB.html#RGB"><span class="hs-identifier hs-type">RGB</span></a></span><span> </span><span id="local-6989586621679466449"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679466449"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679466450"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679466450"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621679466451"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679466451"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; b -&gt; RGB b
+</span><span id="line-37"></span><span>      </span><span id="local-6989586621679466463"><span class="annot"><span class="annottext">traverseRGB :: RGB a -&gt; f (RGB b)
+</span><a href="#local-6989586621679466463"><span class="hs-identifier hs-var hs-var">traverseRGB</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/colour-2.3.6-37930b5325d42d494607d1978c265fbddb55f78b0860295f3c906f22fef1ec56/share/doc/html/src/Data.Colour.RGB.html/Data.Colour.RGB.html#RGB"><span class="hs-identifier hs-type">RGB</span></a></span><span> </span><span id="local-6989586621679466464"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679466464"><span class="hs-identifier hs-var">r</span></a></span></span><span> </span><span id="local-6989586621679466465"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679466465"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span id="local-6989586621679466466"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679466466"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; b -&gt; RGB b
 forall a. a -&gt; a -&gt; a -&gt; RGB a
 </span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/colour-2.3.6-37930b5325d42d494607d1978c265fbddb55f78b0860295f3c906f22fef1ec56/share/doc/html/src/Data.Colour.RGB.html/Data.Colour.RGB.html#RGB"><span class="hs-identifier hs-var">RGB</span></a></span><span> </span><span class="annot"><span class="annottext">(b -&gt; b -&gt; b -&gt; RGB b) -&gt; f b -&gt; f (b -&gt; b -&gt; RGB b)
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679466445"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679466449"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">f (b -&gt; b -&gt; RGB b) -&gt; f b -&gt; f (b -&gt; RGB b)
+</span><a href="#local-6989586621679466460"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679466464"><span class="hs-identifier hs-var">r</span></a></span><span> </span><span class="annot"><span class="annottext">f (b -&gt; b -&gt; RGB b) -&gt; f b -&gt; f (b -&gt; RGB b)
 forall a b. f (a -&gt; b) -&gt; f a -&gt; f b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679466445"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679466450"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">f (b -&gt; RGB b) -&gt; f b -&gt; f (RGB b)
+</span><a href="#local-6989586621679466460"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679466465"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">f (b -&gt; RGB b) -&gt; f b -&gt; f (RGB b)
 forall a b. f (a -&gt; b) -&gt; f a -&gt; f b
 forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; f b
-</span><a href="#local-6989586621679466445"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679466451"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><a href="#local-6989586621679466460"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679466466"><span class="hs-identifier hs-var">b</span></a></span><span>
 </span><span id="line-38"></span><span>
 </span><span id="line-39"></span><span class="annot"><span class="hs-comment">-- | Creates a named color</span></span><span>
-</span><span id="line-40"></span><span id="local-6989586621679466191"><span class="annot"><a href="Ipe.Color.html#named"><span class="hs-identifier hs-type">named</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466191"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-40"></span><span id="local-6989586621679466206"><span class="annot"><a href="Ipe.Color.html#named"><span class="hs-identifier hs-type">named</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466206"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-41"></span><span id="named"><span class="annot"><span class="annottext">named :: forall r. Text -&gt; IpeColor r
 </span><a href="Ipe.Color.html#named"><span class="hs-identifier hs-var hs-var">named</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IpeValue (RGB r) -&gt; IpeColor r
 forall r. IpeValue (RGB r) -&gt; IpeColor r
@@ -173,7 +173,7 @@ forall v. Text -&gt; IpeValue v
 </span><span id="line-43"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
 </span><span id="line-44"></span><span>
 </span><span id="line-45"></span><span class="annot"><span class="hs-comment">-- | All basic named colors</span></span><span>
-</span><span id="line-46"></span><span id="local-6989586621679466197"><span class="annot"><a href="Ipe.Color.html#basicNamedColors"><span class="hs-identifier hs-type">basicNamedColors</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466197"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-46"></span><span id="local-6989586621679466212"><span class="annot"><a href="Ipe.Color.html#basicNamedColors"><span class="hs-identifier hs-type">basicNamedColors</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466212"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">]</span></span><span>
 </span><span id="line-47"></span><span id="basicNamedColors"><span class="annot"><span class="annottext">basicNamedColors :: forall r. [IpeColor r]
 </span><a href="Ipe.Color.html#basicNamedColors"><span class="hs-identifier hs-var hs-var">basicNamedColors</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">IpeColor r
 forall r. IpeColor r
@@ -265,7 +265,7 @@ forall r. IpeColor r
 </span><span id="line-78"></span><span class="annot"><span class="hs-comment">-- * Basic Named colors</span></span><span>
 </span><span id="line-79"></span><span>
 </span><span id="line-80"></span><span class="annot"><span class="hs-comment">-- | a color named 'black'</span></span><span>
-</span><span id="line-81"></span><span id="local-6989586621679466199"><span class="annot"><a href="Ipe.Color.html#black"><span class="hs-identifier hs-type">black</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466199"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-81"></span><span id="local-6989586621679466214"><span class="annot"><a href="Ipe.Color.html#black"><span class="hs-identifier hs-type">black</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466214"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-82"></span><span id="black"><span class="annot"><span class="annottext">black :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#black"><span class="hs-identifier hs-var hs-var">black</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -273,7 +273,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;black&quot;</span></span><span>
 </span><span id="line-83"></span><span>
 </span><span id="line-84"></span><span class="annot"><span class="hs-comment">-- | a color named 'white'</span></span><span>
-</span><span id="line-85"></span><span id="local-6989586621679466486"><span class="annot"><a href="Ipe.Color.html#white"><span class="hs-identifier hs-type">white</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466486"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-85"></span><span id="local-6989586621679466501"><span class="annot"><a href="Ipe.Color.html#white"><span class="hs-identifier hs-type">white</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466501"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-86"></span><span id="white"><span class="annot"><span class="annottext">white :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#white"><span class="hs-identifier hs-var hs-var">white</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -281,7 +281,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;white&quot;</span></span><span>
 </span><span id="line-87"></span><span>
 </span><span id="line-88"></span><span class="annot"><span class="hs-comment">-- | a color named 'red'</span></span><span>
-</span><span id="line-89"></span><span id="local-6989586621679466488"><span class="annot"><a href="Ipe.Color.html#red"><span class="hs-identifier hs-type">red</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466488"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-89"></span><span id="local-6989586621679466503"><span class="annot"><a href="Ipe.Color.html#red"><span class="hs-identifier hs-type">red</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466503"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-90"></span><span id="red"><span class="annot"><span class="annottext">red :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#red"><span class="hs-identifier hs-var hs-var">red</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -289,7 +289,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;red&quot;</span></span><span>
 </span><span id="line-91"></span><span>
 </span><span id="line-92"></span><span class="annot"><span class="hs-comment">-- | a color named 'green'</span></span><span>
-</span><span id="line-93"></span><span id="local-6989586621679466490"><span class="annot"><a href="Ipe.Color.html#green"><span class="hs-identifier hs-type">green</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466490"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-93"></span><span id="local-6989586621679466505"><span class="annot"><a href="Ipe.Color.html#green"><span class="hs-identifier hs-type">green</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466505"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-94"></span><span id="green"><span class="annot"><span class="annottext">green :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#green"><span class="hs-identifier hs-var hs-var">green</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -297,7 +297,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;green&quot;</span></span><span>
 </span><span id="line-95"></span><span>
 </span><span id="line-96"></span><span class="annot"><span class="hs-comment">-- | a color named 'blue'</span></span><span>
-</span><span id="line-97"></span><span id="local-6989586621679466492"><span class="annot"><a href="Ipe.Color.html#blue"><span class="hs-identifier hs-type">blue</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466492"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-97"></span><span id="local-6989586621679466507"><span class="annot"><a href="Ipe.Color.html#blue"><span class="hs-identifier hs-type">blue</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466507"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-98"></span><span id="blue"><span class="annot"><span class="annottext">blue :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#blue"><span class="hs-identifier hs-var hs-var">blue</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -305,7 +305,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;blue&quot;</span></span><span>
 </span><span id="line-99"></span><span>
 </span><span id="line-100"></span><span class="annot"><span class="hs-comment">-- | a color named 'yellow'</span></span><span>
-</span><span id="line-101"></span><span id="local-6989586621679466494"><span class="annot"><a href="Ipe.Color.html#yellow"><span class="hs-identifier hs-type">yellow</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466494"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-101"></span><span id="local-6989586621679466509"><span class="annot"><a href="Ipe.Color.html#yellow"><span class="hs-identifier hs-type">yellow</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466509"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-102"></span><span id="yellow"><span class="annot"><span class="annottext">yellow :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#yellow"><span class="hs-identifier hs-var hs-var">yellow</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -313,7 +313,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;yellow&quot;</span></span><span>
 </span><span id="line-103"></span><span>
 </span><span id="line-104"></span><span class="annot"><span class="hs-comment">-- | a color named 'orange'</span></span><span>
-</span><span id="line-105"></span><span id="local-6989586621679466496"><span class="annot"><a href="Ipe.Color.html#orange"><span class="hs-identifier hs-type">orange</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466496"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-105"></span><span id="local-6989586621679466511"><span class="annot"><a href="Ipe.Color.html#orange"><span class="hs-identifier hs-type">orange</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466511"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-106"></span><span id="orange"><span class="annot"><span class="annottext">orange :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#orange"><span class="hs-identifier hs-var hs-var">orange</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -321,7 +321,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;orange&quot;</span></span><span>
 </span><span id="line-107"></span><span>
 </span><span id="line-108"></span><span class="annot"><span class="hs-comment">-- | a color named 'gold'</span></span><span>
-</span><span id="line-109"></span><span id="local-6989586621679466498"><span class="annot"><a href="Ipe.Color.html#gold"><span class="hs-identifier hs-type">gold</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466498"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-109"></span><span id="local-6989586621679466513"><span class="annot"><a href="Ipe.Color.html#gold"><span class="hs-identifier hs-type">gold</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466513"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-110"></span><span id="gold"><span class="annot"><span class="annottext">gold :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#gold"><span class="hs-identifier hs-var hs-var">gold</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -329,7 +329,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;gold&quot;</span></span><span>
 </span><span id="line-111"></span><span>
 </span><span id="line-112"></span><span class="annot"><span class="hs-comment">-- | a color named 'pruple'</span></span><span>
-</span><span id="line-113"></span><span id="local-6989586621679466500"><span class="annot"><a href="Ipe.Color.html#purple"><span class="hs-identifier hs-type">purple</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466500"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-113"></span><span id="local-6989586621679466515"><span class="annot"><a href="Ipe.Color.html#purple"><span class="hs-identifier hs-type">purple</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466515"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-114"></span><span id="purple"><span class="annot"><span class="annottext">purple :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#purple"><span class="hs-identifier hs-var hs-var">purple</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -337,7 +337,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;purple&quot;</span></span><span>
 </span><span id="line-115"></span><span>
 </span><span id="line-116"></span><span class="annot"><span class="hs-comment">-- | a color named 'gray'</span></span><span>
-</span><span id="line-117"></span><span id="local-6989586621679466502"><span class="annot"><a href="Ipe.Color.html#gray"><span class="hs-identifier hs-type">gray</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466502"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-117"></span><span id="local-6989586621679466517"><span class="annot"><a href="Ipe.Color.html#gray"><span class="hs-identifier hs-type">gray</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466517"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-118"></span><span id="gray"><span class="annot"><span class="annottext">gray :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#gray"><span class="hs-identifier hs-var hs-var">gray</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -345,7 +345,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;gray&quot;</span></span><span>
 </span><span id="line-119"></span><span>
 </span><span id="line-120"></span><span class="annot"><span class="hs-comment">-- | a color named 'brown'</span></span><span>
-</span><span id="line-121"></span><span id="local-6989586621679466504"><span class="annot"><a href="Ipe.Color.html#brown"><span class="hs-identifier hs-type">brown</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466504"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-121"></span><span id="local-6989586621679466519"><span class="annot"><a href="Ipe.Color.html#brown"><span class="hs-identifier hs-type">brown</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466519"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-122"></span><span id="brown"><span class="annot"><span class="annottext">brown :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#brown"><span class="hs-identifier hs-var hs-var">brown</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -353,7 +353,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;brown&quot;</span></span><span>
 </span><span id="line-123"></span><span>
 </span><span id="line-124"></span><span class="annot"><span class="hs-comment">-- | a color named 'navy'</span></span><span>
-</span><span id="line-125"></span><span id="local-6989586621679466506"><span class="annot"><a href="Ipe.Color.html#navy"><span class="hs-identifier hs-type">navy</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466506"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-125"></span><span id="local-6989586621679466521"><span class="annot"><a href="Ipe.Color.html#navy"><span class="hs-identifier hs-type">navy</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466521"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-126"></span><span id="navy"><span class="annot"><span class="annottext">navy :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#navy"><span class="hs-identifier hs-var hs-var">navy</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -361,7 +361,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;navy&quot;</span></span><span>
 </span><span id="line-127"></span><span>
 </span><span id="line-128"></span><span class="annot"><span class="hs-comment">-- | a color named 'pink'</span></span><span>
-</span><span id="line-129"></span><span id="local-6989586621679466508"><span class="annot"><a href="Ipe.Color.html#pink"><span class="hs-identifier hs-type">pink</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466508"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-129"></span><span id="local-6989586621679466523"><span class="annot"><a href="Ipe.Color.html#pink"><span class="hs-identifier hs-type">pink</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466523"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-130"></span><span id="pink"><span class="annot"><span class="annottext">pink :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#pink"><span class="hs-identifier hs-var hs-var">pink</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -369,7 +369,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;pink&quot;</span></span><span>
 </span><span id="line-131"></span><span>
 </span><span id="line-132"></span><span class="annot"><span class="hs-comment">-- | a color named 'seagreen'</span></span><span>
-</span><span id="line-133"></span><span id="local-6989586621679466510"><span class="annot"><a href="Ipe.Color.html#seagreen"><span class="hs-identifier hs-type">seagreen</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466510"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-133"></span><span id="local-6989586621679466525"><span class="annot"><a href="Ipe.Color.html#seagreen"><span class="hs-identifier hs-type">seagreen</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466525"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-134"></span><span id="seagreen"><span class="annot"><span class="annottext">seagreen :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#seagreen"><span class="hs-identifier hs-var hs-var">seagreen</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -377,7 +377,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;seagreen&quot;</span></span><span>
 </span><span id="line-135"></span><span>
 </span><span id="line-136"></span><span class="annot"><span class="hs-comment">-- | a color named 'turquoise'</span></span><span>
-</span><span id="line-137"></span><span id="local-6989586621679466512"><span class="annot"><a href="Ipe.Color.html#turquoise"><span class="hs-identifier hs-type">turquoise</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466512"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-137"></span><span id="local-6989586621679466527"><span class="annot"><a href="Ipe.Color.html#turquoise"><span class="hs-identifier hs-type">turquoise</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466527"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-138"></span><span id="turquoise"><span class="annot"><span class="annottext">turquoise :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#turquoise"><span class="hs-identifier hs-var hs-var">turquoise</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -385,7 +385,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;turquoise&quot;</span></span><span>
 </span><span id="line-139"></span><span>
 </span><span id="line-140"></span><span class="annot"><span class="hs-comment">-- | a color named 'violet'</span></span><span>
-</span><span id="line-141"></span><span id="local-6989586621679466514"><span class="annot"><a href="Ipe.Color.html#violet"><span class="hs-identifier hs-type">violet</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466514"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-141"></span><span id="local-6989586621679466529"><span class="annot"><a href="Ipe.Color.html#violet"><span class="hs-identifier hs-type">violet</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466529"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-142"></span><span id="violet"><span class="annot"><span class="annottext">violet :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#violet"><span class="hs-identifier hs-var hs-var">violet</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -393,7 +393,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;violet&quot;</span></span><span>
 </span><span id="line-143"></span><span>
 </span><span id="line-144"></span><span class="annot"><span class="hs-comment">-- | a color named 'darkblue'</span></span><span>
-</span><span id="line-145"></span><span id="local-6989586621679466516"><span class="annot"><a href="Ipe.Color.html#darkblue"><span class="hs-identifier hs-type">darkblue</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466516"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-145"></span><span id="local-6989586621679466531"><span class="annot"><a href="Ipe.Color.html#darkblue"><span class="hs-identifier hs-type">darkblue</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466531"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-146"></span><span id="darkblue"><span class="annot"><span class="annottext">darkblue :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#darkblue"><span class="hs-identifier hs-var hs-var">darkblue</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -401,7 +401,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;darkblue&quot;</span></span><span>
 </span><span id="line-147"></span><span>
 </span><span id="line-148"></span><span class="annot"><span class="hs-comment">-- | a color named 'darkcyan'</span></span><span>
-</span><span id="line-149"></span><span id="local-6989586621679466518"><span class="annot"><a href="Ipe.Color.html#darkcyan"><span class="hs-identifier hs-type">darkcyan</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466518"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-149"></span><span id="local-6989586621679466533"><span class="annot"><a href="Ipe.Color.html#darkcyan"><span class="hs-identifier hs-type">darkcyan</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466533"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-150"></span><span id="darkcyan"><span class="annot"><span class="annottext">darkcyan :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#darkcyan"><span class="hs-identifier hs-var hs-var">darkcyan</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -409,7 +409,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;darkcyan&quot;</span></span><span>
 </span><span id="line-151"></span><span>
 </span><span id="line-152"></span><span class="annot"><span class="hs-comment">-- | a color named 'darkgray'</span></span><span>
-</span><span id="line-153"></span><span id="local-6989586621679466520"><span class="annot"><a href="Ipe.Color.html#darkgray"><span class="hs-identifier hs-type">darkgray</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466520"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-153"></span><span id="local-6989586621679466535"><span class="annot"><a href="Ipe.Color.html#darkgray"><span class="hs-identifier hs-type">darkgray</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466535"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-154"></span><span id="darkgray"><span class="annot"><span class="annottext">darkgray :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#darkgray"><span class="hs-identifier hs-var hs-var">darkgray</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -417,7 +417,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;darkgray&quot;</span></span><span>
 </span><span id="line-155"></span><span>
 </span><span id="line-156"></span><span class="annot"><span class="hs-comment">-- | a color named 'darkgreen'</span></span><span>
-</span><span id="line-157"></span><span id="local-6989586621679466522"><span class="annot"><a href="Ipe.Color.html#darkgreen"><span class="hs-identifier hs-type">darkgreen</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466522"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-157"></span><span id="local-6989586621679466537"><span class="annot"><a href="Ipe.Color.html#darkgreen"><span class="hs-identifier hs-type">darkgreen</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466537"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-158"></span><span id="darkgreen"><span class="annot"><span class="annottext">darkgreen :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#darkgreen"><span class="hs-identifier hs-var hs-var">darkgreen</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -425,7 +425,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;darkgreen&quot;</span></span><span>
 </span><span id="line-159"></span><span>
 </span><span id="line-160"></span><span class="annot"><span class="hs-comment">-- | a color named 'darkmagenta'</span></span><span>
-</span><span id="line-161"></span><span id="local-6989586621679466524"><span class="annot"><a href="Ipe.Color.html#darkmagenta"><span class="hs-identifier hs-type">darkmagenta</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466524"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-161"></span><span id="local-6989586621679466539"><span class="annot"><a href="Ipe.Color.html#darkmagenta"><span class="hs-identifier hs-type">darkmagenta</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466539"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-162"></span><span id="darkmagenta"><span class="annot"><span class="annottext">darkmagenta :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#darkmagenta"><span class="hs-identifier hs-var hs-var">darkmagenta</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -433,7 +433,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;darkmagenta&quot;</span></span><span>
 </span><span id="line-163"></span><span>
 </span><span id="line-164"></span><span class="annot"><span class="hs-comment">-- | a color named 'darkorange'</span></span><span>
-</span><span id="line-165"></span><span id="local-6989586621679466526"><span class="annot"><a href="Ipe.Color.html#darkorange"><span class="hs-identifier hs-type">darkorange</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466526"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-165"></span><span id="local-6989586621679466541"><span class="annot"><a href="Ipe.Color.html#darkorange"><span class="hs-identifier hs-type">darkorange</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466541"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-166"></span><span id="darkorange"><span class="annot"><span class="annottext">darkorange :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#darkorange"><span class="hs-identifier hs-var hs-var">darkorange</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -441,7 +441,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;darkorange&quot;</span></span><span>
 </span><span id="line-167"></span><span>
 </span><span id="line-168"></span><span class="annot"><span class="hs-comment">-- | a color named 'darkred'</span></span><span>
-</span><span id="line-169"></span><span id="local-6989586621679466528"><span class="annot"><a href="Ipe.Color.html#darkred"><span class="hs-identifier hs-type">darkred</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466528"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-169"></span><span id="local-6989586621679466543"><span class="annot"><a href="Ipe.Color.html#darkred"><span class="hs-identifier hs-type">darkred</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466543"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-170"></span><span id="darkred"><span class="annot"><span class="annottext">darkred :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#darkred"><span class="hs-identifier hs-var hs-var">darkred</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -449,7 +449,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;darkred&quot;</span></span><span>
 </span><span id="line-171"></span><span>
 </span><span id="line-172"></span><span class="annot"><span class="hs-comment">-- | a color named 'lighbtblue'</span></span><span>
-</span><span id="line-173"></span><span id="local-6989586621679466530"><span class="annot"><a href="Ipe.Color.html#lightblue"><span class="hs-identifier hs-type">lightblue</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466530"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-173"></span><span id="local-6989586621679466545"><span class="annot"><a href="Ipe.Color.html#lightblue"><span class="hs-identifier hs-type">lightblue</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466545"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-174"></span><span id="lightblue"><span class="annot"><span class="annottext">lightblue :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#lightblue"><span class="hs-identifier hs-var hs-var">lightblue</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -457,7 +457,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;lightblue&quot;</span></span><span>
 </span><span id="line-175"></span><span>
 </span><span id="line-176"></span><span class="annot"><span class="hs-comment">-- | a color named 'lightcyan'</span></span><span>
-</span><span id="line-177"></span><span id="local-6989586621679466532"><span class="annot"><a href="Ipe.Color.html#lightcyan"><span class="hs-identifier hs-type">lightcyan</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466532"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-177"></span><span id="local-6989586621679466547"><span class="annot"><a href="Ipe.Color.html#lightcyan"><span class="hs-identifier hs-type">lightcyan</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466547"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-178"></span><span id="lightcyan"><span class="annot"><span class="annottext">lightcyan :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#lightcyan"><span class="hs-identifier hs-var hs-var">lightcyan</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -465,7 +465,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;lightcyan&quot;</span></span><span>
 </span><span id="line-179"></span><span>
 </span><span id="line-180"></span><span class="annot"><span class="hs-comment">-- | a color named 'lightgray'</span></span><span>
-</span><span id="line-181"></span><span id="local-6989586621679466534"><span class="annot"><a href="Ipe.Color.html#lightgray"><span class="hs-identifier hs-type">lightgray</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466534"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-181"></span><span id="local-6989586621679466549"><span class="annot"><a href="Ipe.Color.html#lightgray"><span class="hs-identifier hs-type">lightgray</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466549"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-182"></span><span id="lightgray"><span class="annot"><span class="annottext">lightgray :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#lightgray"><span class="hs-identifier hs-var hs-var">lightgray</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -473,7 +473,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;lightgray&quot;</span></span><span>
 </span><span id="line-183"></span><span>
 </span><span id="line-184"></span><span class="annot"><span class="hs-comment">-- | a color named 'lightgreen'</span></span><span>
-</span><span id="line-185"></span><span id="local-6989586621679466536"><span class="annot"><a href="Ipe.Color.html#lightgreen"><span class="hs-identifier hs-type">lightgreen</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466536"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-185"></span><span id="local-6989586621679466551"><span class="annot"><a href="Ipe.Color.html#lightgreen"><span class="hs-identifier hs-type">lightgreen</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466551"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-186"></span><span id="lightgreen"><span class="annot"><span class="annottext">lightgreen :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#lightgreen"><span class="hs-identifier hs-var hs-var">lightgreen</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
@@ -481,7 +481,7 @@ forall r. Text -&gt; IpeColor r
 </span><span class="hs-string">&quot;lightgreen&quot;</span></span><span>
 </span><span id="line-187"></span><span>
 </span><span id="line-188"></span><span class="annot"><span class="hs-comment">-- | a color named 'lightyellow'</span></span><span>
-</span><span id="line-189"></span><span id="local-6989586621679466538"><span class="annot"><a href="Ipe.Color.html#lightyellow"><span class="hs-identifier hs-type">lightyellow</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466538"><span class="hs-identifier hs-type">r</span></a></span></span><span>
+</span><span id="line-189"></span><span id="local-6989586621679466553"><span class="annot"><a href="Ipe.Color.html#lightyellow"><span class="hs-identifier hs-type">lightyellow</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Ipe.Color.html#IpeColor"><span class="hs-identifier hs-type">IpeColor</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679466553"><span class="hs-identifier hs-type">r</span></a></span></span><span>
 </span><span id="line-190"></span><span id="lightyellow"><span class="annot"><span class="annottext">lightyellow :: forall r. IpeColor r
 </span><a href="Ipe.Color.html#lightyellow"><span class="hs-identifier hs-var hs-var">lightyellow</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Text -&gt; IpeColor r
 forall r. Text -&gt; IpeColor r
