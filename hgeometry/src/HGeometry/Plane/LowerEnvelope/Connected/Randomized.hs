@@ -178,25 +178,11 @@ withConflictLists        :: ( Plane_ plane r, Ord r, Num r, Ord plane
                          => Set plane
                          -> VertexForm map r plane
                          -> map (Point 3 r) (Definers plane, Set plane)
-withConflictLists planes = imap (\v defs -> (defs
-                                            , Set.fromList (toList defs)
-                                              <> Set.filter (below v) planes
-                                            )
-                                )
-                           -- note: we include the definers in the conflict lists as well,
-                           -- since we need to include them in the recursive calls
-
+withConflictLists planes = imap (\v defs -> (defs, Set.filter (below v) planes))
   where
     below v h =
       traceShowWith ("below ",v,h,) $
       verticalSideTest v h == LT -- TODO: not sure if this should be LT or 'not GT'
-
-    -- TODO: I think we may need to include the definers of the triangle; i.e.
-    -- the plane at the top of the prism and the at most 3 "neighbouring" planes
-    -- in the recursive call as well.
-    --
-    -- the above adds the conflict lists of the definers of a single corner. In case
-    -- of degeneracies that may be overkill though..
 
 
 -- | Compute the conflit lists for the extra vertices we added.
