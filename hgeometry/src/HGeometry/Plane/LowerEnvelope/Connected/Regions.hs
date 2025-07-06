@@ -31,7 +31,6 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
 
 import           Control.Lens
 import           Data.Coerce
-import           Data.Default.Class
 import qualified Data.Foldable as F
 import           Data.Foldable1
 import           Data.Foldable1 as F1
@@ -163,7 +162,7 @@ mergeDefiners v defs0 defs1 = case extractH0 v (coerce defs0 <> coerce defs1) of
 fromMinimizationDiagramIn                :: ( Plane_ plane r, Ord plane, Ord r, Fractional r
                                             , Point_ corner 2 r
                                             , Foldable1 set
-                                            , Default vtxData, Ord vtxData
+                                            , Ord vtxData
                                             , Show r, Show corner, Show plane
                                             )
                                          => Triangle corner
@@ -197,10 +196,10 @@ fromVertexFormIn            :: ( Plane_ plane r, Ord plane, Ord r, Fractional r,
                                , HasDefiners vertexData plane
                                )
                             => Triangle corner
-                            -> set planes
+                            -> set plane
                             -> NEMap (Point 3 r) vertexData
-                            -> NEMap plane (ClippedBoundedRegion r (MDVertex r plane vertexData) (Point 2 r))
-fromVertexFormIn tri planes = fromMinimizationDiagramIn tri planes . fromVertexForm
+                            -> NEMap plane (ClippedMDCell r plane vertexData)
+fromVertexFormIn tri planes = fromMinimizationDiagramIn tri planes . Just . fromVertexForm
 
 {-
   case fromPoints $ (Extra . (^.asPoint)) <$> tri of
