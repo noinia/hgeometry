@@ -188,7 +188,10 @@ fromMinimizationDiagramIn tri planes env = case env of
 -- * Converting into a minimization diagram
 
 
--- | Pre: the triangle is big enough to contain all vertices of the lower envelope
+-- | Computes the part of the minimization diagram inside the given triangle.
+--
+-- This function takes both the set of planes, as well as the vertex form of the lower
+-- envelope of these planes.
 fromVertexFormIn            :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show plane
                                , Point_ corner 2 r, Foldable1 set
                                , Show r, Show corner
