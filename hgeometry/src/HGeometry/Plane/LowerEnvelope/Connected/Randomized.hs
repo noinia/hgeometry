@@ -21,11 +21,14 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map (Map)
 import           Data.Map.NonEmpty (NEMap, pattern IsEmpty, pattern IsNonEmpty)
 import qualified Data.Map.NonEmpty as NEMap
+import           Data.Maybe (mapMaybe)
 import           Data.Set (Set)
 import qualified Data.Set as Set
+import           Data.Set.NonEmpty (NESet)
 import qualified Data.Set.NonEmpty as NESet
 import qualified Data.Vector.NonEmpty as V
 import           HGeometry.Ext
+import           HGeometry.Foldable.Util
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Intersection
@@ -34,6 +37,7 @@ import           HGeometry.Plane.LowerEnvelope.Clipped.Type
 import qualified HGeometry.Plane.LowerEnvelope.Connected.BruteForce as BruteForce
 import           HGeometry.Plane.LowerEnvelope.Connected.Region
 import           HGeometry.Plane.LowerEnvelope.Connected.Regions
+import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm (definersOf)
 import           HGeometry.Point
 import           HGeometry.Point.Either
 import           HGeometry.Polygon
@@ -41,6 +45,7 @@ import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Triangle
 import           Prelude hiding (filter, head, last)
 import           System.Random
+
 
 import           Debug.Trace
 --------------------------------------------------------------------------------
@@ -77,7 +82,7 @@ computeVertexFormIn         :: forall plane point r.
 computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
   where
     n  = length hs
-    r  = sqrt . sqrt @Double . fromIntegral $ n
+    r  = sqrt . sqrt @Double . fromIntegral $ n -- r = n^{1/4}
     r' = max 4 $ round $ r * logBase 2 r
       -- take a sample of size r*log r
       --
@@ -85,51 +90,55 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
       -- three planes). Moreover since we actually include the definers of the corners
       -- of a triangle we may get 4 planes in any case.
 
+      -- TODO: make sure that if the lower envelope has a vertex, we select planes
+      -- that generate a plane.
+
     lowerEnvelopeIn   :: Foldable1 set
                       => Triangle (Point 2 r)
                       -> set plane
                       -> Map (Point 3 r) (Definers plane)
-    lowerEnvelopeIn tri planes | traceShow ("LE",toList planes) False = undefined
-    lowerEnvelopeIn tri planes =
-      let
-          (rNet,remaining) = takeSample r' planes
+    lowerEnvelopeIn tri planes | traceShow ("LE",tri, toList planes) False = undefined
 
-          verticesRNet    :: Map (Point 3 r) (Definers plane, Set plane)
-          verticesRNet    = withConflictLists remaining $ BruteForce.computeVertexForm rNet
-      in case verticesRNet of
-           IsEmpty                  -> mempty
-           IsNonEmpty verticesRNet' -> NEMap.mapMaybeWithKey (asVertexIn tri) verticesRNet'
-                                       <>
-                                       foldMap lowerEnvelopeIn' triangulatedEnv
-             where
-               -- Construct the lower envelope inside the triangle.
-               -- also compute the conflicts of the corners
-               env :: NEMap plane (ClippedMDCell'' r (MDVertex r plane (_, Set plane))
-                                                     (Point 2 r :+ Set plane)
-                                  )
-               env = withExtraConflictLists remaining
-                   . fromVertexFormIn tri planes $ verticesRNet'
+    lowerEnvelopeIn tri planes = let (rNet,remaining) = traceShowWith ("rnet",) $ takeSample r' planes in
+      case withConflictLists remaining (BruteForce.computeVertexForm rNet) of
+        IsEmpty                                                                    -> mempty
+        IsNonEmpty (verticesRNet :: NEMap (Point 3 r) (Definers plane, Set plane)) ->
+               NEMap.mapMaybeWithKey (asVertexIn tri) verticesRNet
+            <> foldMap lowerEnvelopeIn' triangulatedEnv
+          where
+            -- Construct the lower envelope inside the triangle.
+            -- also compute the conflicts of the corners
+            env :: NEMap plane (ClippedMDCell'' r (MDVertex r plane (_, Set plane))
+                                                  (Point 2 r :+ Set plane)
+                               )
+            env = traceShowWith ("Env",) $
+                  withExtraConflictLists remaining
+                . fromVertexFormIn tri rNet $ verticesRNet
 
-               triangulatedEnv :: NonEmpty (Triangle (Point 2 r :+ Set plane))
-               triangulatedEnv = NonEmpty.fromList $ foldMap triangulate env
-                 -- There should be at least one actual polygon
+            -- | Triangulate the lower envelope, and collect the conflict list of each
+            -- prism. We will already throw away any prisms with an
+            triangulatedEnv :: [Triangle (Point 2 r) :+ NESet plane]
+            triangulatedEnv = Map.foldMapWithKey triangulate env
 
-
-    lowerEnvelopeIn'     :: Triangle (Point 2 r :+ Set plane)
+    lowerEnvelopeIn'     :: Triangle (Point 2 r) :+ NESet plane
                          -> Map (Point 3 r) (Definers plane)
-    lowerEnvelopeIn' tri = case conflictListOf tri of
-      NESet.IsNonEmpty conflictList -> lowerEnvelopeIn (view core <$> tri) conflictList
-      _                             -> mempty
+    lowerEnvelopeIn' (tri :+ conflictList) = lowerEnvelopeIn tri conflictList
+
+    -- tri = case conflictListOf tri of
+    --   NESet.IsNonEmpty conflictList ->  (view core <$> tri) conflictList
+    --   _                             -> mempty
 
 
 -- dropVertexData :: ClippedBoundedRegion r (MDVertex r plane (a,b)) x
 --                -> ClippedBoundedRegion r (MDVertex r plane b) x
 -- dropVertexData = fmap $ first (fmap snd)
 
--- | Given a size r; take a sample of the planes from the given size (essentially by just
+-- | Given a size r > 0; take a sample of the planes from the given size (essentially by just
 -- taking the first r planes.)
-takeSample   :: (Foldable set, Ord plane) => Int -> set plane -> ([plane],Set plane)
-takeSample r = fmap Set.fromList . splitAt r . toList
+--
+-- pre: r > 0
+takeSample   :: (Foldable1 set, Ord plane) => Int -> set plane -> (NonEmpty plane,Set plane)
+takeSample r = bimap NonEmpty.fromList Set.fromList . splitAt r . toList
 
 
 -- | Report whether this is really a vertex of the global lower envelope in the region.
@@ -195,7 +204,10 @@ withExtraConflictLists        :: (Plane_ plane r, Ord r, Num r--, Point_ corner 
 withExtraConflictLists planes = NEMap.mapWithKey $ \h -> fmap (withPolygonVertex h)
   where
     withPolygonVertex h v = v :+ Set.filter (below (evalAt v h) v) planes
-    below z (Point2_ x y) h = verticalSideTest (Point3 x y z) h  == LT
+    below z (Point2_ x y) h = verticalSideTest (Point3 x y z) h  /= GT
+    -- note that we use the /= GT, so that we include the plane that define
+    -- the lower envelope on this place.
+
   -- TODO: make this fast
 
 
@@ -234,25 +246,59 @@ withExtraConflictLists planes = NEMap.mapWithKey $ \h -> fmap (withPolygonVertex
 
                  -- ClippedBoundedRegion r (MDVertex r plane (a, conflictList))
                  --                           (Point 2 r :+ conflictList)
-triangulate                      :: Num r
-                                 => ClippedMDCell'' r (MDVertex r plane (a, conflictList))
-                                                      (Point 2 r :+ conflictList)
-                                 -> [Triangle (Point 2 r :+ conflictList)]
-triangulate (ClippedMDCell cell) = case cell of
-    ActualPolygon poly -> toList $ triangulate' poly
+triangulate                        :: (Num r, Ord plane)
+                                   => plane
+                                   -> ClippedMDCell'' r (MDVertex r plane (a, Set plane))
+                                                        (Point 2 r :+ Set  plane)
+                                   -> [Triangle (Point 2 r) :+ NESet plane]
+triangulate h (ClippedMDCell cell) = case cell of
+    ActualPolygon poly -> triangulate' h poly
     DegenerateVertex _ -> []
     DegenerateEdge   _ -> []
+  -- TODO: technically, there could still be vertices on the degenerate edge.
+  -- make sure we hanlde those somewhere else
 
-triangulate'      :: Num r
-                  => ClippedBoundedRegion r (MDVertex r plane (a, conflictList))
-                                            (Point 2 r :+ conflictList)
-                  -> NonEmpty (Triangle (Point 2 r :+ conflictList))
-triangulate' poly = case flatten <$> toNonEmptyOf vertices poly of
+triangulate'        :: (Num r, Ord plane)
+                    => plane
+                    -> ClippedBoundedRegion r (MDVertex r plane (a, Set plane))
+                                              (Point 2 r :+ Set plane)
+                    -> [Triangle (Point 2 r) :+ NESet plane]
+triangulate' h poly = mapMaybe' withConflictList $ case toNonEmptyOf vertices poly of
     u :| (v : vs) -> NonEmpty.zipWith (Triangle u) (v :| vs) (NonEmpty.fromList vs)
     _             -> error "absurd. trianglulate; impossible"
   where
-    flatten = \case
-      Original v -> v^.asPoint :+ (v^.vertexData._2)
-      Extra    p -> p
+    withConflictList tri = case foldMap conflictListOf tri of
+      NESet.IsEmpty                 -> Nothing
+      NESet.IsNonEmpty conflictList -> Just $ ((^.asPoint) <$> tri)
+                                       :+ (conflictList <>> foldMap definersOf' tri)
+
+    -- if there is no conflict list, there is no need to recurse on this triangle to begin with.
+    -- otherwise, insert thee definers
+
+
+
+    -- FIXME: Instead of taking all the definers (which may not reduce the total number of
+    -- planes in the subproblem if we are unlucky (or n is small) I think we should explicitly
+    -- add the plane h defining the prism and the planes that intersect with h in the edges
+    -- of the triangle (if such planes exist).
+    --
+    -- note: if there are multiple planes intersecting in the edge of the triangle, andy
+    -- of them will do; and we only need to add one (since in the remaining subproblems we
+    -- will care only about vertices inside the triangle (not outside) anyway).
+
+    -- definersOf' :: _ -> Set plane
+    definersOf' = \case
+      Original v -> toList $ definersOf v
+      Extra _    -> mempty
+
+    -- get the conflictList as a vertex
+    conflictListOf = \case
+      Original v -> v^.vertexData._2
+      Extra    p -> p^.extra
+
+    mapMaybe' f = mapMaybe f . toList
+
+    neSet <>> set' = foldr NESet.insert neSet set'
+
 
 ----------------------------------------
