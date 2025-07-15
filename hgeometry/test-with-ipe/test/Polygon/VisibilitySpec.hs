@@ -94,3 +94,66 @@ createFile = do
   pgs <- sample' arbitrary
   writeIpeFile [osp|visibilityInputPolygons.ipe|] $
                  ipeFile $ fmap (\pg -> fromContent [ iO $ defIO pg ]) (myPolygon :| pgs)
+
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------
+
+
+data VPVertex r edge orig = OriginalVertex orig
+                          | NewVertex (Point 2 r) edge orig
+                            -- ^ the intersection point on the edge, defined by the edge
+                            -- and the original vertex
+                          deriving (Show,Eq)
+
+
+withInitialRay q events = case findNonColinear q events of
+  (prefix, e1, e2, rest) -> HalfLine q (midPoint (e1.core) (e2^.core) .-. q)
+  where
+    findNonColinear =
+
+      NonEmpty.zip edges (NonEmpty.tail edges)
+
+newtype ByDist e = ByDist e
+
+fromPoints' = uncheckedFromPoints . undefined -- remove possibly colinear vertices
+
+visibilityPolygon        :: ( Point_ point 2 r, Point_ vertex 2 r
+                            , Polygon_ polygon vertex
+                            , Ord r, Fractional r
+                            )
+                         => point -> polygon -> SimplePolygon (VPVertex r (Edge polygon) orig)
+visibilityPolygon q poly = fromPoints' . snd $ foldl' handle initialStatus events'
+  where
+    events = sort cmp $ foldMapOf outerBoundaryEdgeSegments mkEvents poly
+    mkEvents seg = (seg^.start :+ seg) :| [seg^.end :+ seg]
+
+    (initialRay, events') = withInitialRay q events
+
+    initialStatus = ( foldMapOf outerBoundaryEdgeSegments intersectionPtOf poly
+                    , []
+                    )
+    intersectionPtOf e = case initialRay `intersects` e of
+      Just (HalfLine_x_LineSegment_Point p) -> Set.singleton (ByDist e)
+      _                                     -> mempty
+
+    cmp = ccwCmpAround q
+    -- are we sorting them in the right order for safe use of unchedkedFromPolygon?
+
+    handle event (status, res) = case eventRay event `intersect` (event^.extra) of
+        Just (HalfLine_x_LineSegment_Point _) -> (status',res')
+        Just _                                -> (status, res) -- ignore colinear edges
+        Nothing                               -> error "absurd"
+      where
+        status' = toggle (ByDist $ event^.extra) status
+                  -- if the edge is the status structure; delete it, otherwise insert it
+        res'    = undefined
+
+
+    eventRay event = HalfLine q (event^.core .-. q)
