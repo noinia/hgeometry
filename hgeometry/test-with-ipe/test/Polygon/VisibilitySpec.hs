@@ -4,6 +4,7 @@ module Polygon.VisibilitySpec where
 
 import           Control.Lens
 import           Data.Maybe
+import           Data.Ord (comparing)
 -- import qualified Data.Set as Set
 import           Golden
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -11,21 +12,27 @@ import           HGeometry.Ext
 import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
+import           HGeometry.Foldable.Sort
 import           HGeometry.Polygon
+import           HGeometry.Properties
 import           HGeometry.Polygon.Instances ()
 -- import           HGeometry.Polygon.Visibility
 import qualified HGeometry.Polygon.Visibility.Naive as Naive
 import           HGeometry.Vector
+import           HGeometry.HalfLine
+import qualified Data.Vector as Vector
+import           HGeometry.Intersection
 import           Ipe
 import           Ipe.Color
 import           System.OsPath
 import           Test.Hspec
 -- import           Test.Hspec.QuickCheck
 import           Test.Hspec.WithTempFile
-import           Test.QuickCheck
+import           Test.QuickCheck hiding (vector)
 import           Test.QuickCheck.Instances ()
 -- import qualified Data.Text as Text
 
+import           Data.Semigroup
 
 --------------------------------------------------------------------------------
 
@@ -36,14 +43,29 @@ spec = describe "visibility graph / visibility polygon" $ do
          -- prop "naive visibility graph and fast one the same " $
          --   \(pg :: SimplePolygon (Point 2 R)) ->
          --     Set.fromList (visibilityGraph pg) === Set.fromList (Naive.visibilityGraph pg)
-         polygonPages <- runIO readInputPolygons
+         polygonPages <- runIO $ readInputPolygons [osp|data/test-with-ipe/golden/Polygon/visibilityInputPolygons.ipe|]
+
+
          goldenWith [osp|data/test-with-ipe/golden/Polygon/|]
            (ipeFileGolden { name = [osp|visibility|] })
              (ipeFile $ perPage <$> polygonPages)
 
-readInputPolygons :: IO (NonEmpty (IpePage R))
-readInputPolygons = do
-  Right file <- readIpeFile [osp|data/test-with-ipe/golden/Polygon/visibilityInputPolygons.ipe|]
+         goldenWith [osp|data/test-with-ipe/golden/Polygon/|]
+           (ipeFileGolden { name = [osp|visibilityPolygons|] })
+             (ipeFile $ perPage' <$> polygonPages)
+
+         manualPages <- runIO $ readInputPolygons [osp|data/test-with-ipe/golden/Polygon/manual.ipe|]
+
+
+         goldenWith [osp|data/test-with-ipe/golden/Polygon/|]
+           (ipeFileGolden { name = [osp|manualVisibilityPolygons|] })
+             (ipeFile $ perPage' <$> manualPages)
+
+
+
+readInputPolygons    :: OsPath -> IO (NonEmpty (IpePage R))
+readInputPolygons fp = do
+  Right file <- readIpeFile fp
   pure $ file^.pages
 
 
@@ -97,63 +119,196 @@ createFile = do
 
 
 
+--------------------------------------------------------------------------------
+-- * Visibility Polygons
 
 
+perPage'      :: IpePage R -> IpePage R
+perPage' page = fromContent . concat $
+                [ drawSingle' p poly
+                | poly :+ _ <- readAll page
+                , p :+ _    <- readAll page
+                ]
 
-
+drawSingle'      :: Point 2 R -> SimplePolygon (Point 2 R) -> [IpeObject R]
+drawSingle' q pg = [ iO $ defIO visPoly ! attr SStroke blue
+                                        ! attr SFill   lightcyan
+                                        ! attr SLayer "output"
+                   , iO $ defIO q  ! attr SLayer "orig"
+                   , iO $ defIO pg ! attr SLayer "orig"
+                   ]
+  where
+    visPoly = (^.asPoint) <$> visibilityPolygon q pg
 
 
 --------------------------------------------------------------------------------
 
+-- | The second parameter of DefinerF; the edge, actually stores the index of its starting
+-- vertex.
+type Definer polygon =
+  DefinerF (NumType polygon) (VertexIx polygon) (Vertex polygon :+ VertexIx polygon)
 
-data VPVertex r edge orig = OriginalVertex orig
+data DefinerF r edge orig = OriginalVertex orig
                           | NewVertex (Point 2 r) edge orig
                             -- ^ the intersection point on the edge, defined by the edge
                             -- and the original vertex
-                          deriving (Show,Eq)
+                          deriving (Show,Eq,Functor)
 
+instance Bifunctor (DefinerF r) where
+  bimap f g = \case
+    OriginalVertex p -> OriginalVertex (g p)
+    NewVertex p e v  -> NewVertex p (f e) (g v)
 
-withInitialRay q events = case findNonColinear q events of
-  (prefix, e1, e2, rest) -> HalfLine q (midPoint (e1.core) (e2^.core) .-. q)
+position :: Point_ orig 2 r => Lens' (DefinerF r edge orig) (Point 2 r)
+position = lens (\case
+                    OriginalVertex v -> v^.asPoint
+                    NewVertex p _ _  -> p
+                ) undefined
+
+type instance Dimension (DefinerF r edge orig) = 2
+type instance NumType (DefinerF r edge orig)   = r
+
+instance ( HasSquaredEuclideanDistance orig, Point_ orig 2 r
+         ) => HasSquaredEuclideanDistance (DefinerF r edge orig) where
+  pointClosestTo _ = view asPoint
+
+instance Point_ orig 2 r => HasVector (DefinerF r edge orig) (DefinerF r edge orig) where
+  vector = position.vector
+instance Point_ orig 2 r => Affine_ (DefinerF r edge orig) 2 r
+instance Point_ orig 2 r => Point_ (DefinerF r edge orig) 2 r
+instance Point_ orig 2 r => HasCoordinates (DefinerF r edge orig) (DefinerF r edge orig)
+
+-- | Naive O(n^2) time implementation.
+visibilityPolygon :: forall point vertex polygon r.
+                     ( Point_ point 2 r, Point_ vertex 2 r
+                     , HasSquaredEuclideanDistance vertex
+                     , SimplePolygon_ polygon vertex r
+                     , Ord r, Fractional r
+                     )
+                  => point -> polygon -> SimplePolygon (Definer polygon)
+visibilityPolygon (view asPoint -> q) poly = fromMaybe err . fromPoints $ theVertices
   where
-    findNonColinear =
+    theVertices      :: Vector.Vector (DefinerF r (VertexIx polygon) (vertex :+ VertexIx polygon))
+    theVertices      = fmap dropIx . sortBy alongBoundary $ originalVertices <> newVertices
 
-      NonEmpty.zip edges (NonEmpty.tail edges)
 
-newtype ByDist e = ByDist e
+    visibleVertices  :: [vertex :+ VertexIx polygon]
+    visibleVertices  = poly^..vertices.asIndexedExt.filtered isVisible
 
-fromPoints' = uncheckedFromPoints . undefined -- remove possibly colinear vertices
+    originalVertices
+      , newVertices  :: [DefinerF r  (ClosedLineSegment vertex :+ VertexIx polygon)
+                                     (vertex :+ VertexIx polygon)
+                        ]
+    originalVertices = OriginalVertex <$> visibleVertices
+    newVertices      = [ w | v <- reflexVertices, w <- maybeToList $ rayThrough v ]
 
-visibilityPolygon        :: ( Point_ point 2 r, Point_ vertex 2 r
-                            , Polygon_ polygon vertex
-                            , Ord r, Fractional r
-                            )
-                         => point -> polygon -> SimplePolygon (VPVertex r (Edge polygon) orig)
-visibilityPolygon q poly = fromPoints' . snd $ foldl' handle initialStatus events'
+    obstacleEdges :: [ClosedLineSegment vertex :+ VertexIx polygon]
+    obstacleEdges = poly^..(reindexed fst outerBoundaryEdgeSegments).asIndexedExt
+
+    isVisible   :: vertex :+ ix -> Bool
+    isVisible p =
+      all (not . (intersects (OpenLineSegment (p^.asPoint) q)) . view core) obstacleEdges
+
+    reflexVertices :: [vertex :+ VertexIx polygon]
+    reflexVertices = filter isInterior visibleVertices
+    -- test whether the two neighbours of v are on the same side of the line through q and v
+    -- if so; then v is a reflex vertex that defines a new visible vertex.
+    isInterior          :: vertex :+ VertexIx polygon -> Bool
+    isInterior (v :+ i) =
+      ccw q (poly^.ccwPredecessorOf i.asPoint) (v^.asPoint)
+      ==
+      ccw q (poly^.ccwSuccessorOf i.asPoint) (v^.asPoint)
+
+    intersectionPoint     :: vertex :+ ix -> ClosedLineSegment vertex :+ ix
+                          -> Maybe (DefinerF r (ClosedLineSegment vertex :+ ix) (vertex :+ ix))
+    intersectionPoint v e = case HalfLine (v^.asPoint) ((v^.asPoint) .-. q)
+                                 `intersect` ((^.asPoint) <$> e^.core) of
+      Just (HalfLine_x_LineSegment_Point p) -> Just (NewVertex p e v)
+      _                                     -> Nothing
+
+
+    rayThrough   :: vertex :+ VertexIx polygon
+                 -> Maybe (DefinerF r (ClosedLineSegment vertex :+ VertexIx polygon)
+                                     (vertex :+ VertexIx polygon))
+    rayThrough v = minimumOn (squaredEuclideanDistTo q)
+                 $ mapMaybe (intersectionPoint v) obstacleEdges
+
+
+    err = error "visibilityPolygon: absurd"
+
+dropIx :: DefinerF r (edge :+ x) vertex  -> DefinerF r x vertex
+dropIx = bimap (^.extra) id
+
+alongBoundary :: ( Ord ix, Num r, Ord r, HasStart edge vertex, Point_ vertex 2 r
+                 , HasSquaredEuclideanDistance vertex
+                 )
+              => DefinerF r (edge :+ ix) (vertex :+ ix)
+              -> DefinerF r (edge :+ ix) (vertex :+ ix) -> Ordering
+alongBoundary = comparing getIx
   where
-    events = sort cmp $ foldMapOf outerBoundaryEdgeSegments mkEvents poly
-    mkEvents seg = (seg^.start :+ seg) :| [seg^.end :+ seg]
+    getIx = \case
+      OriginalVertex (_ :+ i) -> (i,0)
+      NewVertex p (e :+ i) _  -> (i,squaredEuclideanDistTo p (e^.start))
+  -- if the polygon has holes this is not correct
 
-    (initialRay, events') = withInitialRay q events
-
-    initialStatus = ( foldMapOf outerBoundaryEdgeSegments intersectionPtOf poly
-                    , []
-                    )
-    intersectionPtOf e = case initialRay `intersects` e of
-      Just (HalfLine_x_LineSegment_Point p) -> Set.singleton (ByDist e)
-      _                                     -> mempty
-
-    cmp = ccwCmpAround q
-    -- are we sorting them in the right order for safe use of unchedkedFromPolygon?
-
-    handle event (status, res) = case eventRay event `intersect` (event^.extra) of
-        Just (HalfLine_x_LineSegment_Point _) -> (status',res')
-        Just _                                -> (status, res) -- ignore colinear edges
-        Nothing                               -> error "absurd"
-      where
-        status' = toggle (ByDist $ event^.extra) status
-                  -- if the edge is the status structure; delete it, otherwise insert it
-        res'    = undefined
+minimumOn   :: (Ord b, Foldable f) => (a -> b) -> f a -> Maybe a
+minimumOn f = fmap (\(Min (Arg _ x)) -> x) . foldMap (\x -> Just $ Min $ Arg (f x) x)
 
 
-    eventRay event = HalfLine q (event^.core .-. q)
+    -- rayThrough (_,v) = case
+
+    -- (pg^..outerBoundaryEdgeSegments)
+
+  -- fromPoints' . snd $ foldl' handle initialStatus events'
+
+
+
+
+
+
+
+
+-- withInitialRay q events = case findNonColinear q events of
+--   (prefix, e1, e2, rest) -> HalfLine q (midPoint (e1.core) (e2^.core) .-. q)
+--   where
+--     findNonColinear =
+
+--       NonEmpty.zip edges (NonEmpty.tail edges)
+
+-- newtype ByDist e = ByDist e
+
+-- fromPoints' = uncheckedFromPoints . undefined -- remove possibly colinear vertices
+
+-- visibilityPolygon        :: ( Point_ point 2 r, Point_ vertex 2 r
+--                             , Polygon_ polygon vertex
+--                             , Ord r, Fractional r
+--                             )
+--                          => point -> polygon -> SimplePolygon (VPVertex r (Edge polygon) orig)
+-- visibilityPolygon q poly = fromPoints' . snd $ foldl' handle initialStatus events'
+--   where
+--     events = sort cmp $ foldMapOf outerBoundaryEdgeSegments mkEvents poly
+--     mkEvents seg = (seg^.start :+ seg) :| [seg^.end :+ seg]
+
+--     (initialRay, events') = withInitialRay q events
+
+--     initialStatus = ( foldMapOf outerBoundaryEdgeSegments intersectionPtOf poly
+--                     , []
+--                     )
+--     intersectionPtOf e = case initialRay `intersects` e of
+--       Just (HalfLine_x_LineSegment_Point p) -> Set.singleton (ByDist e)
+--       _                                     -> mempty
+
+--     cmp = ccwCmpAround q
+--     -- are we sorting them in the right order for safe use of unchedkedFromPolygon?
+
+--     handle event (status, res) = case eventRay event `intersect` (event^.extra) of
+--         Just (HalfLine_x_LineSegment_Point _) -> (status',res')
+--         Just _                                -> (status, res) -- ignore colinear edges
+--         Nothing                               -> error "absurd"
+--       where
+--         status' = toggle (ByDist $ event^.extra) status
+--                   -- if the edge is the status structure; delete it, otherwise insert it
+--         res'    = undefined
+
+
+--     eventRay event = HalfLine q (event^.core .-. q)
