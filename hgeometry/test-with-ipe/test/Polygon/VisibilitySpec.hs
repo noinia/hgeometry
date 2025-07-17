@@ -34,6 +34,12 @@ import           Test.QuickCheck.Instances ()
 
 import           Data.Semigroup
 
+import           Data.Default.Class
+import           Debug.Trace
+import           HGeometry.Graphics.Camera
+import           HGeometry.Transformation
+import           HGeometry.Triangle
+
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -381,3 +387,47 @@ constructPillar' fp = do page <- readSinglePageFileThrow fp
                                       ]
                          writeIpeFile [osp|pillar.ipe|] . addStyleSheet opacitiesStyle
                            $ singlePageFromContent out
+
+
+
+
+
+--------------------------------------------------------------------------------
+
+type R' = Double
+
+blenderCamera :: Camera R'
+blenderCamera = def&cameraPosition .~ Point3 7.35 (-6.92) (4.95)
+
+myCamera :: Camera R'
+myCamera = Camera (Point3 (-30) (-20) 20)
+                  (Vector3 0 0 (-1))
+                  (Vector3 0 1 0)
+                  10
+                  15
+                  55
+                  (Vector2 980 800)
+
+scene :: [Triangle (Point 3 R') :+ IpeColor R']
+scene = [ -- ground plane
+          Triangle origin (Point3 1 0 0) (Point3 1 1 0) :+ blue
+        , Triangle origin (Point3 1 1 0) (Point3 0 1 0) :+ blue
+        -- left side
+        , Triangle origin (Point3 0 1 0) (Point3 0 1 1) :+ green
+        , Triangle origin (Point3 0 1 1) (Point3 0 0 1) :+ green
+        -- front plane
+        , Triangle origin (Point3 1 0 0) (Point3 1 0 1) :+ red
+        , Triangle origin (Point3 1 0 1) (Point3 0 1 1) :+ red
+        ]
+
+
+renderScene :: IO ()
+renderScene = writeIpeFile [osp|scene.ipe|] $ singlePageFromContent $
+                traceShowWith ("scen",) $
+                map render scene
+  where
+    render (triang :+ col) = iO $ defIO triang' ! attr SFill col
+      where
+        triang' :: Triangle (Point 2 R')
+        triang' = triang&vertices %~ projectPoint . transformBy (cameraTransform myCamera)
+        projectPoint (Point3 x y _) = Point2 x y
