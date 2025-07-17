@@ -205,27 +205,53 @@ visibilityPolygon (view asPoint -> q) poly = fromMaybe err . fromPoints $ theVer
     obstacleEdges :: [ClosedLineSegment vertex :+ VertexIx polygon]
     obstacleEdges = poly^..(reindexed fst outerBoundaryEdgeSegments).asIndexedExt
 
+    -- test if the vertex is strictly visible; i.e. the open line segment between p and q lies
+    -- strictly in the interior of the polygon.
     isVisible   :: vertex :+ ix -> Bool
     isVisible p =
       all (not . (intersects (OpenLineSegment (p^.asPoint) q)) . view core) obstacleEdges
+    -- TODO: this does not apprporiately account for colinear vertices ; i.e.
+
+    -- we p should be visible from q if the open segment is contained in the closure of P.
+    -- i.e. it may coincide with edges
+
+    -- however, for the reflex visibility test below, we want to report the closest
+    -- vertices; so we need strictly visible.
+    --
+    -- moreover, we don't want colinear vertices in the output.
+
+
+    -- isVisible   :: vertex :+ ix -> Bool
+    -- isVisible p =
+    --   all (not . (intersects (OpenLineSegment (p^.asPoint) q)) . view core) obstacleEdges
+
 
     reflexVertices :: [vertex :+ VertexIx polygon]
     reflexVertices = filter isInterior visibleVertices
+
     -- test whether the two neighbours of v are on the same side of the line through q and v
     -- if so; then v is a reflex vertex that defines a new visible vertex.
+    --
+    -- if either the predecessor or successor is colinear with v, then v counts as a reflex
+    -- vertex as well (since v was visible)
     isInterior          :: vertex :+ VertexIx polygon -> Bool
-    isInterior (v :+ i) =
-      ccw q (poly^.ccwPredecessorOf i.asPoint) (v^.asPoint)
-      ==
-      ccw q (poly^.ccwSuccessorOf i.asPoint) (v^.asPoint)
+    isInterior (v :+ i) = case ( ccw q (poly^.ccwPredecessorOf i.asPoint) (v^.asPoint)
+                               , ccw q (poly^.ccwSuccessorOf i.asPoint) (v^.asPoint)
+                               ) of
+                            (CoLinear, _)       -> True
+                            (_       ,CoLinear) -> True
+                            (sideP,   sideS)    -> sideP == sideS
 
     intersectionPoint     :: vertex :+ ix -> ClosedLineSegment vertex :+ ix
                           -> Maybe (DefinerF r (ClosedLineSegment vertex :+ ix) (vertex :+ ix))
     intersectionPoint v e = case HalfLine (v^.asPoint) ((v^.asPoint) .-. q)
-                                 `intersect` ((^.asPoint) <$> e^.core) of
+                                 `intersect` (asOpenEdge e) of
       Just (HalfLine_x_LineSegment_Point p) -> Just (NewVertex p e v)
       _                                     -> Nothing
 
+    -- treat e as an open line segment; i.e. we don't want duplicate vertices at endpoints
+    -- anyway.
+    asOpenEdge e = OpenLineSegment (e^.start.asPoint) (e^.end.asPoint)
 
     rayThrough   :: vertex :+ VertexIx polygon
                  -> Maybe (DefinerF r (ClosedLineSegment vertex :+ VertexIx polygon)
@@ -312,3 +338,46 @@ minimumOn f = fmap (\(Min (Arg _ x)) -> x) . foldMap (\x -> Just $ Min $ Arg (f 
 
 
 --     eventRay event = HalfLine q (event^.core .-. q)
+
+
+
+--------------------------------------------------------------------------------
+
+visibilityPillarWith          :: ( ConstructablePoint_ point 2 r, Point_ vertex 2 r
+                                 , LineSegment_ lineSegment point
+                                 , HasSquaredEuclideanDistance vertex
+                                 , SimplePolygon_ polygon vertex r
+                                 , Ord r, Fractional r
+                                 )
+                              => Int
+                              -> lineSegment -> polygon -> [(Int, SimplePolygon (Point 2 r))]
+visibilityPillarWith m s poly = [ let t = fromIntegral i / fromIntegral m
+                                  in (i
+                                     , visibilityPolygon (interpolate t s) poly
+                                         & vertices %~ (^.asPoint)
+                                     )
+                                | i <- [0..m]
+                                ]
+
+
+
+resolution = 12
+
+constructPillar = constructPillar' [osp|data/test-with-ipe/golden/Polygon/pillarIn.ipe|]
+
+constructPillar'    :: OsPath -> IO ()
+constructPillar' fp = do page <- readSinglePageFileThrow fp
+                         let [poly :: SimplePolygon (Point 2 R) :+ _]     = readAll page
+                             [seg  :: ClosedLineSegment (Point 2 R) :+ _] = readAll page
+                             pillar = [ iO $ defIO vis ! attr SLayer   "pillar"
+                                                       ! attr SFill    lightcyan
+                                                       ! attr SOpacity "10%"
+                                      | (_, vis) <- visibilityPillarWith resolution seg poly
+                                      ]
+                             out    = concat
+                                      [ pillar
+                                      , [iO $ defIO poly ! attr SLayer "polygon" ]
+                                      , [iO $ defIO seg  ! attr SLayer "seg" ]
+                                      ]
+                         writeIpeFile [osp|pillar.ipe|] . addStyleSheet opacitiesStyle
+                           $ singlePageFromContent out
