@@ -8,6 +8,7 @@ import           Data.Ord (comparing)
 -- import qualified Data.Set as Set
 import           Golden
 import           Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.List.NonEmpty as NonEmpty
 import           HGeometry.Ext
 import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
@@ -358,10 +359,10 @@ minimumOn f = fmap (\(Min (Arg _ x)) -> x) . foldMap (\x -> Just $ Min $ Arg (f 
 
 -- | Renders a slice
 renderSliceWith           :: (Fractional r, Eq r, Functor f, Foldable f)
-                          => Camera r -> f (Point 3 r) -> IpeObject r
+                          => Camera r -> f (Point 3 r) -> [IpeObject r]
 renderSliceWith camera vs = case fromPoints (render <$> vs) of
-    Just (pg :: SimplePolygon (Point 2 r)) -> iO $ defIO pg ! attr SStroke black
-    Nothing                                -> error "???"
+    Just (pg :: SimplePolygon (Point 2 r)) -> [iO $ defIO pg ! attr SStroke black]
+    Nothing                                -> [] -- error "???"
   where
     render = projectPoint . transformBy (cameraTransform camera)
     projectPoint (Point3 x y _) = Point2 x y
@@ -373,8 +374,8 @@ mkPillar = map (\(i,pg) -> extend i <$> pg^..vertices)
     extend z (Point2 x y) = Point3 x y (fromIntegral z)
 
 
-test :: [IpeObject R']
-test = renderSliceWith blenderCamera <$> mkPillar thePillar
+test        :: Camera R' -> [IpeObject R']
+test camera = foldMap (renderSliceWith camera) $ mkPillar thePillar
 
 thePillar = [ (0, poly)
             , (1, poly)
@@ -430,29 +431,64 @@ constructPillar' fp = do page <- readSinglePageFileThrow fp
 
 type R' = Double
 
--- | Euler angle rotation; Given a vector with three radians,
+-- | Euler angle rotation; in order XYZ (from bottom to top in the gimbal hierarchy)
 --
-rotateXYZ     :: Floating r => Vector 3 r -> Transformation 3 r
-rotateXYZ rot = Transformation . Matrix.Matrix $ Vector4
-     (Vector4 (cb*cg)            ((-1)*cb*sg)       (sb)         0)
-     (Vector4 (ca*sg + cg*sa*sb) (ca*cg - sa*sb*sg) ((-1)*cb*sa) 0)
-     (Vector4 (sa*sg - ca*cg*sb) (cg*sa + ca*sb*sg) (ca*cb)      0)
-     (Vector4 0                  0                  0            1)
-  where
-    Vector3 sa sb sg = sin <$> rot
-    Vector3 ca cb cg = cos <$> rot
--- see:
--- https://wikimedia.org/api/rest_v1/media/math/render/svg/55b6d5a59a72894c1d1659c1635b71a6e8b13ee7
+-- the angles CCW and given in radians.
+rotateXYZ (Vector3 a b g) = rotateZ g |.| rotateY b |.| rotateX a
+
+-- rotateXYZ     :: Floating r => Vector 3 r -> Transformation 3 r
+-- rotateXYZ rot = Transformation . Matrix.Matrix $ Vector4
+--      (Vector4 (cb*cg)            ((-1)*cb*sg)       (sb)         0)
+--      (Vector4 (ca*sg + cg*sa*sb) (ca*cg - sa*sb*sg) ((-1)*cb*sa) 0)
+--      (Vector4 (sa*sg - ca*cg*sb) (cg*sa + ca*sb*sg) (ca*cb)      0)
+--      (Vector4 0                  0                  0            1)
+--   where
+--     Vector3 sa sb sg = sin <$> rot
+--     Vector3 ca cb cg = cos <$> rot
+-- -- see:
+-- -- https://wikimedia.org/api/rest_v1/media/math/render/svg/55b6d5a59a72894c1d1659c1635b71a6e8b13ee7
 
 -- rotateX x =
 
+-- | Rotate $\gamma$-radians CCW around the z-axis
+rotateZ       :: Floating r => r -> Transformation 3 r
+rotateZ gamma = Transformation . Matrix.Matrix $ Vector4
+     (Vector4 cg (-1*sg) 0 0)
+     (Vector4 sg cg      0 0)
+     (Vector4 0  0       1 0)
+     (Vector4 0  0       0 1)
+  where
+    sg = sin gamma
+    cg = cos gamma
+  -- for whatever reason the wikipedia page claims this rotates CW ? i.e. the sg and -sg are
+  -- flipped in the WP version: https://en.wikipedia.org/wiki/Rotation_matrix
 
+-- | Rotate $\beta$-radians CCW around the y-axis
+rotateY       :: Floating r => r -> Transformation 3 r
+rotateY beta = Transformation . Matrix.Matrix $ Vector4
+     (Vector4 cb 0 (-1*sb)  0)
+     (Vector4 0  1       0  0)
+     (Vector4 sb 0       cb 0)
+     (Vector4 0  0       0  1)
+  where
+    sb = sin beta
+    cb = cos beta
 
+-- | Rotate $\alpha$-radians CCW around the x-axis
+rotateX       :: Floating r => r -> Transformation 3 r
+rotateX alpha = Transformation . Matrix.Matrix $ Vector4
+     (Vector4 1  0     0  0)
+     (Vector4 0  ca    sa 0)
+     (Vector4 0  (-sa) ca 0)
+     (Vector4 0  0     0  1)
+  where
+    sa = sin alpha
+    ca = cos alpha
 
 blenderCamera :: Camera R'
 blenderCamera = def&cameraPosition     .~ Point3 7.35 (-34) (4.95)
                                           -- Point3 7.35 (-6.92) (4.95)
-                   -- &cameraNormal       .~ Vector3 0 (-1) 0
+                   -- &cameraNormal       %~ transformBy (rotateZ $ toRadians 10)
                                            --(-1) 1 (-5/7.0)
                                            -- fromRotate (Vector3 0 1 0)
                    -- &viewUp             .~ Vector3 0 0 1 -- fromRotate (Vector3 0 0 1)
@@ -465,9 +501,9 @@ blenderCamera = def&cameraPosition     .~ Point3 7.35 (-34) (4.95)
     -- z=0 means looking towards y=\infy, so along Vecto3 0 1 0 (-- the default view dir)
     rotationAngles = Vector3 63.559 0 46.692
 
+  -- TODO: this does nothing now
     fromRotate :: Vector 3 R' -> Vector 3 R'
     fromRotate = transformBy (rotateXYZ $ toRadians <$> rotationAngles)
-    toRadians deg = pi * (deg / 180.0)
 
     -- camera width in real world space is 36mm
     lensWidth                     = 0.036
@@ -481,6 +517,13 @@ blenderCamera = def&cameraPosition     .~ Point3 7.35 (-34) (4.95)
 --                   15
 --                   55
 --                   (Vector2 980 800)
+
+
+toRadians deg = pi * (deg / 180.0)
+
+
+blenderCube :: [Triangle (Point 3 R') :+ IpeColor R']
+blenderCube = transformBy (translation (Vector3 (-1) (-1) (-1)) |.| uniformScaling 2) <$> scene
 
 scene :: [Triangle (Point 3 R') :+ IpeColor R']
 scene = [ -- ground plane
@@ -513,16 +556,27 @@ theViewPortRect cam = Corners (c .+^ (negated xOffset ^+^ yOffset))
 
 
 renderScene :: IO ()
-renderScene = writeIpeFile [osp|scene.ipe|] $ singlePageFromContent $
-                traceShowWith ("scen",) $
-                scaleUniformlyBy 1000 $
-                             map render scene
-                             -- <> test
-                             <> [renderSliceWith blenderCamera
-                                                         (theViewPortRect blenderCamera)]
+renderScene = writeIpeFile [osp|scene.ipe|] $ ipeFile (renderPage <$> cams)
+  where
+    cams = NonEmpty.fromList . take 180
+         $ iterate (\cam -> let transform = transformBy (rotateX (toRadians 1))
+                            in cam&cameraNormal %~ transform
+                                  &viewUp       %~ transform
+                   )
+                   blenderCamera
+                   -- (blenderCamera&cameraNormal %~ transformBy (rotateZ (toRadians (-90))))
+
+
+renderPage         :: Camera R' -> IpePage R'
+renderPage camera = fromContent $
+                    traceShowWith ("scen",) $
+                    scaleUniformlyBy 10000 $
+                      map render blenderCube
+                      -- <> test camera
+                      <> renderSliceWith camera (theViewPortRect camera)
   where
     render (triang :+ col) = iO $ defIO triang' ! attr SFill col
       where
         triang' :: Triangle (Point 2 R')
-        triang' = triang&vertices %~ projectPoint . transformBy (cameraTransform blenderCamera)
+        triang' = triang&vertices %~ projectPoint . transformBy (cameraTransform camera)
         projectPoint (Point3 x y _) = Point2 x y
