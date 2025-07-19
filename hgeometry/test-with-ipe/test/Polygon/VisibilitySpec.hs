@@ -38,7 +38,10 @@ import           Data.Default.Class
 import           Debug.Trace
 import           HGeometry.Graphics.Camera
 import           HGeometry.Transformation
+import           HGeometry.Number.Radical
 import           HGeometry.Triangle
+import           HGeometry.Box
+import qualified HGeometry.Matrix as Matrix
 
 --------------------------------------------------------------------------------
 
@@ -349,6 +352,37 @@ minimumOn f = fmap (\(Min (Arg _ x)) -> x) . foldMap (\x -> Just $ Min $ Arg (f 
 
 --------------------------------------------------------------------------------
 
+-- renderPillar    :: Num r => [(Int, SimplePolygon (Point 2 r))] ->
+-- renderPillar pg =
+
+
+-- | Renders a slice
+renderSliceWith           :: (Fractional r, Eq r, Functor f, Foldable f)
+                          => Camera r -> f (Point 3 r) -> IpeObject r
+renderSliceWith camera vs = case fromPoints (render <$> vs) of
+    Just (pg :: SimplePolygon (Point 2 r)) -> iO $ defIO pg ! attr SStroke black
+    Nothing                                -> error "???"
+  where
+    render = projectPoint . transformBy (cameraTransform camera)
+    projectPoint (Point3 x y _) = Point2 x y
+
+-- | Construct a 3d pillar
+mkPillar :: Num r => [(Int, SimplePolygon (Point 2 r))] -> [[Point 3 r]]
+mkPillar = map (\(i,pg) -> extend i <$> pg^..vertices)
+  where
+    extend z (Point2 x y) = Point3 x y (fromIntegral z)
+
+
+test :: [IpeObject R']
+test = renderSliceWith blenderCamera <$> mkPillar thePillar
+
+thePillar = [ (0, poly)
+            , (1, poly)
+            ]
+  where
+    poly = fromJust $ fromPoints [origin, Point2 0.5 0.5, Point2 1 0.75, Point2 0 0.75]
+
+
 visibilityPillarWith          :: ( ConstructablePoint_ point 2 r, Point_ vertex 2 r
                                  , LineSegment_ lineSegment point
                                  , HasSquaredEuclideanDistance vertex
@@ -396,17 +430,57 @@ constructPillar' fp = do page <- readSinglePageFileThrow fp
 
 type R' = Double
 
-blenderCamera :: Camera R'
-blenderCamera = def&cameraPosition .~ Point3 7.35 (-6.92) (4.95)
+-- | Euler angle rotation; Given a vector with three radians,
+--
+rotateXYZ     :: Floating r => Vector 3 r -> Transformation 3 r
+rotateXYZ rot = Transformation . Matrix.Matrix $ Vector4
+     (Vector4 (cb*cg)            ((-1)*cb*sg)       (sb)         0)
+     (Vector4 (ca*sg + cg*sa*sb) (ca*cg - sa*sb*sg) ((-1)*cb*sa) 0)
+     (Vector4 (sa*sg - ca*cg*sb) (cg*sa + ca*sb*sg) (ca*cb)      0)
+     (Vector4 0                  0                  0            1)
+  where
+    Vector3 sa sb sg = sin <$> rot
+    Vector3 ca cb cg = cos <$> rot
+-- see:
+-- https://wikimedia.org/api/rest_v1/media/math/render/svg/55b6d5a59a72894c1d1659c1635b71a6e8b13ee7
 
-myCamera :: Camera R'
-myCamera = Camera (Point3 (-30) (-20) 20)
-                  (Vector3 0 0 (-1))
-                  (Vector3 0 1 0)
-                  10
-                  15
-                  55
-                  (Vector2 980 800)
+-- rotateX x =
+
+
+
+
+blenderCamera :: Camera R'
+blenderCamera = def&cameraPosition     .~ Point3 7.35 (-34) (4.95)
+                                          -- Point3 7.35 (-6.92) (4.95)
+                   -- &cameraNormal       .~ Vector3 0 (-1) 0
+                                           --(-1) 1 (-5/7.0)
+                                           -- fromRotate (Vector3 0 1 0)
+                   -- &viewUp             .~ Vector3 0 0 1 -- fromRotate (Vector3 0 0 1)
+                   &viewportDimensions .~ fromAspectRatio (Vector2 1920 1080)
+                   &nearDist           .~ 0.1
+                   &focalDepth         .~ 0.05
+  where
+    -- in degrees with respect to?
+    -- x=0 means looking towards z=-\infty, so along Vector3 0 0 (-1)
+    -- z=0 means looking towards y=\infy, so along Vecto3 0 1 0 (-- the default view dir)
+    rotationAngles = Vector3 63.559 0 46.692
+
+    fromRotate :: Vector 3 R' -> Vector 3 R'
+    fromRotate = transformBy (rotateXYZ $ toRadians <$> rotationAngles)
+    toRadians deg = pi * (deg / 180.0)
+
+    -- camera width in real world space is 36mm
+    lensWidth                     = 0.036
+    fromAspectRatio (Vector2 w h) = Vector2 lensWidth (lensWidth * (h/w))
+
+-- myCamera :: Camera R'
+-- myCamera = Camera (Point3 (-30) (-20) 20)
+--                   (Vector3 0 0 (-1))
+--                   (Vector3 0 1 0)
+--                   10
+--                   15
+--                   55
+--                   (Vector2 980 800)
 
 scene :: [Triangle (Point 3 R') :+ IpeColor R']
 scene = [ -- ground plane
@@ -416,18 +490,39 @@ scene = [ -- ground plane
         , Triangle origin (Point3 0 1 0) (Point3 0 1 1) :+ green
         , Triangle origin (Point3 0 1 1) (Point3 0 0 1) :+ green
         -- front plane
-        , Triangle origin (Point3 1 0 0) (Point3 1 0 1) :+ red
-        , Triangle origin (Point3 1 0 1) (Point3 0 1 1) :+ red
+        -- , Triangle origin (Point3 1 0 0) (Point3 1 0 1) :+ red
+        -- , Triangle origin (Point3 1 0 1) (Point3 0 1 1) :+ red
+
+        -- back plane
+        , Triangle (Point3 0 1 0) (Point3 1 1 0) (Point3 1 1 1) :+ orange
+        , Triangle (Point3 0 1 0) (Point3 1 1 1) (Point3 0 1 1) :+ orange
         ]
+
+
+-- | Computes the corners of the viewport; in world coordinates
+theViewPortRect     :: (Radical r, Floating r) => Camera r -> Corners (Point 3 r)
+theViewPortRect cam = Corners (c .+^ (negated xOffset ^+^ yOffset))
+                              (c .+^ (xOffset         ^+^ yOffset))
+                              (c .+^ (xOffset         ^+^ negated yOffset))
+                              (c .+^ (negated xOffset ^+^ negated yOffset))
+  where
+    c = (cam^.cameraPosition) .+^ (cam^.focalDepth *^ cam^.cameraNormal)
+    Vector2 w h = (/2) <$> cam^.viewportDimensions
+    yOffset = h *^ (cam^.viewUp)
+    xOffset = w *^ cross (cam^.viewUp) (cam^.cameraNormal)
 
 
 renderScene :: IO ()
 renderScene = writeIpeFile [osp|scene.ipe|] $ singlePageFromContent $
                 traceShowWith ("scen",) $
-                map render scene
+                scaleUniformlyBy 1000 $
+                             map render scene
+                             -- <> test
+                             <> [renderSliceWith blenderCamera
+                                                         (theViewPortRect blenderCamera)]
   where
     render (triang :+ col) = iO $ defIO triang' ! attr SFill col
       where
         triang' :: Triangle (Point 2 R')
-        triang' = triang&vertices %~ projectPoint . transformBy (cameraTransform myCamera)
+        triang' = triang&vertices %~ projectPoint . transformBy (cameraTransform blenderCamera)
         projectPoint (Point3 x y _) = Point2 x y

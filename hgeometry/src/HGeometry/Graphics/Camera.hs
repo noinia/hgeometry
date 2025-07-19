@@ -67,7 +67,7 @@ instance Num r => Default (Camera r) where
                , _rawCameraNormal    = Vector3 0 1 0 -- We are looking itnto the y-direction
                , _rawViewUp          = Vector3 0 0 1 -- up in the z-direction
                , _focalDepth         = 1
-               , _nearDist           = 0
+               , _nearDist           = 0.1
                , _farDist            = 100
                , _viewportDimensions = Vector2 4 3
                }
