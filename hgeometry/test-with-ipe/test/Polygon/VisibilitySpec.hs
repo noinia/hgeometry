@@ -489,13 +489,8 @@ rotateX alpha = Transformation . Matrix.Matrix $ Vector4
 
 blenderCamera :: Camera R'
 blenderCamera = def&cameraPosition     .~ Point3 7.35 (-6.92) (4.95) -- Point3 7.35 (-34) (4.95)
-                   &cameraNormal       %~ fromRotate
-                   &viewUp             %~ fromRotate
-                                          -- Point3 7.35 (-6.92) (4.95)
-                   -- &cameraNormal       %~ transformBy (rotateZ $ toRadians 10)
-                                           --(-1) 1 (-5/7.0)
-                                           -- fromRotate (Vector3 0 1 0)
-                   -- &viewUp             .~ Vector3 0 0 1 -- fromRotate (Vector3 0 0 1)
+                   &cameraNormal       .~ fromRotate (Vector3 0 0 (-1))
+                   &viewUp             .~ fromRotate (Vector3 0 1 0)
                    &viewportDimensions .~ fromAspectRatio (Vector2 1920 1080)
                    &nearDist           .~ 0.1
                    &focalDepth         .~ 0.05
@@ -503,15 +498,18 @@ blenderCamera = def&cameraPosition     .~ Point3 7.35 (-6.92) (4.95) -- Point3 7
     -- in degrees with respect to?
     -- x=0 means looking towards z=-\infty, so along Vector3 0 0 (-1)
     -- z=0 means looking towards y=\infy, so along Vecto3 0 1 0 (-- the default view dir)
-    rotationAngles = Vector3 63.559 0 46.692
 
-  -- TODO: this does nothing now
+    rotationAngles = Vector3 (-63.559) 0 46.692
+
     fromRotate :: Vector 3 R' -> Vector 3 R'
     fromRotate = transformBy (rotateXYZ $ toRadians <$> rotationAngles)
 
     -- camera width in real world space is 36mm
     lensWidth                     = 0.036
     fromAspectRatio (Vector2 w h) = Vector2 lensWidth (lensWidth * (h/w))
+
+
+
 
 -- myCamera :: Camera R'
 -- myCamera = Camera (Point3 (-30) (-20) 20)
@@ -562,14 +560,14 @@ theViewPortRect cam = Corners (c .+^ (negated xOffset ^+^ yOffset))
 renderScene :: IO ()
 renderScene = writeIpeFile [osp|scene.ipe|] $ ipeFile (renderPage <$> cams)
   where
-    cams = NonEmpty.fromList [blenderCamera]
-    -- cams = NonEmpty.fromList . take 180
-    --      $ iterate (\cam -> let transform = transformBy (rotateX (toRadians 1))
-    --                         in cam&cameraNormal %~ transform
-    --                               &viewUp       %~ transform
-    --                )
-    --                blenderCamera
-    --                -- (blenderCamera&cameraNormal %~ transformBy (rotateZ (toRadians (-90))))
+    -- cams = NonEmpty.fromList [blenderCamera]
+    cams = NonEmpty.fromList . take 180
+         $ iterate (\cam -> let transform = transformBy (rotateX (toRadians 1))
+                            in cam&cameraNormal %~ transform
+                                  &viewUp       %~ transform
+                   )
+                   blenderCamera
+                   -- (blenderCamera&cameraNormal %~ transformBy (rotateZ (toRadians (-90))))
 
 
 renderPage         :: Camera R' -> IpePage R'
