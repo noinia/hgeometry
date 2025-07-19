@@ -463,6 +463,8 @@ rotateZ gamma = Transformation . Matrix.Matrix $ Vector4
   -- for whatever reason the wikipedia page claims this rotates CW ? i.e. the sg and -sg are
   -- flipped in the WP version: https://en.wikipedia.org/wiki/Rotation_matrix
 
+
+
 -- | Rotate $\beta$-radians CCW around the y-axis
 rotateY       :: Floating r => r -> Transformation 3 r
 rotateY beta = Transformation . Matrix.Matrix $ Vector4
@@ -486,7 +488,9 @@ rotateX alpha = Transformation . Matrix.Matrix $ Vector4
     ca = cos alpha
 
 blenderCamera :: Camera R'
-blenderCamera = def&cameraPosition     .~ Point3 7.35 (-34) (4.95)
+blenderCamera = def&cameraPosition     .~ Point3 7.35 (-6.92) (4.95) -- Point3 7.35 (-34) (4.95)
+                   &cameraNormal       %~ fromRotate
+                   &viewUp             %~ fromRotate
                                           -- Point3 7.35 (-6.92) (4.95)
                    -- &cameraNormal       %~ transformBy (rotateZ $ toRadians 10)
                                            --(-1) 1 (-5/7.0)
@@ -558,13 +562,14 @@ theViewPortRect cam = Corners (c .+^ (negated xOffset ^+^ yOffset))
 renderScene :: IO ()
 renderScene = writeIpeFile [osp|scene.ipe|] $ ipeFile (renderPage <$> cams)
   where
-    cams = NonEmpty.fromList . take 180
-         $ iterate (\cam -> let transform = transformBy (rotateX (toRadians 1))
-                            in cam&cameraNormal %~ transform
-                                  &viewUp       %~ transform
-                   )
-                   blenderCamera
-                   -- (blenderCamera&cameraNormal %~ transformBy (rotateZ (toRadians (-90))))
+    cams = NonEmpty.fromList [blenderCamera]
+    -- cams = NonEmpty.fromList . take 180
+    --      $ iterate (\cam -> let transform = transformBy (rotateX (toRadians 1))
+    --                         in cam&cameraNormal %~ transform
+    --                               &viewUp       %~ transform
+    --                )
+    --                blenderCamera
+    --                -- (blenderCamera&cameraNormal %~ transformBy (rotateZ (toRadians (-90))))
 
 
 renderPage         :: Camera R' -> IpePage R'
