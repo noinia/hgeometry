@@ -36,13 +36,14 @@ import           Test.QuickCheck.Instances ()
 import           Data.Semigroup
 
 import           Data.Default.Class
+import qualified Data.Text as Text
 import           Debug.Trace
-import           HGeometry.Graphics.Camera
-import           HGeometry.Transformation
-import           HGeometry.Number.Radical
-import           HGeometry.Triangle
 import           HGeometry.Box
+import           HGeometry.Graphics.Camera
 import qualified HGeometry.Matrix as Matrix
+import           HGeometry.Number.Radical
+import           HGeometry.Transformation
+import           HGeometry.Triangle
 
 --------------------------------------------------------------------------------
 
@@ -368,20 +369,47 @@ renderSliceWith camera vs = case fromPoints (render <$> vs) of
     projectPoint (Point3 x y _) = Point2 x y
 
 -- | Construct a 3d pillar
-mkPillar :: Num r => [(Int, SimplePolygon (Point 2 r))] -> [[Point 3 r]]
-mkPillar = map (\(i,pg) -> extend i <$> pg^..vertices)
+mkPillar :: Num r => [(r, SimplePolygon (Point 2 r))] -> [[Point 3 r]]
+mkPillar = map (\(t,pg) -> extend t <$> pg^..vertices)
   where
-    extend z (Point2 x y) = Point3 x y (fromIntegral z)
+    extend z (Point2 x y) = Point3 x y z
 
 
-test        :: Camera R' -> [IpeObject R']
-test camera = foldMap (renderSliceWith camera) $ mkPillar thePillar
+-- generatePages seg inputPolygon = NonEmpty.fromList [ myScene camera seg inputPolygon
+--                                                    , visibilityPolgins
+--                                                    ]
+--   where
+--     seg       = ClosedLineSegment origin (Point2 0.1 0.2 :: Point 2 R')
+inputPolygon = fromJust
+                 $ fromPoints
+                   [Point2 (-0.5) (-0.8), Point2 0.5 0.5, Point2 1 0.75, Point2 (-1) 0.75
+                   , Point2 (-1) (-0.8)
+                   ]
 
-thePillar = [ (0, poly)
-            , (1, poly)
-            ]
+
+
+
+
+visibilityPolygons        :: [(R', SimplePolygon (Point 2 R'))]
+                          -> ([Ipe.View], [IpeObject R'])
+visibilityPolygons pillar = (views',obs)
   where
-    poly = fromJust $ fromPoints [origin, Point2 0.5 0.5, Point2 1 0.75, Point2 0 0.75]
+    obs = (\(t,vis) -> iO $ defIO vis ! attr SLayer   (mkLayer t)
+                                      ! attr SFill    lightcyan
+                                      ! attr SOpacity "10%"
+          ) <$> pillar
+    mkLayer t = LayerName $ "time" <> Text.pack (show t)
+    views' = (\(t,_) -> View [mkLayer t,"alpha"] "alpha") <$> pillar
+
+myScene                         :: Camera R' -> ClosedLineSegment (Point 2 R')
+                                -> SimplePolygon (Point 2 R') -> [IpeObject R']
+myScene camera seg inputPolygon = foldMap (renderSliceWith camera)
+                                $ mkPillar (thePillar <> [(0,inputPolygon),(0,basePlane)])
+  where
+    thePillar = visibilityPillarWith 10 seg inputPolygon
+    basePlane    = fromJust
+                 $ fromPoints [Point2 (-1) (-1), Point2 (-1) 1, Point2 1 1, Point2 1 (-1)]
+
 
 
 visibilityPillarWith          :: ( ConstructablePoint_ point 2 r, Point_ vertex 2 r
@@ -391,9 +419,9 @@ visibilityPillarWith          :: ( ConstructablePoint_ point 2 r, Point_ vertex 
                                  , Ord r, Fractional r
                                  )
                               => Int
-                              -> lineSegment -> polygon -> [(Int, SimplePolygon (Point 2 r))]
+                              -> lineSegment -> polygon -> [(r, SimplePolygon (Point 2 r))]
 visibilityPillarWith m s poly = [ let t = fromIntegral i / fromIntegral m
-                                  in (i
+                                  in ( t
                                      , visibilityPolygon (interpolate t s) poly
                                          & vertices %~ (^.asPoint)
                                      )
@@ -544,6 +572,17 @@ scene = [ -- ground plane
         ]
 
 
+
+
+
+
+
+
+
+
+
+
+
 -- | Computes the corners of the viewport; in world coordinates
 theViewPortRect     :: (Radical r, Floating r) => Camera r -> Corners (Point 3 r)
 theViewPortRect cam = Corners (c .+^ (negated xOffset ^+^ yOffset))
@@ -560,14 +599,14 @@ theViewPortRect cam = Corners (c .+^ (negated xOffset ^+^ yOffset))
 renderScene :: IO ()
 renderScene = writeIpeFile [osp|scene.ipe|] $ ipeFile (renderPage <$> cams)
   where
-    -- cams = NonEmpty.fromList [blenderCamera]
-    cams = NonEmpty.fromList . take 180
-         $ iterate (\cam -> let transform = transformBy (rotateX (toRadians 1))
-                            in cam&cameraNormal %~ transform
-                                  &viewUp       %~ transform
-                   )
-                   blenderCamera
-                   -- (blenderCamera&cameraNormal %~ transformBy (rotateZ (toRadians (-90))))
+    cams = NonEmpty.fromList [blenderCamera]
+    -- cams = NonEmpty.fromList . take 180
+    --      $ iterate (\cam -> let transform = transformBy (rotateX (toRadians 1))
+    --                         in cam&cameraNormal %~ transform
+    --                               &viewUp       %~ transform
+    --                )
+    --                blenderCamera
+    --                -- (blenderCamera&cameraNormal %~ transformBy (rotateZ (toRadians (-90))))
 
 
 renderPage         :: Camera R' -> IpePage R'
@@ -575,7 +614,7 @@ renderPage camera = fromContent $
                     traceShowWith ("scen",) $
                     scaleUniformlyBy 10000 $
                       map render blenderCube
-                      -- <> test camera
+                      <> myScene camera (ClosedLineSegment origin (Point2 0.1 0.2)) inputPolygon
                       <> renderSliceWith camera (theViewPortRect camera)
   where
     render (triang :+ col) = iO $ defIO triang' ! attr SFill col
