@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Polygon.VisibilitySpec where
 
-import           Control.Lens
+import           Control.Lens hiding (views)
 import           Data.Maybe
 import           Data.Ord (comparing)
 -- import qualified Data.Set as Set
@@ -369,10 +369,10 @@ renderSliceWith camera vs = case fromPoints (render <$> vs) of
     projectPoint (Point3 x y _) = Point2 x y
 
 -- | Construct a 3d pillar
-mkPillar :: Num r => [(r, SimplePolygon (Point 2 r))] -> [[Point 3 r]]
+mkPillar :: (Num r, Real r) => [(r, SimplePolygon (Point 2 r))] -> [[Point 3 R']]
 mkPillar = map (\(t,pg) -> extend t <$> pg^..vertices)
   where
-    extend z (Point2 x y) = Point3 x y z
+    extend z (Point2 x y) = Point3 (realToFrac x) (realToFrac y) (realToFrac z)
 
 
 -- generatePages seg inputPolygon = NonEmpty.fromList [ myScene camera seg inputPolygon
@@ -380,31 +380,34 @@ mkPillar = map (\(t,pg) -> extend t <$> pg^..vertices)
 --                                                    ]
 --   where
 --     seg       = ClosedLineSegment origin (Point2 0.1 0.2 :: Point 2 R')
-inputPolygon = fromJust
-                 $ fromPoints
-                   [Point2 (-0.5) (-0.8), Point2 0.5 0.5, Point2 1 0.75, Point2 (-1) 0.75
-                   , Point2 (-1) (-0.8)
-                   ]
+-- inputPolygon = fromJust
+--                  $ fromPoints
+--                    [Point2 (-0.5) (-0.8), Point2 0.5 0.5, Point2 1 0.75, Point2 (-1) 0.75
+--                    , Point2 (-1) (-0.8)
+--                    ]
 
 
 
 
 
-visibilityPolygons        :: [(R', SimplePolygon (Point 2 R'))]
-                          -> ([Ipe.View], [IpeObject R'])
+visibilityPolygons        :: [(R, SimplePolygon (Point 2 R))]
+                          -> ([Ipe.View], [IpeObject R])
 visibilityPolygons pillar = (views',obs)
   where
     obs = (\(t,vis) -> iO $ defIO vis ! attr SLayer   (mkLayer t)
                                       ! attr SFill    lightcyan
                                       ! attr SOpacity "10%"
           ) <$> pillar
-    mkLayer t = LayerName $ "time" <> Text.pack (show t)
     views' = (\(t,_) -> View [mkLayer t,"alpha"] "alpha") <$> pillar
 
-myScene                         :: Camera R' -> ClosedLineSegment (Point 2 R')
-                                -> SimplePolygon (Point 2 R') -> [IpeObject R']
+
+mkLayer t = LayerName $ "time" <> Text.pack (show t)
+
+myScene                         :: Camera R' -> ClosedLineSegment (Point 2 R)
+                                -> SimplePolygon (Point 2 R) -> [IpeObject R']
 myScene camera seg inputPolygon = foldMap (renderSliceWith camera)
-                                $ mkPillar (thePillar <> [(0,inputPolygon),(0,basePlane)])
+                                $ mkPillar (thePillar <> [(0,inputPolygon)
+                                                         ,(0,basePlane)])
   where
     thePillar = visibilityPillarWith 10 seg inputPolygon
     basePlane    = fromJust
@@ -432,24 +435,37 @@ visibilityPillarWith m s poly = [ let t = fromIntegral i / fromIntegral m
 
 resolution = 12
 
-constructPillar = constructPillar' [osp|data/test-with-ipe/golden/Polygon/pillarIn.ipe|]
+constructPillar = constructPillar' [osp|data/test-with-ipe/golden/Polygon/pillarIn2.ipe|]
 
 constructPillar'    :: OsPath -> IO ()
-constructPillar' fp = do page <- readSinglePageFileThrow fp
-                         let [poly :: SimplePolygon (Point 2 R) :+ _]     = readAll page
+constructPillar' fp = do page <- readSinglePageFileThrow @R fp
+                         let (polies :: [SimplePolygon (Point 2 R) :+ _]) = readAll page
                              [seg  :: ClosedLineSegment (Point 2 R) :+ _] = readAll page
-                             pillar = [ iO $ defIO vis ! attr SLayer   "pillar"
-                                                       ! attr SFill    lightcyan
-                                                       ! attr SOpacity "10%"
-                                      | (_, vis) <- visibilityPillarWith resolution seg poly
+                             poly = head polies
+                         print polies
+                         print seg
+                         let
+                             pillar = [ [iO $ defIO vis ! attr SLayer   "pillar"
+                                                        ! attr SFill    lightcyan
+                                                        ! attr SLayer (mkLayer t)
+                                        , iO $ defIO (interpolate t seg)
+                                                     ! attr SLayer (mkLayer t)
+
+                                        ]
+                                      | (t, vis) <- visibilityPillarWith resolution seg poly
                                       ]
+                             (views',pillar') = visibilityPolygons
+                                              $ visibilityPillarWith resolution seg poly
                              out    = concat
-                                      [ pillar
+                                      [ concat pillar
                                       , [iO $ defIO poly ! attr SLayer "polygon" ]
                                       , [iO $ defIO seg  ! attr SLayer "seg" ]
                                       ]
-                         writeIpeFile [osp|pillar.ipe|] . addStyleSheet opacitiesStyle
-                           $ singlePageFromContent out
+                             page :: IpePage R
+                             page = fromContent out
+                                        & views %~ (<> views')
+                         writeIpeFile [osp|pillar.ipe|] . addStyleSheet opacitiesStyle $
+                                        ipeFile (page :| [])
 
 
 
@@ -597,7 +613,16 @@ theViewPortRect cam = Corners (c .+^ (negated xOffset ^+^ yOffset))
 
 
 renderScene :: IO ()
-renderScene = writeIpeFile [osp|scene.ipe|] $ ipeFile (renderPage <$> cams)
+renderScene = do
+    -- page <- readSinglePageFileThrow @R [osp|data/test-with-ipe/golden/Polygon/pillarIn1.ipe|]
+    page <- readSinglePageFileThrow @R [osp|data/test-with-ipe/golden/Polygon/pillarIn2.ipe|]
+    let [poly' :: SimplePolygon (Point 2 R) :+ _]     = readAll page
+        [seg'  :: ClosedLineSegment (Point 2 R) :+ _] = readAll page
+        box = Rectangle (Point2 (-0.9) 0) (Point2 0.9 0.75)
+        transform = fitToBoxTransform box poly'
+        poly = transformBy transform (poly'^.core)
+        seg  = transformBy transform (seg'^.core)
+    writeIpeFile [osp|scene.ipe|] $ ipeFile ((\cam -> renderPage cam seg poly) <$> cams)
   where
     cams = NonEmpty.fromList [blenderCamera]
     -- cams = NonEmpty.fromList . take 180
@@ -609,12 +634,12 @@ renderScene = writeIpeFile [osp|scene.ipe|] $ ipeFile (renderPage <$> cams)
     --                -- (blenderCamera&cameraNormal %~ transformBy (rotateZ (toRadians (-90))))
 
 
-renderPage         :: Camera R' -> IpePage R'
-renderPage camera = fromContent $
+renderPage         :: Camera R' -> _ -> _ -> IpePage R'
+renderPage camera seg inputPolygon = fromContent $
                     traceShowWith ("scen",) $
                     scaleUniformlyBy 10000 $
                       map render blenderCube
-                      <> myScene camera (ClosedLineSegment origin (Point2 0.1 0.2)) inputPolygon
+                      <> myScene camera seg inputPolygon
                       <> renderSliceWith camera (theViewPortRect camera)
   where
     render (triang :+ col) = iO $ defIO triang' ! attr SFill col
