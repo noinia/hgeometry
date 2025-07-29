@@ -13,6 +13,7 @@ module HGeometry.LineSegment
   ( LineSegment(LineSegment, ClosedLineSegment, OpenLineSegment)
   , ClosedLineSegment
   , OpenLineSegment
+  , asALineSegment
   , EndPoint(EndPoint,OpenE,ClosedE)
   , AnEndPoint(AnEndPoint,AnOpenE,AnClosedE)
   , module HGeometry.LineSegment.Class

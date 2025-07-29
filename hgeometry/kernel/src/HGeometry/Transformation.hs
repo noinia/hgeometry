@@ -20,6 +20,7 @@ module HGeometry.Transformation
   , translateBy, scaleBy, scaleUniformlyBy
 
   , rotateTo
+  , rotateXYZ, rotateX, rotateY, rotateZ
 
   , skewX, rotation, reflection, reflectionV, reflectionH
 

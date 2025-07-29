@@ -18,6 +18,7 @@ module HGeometry.LineSegment.Internal
   , module HGeometry.LineSegment.Class
   , spanIn
   , EndPoint_(..)
+  , asALineSegment
   ) where
 
 
@@ -394,3 +395,8 @@ spanIn coord'' seg = case (i^.start) `compare` (i^.end) of
                        GT -> Interval e s
   where
     i@(Interval s e) = view coord'' <$> seg^._LineSegmentInterval.to asAnInterval
+
+
+-- | convert into an LineSegment whose endpoints are explicitly tagged.
+asALineSegment   :: LineSegment_ segment point => segment -> LineSegment AnEndPoint point
+asALineSegment e = LineSegment (asAnEndPoint $ e^.startPoint) (asAnEndPoint $ e^.endPoint)

@@ -9,7 +9,6 @@ import           HGeometry.Number.Real.Rational
 import           HGeometry.PlaneGraph
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Instances ()
-import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Triangulation
 import qualified HGeometry.Polygon.Triangulation.TriangulateMonotone as TM
 import           Test.Hspec
