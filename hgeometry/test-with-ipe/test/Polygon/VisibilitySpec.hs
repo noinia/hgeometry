@@ -1,77 +1,64 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 module Polygon.VisibilitySpec where
 
 import           Control.Lens hiding (views)
-import           Data.Maybe
-import           Data.Ord (comparing)
--- import qualified Data.Set as Set
-import           Golden
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import           Data.Maybe
+import qualified Data.Text as Text
+import           Golden
+import           HGeometry.Box
 import           HGeometry.Ext
+import           HGeometry.Graphics.Camera
 import           HGeometry.LineSegment
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
-import           HGeometry.Foldable.Sort
 import           HGeometry.Polygon
-import           HGeometry.Properties
 import           HGeometry.Polygon.Instances ()
--- import           HGeometry.Polygon.Visibility
 import qualified HGeometry.Polygon.Visibility.Naive as Naive
+import           HGeometry.Transformation
+import           HGeometry.Triangle
 import           HGeometry.Vector
-import           HGeometry.HalfLine
-import qualified Data.Vector as Vector
-import           HGeometry.Intersection
 import           Ipe
 import           Ipe.Color
 import           System.OsPath
 import           Test.Hspec
--- import           Test.Hspec.QuickCheck
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck hiding (vector)
 import           Test.QuickCheck.Instances ()
--- import qualified Data.Text as Text
-
-import           Data.Semigroup
-
-import           Data.Default.Class
-import qualified Data.Text as Text
-import           HGeometry.Box
-import           HGeometry.Graphics.Camera
-import qualified HGeometry.Matrix as Matrix
-import           HGeometry.Number.Radical
-import           HGeometry.Transformation
-import           HGeometry.Triangle
 
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
+inputPolygonPath :: OsPath
+inputPolygonPath = [osp|data/test-with-ipe/golden/Polygon/visibilityInputPolygons.ipe|]
+
 spec :: Spec
-spec = describe "visibility graph / visibility polygon" $ do
-         -- prop "naive visibility graph and fast one the same " $
-         --   \(pg :: SimplePolygon (Point 2 R)) ->
-         --     Set.fromList (visibilityGraph pg) === Set.fromList (Naive.visibilityGraph pg)
-         polygonPages <- runIO $ readInputPolygons [osp|data/test-with-ipe/golden/Polygon/visibilityInputPolygons.ipe|]
+spec = describe "visibility" $ do
+         polygonPages <- runIO $ readInputPolygons inputPolygonPath
+         describe "visibility graph" $ do
+           -- prop "naive visibility graph and fast one the same " $
+           --   \(pg :: SimplePolygon (Point 2 R)) ->
+           --     Set.fromList (visibilityGraph pg) === Set.fromList (Naive.visibilityGraph pg)
 
+           goldenWith [osp|data/test-with-ipe/golden/Polygon/|]
+             (ipeFileGolden { name = [osp|visibility|] })
+               (ipeFile $ perPage <$> polygonPages)
 
-         goldenWith [osp|data/test-with-ipe/golden/Polygon/|]
-           (ipeFileGolden { name = [osp|visibility|] })
-             (ipeFile $ perPage <$> polygonPages)
+         describe "visibility polygon" $ do
+           goldenWith [osp|data/test-with-ipe/golden/Polygon/|]
+             (ipeFileGolden { name = [osp|visibilityPolygons|] })
+               (ipeFile $ perPage' <$> polygonPages)
 
-         goldenWith [osp|data/test-with-ipe/golden/Polygon/|]
-           (ipeFileGolden { name = [osp|visibilityPolygons|] })
-             (ipeFile $ perPage' <$> polygonPages)
+           manualPages <- runIO $
+                          readInputPolygons [osp|data/test-with-ipe/golden/Polygon/manual.ipe|]
 
-         manualPages <- runIO $ readInputPolygons [osp|data/test-with-ipe/golden/Polygon/manual.ipe|]
-
-
-         goldenWith [osp|data/test-with-ipe/golden/Polygon/|]
-           (ipeFileGolden { name = [osp|manualVisibilityPolygons|] })
-             (ipeFile $ perPage' <$> manualPages)
-
-
+           goldenWith [osp|data/test-with-ipe/golden/Polygon/|]
+             (ipeFileGolden { name = [osp|manualVisibilityPolygons|] })
+               (ipeFile $ perPage' <$> manualPages)
 
 readInputPolygons    :: OsPath -> IO (NonEmpty (IpePage R))
 readInputPolygons fp = do
@@ -79,8 +66,8 @@ readInputPolygons fp = do
   pure $ file^.pages
 
 
-perPage      :: IpePage R -> IpePage R
-perPage page = fromContent . foldMap (drawSingle . (^.core)) $ readAll page
+perPage       :: IpePage R -> IpePage R
+perPage page' = fromContent . foldMap (drawSingle . (^.core)) $ readAll page'
 
 drawSingle    :: SimplePolygon (Point 2 R) -> [IpeObject R]
 drawSingle pg = concat
@@ -130,15 +117,15 @@ createFile = do
 
 
 --------------------------------------------------------------------------------
--- * Visibility Polygons
+-- * Testing the Visibility Polygon algorithms
 
 
-perPage'      :: IpePage R -> IpePage R
-perPage' page = fromContent . concat $
-                [ drawSingle' p poly
-                | poly :+ _ <- readAll page
-                , p :+ _    <- readAll page
-                ]
+perPage'       :: IpePage R -> IpePage R
+perPage' page' = fromContent . concat $
+                 [ drawSingle' p poly
+                 | poly :+ _ <- readAll page'
+                 , p :+ _    <- readAll page'
+                 ]
 
 drawSingle'      :: Point 2 R -> SimplePolygon (Point 2 R) -> [IpeObject R]
 drawSingle' q pg = [ iO $ defIO visPoly ! attr SStroke blue
@@ -152,19 +139,7 @@ drawSingle' q pg = [ iO $ defIO visPoly ! attr SStroke blue
 
 
 --------------------------------------------------------------------------------
-
-
-    -- rayThrough (_,v) = case
-
-    -- (pg^..outerBoundaryEdgeSegments)
-
-  -- fromPoints' . snd $ foldl' handle initialStatus events'
-
-
-
-
-
-
+-- * Remnants of the rotating sweep line implementation
 
 
 -- withInitialRay q events = case findNonColinear q events of
@@ -215,10 +190,10 @@ drawSingle' q pg = [ iO $ defIO visPoly ! attr SStroke blue
 
 
 --------------------------------------------------------------------------------
-
--- renderPillar    :: Num r => [(Int, SimplePolygon (Point 2 r))] ->
--- renderPillar pg =
-
+-- * The code below is on rendering a "pillar" of visibility polygons.
+--
+-- This should really be moved somewhere else; I used it to generate some
+-- input figures for my ATMCS talk.
 
 -- | Renders a slice
 renderSliceWith           :: (Fractional r, Eq r, Functor f, Foldable f)
@@ -293,8 +268,6 @@ visibilityPillarWith m s poly = [ let t = fromIntegral i / fromIntegral m
                                 | i <- [0..m]
                                 ]
 
-
-
 resolution = 12
 
 constructPillar = constructPillar' [osp|data/test-with-ipe/golden/Polygon/pillarIn2.ipe|]
@@ -303,7 +276,7 @@ constructPillar'    :: OsPath -> IO ()
 constructPillar' fp = do page <- readSinglePageFileThrow @R fp
                          let (polies :: [SimplePolygon (Point 2 R) :+ _]) = readAll page
                              [seg  :: ClosedLineSegment (Point 2 R) :+ _] = readAll page
-                             poly = head polies
+                             (poly : _ ) = polies
                          print polies
                          print seg
                          let
@@ -316,22 +289,18 @@ constructPillar' fp = do page <- readSinglePageFileThrow @R fp
                                         ]
                                       | (t, vis) <- visibilityPillarWith resolution seg poly
                                       ]
-                             (views',pillar') = visibilityPolygons
-                                              $ visibilityPillarWith resolution seg poly
+                             (views',_) = visibilityPolygons
+                                        $ visibilityPillarWith resolution seg poly
                              out    = concat
                                       [ concat pillar
                                       , [iO $ defIO poly ! attr SLayer "polygon" ]
                                       , [iO $ defIO seg  ! attr SLayer "seg" ]
                                       ]
-                             page :: IpePage R
-                             page = fromContent out
-                                        & views %~ (<> views')
+                             page' :: IpePage R
+                             page' = fromContent out
+                                         & views %~ (<> views')
                          writeIpeFile [osp|pillar.ipe|] . addStyleSheet opacitiesStyle $
-                                        ipeFile (page :| [])
-
-
-
-
+                                        ipeFile (page' :| [])
 
 --------------------------------------------------------------------------------
 
@@ -396,18 +365,7 @@ scene = [ -- ground plane
         ]
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+-- Some code to render the default blender cube.
 
 renderScene :: IO ()
 renderScene = do
