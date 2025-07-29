@@ -37,7 +37,6 @@ import           Data.Semigroup
 
 import           Data.Default.Class
 import qualified Data.Text as Text
-import           Debug.Trace
 import           HGeometry.Box
 import           HGeometry.Graphics.Camera
 import qualified HGeometry.Matrix as Matrix
@@ -159,6 +158,8 @@ drawSingle' q pg = [ iO $ defIO visPoly ! attr SStroke blue
 type Definer polygon =
   DefinerF (NumType polygon) (VertexIx polygon) (Vertex polygon :+ VertexIx polygon)
 
+-- | A vertex of a visibility polygon; which is either an original vertex of type 'orig' or
+-- a vertex that is the intersection point of a ray through an original vertex and an edge.
 data DefinerF r edge orig = OriginalVertex orig
                           | NewVertex (Point 2 r) edge orig
                             -- ^ the intersection point on the edge, defined by the edge
@@ -170,11 +171,20 @@ instance Bifunctor (DefinerF r) where
     OriginalVertex p -> OriginalVertex (g p)
     NewVertex p e v  -> NewVertex p (f e) (g v)
 
+-- | Lens to access the position of a vertex of a visibility polygon.
+--
+-- Note that using this as a setter may be unsafe/break invariants!
 position :: Point_ orig 2 r => Lens' (DefinerF r edge orig) (Point 2 r)
 position = lens (\case
                     OriginalVertex v -> v^.asPoint
                     NewVertex p _ _  -> p
-                ) undefined
+                )
+                (\v p@(Point2 x y) -> case v of
+                    OriginalVertex v' -> OriginalVertex $ v'&xCoord .~ x
+                                                            &yCoord .~ y
+                    NewVertex _ e o   -> NewVertex p e o
+                )
+
 
 type instance Dimension (DefinerF r edge orig) = 2
 type instance NumType (DefinerF r edge orig)   = r
@@ -199,10 +209,11 @@ visibilityPolygon :: forall point vertex polygon r.
                   => point -> polygon -> SimplePolygon (Definer polygon)
 visibilityPolygon (view asPoint -> q) poly = fromMaybe err . fromPoints $ theVertices
   where
+    -- the vertices of our visiblity polygon
     theVertices      :: Vector.Vector (DefinerF r (VertexIx polygon) (vertex :+ VertexIx polygon))
     theVertices      = fmap dropIx . sortBy alongBoundary $ originalVertices <> newVertices
 
-
+    -- all vertices of the original polygon that are visible
     visibleVertices  :: [vertex :+ VertexIx polygon]
     visibleVertices  = poly^..vertices.asIndexedExt.filtered isVisible
 
@@ -216,32 +227,31 @@ visibilityPolygon (view asPoint -> q) poly = fromMaybe err . fromPoints $ theVer
     obstacleEdges :: [ClosedLineSegment vertex :+ VertexIx polygon]
     obstacleEdges = poly^..(reindexed fst outerBoundaryEdgeSegments).asIndexedExt
 
-    -- test if the vertex is strictly visible; i.e. the open line segment between p and q lies
-    -- strictly in the interior of the polygon.
-    isVisible   :: vertex :+ ix -> Bool
-    isVisible p =
+    -- | test if the vertex is strictly visible; i.e. the open line segment between p and
+    -- q lies strictly in the interior of the polygon.
+    isStrictlyVisible   :: vertex :+ ix -> Bool
+    isStrictlyVisible p =
       all (not . (intersects (OpenLineSegment (p^.asPoint) q)) . view core) obstacleEdges
-    -- TODO: this does not apprporiately account for colinear vertices ; i.e.
 
-    -- we p should be visible from q if the open segment is contained in the closure of P.
-    -- i.e. it may coincide with edges
+    -- | test if a given vertex is visible; i.e. if the open linesegment between p and q
+    -- lies in the closure of the polygon. This means we should test whether it does not
+    -- intersect the interior of any of the edges. Overlap with edges is allowed.
+    isVisible   :: vertex :+ ix -> Bool
+    isVisible p = flip all obstacleEdges $ \(e :+ _) ->
+        case (OpenLineSegment (p^.asPoint) q) `intersect` (asOpenEdge e) of
+          Nothing                                        -> True
+          Just (LineSegment_x_LineSegment_Point _)       -> False
+          Just (LineSegment_x_LineSegment_LineSegment _) -> True
 
-    -- however, for the reflex visibility test below, we want to report the closest
-    -- vertices; so we need strictly visible.
-    --
-    -- moreover, we don't want colinear vertices in the output.
-
-
-    -- isVisible   :: vertex :+ ix -> Bool
-    -- isVisible p =
-    --   all (not . (intersects (OpenLineSegment (p^.asPoint) q)) . view core) obstacleEdges
-
-
+    -- | Compute the set of closest reflex vertices. Note that here we use the strict
+    -- visibility so that we only get hte first visible reflex vertex in some direction
+    -- (if the ray would go thorugh more vertices)
     reflexVertices :: [vertex :+ VertexIx polygon]
-    reflexVertices = filter isInterior visibleVertices
+    reflexVertices = poly^..vertices.asIndexedExt.filtered (\v ->
+                       isStrictlyVisible v && isInterior v)
 
-    -- test whether the two neighbours of v are on the same side of the line through q and v
-    -- if so; then v is a reflex vertex that defines a new visible vertex.
+    -- | test whether the two neighbours of v are on the same side of the line through q
+    -- and v if so; then v is a reflex vertex that defines a new visible vertex.
     --
     -- if either the predecessor or successor is colinear with v, then v counts as a reflex
     -- vertex as well (since v was visible)
@@ -365,8 +375,8 @@ renderSliceWith camera vs = case fromPoints (render <$> vs) of
     Just (pg :: SimplePolygon (Point 2 r)) -> [iO $ defIO pg ! attr SStroke black]
     Nothing                                -> [] -- error "???"
   where
-    render = projectPoint . transformBy (cameraTransform camera)
-    projectPoint (Point3 x y _) = Point2 x y
+    render = projectPoint @2 . transformBy (cameraTransform camera)
+    -- projectPoint (Point3 x y _) = Point2 x y
 
 -- | Construct a 3d pillar
 mkPillar :: (Num r, Real r) => [(r, SimplePolygon (Point 2 r))] -> [[Point 3 R']]
@@ -554,9 +564,9 @@ renderScene = do
     let [poly' :: SimplePolygon (Point 2 R) :+ _]     = readAll page
         [seg'  :: ClosedLineSegment (Point 2 R) :+ _] = readAll page
         box = Rectangle (Point2 (-0.9) 0) (Point2 0.9 0.75)
-        transform = fitToBoxTransform box poly'
-        poly = transformBy transform (poly'^.core)
-        seg  = transformBy transform (seg'^.core)
+        theTransform = fitToBoxTransform box poly'
+        poly = transformBy theTransform (poly'^.core)
+        seg  = transformBy theTransform (seg'^.core)
     writeIpeFile [osp|scene.ipe|] $ ipeFile ((\cam -> renderPage cam seg poly) <$> cams)
   where
     cams = NonEmpty.fromList [blenderCamera]
@@ -571,7 +581,6 @@ renderScene = do
 
 renderPage         :: Camera R' -> _ -> _ -> IpePage R'
 renderPage camera seg inputPolygon = fromContent $
-                    traceShowWith ("scen",) $
                     scaleUniformlyBy 10000 $
                       map render blenderCube
                       <> myScene camera seg inputPolygon
@@ -581,4 +590,4 @@ renderPage camera seg inputPolygon = fromContent $
       where
         triang' :: Triangle (Point 2 R')
         triang' = triang&vertices %~ projectPoint . transformBy (cameraTransform camera)
-        projectPoint (Point3 x y _) = Point2 x y
+        -- projectPoint (Point3 x y _) = Point2 x y
