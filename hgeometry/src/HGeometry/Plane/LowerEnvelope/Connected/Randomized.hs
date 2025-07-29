@@ -12,13 +12,14 @@ module HGeometry.Plane.LowerEnvelope.Connected.Randomized
   ( computeVertexForm
   ) where
 
-import           Control.Lens
+import           Control.Lens hiding (below)
 import           Data.Bifunctor
 import           Data.Foldable
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map (Map)
+import qualified Data.Map as Map
 import           Data.Map.NonEmpty (NEMap, pattern IsEmpty, pattern IsNonEmpty)
 import qualified Data.Map.NonEmpty as NEMap
 import           Data.Maybe (mapMaybe)
@@ -83,12 +84,14 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
   where
     n  = length hs
     r  = sqrt . sqrt @Double . fromIntegral $ n -- r = n^{1/4}
-    r' = max 4 $ round $ r * logBase 2 r
+    r' = max 5 $ round $ r * logBase 2 r
       -- take a sample of size r*log r
       --
-      -- the max 4 is so that we always have at least one vertex (which requires at least
-      -- three planes). Moreover since we actually include the definers of the corners
-      -- of a triangle we may get 4 planes in any case.
+      -- the max 5 is due to the following: consider some triangle defined by the plane
+      -- h_0, and let h_1, h_2, h_3, be the planes that intersect h_0 on the edges of the
+      -- triangle. If this triangle has a conflict list, i.e. there is a plane h that
+      -- intersects below a vertex, then we need to include at least h_0,..,h_3,h. Hence,
+      -- we need at least 5 planes.
 
       -- TODO: make sure that if the lower envelope has a vertex, we select planes
       -- that generate a plane.
@@ -118,7 +121,7 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
             -- | Triangulate the lower envelope, and collect the conflict list of each
             -- prism. We will already throw away any prisms with an
             triangulatedEnv :: [Triangle (Point 2 r) :+ NESet plane]
-            triangulatedEnv = Map.foldMapWithKey triangulate env
+            triangulatedEnv = NEMap.foldMapWithKey triangulate env
 
     lowerEnvelopeIn'     :: Triangle (Point 2 r) :+ NESet plane
                          -> Map (Point 3 r) (Definers plane)
@@ -191,7 +194,8 @@ withConflictLists planes = imap (\v defs -> (defs, Set.filter (below v) planes))
   where
     below v h =
       traceShowWith ("below ",v,h,) $
-      verticalSideTest v h == LT -- TODO: not sure if this should be LT or 'not GT'
+      verticalSideTest v h == LT
+      -- a plane conflicts with a vertex v if it passes strictly below the point
 
 
 -- | Compute the conflit lists for the extra vertices we added.
@@ -204,12 +208,10 @@ withExtraConflictLists        :: (Plane_ plane r, Ord r, Num r--, Point_ corner 
 withExtraConflictLists planes = NEMap.mapWithKey $ \h -> fmap (withPolygonVertex h)
   where
     withPolygonVertex h v = v :+ Set.filter (below (evalAt v h) v) planes
-    below z (Point2_ x y) h = verticalSideTest (Point3 x y z) h  /= GT
+    below z (Point2_ x y) h = verticalSideTest (Point3 x y z) h  /= GT -- == LT
     -- note that we use the /= GT, so that we include the plane that define
     -- the lower envelope on this place.
-
-  -- TODO: make this fast
-
+  -- TODO: do we really want this?
 
 
 -- withConflictLists
@@ -269,27 +271,20 @@ triangulate' h poly = mapMaybe' withConflictList $ case toNonEmptyOf vertices po
   where
     withConflictList tri = case foldMap conflictListOf tri of
       NESet.IsEmpty                 -> Nothing
-      NESet.IsNonEmpty conflictList -> Just $ ((^.asPoint) <$> tri)
-                                       :+ (conflictList <>> foldMap definersOf' tri)
+      NESet.IsNonEmpty conflictList -> Just $
+        let conflictList' = foldr NESet.insert conflictList (foldMap edgeDefiners $ edgesOf tri)
+        in ((^.asPoint) <$> tri) :+ conflictList'
 
-    -- if there is no conflict list, there is no need to recurse on this triangle to begin with.
-    -- otherwise, insert thee definers
+    edgesOf (Triangle a b c) = [(b,a),(c,b),(a,c)]
+                               -- [(a,b),(b,c),(c,a)]
 
-
-
-    -- FIXME: Instead of taking all the definers (which may not reduce the total number of
-    -- planes in the subproblem if we are unlucky (or n is small) I think we should explicitly
-    -- add the plane h defining the prism and the planes that intersect with h in the edges
-    -- of the triangle (if such planes exist).
-    --
-    -- note: if there are multiple planes intersecting in the edge of the triangle, andy
-    -- of them will do; and we only need to add one (since in the remaining subproblems we
-    -- will care only about vertices inside the triangle (not outside) anyway).
-
-    -- definersOf' :: _ -> Set plane
+    -- computes the edge definers of the edge u,v. Note that this will typically consist
+    -- of two planes; h, and the other plane h_(u,v) on the other side of the edge.
+    edgeDefiners (u,v) = definersOf' u `Set.intersection` definersOf' v
     definersOf' = \case
-      Original v -> toList $ definersOf v
-      Extra _    -> mempty
+      Original v -> foldMap Set.singleton $ definersOf v
+      Extra    _ -> Set.singleton h
+    -- TODO: hmm, not quite sure if the h is right
 
     -- get the conflictList as a vertex
     conflictListOf = \case
@@ -298,7 +293,7 @@ triangulate' h poly = mapMaybe' withConflictList $ case toNonEmptyOf vertices po
 
     mapMaybe' f = mapMaybe f . toList
 
-    neSet <>> set' = foldr NESet.insert neSet set'
+    -- neSet <>> set' = foldr NESet.insert neSet set'
 
 
 ----------------------------------------
