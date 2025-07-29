@@ -273,6 +273,62 @@ rotateTo (Vector3 u v w) = Transformation . Matrix $ Vector4 (snoc u        0)
                                                              (Vector4 0 0 0 1)
 {-# INLINE rotateTo #-}
 
+-- | Euler angle rotation; in order XYZ (from bottom to top in the gimbal hierarchy)
+--
+-- the angles CCW and given in radians.
+rotateXYZ (Vector3 a b g) = rotateZ g |.| rotateY b |.| rotateX a
+
+-- rotateXYZ     :: Floating r => Vector 3 r -> Transformation 3 r
+-- rotateXYZ rot = Transformation . Matrix $ Vector4
+--      (Vector4 (cb*cg)            ((-1)*cb*sg)       (sb)         0)
+--      (Vector4 (ca*sg + cg*sa*sb) (ca*cg - sa*sb*sg) ((-1)*cb*sa) 0)
+--      (Vector4 (sa*sg - ca*cg*sb) (cg*sa + ca*sb*sg) (ca*cb)      0)
+--      (Vector4 0                  0                  0            1)
+--   where
+--     Vector3 sa sb sg = sin <$> rot
+--     Vector3 ca cb cg = cos <$> rot
+-- -- see:
+-- -- https://wikimedia.org/api/rest_v1/media/math/render/svg/55b6d5a59a72894c1d1659c1635b71a6e8b13ee7
+
+-- rotateX x =
+
+-- | Rotate $\gamma$-radians CCW around the z-axis
+rotateZ       :: Floating r => r -> Transformation 3 r
+rotateZ gamma = Transformation . Matrix $ Vector4
+     (Vector4 cg (-1*sg) 0 0)
+     (Vector4 sg cg      0 0)
+     (Vector4 0  0       1 0)
+     (Vector4 0  0       0 1)
+  where
+    sg = sin gamma
+    cg = cos gamma
+  -- for whatever reason the wikipedia page claims this rotates CW ? i.e. the sg and -sg are
+  -- flipped in the WP version: https://en.wikipedia.org/wiki/Rotation_matrix
+
+
+
+-- | Rotate $\beta$-radians CCW around the y-axis
+rotateY       :: Floating r => r -> Transformation 3 r
+rotateY beta = Transformation . Matrix $ Vector4
+     (Vector4 cb 0 (-1*sb)  0)
+     (Vector4 0  1       0  0)
+     (Vector4 sb 0       cb 0)
+     (Vector4 0  0       0  1)
+  where
+    sb = sin beta
+    cb = cos beta
+
+-- | Rotate $\alpha$-radians CCW around the x-axis
+rotateX       :: Floating r => r -> Transformation 3 r
+rotateX alpha = Transformation . Matrix $ Vector4
+     (Vector4 1  0     0  0)
+     (Vector4 0  ca    sa 0)
+     (Vector4 0  (-sa) ca 0)
+     (Vector4 0  0     0  1)
+  where
+    sa = sin alpha
+    ca = cos alpha
+
 --------------------------------------------------------------------------------
 -- * 2D Transformations
 

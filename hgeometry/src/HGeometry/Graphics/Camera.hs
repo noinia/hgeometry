@@ -14,20 +14,24 @@ module HGeometry.Graphics.Camera
 
   , cameraNormal, viewUp
 
+  , blenderCamera
+
   , cameraTransform, worldToView
 
-  , toViewPortTransform, perspectiveProjection, rotateCoordSystem
+  , toViewportTransform, perspectiveProjection, rotateCoordSystem
   , flipAxes
-
+  , viewportInWorld
   ) where
 
 import Control.Lens
 import Data.Default.Class
+import HGeometry.Box
 import HGeometry.Matrix
 import HGeometry.Number.Radical
 import HGeometry.Point
 import HGeometry.Transformation
 import HGeometry.Vector
+
 --------------------------------------------------------------------------------
 
 -- | A basic camera data type. The fields stored are:
@@ -60,7 +64,7 @@ data Camera r = Camera { _cameraPosition     :: !(Point 3 r)
 
 --------------------------------------------------------------------------------
 
-instance Num r => Default (Camera r) where
+instance Fractional r => Default (Camera r) where
   -- ^ A default camera, placed at the origin, looking along the y-axis. The view-up
   -- vector is the z-axis. The focalDepth is 1.
   def = Camera { _cameraPosition     = origin
@@ -71,6 +75,31 @@ instance Num r => Default (Camera r) where
                , _farDist            = 100
                , _viewportDimensions = Vector2 4 3
                }
+
+-- | This is the default camera position used in Blender
+blenderCamera :: forall r. (Floating r, Radical r) => Camera r
+blenderCamera = def&cameraPosition     .~ Point3 7.35 (-6.92) (4.95) -- Point3 7.35 (-34) (4.95)
+                   &cameraNormal       .~ fromRotate (Vector3 0 0 (-1))
+                   &viewUp             .~ fromRotate (Vector3 0 1 0)
+                   &viewportDimensions .~ fromAspectRatio (Vector2 1920 1080)
+                   &nearDist           .~ 0.1
+                   &focalDepth         .~ 0.05
+  where
+    -- in degrees with respect to?
+    -- x=0 means looking towards z=-\infty, so along Vector3 0 0 (-1)
+    -- z=0 means looking towards y=\infy, so along Vecto3 0 1 0 (-- the default view dir)
+
+    rotationAngles = Vector3 (-63.559) 0 46.692
+
+    fromRotate :: Vector 3 r -> Vector 3 r
+    fromRotate = transformBy (rotateXYZ $ toRadians <$> rotationAngles)
+
+    -- camera width in real world space is 36mm
+    lensWidth                     = 0.036
+    fromAspectRatio (Vector2 w h) = Vector2 lensWidth (lensWidth * (h/w))
+
+    toRadians deg = pi * (deg / 180.0)
+
 
 ----------------------------------------
 -- * Field Accessor Lenses
@@ -122,13 +151,17 @@ viewUp :: (Radical r, Fractional r) => Lens' (Camera r) (Vector 3 r)
 viewUp = lens _rawViewUp (\c n -> c { _rawViewUp = signorm n})
 
 
+
+
+
+
 --------------------------------------------------------------------------------
 -- * Camera Transformation functions
 
 
 -- | Full transformation that renders the figure
 cameraTransform   :: Fractional r => Camera r -> Transformation 3 r
-cameraTransform c =  toViewPortTransform c
+cameraTransform c =  toViewportTransform c
                  |.| perspectiveProjection c
                  |.| worldToView c
 
@@ -137,8 +170,8 @@ worldToView   :: Fractional r => Camera r -> Transformation 3 r
 worldToView c = rotateCoordSystem c |.| translation ((-1) *^ c^.cameraPosition.vector)
 
 -- | Transformation into viewport coordinates
-toViewPortTransform   :: Fractional r => Camera r -> Transformation 3 r
-toViewPortTransform c = Transformation . Matrix
+toViewportTransform   :: Fractional r => Camera r -> Transformation 3 r
+toViewportTransform c = Transformation . Matrix
                       $ Vector4 (Vector4 (w/2) 0     0     0)
                                 (Vector4 0     (h/2) 0     0)
                                 (Vector4 0     0     (1/2) (1/2))
@@ -179,3 +212,15 @@ flipAxes = Transformation . Matrix
                        (Vector4 0 0 1 0)
                        (Vector4 0 1 0 0)
                        (Vector4 0 0 0 1)
+
+-- | Computes the corners of the viewport; in world coordinates.
+viewportInWorld     :: (Radical r, Floating r) => Camera r -> Corners (Point 3 r)
+viewportInWorld cam = Corners (c .+^ (negated xOffset ^+^ yOffset))
+                              (c .+^ (xOffset         ^+^ yOffset))
+                              (c .+^ (xOffset         ^+^ negated yOffset))
+                              (c .+^ (negated xOffset ^+^ negated yOffset))
+  where
+    c = (cam^.cameraPosition) .+^ (cam^.focalDepth *^ cam^.cameraNormal)
+    Vector2 w h = (/2) <$> cam^.viewportDimensions
+    yOffset = h *^ (cam^.viewUp)
+    xOffset = w *^ cross (cam^.viewUp) (cam^.cameraNormal)

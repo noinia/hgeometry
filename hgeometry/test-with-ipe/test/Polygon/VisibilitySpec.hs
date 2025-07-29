@@ -475,94 +475,40 @@ constructPillar' fp = do page <- readSinglePageFileThrow @R fp
 
 type R' = Double
 
--- | Euler angle rotation; in order XYZ (from bottom to top in the gimbal hierarchy)
---
--- the angles CCW and given in radians.
-rotateXYZ (Vector3 a b g) = rotateZ g |.| rotateY b |.| rotateX a
 
--- rotateXYZ     :: Floating r => Vector 3 r -> Transformation 3 r
--- rotateXYZ rot = Transformation . Matrix.Matrix $ Vector4
---      (Vector4 (cb*cg)            ((-1)*cb*sg)       (sb)         0)
---      (Vector4 (ca*sg + cg*sa*sb) (ca*cg - sa*sb*sg) ((-1)*cb*sa) 0)
---      (Vector4 (sa*sg - ca*cg*sb) (cg*sa + ca*sb*sg) (ca*cb)      0)
---      (Vector4 0                  0                  0            1)
+-- -- | This is the default camera position used in Blender
+-- blenderCamera :: forall r. Floating r => Camera r
+-- blenderCamera = def&cameraPosition     .~ Point3 7.35 (-6.92) (4.95) -- Point3 7.35 (-34) (4.95)
+--                    &cameraNormal       .~ fromRotate (Vector3 0 0 (-1))
+--                    &viewUp             .~ fromRotate (Vector3 0 1 0)
+--                    &viewportDimensions .~ fromAspectRatio (Vector2 1920 1080)
+--                    &nearDist           .~ 0.1
+--                    &focalDepth         .~ 0.05
 --   where
---     Vector3 sa sb sg = sin <$> rot
---     Vector3 ca cb cg = cos <$> rot
--- -- see:
--- -- https://wikimedia.org/api/rest_v1/media/math/render/svg/55b6d5a59a72894c1d1659c1635b71a6e8b13ee7
+--     -- in degrees with respect to?
+--     -- x=0 means looking towards z=-\infty, so along Vector3 0 0 (-1)
+--     -- z=0 means looking towards y=\infy, so along Vecto3 0 1 0 (-- the default view dir)
 
--- rotateX x =
+--     rotationAngles = Vector3 (-63.559) 0 46.692
 
--- | Rotate $\gamma$-radians CCW around the z-axis
-rotateZ       :: Floating r => r -> Transformation 3 r
-rotateZ gamma = Transformation . Matrix.Matrix $ Vector4
-     (Vector4 cg (-1*sg) 0 0)
-     (Vector4 sg cg      0 0)
-     (Vector4 0  0       1 0)
-     (Vector4 0  0       0 1)
-  where
-    sg = sin gamma
-    cg = cos gamma
-  -- for whatever reason the wikipedia page claims this rotates CW ? i.e. the sg and -sg are
-  -- flipped in the WP version: https://en.wikipedia.org/wiki/Rotation_matrix
+--     fromRotate :: Vector 3 r -> Vector 3 r
+--     fromRotate = transformBy (rotateXYZ $ toRadians <$> rotationAngles)
 
-
-
--- | Rotate $\beta$-radians CCW around the y-axis
-rotateY       :: Floating r => r -> Transformation 3 r
-rotateY beta = Transformation . Matrix.Matrix $ Vector4
-     (Vector4 cb 0 (-1*sb)  0)
-     (Vector4 0  1       0  0)
-     (Vector4 sb 0       cb 0)
-     (Vector4 0  0       0  1)
-  where
-    sb = sin beta
-    cb = cos beta
-
--- | Rotate $\alpha$-radians CCW around the x-axis
-rotateX       :: Floating r => r -> Transformation 3 r
-rotateX alpha = Transformation . Matrix.Matrix $ Vector4
-     (Vector4 1  0     0  0)
-     (Vector4 0  ca    sa 0)
-     (Vector4 0  (-sa) ca 0)
-     (Vector4 0  0     0  1)
-  where
-    sa = sin alpha
-    ca = cos alpha
-
-blenderCamera :: Camera R'
-blenderCamera = def&cameraPosition     .~ Point3 7.35 (-6.92) (4.95) -- Point3 7.35 (-34) (4.95)
-                   &cameraNormal       .~ fromRotate (Vector3 0 0 (-1))
-                   &viewUp             .~ fromRotate (Vector3 0 1 0)
-                   &viewportDimensions .~ fromAspectRatio (Vector2 1920 1080)
-                   &nearDist           .~ 0.1
-                   &focalDepth         .~ 0.05
-  where
-    -- in degrees with respect to?
-    -- x=0 means looking towards z=-\infty, so along Vector3 0 0 (-1)
-    -- z=0 means looking towards y=\infy, so along Vecto3 0 1 0 (-- the default view dir)
-
-    rotationAngles = Vector3 (-63.559) 0 46.692
-
-    fromRotate :: Vector 3 R' -> Vector 3 R'
-    fromRotate = transformBy (rotateXYZ $ toRadians <$> rotationAngles)
-
-    -- camera width in real world space is 36mm
-    lensWidth                     = 0.036
-    fromAspectRatio (Vector2 w h) = Vector2 lensWidth (lensWidth * (h/w))
+--     -- camera width in real world space is 36mm
+--     lensWidth                     = 0.036
+--     fromAspectRatio (Vector2 w h) = Vector2 lensWidth (lensWidth * (h/w))
 
 
 
 
--- myCamera :: Camera R'
--- myCamera = Camera (Point3 (-30) (-20) 20)
---                   (Vector3 0 0 (-1))
---                   (Vector3 0 1 0)
---                   10
---                   15
---                   55
---                   (Vector2 980 800)
+-- -- myCamera :: Camera R'
+-- -- myCamera = Camera (Point3 (-30) (-20) 20)
+-- --                   (Vector3 0 0 (-1))
+-- --                   (Vector3 0 1 0)
+-- --                   10
+-- --                   15
+-- --                   55
+-- --                   (Vector2 980 800)
 
 
 toRadians deg = pi * (deg / 180.0)
@@ -599,17 +545,6 @@ scene = [ -- ground plane
 
 
 
--- | Computes the corners of the viewport; in world coordinates
-theViewPortRect     :: (Radical r, Floating r) => Camera r -> Corners (Point 3 r)
-theViewPortRect cam = Corners (c .+^ (negated xOffset ^+^ yOffset))
-                              (c .+^ (xOffset         ^+^ yOffset))
-                              (c .+^ (xOffset         ^+^ negated yOffset))
-                              (c .+^ (negated xOffset ^+^ negated yOffset))
-  where
-    c = (cam^.cameraPosition) .+^ (cam^.focalDepth *^ cam^.cameraNormal)
-    Vector2 w h = (/2) <$> cam^.viewportDimensions
-    yOffset = h *^ (cam^.viewUp)
-    xOffset = w *^ cross (cam^.viewUp) (cam^.cameraNormal)
 
 
 renderScene :: IO ()
@@ -640,7 +575,7 @@ renderPage camera seg inputPolygon = fromContent $
                     scaleUniformlyBy 10000 $
                       map render blenderCube
                       <> myScene camera seg inputPolygon
-                      <> renderSliceWith camera (theViewPortRect camera)
+                      <> renderSliceWith camera (viewportInWorld camera)
   where
     render (triang :+ col) = iO $ defIO triang' ! attr SFill col
       where
