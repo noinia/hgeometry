@@ -1,0 +1,1290 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-2"></span><span class="hs-comment">-- |</span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- Module      :  HGeometry.Polygon.Visibility.NaiveVisibilityPolygon</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- Copyright   :  (C) Frank Staals</span><span>
+</span><span id="line-5"></span><span class="hs-comment">-- License     :  see the LICENSE file</span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- Maintainer  :  Frank Staals</span><span>
+</span><span id="line-7"></span><span class="hs-comment">--</span><span>
+</span><span id="line-8"></span><span class="hs-comment">-- Naive O(n^2) time algorithm to compute the Visibility polygon in a simple polygon</span><span>
+</span><span id="line-9"></span><span class="hs-comment">--</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-11"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html"><span class="hs-identifier">HGeometry.Polygon.Visibility.NaiveVisibilityPolygon</span></a></span><span>
+</span><span id="line-12"></span><span>  </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#visibilityPolygon"><span class="hs-identifier">visibilityPolygon</span></a></span><span>
+</span><span id="line-13"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#Definer"><span class="hs-identifier">Definer</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier">DefinerF</span></a></span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#views"><span class="hs-identifier">views</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Ord</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">comparing</span></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Semigroup</span></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.2.0-66c0c43b6a1c7e682eec5be5849d4cbdf281375d0306ebde2a04ed8c14b07f1d/share/doc/html/src/Data.Vector.html/Data.Vector.html"><span class="hs-identifier">Data.Vector</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Vector</span></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html"><span class="hs-identifier">HGeometry.Ext</span></a></span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Foldable.Sort.html/HGeometry.Foldable.Sort.html"><span class="hs-identifier">HGeometry.Foldable.Sort</span></a></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.HalfLine</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Intersection</span></span><span>
+</span><span id="line-25"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.LineSegment</span></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Point</span></span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Polygon</span></span><span>
+</span><span id="line-28"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">HGeometry.Properties</span></span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="hs-comment">-- | Naive O(n^2) time algorithm to compute the visibility polygon of a point inside a</span><span>
+</span><span id="line-33"></span><span class="hs-comment">-- simple polygon.</span><span>
+</span><span id="line-34"></span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#visibilityPolygon"><span class="hs-identifier hs-type">visibilityPolygon</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span id="local-6989586621679497933"><span class="annot"><a href="#local-6989586621679497933"><span class="hs-identifier hs-type">point</span></a></span></span><span> </span><span id="local-6989586621679497936"><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span></span><span> </span><span id="local-6989586621679497938"><span class="annot"><a href="#local-6989586621679497938"><span class="hs-identifier hs-type">polygon</span></a></span></span><span> </span><span id="local-6989586621679497934"><span class="annot"><a href="#local-6989586621679497934"><span class="hs-identifier hs-type">r</span></a></span></span><span class="hs-operator">.</span><span>
+</span><span id="line-35"></span><span>                     </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679497933"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679497934"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679497934"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-36"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasSquaredEuclideanDistance</span></span><span> </span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span>
+</span><span id="line-37"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SimplePolygon_</span></span><span> </span><span class="annot"><a href="#local-6989586621679497938"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497934"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-38"></span><span>                     </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679497934"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679497934"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-39"></span><span>                     </span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span>                  </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679497933"><span class="hs-identifier hs-type">point</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679497938"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SimplePolygon</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#Definer"><span class="hs-identifier hs-type">Definer</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497938"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span id="visibilityPolygon"><span class="annot"><span class="annottext">visibilityPolygon :: forall point vertex polygon r.
+(Point_ point 2 r, Point_ vertex 2 r,
+ HasSquaredEuclideanDistance vertex,
+ SimplePolygon_ polygon vertex r, Ord r, Fractional r) =&gt;
+point -&gt; polygon -&gt; SimplePolygon (Definer polygon)
+</span><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#visibilityPolygon"><span class="hs-identifier hs-var hs-var">visibilityPolygon</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r) -&gt; point -&gt; Point 2 r
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) point (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' point (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679499292"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679499292"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679499293"><span class="annot"><span class="annottext">polygon
+</span><a href="#local-6989586621679499293"><span class="hs-identifier hs-var">poly</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SimplePolygon (DefinerF r Int (vertex :+ Int))
+-&gt; Maybe (SimplePolygon (DefinerF r Int (vertex :+ Int)))
+-&gt; SimplePolygon (DefinerF r Int (vertex :+ Int))
+forall a. a -&gt; Maybe a -&gt; a
+</span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="annot"><span class="annottext">SimplePolygon (DefinerF r Int (vertex :+ Int))
+forall {a}. a
+</span><a href="#local-6989586621679499295"><span class="hs-identifier hs-var">err</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (SimplePolygon (DefinerF r Int (vertex :+ Int)))
+ -&gt; SimplePolygonF
+      (Cyclic NonEmptyVector)
+      (DefinerF
+         (NumType polygon)
+         (VertexIx polygon)
+         (Vertex polygon :+ VertexIx polygon)))
+-&gt; (Vector
+      (DefinerF r (VertexIx polygon) (vertex :+ VertexIx polygon))
+    -&gt; Maybe (SimplePolygon (DefinerF r Int (vertex :+ Int))))
+-&gt; Vector
+     (DefinerF r (VertexIx polygon) (vertex :+ VertexIx polygon))
+-&gt; SimplePolygonF
+     (Cyclic NonEmptyVector)
+     (DefinerF
+        (NumType polygon)
+        (VertexIx polygon)
+        (Vertex polygon :+ VertexIx polygon))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Vector (DefinerF r Int (vertex :+ Int))
+-&gt; Maybe (SimplePolygon (DefinerF r Int (vertex :+ Int)))
+Vector (DefinerF r (VertexIx polygon) (vertex :+ VertexIx polygon))
+-&gt; Maybe (SimplePolygon (DefinerF r Int (vertex :+ Int)))
+forall simplePolygon point r (f :: * -&gt; *).
+(SimplePolygon_ simplePolygon point r, Foldable f,
+ ConstructableSimplePolygon simplePolygon point r) =&gt;
+f point -&gt; Maybe simplePolygon
+forall (f :: * -&gt; *).
+(Foldable f,
+ ConstructableSimplePolygon
+   (SimplePolygon (DefinerF r Int (vertex :+ Int)))
+   (DefinerF r Int (vertex :+ Int))
+   r) =&gt;
+f (DefinerF r Int (vertex :+ Int))
+-&gt; Maybe (SimplePolygon (DefinerF r Int (vertex :+ Int)))
+</span><span class="hs-identifier hs-var">fromPoints</span></span><span> </span><span class="annot"><span class="annottext">(Vector
+   (DefinerF r (VertexIx polygon) (vertex :+ VertexIx polygon))
+ -&gt; SimplePolygonF
+      (Cyclic NonEmptyVector)
+      (DefinerF
+         (NumType polygon)
+         (VertexIx polygon)
+         (Vertex polygon :+ VertexIx polygon)))
+-&gt; Vector
+     (DefinerF r (VertexIx polygon) (vertex :+ VertexIx polygon))
+-&gt; SimplePolygonF
+     (Cyclic NonEmptyVector)
+     (DefinerF
+        (NumType polygon)
+        (VertexIx polygon)
+        (Vertex polygon :+ VertexIx polygon))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Vector (DefinerF r (VertexIx polygon) (vertex :+ VertexIx polygon))
+</span><a href="#local-6989586621679499298"><span class="hs-identifier hs-var">theVertices</span></a></span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-43"></span><span>    </span><span class="hs-comment">-- the vertices of our visiblity polygon</span><span>
+</span><span id="line-44"></span><span>    </span><span class="annot"><a href="#local-6989586621679499298"><span class="hs-identifier hs-type">theVertices</span></a></span><span>      </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/vector-0.13.2.0-66c0c43b6a1c7e682eec5be5849d4cbdf281375d0306ebde2a04ed8c14b07f1d/share/doc/html/src/Data.Vector.html/Data.Vector.html#Vector"><span class="hs-identifier hs-type">Vector.Vector</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497934"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497938"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497938"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>    </span><span id="local-6989586621679499298"><span class="annot"><span class="annottext">theVertices :: Vector (DefinerF r (VertexIx polygon) (vertex :+ VertexIx polygon))
+</span><a href="#local-6989586621679499298"><span class="hs-identifier hs-var hs-var">theVertices</span></a></span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)
+ -&gt; DefinerF r Int (vertex :+ Int))
+-&gt; Vector
+     (DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int))
+-&gt; Vector (DefinerF r Int (vertex :+ Int))
+forall a b. (a -&gt; b) -&gt; Vector a -&gt; Vector b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)
+-&gt; DefinerF r Int (vertex :+ Int)
+forall r edge x vertex.
+DefinerF r (edge :+ x) vertex -&gt; DefinerF r x vertex
+</span><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#dropIx"><span class="hs-identifier hs-var">dropIx</span></a></span><span> </span><span class="annot"><span class="annottext">(Vector
+   (DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int))
+ -&gt; Vector
+      (DefinerF r (VertexIx polygon) (vertex :+ VertexIx polygon)))
+-&gt; ([DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)]
+    -&gt; Vector
+         (DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)))
+-&gt; [DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)]
+-&gt; Vector
+     (DefinerF r (VertexIx polygon) (vertex :+ VertexIx polygon))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)
+ -&gt; DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)
+ -&gt; Ordering)
+-&gt; [DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)]
+-&gt; Vector
+     (DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int))
+forall (vector :: * -&gt; *) (f :: * -&gt; *) a.
+(Foldable f, Vector vector a) =&gt;
+(a -&gt; a -&gt; Ordering) -&gt; f a -&gt; vector a
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Foldable.Sort.html/HGeometry.Foldable.Sort.html#sortBy"><span class="hs-identifier hs-var">sortBy</span></a></span><span> </span><span class="annot"><span class="annottext">DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)
+-&gt; DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)
+-&gt; Ordering
+forall ix r edge vertex.
+(Ord ix, Num r, Ord r, HasStart edge vertex, Point_ vertex 2 r,
+ HasSquaredEuclideanDistance vertex) =&gt;
+DefinerF r (edge :+ ix) (vertex :+ ix)
+-&gt; DefinerF r (edge :+ ix) (vertex :+ ix) -&gt; Ordering
+</span><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#alongBoundary"><span class="hs-identifier hs-var">alongBoundary</span></a></span><span> </span><span class="annot"><span class="annottext">([DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)]
+ -&gt; Vector
+      (DefinerF r (VertexIx polygon) (vertex :+ VertexIx polygon)))
+-&gt; [DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)]
+-&gt; Vector
+     (DefinerF r (VertexIx polygon) (vertex :+ VertexIx polygon))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)]
+[DefinerF
+   r
+   (ClosedLineSegment vertex :+ VertexIx polygon)
+   (vertex :+ VertexIx polygon)]
+</span><a href="#local-6989586621679499302"><span class="hs-identifier hs-var">originalVertices</span></a></span><span> </span><span class="annot"><span class="annottext">[DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)]
+-&gt; [DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)]
+-&gt; [DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)]
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)]
+[DefinerF
+   r
+   (ClosedLineSegment vertex :+ VertexIx polygon)
+   (vertex :+ VertexIx polygon)]
+</span><a href="#local-6989586621679499303"><span class="hs-identifier hs-var">newVertices</span></a></span><span>
+</span><span id="line-46"></span><span>
+</span><span id="line-47"></span><span>    </span><span class="hs-comment">-- all vertices of the original polygon that are visible</span><span>
+</span><span id="line-48"></span><span>    </span><span class="annot"><a href="#local-6989586621679499304"><span class="hs-identifier hs-type">visibleVertices</span></a></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497938"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-49"></span><span>    </span><span id="local-6989586621679499304"><span class="annot"><span class="annottext">visibleVertices :: [vertex :+ VertexIx polygon]
+</span><a href="#local-6989586621679499304"><span class="hs-identifier hs-var hs-var">visibleVertices</span></a></span></span><span>  </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">polygon
+</span><a href="#local-6989586621679499293"><span class="hs-identifier hs-var">poly</span></a></span><span class="annot"><span class="annottext">polygon
+-&gt; Getting (Endo [vertex :+ Int]) polygon (vertex :+ Int)
+-&gt; [vertex :+ Int]
+forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#%5E.."><span class="hs-operator hs-var">^..</span></a></span><span class="annot"><span class="annottext">Indexed Int vertex (Const (Endo [vertex :+ Int]) vertex)
+-&gt; polygon -&gt; Const (Endo [vertex :+ Int]) polygon
+Indexed
+  Int
+  (Vertex polygon)
+  (Const (Endo [vertex :+ Int]) (Vertex polygon))
+-&gt; polygon -&gt; Const (Endo [vertex :+ Int]) polygon
+forall graph graph'.
+HasVertices graph graph' =&gt;
+IndexedTraversal1
+  (VertexIx graph) graph graph' (Vertex graph) (Vertex graph')
+IndexedTraversal1
+  (VertexIx polygon)
+  polygon
+  polygon
+  (Vertex polygon)
+  (Vertex polygon)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#vertices"><span class="hs-identifier hs-var">vertices</span></a></span><span class="annot"><span class="annottext">(Indexed Int vertex (Const (Endo [vertex :+ Int]) vertex)
+ -&gt; polygon -&gt; Const (Endo [vertex :+ Int]) polygon)
+-&gt; (((vertex :+ Int)
+     -&gt; Const (Endo [vertex :+ Int]) (vertex :+ Int))
+    -&gt; Indexed Int vertex (Const (Endo [vertex :+ Int]) vertex))
+-&gt; Getting (Endo [vertex :+ Int]) polygon (vertex :+ Int)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">((vertex :+ Int) -&gt; Const (Endo [vertex :+ Int]) (vertex :+ Int))
+-&gt; Indexed Int vertex (Const (Endo [vertex :+ Int]) vertex)
+forall i (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s t j.
+(Indexable i p, Functor f) =&gt;
+p (s :+ i) (f (t :+ j)) -&gt; Indexed i s (f t)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#asIndexedExt"><span class="hs-identifier hs-var">asIndexedExt</span></a></span><span class="annot"><span class="annottext">(((vertex :+ Int) -&gt; Const (Endo [vertex :+ Int]) (vertex :+ Int))
+ -&gt; Indexed Int vertex (Const (Endo [vertex :+ Int]) vertex))
+-&gt; (((vertex :+ Int)
+     -&gt; Const (Endo [vertex :+ Int]) (vertex :+ Int))
+    -&gt; (vertex :+ Int) -&gt; Const (Endo [vertex :+ Int]) (vertex :+ Int))
+-&gt; ((vertex :+ Int)
+    -&gt; Const (Endo [vertex :+ Int]) (vertex :+ Int))
+-&gt; Indexed Int vertex (Const (Endo [vertex :+ Int]) vertex)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">((vertex :+ Int) -&gt; Bool)
+-&gt; ((vertex :+ Int)
+    -&gt; Const (Endo [vertex :+ Int]) (vertex :+ Int))
+-&gt; (vertex :+ Int)
+-&gt; Const (Endo [vertex :+ Int]) (vertex :+ Int)
+forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) a.
+(Choice p, Applicative f) =&gt;
+(a -&gt; Bool) -&gt; Optic' p f a a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#filtered"><span class="hs-identifier hs-var">filtered</span></a></span><span> </span><span class="annot"><span class="annottext">(vertex :+ Int) -&gt; Bool
+forall ix. (vertex :+ ix) -&gt; Bool
+</span><a href="#local-6989586621679499309"><span class="hs-identifier hs-var">isVisible</span></a></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span>    </span><span class="annot"><a href="#local-6989586621679499302"><span class="hs-identifier hs-type">originalVertices</span></a></span><span>
+</span><span id="line-52"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679499303"><span class="hs-identifier hs-type">newVertices</span></a></span><span>  </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497934"><span class="hs-identifier hs-type">r</span></a></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497938"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span>                                     </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497938"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span>                        </span><span class="hs-special">]</span><span>
+</span><span id="line-55"></span><span>    </span><span id="local-6989586621679499302"><span class="annot"><span class="annottext">originalVertices :: [DefinerF
+   r
+   (ClosedLineSegment vertex :+ VertexIx polygon)
+   (vertex :+ VertexIx polygon)]
+</span><a href="#local-6989586621679499302"><span class="hs-identifier hs-var hs-var">originalVertices</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(vertex :+ Int)
+-&gt; DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)
+forall r edge orig. orig -&gt; DefinerF r edge orig
+</span><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#OriginalVertex"><span class="hs-identifier hs-var">OriginalVertex</span></a></span><span> </span><span class="annot"><span class="annottext">((vertex :+ Int)
+ -&gt; DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int))
+-&gt; [vertex :+ Int]
+-&gt; [DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)]
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">[vertex :+ Int]
+[vertex :+ VertexIx polygon]
+</span><a href="#local-6989586621679499304"><span class="hs-identifier hs-var">visibleVertices</span></a></span><span>
+</span><span id="line-56"></span><span>    </span><span id="local-6989586621679499303"><span class="annot"><span class="annottext">newVertices :: [DefinerF
+   r
+   (ClosedLineSegment vertex :+ VertexIx polygon)
+   (vertex :+ VertexIx polygon)]
+</span><a href="#local-6989586621679499303"><span class="hs-identifier hs-var hs-var">newVertices</span></a></span></span><span>      </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)
+DefinerF
+  r
+  (ClosedLineSegment vertex :+ VertexIx polygon)
+  (vertex :+ VertexIx polygon)
+</span><a href="#local-6989586621679499312"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679499313"><span class="annot"><span class="annottext">vertex :+ Int
+</span><a href="#local-6989586621679499313"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[vertex :+ Int]
+[vertex :+ VertexIx polygon]
+</span><a href="#local-6989586621679499314"><span class="hs-identifier hs-var">reflexVertices</span></a></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679499312"><span class="annot"><span class="annottext">DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)
+</span><a href="#local-6989586621679499312"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Maybe
+  (DefinerF
+     r
+     (ClosedLineSegment vertex :+ VertexIx polygon)
+     (vertex :+ VertexIx polygon))
+-&gt; [DefinerF
+      r
+      (ClosedLineSegment vertex :+ VertexIx polygon)
+      (vertex :+ VertexIx polygon)]
+forall a. Maybe a -&gt; [a]
+</span><span class="hs-identifier hs-var">maybeToList</span></span><span> </span><span class="annot"><span class="annottext">(Maybe
+   (DefinerF
+      r
+      (ClosedLineSegment vertex :+ VertexIx polygon)
+      (vertex :+ VertexIx polygon))
+ -&gt; [DefinerF
+       r
+       (ClosedLineSegment vertex :+ VertexIx polygon)
+       (vertex :+ VertexIx polygon)])
+-&gt; Maybe
+     (DefinerF
+        r
+        (ClosedLineSegment vertex :+ VertexIx polygon)
+        (vertex :+ VertexIx polygon))
+-&gt; [DefinerF
+      r
+      (ClosedLineSegment vertex :+ VertexIx polygon)
+      (vertex :+ VertexIx polygon)]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(vertex :+ VertexIx polygon)
+-&gt; Maybe
+     (DefinerF
+        r
+        (ClosedLineSegment vertex :+ VertexIx polygon)
+        (vertex :+ VertexIx polygon))
+</span><a href="#local-6989586621679499316"><span class="hs-identifier hs-var">rayThrough</span></a></span><span> </span><span class="annot"><span class="annottext">vertex :+ Int
+vertex :+ VertexIx polygon
+</span><a href="#local-6989586621679499313"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-special">]</span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span>    </span><span class="annot"><a href="#local-6989586621679499317"><span class="hs-identifier hs-type">obstacleEdges</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497938"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-59"></span><span>    </span><span id="local-6989586621679499317"><span class="annot"><span class="annottext">obstacleEdges :: [ClosedLineSegment vertex :+ VertexIx polygon]
+</span><a href="#local-6989586621679499317"><span class="hs-identifier hs-var hs-var">obstacleEdges</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">polygon
+</span><a href="#local-6989586621679499293"><span class="hs-identifier hs-var">poly</span></a></span><span class="annot"><span class="annottext">polygon
+-&gt; Getting
+     (Endo [ClosedLineSegment vertex :+ Int])
+     polygon
+     (ClosedLineSegment vertex :+ Int)
+-&gt; [ClosedLineSegment vertex :+ Int]
+forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#%5E.."><span class="hs-operator hs-var">^..</span></a></span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Int, Int) -&gt; Int)
+-&gt; (Indexed
+      (Int, Int)
+      (ClosedLineSegment vertex)
+      (Const
+         (Endo [ClosedLineSegment vertex :+ Int])
+         (ClosedLineSegment vertex))
+    -&gt; polygon
+    -&gt; Const (Endo [ClosedLineSegment vertex :+ Int]) polygon)
+-&gt; Indexed
+     Int
+     (ClosedLineSegment vertex)
+     (Const
+        (Endo [ClosedLineSegment vertex :+ Int])
+        (ClosedLineSegment vertex))
+-&gt; polygon
+-&gt; Const (Endo [ClosedLineSegment vertex :+ Int]) polygon
+forall j (p :: * -&gt; * -&gt; *) i a b r.
+Indexable j p =&gt;
+(i -&gt; j) -&gt; (Indexed i a b -&gt; r) -&gt; p a b -&gt; r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Indexed.html/Control.Lens.Indexed.html#reindexed"><span class="hs-identifier hs-var">reindexed</span></a></span><span> </span><span class="annot"><span class="annottext">(Int, Int) -&gt; Int
+forall a b. (a, b) -&gt; a
+</span><span class="hs-identifier hs-var">fst</span></span><span> </span><span class="annot"><span class="annottext">Indexed
+  (Int, Int)
+  (ClosedLineSegment vertex)
+  (Const
+     (Endo [ClosedLineSegment vertex :+ Int])
+     (ClosedLineSegment vertex))
+-&gt; polygon
+-&gt; Const (Endo [ClosedLineSegment vertex :+ Int]) polygon
+forall polygon point r.
+(HasOuterBoundary polygon, Vertex polygon ~ point,
+ Point_ point 2 r) =&gt;
+IndexedFold1
+  (VertexIx polygon, VertexIx polygon)
+  polygon
+  (ClosedLineSegment point)
+IndexedFold1
+  (VertexIx polygon, VertexIx polygon)
+  polygon
+  (ClosedLineSegment vertex)
+</span><span class="hs-identifier hs-var">outerBoundaryEdgeSegments</span></span><span class="hs-special">)</span><span class="annot"><span class="annottext">(Indexed
+   Int
+   (ClosedLineSegment vertex)
+   (Const
+      (Endo [ClosedLineSegment vertex :+ Int])
+      (ClosedLineSegment vertex))
+ -&gt; polygon
+ -&gt; Const (Endo [ClosedLineSegment vertex :+ Int]) polygon)
+-&gt; (((ClosedLineSegment vertex :+ Int)
+     -&gt; Const
+          (Endo [ClosedLineSegment vertex :+ Int])
+          (ClosedLineSegment vertex :+ Int))
+    -&gt; Indexed
+         Int
+         (ClosedLineSegment vertex)
+         (Const
+            (Endo [ClosedLineSegment vertex :+ Int])
+            (ClosedLineSegment vertex)))
+-&gt; Getting
+     (Endo [ClosedLineSegment vertex :+ Int])
+     polygon
+     (ClosedLineSegment vertex :+ Int)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">((ClosedLineSegment vertex :+ Int)
+ -&gt; Const
+      (Endo [ClosedLineSegment vertex :+ Int])
+      (ClosedLineSegment vertex :+ Int))
+-&gt; Indexed
+     Int
+     (ClosedLineSegment vertex)
+     (Const
+        (Endo [ClosedLineSegment vertex :+ Int])
+        (ClosedLineSegment vertex))
+forall i (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s t j.
+(Indexable i p, Functor f) =&gt;
+p (s :+ i) (f (t :+ j)) -&gt; Indexed i s (f t)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#asIndexedExt"><span class="hs-identifier hs-var">asIndexedExt</span></a></span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span>    </span><span class="hs-comment">-- | test if the vertex is strictly visible; i.e. the open line segment between p and</span><span>
+</span><span id="line-62"></span><span>    </span><span class="hs-comment">-- q lies strictly in the interior of the polygon.</span><span>
+</span><span id="line-63"></span><span>    </span><span id="local-6989586621679499321"><span class="annot"><a href="#local-6989586621679499322"><span class="hs-identifier hs-type">isStrictlyVisible</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679499321"><span class="hs-identifier hs-type">ix</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
+</span><span id="line-64"></span><span>    </span><span id="local-6989586621679499322"><span class="annot"><span class="annottext">isStrictlyVisible :: forall ix. (vertex :+ ix) -&gt; Bool
+</span><a href="#local-6989586621679499322"><span class="hs-identifier hs-var hs-var">isStrictlyVisible</span></a></span></span><span> </span><span id="local-6989586621679499409"><span class="annot"><span class="annottext">vertex :+ ix
+</span><a href="#local-6989586621679499409"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-65"></span><span>      </span><span class="annot"><span class="annottext">((ClosedLineSegment vertex :+ Int) -&gt; Bool)
+-&gt; [ClosedLineSegment vertex :+ Int] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">all</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; Bool
+</span><span class="hs-identifier hs-var">not</span></span><span> </span><span class="annot"><span class="annottext">(Bool -&gt; Bool)
+-&gt; ((ClosedLineSegment vertex :+ Int) -&gt; Bool)
+-&gt; (ClosedLineSegment vertex :+ Int)
+-&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">OpenLineSegment (Point 2 r) -&gt; ClosedLineSegment vertex -&gt; Bool
+forall g h. HasIntersectionWith g h =&gt; g -&gt; h -&gt; Bool
+</span><span class="hs-identifier hs-var">intersects</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; OpenLineSegment (Point 2 r)
+forall point. point -&gt; point -&gt; OpenLineSegment point
+</span><span class="hs-identifier hs-var">OpenLineSegment</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">vertex :+ ix
+</span><a href="#local-6989586621679499409"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(vertex :+ ix)
+-&gt; Getting (Point 2 r) (vertex :+ ix) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) (vertex :+ ix) (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' (vertex :+ ix) (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679499292"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(ClosedLineSegment vertex -&gt; Bool)
+-&gt; ((ClosedLineSegment vertex :+ Int) -&gt; ClosedLineSegment vertex)
+-&gt; (ClosedLineSegment vertex :+ Int)
+-&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Getting
+  (ClosedLineSegment vertex)
+  (ClosedLineSegment vertex :+ Int)
+  (ClosedLineSegment vertex)
+-&gt; (ClosedLineSegment vertex :+ Int) -&gt; ClosedLineSegment vertex
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting
+  (ClosedLineSegment vertex)
+  (ClosedLineSegment vertex :+ Int)
+  (ClosedLineSegment vertex)
+forall core extra core' (f :: * -&gt; *).
+Functor f =&gt;
+(core -&gt; f core') -&gt; (core :+ extra) -&gt; f (core' :+ extra)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#core"><span class="hs-identifier hs-var">core</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[ClosedLineSegment vertex :+ Int]
+[ClosedLineSegment vertex :+ VertexIx polygon]
+</span><a href="#local-6989586621679499317"><span class="hs-identifier hs-var">obstacleEdges</span></a></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span>    </span><span class="hs-comment">-- | test if a given vertex is visible; i.e. if the open linesegment between p and q</span><span>
+</span><span id="line-68"></span><span>    </span><span class="hs-comment">-- lies in the closure of the polygon. This means we should test whether it does not</span><span>
+</span><span id="line-69"></span><span>    </span><span class="hs-comment">-- intersect the interior of any of the edges. Overlap with edges is allowed.</span><span>
+</span><span id="line-70"></span><span>    </span><span id="local-6989586621679498141"><span class="annot"><a href="#local-6989586621679499309"><span class="hs-identifier hs-type">isVisible</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498141"><span class="hs-identifier hs-type">ix</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span></span><span>
+</span><span id="line-71"></span><span>    </span><span id="local-6989586621679499309"><span class="annot"><span class="annottext">isVisible :: forall ix. (vertex :+ ix) -&gt; Bool
+</span><a href="#local-6989586621679499309"><span class="hs-identifier hs-var hs-var">isVisible</span></a></span></span><span> </span><span id="local-6989586621679499528"><span class="annot"><span class="annottext">vertex :+ ix
+</span><a href="#local-6989586621679499528"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(((ClosedLineSegment vertex :+ Int) -&gt; Bool)
+ -&gt; [ClosedLineSegment vertex :+ Int] -&gt; Bool)
+-&gt; [ClosedLineSegment vertex :+ Int]
+-&gt; ((ClosedLineSegment vertex :+ Int) -&gt; Bool)
+-&gt; Bool
+forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
+</span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">((ClosedLineSegment vertex :+ Int) -&gt; Bool)
+-&gt; [ClosedLineSegment vertex :+ Int] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; (a -&gt; Bool) -&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">all</span></span><span> </span><span class="annot"><span class="annottext">[ClosedLineSegment vertex :+ Int]
+[ClosedLineSegment vertex :+ VertexIx polygon]
+</span><a href="#local-6989586621679499317"><span class="hs-identifier hs-var">obstacleEdges</span></a></span><span> </span><span class="annot"><span class="annottext">(((ClosedLineSegment vertex :+ Int) -&gt; Bool) -&gt; Bool)
+-&gt; ((ClosedLineSegment vertex :+ Int) -&gt; Bool) -&gt; Bool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679499530"><span class="annot"><span class="annottext">ClosedLineSegment vertex
+</span><a href="#local-6989586621679499530"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-72"></span><span>        </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; OpenLineSegment (Point 2 r)
+forall point. point -&gt; point -&gt; OpenLineSegment point
+</span><span class="hs-identifier hs-var">OpenLineSegment</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">vertex :+ ix
+</span><a href="#local-6989586621679499528"><span class="hs-identifier hs-var">p</span></a></span><span class="annot"><span class="annottext">(vertex :+ ix)
+-&gt; Getting (Point 2 r) (vertex :+ ix) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) (vertex :+ ix) (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' (vertex :+ ix) (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679499292"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">OpenLineSegment (Point 2 r)
+-&gt; OpenLineSegment (Point (Dimension vertex) (NumType vertex))
+-&gt; Intersection
+     (OpenLineSegment (Point 2 r))
+     (OpenLineSegment (Point (Dimension vertex) (NumType vertex)))
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">ClosedLineSegment vertex
+-&gt; OpenLineSegment (Point (Dimension vertex) (NumType vertex))
+forall {p} {p} {s}.
+(Dimension p ~ Dimension p, NumType p ~ NumType p, HasStart s p,
+ HasEnd s p, Point_ p (Dimension p) (NumType p),
+ Point_ p (Dimension p) (NumType p)) =&gt;
+s -&gt; OpenLineSegment (Point (Dimension p) (NumType p))
+</span><a href="#local-6989586621679499533"><span class="hs-identifier hs-var">asOpenEdge</span></a></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment vertex
+</span><a href="#local-6989586621679499530"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-73"></span><span>          </span><span class="annot"><span class="annottext">Maybe
+  (LineSegmentLineSegmentIntersection (OpenLineSegment (Point 2 r)))
+Intersection
+  (OpenLineSegment (Point 2 r))
+  (OpenLineSegment (Point (Dimension vertex) (NumType vertex)))
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>                                        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-74"></span><span>          </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LineSegment_x_LineSegment_Point</span></span><span> </span><span class="annot"><span class="annottext">Point 2 (NumType (OpenLineSegment (Point 2 r)))
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span>
+</span><span id="line-75"></span><span>          </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">LineSegment_x_LineSegment_LineSegment</span></span><span> </span><span class="annot"><span class="annottext">OpenLineSegment (Point 2 r)
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span>    </span><span class="hs-comment">-- | Compute the set of closest reflex vertices. Note that here we use the strict</span><span>
+</span><span id="line-78"></span><span>    </span><span class="hs-comment">-- visibility so that we only get hte first visible reflex vertex in some direction</span><span>
+</span><span id="line-79"></span><span>    </span><span class="hs-comment">-- (if the ray would go thorugh more vertices)</span><span>
+</span><span id="line-80"></span><span>    </span><span class="annot"><a href="#local-6989586621679499314"><span class="hs-identifier hs-type">reflexVertices</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497938"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-81"></span><span>    </span><span id="local-6989586621679499314"><span class="annot"><span class="annottext">reflexVertices :: [vertex :+ VertexIx polygon]
+</span><a href="#local-6989586621679499314"><span class="hs-identifier hs-var hs-var">reflexVertices</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">polygon
+</span><a href="#local-6989586621679499293"><span class="hs-identifier hs-var">poly</span></a></span><span class="annot"><span class="annottext">polygon
+-&gt; Getting (Endo [vertex :+ Int]) polygon (vertex :+ Int)
+-&gt; [vertex :+ Int]
+forall s a. s -&gt; Getting (Endo [a]) s a -&gt; [a]
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#%5E.."><span class="hs-operator hs-var">^..</span></a></span><span class="annot"><span class="annottext">Indexed Int vertex (Const (Endo [vertex :+ Int]) vertex)
+-&gt; polygon -&gt; Const (Endo [vertex :+ Int]) polygon
+Indexed
+  Int
+  (Vertex polygon)
+  (Const (Endo [vertex :+ Int]) (Vertex polygon))
+-&gt; polygon -&gt; Const (Endo [vertex :+ Int]) polygon
+forall graph graph'.
+HasVertices graph graph' =&gt;
+IndexedTraversal1
+  (VertexIx graph) graph graph' (Vertex graph) (Vertex graph')
+IndexedTraversal1
+  (VertexIx polygon)
+  polygon
+  polygon
+  (Vertex polygon)
+  (Vertex polygon)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#vertices"><span class="hs-identifier hs-var">vertices</span></a></span><span class="annot"><span class="annottext">(Indexed Int vertex (Const (Endo [vertex :+ Int]) vertex)
+ -&gt; polygon -&gt; Const (Endo [vertex :+ Int]) polygon)
+-&gt; (((vertex :+ Int)
+     -&gt; Const (Endo [vertex :+ Int]) (vertex :+ Int))
+    -&gt; Indexed Int vertex (Const (Endo [vertex :+ Int]) vertex))
+-&gt; Getting (Endo [vertex :+ Int]) polygon (vertex :+ Int)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">((vertex :+ Int) -&gt; Const (Endo [vertex :+ Int]) (vertex :+ Int))
+-&gt; Indexed Int vertex (Const (Endo [vertex :+ Int]) vertex)
+forall i (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) s t j.
+(Indexable i p, Functor f) =&gt;
+p (s :+ i) (f (t :+ j)) -&gt; Indexed i s (f t)
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#asIndexedExt"><span class="hs-identifier hs-var">asIndexedExt</span></a></span><span class="annot"><span class="annottext">(((vertex :+ Int) -&gt; Const (Endo [vertex :+ Int]) (vertex :+ Int))
+ -&gt; Indexed Int vertex (Const (Endo [vertex :+ Int]) vertex))
+-&gt; (((vertex :+ Int)
+     -&gt; Const (Endo [vertex :+ Int]) (vertex :+ Int))
+    -&gt; (vertex :+ Int) -&gt; Const (Endo [vertex :+ Int]) (vertex :+ Int))
+-&gt; ((vertex :+ Int)
+    -&gt; Const (Endo [vertex :+ Int]) (vertex :+ Int))
+-&gt; Indexed Int vertex (Const (Endo [vertex :+ Int]) vertex)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">((vertex :+ Int) -&gt; Bool)
+-&gt; ((vertex :+ Int)
+    -&gt; Const (Endo [vertex :+ Int]) (vertex :+ Int))
+-&gt; (vertex :+ Int)
+-&gt; Const (Endo [vertex :+ Int]) (vertex :+ Int)
+forall (p :: * -&gt; * -&gt; *) (f :: * -&gt; *) a.
+(Choice p, Applicative f) =&gt;
+(a -&gt; Bool) -&gt; Optic' p f a a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#filtered"><span class="hs-identifier hs-var">filtered</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679499536"><span class="annot"><span class="annottext">vertex :+ Int
+</span><a href="#local-6989586621679499536"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-82"></span><span>                       </span><span class="annot"><span class="annottext">(vertex :+ Int) -&gt; Bool
+forall ix. (vertex :+ ix) -&gt; Bool
+</span><a href="#local-6989586621679499322"><span class="hs-identifier hs-var">isStrictlyVisible</span></a></span><span> </span><span class="annot"><span class="annottext">vertex :+ Int
+</span><a href="#local-6989586621679499536"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">Bool -&gt; Bool -&gt; Bool
+</span><span class="hs-operator hs-var">&amp;&amp;</span></span><span> </span><span class="annot"><span class="annottext">(vertex :+ VertexIx polygon) -&gt; Bool
+</span><a href="#local-6989586621679499538"><span class="hs-identifier hs-var">isInterior</span></a></span><span> </span><span class="annot"><span class="annottext">vertex :+ Int
+vertex :+ VertexIx polygon
+</span><a href="#local-6989586621679499536"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-83"></span><span>
+</span><span id="line-84"></span><span>    </span><span class="hs-comment">-- | test whether the two neighbours of v are on the same side of the line through q</span><span>
+</span><span id="line-85"></span><span>    </span><span class="hs-comment">-- and v if so; then v is a reflex vertex that defines a new visible vertex.</span><span>
+</span><span id="line-86"></span><span>    </span><span class="hs-comment">--</span><span>
+</span><span id="line-87"></span><span>    </span><span class="hs-comment">-- if either the predecessor or successor is colinear with v, then v counts as a reflex</span><span>
+</span><span id="line-88"></span><span>    </span><span class="hs-comment">-- vertex as well (since v was visible)</span><span>
+</span><span id="line-89"></span><span>    </span><span class="annot"><a href="#local-6989586621679499538"><span class="hs-identifier hs-type">isInterior</span></a></span><span>          </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497938"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-90"></span><span>    </span><span id="local-6989586621679499538"><span class="annot"><span class="annottext">isInterior :: (vertex :+ VertexIx polygon) -&gt; Bool
+</span><a href="#local-6989586621679499538"><span class="hs-identifier hs-var hs-var">isInterior</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679499539"><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679499539"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679499540"><span class="annot"><span class="annottext">VertexIx polygon
+</span><a href="#local-6989586621679499540"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; CCW
+forall point r point' point''.
+(Point_ point 2 r, Point_ point' 2 r, Point_ point'' 2 r, Num r,
+ Ord r) =&gt;
+point -&gt; point' -&gt; point'' -&gt; CCW
+</span><span class="hs-identifier hs-var">ccw</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679499292"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">polygon
+</span><a href="#local-6989586621679499293"><span class="hs-identifier hs-var">poly</span></a></span><span class="annot"><span class="annottext">polygon -&gt; Getting (Point 2 r) polygon (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">VertexIx polygon
+-&gt; IndexedLens' (VertexIx polygon) polygon (Vertex polygon)
+forall polygon point r.
+Polygon_ polygon point r =&gt;
+VertexIx polygon
+-&gt; IndexedLens' (VertexIx polygon) polygon (Vertex polygon)
+</span><span class="hs-identifier hs-var">ccwPredecessorOf</span></span><span> </span><span class="annot"><span class="annottext">VertexIx polygon
+</span><a href="#local-6989586621679499540"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">((vertex -&gt; Const (Point 2 r) vertex)
+ -&gt; polygon -&gt; Const (Point 2 r) polygon)
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; vertex -&gt; Const (Point 2 r) vertex)
+-&gt; Getting (Point 2 r) polygon (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; vertex -&gt; Const (Point 2 r) vertex
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' vertex (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679499539"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">vertex
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; vertex -&gt; Const (Point 2 r) vertex)
+-&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; vertex -&gt; Const (Point 2 r) vertex
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' vertex (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span>
+</span><span id="line-91"></span><span>                               </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Point 2 r -&gt; CCW
+forall point r point' point''.
+(Point_ point 2 r, Point_ point' 2 r, Point_ point'' 2 r, Num r,
+ Ord r) =&gt;
+point -&gt; point' -&gt; point'' -&gt; CCW
+</span><span class="hs-identifier hs-var">ccw</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679499292"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">polygon
+</span><a href="#local-6989586621679499293"><span class="hs-identifier hs-var">poly</span></a></span><span class="annot"><span class="annottext">polygon -&gt; Getting (Point 2 r) polygon (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">VertexIx polygon
+-&gt; IndexedLens' (VertexIx polygon) polygon (Vertex polygon)
+forall polygon point r.
+Polygon_ polygon point r =&gt;
+VertexIx polygon
+-&gt; IndexedLens' (VertexIx polygon) polygon (Vertex polygon)
+</span><span class="hs-identifier hs-var">ccwSuccessorOf</span></span><span> </span><span class="annot"><span class="annottext">VertexIx polygon
+</span><a href="#local-6989586621679499540"><span class="hs-identifier hs-var">i</span></a></span><span class="annot"><span class="annottext">((vertex -&gt; Const (Point 2 r) vertex)
+ -&gt; polygon -&gt; Const (Point 2 r) polygon)
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; vertex -&gt; Const (Point 2 r) vertex)
+-&gt; Getting (Point 2 r) polygon (Point 2 r)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; vertex -&gt; Const (Point 2 r) vertex
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' vertex (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679499539"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">vertex
+-&gt; ((Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+    -&gt; vertex -&gt; Const (Point 2 r) vertex)
+-&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(Point 2 r -&gt; Const (Point 2 r) (Point 2 r))
+-&gt; vertex -&gt; Const (Point 2 r) vertex
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' vertex (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span>
+</span><span id="line-92"></span><span>                               </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-93"></span><span>                            </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CCW
+</span><span class="hs-identifier hs-var">CoLinear</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">CCW
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span>       </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-94"></span><span>                            </span><span class="hs-special">(</span><span class="annot"><span class="annottext">CCW
+</span><span class="hs-identifier">_</span></span><span>       </span><span class="hs-special">,</span><span class="annot"><span class="annottext">CCW
+</span><span class="hs-identifier hs-var">CoLinear</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span>
+</span><span id="line-95"></span><span>                            </span><span class="hs-special">(</span><span id="local-6989586621679499545"><span class="annot"><span class="annottext">CCW
+</span><a href="#local-6989586621679499545"><span class="hs-identifier hs-var">sideP</span></a></span></span><span class="hs-special">,</span><span>   </span><span id="local-6989586621679499546"><span class="annot"><span class="annottext">CCW
+</span><a href="#local-6989586621679499546"><span class="hs-identifier hs-var">sideS</span></a></span></span><span class="hs-special">)</span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">CCW
+</span><a href="#local-6989586621679499545"><span class="hs-identifier hs-var">sideP</span></a></span><span> </span><span class="annot"><span class="annottext">CCW -&gt; CCW -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">CCW
+</span><a href="#local-6989586621679499546"><span class="hs-identifier hs-var">sideS</span></a></span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span>    </span><span id="local-6989586621679498227"><span class="annot"><a href="#local-6989586621679499547"><span class="hs-identifier hs-type">intersectionPoint</span></a></span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498227"><span class="hs-identifier hs-type">ix</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498227"><span class="hs-identifier hs-type">ix</span></a></span><span>
+</span><span id="line-98"></span><span>                          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497934"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498227"><span class="hs-identifier hs-type">ix</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498227"><span class="hs-identifier hs-type">ix</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span>
+</span><span id="line-99"></span><span>    </span><span id="local-6989586621679499547"><span class="annot"><span class="annottext">intersectionPoint :: forall ix.
+(vertex :+ ix)
+-&gt; (ClosedLineSegment vertex :+ ix)
+-&gt; Maybe
+     (DefinerF r (ClosedLineSegment vertex :+ ix) (vertex :+ ix))
+</span><a href="#local-6989586621679499547"><span class="hs-identifier hs-var hs-var">intersectionPoint</span></a></span></span><span> </span><span id="local-6989586621679499739"><span class="annot"><span class="annottext">vertex :+ ix
+</span><a href="#local-6989586621679499739"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679499740"><span class="annot"><span class="annottext">ClosedLineSegment vertex :+ ix
+</span><a href="#local-6989586621679499740"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+-&gt; Vector (Dimension (Point 2 r)) (NumType (Point 2 r))
+-&gt; HalfLine (Point 2 r)
+forall point.
+point -&gt; Vector (Dimension point) (NumType point) -&gt; HalfLine point
+</span><span class="hs-identifier hs-var">HalfLine</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">vertex :+ ix
+</span><a href="#local-6989586621679499739"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">(vertex :+ ix)
+-&gt; Getting (Point 2 r) (vertex :+ ix) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) (vertex :+ ix) (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' (vertex :+ ix) (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">vertex :+ ix
+</span><a href="#local-6989586621679499739"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">(vertex :+ ix)
+-&gt; Getting (Point 2 r) (vertex :+ ix) (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) (vertex :+ ix) (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' (vertex :+ ix) (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; Point 2 r -&gt; Vector 2 r
+forall point (d :: Nat) r.
+(Affine_ point d r, Num r) =&gt;
+point -&gt; point -&gt; Vector d r
+</span><span class="hs-operator hs-var">.-.</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679499292"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-100"></span><span>                                 </span><span class="annot"><span class="annottext">HalfLine (Point 2 r)
+-&gt; OpenLineSegment (Point (Dimension vertex) (NumType vertex))
+-&gt; Intersection
+     (HalfLine (Point 2 r))
+     (OpenLineSegment (Point (Dimension vertex) (NumType vertex)))
+forall g h. IsIntersectableWith g h =&gt; g -&gt; h -&gt; Intersection g h
+</span><span class="hs-operator hs-var">`intersect`</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(ClosedLineSegment vertex :+ ix)
+-&gt; OpenLineSegment (Point (Dimension vertex) (NumType vertex))
+forall {p} {p} {s}.
+(Dimension p ~ Dimension p, NumType p ~ NumType p, HasStart s p,
+ HasEnd s p, Point_ p (Dimension p) (NumType p),
+ Point_ p (Dimension p) (NumType p)) =&gt;
+s -&gt; OpenLineSegment (Point (Dimension p) (NumType p))
+</span><a href="#local-6989586621679499533"><span class="hs-identifier hs-var">asOpenEdge</span></a></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment vertex :+ ix
+</span><a href="#local-6989586621679499740"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-101"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HalfLine_x_LineSegment_Point</span></span><span> </span><span id="local-6989586621679499744"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679499744"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">DefinerF r (ClosedLineSegment vertex :+ ix) (vertex :+ ix)
+-&gt; Maybe
+     (DefinerF r (ClosedLineSegment vertex :+ ix) (vertex :+ ix))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+-&gt; (ClosedLineSegment vertex :+ ix)
+-&gt; (vertex :+ ix)
+-&gt; DefinerF r (ClosedLineSegment vertex :+ ix) (vertex :+ ix)
+forall r edge orig.
+Point 2 r -&gt; edge -&gt; orig -&gt; DefinerF r edge orig
+</span><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#NewVertex"><span class="hs-identifier hs-var">NewVertex</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679499744"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">ClosedLineSegment vertex :+ ix
+</span><a href="#local-6989586621679499740"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">vertex :+ ix
+</span><a href="#local-6989586621679499739"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-102"></span><span>      </span><span class="annot"><span class="annottext">Intersection
+  (HalfLine (Point 2 r))
+  (OpenLineSegment (Point (Dimension vertex) (NumType vertex)))
+</span><span class="hs-identifier">_</span></span><span>                                     </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe (DefinerF r (ClosedLineSegment vertex :+ ix) (vertex :+ ix))
+forall a. Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span>
+</span><span id="line-103"></span><span>
+</span><span id="line-104"></span><span>    </span><span class="hs-comment">-- treat e as an open line segment; i.e. we don't want duplicate vertices at endpoints</span><span>
+</span><span id="line-105"></span><span>    </span><span class="hs-comment">-- anyway.</span><span>
+</span><span id="line-106"></span><span>    </span><span id="local-6989586621679499533"><span class="annot"><span class="annottext">asOpenEdge :: s -&gt; OpenLineSegment (Point (Dimension p) (NumType p))
+</span><a href="#local-6989586621679499533"><span class="hs-identifier hs-var hs-var">asOpenEdge</span></a></span></span><span> </span><span id="local-6989586621679499872"><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679499872"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Point (Dimension p) (NumType p)
+-&gt; Point (Dimension p) (NumType p)
+-&gt; OpenLineSegment (Point (Dimension p) (NumType p))
+forall point. point -&gt; point -&gt; OpenLineSegment point
+</span><span class="hs-identifier hs-var">OpenLineSegment</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679499872"><span class="hs-identifier hs-var">e</span></a></span><span class="annot"><span class="annottext">s
+-&gt; Getting
+     (Point (Dimension p) (NumType p))
+     s
+     (Point (Dimension p) (NumType p))
+-&gt; Point (Dimension p) (NumType p)
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(p -&gt; Const (Point (Dimension p) (NumType p)) p)
+-&gt; s -&gt; Const (Point (Dimension p) (NumType p)) s
+forall seg p. HasStart seg p =&gt; Lens' seg p
+Lens' s p
+</span><span class="hs-identifier hs-var">start</span></span><span class="annot"><span class="annottext">((p -&gt; Const (Point (Dimension p) (NumType p)) p)
+ -&gt; s -&gt; Const (Point (Dimension p) (NumType p)) s)
+-&gt; ((Point (Dimension p) (NumType p)
+     -&gt; Const
+          (Point (Dimension p) (NumType p))
+          (Point (Dimension p) (NumType p)))
+    -&gt; p -&gt; Const (Point (Dimension p) (NumType p)) p)
+-&gt; Getting
+     (Point (Dimension p) (NumType p))
+     s
+     (Point (Dimension p) (NumType p))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point (Dimension p) (NumType p)
+ -&gt; Const
+      (Point (Dimension p) (NumType p))
+      (Point (Dimension p) (NumType p)))
+-&gt; p -&gt; Const (Point (Dimension p) (NumType p)) p
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' p (Point (Dimension p) (NumType p))
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">s
+</span><a href="#local-6989586621679499872"><span class="hs-identifier hs-var">e</span></a></span><span class="annot"><span class="annottext">s
+-&gt; Getting
+     (Point (Dimension p) (NumType p))
+     s
+     (Point (Dimension p) (NumType p))
+-&gt; Point (Dimension p) (NumType p)
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">(p -&gt; Const (Point (Dimension p) (NumType p)) p)
+-&gt; s -&gt; Const (Point (Dimension p) (NumType p)) s
+forall seg p. HasEnd seg p =&gt; Lens' seg p
+Lens' s p
+</span><span class="hs-identifier hs-var">end</span></span><span class="annot"><span class="annottext">((p -&gt; Const (Point (Dimension p) (NumType p)) p)
+ -&gt; s -&gt; Const (Point (Dimension p) (NumType p)) s)
+-&gt; ((Point (Dimension p) (NumType p)
+     -&gt; Const
+          (Point (Dimension p) (NumType p))
+          (Point (Dimension p) (NumType p)))
+    -&gt; p -&gt; Const (Point (Dimension p) (NumType p)) p)
+-&gt; Getting
+     (Point (Dimension p) (NumType p))
+     s
+     (Point (Dimension p) (NumType p))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Point (Dimension p) (NumType p)
+ -&gt; Const
+      (Point (Dimension p) (NumType p))
+      (Point (Dimension p) (NumType p)))
+-&gt; p -&gt; Const (Point (Dimension p) (NumType p)) p
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' p (Point (Dimension p) (NumType p))
+</span><span class="hs-identifier hs-var">asPoint</span></span><span class="hs-special">)</span><span>
+</span><span id="line-107"></span><span>
+</span><span id="line-108"></span><span>    </span><span class="annot"><a href="#local-6989586621679499316"><span class="hs-identifier hs-type">rayThrough</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497938"><span class="hs-identifier hs-type">polygon</span></a></span><span>
+</span><span id="line-109"></span><span>                 </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497934"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">ClosedLineSegment</span></span><span> </span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497938"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-110"></span><span>                                     </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679497936"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679497938"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-111"></span><span>    </span><span id="local-6989586621679499316"><span class="annot"><span class="annottext">rayThrough :: (vertex :+ VertexIx polygon)
+-&gt; Maybe
+     (DefinerF
+        r
+        (ClosedLineSegment vertex :+ VertexIx polygon)
+        (vertex :+ VertexIx polygon))
+</span><a href="#local-6989586621679499316"><span class="hs-identifier hs-var hs-var">rayThrough</span></a></span></span><span> </span><span id="local-6989586621679499875"><span class="annot"><span class="annottext">vertex :+ VertexIx polygon
+</span><a href="#local-6989586621679499875"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DefinerF
+   r
+   (ClosedLineSegment vertex :+ VertexIx polygon)
+   (vertex :+ VertexIx polygon)
+ -&gt; NumType
+      (DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)))
+-&gt; [DefinerF
+      r
+      (ClosedLineSegment vertex :+ VertexIx polygon)
+      (vertex :+ VertexIx polygon)]
+-&gt; Maybe
+     (DefinerF
+        r
+        (ClosedLineSegment vertex :+ VertexIx polygon)
+        (vertex :+ VertexIx polygon))
+forall b (f :: * -&gt; *) a.
+(Ord b, Foldable f) =&gt;
+(a -&gt; b) -&gt; f a -&gt; Maybe a
+</span><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#minimumOn"><span class="hs-identifier hs-var">minimumOn</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Point 2 r
+-&gt; DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)
+-&gt; NumType
+     (DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int))
+forall g r (d :: Nat) point.
+(HasSquaredEuclideanDistance g, r ~ NumType g, d ~ Dimension g,
+ Num r, Point_ point d r) =&gt;
+point -&gt; g -&gt; r
+forall r (d :: Nat) point.
+(r
+ ~ NumType
+     (DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)),
+ d
+ ~ Dimension
+     (DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)),
+ Num r, Point_ point d r) =&gt;
+point
+-&gt; DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)
+-&gt; r
+</span><span class="hs-identifier hs-var">squaredEuclideanDistTo</span></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679499292"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span>                 </span><span class="annot"><span class="annottext">([DefinerF
+    r
+    (ClosedLineSegment vertex :+ VertexIx polygon)
+    (vertex :+ VertexIx polygon)]
+ -&gt; Maybe
+      (DefinerF
+         r
+         (ClosedLineSegment vertex :+ VertexIx polygon)
+         (vertex :+ VertexIx polygon)))
+-&gt; [DefinerF
+      r
+      (ClosedLineSegment vertex :+ VertexIx polygon)
+      (vertex :+ VertexIx polygon)]
+-&gt; Maybe
+     (DefinerF
+        r
+        (ClosedLineSegment vertex :+ VertexIx polygon)
+        (vertex :+ VertexIx polygon))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">((ClosedLineSegment vertex :+ Int)
+ -&gt; Maybe
+      (DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)))
+-&gt; [ClosedLineSegment vertex :+ Int]
+-&gt; [DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int)]
+forall a b. (a -&gt; Maybe b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">mapMaybe</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(vertex :+ Int)
+-&gt; (ClosedLineSegment vertex :+ Int)
+-&gt; Maybe
+     (DefinerF r (ClosedLineSegment vertex :+ Int) (vertex :+ Int))
+forall ix.
+(vertex :+ ix)
+-&gt; (ClosedLineSegment vertex :+ ix)
+-&gt; Maybe
+     (DefinerF r (ClosedLineSegment vertex :+ ix) (vertex :+ ix))
+</span><a href="#local-6989586621679499547"><span class="hs-identifier hs-var">intersectionPoint</span></a></span><span> </span><span class="annot"><span class="annottext">vertex :+ Int
+vertex :+ VertexIx polygon
+</span><a href="#local-6989586621679499875"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[ClosedLineSegment vertex :+ Int]
+[ClosedLineSegment vertex :+ VertexIx polygon]
+</span><a href="#local-6989586621679499317"><span class="hs-identifier hs-var">obstacleEdges</span></a></span><span>
+</span><span id="line-113"></span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span>    </span><span id="local-6989586621679499295"><span class="annot"><span class="annottext">err :: a
+</span><a href="#local-6989586621679499295"><span class="hs-identifier hs-var hs-var">err</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Char] -&gt; a
+forall a. HasCallStack =&gt; [Char] -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">[Char]
+</span><span class="hs-string">&quot;visibilityPolygon: absurd&quot;</span></span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-118"></span><span class="annot"><span class="hs-comment">-- * Data types representing the vertices of a visibility polygon</span></span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span class="hs-comment">-- | The second parameter of DefinerF; the edge, actually stores the index of its starting</span><span>
+</span><span id="line-121"></span><span class="hs-comment">-- vertex.</span><span>
+</span><span id="line-122"></span><span class="hs-keyword">type</span><span> </span><span id="Definer"><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#Definer"><span class="hs-identifier hs-var">Definer</span></a></span></span><span> </span><span id="local-6989586621679499882"><span class="annot"><a href="#local-6989586621679499882"><span class="hs-identifier hs-type">polygon</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-123"></span><span>  </span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">NumType</span></span><span> </span><span class="annot"><a href="#local-6989586621679499882"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679499882"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#Vertex"><span class="hs-identifier hs-type">Vertex</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679499882"><span class="hs-identifier hs-type">polygon</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hiraffe-0.1/doc/html/hiraffe/src/Hiraffe.Graph.Class.html/Hiraffe.Graph.Class.html#VertexIx"><span class="hs-identifier hs-type">VertexIx</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679499882"><span class="hs-identifier hs-type">polygon</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span class="hs-comment">-- | A vertex of a visibility polygon; which is either an original vertex of type 'orig' or</span><span>
+</span><span id="line-126"></span><span class="hs-comment">-- a vertex that is the intersection point of a ray through an original vertex and an edge.</span><span>
+</span><span id="line-127"></span><span class="hs-keyword">data</span><span> </span><span id="DefinerF"><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-var">DefinerF</span></a></span></span><span> </span><span id="local-6989586621679498143"><span class="annot"><a href="#local-6989586621679498143"><span class="hs-identifier hs-type">r</span></a></span></span><span> </span><span id="local-6989586621679498144"><span class="annot"><a href="#local-6989586621679498144"><span class="hs-identifier hs-type">edge</span></a></span></span><span> </span><span id="local-6989586621679498142"><span class="annot"><a href="#local-6989586621679498142"><span class="hs-identifier hs-type">orig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="OriginalVertex"><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#OriginalVertex"><span class="hs-identifier hs-var">OriginalVertex</span></a></span></span><span> </span><span class="annot"><a href="#local-6989586621679498142"><span class="hs-identifier hs-type">orig</span></a></span><span>
+</span><span id="line-128"></span><span>                          </span><span class="hs-glyph">|</span><span> </span><span id="NewVertex"><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#NewVertex"><span class="hs-identifier hs-var">NewVertex</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679498143"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679498144"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498142"><span class="hs-identifier hs-type">orig</span></a></span><span>
+</span><span id="line-129"></span><span>                            </span><span class="hs-comment">-- ^ the intersection point on the edge, defined by the edge</span><span>
+</span><span id="line-130"></span><span>                            </span><span class="hs-comment">-- and the original vertex</span><span>
+</span><span id="line-131"></span><span>                          </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679499887"><span id="local-6989586621679499899"><span id="local-6989586621679499903"><span class="annot"><span class="annottext">Int -&gt; DefinerF r edge orig -&gt; ShowS
+[DefinerF r edge orig] -&gt; ShowS
+DefinerF r edge orig -&gt; [Char]
+(Int -&gt; DefinerF r edge orig -&gt; ShowS)
+-&gt; (DefinerF r edge orig -&gt; [Char])
+-&gt; ([DefinerF r edge orig] -&gt; ShowS)
+-&gt; Show (DefinerF r edge orig)
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; [Char]) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+forall r edge orig.
+(Show r, Show edge, Show orig) =&gt;
+Int -&gt; DefinerF r edge orig -&gt; ShowS
+forall r edge orig.
+(Show r, Show edge, Show orig) =&gt;
+[DefinerF r edge orig] -&gt; ShowS
+forall r edge orig.
+(Show r, Show edge, Show orig) =&gt;
+DefinerF r edge orig -&gt; [Char]
+$cshowsPrec :: forall r edge orig.
+(Show r, Show edge, Show orig) =&gt;
+Int -&gt; DefinerF r edge orig -&gt; ShowS
+showsPrec :: Int -&gt; DefinerF r edge orig -&gt; ShowS
+$cshow :: forall r edge orig.
+(Show r, Show edge, Show orig) =&gt;
+DefinerF r edge orig -&gt; [Char]
+show :: DefinerF r edge orig -&gt; [Char]
+$cshowList :: forall r edge orig.
+(Show r, Show edge, Show orig) =&gt;
+[DefinerF r edge orig] -&gt; ShowS
+showList :: [DefinerF r edge orig] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679499938"><span id="local-6989586621679499949"><span class="annot"><span class="annottext">DefinerF r edge orig -&gt; DefinerF r edge orig -&gt; Bool
+(DefinerF r edge orig -&gt; DefinerF r edge orig -&gt; Bool)
+-&gt; (DefinerF r edge orig -&gt; DefinerF r edge orig -&gt; Bool)
+-&gt; Eq (DefinerF r edge orig)
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+forall r edge orig.
+(Eq r, Eq edge, Eq orig) =&gt;
+DefinerF r edge orig -&gt; DefinerF r edge orig -&gt; Bool
+$c== :: forall r edge orig.
+(Eq r, Eq edge, Eq orig) =&gt;
+DefinerF r edge orig -&gt; DefinerF r edge orig -&gt; Bool
+== :: DefinerF r edge orig -&gt; DefinerF r edge orig -&gt; Bool
+$c/= :: forall r edge orig.
+(Eq r, Eq edge, Eq orig) =&gt;
+DefinerF r edge orig -&gt; DefinerF r edge orig -&gt; Bool
+/= :: DefinerF r edge orig -&gt; DefinerF r edge orig -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span id="local-6989586621679499955"><span id="local-6989586621679499957"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; DefinerF r edge a -&gt; DefinerF r edge b)
+-&gt; (forall a b. a -&gt; DefinerF r edge b -&gt; DefinerF r edge a)
+-&gt; Functor (DefinerF r edge)
+forall a b. a -&gt; DefinerF r edge b -&gt; DefinerF r edge a
+forall a b. (a -&gt; b) -&gt; DefinerF r edge a -&gt; DefinerF r edge b
+forall r edge a b. a -&gt; DefinerF r edge b -&gt; DefinerF r edge a
+forall r edge a b.
+(a -&gt; b) -&gt; DefinerF r edge a -&gt; DefinerF r edge b
+forall (f :: * -&gt; *).
+(forall a b. (a -&gt; b) -&gt; f a -&gt; f b)
+-&gt; (forall a b. a -&gt; f b -&gt; f a) -&gt; Functor f
+$cfmap :: forall r edge a b.
+(a -&gt; b) -&gt; DefinerF r edge a -&gt; DefinerF r edge b
+fmap :: forall a b. (a -&gt; b) -&gt; DefinerF r edge a -&gt; DefinerF r edge b
+$c&lt;$ :: forall r edge a b. a -&gt; DefinerF r edge b -&gt; DefinerF r edge a
+&lt;$ :: forall a b. a -&gt; DefinerF r edge b -&gt; DefinerF r edge a
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Functor</span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-132"></span><span>
+</span><span id="line-133"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679498312"><span id="local-6989586621679499965"><span id="local-6989586621679499969"><span class="annot"><span class="hs-identifier hs-type">Bifunctor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498312"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-134"></span><span>  </span><span id="local-6989586621679499972"><span class="annot"><span class="annottext">bimap :: forall a b c d.
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; DefinerF r a c -&gt; DefinerF r b d
+</span><a href="#local-6989586621679499972"><span class="hs-identifier hs-var hs-var hs-var">bimap</span></a></span></span><span> </span><span id="local-6989586621679499974"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679499974"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679499975"><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679499975"><span class="hs-identifier hs-var">g</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-135"></span><span>    </span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#OriginalVertex"><span class="hs-identifier hs-type">OriginalVertex</span></a></span><span> </span><span id="local-6989586621679499976"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679499976"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">d -&gt; DefinerF r b d
+forall r edge orig. orig -&gt; DefinerF r edge orig
+</span><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#OriginalVertex"><span class="hs-identifier hs-var">OriginalVertex</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679499975"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679499976"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-136"></span><span>    </span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#NewVertex"><span class="hs-identifier hs-type">NewVertex</span></a></span><span> </span><span id="local-6989586621679499977"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679499977"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679499978"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679499978"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span id="local-6989586621679499979"><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679499979"><span class="hs-identifier hs-var">v</span></a></span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; b -&gt; d -&gt; DefinerF r b d
+forall r edge orig.
+Point 2 r -&gt; edge -&gt; orig -&gt; DefinerF r edge orig
+</span><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#NewVertex"><span class="hs-identifier hs-var">NewVertex</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679499977"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679499974"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679499978"><span class="hs-identifier hs-var">e</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">c -&gt; d
+</span><a href="#local-6989586621679499975"><span class="hs-identifier hs-var">g</span></a></span><span> </span><span class="annot"><span class="annottext">c
+</span><a href="#local-6989586621679499979"><span class="hs-identifier hs-var">v</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>
+</span><span id="line-138"></span><span class="hs-comment">-- | Lens to access the position of a vertex of a visibility polygon.</span><span>
+</span><span id="line-139"></span><span class="hs-comment">--</span><span>
+</span><span id="line-140"></span><span class="hs-comment">-- Note that using this as a setter may be unsafe/break invariants!</span><span>
+</span><span id="line-141"></span><span id="local-6989586621679498317"><span id="local-6989586621679498318"><span id="local-6989586621679498319"><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#position"><span class="hs-identifier hs-type">position</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679498317"><span class="hs-identifier hs-type">orig</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679498318"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Lens%27"><span class="hs-identifier hs-type">Lens'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498318"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498319"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498317"><span class="hs-identifier hs-type">orig</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679498318"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span></span></span></span><span>
+</span><span id="line-142"></span><span id="position"><span class="annot"><span class="annottext">position :: forall orig r edge.
+Point_ orig 2 r =&gt;
+Lens' (DefinerF r edge orig) (Point 2 r)
+</span><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#position"><span class="hs-identifier hs-var hs-var">position</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DefinerF r edge orig -&gt; Point 2 r)
+-&gt; (DefinerF r edge orig -&gt; Point 2 r -&gt; DefinerF r edge orig)
+-&gt; Lens
+     (DefinerF r edge orig)
+     (DefinerF r edge orig)
+     (Point 2 r)
+     (Point 2 r)
+forall s a b t. (s -&gt; a) -&gt; (s -&gt; b -&gt; t) -&gt; Lens s t a b
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Lens.html/Control.Lens.Lens.html#lens"><span class="hs-identifier hs-var">lens</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-143"></span><span>                    </span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#OriginalVertex"><span class="hs-identifier hs-type">OriginalVertex</span></a></span><span> </span><span id="local-6989586621679500110"><span class="annot"><span class="annottext">orig
+</span><a href="#local-6989586621679500110"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">orig
+</span><a href="#local-6989586621679500110"><span class="hs-identifier hs-var">v</span></a></span><span class="annot"><span class="annottext">orig -&gt; Getting (Point 2 r) orig (Point 2 r) -&gt; Point 2 r
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) orig (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' orig (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span>
+</span><span id="line-144"></span><span>                    </span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#NewVertex"><span class="hs-identifier hs-type">NewVertex</span></a></span><span> </span><span id="local-6989586621679500111"><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679500111"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="annot"><span class="annottext">edge
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">orig
+</span><span class="hs-identifier">_</span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679500111"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-145"></span><span>                </span><span class="hs-special">)</span><span>
+</span><span id="line-146"></span><span>                </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679500112"><span class="annot"><span class="annottext">DefinerF r edge orig
+</span><a href="#local-6989586621679500112"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679500113"><span class="annot"><span class="annottext">p :: Point 2 r
+</span><a href="#local-6989586621679500113"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point2</span></span><span> </span><span id="local-6989586621679500115"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679500115"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679500116"><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679500116"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">DefinerF r edge orig
+</span><a href="#local-6989586621679500112"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-147"></span><span>                    </span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#OriginalVertex"><span class="hs-identifier hs-type">OriginalVertex</span></a></span><span> </span><span id="local-6989586621679500117"><span class="annot"><span class="annottext">orig
+</span><a href="#local-6989586621679500117"><span class="hs-identifier hs-var">v'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">orig -&gt; DefinerF r edge orig
+forall r edge orig. orig -&gt; DefinerF r edge orig
+</span><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#OriginalVertex"><span class="hs-identifier hs-var">OriginalVertex</span></a></span><span> </span><span class="annot"><span class="annottext">(orig -&gt; DefinerF r edge orig) -&gt; orig -&gt; DefinerF r edge orig
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">orig
+</span><a href="#local-6989586621679500117"><span class="hs-identifier hs-var">v'</span></a></span><span class="annot"><span class="annottext">orig -&gt; (orig -&gt; orig) -&gt; orig
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(r -&gt; Identity r) -&gt; orig -&gt; Identity orig
+forall (d :: Nat) point r.
+(1 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int orig r
+</span><span class="hs-identifier hs-var">xCoord</span></span><span> </span><span class="annot"><span class="annottext">((r -&gt; Identity r) -&gt; orig -&gt; Identity orig) -&gt; r -&gt; orig -&gt; orig
+forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679500115"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-148"></span><span>                                                            </span><span class="annot"><span class="annottext">orig -&gt; (orig -&gt; orig) -&gt; orig
+forall a b. a -&gt; (a -&gt; b) -&gt; b
+</span><span class="hs-operator hs-var">&amp;</span></span><span class="annot"><span class="annottext">(r -&gt; Identity r) -&gt; orig -&gt; Identity orig
+forall (d :: Nat) point r.
+(2 &lt;= d, Point_ point d r) =&gt;
+IndexedLens' Int point r
+IndexedLens' Int orig r
+</span><span class="hs-identifier hs-var">yCoord</span></span><span> </span><span class="annot"><span class="annottext">((r -&gt; Identity r) -&gt; orig -&gt; Identity orig) -&gt; r -&gt; orig -&gt; orig
+forall s t a b. ASetter s t a b -&gt; b -&gt; s -&gt; t
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Setter.html/Control.Lens.Setter.html#.~"><span class="hs-operator hs-var">.~</span></a></span><span> </span><span class="annot"><span class="annottext">r
+</span><a href="#local-6989586621679500116"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-149"></span><span>                    </span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#NewVertex"><span class="hs-identifier hs-type">NewVertex</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679500122"><span class="annot"><span class="annottext">edge
+</span><a href="#local-6989586621679500122"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span id="local-6989586621679500123"><span class="annot"><span class="annottext">orig
+</span><a href="#local-6989586621679500123"><span class="hs-identifier hs-var">o</span></a></span></span><span>   </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Point 2 r -&gt; edge -&gt; orig -&gt; DefinerF r edge orig
+forall r edge orig.
+Point 2 r -&gt; edge -&gt; orig -&gt; DefinerF r edge orig
+</span><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#NewVertex"><span class="hs-identifier hs-var">NewVertex</span></a></span><span> </span><span class="annot"><span class="annottext">Point 2 r
+</span><a href="#local-6989586621679500113"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">edge
+</span><a href="#local-6989586621679500122"><span class="hs-identifier hs-var">e</span></a></span><span> </span><span class="annot"><span class="annottext">orig
+</span><a href="#local-6989586621679500123"><span class="hs-identifier hs-var">o</span></a></span><span>
+</span><span id="line-150"></span><span>                </span><span class="hs-special">)</span><span>
+</span><span id="line-151"></span><span>
+</span><span id="line-152"></span><span>
+</span><span id="line-153"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="Dimension"><span class="annot"><span class="hs-identifier hs-var">Dimension</span></span></span><span> </span><span id="local-6989586621679500124"><span id="local-6989586621679500125"><span id="local-6989586621679500126"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500124"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500125"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500126"><span class="hs-identifier hs-type">orig</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span>
+</span><span id="line-154"></span><span class="hs-keyword">type</span><span> </span><span class="hs-keyword">instance</span><span> </span><span id="NumType"><span class="annot"><span class="hs-identifier hs-var">NumType</span></span></span><span> </span><span id="local-6989586621679500127"><span id="local-6989586621679500128"><span id="local-6989586621679500129"><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500127"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500128"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679500129"><span class="hs-identifier hs-type">orig</span></a></span><span class="hs-special">)</span></span></span></span><span>   </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="#local-6989586621679500127"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-155"></span><span>
+</span><span id="line-156"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679498086"><span id="local-6989586621679498087"><span id="local-6989586621679498088"><span id="local-6989586621679500136"><span id="local-6989586621679500153"><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasSquaredEuclideanDistance</span></span><span> </span><span class="annot"><a href="#local-6989586621679498086"><span class="hs-identifier hs-type">orig</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679498086"><span class="hs-identifier hs-type">orig</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679498087"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-157"></span><span>         </span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasSquaredEuclideanDistance</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498087"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498088"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498086"><span class="hs-identifier hs-type">orig</span></a></span><span class="hs-special">)</span></span></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-158"></span><span>  </span><span id="local-6989586621679500195"><span class="annot"><span class="annottext">pointClosestTo :: forall r (d :: Nat) point.
+(r ~ NumType (DefinerF r edge orig),
+ d ~ Dimension (DefinerF r edge orig), Num r, Point_ point d r) =&gt;
+point -&gt; DefinerF r edge orig -&gt; Point d r
+</span><a href="#local-6989586621679500195"><span class="hs-identifier hs-var hs-var hs-var">pointClosestTo</span></a></span></span><span> </span><span class="annot"><span class="annottext">point
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) (DefinerF r edge orig) (Point 2 r)
+-&gt; DefinerF r edge orig -&gt; Point 2 r
+forall s (m :: * -&gt; *) a. MonadReader s m =&gt; Getting a s a -&gt; m a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#view"><span class="hs-identifier hs-var">view</span></a></span><span> </span><span class="annot"><span class="annottext">Getting (Point 2 r) (DefinerF r edge orig) (Point 2 r)
+forall point (d :: Nat) r.
+Point_ point d r =&gt;
+Lens' point (Point d r)
+Lens' (DefinerF r edge orig) (Point 2 r)
+</span><span class="hs-identifier hs-var">asPoint</span></span><span>
+</span><span id="line-159"></span><span>
+</span><span id="line-160"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679498089"><span id="local-6989586621679498090"><span id="local-6989586621679498091"><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679498089"><span class="hs-identifier hs-type">orig</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679498090"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasVector</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498090"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498091"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498089"><span class="hs-identifier hs-type">orig</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498090"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498091"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498089"><span class="hs-identifier hs-type">orig</span></a></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-161"></span><span>  </span><span id="local-6989586621679500245"><span class="annot"><span class="annottext">vector :: forall (d :: Nat) r s.
+(Dimension (DefinerF r edge orig) ~ d,
+ NumType (DefinerF r edge orig) ~ r,
+ Dimension (DefinerF r edge orig) ~ d,
+ NumType (DefinerF r edge orig) ~ s) =&gt;
+Lens
+  (DefinerF r edge orig)
+  (DefinerF r edge orig)
+  (Vector d r)
+  (Vector d s)
+</span><a href="#local-6989586621679500245"><span class="hs-identifier hs-var hs-var hs-var">vector</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Point 2 r -&gt; f (Point 2 r))
+-&gt; DefinerF r edge orig -&gt; f (DefinerF r edge orig)
+forall orig r edge.
+Point_ orig 2 r =&gt;
+Lens' (DefinerF r edge orig) (Point 2 r)
+Lens' (DefinerF r edge orig) (Point 2 r)
+</span><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#position"><span class="hs-identifier hs-var">position</span></a></span><span class="annot"><span class="annottext">((Point 2 r -&gt; f (Point 2 r))
+ -&gt; DefinerF r edge orig -&gt; f (DefinerF r edge orig))
+-&gt; ((Vector d r -&gt; f (Vector d s)) -&gt; Point 2 r -&gt; f (Point 2 r))
+-&gt; (Vector d r -&gt; f (Vector d s))
+-&gt; DefinerF r edge orig
+-&gt; f (DefinerF r edge orig)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span class="annot"><span class="annottext">(Vector d r -&gt; f (Vector d s)) -&gt; Point 2 r -&gt; f (Point 2 r)
+forall (d :: Nat) r s.
+(Dimension (Point 2 r) ~ d, NumType (Point 2 r) ~ r,
+ Dimension (Point 2 r) ~ d, NumType (Point 2 r) ~ s) =&gt;
+Lens (Point 2 r) (Point 2 r) (Vector d r) (Vector d s)
+forall point point' (d :: Nat) r s.
+(HasVector point point', Dimension point ~ d, NumType point ~ r,
+ Dimension point' ~ d, NumType point' ~ s) =&gt;
+Lens point point' (Vector d r) (Vector d s)
+Lens (Point 2 r) (Point 2 r) (Vector d r) (Vector d s)
+</span><span class="hs-identifier hs-var">vector</span></span><span>
+</span><span id="line-162"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679498080"><span id="local-6989586621679498081"><span id="local-6989586621679498082"><span id="local-6989586621679500260"><span id="local-6989586621679500266"><span id="local-6989586621679500272"><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679498080"><span class="hs-identifier hs-type">orig</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679498081"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Affine_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498081"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498082"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498080"><span class="hs-identifier hs-type">orig</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679498081"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span></span></span><span>
+</span><span id="line-163"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679498092"><span id="local-6989586621679498093"><span id="local-6989586621679498094"><span id="local-6989586621679500284"><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679498092"><span class="hs-identifier hs-type">orig</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679498093"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498093"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498094"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498092"><span class="hs-identifier hs-type">orig</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679498093"><span class="hs-identifier hs-type">r</span></a></span></span></span></span></span><span>
+</span><span id="line-164"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679498083"><span id="local-6989586621679498084"><span id="local-6989586621679498085"><span id="local-6989586621679500302"><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679498083"><span class="hs-identifier hs-type">orig</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679498084"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasCoordinates</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498084"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498085"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498083"><span class="hs-identifier hs-type">orig</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498084"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498085"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498083"><span class="hs-identifier hs-type">orig</span></a></span><span class="hs-special">)</span></span></span></span></span><span>
+</span><span id="line-165"></span><span>
+</span><span id="line-166"></span><span>
+</span><span id="line-167"></span><span id="local-6989586621679498116"><span id="local-6989586621679498117"><span id="local-6989586621679498118"><span id="local-6989586621679498119"><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#dropIx"><span class="hs-identifier hs-type">dropIx</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498116"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679498117"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498118"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="#local-6989586621679498119"><span class="hs-identifier hs-type">vertex</span></a></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498116"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498118"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498119"><span class="hs-identifier hs-type">vertex</span></a></span></span></span></span></span><span>
+</span><span id="line-168"></span><span id="dropIx"><span class="annot"><span class="annottext">dropIx :: forall r edge x vertex.
+DefinerF r (edge :+ x) vertex -&gt; DefinerF r x vertex
+</span><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#dropIx"><span class="hs-identifier hs-var hs-var">dropIx</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">((edge :+ x) -&gt; x)
+-&gt; (vertex -&gt; vertex)
+-&gt; DefinerF r (edge :+ x) vertex
+-&gt; DefinerF r x vertex
+forall a b c d.
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; DefinerF r a c -&gt; DefinerF r b d
+forall (p :: * -&gt; * -&gt; *) a b c d.
+Bifunctor p =&gt;
+(a -&gt; b) -&gt; (c -&gt; d) -&gt; p a c -&gt; p b d
+</span><span class="hs-identifier hs-var">bimap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(edge :+ x) -&gt; Getting x (edge :+ x) x -&gt; x
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting x (edge :+ x) x
+forall core extra extra' (f :: * -&gt; *).
+Functor f =&gt;
+(extra -&gt; f extra') -&gt; (core :+ extra) -&gt; f (core :+ extra')
+</span><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#extra"><span class="hs-identifier hs-var">extra</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">vertex -&gt; vertex
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span>
+</span><span id="line-169"></span><span>
+</span><span id="line-170"></span><span id="local-6989586621679498123"><span id="local-6989586621679498124"><span id="local-6989586621679498125"><span id="local-6989586621679498126"><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#alongBoundary"><span class="hs-identifier hs-type">alongBoundary</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679498123"><span class="hs-identifier hs-type">ix</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679498124"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679498124"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasStart</span></span><span> </span><span class="annot"><a href="#local-6989586621679498125"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498126"><span class="hs-identifier hs-type">vertex</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679498126"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679498124"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-171"></span><span>                 </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">HasSquaredEuclideanDistance</span></span><span> </span><span class="annot"><a href="#local-6989586621679498126"><span class="hs-identifier hs-type">vertex</span></a></span><span>
+</span><span id="line-172"></span><span>                 </span><span class="hs-special">)</span><span>
+</span><span id="line-173"></span><span>              </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498124"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679498125"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498123"><span class="hs-identifier hs-type">ix</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679498126"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498123"><span class="hs-identifier hs-type">ix</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-174"></span><span>              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#DefinerF"><span class="hs-identifier hs-type">DefinerF</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498124"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679498125"><span class="hs-identifier hs-type">edge</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498123"><span class="hs-identifier hs-type">ix</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679498126"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498123"><span class="hs-identifier hs-type">ix</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Ordering</span></span></span></span></span></span><span>
+</span><span id="line-175"></span><span id="alongBoundary"><span class="annot"><span class="annottext">alongBoundary :: forall ix r edge vertex.
+(Ord ix, Num r, Ord r, HasStart edge vertex, Point_ vertex 2 r,
+ HasSquaredEuclideanDistance vertex) =&gt;
+DefinerF r (edge :+ ix) (vertex :+ ix)
+-&gt; DefinerF r (edge :+ ix) (vertex :+ ix) -&gt; Ordering
+</span><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#alongBoundary"><span class="hs-identifier hs-var hs-var">alongBoundary</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(DefinerF r (edge :+ ix) (vertex :+ ix) -&gt; (ix, r))
+-&gt; DefinerF r (edge :+ ix) (vertex :+ ix)
+-&gt; DefinerF r (edge :+ ix) (vertex :+ ix)
+-&gt; Ordering
+forall a b. Ord a =&gt; (b -&gt; a) -&gt; b -&gt; b -&gt; Ordering
+</span><span class="hs-identifier hs-var">comparing</span></span><span> </span><span class="annot"><span class="annottext">DefinerF r (edge :+ ix) (vertex :+ ix) -&gt; (ix, r)
+DefinerF (NumType vertex) (edge :+ ix) (vertex :+ ix)
+-&gt; (ix, NumType vertex)
+forall {a} {core}.
+DefinerF (NumType vertex) (edge :+ a) (core :+ a)
+-&gt; (a, NumType vertex)
+</span><a href="#local-6989586621679500338"><span class="hs-identifier hs-var">getIx</span></a></span><span>
+</span><span id="line-176"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-177"></span><span>    </span><span id="local-6989586621679500338"><span class="annot"><span class="annottext">getIx :: DefinerF (NumType vertex) (edge :+ a) (core :+ a)
+-&gt; (a, NumType vertex)
+</span><a href="#local-6989586621679500338"><span class="hs-identifier hs-var hs-var">getIx</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-glyph">\</span><span class="hs-glyph">case</span><span>
+</span><span id="line-178"></span><span>      </span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#OriginalVertex"><span class="hs-identifier hs-type">OriginalVertex</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">core
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679500393"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679500393"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679500393"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">NumType vertex
+</span><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-179"></span><span>      </span><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#NewVertex"><span class="hs-identifier hs-type">NewVertex</span></a></span><span> </span><span id="local-6989586621679500394"><span class="annot"><span class="annottext">Point 2 (NumType vertex)
+</span><a href="#local-6989586621679500394"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679500395"><span class="annot"><span class="annottext">edge
+</span><a href="#local-6989586621679500395"><span class="hs-identifier hs-var">e</span></a></span></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679500396"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679500396"><span class="hs-identifier hs-var">i</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">core :+ a
+</span><span class="hs-identifier">_</span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679500396"><span class="hs-identifier hs-var">i</span></a></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Point 2 (NumType vertex) -&gt; vertex -&gt; NumType vertex
+forall g r (d :: Nat) point.
+(HasSquaredEuclideanDistance g, r ~ NumType g, d ~ Dimension g,
+ Num r, Point_ point d r) =&gt;
+point -&gt; g -&gt; r
+forall r (d :: Nat) point.
+(r ~ NumType vertex, d ~ Dimension vertex, Num r,
+ Point_ point d r) =&gt;
+point -&gt; vertex -&gt; r
+</span><span class="hs-identifier hs-var">squaredEuclideanDistTo</span></span><span> </span><span class="annot"><span class="annottext">Point 2 (NumType vertex)
+</span><a href="#local-6989586621679500394"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">edge
+</span><a href="#local-6989586621679500395"><span class="hs-identifier hs-var">e</span></a></span><span class="annot"><span class="annottext">edge -&gt; Getting vertex edge vertex -&gt; vertex
+forall s a. s -&gt; Getting a s a -&gt; a
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting vertex edge vertex
+forall seg p. HasStart seg p =&gt; Lens' seg p
+Lens' edge vertex
+</span><span class="hs-identifier hs-var">start</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-180"></span><span>  </span><span class="hs-comment">-- if the polygon has holes this is not correct</span><span>
+</span><span id="line-181"></span><span>
+</span><span id="line-182"></span><span id="local-6989586621679498255"><span id="local-6989586621679498256"><span id="local-6989586621679498257"><span class="annot"><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#minimumOn"><span class="hs-identifier hs-type">minimumOn</span></a></span><span>   </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679498255"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Foldable</span></span><span> </span><span class="annot"><a href="#local-6989586621679498256"><span class="hs-identifier hs-type">f</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679498257"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679498255"><span class="hs-identifier hs-type">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679498256"><span class="hs-identifier hs-type">f</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679498257"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679498257"><span class="hs-identifier hs-type">a</span></a></span></span></span></span><span>
+</span><span id="line-183"></span><span id="minimumOn"><span class="annot"><span class="annottext">minimumOn :: forall b (f :: * -&gt; *) a.
+(Ord b, Foldable f) =&gt;
+(a -&gt; b) -&gt; f a -&gt; Maybe a
+</span><a href="HGeometry.Polygon.Visibility.NaiveVisibilityPolygon.html#minimumOn"><span class="hs-identifier hs-var hs-var">minimumOn</span></a></span></span><span> </span><span id="local-6989586621679500408"><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679500408"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Min (Arg b a) -&gt; a) -&gt; Maybe (Min (Arg b a)) -&gt; Maybe a
+forall a b. (a -&gt; b) -&gt; Maybe a -&gt; Maybe b
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Min</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Arg</span></span><span> </span><span class="annot"><span class="annottext">b
+</span><span class="hs-identifier">_</span></span><span> </span><span id="local-6989586621679500411"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679500411"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679500411"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Maybe (Min (Arg b a)) -&gt; Maybe a)
+-&gt; (f a -&gt; Maybe (Min (Arg b a))) -&gt; f a -&gt; Maybe a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Maybe (Min (Arg b a))) -&gt; f a -&gt; Maybe (Min (Arg b a))
+forall m a. Monoid m =&gt; (a -&gt; m) -&gt; f a -&gt; m
+forall (t :: * -&gt; *) m a.
+(Foldable t, Monoid m) =&gt;
+(a -&gt; m) -&gt; t a -&gt; m
+</span><span class="hs-identifier hs-var">foldMap</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679500413"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679500413"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Min (Arg b a) -&gt; Maybe (Min (Arg b a))
+forall a. a -&gt; Maybe a
+</span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(Min (Arg b a) -&gt; Maybe (Min (Arg b a)))
+-&gt; Min (Arg b a) -&gt; Maybe (Min (Arg b a))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Arg b a -&gt; Min (Arg b a)
+forall a. a -&gt; Min a
+</span><span class="hs-identifier hs-var">Min</span></span><span> </span><span class="annot"><span class="annottext">(Arg b a -&gt; Min (Arg b a)) -&gt; Arg b a -&gt; Min (Arg b a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">b -&gt; a -&gt; Arg b a
+forall a b. a -&gt; b -&gt; Arg a b
+</span><span class="hs-identifier hs-var">Arg</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; b
+</span><a href="#local-6989586621679500408"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679500413"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679500413"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-184"></span></pre></body></html>
