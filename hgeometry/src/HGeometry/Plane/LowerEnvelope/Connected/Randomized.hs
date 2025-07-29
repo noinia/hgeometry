@@ -275,8 +275,7 @@ triangulate' h poly = mapMaybe' withConflictList $ case toNonEmptyOf vertices po
         let conflictList' = foldr NESet.insert conflictList (foldMap edgeDefiners $ edgesOf tri)
         in ((^.asPoint) <$> tri) :+ conflictList'
 
-    edgesOf (Triangle a b c) = [(b,a),(c,b),(a,c)]
-                               -- [(a,b),(b,c),(c,a)]
+    edgesOf (Triangle a b c) = [(a,b),(b,c),(c,a)]
 
     -- computes the edge definers of the edge u,v. Note that this will typically consist
     -- of two planes; h, and the other plane h_(u,v) on the other side of the edge.

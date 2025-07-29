@@ -1,5 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Kernel.Instances
@@ -196,11 +197,17 @@ instance ( Arbitrary r, Has_ Vector_ (d+1) r, Has_ Additive_ d r
   arbitrary = do a0                <- arbitrary
                  (a :: Vector d r) <- arbitrary `suchThat` (/= zero)
                  pure $ HyperPlane $ cons a0 a
+  shrink (HyperPlane u) = [ HyperPlane u
+                          | v <- shrink u, prefix @d @(d+1) @_ @(Vector d r) v /= zero
+                          ]
+
 
 instance (Arbitrary r, Has_ Additive_ d r
          , Num r, Eq (Vector d r)) => Arbitrary (NonVerticalHyperPlane d r) where
   arbitrary = NonVerticalHyperPlane <$> arbitrary `suchThat` (/= zero)
-
+  shrink (NonVerticalHyperPlane u) = [ NonVerticalHyperPlane u
+                                     | v <- shrink u, v /= zero
+                                     ]
 
 instance Arbitrary boundingHyperPlane => Arbitrary (HalfSpaceF boundingHyperPlane) where
   arbitrary = HalfSpace <$> arbitrary <*> arbitrary
