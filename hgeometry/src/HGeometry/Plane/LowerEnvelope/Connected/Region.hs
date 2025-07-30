@@ -2,13 +2,14 @@
 {-# LANGUAGE UndecidableInstances  #-}
 module HGeometry.Plane.LowerEnvelope.Connected.Region
   ( Region(..)
-  , MDVertex(MDVertex), location
+  , MDVertex(MDVertex), location, vertexData
   , ClippedBoundedRegion
   ) where
 
 import Control.Lens
+import Data.Bifoldable
+import Data.Bifunctor
 import Data.List.NonEmpty (NonEmpty(..))
--- import qualified Data.List.NonEmpty as NonEmpty
 import HGeometry.Box
 import HGeometry.Ext
 import HGeometry.HyperPlane
@@ -34,32 +35,38 @@ import HGeometry.Cyclic
 -- of planes.
 --
 -- Note that we interpet this vertex as a 2-dimensional thing.
-data MDVertex r plane = MDVertex { _location :: Point 3 r
-                                 , _definers :: Definers plane
-                                 -- ^ the definers of the vertex
-                                 } deriving (Show,Eq,Ord,Functor,Foldable)
+data MDVertex r plane a  = MDVertex { _location   :: Point 3 r
+                                    , _definers   :: Definers plane
+                                     -- ^ the definers of the vertex
+                                    , _vertexData :: a
+                                    } deriving (Show,Eq,Ord,Functor,Foldable)
 makeLenses ''MDVertex
 
-type instance Dimension (MDVertex r plane) = 2
-type instance NumType   (MDVertex r plane) = r
+type instance Dimension (MDVertex r plane a) = 2
+type instance NumType   (MDVertex r plane a) = r
 
-instance Num r => IsBoxable (MDVertex r plane) where
+instance Num r => IsBoxable (MDVertex r plane a) where
   boundingBox = boundingBox . view asPoint
 
+instance Bifunctor (MDVertex r) where
+  bimap f g (MDVertex l defs x) = MDVertex l (f <$> defs) (g x)
+instance Bifoldable (MDVertex r) where
+  bifoldMap f g (MDVertex _ defs x)  = foldMap f defs <> g x
 
-instance Affine_ (MDVertex r plane) 2 r where
-instance HasVector (MDVertex r plane) (MDVertex r plane) where
+
+instance Affine_ (MDVertex r plane a) 2 r where
+instance HasVector (MDVertex r plane a) (MDVertex r plane a) where
   vector = lens (^.location.vector.to prefix)
                 (\v (Vector2 x y) -> v&location %~ \(Point3 _ _ z) -> Point3 x y z)
 
-instance HasDefiners (MDVertex r plane) plane where
+instance HasDefiners (MDVertex r plane a) plane where
   definersOf = view definers
 
-instance HasCoordinates (MDVertex r plane) (MDVertex r plane) where
+instance HasCoordinates (MDVertex r plane a) (MDVertex r plane a) where
   -- ^ Note that this only traverses the x and y coordinates of the vertex!
   coordinates = vector.traversed1
 
-instance Num r => Point_ (MDVertex r plane) 2 r where
+instance Num r => Point_ (MDVertex r plane a) 2 r where
 
 --------------------------------------------------------------------------------
 

@@ -26,7 +26,8 @@ import           HGeometry.Properties
 
 
 
-type UpperHull point = LowerEnvelope (NonVerticalHyperPlane 3 (NumType point) :+ point)
+type UpperHull point =
+  LowerEnvelope (NonVerticalHyperPlane 3 (NumType point) :+ point) ()
 
 
 -- | Computes the upper hull of a set of points in R^3

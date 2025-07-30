@@ -165,6 +165,9 @@ algorithms for
 * Computing the shortest path tree of a point in a triangulated simple
   polygon in $O(n)$ time.
 
+* Computing the visibility polygon of a point inside a simple
+  polygon. We currently provide a naive $O(n^2)$ time implementation.
+
 HGeometry also contains an implementation of some geometric data
 structures. In particular,
 

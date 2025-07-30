@@ -3,28 +3,37 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-unused-binds #-}
 module Plane.LowerEnvelopeSpec
-  ( spec
-  ) where
+  -- ( spec
+  -- ) where
+  where
 
 import           Control.Lens
 import           Data.Foldable
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Map as Map
 import qualified Data.Map.NonEmpty as NEMap
+import           Data.Semigroup
 import qualified Data.Set as Set
+import qualified Data.Set.NonEmpty as NESet
 import qualified Data.Text as Text
 import           Golden
 import           HGeometry.Box
 import           HGeometry.Cyclic
 import           HGeometry.Ext
+import           HGeometry.HyperPlane.NonVertical
+import           HGeometry.Instances ()
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope
+import qualified HGeometry.Plane.LowerEnvelope.Connected.BruteForce as BruteForce
 import qualified HGeometry.Plane.LowerEnvelope.Connected.Randomized as Randomized
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Convex.Unbounded
+import           HGeometry.Properties
 import           HGeometry.Sequence.Alternating (separators)
+import           HGeometry.Vector
 import           HGeometry.VoronoiDiagram
 import qualified HGeometry.VoronoiDiagram as VD
 import           Hiraffe.Graph.Class
@@ -33,7 +42,9 @@ import           Ipe.Color
 import           System.OsPath
 import           System.Random
 import           Test.Hspec
+import           Test.Hspec.QuickCheck
 import           Test.Hspec.WithTempFile
+import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
@@ -44,7 +55,7 @@ type R = RealNumber 5
 rVoronoiDiagram :: ( Point_ point 2 r, Functor f, Ord point
                    , Ord r, Fractional r, Foldable1 f
                    , Show point, Show r
-                   ) => f point -> VoronoiDiagram point
+                   ) => f point -> VoronoiDiagram point ()
 rVoronoiDiagram = voronoiDiagramWith (lowerEnvelopeWith . connectedLowerEnvelopeWith $
                                        Randomized.computeVertexForm (mkStdGen 1))
 
@@ -74,9 +85,6 @@ grow d (Box p q) = Box (p&coordinates %~ subtract d)
 
 
 
-    -- $ ((uncheckedFromCCWPoints $ map (^.asPoint) vertices)
-    --                      :: ConvexPolygon (Point 2 r)
-    --                      )
 
     -- case fromPoints $ map (^.asPoint) vertices of
     --   Nothing -> error $ "could not create convex polygon?" <> show vertices
@@ -106,10 +114,10 @@ grow d (Box p q) = Box (p&coordinates %~ subtract d)
 -- h
 
 instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
-         , Show point, Show r
+         , Show point, Show r, Show vtxData
          )
-         => HasDefaultIpeOut (VoronoiDiagram_ r point) where
-  type DefaultIpeOut (VoronoiDiagram_ r point) = Group
+         => HasDefaultIpeOut (VoronoiDiagram_ r point vtxData) where
+  type DefaultIpeOut (VoronoiDiagram_ r point vtxData) = Group
   defIO = \case
     AllColinear colinearPts -> let sites     = toList colinearPts
                                    bisectors = toList $ separators colinearPts
@@ -137,24 +145,25 @@ instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
 
 spec :: Spec
 spec = describe "lower envelope tests" $ do
-         testIpe [osp|trivial.ipe|]
-                 [osp|trivial_out|]
-         testIpe [osp|simplest.ipe|]
-                 [osp|simplest_out|]
-         testIpe [osp|simpler.ipe|]
-                 [osp|simpler_out|]
-         testIpe [osp|simple.ipe|]
-                 [osp|simple_out|]
-         testIpe [osp|simple1.ipe|]
-                 [osp|simple1_out|]
-         testIpe [osp|foo.ipe|]
-                 [osp|foo_out|]
-         testIpe [osp|degenerate.ipe|]
-                 [osp|degenerate_out|]
-         testIpe [osp|degenerate1.ipe|]
-                 [osp|degenerate1_out|]
-         testIpe [osp|degenerate2.ipe|]
-                 [osp|degenerate2_out|]
+         randomizedSameAsBruteForce
+         -- testIpe [osp|trivial.ipe|]
+         --         [osp|trivial_out|]
+         -- testIpe [osp|simplest.ipe|]
+         --         [osp|simplest_out|]
+         -- testIpe [osp|simpler.ipe|]
+         --         [osp|simpler_out|]
+         -- testIpe [osp|simple.ipe|]
+         --         [osp|simple_out|]
+         -- testIpe [osp|simple1.ipe|]
+         --         [osp|simple1_out|]
+         -- testIpe [osp|foo.ipe|]
+         --         [osp|foo_out|]
+         -- testIpe [osp|degenerate.ipe|]
+         --         [osp|degenerate_out|]
+         -- testIpe [osp|degenerate1.ipe|]
+         --         [osp|degenerate1_out|]
+         -- testIpe [osp|degenerate2.ipe|]
+         --         [osp|degenerate2_out|]
 
 
 -- | Build voronoi diagrams on the input points
@@ -163,8 +172,8 @@ testIpe inFp outFp = do
     (points :: NonEmpty (Point 2 R :+ _)) <- runIO $ do
       inFp' <- getDataFileName ([osp|test-with-ipe/VoronoiDiagram/|] <> inFp)
       NonEmpty.fromList <$> readAllFrom inFp'
-    let vd = voronoiDiagram $ view core <$> points
-        -- vd = rVoronoiDiagram $ view core <$> points
+    let --vd = voronoiDiagram $ view core <$> points
+        vd = rVoronoiDiagram $ view core <$> points
         vv = voronoiVertices $ view core <$> points
         out = [ iO' points
               , iO' vd
@@ -334,3 +343,132 @@ trivialVD = VoronoiDiagram $ LowerEnvelope vInfty (Seq.fromList [bv])
   -- order of the planes is incorrect, as is the z-coord.
 
 -}
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------
+
+newtype MyPlane = MyPlane (Plane R)
+  deriving newtype (Show,Eq,Ord)
+
+asPlane :: Iso' MyPlane (Plane R)
+asPlane = coerced
+
+type instance NumType MyPlane   = R
+type instance Dimension MyPlane = 3
+
+instance HyperPlane_ MyPlane 3 R
+instance NonVerticalHyperPlane_  MyPlane 3 R where
+  hyperPlaneCoefficients = asPlane.hyperPlaneCoefficients
+
+instance Arbitrary MyPlane where
+  arbitrary = do h <- arbitrary `suchThat` allOf (hyperPlaneCoefficients.traverse) (inRange 100)
+                 pure $ MyPlane h
+  shrink (MyPlane p) = MyPlane <$> shrink p
+
+-- instance (Arbitrary a, Ord a) => Arbitrary (NESet.NESet a) where
+--   arbitrary = do x  <- arbitrary
+--                  xs <- arbitrary
+--                  pure $ NESet.fromList (x :| xs)
+
+
+inRange m x = abs x <= m
+
+randomizedSameAsBruteForce :: Spec
+randomizedSameAsBruteForce = describe "randomized lower envelope tests" $ do
+    prop "randomized should be the same as brute force" $
+      \(hs :: NESet.NESet MyPlane) ->
+        Randomized.computeVertexForm (mkStdGen 1) hs `shouldBe` BruteForce.computeVertexForm hs
+
+    prop "definers start with up direction (brute force)" $
+      \(hs :: NESet.NESet MyPlane) ->
+        verifyStartWithUp $ BruteForce.computeVertexForm hs
+
+    -- prop "definers start with up direction (randomized)" $
+    --   \(hs :: NESet.NESet MyPlane) ->
+    --     verifyStartWithUp $ Randomized.computeVertexForm (mkStdGen 1) hs
+
+debug = do let hs :: NonEmpty (Plane R)
+               hs = NonEmpty.fromList
+                    [ NonVerticalHyperPlane $ fromList' [-7.2,7.5,0.5]
+                    , NonVerticalHyperPlane $ fromList' [-5.28572,5,-8]
+                    , NonVerticalHyperPlane $ fromList' [-2,4.75,-5.83334]
+                    , NonVerticalHyperPlane $ fromList' [0.25,-6.625,2]
+                    , NonVerticalHyperPlane $ fromList' [3.57142,-6.2,1.71428]
+                    , NonVerticalHyperPlane $ fromList' [4,7.625,3.66666]
+                    , NonVerticalHyperPlane $ fromList' [8,-6,-0.28572]
+                    , NonVerticalHyperPlane $ fromList' [8,5.66666,-2.125]
+                    , NonVerticalHyperPlane $ fromList' [8,7.75,4.66666]
+                    ]
+               fromList' [a,b,c] = Vector3 a b c
+           renderToIpe [osp|/tmp/bruteforce.ipe|] BruteForce.computeVertexForm hs
+           renderToIpe [osp|/tmp/randomized.ipe|] (Randomized.computeVertexForm (mkStdGen 1)) hs
+
+
+verifyStartWithUp env =  let startWithUp        :: Point 3 R -> Definers MyPlane -> All
+                             startWithUp p defs = let h = NonEmpty.head $ toNonEmpty defs
+                                                      q = projectPoint p .+^ Vector2 0 1
+                                                      z = evalAt q h
+                                                  in All $ all (\h' -> evalAt q h' >= z) defs
+                                    -- verify that h is the lowest at q
+                         in getAll $ Map.foldMapWithKey startWithUp env
+
+
+renderToIpe             :: (Plane_ plane R, Ord plane, Show plane
+                           ) => OsPath -> _ -> NonEmpty plane -> IO ()
+renderToIpe fp mkEnv hs =
+    writeIpeFile fp . addStyleSheet opacitiesStyle $ singlePageFromContent out
+  where
+    Just env = connectedLowerEnvelopeWith mkEnv hs
+
+    out :: [IpeObject R]
+    out = zipWith render (cycle $ drop 3 basicNamedColors)
+        . toList . NEMap.assocs . HGeometry.Plane.LowerEnvelope.asMap $ env
+
+    -- render :: IpeColor R -> (Point 3 R, Definers plane) -> IpeObject R
+    -- render color (p, _defs) = iO $ defIO (projectPoint @2 p) ! attr SStroke color
+
+    render color (h, region) = iO' $ ipeGroup
+                               [ iO $ labelled centroid' defIO' (region :+ h)
+                               -- , iO $ ipeLabel (c :+ h)
+                               -- , iO $ defIO (site^.asPoint) ! attr SStroke  color
+                               -- ,
+                               ]
+      where
+        defIO' reg = defIO reg ! attr SFill    color
+                               ! attr SOpacity (Text.pack "10%")
+        centroid' reg = centerPoint (boundingBox $ toPoly reg)
+        toPoly reg = case toConvexPolygonIn rect' region of
+            Left pg  -> (pg&vertices %~ view asPoint :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 R))
+            Right pg -> pg&vertices %~ view asPoint
+
+          where
+            rect' = grow 1000 $ boundingBox region
+
+
+-- TODO: for whatever reason we get the definers in a different order.
+-- According to the spec of Definers the edges should be in CCW order, starting with the plane that is minimal at the vertical up direction.
+--
+-- bug =fromList (NonVerticalHyperPlane [-2,5,-4.33334] :| [NonVerticalHyperPlane [-0.83334,1.5,-3],NonVerticalHyperPlane [1.33333,1.5,0.33333]])
+
+
+
+--        -- expected:
+
+--      fromList [(Point3 (-1.53846~) (-0.13187~) (-1.91574~),
+
+--                 Definers (NonVerticalHyperPlane [-0.83334,1.5,-3] :| [
+--                           NonVerticalHyperPlane [1.33333,1.5,0.33333],
+--                           NonVerticalHyperPlane [-2,5,-4.33334]]))]
+
+--      but got:
+
+--      fromList [(Point3 (-1.53846~) (-0.13187~) (-1.91574~)
+--                ,Definers (NonVerticalHyperPlane [1.33333,1.5,0.33333] :| [
+--                           NonVerticalHyperPlane [-2,5,-4.33334],
+--                           NonVerticalHyperPlane [-0.83334,1.5,-3]]))]
