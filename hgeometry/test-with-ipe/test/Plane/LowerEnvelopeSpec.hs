@@ -3,8 +3,9 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-unused-binds #-}
 module Plane.LowerEnvelopeSpec
-  ( spec
-  ) where
+  -- ( spec
+  -- ) where
+  where
 
 import           Control.Lens
 import           Data.Foldable
@@ -392,9 +393,21 @@ randomizedSameAsBruteForce = describe "randomized lower envelope tests" $ do
     --   \(hs :: NESet.NESet MyPlane) ->
     --     verifyStartWithUp $ Randomized.computeVertexForm (mkStdGen 1) hs
 
--- debug = do let hs = undefined
---            renderToIpe [osp|/tmp/bruteforce.ipe|] BruteForce.computeVertexForm hs
---            renderToIpe [osp|/tmp/randomized.ipe|] Randomized.computeVertexForm (mkStdGen 1) hs
+debug = do let hs :: NonEmpty (Plane R)
+               hs = NonEmpty.fromList
+                    [ NonVerticalHyperPlane $ fromList' [-7.2,7.5,0.5]
+                    , NonVerticalHyperPlane $ fromList' [-5.28572,5,-8]
+                    , NonVerticalHyperPlane $ fromList' [-2,4.75,-5.83334]
+                    , NonVerticalHyperPlane $ fromList' [0.25,-6.625,2]
+                    , NonVerticalHyperPlane $ fromList' [3.57142,-6.2,1.71428]
+                    , NonVerticalHyperPlane $ fromList' [4,7.625,3.66666]
+                    , NonVerticalHyperPlane $ fromList' [8,-6,-0.28572]
+                    , NonVerticalHyperPlane $ fromList' [8,5.66666,-2.125]
+                    , NonVerticalHyperPlane $ fromList' [8,7.75,4.66666]
+                    ]
+               fromList' [a,b,c] = Vector3 a b c
+           renderToIpe [osp|/tmp/bruteforce.ipe|] BruteForce.computeVertexForm hs
+           renderToIpe [osp|/tmp/randomized.ipe|] (Randomized.computeVertexForm (mkStdGen 1)) hs
 
 
 verifyStartWithUp env =  let startWithUp        :: Point 3 R -> Definers MyPlane -> All
@@ -406,17 +419,36 @@ verifyStartWithUp env =  let startWithUp        :: Point 3 R -> Definers MyPlane
                          in getAll $ Map.foldMapWithKey startWithUp env
 
 
-renderToIpe fp env = writeIpeFile fp . addStyleSheet opacitiesStyle $ singlePageFromContent out
+renderToIpe             :: (Plane_ plane R, Ord plane, Show plane
+                           ) => OsPath -> _ -> NonEmpty plane -> IO ()
+renderToIpe fp mkEnv hs =
+    writeIpeFile fp . addStyleSheet opacitiesStyle $ singlePageFromContent out
   where
+    Just env = connectedLowerEnvelopeWith mkEnv hs
+
+    out :: [IpeObject R]
     out = zipWith render (cycle $ drop 3 basicNamedColors)
         . toList . NEMap.assocs . HGeometry.Plane.LowerEnvelope.asMap $ env
 
-    render color (_, region) = iO' $ ipeGroup
-                               [ iO $ defIO region   ! attr SFill    color
-                                                     ! attr SOpacity (Text.pack "10%")
+    -- render :: IpeColor R -> (Point 3 R, Definers plane) -> IpeObject R
+    -- render color (p, _defs) = iO $ defIO (projectPoint @2 p) ! attr SStroke color
+
+    render color (h, region) = iO' $ ipeGroup
+                               [ iO $ labelled centroid' defIO' (region :+ h)
+                               -- , iO $ ipeLabel (c :+ h)
                                -- , iO $ defIO (site^.asPoint) ! attr SStroke  color
                                -- ,
                                ]
+      where
+        defIO' reg = defIO reg ! attr SFill    color
+                               ! attr SOpacity (Text.pack "10%")
+        centroid' reg = centerPoint (boundingBox $ toPoly reg)
+        toPoly reg = case toConvexPolygonIn rect' region of
+            Left pg  -> (pg&vertices %~ view asPoint :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 R))
+            Right pg -> pg&vertices %~ view asPoint
+
+          where
+            rect' = grow 1000 $ boundingBox region
 
 
 -- TODO: for whatever reason we get the definers in a different order.
