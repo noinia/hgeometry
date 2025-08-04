@@ -208,7 +208,10 @@ withExtraConflictLists        :: (Plane_ plane r, Ord r, Num r--, Point_ corner 
 withExtraConflictLists planes = NEMap.mapWithKey $ \h -> fmap (withPolygonVertex h)
   where
     withPolygonVertex h v = v :+ Set.filter (below (evalAt v h) v) planes
-    below z (Point2_ x y) h = verticalSideTest (Point3 x y z) h  /= GT -- == LT
+    below z (Point2_ x y) h = verticalSideTest (Point3 x y z) h  == LT
+
+
+  -- TODO
     -- note that we use the /= GT, so that we include the plane that define
     -- the lower envelope on this place.
   -- TODO: do we really want this?
