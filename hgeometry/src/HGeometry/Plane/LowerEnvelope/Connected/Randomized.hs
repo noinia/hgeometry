@@ -106,8 +106,8 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
       case withConflictLists remaining (BruteForce.computeVertexForm rNet) of
         IsEmpty                                                                    -> mempty
         IsNonEmpty (verticesRNet :: NEMap (Point 3 r) (Definers plane, Set plane)) ->
-               NEMap.mapMaybeWithKey (asVertexIn tri) verticesRNet
-            <> foldMap lowerEnvelopeIn' triangulatedEnv
+          NEMap.mapMaybeWithKey (asVertexIn tri) verticesRNet
+            `merge` foldMap lowerEnvelopeIn' triangulatedEnv
           where
             -- Construct the lower envelope inside the triangle.
             -- also compute the conflicts of the corners
@@ -122,6 +122,10 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
             -- prism. We will already throw away any prisms with an
             triangulatedEnv :: [Triangle (Point 2 r) :+ NESet plane]
             triangulatedEnv = NEMap.foldMapWithKey triangulate env
+
+            -- merge the resulting Maps; making sure to actually combine the definers
+            merge = Map.unionWithKey mergeDefiners
+
 
     lowerEnvelopeIn'     :: Triangle (Point 2 r) :+ NESet plane
                          -> Map (Point 3 r) (Definers plane)
