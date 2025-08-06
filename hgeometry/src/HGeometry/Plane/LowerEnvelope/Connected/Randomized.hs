@@ -150,16 +150,23 @@ takeSample r = bimap NonEmpty.fromList Set.fromList . splitAt r . toList
 
 -- | Report whether this is really a vertex of the global lower envelope in the region.
 asVertexIn :: (Ord r, Num r, Point_ vertex 2 r, Foldable set
-              , Show definers, Show (set plane), Show r, Show vertex
+
+              , definers ~ Definers plane
+              , Show (set plane), Show r, Show vertex, Show plane, Ord plane
               )
            => Triangle vertex -> Point 3 r -> (definers, set plane) -> Maybe definers
-asVertexIn tri (Point3 x y _) (defs,conflictList)
-  | traceShow ("asVertexIn ",tri,x,y, conflictList, null conflictList && (Point2 x y) `intersects` tri) False = undefined
+asVertexIn tri (Point3 x y z) (defs,conflictList)
+  | traceShow ("asVertexIn ",tri,x,y,z
+              ,"defs", defs
+              ,"CL:",conflictList
+              , null conflictList && (Point2 x y) `intersects` tri) False = undefined
   | null conflictList && (Point2 x y) `intersects'` tri = Just defs
   | otherwise                                           = Nothing
   where
     p `intersects'` tri = p `intersects` tri && notElemOf (vertices.asPoint) p tri
 
+    toSet :: (Foldable f, Ord a) => f a -> Set a
+    toSet = Set.fromList . toList
 
 -- -- | Test whether the given point lies inside the triangular region.
 -- inRegion         :: (Ord r, Num r, Point_ vertex 2 r)
@@ -198,7 +205,7 @@ withConflictLists planes = imap (\v defs -> (defs, Set.filter (below v) planes))
   where
     below v h =
       traceShowWith ("below ",v,h,) $
-      verticalSideTest v h == LT
+      verticalSideTest v h == GT
       -- a plane conflicts with a vertex v if it passes strictly below the point
 
 
@@ -212,7 +219,7 @@ withExtraConflictLists        :: (Plane_ plane r, Ord r, Num r--, Point_ corner 
 withExtraConflictLists planes = NEMap.mapWithKey $ \h -> fmap (withPolygonVertex h)
   where
     withPolygonVertex h v = v :+ Set.filter (below (evalAt v h) v) planes
-    below z (Point2_ x y) h = verticalSideTest (Point3 x y z) h  == LT
+    below z (Point2_ x y) h = verticalSideTest (Point3 x y z) h  == GT
 
 
   -- TODO
@@ -228,7 +235,7 @@ withExtraConflictLists planes = NEMap.mapWithKey $ \h -> fmap (withPolygonVertex
                          -- NEMap (Point 3 r) (Definers plane, Set plane)
 -- withConflictLists planes = NEMap.mapWithKey (\v defs -> (defs, Set.filter (below v) planes))
 --   where
---     below v h = verticalSideTest v h == LT -- TODO: not sure if this should be LT or 'not GT'
+--     below v h = verticalSideTest v h == GT -- TODO: not sure if this should be LT or 'not GT'
 -- TODO: dummy implementation for now
 --}
 

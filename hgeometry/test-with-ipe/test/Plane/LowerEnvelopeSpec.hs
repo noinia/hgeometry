@@ -395,19 +395,48 @@ randomizedSameAsBruteForce = describe "randomized lower envelope tests" $ do
 
 debug = do let hs :: NonEmpty (Plane R)
                hs = NonEmpty.fromList
-                    [ NonVerticalHyperPlane $ fromList' [-7.2,7.5,0.5]
-                    , NonVerticalHyperPlane $ fromList' [-5.28572,5,-8]
-                    , NonVerticalHyperPlane $ fromList' [-2,4.75,-5.83334]
-                    , NonVerticalHyperPlane $ fromList' [0.25,-6.625,2]
-                    , NonVerticalHyperPlane $ fromList' [3.57142,-6.2,1.71428]
-                    , NonVerticalHyperPlane $ fromList' [4,7.625,3.66666]
-                    , NonVerticalHyperPlane $ fromList' [8,-6,-0.28572]
-                    , NonVerticalHyperPlane $ fromList' [8,5.66666,-2.125]
-                    , NonVerticalHyperPlane $ fromList' [8,7.75,4.66666]
+                    [NonVerticalHyperPlane $ fromList'  [-5,-3.33334,0.83333]
+                    ,NonVerticalHyperPlane $ fromList' [-5,2.33333,-3]
+                    ,NonVerticalHyperPlane $ fromList' [-3.83334,-4.66667,5.5]
+                    ,NonVerticalHyperPlane $ fromList' [-3.66667,0.25,3]
+                    ,NonVerticalHyperPlane $ fromList' [0,-6,-1]
+                    ,NonVerticalHyperPlane $ fromList' [0,-6,5.25]
+                    ,NonVerticalHyperPlane $ fromList' [0,4.33333,4.66666]
                     ]
+
+
+
+                    -- [ NonVerticalHyperPlane $ fromList' [-7.2,7.5,0.5]
+                    -- , NonVerticalHyperPlane $ fromList' [-5.28572,5,-8]
+                    -- , NonVerticalHyperPlane $ fromList' [-2,4.75,-5.83334]
+                    -- , NonVerticalHyperPlane $ fromList' [0.25,-6.625,2]
+                    -- , NonVerticalHyperPlane $ fromList' [3.57142,-6.2,1.71428]
+                    -- , NonVerticalHyperPlane $ fromList' [4,7.625,3.66666]
+                    -- , NonVerticalHyperPlane $ fromList' [8,-6,-0.28572]
+                    -- , NonVerticalHyperPlane $ fromList' [8,5.66666,-2.125]
+                    -- , NonVerticalHyperPlane $ fromList' [8,7.75,4.66666]
+                    -- ]
                fromList' [a,b,c] = Vector3 a b c
+
+               v  = Point3 4.18748 7.16404 (-43.98427)
+           for_ hs $ \h ->
+             print $ (h, evalAt (projectPoint v) h
+                     ,verticalSideTest v h
+                     )
+
            renderToIpe [osp|/tmp/bruteforce.ipe|] BruteForce.computeVertexForm hs
            renderToIpe [osp|/tmp/randomized.ipe|] (Randomized.computeVertexForm (mkStdGen 1)) hs
+
+
+
+
+-- buggySideTest = it "buggy sideTest" $
+--                   verticalSideTest v h `shouldBe` GT
+--   where
+--     v :: Point 3 R
+--     v  = Point3 4.18748 7.16404 (-43.98427)
+--     h = ,
+--                      )
 
 
 verifyStartWithUp env =  let startWithUp        :: Point 3 R -> Definers MyPlane -> All
@@ -449,26 +478,3 @@ renderToIpe fp mkEnv hs =
 
           where
             rect' = grow 1000 $ boundingBox region
-
-
--- TODO: for whatever reason we get the definers in a different order.
--- According to the spec of Definers the edges should be in CCW order, starting with the plane that is minimal at the vertical up direction.
---
--- bug =fromList (NonVerticalHyperPlane [-2,5,-4.33334] :| [NonVerticalHyperPlane [-0.83334,1.5,-3],NonVerticalHyperPlane [1.33333,1.5,0.33333]])
-
-
-
---        -- expected:
-
---      fromList [(Point3 (-1.53846~) (-0.13187~) (-1.91574~),
-
---                 Definers (NonVerticalHyperPlane [-0.83334,1.5,-3] :| [
---                           NonVerticalHyperPlane [1.33333,1.5,0.33333],
---                           NonVerticalHyperPlane [-2,5,-4.33334]]))]
-
---      but got:
-
---      fromList [(Point3 (-1.53846~) (-0.13187~) (-1.91574~)
---                ,Definers (NonVerticalHyperPlane [1.33333,1.5,0.33333] :| [
---                           NonVerticalHyperPlane [-2,5,-4.33334],
---                           NonVerticalHyperPlane [-0.83334,1.5,-3]]))]
