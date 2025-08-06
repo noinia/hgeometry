@@ -69,6 +69,9 @@ computeVertexForm gen = computeVertexFormIn tri . V.unsafeFromVector . shuffle g
                    (Point2 (200_000)  (-100_000))
     -- TODO: compute abounding box/triangle instead
 
+toSet :: (Foldable1 f, Ord a) => f a -> NESet a
+toSet = NESet.fromList . toNonEmpty
+
 -- | pre:
 --
 -- - input is already a random permutation
@@ -80,7 +83,7 @@ computeVertexFormIn         :: forall plane point r.
                             => Triangle point
                             -> V.NonEmptyVector plane
                             -> VertexForm Map r plane
-computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
+computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) (toSet hs)
   where
     n  = length hs
     r  = sqrt . sqrt @Double . fromIntegral $ n -- r = n^{1/4}
@@ -96,9 +99,8 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
       -- TODO: make sure that if the lower envelope has a vertex, we select planes
       -- that generate a plane.
 
-    lowerEnvelopeIn   :: Foldable1 set
-                      => Triangle (Point 2 r)
-                      -> set plane
+    lowerEnvelopeIn   :: Triangle (Point 2 r)
+                      -> NESet plane
                       -> Map (Point 3 r) (Definers plane)
     lowerEnvelopeIn tri planes | traceShow ("LE",tri, toList planes) False = undefined
 
@@ -112,10 +114,10 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) hs
             -- Construct the lower envelope inside the triangle.
             -- also compute the conflicts of the corners
             env :: NEMap plane (ClippedMDCell'' r (MDVertex r plane (_, Set plane))
-                                                  (Point 2 r :+ Set plane)
+                                                  (Point 2 r :+ (ExtraDefiners plane, Set plane))
                                )
             env = traceShowWith ("Env",) $
-                  withExtraConflictLists remaining
+                  withExtraConflictLists (NESet.toSet planes)
                 . fromVertexFormIn tri rNet $ verticesRNet
 
             -- | Triangulate the lower envelope, and collect the conflict list of each
@@ -209,17 +211,25 @@ withConflictLists planes = imap (\v defs -> (defs, Set.filter (below v) planes))
       -- a plane conflicts with a vertex v if it passes strictly below the point
 
 
--- | Compute the conflit lists for the extra vertices we added.
+-- | Compute the conflict lists for the extra vertices we added.
 withExtraConflictLists        :: (Plane_ plane r, Ord r, Num r--, Point_ corner 2 r
+                                 , Show plane, Show r
                                  )
                               => Set plane
                               -> NEMap plane (ClippedMDCell r plane (a, Set plane))
                               -> NEMap plane (ClippedMDCell'' r (MDVertex r plane (a, Set plane))
-                                                                (Point 2 r :+ Set plane))
+                                                                (Point 2 r :+ (ExtraDefiners plane, Set plane)))
+withExtraConflictLists planes | traceShow ("withExtraConflictLists",planes) False = undefined
 withExtraConflictLists planes = NEMap.mapWithKey $ \h -> fmap (withPolygonVertex h)
   where
-    withPolygonVertex h v = v :+ Set.filter (below (evalAt v h) v) planes
-    below z (Point2_ x y) h = verticalSideTest (Point3 x y z) h  == GT
+    withPolygonVertex h v = traceShowWith ("withPolygonVertex",h,v,) $ v :+ (defs,belows)
+      where
+        z             = evalAt v h
+        (belows,rest) = Set.partition (sideTest z v GT) planes
+        (defs, _)     = Set.partition (sideTest z v EQ) planes
+        sideTest z (Point2_ x y) res h = verticalSideTest (Point3 x y z) h == res
+
+-- I think we need to compute both the conflict list and the definers of these extra vertices.
 
 
   -- TODO
@@ -262,10 +272,12 @@ withExtraConflictLists planes = NEMap.mapWithKey $ \h -> fmap (withPolygonVertex
 
                  -- ClippedBoundedRegion r (MDVertex r plane (a, conflictList))
                  --                           (Point 2 r :+ conflictList)
-triangulate                        :: (Num r, Ord plane)
+triangulate                        :: (Num r, Ord plane
+                                      , Show plane, Show a, Show r
+                                      )
                                    => plane
                                    -> ClippedMDCell'' r (MDVertex r plane (a, Set plane))
-                                                        (Point 2 r :+ Set  plane)
+                                                        (Point 2 r :+ (ExtraDefiners plane, Set  plane))
                                    -> [Triangle (Point 2 r) :+ NESet plane]
 triangulate h (ClippedMDCell cell) = case cell of
     ActualPolygon poly -> triangulate' h poly
@@ -274,19 +286,28 @@ triangulate h (ClippedMDCell cell) = case cell of
   -- TODO: technically, there could still be vertices on the degenerate edge.
   -- make sure we hanlde those somewhere else
 
-triangulate'        :: (Num r, Ord plane)
+
+-- | The definers of extra vertices. These extra vertices typically lie on edges
+-- of the lower envelope; these extra definers are the planes that define such an edge.
+type ExtraDefiners plane = Set plane
+
+triangulate'        :: (Num r, Ord plane
+                                      , Show plane, Show a, Show r
+                       )
                     => plane
                     -> ClippedBoundedRegion r (MDVertex r plane (a, Set plane))
-                                              (Point 2 r :+ Set plane)
+                                              (Point 2 r :+ (ExtraDefiners plane, Set plane))
                     -> [Triangle (Point 2 r) :+ NESet plane]
-triangulate' h poly = mapMaybe' withConflictList $ case toNonEmptyOf vertices poly of
+triangulate' h poly = traceShowWith ("triangulate'", h, poly,"->",) $ mapMaybe' withConflictList $ case toNonEmptyOf vertices poly of
     u :| (v : vs) -> NonEmpty.zipWith (Triangle u) (v :| vs) (NonEmpty.fromList vs)
     _             -> error "absurd. trianglulate; impossible"
   where
-    withConflictList tri = case foldMap conflictListOf tri of
+    withConflictList tri = case traceShowWith ("withConflictList,tri",tri,) $ foldMap conflictListOf tri of
       NESet.IsEmpty                 -> Nothing
       NESet.IsNonEmpty conflictList -> Just $
-        let conflictList' = foldr NESet.insert conflictList (foldMap edgeDefiners $ edgesOf tri)
+        let conflictList' = foldr NESet.insert conflictList (
+              traceShowWith ("edgeDefinersOf",tri,"with",conflictList,"->",) $
+              foldMap edgeDefiners $ edgesOf tri)
         in ((^.asPoint) <$> tri) :+ conflictList'
 
     edgesOf (Triangle a b c) = [(a,b),(b,c),(c,a)]
@@ -295,14 +316,15 @@ triangulate' h poly = mapMaybe' withConflictList $ case toNonEmptyOf vertices po
     -- of two planes; h, and the other plane h_(u,v) on the other side of the edge.
     edgeDefiners (u,v) = definersOf' u `Set.intersection` definersOf' v
     definersOf' = \case
-      Original v -> foldMap Set.singleton $ definersOf v
-      Extra    _ -> Set.singleton h
-    -- TODO: hmm, not quite sure if the h is right
+      Original v            -> foldMap Set.singleton $ definersOf v
+      Extra (_ :+ (defs,_)) -> defs
+    --   _ -> Set.singleton h
+    -- -- TODO: hmm, not quite sure if the h is right
 
     -- get the conflictList as a vertex
     conflictListOf = \case
       Original v -> v^.vertexData._2
-      Extra    p -> p^.extra
+      Extra    p -> p^.extra._2
 
     mapMaybe' f = mapMaybe f . toList
 

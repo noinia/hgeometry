@@ -395,18 +395,25 @@ randomizedSameAsBruteForce = describe "randomized lower envelope tests" $ do
 
 debug = do let hs :: NonEmpty (Plane R)
                hs = NonEmpty.fromList
-                    [NonVerticalHyperPlane $ fromList'  [-5,-3.33334,0.83333]
-                    ,NonVerticalHyperPlane $ fromList' [-5,2.33333,-3]
-                    ,NonVerticalHyperPlane $ fromList' [-3.83334,-4.66667,5.5]
-                    ,NonVerticalHyperPlane $ fromList' [-3.66667,0.25,3]
-                    ,NonVerticalHyperPlane $ fromList' [0,-6,-1]
-                    ,NonVerticalHyperPlane $ fromList' [0,-6,5.25]
-                    ,NonVerticalHyperPlane $ fromList' [0,4.33333,4.66666]
-                    ]
+                 [NonVerticalHyperPlane $ fromList' [-8,6,-1.8]
+                 ,NonVerticalHyperPlane $ fromList' [-6,-7.66667,5]
+                 ,NonVerticalHyperPlane $ fromList' [-5.83334,6.75,1.4]
+                 ,NonVerticalHyperPlane $ fromList' [3,6,1.33333]
+                 ,NonVerticalHyperPlane $ fromList' [4.2,-5.33334,0.66666]
+                 ,NonVerticalHyperPlane $ fromList' [7.8,4,-5]
+                 ]
 
+               -- hs = NonEmpty.fromList
+               --      [NonVerticalHyperPlane $ fromList'  [-5,-3.33334,0.83333]
+               --      ,NonVerticalHyperPlane $ fromList' [-5,2.33333,-3]
+               --      ,NonVerticalHyperPlane $ fromList' [-3.83334,-4.66667,5.5]
+               --      ,NonVerticalHyperPlane $ fromList' [-3.66667,0.25,3]
+               --      ,NonVerticalHyperPlane $ fromList' [0,-6,-1]
+               --      ,NonVerticalHyperPlane $ fromList' [0,-6,5.25]
+               --      ,NonVerticalHyperPlane $ fromList' [0,4.33333,4.66666]
+               --      ]
 
-
-                    -- [ NonVerticalHyperPlane $ fromList' [-7.2,7.5,0.5]
+                 -- [ NonVerticalHyperPlane $ fromList' [-7.2,7.5,0.5]
                     -- , NonVerticalHyperPlane $ fromList' [-5.28572,5,-8]
                     -- , NonVerticalHyperPlane $ fromList' [-2,4.75,-5.83334]
                     -- , NonVerticalHyperPlane $ fromList' [0.25,-6.625,2]
@@ -418,7 +425,7 @@ debug = do let hs :: NonEmpty (Plane R)
                     -- ]
                fromList' [a,b,c] = Vector3 a b c
 
-               v  = Point3 4.18748 7.16404 (-43.98427)
+               v  = Point3 (-0.24717) (-3.55263) 0
            for_ hs $ \h ->
              print $ (h, evalAt (projectPoint v) h
                      ,verticalSideTest v h
