@@ -133,14 +133,6 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) (toSet hs)
                          -> Map (Point 3 r) (Definers plane)
     lowerEnvelopeIn' (tri :+ conflictList) = lowerEnvelopeIn tri conflictList
 
-    -- tri = case conflictListOf tri of
-    --   NESet.IsNonEmpty conflictList ->  (view core <$> tri) conflictList
-    --   _                             -> mempty
-
-
--- dropVertexData :: ClippedBoundedRegion r (MDVertex r plane (a,b)) x
---                -> ClippedBoundedRegion r (MDVertex r plane b) x
--- dropVertexData = fmap $ first (fmap snd)
 
 -- | Given a size r > 0; take a sample of the planes from the given size (essentially by just
 -- taking the first r planes.)
@@ -170,22 +162,6 @@ asVertexIn tri (Point3 x y z) (defs,conflictList)
     toSet :: (Foldable f, Ord a) => f a -> Set a
     toSet = Set.fromList . toList
 
--- -- | Test whether the given point lies inside the triangular region.
--- inRegion         :: (Ord r, Num r, Point_ vertex 2 r)
---                  => Triangle vertex -> Point 3 r -> a -> Bool
--- inRegion tri v _ = projectPoint v `intersects` tri
-
---   -- all () (halfspaces tri)
-
-
--- -- | The triangular region is the intersection of halfspaces; compute this set of halfspaces.
--- halfspaces :: (Point_ vertex 2 r, Num r, Ord r)
---            => Triangular r vertex -> NonEmpty (HalfSpaceF (LinePV 2 r))
--- halfspaces tr = case view asPoint <$> tr of
---   Triangular triangle  -> toNonEmpty $ intersectingHalfPlanes triangle
---   UnboundedOne u p v   -> leftHalfPlane <$> (LinePV p u) :| [ LinePV p v ]
---   UnboundedTwo u p q v -> leftHalfPlane <$> (LinePV p u) :| [ LinePV p (q .-. p), LinePV q v ]
-
 hasNoConflict                     :: Foldable set => (definers, set plane) -> Maybe definers
 hasNoConflict (defs,conflictList)
   | null conflictList              = Just defs
@@ -205,13 +181,13 @@ withConflictLists        :: ( Plane_ plane r, Ord r, Num r, Ord plane
                          -> map (Point 3 r) (Definers plane, Set plane)
 withConflictLists planes = imap (\v defs -> (defs, Set.filter (below v) planes))
   where
-    below v h =
-      traceShowWith ("below ",v,h,) $
-      verticalSideTest v h == GT
-      -- a plane conflicts with a vertex v if it passes strictly below the point
+    below v h = verticalSideTest v h == GT
+    -- a plane conflicts with a vertex v if it passes strictly below the point
+  -- TODO: we should replace this with something more efficient.
 
 
--- | Compute the conflict lists for the extra vertices we added.
+-- | Compute the conflict lists for the extra vertices we added. In addition,
+-- compute the definers for the given position.
 withExtraConflictLists        :: (Plane_ plane r, Ord r, Num r--, Point_ corner 2 r
                                  , Show plane, Show r
                                  )
@@ -222,56 +198,14 @@ withExtraConflictLists        :: (Plane_ plane r, Ord r, Num r--, Point_ corner 
 withExtraConflictLists planes | traceShow ("withExtraConflictLists",planes) False = undefined
 withExtraConflictLists planes = NEMap.mapWithKey $ \h -> fmap (withPolygonVertex h)
   where
-    withPolygonVertex h v = traceShowWith ("withPolygonVertex",h,v,) $ v :+ (defs,belows)
+    withPolygonVertex h v = v :+ (defs,belows)
       where
         z             = evalAt v h
         (belows,rest) = Set.partition (sideTest z v GT) planes
         (defs, _)     = Set.partition (sideTest z v EQ) planes
         sideTest z (Point2_ x y) res h = verticalSideTest (Point3 x y z) h == res
 
--- I think we need to compute both the conflict list and the definers of these extra vertices.
 
-
-  -- TODO
-    -- note that we use the /= GT, so that we include the plane that define
-    -- the lower envelope on this place.
-  -- TODO: do we really want this?
-
-
--- withConflictLists
--- withConflictLists planes = undefined
--- {-
-
-                         -- NEMap (Point 3 r) (Definers plane, Set plane)
--- withConflictLists planes = NEMap.mapWithKey (\v defs -> (defs, Set.filter (below v) planes))
---   where
---     below v h = verticalSideTest v h == GT -- TODO: not sure if this should be LT or 'not GT'
--- TODO: dummy implementation for now
---}
-
--- data Triangular r vertex = Triangular   (Triangle vertex)
---                          | UnboundedOne (Vector 2 r) vertex (Vector 2 r)
---                          | UnboundedTwo (Vector 2 r) vertex vertex (Vector 2 r)
---                          deriving (Show,Eq,Functor,Foldable)
-
-
--- -- | Triangulate the minimization diagram.
--- toTriangles :: MinimizationDiagram r vertex plane -> NonEmpty (Triangular r vertex)
--- toTriangles = foldMap1 toTriangles' . asMap
---   where
---     toTriangles' = \case
---       Bounded vertices       -> case toNonEmpty vertices of
---                                   u :| (v : w : vs) -> triangulate u v (w:|vs)
---                                   _                 -> error "bounded reg with < 3 vertices.."
---       Unbounded u vertices v -> case vertices of
---                                   p :| []       -> UnboundedOne u p v :| []
---                                   p :| (q:rest) -> let z = last $ q:|rest in
---                                                    UnboundedTwo u p z v :| triangulate' p q rest
-
-
-
-                 -- ClippedBoundedRegion r (MDVertex r plane (a, conflictList))
-                 --                           (Point 2 r :+ conflictList)
 triangulate                        :: (Num r, Ord plane
                                       , Show plane, Show a, Show r
                                       )
@@ -318,8 +252,6 @@ triangulate' h poly = traceShowWith ("triangulate'", h, poly,"->",) $ mapMaybe' 
     definersOf' = \case
       Original v            -> foldMap Set.singleton $ definersOf v
       Extra (_ :+ (defs,_)) -> defs
-    --   _ -> Set.singleton h
-    -- -- TODO: hmm, not quite sure if the h is right
 
     -- get the conflictList as a vertex
     conflictListOf = \case
@@ -328,7 +260,6 @@ triangulate' h poly = traceShowWith ("triangulate'", h, poly,"->",) $ mapMaybe' 
 
     mapMaybe' f = mapMaybe f . toList
 
-    -- neSet <>> set' = foldr NESet.insert neSet set'
 
 
 ----------------------------------------

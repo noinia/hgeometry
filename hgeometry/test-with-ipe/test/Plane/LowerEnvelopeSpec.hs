@@ -10,10 +10,13 @@ module Plane.LowerEnvelopeSpec
 import           Control.Lens
 import           Data.Foldable
 import           Data.Foldable1
+import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Data.Map.NonEmpty as NEMap
+import           Data.Maybe (mapMaybe)
+import           Data.Ord (comparing)
 import           Data.Semigroup
 import qualified Data.Set as Set
 import qualified Data.Set.NonEmpty as NESet
@@ -46,7 +49,7 @@ import           Test.Hspec.QuickCheck
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
-
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -393,15 +396,92 @@ randomizedSameAsBruteForce = describe "randomized lower envelope tests" $ do
     --   \(hs :: NESet.NESet MyPlane) ->
     --     verifyStartWithUp $ Randomized.computeVertexForm (mkStdGen 1) hs
 
+
+subsets    :: Foldable f => f a -> [NonEmpty a]
+subsets xs = mapMaybe NonEmpty.nonEmpty
+           . filter (\ys -> length ys >= 6)
+           . List.sortBy (comparing length) $ subsets' $ toList xs
+
+subsets' []     = [[]]
+subsets' (x:xs) = concatMap (\r -> [r,x:r]) (subsets' xs)
+
+smallest hs = toList $ List.head $ filter isBug $ subsets hs
+  where
+    isBug hsL
+      | traceShow ("===========", hsL, "=================") False  = undefined
+      | otherwise
+      = let hs' = NESet.fromList hsL in
+        Randomized.computeVertexForm (mkStdGen 1) hs' /= BruteForce.computeVertexForm hs'
+
+debug1 = smallest $ NonEmpty.fromList
+                 [NonVerticalHyperPlane $ fromList' [-25.8,-25.5,-0.94445]
+                 ,NonVerticalHyperPlane $ fromList' [-20.25,-16.66667,-28]
+                 ,NonVerticalHyperPlane $ fromList' [-19,-18.88889,10]
+                 ,NonVerticalHyperPlane $ fromList' [-17.83334,1.47058,14.18181]
+                 ,NonVerticalHyperPlane $ fromList' [-15.8,-6.64706,-25.66667]
+                 ,NonVerticalHyperPlane $ fromList' [-15.46667,-11.95239,-0.8]
+                 ,NonVerticalHyperPlane $ fromList' [-15.44445,-27.66667,28]
+                 ,NonVerticalHyperPlane $ fromList' [-15.06667,-25.75,8.73076]
+                 ,NonVerticalHyperPlane $ fromList' [-15,9.66666,-18]
+                 ]
+  where
+    fromList' [a,b,c] = Vector3 a b c
+
+
 debug = do let hs :: NonEmpty (Plane R)
                hs = NonEmpty.fromList
-                 [NonVerticalHyperPlane $ fromList' [-8,6,-1.8]
-                 ,NonVerticalHyperPlane $ fromList' [-6,-7.66667,5]
-                 ,NonVerticalHyperPlane $ fromList' [-5.83334,6.75,1.4]
-                 ,NonVerticalHyperPlane $ fromList' [3,6,1.33333]
-                 ,NonVerticalHyperPlane $ fromList' [4.2,-5.33334,0.66666]
-                 ,NonVerticalHyperPlane $ fromList' [7.8,4,-5]
+                 -- [NonVerticalHyperPlane $fromList' [-25.8,-25.5,-0.94445]
+                 -- ,NonVerticalHyperPlane $fromList' [-20.25,-16.66667,-28.0]
+                 -- ,NonVerticalHyperPlane $fromList' [-19.0,-18.88889,10.0]
+                 -- ,NonVerticalHyperPlane $fromList' [-17.83334,1.47058,14.18181]
+                 -- ,NonVerticalHyperPlane $fromList' [-15.8,-6.64706,-25.66667]
+                 -- ,NonVerticalHyperPlane $fromList' [-15.46667,-11.95239,-0.8]
+
+                 [NonVerticalHyperPlane $ fromList' [-25.8,-25.5,-0.94445]
+                 ,NonVerticalHyperPlane $ fromList' [-20.25,-16.66667,-28]
+                 ,NonVerticalHyperPlane $ fromList' [-19,-18.88889,10]
+                 ,NonVerticalHyperPlane $ fromList' [-17.83334,1.47058,14.18181]
+                 ,NonVerticalHyperPlane $ fromList' [-15.8,-6.64706,-25.66667]
+                 ,NonVerticalHyperPlane $ fromList' [-15.46667,-11.95239,-0.8]
+                 ,NonVerticalHyperPlane $ fromList' [-15.44445,-27.66667,28]
+                 ,NonVerticalHyperPlane $ fromList' [-15.06667,-25.75,8.73076]
+                 ,NonVerticalHyperPlane $ fromList' [-15,9.66666,-18]
+
+
+                 -- ,NonVerticalHyperPlane $ fromList' [-14,-7.1,27.90909]
+
+
+                 -- ,NonVerticalHyperPlane $ fromList' [-10.56522,-15.45455,-15.47827]
+                 -- ,NonVerticalHyperPlane $ fromList' [-9,12.5,-26.06667]
+                 -- ,NonVerticalHyperPlane $ fromList' [-6.75,-7.52174,-17]
+
+
+
+                 -- ,NonVerticalHyperPlane $ fromList' [-5,17.0909,-24.85]
+                 -- ,NonVerticalHyperPlane $ fromList' [-1.5,14.33333,-18.8]
+                 -- ,NonVerticalHyperPlane $ fromList' [-0.92,-20.27273,-16.65385]
+
+
+
+
+                 -- ,NonVerticalHyperPlane $ fromList' [1.22222,-18.66667,-2.83334]
+                 -- ,NonVerticalHyperPlane $ fromList' [2.66666,-28,-5.13334]
+                 -- ,NonVerticalHyperPlane $ fromList' [7.17647,-22.78572,21.64285]
+                 -- ,NonVerticalHyperPlane $ fromList' [9.4,-23,-0.38462]
+                 -- ,NonVerticalHyperPlane $ fromList' [10.20833,24.53846,27]
+                 -- ,NonVerticalHyperPlane $ fromList' [10.47368,-3.68422,9.83333]
+                 -- ,NonVerticalHyperPlane $ fromList' [23.28571,-13.54546,-1.375]
+                 -- ,NonVerticalHyperPlane $ fromList' [24.17857,-16.39286,1.08333]
+                 -- ,NonVerticalHyperPlane $ fromList' [24.66666,26.125,25.75]
                  ]
+
+                 -- [NonVerticalHyperPlane $ fromList' [-8,6,-1.8]
+                 -- ,NonVerticalHyperPlane $ fromList' [-6,-7.66667,5]
+                 -- ,NonVerticalHyperPlane $ fromList' [-5.83334,6.75,1.4]
+                 -- ,NonVerticalHyperPlane $ fromList' [3,6,1.33333]
+                 -- ,NonVerticalHyperPlane $ fromList' [4.2,-5.33334,0.66666]
+                 -- ,NonVerticalHyperPlane $ fromList' [7.8,4,-5]
+                 -- ]
 
                -- hs = NonEmpty.fromList
                --      [NonVerticalHyperPlane $ fromList'  [-5,-3.33334,0.83333]
@@ -431,8 +511,11 @@ debug = do let hs :: NonEmpty (Plane R)
                      ,verticalSideTest v h
                      )
 
-           renderToIpe [osp|/tmp/bruteforce.ipe|] BruteForce.computeVertexForm hs
-           renderToIpe [osp|/tmp/randomized.ipe|] (Randomized.computeVertexForm (mkStdGen 1)) hs
+           env1 <- renderToIpe [osp|/tmp/bruteforce.ipe|] BruteForce.computeVertexForm hs
+           env2 <- renderToIpe [osp|/tmp/randomized.ipe|] (Randomized.computeVertexForm (mkStdGen 1)) hs
+           print $ env1 == env2
+
+
 
 
 
@@ -456,9 +539,10 @@ verifyStartWithUp env =  let startWithUp        :: Point 3 R -> Definers MyPlane
 
 
 renderToIpe             :: (Plane_ plane R, Ord plane, Show plane
-                           ) => OsPath -> _ -> NonEmpty plane -> IO ()
+                           ) => OsPath -> _ -> NonEmpty plane -> IO _
 renderToIpe fp mkEnv hs =
-    writeIpeFile fp . addStyleSheet opacitiesStyle $ singlePageFromContent out
+   do writeIpeFile fp . addStyleSheet opacitiesStyle $ singlePageFromContent out
+      pure $ env
   where
     Just env = connectedLowerEnvelopeWith mkEnv hs
 
