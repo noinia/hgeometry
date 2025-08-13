@@ -11,12 +11,17 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Viewport
-  ( Viewport(Viewport), mkViewport
+  ( Viewport(Viewport)
   , viewPort, worldToHost, hostToWorld
-  , toWorldIn, toHostFrom
-  , fromSize, flipY
+  -- * Smart constructors
   , centeredOrigin
   , alignedOrigin
+  , graphicsOrigin, normalizedCenteredOrigin
+  -- * Low level constructors
+  , mkViewport
+  , fromSize, flipY
+  -- * Functions
+  , toWorldIn, toHostFrom
   , wrtCenter
   -- * ZoomConfiging
   , ZoomConfig(ZoomConfig), range, currentLevel
@@ -53,6 +58,58 @@ viewPort = lens _viewPort (\(Viewport _ t) vp -> Viewport vp t)
 worldToHost :: Lens' (Viewport r) (Transformation 2 r)
 worldToHost = lens _worldToHost (\(Viewport t _) -> Viewport t)
 
+-- | Host to world transformation, i.e. given a point in the host
+-- coordinate system, we can compute the point in world coordinates
+-- using this transformation.
+hostToWorld :: (Fractional r)
+            => Getter (Viewport r) (Transformation 2 r)
+hostToWorld = worldToHost.to inverseOf
+
+--------------------------------------------------------------------------------
+-- * Smart constructors
+
+-- | Create a viewport whose world-space is \([-1,1] \times [-1,1]\) whose origin is in
+-- the center of the screen (which is defined by the given input rectangle)
+normalizedCenteredOrigin      :: ( Fractional r, Rectangle_ rectangle point
+                                 , Point_ point 2 r
+                                 )
+                              => rectangle -> Viewport r
+normalizedCenteredOrigin rect = let Vector2 w h = size rect
+                                    s           = Vector2 (w/2) ((-1)*h/2)
+                                in mkViewport rect $ scaling s
+
+-- | Creates a viewport in which the origin is at the center of the viewport
+centeredOrigin       :: ( Fractional r
+                        , Rectangle_ rectangle point
+                        , Point_ point 2 r
+                        ) => rectangle -> Viewport r
+centeredOrigin rect' = Viewport rect
+                                (translation $ (centerPoint rect')^.vector)
+  where rect = Box (rect'^.minPoint.asPoint) (rect'^.maxPoint.asPoint)
+
+-- | Creates a viewport in which the origin at the bottom left of the viewport
+alignedOrigin       :: ( Num r
+                       ) => Rectangle (Point 2 r) -> Viewport r
+alignedOrigin rect' = Viewport rect' (translation $ bottomLeft .-. origin)
+  where
+    bottomLeft = rect'^.minPoint
+
+-- | Same as 'alignedOrigin', except that we also flip the y-direction.
+--
+-- From the view of a math coordinate system, this puts the origin in the top-left, and
+-- has the y-coordinates going down.
+--
+-- From the view of a "graphics" coordiante system, this actually puts the origin
+-- in the bottom left of the rectangle and the y-axixs up; so it turns the
+-- viewport into a "proper" math viewport.
+graphicsOrigin      :: Num r => Rectangle (Point 2 r) -> Viewport r
+graphicsOrigin rect = Viewport rect
+                    $     translation ((rect^.minPoint) .-. origin ^+^ Vector2 0 h)
+                      |.| scaling (Vector2 1 (-1))
+  where
+    h = (size rect) ^.component @1 -- height of the rect
+
+--------------------------------------------------------------------------------
 
 -- | Creates a viewport from the given rectangle and the
 -- transformation. The transformation is applied with respect to the
@@ -61,13 +118,19 @@ mkViewport     :: ( Rectangle_ rectangle point, Point_ point 2 r, Fractional r
                   ) => rectangle -> Transformation 2 r -> Viewport r
 mkViewport r t = centeredOrigin r & worldToHost %~ (|.| t)
 
+-- | Given a vector with widht w and height h, crates a viewport with
+  -- focussing on [0,w] x [0,h]
+fromSize   :: ( Num r, Vector_ vector 2 r
+              ) => vector -> Viewport r
+fromSize v = Viewport (Box origin (Point $ v^._Vector)) identity
 
--- | Host to world transformation, i.e. given a point in the host
--- coordinate system, we can compute the point in world coordinates
--- using this transformation.
-hostToWorld :: (Fractional r)
-            => Getter (Viewport r) (Transformation 2 r)
-hostToWorld = worldToHost.to inverseOf
+-- | Flips the y-coordinate so that the origin is in the bottom left.
+--
+flipY    :: ( Num r, Vector_ vector 2 r)
+         => vector -- ^ the dimensions of the viewport
+         -> Viewport r
+flipY v = Viewport (Box origin (Point $ v^._Vector))
+                   (flipY' $ v^.yComponent)
 
 --------------------------------------------------------------------------------
 
@@ -87,20 +150,6 @@ toHostFrom vp = transformBy (vp^.worldToHost)
 
 --------------------------------------------------------------------------------
 
--- | Given a vector with widht w and height h, crates a viewport with
-  -- focussing on [0,w] x [0,h]
-fromSize   :: ( Num r, Vector_ vector 2 r
-              ) => vector -> Viewport r
-fromSize v = Viewport (Box origin (Point $ v^._Vector)) identity
-
--- | Flips the y-coordinate so that the origin is in the bottom left.
---
-flipY    :: ( Num r, Vector_ vector 2 r)
-         => vector -- ^ the dimensions of the viewport
-         -> Viewport r
-flipY v = Viewport (Box origin (Point $ v^._Vector))
-                   (flipY' $ v^.yComponent)
-
 -- | Transformation that flips the y-axis and shifts by h, essenitally
 -- moving the origin from the top-left facing downards to the
 -- bottom-left and upwards.
@@ -110,25 +159,6 @@ flipY' h = translation (Vector2 0 h) |.| scaling (Vector2 1 (-1))
 
 
 --------------------------------------------------------------------------------
-
--- | Creates a viewport in which the origin is at the center of the viewport
-centeredOrigin       :: ( Fractional r
-                        , Rectangle_ rectangle point
-                        , Point_ point 2 r
-                        ) => rectangle -> Viewport r
-centeredOrigin rect' = Viewport rect
-                                (translation $ (centerPoint rect')^.vector)
-  where rect = Box (rect'^.minPoint.asPoint) (rect'^.maxPoint.asPoint)
-
-
-
--- | Creates a viewport in which the origin at the bottom left of the viewport
-alignedOrigin       :: ( Num r
-                       ) => Rectangle (Point 2 r) -> Viewport r
-alignedOrigin rect' = Viewport rect' (translation $ bottomLeft .-. origin)
-  where
-    bottomLeft = rect'^.minPoint
-
 
 
 -- | make the transformation with respect to the center of the viewport

@@ -10,7 +10,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Box.Internal
-  ( Box(Box,Rectangle)
+  ( Box(Box,Rectangle,Rect)
   , Rectangle
   , fromExtent
   ) where
@@ -53,6 +53,19 @@ pattern Rectangle           :: Dimension point ~ 2
 pattern Rectangle minP maxP = Box minP maxP
 {-# COMPLETE Rectangle #-}
 {-# INLINE Rectangle #-}
+
+-- | Given x y w h construct the rectangle with bottom left corner (x,y), width w, and
+-- hegith h.
+pattern Rect :: Num r => r -> r -> r -> r -> Rectangle (Point 2 r)
+pattern Rect x y w h <- (rectXYWH -> (x,y,w,h))
+  where
+    Rect x y w h = Rectangle (Point2 x y) (Point2 (x+w) (y+h))
+
+-- | Extract the x,y of the lower left corner, and width and height of the rectangle.
+rectXYWH      :: Num r => Rectangle (Point 2 r) -> (r,r,r,r)
+rectXYWH rect = let Vector2 w h = size rect
+                    Point2 x y  = rect^.minPoint
+                in (x,y,w,h)
 
 -- type instance PointFor  (Box point) = point
 type instance Dimension (Box point) = Dimension point
