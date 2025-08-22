@@ -2,7 +2,7 @@
 {-# LANGUAGE QuasiQuotes #-}
 module PlaneGraph.FromPolygonsSpec where
 
-import           Control.Lens
+import           Control.Lens hiding (holes)
 import           Data.Coerce
 import           Data.Foldable
 import           Data.Foldable1
@@ -26,7 +26,7 @@ import qualified HGeometry.Map.NonEmpty.Monoidal as MonoidalNEMap
 import           HGeometry.Number.Real.Rational
 import           HGeometry.PlaneGraph
 import           HGeometry.Point
-import           HGeometry.Polygon
+import           HGeometry.Polygon hiding (holes)
 import           HGeometry.Properties
 import           HGeometry.Vector.NonEmpty.Util ()
 import           Hiraffe.PlanarGraph
@@ -41,8 +41,9 @@ import           Test.Hspec.WithTempFile
 import           Test.QuickCheck
 import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.Vector as Builder
-
+import qualified Hiraffe.AdjacencyListRep.Map as MapRep
 -- import HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
+
 
 import           Debug.Trace
 --------------------------------------------------------------------------------
@@ -292,7 +293,9 @@ goFaces globalOuterFaceId localOuterFaceId raw nf = imapAccumLOf faces go (nf, m
 --------------------------------------------------------------------------------
 
 instance PlanarGraph_ (PlaneGraph s vertex e f) where
-  type DualGraphOf (PlaneGraph s vertex e f) = CPlanarGraph Dual s f e vertex
+  type DualGraphOf (PlaneGraph s vertex e f) = MapRep.Graph (FaceIx (PlaneGraph s vertex e f))
+                                                            f
+                                                            (DartIx (PlaneGraph s vertex e f),e)
   type WorldOf     (PlaneGraph s vertex e f) = Primal
 
   dualGraph = dualGraph . view _PlanarGraph
@@ -304,7 +307,9 @@ instance PlanarGraph_ (PlaneGraph s vertex e f) where
   nextDartOf      d = _PlanarGraph .> nextDartOf d
 
   boundaryDartOf  f = _PlanarGraph .> boundaryDartOf f
-  boundaryDarts   f g = undefined
+
+
+  -- boundaryDarts   f g = undefined
                         -- FIXME!!!!!!
 
 -- boundaryDarts :: FaceIx planarGraph -> planarGraph -> NonEmptyVector (DartIx planarGraph)
@@ -373,10 +378,20 @@ instance ( -- PlanarGraph_ (Component s)
          -- , Edge     (Component s) ~ Dart.Dart s
          ) => PlanarGraph_ (PlanarGraph w s v e f) where
   -- dualGraph, (incidentFaceOf | leftFaceOf), prevDartOf, nextDartOf, boundaryDartOf, boundaryDartOf, boundaryDarts
-  type DualGraphOf (PlanarGraph w s v e f) = CPlanarGraph (DualOf w) s f e v
+  type DualGraphOf (PlanarGraph w s v e f) = MapRep.Graph (FaceIx (PlanarGraph w s v e f))
+                                                          f
+                                                          (DartIx (PlanarGraph w s v e f),e)
+  -- this is not a great representation; as we loose a bit of information.
+  --
+  -- the dual graph is a planar graph as well.
+
+    -- CPlanarGraph (DualOf w) s f e v
+    --
+
   type WorldOf     (PlanarGraph w s v e f) = w
 
   dualGraph =  computeDualGraph
+
   _DualFaceIx     _ = coerced
   _DualVertexIx   _ = coerced
 
@@ -393,20 +408,49 @@ instance ( -- PlanarGraph_ (Component s)
                                     nextD     = c^.nextDartOf d'
                                 in singular (dartAt nextD) pF gr
 
-  boundaryDartOf _ = undefined
-
-  -- boundaryDartOf  f = \pF gr -> let (_,f', c) = asLocalF f gr
-  --                                   d         = c^.boundaryDartOf f'
-  --                               in singular (dartAt d) pF gr
-
-  boundaryDarts   f g = undefined
-
-
-
-computeDualGraph :: PlanarGraph w s v e f -> CPlanarGraph (DualOf w) s f e v
-computeDualGraph = undefined
+  boundaryDartOf fi = \pF gr -> let d = computeD gr in singular (dartAt d) pF gr
+    where
+      computeD    :: PlanarGraph w s v e f -> DartIx (PlanarGraph w s v e f)
+      computeD gr = let RawFace faceIdx fd = gr^?!rawFaceData.ix (coerce fi)
+                    in case faceIdx of
+                         Nothing      -> fd^?!holes._head
+                         Just (c,fi') -> gr^?!connectedComponentAt c.boundaryDartOf fi'
 
 
+
+-- withFace :: (                                    FaceData (Dart s) f -> res)
+--          -> ((ComponentId s, FaceId (Wrap s)) -> FaceData (Dart s) f -> res)
+--          -> FaceIx (PlanarGraph w s v e f) -> PlanarGraph w s v e f -> res
+-- withFace withOuterF withInnerF fi = case gr^?!rawFaceData.ix (coerce fi) of
+--   RawFace Nothing   x -> withOuterF x
+--   RawFace (Just fd) x -> withInnerF fd x
+
+
+
+
+
+-- | Computes the dual graph. Every edge in the primal corresponds to an edge in this dual graph.
+--
+computeDualGraph    :: forall w s v e f. PlanarGraph w s v e f
+                    -> MapRep.Graph (FaceIx (PlanarGraph w s v e f))
+                                    f
+                                    (DartIx (PlanarGraph w s v e f),e)
+computeDualGraph ps = g
+  where
+    g = fromAdjacencyLists
+      . NonEmptyV.imap (\i -> fromFace (coerce i)) $ _rawFaceData ps
+    fromFace :: FaceIx (PlanarGraph w s v e f) -> RawFace w s f
+             -> ( FaceIx (PlanarGraph w s v e f)
+                , f
+                -- , NonEmpty (FaceIx (PlanarGraph w s v e f), e)
+                , [_]
+                )
+    fromFace fi rawFace = (fi, rawFace^.faceDataVal.fData, boundaryDarts)
+      where
+        boundaryDarts = case rawFace^.faceIdx of
+          Nothing          -> []
+          Just (c,localFi) -> []
+          -- TODO; some fold over the holes + the outer boundary
 
 testPoly :: SimplePolygon (Point 2 Int :+ Int)
 testPoly = uncheckedFromCCWPoints $ NonEmpty.fromList

@@ -212,7 +212,8 @@ testIpe inFp outFp = describe (show inFp) $ do
 -- | computes the faces (represented by their face Id and a list of vertices)
 --  that have the "wrong" orientation.
 incorrectDualTreeNodes        :: forall graph vertex dart r.
-                                 (PlaneGraph_ graph vertex, Point_ vertex 2 r, Fractional r, Ord r)
+                                   (PlaneGraph_ graph vertex, HasOuterBoundaryOf graph
+                                     , Point_ vertex 2 r, Fractional r, Ord r)
                               => graph
                               -> DualTree (FaceIx graph)
                                           dart
@@ -258,7 +259,7 @@ inCorrectOrientations = \case
 
 
 drawDualTree       :: ( Point_ vertex 2 r, Ord r, Fractional r
-                      , PlaneGraph_ planeGraph vertex
+                      , PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
                       )
                    => planeGraph
                    -> DualTree (FaceIx planeGraph)

@@ -211,7 +211,7 @@ edgeSegments = theFold
 
 -- | Renders all interior faces as simple polygons.
 interiorFacePolygons :: forall planeGraph vertex r.
-                        ( PlaneGraph_ planeGraph vertex
+                        ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
                         , Point_ vertex 2 r
                         , Ord r, Num r
                         , Eq (FaceIx planeGraph)
@@ -222,7 +222,7 @@ interiorFacePolygons :: forall planeGraph vertex r.
 interiorFacePolygons = theFold
   where
     theFold              :: forall p f.
-                            ( PlaneGraph_ planeGraph vertex
+                            ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
                             , Indexable (FaceIx planeGraph) p, Applicative f, Contravariant f)
                          => p (SimplePolygon (vertex :+ VertexIx planeGraph))
                               (f (SimplePolygon (vertex :+ VertexIx planeGraph)))
@@ -234,7 +234,9 @@ interiorFacePolygons = theFold
         draw fi _ = let poly = polygonFromFace g fi
                     in poly >$ indexed pPolyFPoly fi poly
 
-polygonFromFace      :: forall planeGraph vertex r.( PlaneGraph_ planeGraph vertex
+polygonFromFace      :: forall planeGraph vertex r.
+                        ( PlaneGraph_ planeGraph vertex
+                        , HasOuterBoundaryOf planeGraph
                         , Point_ vertex 2 r
                         )
                      => planeGraph -> FaceIx planeGraph
@@ -243,8 +245,8 @@ polygonFromFace gr fi = poly'&vertices.extra %~ coerce
   where
     poly' :: SimplePolygon (vertex :+ VertexIx planeGraph)
     poly' = uncheckedFromCCWPoints
-         . fmap (\vi -> gr^?!vertexAt vi :+ vi)
-         $ boundaryVertices fi gr
+          . fmap (\vi -> gr^?!vertexAt vi :+ vi)
+          $ outerBoundaryVertices fi gr
         -- note that this is safe, since boundaryVerticesOf guarantees that for
         -- interior faces, the vertices are returned in CCW order.
 
@@ -257,6 +259,7 @@ polygonFromFace gr fi = poly'&vertices.extra %~ coerce
 -- rather than a lens: i.e. if you pass some nonsensical FaceIx the face may not exist.
 interiorFacePolygonAt    :: forall planeGraph vertex.
                             ( PlaneGraph_ planeGraph vertex
+                            , HasOuterBoundaryOf planeGraph
                             , Point_ vertex 2 (NumType vertex)
                             )
                          => FaceIx planeGraph

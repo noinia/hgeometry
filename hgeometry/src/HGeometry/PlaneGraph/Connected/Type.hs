@@ -188,7 +188,9 @@ instance ( Point_ v 2 (NumType v)
   prevDartOf d = _CPlanarGraph.prevDartOf d
 
   boundaryDartOf f = _CPlanarGraph.boundaryDartOf f
-  boundaryDarts f = boundaryDarts f . coerce @_ @(CPlanarGraph Primal s v e f)
+
+instance HasOuterBoundaryOf (CPlaneGraph s v e f) where
+  outerBoundaryDarts f = outerBoundaryDarts f . coerce @_ @(CPlanarGraph Primal s v e f)
 
 
 instance ( Point_ v 2 (NumType v)

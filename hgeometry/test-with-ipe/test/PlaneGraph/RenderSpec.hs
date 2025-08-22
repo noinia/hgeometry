@@ -90,7 +90,7 @@ spec = describe "render planegraph tests" $ do
 
 --------------------------------------------------------------------------------
 
-drawGraph    :: ( PlaneGraph_ planeGraph vertex
+drawGraph    :: ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
                 , IsTransformable vertex
                 , ConstructablePoint_ vertex 2 r, Ord r, Real r
                 , Fractional r, Show r, Eq (FaceIx planeGraph)
