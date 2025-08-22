@@ -293,9 +293,11 @@ goFaces globalOuterFaceId localOuterFaceId raw nf = imapAccumLOf faces go (nf, m
 --------------------------------------------------------------------------------
 
 instance PlanarGraph_ (PlaneGraph s vertex e f) where
-  type DualGraphOf (PlaneGraph s vertex e f) = MapRep.Graph (FaceIx (PlaneGraph s vertex e f))
-                                                            f
-                                                            (DartIx (PlaneGraph s vertex e f),e)
+  type DualGraphOf (PlaneGraph s vertex e f) = DualGraph Primal s vertex e f
+
+    -- MapRep.Graph (FaceIx (PlaneGraph s vertex e f))
+    --                                                         f
+    --                                                         (DartIx (PlaneGraph s vertex e f),e)
   type WorldOf     (PlaneGraph s vertex e f) = Primal
 
   dualGraph = dualGraph . view _PlanarGraph
@@ -365,12 +367,35 @@ instance ( Point_ vertex 2 r, Ord r, Num r
 
 --------------------------------------------------------------------------------
 
+-- | FIXME: This should do something useful rather than just wrap the original graph.
+newtype DualGraph w s v e f = DualGraph (PlanarGraph w s v e f)
 
+_DualGraph :: Iso (DualGraph w s v e f)   (DualGraph   w' s' v' e' f')
+                  (PlanarGraph w s v e f) (PlanarGraph w' s' v' e' f')
+_DualGraph = coerced
+
+instance HasVertices' (DualGraph w s v e f) where
+  type VertexIx (DualGraph w s v e f) = FaceIx (PlanarGraph w s v e f)
+  type Vertex   (DualGraph w s v e f) = Face   (PlanarGraph w s v e f)
+  vertexAt f = _DualGraph.faceAt f
+  numVertices (DualGraph gr) = numVertices gr
+
+instance HasFaces' (DualGraph w s v e f) where
+  type FaceIx (DualGraph w s v e f) = VertexIx (PlanarGraph w s v e f)
+  type Face   (DualGraph w s v e f) = Vertex   (PlanarGraph w s v e f)
+  faceAt v = _DualGraph.vertexAt v
+  numFaces (DualGraph gr) = numFaces gr
 
 {-
+
+data DualGraph w s v e f =
+  DualGraph { _dualGraph :: MapRep.Graph (FaceIx (PlanarGraph w s v e f))
+                                         f
+                                         (DartIx (PlanarGraph w s v e f),e)
+            , _primalGraph :: PlanarGraph w s v e f
+            } deriving (Show,Eq)
+
 -}
-
-
 
 instance ( -- PlanarGraph_ (Component s)
          -- , IsComponent s
@@ -378,9 +403,8 @@ instance ( -- PlanarGraph_ (Component s)
          -- , Edge     (Component s) ~ Dart.Dart s
          ) => PlanarGraph_ (PlanarGraph w s v e f) where
   -- dualGraph, (incidentFaceOf | leftFaceOf), prevDartOf, nextDartOf, boundaryDartOf, boundaryDartOf, boundaryDarts
-  type DualGraphOf (PlanarGraph w s v e f) = MapRep.Graph (FaceIx (PlanarGraph w s v e f))
-                                                          f
-                                                          (DartIx (PlanarGraph w s v e f),e)
+  type DualGraphOf (PlanarGraph w s v e f) = DualGraph w s v e f
+    -- DualGraph w s v e f
   -- this is not a great representation; as we loose a bit of information.
   --
   -- the dual graph is a planar graph as well.
@@ -390,7 +414,8 @@ instance ( -- PlanarGraph_ (Component s)
 
   type WorldOf     (PlanarGraph w s v e f) = w
 
-  dualGraph =  computeDualGraph
+  dualGraph = DualGraph
+  -- TODO: this does not really do anything useful yet
 
   _DualFaceIx     _ = coerced
   _DualVertexIx   _ = coerced
