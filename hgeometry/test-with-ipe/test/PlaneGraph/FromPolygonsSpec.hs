@@ -278,17 +278,19 @@ goFaces        :: FaceId s
                -> ( Builder.Builder f'
                   , CPlanarGraph Primal (Wrap s) v e (FaceId s)
                   )
-goFaces globalOuterFaceId localOuterFaceId raw offSet = over _1 snd
-                                                      . imapAccumLOf faces go (offSet, mempty)
+goFaces globalOuterFaceId localOuterFaceId raw offSet = over _1 (\(WO _ x) -> x)
+                                                      . imapAccumLOf faces go (WO offSet mempty)
   where
     raw' a b = Builder.singleton $ raw a b
-    go fi (newId, res) x
-      | fi == localOuterFaceId = ((newId, res), globalOuterFaceId)
-      | otherwise              = ((newId + 1, res <> raw' fi x), coerce newId)
+    go fi (WO newId res) x
+      | fi == localOuterFaceId = (WO newId res,                      globalOuterFaceId)
+      | otherwise              = (WO (newId + 1) (res <> raw' fi x), coerce newId)
       -- if this face is its local outerFaceId, we just refer to the
       -- global outerFaceId. Otherwise we will have to create a new
       -- global faceId (newId) that corresponds to this face, and store its
       -- data.
+
+data WithOffset a = WO {-# UNPACK #-}!Int a
 
 
 --------------------------------------------------------------------------------
