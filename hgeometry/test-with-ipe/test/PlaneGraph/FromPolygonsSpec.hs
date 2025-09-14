@@ -6,17 +6,16 @@ import           Control.Lens hiding (holes)
 import           Data.Coerce
 import           Data.Foldable
 import           Data.Foldable1
-import           Data.Functor.Apply (WrappedApplicative(..))
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.List as List
 import           Data.Map.NonEmpty (NEMap)
 import qualified Data.Map.NonEmpty as NEMap
 import qualified Data.Sequence as Seq
-import qualified Data.Vector as Vector
+-- import qualified Data.Vector as Vector
 import           Data.Vector.NonEmpty (NonEmptyVector)
 import qualified Data.Vector.NonEmpty as NonEmptyV
-import           GHC.Generics (Generic)
+-- import           GHC.Generics (Generic)
 import           Golden
 import           HGeometry.Boundary
 import           HGeometry.Ext
@@ -196,7 +195,7 @@ fromDisjointComponents1 combineOuterFace graphs =
 
     go i (Comps nv nd nf vB dB fB) (gr, localOuterFaceId) =
         ( Comps (nv + numVertices gr)
-                (nd + numDarts gr)
+                (nd + (numDarts gr `div` 2)) -- number of arc's is just numberOf darts / 2
                 (nf + numFaces gr - 1) -- note the -1 since we don't count the outerFace of each component
                 (vB <> vB') (dB <> dB') (fB <> fB')
         , (gr3, localOuterFaceId)
@@ -279,17 +278,16 @@ goFaces        :: FaceId s
                -> ( Builder.Builder f'
                   , CPlanarGraph Primal (Wrap s) v e (FaceId s)
                   )
-goFaces globalOuterFaceId localOuterFaceId raw offSet = imapAccumLOf faces go mempty
+goFaces globalOuterFaceId localOuterFaceId raw offSet = over _1 snd
+                                                      . imapAccumLOf faces go (offSet, mempty)
   where
-    shiftR i = coerce $ (coerce i) + offSet
     raw' a b = Builder.singleton $ raw a b
-    go fi res x
-      | fi == localOuterFaceId = (res, globalOuterFaceId)
-      | otherwise              = let fi' = shiftR fi
-                                 in (res <> raw' fi x, fi')
+    go fi (newId, res) x
+      | fi == localOuterFaceId = ((newId, res), globalOuterFaceId)
+      | otherwise              = ((newId + 1, res <> raw' fi x), coerce newId)
       -- if this face is its local outerFaceId, we just refer to the
       -- global outerFaceId. Otherwise we will have to create a new
-      -- global faceId (fi') that corresponds to this face, and store its
+      -- global faceId (newId) that corresponds to this face, and store its
       -- data.
 
 
@@ -444,19 +442,30 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
                           ()
         grr = fromDisjointComponents (const ()) graphs
 
-    runIO $ print grr
-    runIO $ print $ numDarts grr
+    -- runIO $ print grr
+    -- runIO $ print $ numDarts grr
+
+    -- runIO $ traverseOf_ (vertices.withIndex) print grr
+    -- runIO $ traverseOf_ (darts.withIndex) (\(d,_) -> print $ (d, endPoints grr d)) grr
 
 
+    -- runIO $ do
+    --   let [_,_,_,(fi,_)] = grr^..interiorFaces.withIndex
+    --   print "outerboundaryDarts"
+    --   print $ outerBoundaryDarts fi grr -- grr^?!interiorFacePolygonAt fi
+    --   print "outerboundaryvertices"
+    --   print $ outerBoundaryVertices fi grr -- grr^?!interiorFacePolygonAt fi
+    --   print "interiorfacepolygonat"
+    --   print $ grr^?!interiorFacePolygonAt fi
+
+    --   -- for_ (grr^..interiorFaces.withIndex) print
+
+    --   traverseOf_ (interiorFacePolygons.withIndex) print grr
+    --   -- OK: so faceId 4 is the issue somehow.
 
 
-    runIO $ traverseOf_ (vertices.withIndex) print grr
-    runIO $ traverseOf_ (darts.withIndex) (\(d,_) -> print $ (d, endPoints grr d)) grr
-
-
-    runIO $ do
-      for_ (grr^..connectedComponents.withIndex) $ \(ci,c) ->
-        traverseOf_ (vertices.withIndex) (\x -> print (ci,x)) c
+    --   for_ (grr^..connectedComponents.withIndex) $ \(ci,c) ->
+    --     traverseOf_ (faces.withIndex) (\x -> print (ci,x)) c
 
 
 

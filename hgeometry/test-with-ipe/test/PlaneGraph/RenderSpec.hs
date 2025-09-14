@@ -134,6 +134,7 @@ drawDart gr d s = [ iO $ ipeLineSegment (offset s)
     c = interpolate 0.5 s ^. asPoint
     -- computes the midpoint of the segment.
 
+-- | slightly shift the segment
 offset   :: forall lineSegment point r.
             (LineSegment_ lineSegment point, IsTransformable lineSegment
             , HasSupportingLine lineSegment
