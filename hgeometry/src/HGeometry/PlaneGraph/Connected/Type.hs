@@ -199,6 +199,11 @@ instance ( Point_ v 2 (NumType v)
 
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
+         ) => HasOuterFace (CPlaneGraph s v e f) where
+  outerFaceDart = defaultOuterFaceDart
+
+instance ( Point_ v 2 (NumType v)
+         , Ord (NumType v), Num (NumType v)
          ) => ConstructablePlaneGraph_ (CPlaneGraph s v e f) v where
   fromEmbedding = CPlaneGraph . fromAdjacencyLists
 

@@ -9,6 +9,7 @@ import           Data.Foldable1
 import           Data.Functor.Apply (WrappedApplicative(..))
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.List as List
 import           Data.Map.NonEmpty (NEMap)
 import qualified Data.Map.NonEmpty as NEMap
 import qualified Data.Sequence as Seq
@@ -292,44 +293,10 @@ goFaces globalOuterFaceId localOuterFaceId raw nf = imapAccumLOf faces go (nf, m
 
 --------------------------------------------------------------------------------
 
-instance PlanarGraph_ (PlaneGraph s vertex e f) where
-  type DualGraphOf (PlaneGraph s vertex e f) = DualGraph Primal s vertex e f
 
-    -- MapRep.Graph (FaceIx (PlaneGraph s vertex e f))
-    --                                                         f
-    --                                                         (DartIx (PlaneGraph s vertex e f),e)
-  type WorldOf     (PlaneGraph s vertex e f) = Primal
-
-  dualGraph = dualGraph . view _PlanarGraph
-  _DualFaceIx     _ = coerced
-  _DualVertexIx   _ = coerced
-  incidentFaceOf  d = _PlanarGraph .> incidentFaceOf d
-
-  prevDartOf      d = _PlanarGraph .> prevDartOf d
-  nextDartOf      d = _PlanarGraph .> nextDartOf d
-
-  boundaryDartOf  f = _PlanarGraph .> boundaryDartOf f
-
-
-  -- boundaryDarts   f g = undefined
-                        -- FIXME!!!!!!
-
--- boundaryDarts :: FaceIx planarGraph -> planarGraph -> NonEmptyVector (DartIx planarGraph)
-
--- The darts bounding this face. The darts are reported in order along the face. This means that for internal faces the darts are reported in *counter clockwise* order along the boundary, whereas for the outer face the darts are reported in clockwise order.
-
--- running time: 𝑂(𝑘)
--- , where 𝑘 is the output size.
-
-
-instance ( Point_ vertex 2 r, Ord r, Num r
-         ) => PlaneGraph_ (PlaneGraph s vertex e f) vertex
 instance ( Point_ vertex 2 r, Ord r, Num r
          ) => ConstructablePlaneGraph_ (PlaneGraph s vertex e f) vertex where
   fromEmbedding = undefined
-
-
-
 
 --------------------------------------------------------------------------------
 
@@ -358,124 +325,13 @@ instance ( Point_ vertex 2 r, Ord r, Num r
 
 --------------------------------------------------------------------------------
 
--- instance ( Point_ v 2 (NumType v)
---          , Ord (NumType v), Num (NumType v)
-
---          ) => PlanarGraph_ (PlaneGraph s v e f) where
---   type DualGraphOf (PlaneGraph s v e f) = PlanarGraph Dual s f e v
 
 
 --------------------------------------------------------------------------------
 
--- | FIXME: This should do something useful rather than just wrap the original graph.
-newtype DualGraph w s v e f = DualGraph (PlanarGraph w s v e f)
-
-_DualGraph :: Iso (DualGraph w s v e f)   (DualGraph   w' s' v' e' f')
-                  (PlanarGraph w s v e f) (PlanarGraph w' s' v' e' f')
-_DualGraph = coerced
-
-instance HasVertices' (DualGraph w s v e f) where
-  type VertexIx (DualGraph w s v e f) = FaceIx (PlanarGraph w s v e f)
-  type Vertex   (DualGraph w s v e f) = Face   (PlanarGraph w s v e f)
-  vertexAt f = _DualGraph.faceAt f
-  numVertices (DualGraph gr) = numVertices gr
-
-instance HasFaces' (DualGraph w s v e f) where
-  type FaceIx (DualGraph w s v e f) = VertexIx (PlanarGraph w s v e f)
-  type Face   (DualGraph w s v e f) = Vertex   (PlanarGraph w s v e f)
-  faceAt v = _DualGraph.vertexAt v
-  numFaces (DualGraph gr) = numFaces gr
-
-{-
-
-data DualGraph w s v e f =
-  DualGraph { _dualGraph :: MapRep.Graph (FaceIx (PlanarGraph w s v e f))
-                                         f
-                                         (DartIx (PlanarGraph w s v e f),e)
-            , _primalGraph :: PlanarGraph w s v e f
-            } deriving (Show,Eq)
-
--}
-
-instance ( -- PlanarGraph_ (Component s)
-         -- , IsComponent s
-         -- , EdgeIx   (Component s) ~ Dart.Dart (Wrap s)
-         -- , Edge     (Component s) ~ Dart.Dart s
-         ) => PlanarGraph_ (PlanarGraph w s v e f) where
-  -- dualGraph, (incidentFaceOf | leftFaceOf), prevDartOf, nextDartOf, boundaryDartOf, boundaryDartOf, boundaryDarts
-  type DualGraphOf (PlanarGraph w s v e f) = DualGraph w s v e f
-    -- DualGraph w s v e f
-  -- this is not a great representation; as we loose a bit of information.
-  --
-  -- the dual graph is a planar graph as well.
-
-    -- CPlanarGraph (DualOf w) s f e v
-    --
-
-  type WorldOf     (PlanarGraph w s v e f) = w
-
-  dualGraph = DualGraph
-  -- TODO: this does not really do anything useful yet
-
-  _DualFaceIx     _ = coerced
-  _DualVertexIx   _ = coerced
-
-  incidentFaceOf  d = \pF gr -> let (_,d', c) = asLocalD d gr
-                                    fi        = c^.incidentFaceOf d'
-                                in singular (faceAt fi) pF gr
-
-
-  prevDartOf      d = \pF gr -> let (_,d', c) = asLocalD d gr
-                                    prevD     = c^.prevDartOf d'
-                                in singular (dartAt prevD) pF gr
-
-  nextDartOf      d = \pF gr -> let (_,d', c) = asLocalD d gr
-                                    nextD     = c^.nextDartOf d'
-                                in singular (dartAt nextD) pF gr
-
-  boundaryDartOf fi = \pF gr -> let d = computeD gr in singular (dartAt d) pF gr
-    where
-      computeD    :: PlanarGraph w s v e f -> DartIx (PlanarGraph w s v e f)
-      computeD gr = let RawFace faceIdx fd = gr^?!rawFaceData.ix (coerce fi)
-                    in case faceIdx of
-                         Nothing      -> fd^?!holes._head
-                         Just (c,fi') -> gr^?!connectedComponentAt c.boundaryDartOf fi'
 
 
 
--- withFace :: (                                    FaceData (Dart s) f -> res)
---          -> ((ComponentId s, FaceId (Wrap s)) -> FaceData (Dart s) f -> res)
---          -> FaceIx (PlanarGraph w s v e f) -> PlanarGraph w s v e f -> res
--- withFace withOuterF withInnerF fi = case gr^?!rawFaceData.ix (coerce fi) of
---   RawFace Nothing   x -> withOuterF x
---   RawFace (Just fd) x -> withInnerF fd x
-
-
-
-
-
--- | Computes the dual graph. Every edge in the primal corresponds to an edge in this dual graph.
---
-computeDualGraph    :: forall w s v e f. PlanarGraph w s v e f
-                    -> MapRep.Graph (FaceIx (PlanarGraph w s v e f))
-                                    f
-                                    (DartIx (PlanarGraph w s v e f),e)
-computeDualGraph ps = g
-  where
-    g = fromAdjacencyLists
-      . NonEmptyV.imap (\i -> fromFace (coerce i)) $ _rawFaceData ps
-    fromFace :: FaceIx (PlanarGraph w s v e f) -> RawFace w s f
-             -> ( FaceIx (PlanarGraph w s v e f)
-                , f
-                -- , NonEmpty (FaceIx (PlanarGraph w s v e f), e)
-                , [_]
-                )
-    fromFace fi rawFace = (fi, rawFace^.faceDataVal.fData, boundaryDarts)
-      where
-        boundaryDarts = case rawFace^.faceIdx of
-          Nothing          -> []
-          Just (c,localFi) -> []
-          -- TODO; some fold over the holes + the outer boundary
 
 testPoly :: SimplePolygon (Point 2 Int :+ Int)
 testPoly = uncheckedFromCCWPoints $ NonEmpty.fromList
@@ -498,7 +354,7 @@ spec = describe "Constructing a PlaneGraph from overlapping Polygons" $ do
          --   let g = fromSimplePolygonWith testPoly "In" "Out"
          --   in allOf (vertices.withIndex) (\v _ -> v&outNeighboursOfByDart )
          testIpe [osp|components.ipe|]
-                 [osp|components.out|]
+                 [osp|components.out.ipe|]
 
 
 --------------------------------------------------------------------------------
@@ -586,10 +442,20 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
                           ()
         grr = fromDisjointComponents (const ()) graphs
 
-    xit "fromDisjointSegments" $ do
+    runIO $ writeIpeFile outFP . singlePageFromContent  $ drawGraph grr
+
+
+    it "fromDisjointSegments" $ do
       show gr `shouldBe` ""
-    xit "fromDisjointComponents" $ do
-      show grr `shouldBe` ""
+    it "fromDisjointComponents" $ do
+      show grr `shouldSatisfy` (startsWith
+        "PlaneGraph (PlanarGraph {_components = [CPlanarGraph embedding = Permutation {_orbits = [[Dart (Arc 3) -1,Dart (Arc 4) +1,Dart (Arc 0) +1],[Dart (Arc 3) +1,Dart (Arc 6) -1,Dart (Arc 2) -1],[Dart (Arc 0) -1,Dart (Arc 1) +1,Dart (Arc 5) +1],[Dart (Arc 1) -1,Dart (Arc 4) -1,Dart (Arc 2) +1],[Dart (Arc 6) +1,Dart (Arc 7) -1],[Dart (Arc 5) -1,Dart (Arc 7) +1]],")
+
+
+      -- goldenWith [osp|data/test-with-ipe/PlaneGraph/|]
+      --            (ipeContentGolden { name = inFP})
+      --            (drawGraph grr)
+
 
     it "fromDisjointComponents components" $ do
       numConnectedComponents grr `shouldBe` length graphs0
@@ -633,3 +499,10 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
 
 
   -- tests: all edges of a component have the same color
+
+startsWith pref s = pref `List.isPrefixOf` s
+
+
+
+-- drawGraph       :: OsPath -> _ -> IO ()
+-- drawGraph fp gr = writeIpeFile fp . singlePageFromContent  $ drawGraph gr

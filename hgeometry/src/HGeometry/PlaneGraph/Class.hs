@@ -16,6 +16,7 @@ module HGeometry.PlaneGraph.Class
   ( PlaneGraph_(..)
   , ConstructablePlaneGraph_(..)
   -- , HasLocation(..)
+  , defaultOuterFaceDart
 
   , dartSegmentAt
   , edgeSegmentAt
@@ -52,59 +53,9 @@ class ( PlanarGraph_ planeGraph
       , NumType vertex ~ NumType planeGraph
       -- , HasVertices graph graph
       , HasEdges planeGraph planeGraph
+      , HasOuterFace planeGraph
       ) => PlaneGraph_ planeGraph vertex | planeGraph -> vertex where
   {-# MINIMAL #-}
-
-  -- | Getter to access the outer face
-  outerFace :: Eq (FaceIx planeGraph)
-            => IndexedLens' (FaceIx planeGraph) planeGraph (Face planeGraph)
-  outerFace = singular theLens
-    where
-      theLens pFaceFFace g = faceAt theOuterFaceId pFaceFFace g
-        where
-          theOuterFaceId = outerFaceId g
-
-  -- | Traversal of all interior faces in the graph
-  interiorFaces :: (Eq (FaceIx planeGraph))
-                => IndexedTraversal' (FaceIx planeGraph) planeGraph (Face planeGraph)
-  interiorFaces = theTraversal
-    where
-      theTraversal :: (Applicative f, Indexable (FaceIx planeGraph) p)
-                   => p (Face planeGraph) (f (Face planeGraph)) -> planeGraph -> f planeGraph
-      theTraversal pFaceFFace g = unwrapApplicative
-                                $ (faces.ifiltered (\i _ -> i /= theOuterFaceId))
-                                                   (rmap WrapApplicative pFaceFFace)
-                                                   g
-        where
-          theOuterFaceId = outerFaceId g
-
-  -- | gets the id of the outer face
-  --
-  outerFaceId    :: planeGraph -> FaceIx planeGraph
-  outerFaceId ps = ps^.leftFaceOf (outerFaceDart ps).asIndex
-
-  -- | gets a dart incident to the outer face (in particular, that has the
-  -- outerface on its left)
-  --
-  -- running time: \(O(n)\)
-  --
-  outerFaceDart :: planeGraph -> DartIx planeGraph
-  default outerFaceDart :: (r ~ NumType planeGraph, Ord r, Num r)
-                   => planeGraph -> DartIx planeGraph
-  outerFaceDart pg = minimum1ByOf (outgoingDartsOf vi.asIndex) cmp pg
-    where
-      (vi,v) = minimum1ByOf (vertices.withIndex) (comparing (^._2.asPoint)) pg
-          -- compare lexicographically; i.e. if same x-coord prefer the one with the lowest one
-      cmp d1 d2 = cwCmpAroundWith (Vector2 (-1) 0) v (pg^.headOf d1) (pg^.headOf d2)
-
-      -- based on the approach sketched at https://cstheory.stackexchange.com/questions/27586/finding-outer-face-in-plane-graph-embedded-planar-graph
-      -- basically: find the leftmost vertex, find the incident edge with the largest slope
-      -- and take the face left of that edge. This is the outerface.
-      -- note that this requires that the edges are straight line segments
-      --
-      -- note that rather computing slopes we just ask for the first
-      -- vertec cw vertex around v. First with respect to some direction
-      -- pointing towards the left.
 
 -- | A class representing constructable Plane graphs, i.e. planar graphs that have a
 -- straight line embedding in the plane.
@@ -124,6 +75,33 @@ class PlaneGraph_ planeGraph vertex => ConstructablePlaneGraph_ planeGraph verte
                    , e ~ Edge planeGraph
                    , GraphFromAdjListExtraConstraints planeGraph h
                    ) => f (vi, v, h (vi, e)) -> planeGraph
+
+--------------------------------------------------------------------------------
+
+
+-- | Computes a dart that is incident to the outer face (i.e. in
+-- | particular, that has the outer face to its left.)
+--
+-- running time: \(O(n)\)
+defaultOuterFaceDart   :: (r ~ NumType planeGraph, Ord r, Num r
+                          , Point_ vertex 2
+                          )
+                       => planeGraph -> DartIx planeGraph
+defaultOuterFaceDart pg = minimum1ByOf (outgoingDartsOf vi.asIndex) cmp pg
+    where
+      (vi,v) = minimum1ByOf (vertices.withIndex) (comparing (^._2.asPoint)) pg
+          -- compare lexicographically; i.e. if same x-coord prefer the one with the lowest one
+      cmp d1 d2 = cwCmpAroundWith (Vector2 (-1) 0) v (pg^.headOf d1) (pg^.headOf d2)
+
+      -- based on the approach sketched at https://cstheory.stackexchange.com/questions/27586/finding-outer-face-in-plane-graph-embedded-planar-graph
+      -- basically: find the leftmost vertex, find the incident edge with the largest slope
+      -- and take the face left of that edge. This is the outerface.
+      -- note that this requires that the edges are straight line segments
+      --
+      -- note that rather computing slopes we just ask for the first
+      -- vertec cw vertex around v. First with respect to some direction
+      -- pointing towards the left.
+
 
 --------------------------------------------------------------------------------
 

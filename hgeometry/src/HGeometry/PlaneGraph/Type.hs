@@ -163,29 +163,30 @@ instance ( Point_ v 2 (NumType v)
   fromAdjacencyLists = fromEmbedding . toEmbedding
 -}
 
+instance PlanarGraph_ (PlaneGraph s vertex e f) where
+  type DualGraphOf (PlaneGraph s vertex e f) = DualGraph Primal s vertex e f
+  type WorldOf     (PlaneGraph s vertex e f) = Primal
+
+  dualGraph = dualGraph . view _PlanarGraph
+  _DualFaceIx     _ = coerced
+  _DualVertexIx   _ = coerced
+  incidentFaceOf  d = _PlanarGraph .> incidentFaceOf d
+
+  prevDartOf      d = _PlanarGraph .> prevDartOf d
+  nextDartOf      d = _PlanarGraph .> nextDartOf d
+
+  boundaryDartOf  f = _PlanarGraph .> boundaryDartOf f
+
+instance ( Point_ vertex 2 r, Ord r, Num r
+         ) => PlaneGraph_ (PlaneGraph s vertex e f) vertex
+
+
+instance HasOuterBoundaryOf (PlaneGraph s v e f) where
+  outerBoundaryDarts f = outerBoundaryDarts f . coerce @_ @(PlanarGraph Primal s v e f)
+
+
+
 {-
-instance ( Point_ v 2 (NumType v)
-         , Ord (NumType v), Num (NumType v)
-
-         ) => PlanarGraph_ (PlaneGraph s v e f) where
-  type DualGraphOf (PlaneGraph s v e f) = PlanarGraph Dual s f e v
-
-  dualGraph = dualGraph . coerce @_ @(PlanarGraph Primal s v e f)
-
-  leftFaceOf  d = _PlanarGraph.leftFaceOf d
-  rightFaceOf d = _PlanarGraph.rightFaceOf d
-
-  nextDartOf d = _PlanarGraph.nextDartOf d
-  prevDartOf d = _PlanarGraph.prevDartOf d
-
-  boundaryDartOf f = _PlanarGraph.boundaryDartOf f
-  boundaryDarts f = boundaryDarts f . coerce @_ @(PlanarGraph Primal s v e f)
-
-
-instance ( Point_ v 2 (NumType v)
-         , Ord (NumType v), Num (NumType v)
-         ) => PlaneGraph_ (PlaneGraph s v e f) v where
-  fromEmbedding = PlaneGraph . fromAdjacencyLists
 
 instance ( Point_ v 2 r, Point_ v' 2 r'
          ) => HasPoints (PlaneGraph s v e f)
