@@ -442,7 +442,7 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
                           ()
         grr = fromDisjointComponents (const ()) graphs
 
-    runIO $ writeIpeFile outFP . singlePageFromContent  $ drawGraph grr
+    -- runIO $ writeIpeFile outFP . singlePageFromContent  $ drawGraph grr
 
 
     it "fromDisjointSegments" $ do

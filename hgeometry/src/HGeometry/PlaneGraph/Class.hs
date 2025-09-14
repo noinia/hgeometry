@@ -30,7 +30,6 @@ module HGeometry.PlaneGraph.Class
 import Control.Lens
 import Data.Coerce
 import Data.Foldable1
-import Data.Functor.Apply
 import Data.Maybe (fromMaybe)
 import Data.Monoid (Endo(..))
 import Data.Ord (comparing)
@@ -83,8 +82,10 @@ class PlaneGraph_ planeGraph vertex => ConstructablePlaneGraph_ planeGraph verte
 -- | particular, that has the outer face to its left.)
 --
 -- running time: \(O(n)\)
-defaultOuterFaceDart   :: (r ~ NumType planeGraph, Ord r, Num r
-                          , Point_ vertex 2
+defaultOuterFaceDart   :: ( PlanarGraph_ planeGraph
+                          , vertex ~ Vertex planeGraph, r ~ NumType planeGraph
+                          , Point_ vertex 2 r
+                          , Ord r, Num r
                           )
                        => planeGraph -> DartIx planeGraph
 defaultOuterFaceDart pg = minimum1ByOf (outgoingDartsOf vi.asIndex) cmp pg
