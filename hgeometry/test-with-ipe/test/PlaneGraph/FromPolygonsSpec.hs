@@ -189,22 +189,25 @@ fromDisjointComponents1 combineOuterFace graphs =
     -- construct the final 'rawVertexData', 'rawDartData', and 'rawFaceData'
     -- vectors.
     ( Comps _ _ _ vData dData fData, components) =
-        imapAccumL go (Comps 0 0 0 mempty mempty mempty) (fromFoldable1 graphs)
+        imapAccumL go (Comps 0 0 1 mempty mempty mempty) (fromFoldable1 graphs)
 
     globalOuterFaceId :: FaceId s
     globalOuterFaceId = coerce @Int 0
 
     go i (Comps nv nd nf vB dB fB) (gr, localOuterFaceId) =
-        ( Comps nv' nd' nf' (vB <> vB') (dB <> dB') (fB <> fB')
+        ( Comps (nv + numVertices gr)
+                (nd + numDarts gr)
+                (nf + numFaces gr - 1) -- note the -1 since we don't count the outerFace of each component
+                (vB <> vB') (dB <> dB') (fB <> fB')
         , (gr3, localOuterFaceId)
         )
       where
-        ((nv',vB'), gr1) = goVertices (Raw (coerce i))     nv gr
-        ((nd',dB'), gr2) = goDarts    (Raw (coerce i))     nd gr1
-        ((nf',fB'), gr3) = goFaces globalOuterFaceId
-                                   localOuterFaceId
-                                   (rawFace (coerce i))
-                                   nf gr2
+        (vB', gr1) = goVertices (Raw (coerce i))     nv gr
+        (dB', gr2) = goDarts    (Raw (coerce i))     nd gr1
+        (fB', gr3) = goFaces globalOuterFaceId
+                             localOuterFaceId
+                             (rawFace (coerce i))
+                             nf gr2
         rawFace ci fi x = RawFace (Just (ci, fi)) (FaceData mempty x)
 
     -- | Given a non-empty builder, construct the NonEmpty vector out of it
@@ -233,29 +236,28 @@ data Comps v e f =
         }
 
 -- | Computes, for each local vertex its global vertexId
-goVertices        ::(VertexId (Wrap s) -> v -> v')
-                  -> Int -- ^ vertex offset
-                  -> CPlanarGraph Primal (Wrap s) v e f
-                  -> ((Int, Builder.Builder v'), CPlanarGraph Primal (Wrap s) (VertexId s) e f)
-goVertices raw nv = imapAccumLOf vertices
-                                 (\vi (offSet,res) x -> let vi' = vi `shiftR` offSet
-                                                        in ((offSet+1, res <> raw' vi x), vi')
-                                 ) (nv, mempty)
+goVertices            :: (VertexId (Wrap s) -> v -> v')
+                      -> Int -- ^ vertex offset
+                      -> CPlanarGraph Primal (Wrap s) v e f
+                      -> ( Builder.Builder v'
+                         , CPlanarGraph Primal (Wrap s) (VertexId s) e f
+                         )
+goVertices raw offSet = imapAccumLOf vertices f mempty
   where
-    shiftR i offSet = coerce $ (coerce i) + offSet
+    f vi res x = let vi' = shiftR vi in (res <> raw' vi x, vi')
+    shiftR i = coerce $ (coerce i) + offSet
     raw' a b = Builder.singleton $ raw a b
 
 -- | Computes for each ddart the global dart
 goDarts        :: ( Dart.Dart (Wrap s) -> e -> e') -- ^ compute the new dart data
                -> Int -- ^ initial offset
                -> CPlanarGraph Primal (Wrap s) v e f
-               -> ((Int, Builder.Builder e'), CPlanarGraph Primal (Wrap s) v (Dart.Dart s) f)
-goDarts raw nd = imapAccumLOf darts
-                                 (\d (offSet,res) x -> let d' = d `shiftR` offSet
-                                                       in ((offSet+1, res <> raw' d x), d')
-                                 ) (nd, mempty)
+               -> (Builder.Builder e', CPlanarGraph Primal (Wrap s) v (Dart.Dart s) f)
+goDarts raw offSet = imapAccumLOf darts f mempty
   where
-    shiftR (Dart.Dart a dir) offSet = Dart.Dart (coerce $ (coerce a) + offSet) dir
+    f d res x = let d' = shiftR d
+                in (res <> raw' d x, d')
+    shiftR (Dart.Dart a dir) = Dart.Dart (coerce $ (coerce a) + offSet) dir
     raw' a b = Builder.singleton $ raw a b
 
 -- | Process the faces. replaces the face data in the component by references to the
@@ -274,17 +276,17 @@ goFaces        :: FaceId s
                -> Int
                   -- ^ initial offset
                -> CPlanarGraph Primal (Wrap s) v e f
-               -> ( (Int, Builder.Builder f')
+               -> ( Builder.Builder f'
                   , CPlanarGraph Primal (Wrap s) v e (FaceId s)
                   )
-goFaces globalOuterFaceId localOuterFaceId raw nf = imapAccumLOf faces go (nf, mempty)
+goFaces globalOuterFaceId localOuterFaceId raw offSet = imapAccumLOf faces go mempty
   where
-    shiftR i offSet = coerce $ (coerce i) + offSet
+    shiftR i = coerce $ (coerce i) + offSet
     raw' a b = Builder.singleton $ raw a b
-    go fi (offSet,res) x
-      | fi == localOuterFaceId = ((offSet, res), globalOuterFaceId)
-      | otherwise              = let fi' = fi `shiftR` offSet
-                                 in ((offSet+1, res <> raw' fi x), fi')
+    go fi res x
+      | fi == localOuterFaceId = (res, globalOuterFaceId)
+      | otherwise              = let fi' = shiftR fi
+                                 in (res <> raw' fi x, fi')
       -- if this face is its local outerFaceId, we just refer to the
       -- global outerFaceId. Otherwise we will have to create a new
       -- global faceId (fi') that corresponds to this face, and store its
@@ -442,7 +444,28 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
                           ()
         grr = fromDisjointComponents (const ()) graphs
 
-    -- runIO $ writeIpeFile outFP . singlePageFromContent  $ drawGraph grr
+    runIO $ print grr
+    runIO $ print $ numDarts grr
+
+
+
+
+    runIO $ traverseOf_ (vertices.withIndex) print grr
+    runIO $ traverseOf_ (darts.withIndex) (\(d,_) -> print $ (d, endPoints grr d)) grr
+
+
+    runIO $ do
+      for_ (grr^..connectedComponents.withIndex) $ \(ci,c) ->
+        traverseOf_ (vertices.withIndex) (\x -> print (ci,x)) c
+
+
+
+    -- runIO $ itraverseOf_ dartSegments (\i s -> print (i,s)) grr
+      -- ifoldMapOf dartSegments
+--]
+    runIO $ writeIpeFile outFP . singlePageFromContent  $ drawGraph grr
+
+-- (Dart (Arc 5) +1,ClosedLineSegment (Point2 128 144) (Point2 256 144) :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "black"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})
 
 
     it "fromDisjointSegments" $ do
@@ -461,6 +484,9 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
       numConnectedComponents grr `shouldBe` length graphs0
     it "fromDisjointComponents faces" $ do
       numFaces grr `shouldBe` 5
+
+
+
 
     -- runIO $ mapM_ print (grr^..)
 
