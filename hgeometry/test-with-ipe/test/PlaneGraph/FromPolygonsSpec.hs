@@ -44,6 +44,7 @@ import qualified VectorBuilder.Vector as Builder
 import qualified Hiraffe.AdjacencyListRep.Map as MapRep
 import qualified Data.Vector.Mutable as MV
 import           Control.Monad.ST
+import Data.Functor.Bind.Class
 
 
 import           Debug.Trace
@@ -54,6 +55,8 @@ type R = RealNumber 5
 --------------------------------------------------------------------------------
 
 
+instance Apply (ST s) where
+  ff <.> fx = ff <*> fx
 
 --------------------------------------------------------------------------------
 
@@ -187,6 +190,9 @@ asViewL1 = \case
   x Seq.:<| xs -> Just (x :<< xs)
   _            -> Nothing
 
+
+
+
 -- | Merge a bunch of components into a single graph. For each
 -- component we specify the component and the FaceId of its outer
 -- face. In addition, we specify the componentId and the faceId that
@@ -211,6 +217,7 @@ mergeComponentsInto merger graphs = PlanarGraph components
   where
     -- Computes the connected components, and, for each face, all the
     -- data we need to apply merger on obtain the final face data.
+    fData :: NonEmptyVector (FaceMergeData s f)
     (components, fData) = runST $ do
           fDataVec  <- MV.replicate nf (Nothing,FaceData mempty undefined)
           comps     <- constructComponentsAndData fDataVec
@@ -221,13 +228,19 @@ mergeComponentsInto merger graphs = PlanarGraph components
     -- are all references to globalId's, except for the data stored at
     -- the outer face of each component. Replace those by proper
     -- references as well.
-    constructComponentsAndData          :: MV.MVector s' (FaceMergeData s f)
+    constructComponentsAndData          :: forall s'. MV.MVector s' (FaceMergeData s f)
                                         -> ST s' (NonEmptyVector (Component Primal s))
     constructComponentsAndData fDataVec = ifor components' $ \ci comp ->
-        comp&faces %%@~ \fi (eGlobalId,fData) -> case eGlobalId of
-          Right globalFi   -> do modifyMV globalFi $ \(_,fDataVal) -> ( Just (coerce ci, fi)
-                                                                      , fDataVal&fData .~ fData
-                                                                      )
+                                            comp&faces %%@~ handle ci
+      where
+        modifyMV i f = MV.modify fDataVec f (coerce i)
+
+        handle                           :: Int -> FaceId (Wrap s) -> (_, f) -> ST s' (FaceId s)
+        handle ci fi (eGlobalId,theData) = case eGlobalId of
+          Right globalFi   -> do modifyMV globalFi $ \(_,FaceData hs _) ->
+                                                        ( Just (coerce ci, fi)
+                                                        , FaceData hs theData
+                                                        )
                                  pure globalFi
                               -- we are an inner face, so the face in the component
                               -- should just store the globalFaceId. Similarly, in our
@@ -243,14 +256,14 @@ mergeComponentsInto merger graphs = PlanarGraph components
                                  modifyMV globalFi $ \(orig,fDataVal) ->
                                                        ( orig
                                                        , fDataVal&holes %~
-                                                           (Seq.|> (d,(coerce ci, fi, fData)))
+                                                           (Seq.|> (d,(coerce ci, fi, theData)))
                                                        )
                                  pure globalFi
-      where
-        modifyMV i f = MV.modify fDataVec f (coerce i)
+
 
 
     -- apply the merger function to merge the face data into its final data
+    fData' :: NonEmptyVector (RawFace Primal s f)
     fData' = flip imap fData $ \fi (mFaceIdx, FaceData extras orig) ->
                 RawFace mFaceIdx $ case fmap snd <$> asViewL1 extras of
                   Nothing      -> FaceData mempty orig
