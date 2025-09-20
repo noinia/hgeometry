@@ -57,7 +57,9 @@ type R = RealNumber 5
 -- TODO:: this should probably go into Semigroups?
 
 instance Apply (ST s) where
-  ff <.> fx = ff <*> fx
+  (<.>) = (<*>)
+  (<.) = (<*)
+  (.>) = (*>)
 
 --------------------------------------------------------------------------------
 

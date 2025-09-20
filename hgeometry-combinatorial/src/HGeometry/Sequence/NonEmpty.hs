@@ -103,8 +103,8 @@ instance Reversing (ViewL1 a) where
 -- | Try to parse a Seq into a ViewL1
 asViewL1 :: Seq a -> Maybe (ViewL1 a)
 asViewL1 = \case
-  x Seq.:<| xs -> Just (x :<< xs)
-  _            -> Nothing
+  x :<| xs -> Just (x :<< xs)
+  _        -> Nothing
 
 --------------------------------------------------------------------------------
 
@@ -206,8 +206,8 @@ viewr1 (l :<< ls) = case Sequence.viewr ls of
 -- | Try to parse a Seq into a ViewLR
 asViewR1 :: Seq a -> Maybe (ViewR1 a)
 asViewR1 = \case
-  xs Seq.:|> x -> Just (xss :>> x)
-  _            -> Nothing
+  xs :|> x -> Just (xs :>> x)
+  _        -> Nothing
 
 --------------------------------------------------------------------------------
 
