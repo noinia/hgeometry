@@ -167,7 +167,7 @@ type FaceDataMerger s f = Maybe (FaceId s, f)
 
 -- | The data that we collect during mering
 type FaceMergeData s f  = ( Maybe (ComponentId s, FaceId (Wrap s))
-                          , FaceData (Dart.Dart s,(Int, FaceId (Wrap s), f)) f
+                          , LazyFaceData (Dart.Dart s,(Int, FaceId (Wrap s), f)) f
                           )
 
 -- | Given a bunch of components, each one with a given outer face,
@@ -192,6 +192,9 @@ asViewL1 = \case
 
 
 
+-- we want the f to be lazy
+data LazyFaceData h f = LazyFaceData (Seq.Seq h) f
+  deriving (Show)
 
 -- | Merge a bunch of components into a single graph. For each
 -- component we specify the component and the FaceId of its outer
@@ -219,7 +222,7 @@ mergeComponentsInto merger graphs = PlanarGraph components
     -- data we need to apply merger on obtain the final face data.
     fData :: NonEmptyVector (FaceMergeData s f)
     (components, fData) = runST $ do
-          fDataVec  <- MV.replicate nf (Nothing,FaceData mempty undefined)
+          fDataVec  <- MV.replicate nf (Nothing,LazyFaceData mempty undefined)
           comps     <- constructComponentsAndData fDataVec
           fDataVec' <- Vector.unsafeFreeze fDataVec
           pure (comps, NonEmptyV.unsafeFromVector fDataVec')
@@ -237,9 +240,9 @@ mergeComponentsInto merger graphs = PlanarGraph components
 
         handle                           :: Int -> FaceId (Wrap s) -> (_, f) -> ST s' (FaceId s)
         handle ci fi (eGlobalId,theData) = case eGlobalId of
-          Right globalFi   -> do modifyMV globalFi $ \(_,FaceData hs _) ->
+          Right globalFi   -> do modifyMV globalFi $ \(_,LazyFaceData hs _) ->
                                                         ( Just (coerce ci, fi)
-                                                        , FaceData hs theData
+                                                        , LazyFaceData hs theData
                                                         )
                                  pure globalFi
                               -- we are an inner face, so the face in the component
@@ -253,18 +256,17 @@ mergeComponentsInto merger graphs = PlanarGraph components
                                                       components^?!ix parentCi.faceAt parentFi
                                       -- Note the components instead of components'.
                                       --  here, hence this relies on laziness
-                                 modifyMV globalFi $ \(orig,fDataVal) ->
-                                                       ( orig
-                                                       , fDataVal&holes %~
-                                                           (Seq.|> (d,(coerce ci, fi, theData)))
-                                                       )
+                                 modifyMV globalFi $ \(orig, LazyFaceData hs x) ->
+                                   ( orig
+                                   , LazyFaceData (hs Seq.|> (d,(coerce ci, fi, theData))) x
+                                   )
                                  pure globalFi
 
 
 
     -- apply the merger function to merge the face data into its final data
     fData' :: NonEmptyVector (RawFace Primal s f)
-    fData' = flip imap fData $ \fi (mFaceIdx, FaceData extras orig) ->
+    fData' = flip imap fData $ \fi (mFaceIdx, LazyFaceData extras orig) ->
                 RawFace mFaceIdx $ case fmap snd <$> asViewL1 extras of
                   Nothing      -> FaceData mempty orig
                   Just extras' -> let orig' = (coerce fi,orig) <$ mFaceIdx
@@ -322,7 +324,7 @@ mergeComponentsInto merger graphs = PlanarGraph components
     build  = NonEmptyV.unsafeFromVector . Builder.build
 
     -- we compute the data of the a component, which in this case is a (global) Dart
-    computeHole gr outerFaceId = gr^.boundaryDartOf outerFaceId
+    computeHole gr outerFaceId' = gr^.boundaryDartOf outerFaceId'
 
 
 {-
