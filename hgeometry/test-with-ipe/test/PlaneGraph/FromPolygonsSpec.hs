@@ -12,15 +12,15 @@ import qualified Data.List as List
 import           Data.Map.NonEmpty (NEMap)
 import qualified Data.Map.NonEmpty as NEMap
 import qualified Data.Sequence as Seq
--- import qualified Data.Vector as Vector
+import qualified Data.Vector as Vector
 import           Data.Vector.NonEmpty (NonEmptyVector)
 import qualified Data.Vector.NonEmpty as NonEmptyV
--- import           GHC.Generics (Generic)
 import           Golden
 import           HGeometry.Boundary
 import           HGeometry.Ext
 import           HGeometry.Foldable.Util
 import           HGeometry.LineSegment
+import           HGeometry.Sequence.NonEmpty
 import           HGeometry.Map.NonEmpty.Monoidal (MonoidalNEMap)
 import qualified HGeometry.Map.NonEmpty.Monoidal as MonoidalNEMap
 import           HGeometry.Number.Real.Rational
@@ -42,7 +42,8 @@ import           Test.QuickCheck
 import qualified VectorBuilder.Builder as Builder
 import qualified VectorBuilder.Vector as Builder
 import qualified Hiraffe.AdjacencyListRep.Map as MapRep
--- import HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
+import qualified Data.Vector.Mutable as MV
+import           Control.Monad.ST
 
 
 import           Debug.Trace
@@ -50,16 +51,12 @@ import           Debug.Trace
 
 type R = RealNumber 5
 
-
--- deriving stock Show (PlaneGraph s v e f)
-
 --------------------------------------------------------------------------------
 
 
 
 --------------------------------------------------------------------------------
 
--- data VTXData point = VTXData point edge
 
 
 -- | Given a set of line segments that may intersect only in endpoints, construct
@@ -131,12 +128,12 @@ fromPolygons = undefined
 -- | Given a bunch of components, each one with a given outer face,
 -- construct a PlaneGraph from them that unifies all their outer faces; i.e.
 -- embeds all components in a single outer face.
-fromDisjointComponents :: forall set s v e f r.
-                          (Foldable1 set, Functor set, Point_ v 2 r, Num r, Ord r
+fromDisjointComponents :: forall s v e f r.
+                          (Point_ v 2 r, Num r, Ord r
                           )
-                       => (set (FaceId (Wrap s), f) -> f)
+                       => (ViewL1 (Int,FaceId (Wrap s), f) -> f)
                           -- ^ How to combine the data from the "outer faces"
-                       -> set (CPlaneGraph (Wrap s) v e f)
+                       -> NonEmptyVector (CPlaneGraph (Wrap s) v e f)
                        -> PlaneGraph s v e f
 fromDisjointComponents combineOuterFace graphs = review _PlanarGraph $
   fromDisjointComponents1 combineOuterFace
@@ -147,19 +144,178 @@ fromDisjointComponents combineOuterFace graphs = review _PlanarGraph $
 -- | Given a bunch of components, each one with a given outer face,
 -- construct a PlaneGraph from them that unifies all their outer faces; i.e.
 -- embeds all components in a single outer face.
-fromDisjointComponents' :: forall set s v e f. (Foldable1 set, Functor set)
-                       => (set (FaceId (Wrap s), f) -> f)
-                          -- ^ How to combine the data from the "outer faces"
-                       -> set ( CPlaneGraph (Wrap s) v e f
-                              , FaceId (Wrap s)
-                              )
-                       -> PlaneGraph s v e f
+fromDisjointComponents' :: (ViewL1 (Int, FaceId (Wrap s), f) -> f)
+                        -- ^ How to combine the data from the "outer faces"
+                        -> NonEmptyVector ( CPlaneGraph (Wrap s) v e f
+                                          , FaceId (Wrap s)
+                                          )
+                        -> PlaneGraph s v e f
 fromDisjointComponents' combineOuterFace graphs = review _PlanarGraph $
   fromDisjointComponents1 combineOuterFace ((\(gr,fi) -> (gr^._CPlanarGraph,fi))
                                             <$> graphs
                                            )
 
 
+type FaceDataMerger s f = Maybe (FaceId s, f)
+                       -- ^ The faceId and data corresponding to the face we are merging into
+                       -> ViewL1 (Int, FaceId (Wrap s), f)
+                       -- ^ The data we are merging into the new face
+                       -> f
+
+-- | The data that we collect during mering
+type FaceMergeData s f  = ( Maybe (ComponentId s, FaceId (Wrap s))
+                          , FaceData (Dart.Dart s,(Int, FaceId (Wrap s), f)) f
+                          )
+
+-- | Given a bunch of components, each one with a given outer face,
+-- construct a PlanarGraph from them that unifies all their outer faces; i.e.
+-- embeds all components in a single outer face.
+fromDisjointComponents1               :: (ViewL1 (Int, FaceId (Wrap s), f) -> f)
+                                        -- ^ How to combine the data from the "outer faces"
+                                      -> NonEmptyVector ( CPlanarGraph Primal (Wrap s) v e f
+                                                        , FaceId (Wrap s)
+                                                        )
+                                      -> PlanarGraph Primal s v e f
+fromDisjointComponents1 merger graphs =
+  mergeComponentsInto (\_nothing extras -> merger extras)
+                      ((\(gr,outer) -> (gr,outer,Nothing)) <$> graphs)
+
+
+-- | Try to parse a Seq into a ViewL1
+asViewL1 :: Seq.Seq a -> Maybe (ViewL1 a)
+asViewL1 = \case
+  x Seq.:<| xs -> Just (x :<< xs)
+  _            -> Nothing
+
+-- | Merge a bunch of components into a single graph. For each
+-- component we specify the component and the FaceId of its outer
+-- face. In addition, we specify the componentId and the faceId that
+-- we should identify this outer face with. If this is Nothing, it
+-- should be the global outerface.
+--
+-- pre: at least one component has a 'Nothing' as the face containing it (i.e.)
+-- there is at least one face that appears in the outer face
+mergeComponentsInto               :: forall s v e f.
+                                     FaceDataMerger s f
+                                  -> NonEmptyVector ( CPlanarGraph Primal (Wrap s) v e f
+                                                    , FaceId (Wrap s)
+                                                    , Maybe (Int, FaceId (Wrap s))
+                                                    )
+                                     -- ^ All components are supposed to be given, in the
+                                     -- proper componentId order.
+                                  -> PlanarGraph Primal s v e f
+mergeComponentsInto merger graphs = PlanarGraph components
+                                                (build   vData)
+                                                (build   dData)
+                                                fData'
+  where
+    -- Computes the connected components, and, for each face, all the
+    -- data we need to apply merger on obtain the final face data.
+    (components, fData) = runST $ do
+          fDataVec  <- MV.replicate nf (Nothing,FaceData mempty undefined)
+          comps     <- constructComponentsAndData fDataVec
+          fDataVec' <- Vector.unsafeFreeze fDataVec
+          pure (comps, NonEmptyV.unsafeFromVector fDataVec')
+    -- The components' array contains the CPlanarGraphs representing
+    -- the invididual component.  The data values stored in this graph
+    -- are all references to globalId's, except for the data stored at
+    -- the outer face of each component. Replace those by proper
+    -- references as well.
+    constructComponentsAndData          :: MV.MVector s' (FaceMergeData s f)
+                                        -> ST s' (NonEmptyVector (Component Primal s))
+    constructComponentsAndData fDataVec = ifor components' $ \ci comp ->
+        comp&faces %%@~ \fi (eGlobalId,fData) -> case eGlobalId of
+          Right globalFi   -> do modifyMV globalFi $ \(_,fDataVal) -> ( Just (coerce ci, fi)
+                                                                      , fDataVal&fData .~ fData
+                                                                      )
+                                 pure globalFi
+                              -- we are an inner face, so the face in the component
+                              -- should just store the globalFaceId. Similarly, in our
+                              -- global faceData array, we will store the (ComponentId, FaceId)
+                              -- value, and initialize the initial face value at the given fData.
+
+          Left (d, parent) -> do let globalFi = case parent of
+                                        Nothing                  -> globalOuterFaceId
+                                        Just (parentCi,parentFi) ->
+                                                      components^?!ix parentCi.faceAt parentFi
+                                      -- Note the components instead of components'.
+                                      --  here, hence this relies on laziness
+                                 modifyMV globalFi $ \(orig,fDataVal) ->
+                                                       ( orig
+                                                       , fDataVal&holes %~
+                                                           (Seq.|> (d,(coerce ci, fi, fData)))
+                                                       )
+                                 pure globalFi
+      where
+        modifyMV i f = MV.modify fDataVec f (coerce i)
+
+
+    -- apply the merger function to merge the face data into its final data
+    fData' = flip imap fData $ \fi (mFaceIdx, FaceData extras orig) ->
+                RawFace mFaceIdx $ case fmap snd <$> asViewL1 extras of
+                  Nothing      -> FaceData mempty orig
+                  Just extras' -> let orig' = (coerce fi,orig) <$ mFaceIdx
+                                  in FaceData (fst <$> extras) (merger orig' extras')
+
+
+    -- this is where we do the main work we replace the data of each
+    -- vertex, dart, and face in each component with a reference to
+    -- their global Ids. For the outer faces of each local component,
+    -- we don't quite know the proper outerfaceId yet. So for the time
+    -- being keep using our "Maybe (Int, FaceId)" 'ids'. In addition, for those
+    -- outer faces we compute a dart on the boundary (which we will later need)
+    -- for the face data of its parent face
+    --
+    -- Along the way we create builders (vvData, dData, and fData) that can actually
+    -- construct the final 'rawVertexData', 'rawDartData', and 'rawFaceData'
+    -- vectors.
+    components' :: NonEmptyVector (CPlanarGraph Primal (Wrap s) (VertexId s) (Dart.Dart s)
+                                                       (Either ( Dart.Dart s
+                                                               , Maybe (Int,FaceId (Wrap s))
+                                                               )
+                                                               (FaceId s), f
+                                                       )
+                                                )
+    ( Comps _ _ nf vData dData, components') =
+        imapAccumL go (Comps 0 0 1 mempty mempty) graphs
+
+    globalOuterFaceId :: FaceId s
+    globalOuterFaceId = coerce @Int 0
+
+    go i (Comps nv' nd' nf' vB dB) (gr, grOuterFaceId, containingFace) =
+        ( Comps (nv' + numVertices gr)
+                (nd' + (numDarts gr `div` 2)) -- number of arc's is just numberOf darts / 2
+                (nf' + numFaces gr - 1) -- note the -1 since we don't count the outerFace of each component
+                (vB <> vB') (dB <> dB')
+        , gr3
+        )
+      where
+        (vB', gr1) = goVertices (Raw (coerce i))     nv' gr
+        (dB', gr2) = goDarts    (Raw (coerce i))     nd' gr1
+        gr3        = goFaces (computeHole gr2 grOuterFaceId, containingFace)
+                             grOuterFaceId
+                             nf'
+                             gr2
+        rawFace ci fi x = RawFace (Just (ci, fi)) (FaceData mempty x)
+
+
+
+    -- | Given a non-empty builder, construct the NonEmpty vector out of it
+    -- pre: the builder is indeed non-empty.
+    --
+    -- in our case the use is indeed safe as we are guaranteed to have non-empty builders of
+    -- vectors, faces etc.
+    build  :: Builder.Builder a -> NonEmptyVector a
+    build  = NonEmptyV.unsafeFromVector . Builder.build
+
+    -- we compute the data of the a component, which in this case is a (global) Dart
+    computeHole gr outerFaceId = gr^.boundaryDartOf outerFaceId
+
+
+{-
+
+
+-- TODO: write this as a call to merge components into
 -- | Given a bunch of components, each one with a given outer face,
 -- construct a PlanarGraph from them that unifies all their outer faces; i.e.
 -- embeds all components in a single outer face.
@@ -223,15 +379,14 @@ fromDisjointComponents1 combineOuterFace graphs =
 
     -- we compute the data of the a component, which in this case is a (global) Dart
     computeHole (gr,outerFaceId) = gr^.boundaryDartOf outerFaceId
-
+-}
 
 data Comps v e f =
-  Comps { _numVertices' :: {-#UNPACK#-}!Int -- ^ num vertices in earlier components
-        , _numDarts'    :: {-#UNPACK#-}!Int -- ^ number of darts in earlier components
-        , _numFaces'    :: {-#UNPACK#-}!Int -- ^ number of faces in earlier components
+  Comps { _vertexOffset :: {-#UNPACK#-}!Int -- ^ num vertices in earlier components
+        , _dartOffset   :: {-#UNPACK#-}!Int -- ^ number of darts in earlier components
+        , _faceOffset   :: {-#UNPACK#-}!Int -- ^ number of faces in earlier components
         , _vData'       :: v -- ^ information about vertices we've already seen
         , _eData'       :: e -- ^ information about the edges we've already seen
-        , _fData'       :: f -- ^ information about the darts we've already seen
         }
 
 -- | Computes, for each local vertex its global vertexId
@@ -259,38 +414,31 @@ goDarts raw offSet = imapAccumLOf darts f mempty
     shiftR (Dart.Dart a dir) = Dart.Dart (coerce $ (coerce a) + offSet) dir
     raw' a b = Builder.singleton $ raw a b
 
+
 -- | Process the faces. replaces the face data in the component by references to the
 -- global face Id's. In addition, for every internal face, we create a new
 -- entry in the builder storing its actual data.
 --
 -- note that this function essentially throws away the data of the (local) outerface.
 -- so it's important to retain that somewhere else first.
-goFaces        :: FaceId s
+goFaces        :: globalFaceId
                -- ^ The global outerFaceId
                -> FaceId (Wrap s)
                -- ^ The outer face in this component
-               -> ( FaceId (Wrap s) -> f -> f')
-               -- ^ returns the new face data; left means we have to create a new face
-               -- right means we keep the current face.
                -> Int
                   -- ^ initial offset
                -> CPlanarGraph Primal (Wrap s) v e f
-               -> ( Builder.Builder f'
-                  , CPlanarGraph Primal (Wrap s) v e (FaceId s)
-                  )
-goFaces globalOuterFaceId localOuterFaceId raw offSet = over _1 (\(WO _ x) -> x)
-                                                      . imapAccumLOf faces go (WO offSet mempty)
+               -> CPlanarGraph Primal (Wrap s) v e (Either globalFaceId (FaceId s), f)
+goFaces globalOuterFaceId localOuterFaceId offSet = snd . imapAccumLOf faces go offSet
   where
-    raw' a b = Builder.singleton $ raw a b
-    go fi (WO newId res) x
-      | fi == localOuterFaceId = (WO newId res,                      globalOuterFaceId)
-      | otherwise              = (WO (newId + 1) (res <> raw' fi x), coerce newId)
+    go fi newId  x
+      | fi == localOuterFaceId = (newId,     (Left globalOuterFaceId, x))
+      | otherwise              = (newId + 1, (Right $ coerce newId, x))
       -- if this face is its local outerFaceId, we just refer to the
       -- global outerFaceId. Otherwise we will have to create a new
       -- global faceId (newId) that corresponds to this face, and store its
       -- data.
 
-data WithOffset a = WO {-# UNPACK #-}!Int a
 
 
 --------------------------------------------------------------------------------
@@ -395,7 +543,7 @@ bug = describe "bug" $ do
                           (Point 2 R)
                           (ClosedLineSegment (Point 2 R) :+ IpeAttributes Path R)
                           ()
-        grr = fromDisjointComponents (const ()) graphs
+        grr = fromDisjointComponents (const ()) (fromFoldable1 graphs)
 
 {-
     prop "test headOf 5" $  do
@@ -442,7 +590,7 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
                           (Point 2 R)
                           (ClosedLineSegment (Point 2 R) :+ IpeAttributes Path R)
                           ()
-        grr = fromDisjointComponents (const ()) graphs
+        grr = fromDisjointComponents (const ()) (fromFoldable1 graphs)
 
     -- runIO $ print grr
     -- runIO $ print $ numDarts grr
