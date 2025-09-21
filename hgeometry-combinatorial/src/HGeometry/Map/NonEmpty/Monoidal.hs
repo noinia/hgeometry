@@ -14,8 +14,13 @@ module HGeometry.Map.NonEmpty.Monoidal
   , singleton
   , unions1WithKey
   , mapWithKeyMerge1
+
+
+  , assocs
   ) where
 
+
+import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Foldable1
 import           Data.Map.NonEmpty (NEMap)
 import qualified Data.Map.NonEmpty as NEMap
@@ -43,3 +48,12 @@ unions1WithKey f = foldl1' (NEMap.unionWithKey f)
 mapWithKeyMerge1   :: (Ord k', Semigroup v')
                    => (k -> v -> NEMap k' v') -> NEMap k v -> NEMap k' v'
 mapWithKeyMerge1 f = getNEMap . NEMap.foldMapWithKey (\k v -> MonoidalNEMap $ f k v)
+
+
+--------------------------------------------------------------------------------
+
+-- | Return all key/value pairs in the map in ascending key order.
+--
+-- \(O(n)\)
+assocs :: MonoidalNEMap k v -> NonEmpty (k, v)
+assocs = NEMap.assocs . getNEMap
