@@ -40,6 +40,7 @@ import           HGeometry.Ext
 import           HGeometry.LineSegment
 import           HGeometry.Point
 import           HGeometry.Polygon.Simple
+import           HGeometry.Lens.Util
 import           HGeometry.Polygon.WithHoles
 import           HGeometry.Properties
 import           HGeometry.Vector
@@ -195,16 +196,15 @@ edgeSegments = theFold
 --------------------------------------------------------------------------------
 
 
-instance HasInnerComponent (PlaneGraph s v e f) where
-  innerComponentsAt fi = _PlanarGraph.innerComponentsAt fi
 
-instance HasInnerComponent (PlanarGraph w s v e f) where
-  innerComponentsAt fi = undefined
-   -- TODO: implement this
+-- instance HasInnerComponent (PlanarGraph w s v e f) where
+--   innerComponentsAt fi = undefined
+--    -- TODO: implement this
 
 -- | Renders all interior faces as polygons (which may possibly contain holes)
 interiorFacePolygons :: forall planeGraph vertex r.
                         ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
+                        , HasInnerComponent planeGraph
                         , Point_ vertex 2 r
                         , Ord r, Num r
                         , Eq (FaceIx planeGraph)
@@ -229,13 +229,14 @@ interiorFacePolygons = theFold
 interiorFacePolygonAt    :: forall planeGraph vertex.
                             ( PlaneGraph_ planeGraph vertex
                             , HasOuterBoundaryOf planeGraph
+                            , HasInnerComponent planeGraph
                             , Point_ vertex 2 (NumType vertex)
                             )
                          => FaceIx planeGraph
                          -> IndexedFold (FaceIx planeGraph)
                                         planeGraph
                                         (PolygonalDomain (vertex :+ VertexIx planeGraph))
-interiorFacePolygonAt = theFold
+interiorFacePolygonAt fi = theFold
   where
     theFold pPolyFPoly gr = faceAt fi draw gr
       where
@@ -247,19 +248,20 @@ interiorFacePolygonAt = theFold
 polygonFromFace      :: forall planeGraph vertex r.
                         ( PlaneGraph_ planeGraph vertex
                         , HasOuterBoundaryOf planeGraph
+                        , HasInnerComponent planeGraph
                         , Point_ vertex 2 r
                         )
                      => planeGraph -> FaceIx planeGraph
                      -> PolygonalDomain (vertex :+ VertexIx planeGraph)
 polygonFromFace gr fi =
     PolygonalDomain (simplePolygonFromFace gr fi)
-                    (mkHole <$> toNonEmptyVectorOf (innerComponentsAt fi.asIndex) gr)
+                    (mkHole <$> toVectorOf (innerComponentsAt fi.asIndex) gr)
   where
     mkHole   :: DartIx planeGraph -> SimplePolygon (vertex :+ VertexIx planeGraph)
     mkHole d = uncheckedFromCCWPoints
-             . fmap (\d -> gr^?!tailOf d.asIndexedExt)
+             . fmap (\d' -> gr^?!tailOf d'.asIndexedExt)
              . NonEmptyV.reverse
-             $ boundaryDartsFrom d gr
+             $ toNonEmptyVectorOf (boundaryDartsFrom d.asIndex) gr
      -- make sure we get them in the right order.
 
 

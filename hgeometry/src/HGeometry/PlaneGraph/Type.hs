@@ -174,6 +174,7 @@ instance PlanarGraph_ (PlaneGraph s vertex e f) where
   nextDartOf      d = _PlanarGraph .> nextDartOf d
 
   boundaryDartOf  f = _PlanarGraph .> boundaryDartOf f
+  boundaryDartsFrom d = _PlanarGraph .> boundaryDartsFrom d
 
 instance ( Point_ vertex 2 r, Ord r, Num r
          ) => PlaneGraph_ (PlaneGraph s vertex e f) vertex
@@ -184,7 +185,12 @@ instance HasOuterFace (PlaneGraph s vertex e f) where
 instance HasOuterBoundaryOf (PlaneGraph s v e f) where
   outerBoundaryDarts f = outerBoundaryDarts f . coerce @_ @(PlanarGraph Primal s v e f)
 
+instance HasInnerComponent (PlaneGraph s v e f) where
+  innerComponentsAt fi = _PlanarGraph.innerComponentsAt fi
 
+-- instance HasInnerComponent (PlanarGraph Primal s v e f) where
+--   innerComponentsAt fi = undefined
+  -- TODO:
 
 {-
 
