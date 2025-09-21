@@ -25,22 +25,27 @@ module HGeometry.PlaneGraph.Class
 
   , interiorFacePolygonAt
   , interiorFacePolygons
+
+  , outerBoundaryPolygonAt
+  , outerBoundaryPolygons
   ) where
 
-import Control.Lens
-import Data.Coerce
-import Data.Foldable1
-import Data.Maybe (fromMaybe)
-import Data.Monoid (Endo(..))
-import Data.Ord (comparing)
-import HGeometry.Ext
-import HGeometry.LineSegment
-import HGeometry.Point
-import HGeometry.Polygon.Simple
-import HGeometry.Properties
-import HGeometry.Vector
-import Hiraffe.Graph.Class
-import Hiraffe.PlanarGraph.Class
+import           Control.Lens
+import           Data.Coerce
+import           Data.Foldable1
+import           Data.Maybe (fromMaybe)
+import           Data.Monoid (Endo(..))
+import           Data.Ord (comparing)
+import           HGeometry.Ext
+import           HGeometry.LineSegment
+import           HGeometry.Point
+import           HGeometry.Polygon.Simple
+import           HGeometry.Polygon.WithHoles
+import           HGeometry.Properties
+import           HGeometry.Vector
+import           Hiraffe.Graph.Class
+import           Hiraffe.PlanarGraph.Class
+import qualified Data.Vector.NonEmpty as NonEmptyV
 
 --------------------------------------------------------------------------------
 
@@ -187,8 +192,17 @@ edgeSegments = theFold
         draw ei _ = let seg = uncurry ClosedLineSegment $ g^.endPointsOf (getPositiveDart g ei)
                     in seg >$ indexed pSegFSeg ei seg
 
+--------------------------------------------------------------------------------
 
--- | Renders all interior faces as simple polygons.
+
+instance HasInnerComponent (PlaneGraph s v e f) where
+  innerComponentsAt fi = _PlanarGraph.innerComponentsAt fi
+
+instance HasInnerComponent (PlanarGraph w s v e f) where
+  innerComponentsAt fi = undefined
+   -- TODO: implement this
+
+-- | Renders all interior faces as polygons (which may possibly contain holes)
 interiorFacePolygons :: forall planeGraph vertex r.
                         ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
                         , Point_ vertex 2 r
@@ -197,45 +211,21 @@ interiorFacePolygons :: forall planeGraph vertex r.
                         )
                      => IndexedFold (FaceIx planeGraph)
                                     planeGraph
-                                    (SimplePolygon (vertex :+ VertexIx planeGraph))
+                                    (PolygonalDomain (vertex :+ VertexIx planeGraph))
 interiorFacePolygons = theFold
   where
     theFold              :: forall p f.
-                            ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
-                            , Indexable (FaceIx planeGraph) p, Applicative f, Contravariant f)
-                         => p (SimplePolygon (vertex :+ VertexIx planeGraph))
-                              (f (SimplePolygon (vertex :+ VertexIx planeGraph)))
-                         -> planeGraph
-                         -> f planeGraph
+                            ( Indexable (FaceIx planeGraph) p, Applicative f, Contravariant f)
+                         => p (PolygonalDomain (vertex :+ VertexIx planeGraph))
+                              (f (PolygonalDomain (vertex :+ VertexIx planeGraph)))
+                         -> planeGraph -> f planeGraph
     theFold pPolyFPoly g = interiorFaces (Indexed draw) g
       where
         draw      :: FaceIx planeGraph -> Face planeGraph -> f (Face planeGraph)
         draw fi _ = let poly = polygonFromFace g fi
                     in poly >$ indexed pPolyFPoly fi poly
 
-polygonFromFace      :: forall planeGraph vertex r.
-                        ( PlaneGraph_ planeGraph vertex
-                        , HasOuterBoundaryOf planeGraph
-                        , Point_ vertex 2 r
-                        )
-                     => planeGraph -> FaceIx planeGraph
-                     -> SimplePolygon (vertex :+ VertexIx planeGraph)
-polygonFromFace gr fi = poly'&vertices.extra %~ coerce
-  where
-    poly' :: SimplePolygon (vertex :+ VertexIx planeGraph)
-    poly' = uncheckedFromCCWPoints
-          . fmap (\vi -> gr^?!vertexAt vi :+ vi)
-          $ outerBoundaryVertices fi gr
-        -- note that this is safe, since boundaryVerticesOf guarantees that for
-        -- interior faces, the vertices are returned in CCW order.
-
-    -- TODO: why can't I just coerce poyl' to the right type?
-
-
--- | Renders a single interior face as a simple polygon.
---
--- Note that this is a fold rather than a getter for the same reason faceAt is a traversal
--- rather than a lens: i.e. if you pass some nonsensical FaceIx the face may not exist.
+-- | Render a given interior face as a polygon (which may cotnain holes)
 interiorFacePolygonAt    :: forall planeGraph vertex.
                             ( PlaneGraph_ planeGraph vertex
                             , HasOuterBoundaryOf planeGraph
@@ -244,14 +234,105 @@ interiorFacePolygonAt    :: forall planeGraph vertex.
                          => FaceIx planeGraph
                          -> IndexedFold (FaceIx planeGraph)
                                         planeGraph
-                                        (SimplePolygon (vertex :+ VertexIx planeGraph))
-interiorFacePolygonAt fi = theFold
+                                        (PolygonalDomain (vertex :+ VertexIx planeGraph))
+interiorFacePolygonAt = theFold
   where
     theFold pPolyFPoly gr = faceAt fi draw gr
       where
         -- draw   :: Face planeGraph -> f (Face planeGraph)
-        draw _ = let poly =  polygonFromFace gr fi
+        draw _ = let poly = polygonFromFace gr fi
                  in poly >$ indexed pPolyFPoly fi poly
+
+-- | The actual code that constructs the polygonal domain
+polygonFromFace      :: forall planeGraph vertex r.
+                        ( PlaneGraph_ planeGraph vertex
+                        , HasOuterBoundaryOf planeGraph
+                        , Point_ vertex 2 r
+                        )
+                     => planeGraph -> FaceIx planeGraph
+                     -> PolygonalDomain (vertex :+ VertexIx planeGraph)
+polygonFromFace gr fi =
+    PolygonalDomain (simplePolygonFromFace gr fi)
+                    (mkHole <$> toNonEmptyVectorOf (innerComponentsAt fi.asIndex) gr)
+  where
+    mkHole   :: DartIx planeGraph -> SimplePolygon (vertex :+ VertexIx planeGraph)
+    mkHole d = uncheckedFromCCWPoints
+             . fmap (\d -> gr^?!tailOf d.asIndexedExt)
+             . NonEmptyV.reverse
+             $ boundaryDartsFrom d gr
+     -- make sure we get them in the right order.
+
+
+----------------------------------------
+
+-- | Renders all interior faces as simple polygons.
+outerBoundaryPolygons :: forall planeGraph vertex r.
+                        ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
+                        , Point_ vertex 2 r
+                        , Ord r, Num r
+                        , Eq (FaceIx planeGraph)
+                        )
+                     => IndexedFold (FaceIx planeGraph)
+                                    planeGraph
+                                    (SimplePolygon (vertex :+ VertexIx planeGraph))
+outerBoundaryPolygons = theFold
+  where
+    theFold              :: forall p f.
+                            ( Indexable (FaceIx planeGraph) p, Applicative f, Contravariant f)
+                         => p (SimplePolygon (vertex :+ VertexIx planeGraph))
+                              (f (SimplePolygon (vertex :+ VertexIx planeGraph)))
+                         -> planeGraph
+                         -> f planeGraph
+    theFold pPolyFPoly g = interiorFaces (Indexed draw) g
+      where
+        draw      :: FaceIx planeGraph -> Face planeGraph -> f (Face planeGraph)
+        draw fi _ = let poly = simplePolygonFromFace g fi
+                    in poly >$ indexed pPolyFPoly fi poly
+
+-- | Return the outer boundary of a face as a simple polygon
+simplePolygonFromFace       :: forall planeGraph vertex r.
+                                 ( PlaneGraph_ planeGraph vertex
+                                 , HasOuterBoundaryOf planeGraph
+                                 , Point_ vertex 2 r
+                                 )
+                            => planeGraph -> FaceIx planeGraph
+                            -> SimplePolygon (vertex :+ VertexIx planeGraph)
+simplePolygonFromFace gr fi = poly'&vertices.extra %~ coerce
+  where
+    poly' :: SimplePolygon (vertex :+ VertexIx planeGraph)
+    poly' = uncheckedFromCCWPoints
+          . fmap (\vi -> gr^?!vertexAt vi :+ vi)
+          $ outerBoundaryVertices fi gr
+        -- note that this is safe, since boundaryVerticesOf guarantees that for
+        -- interior faces, the vertices are returned in CCW order.
+
+    -- TODO: why can't I just coerce poly' to the right type?
+
+
+-- | Renders a single interior face as a simple polygon.
+--
+-- Note that this is a fold rather than a getter for the same reason faceAt is a traversal
+-- rather than a lens: i.e. if you pass some nonsensical FaceIx the face may not exist.
+outerBoundaryPolygonAt    :: forall planeGraph vertex.
+                            ( PlaneGraph_ planeGraph vertex
+                            , HasOuterBoundaryOf planeGraph
+                            , Point_ vertex 2 (NumType vertex)
+                            )
+                         => FaceIx planeGraph
+                         -> IndexedFold (FaceIx planeGraph)
+                                        planeGraph
+                                        (SimplePolygon (vertex :+ VertexIx planeGraph))
+outerBoundaryPolygonAt fi = theFold
+  where
+    theFold pPolyFPoly gr = faceAt fi draw gr
+      where
+        -- draw   :: Face planeGraph -> f (Face planeGraph)
+        draw _ = let poly =  simplePolygonFromFace gr fi
+                 in poly >$ indexed pPolyFPoly fi poly
+
+--------------------------------------------------------------------------------
+
+
 
 --------------------------------------------------------------------------------
 

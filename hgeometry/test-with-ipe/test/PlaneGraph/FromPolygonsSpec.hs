@@ -191,6 +191,23 @@ fromDisjointComponents1 merger graphs =
 data LazyFaceData h f = LazyFaceData (Seq.Seq h) f
   deriving (Show)
 
+
+mergeComponentsInto'               :: forall s v e f.
+                                     FaceDataMerger s f
+                                  -> NonEmptyVector ( CPlaneGraph (Wrap s) v e f
+                                                    , FaceId (Wrap s)
+                                                    , Maybe (Int, FaceId (Wrap s))
+                                                    )
+                                     -- ^ All components are supposed to be given, in the
+                                     -- proper componentId order.
+                                  -> PlaneGraph s v e f
+mergeComponentsInto' merger graphs =
+  review _PlanarGraph . mergeComponentsInto merger $ over (traverse._1) (^._CPlanarGraph) graphs
+
+
+
+
+
 -- | Merge a bunch of components into a single graph. For each
 -- component we specify the component and the FaceId of its outer
 -- face. In addition, we specify the componentId and the faceId that
@@ -233,7 +250,13 @@ mergeComponentsInto merger graphs = PlanarGraph theComponents
       where
         modifyMV i f = MV.modify fDataVec f (coerce i)
 
-        handle                           :: Int -> FaceId (Wrap s) -> (_, f) -> ST s' (FaceId s)
+        handle                           :: Int
+                                         -> FaceId (Wrap s)
+                                         -> (Either (Dart.Dart s, Maybe (Int, FaceId (Wrap s)))
+                                                    (FaceId s)
+                                            , f
+                                            )
+                                         -> ST s' (FaceId s)
         handle ci fi (eGlobalId,theData) = case eGlobalId of
           Right globalFi   -> do modifyMV globalFi $ \(_,LazyFaceData hs _) ->
                                                         ( Just (coerce ci, fi)
@@ -245,19 +268,23 @@ mergeComponentsInto merger graphs = PlanarGraph theComponents
                               -- global faceData array, we will store the (ComponentId, FaceId)
                               -- value, and initialize the initial face value at the given fData.
 
-          Left (d, parent) -> do let globalFi = case parent of
-                                        Nothing                  -> globalOuterFaceId
-                                        Just (parentCi,parentFi) ->
-                                                      theComponents^?!ix parentCi.faceAt parentFi
-                                      -- Note the theComponents instead of components'.
-                                      --  here, hence this relies on laziness
+          Left (d, parent) -> do let globalFi = computeGlobalFi eGlobalId
                                  modifyMV globalFi $ \(orig, LazyFaceData hs x) ->
                                    ( orig
                                    , LazyFaceData (hs Seq.|> (d,(coerce ci, fi, theData))) x
                                    )
                                  pure globalFi
 
+        -- TODO: we have some code duplication here.
 
+        -- compute the globalFaceIndex of the given temporary faceIndex
+        computeGlobalFi :: Either (_, Maybe (Int,FaceId (Wrap s))) (FaceId s) -> FaceId s
+        computeGlobalFi = \case
+          Right globalFi  -> globalFi
+          Left (_,parent) -> case parent of
+            Nothing                  -> globalOuterFaceId
+            Just (parentCi,parentFi) -> computeGlobalFi . fst
+                                          $ components'^?!ix parentCi.faceAt parentFi
 
     -- apply the merger function to merge the face data into its final data
     fData' :: NonEmptyVector (RawFace Primal s f)
@@ -283,7 +310,8 @@ mergeComponentsInto merger graphs = PlanarGraph theComponents
                                                        (Either ( Dart.Dart s
                                                                , Maybe (Int,FaceId (Wrap s))
                                                                )
-                                                               (FaceId s), f
+                                                               (FaceId s)
+                                                       , f
                                                        )
                                                 )
     ( Comps _ _ nf vData dData, components') =
@@ -443,61 +471,14 @@ spec = describe "Constructing a PlaneGraph from overlapping Polygons" $ do
          --   in allOf (vertices.withIndex) (\v _ -> v&outNeighboursOfByDart )
          testIpe [osp|components.ipe|]
                  [osp|components.out.ipe|]
-
+         testIpe1 [osp|components1.ipe|]
+                  [osp|components1.out.ipe|]
 
 --------------------------------------------------------------------------------
 
 readInput      :: OsPath -> IO (NonEmpty (ClosedLineSegment (Point 2 R) :+ IpeAttributes Path R))
 readInput inFP = NonEmpty.fromList <$>
                  readAllFrom ([osp|data/test-with-ipe/PlaneGraph|] </> inFP)
-
-
-bug = describe "bug" $ do
-    segs <- runIO $ readInput [osp|components.ipe|]
-    let (gr :: PlaneGraph () (NonEmpty (Point 2 R))
-                             (ClosedLineSegment (Point 2 R) :+ _)
-                             ()
-          )  = fromDisjointSegments segs
-
-
-        segsbyColor :: MonoidalNEMap (IpeColor R) (NonEmpty (ClosedLineSegment (Point 2 R) :+ _))
-        segsbyColor = foldMap1 (\seg -> MonoidalNEMap.singleton (seg^?!extra._Attr SStroke)
-                                                                (NonEmpty.singleton seg)
-                               ) segs
-
-
-        graphs0 :: MonoidalNEMap _ (CPlaneGraph (Wrap ()) (NonEmpty (Point 2 R)) _ _)
-        graphs0 = fromConnectedSegments <$> segsbyColor
-
-        graphs :: MonoidalNEMap _
-                                (CPlaneGraph (Wrap ())
-                                      (Point 2 R)
-                                      (ClosedLineSegment (Point 2 R) :+ IpeAttributes Path R)
-                                      ()
-                                )
-        graphs = over vertices NonEmpty.head <$> graphs0
-
-        grr :: PlaneGraph ()
-                          (Point 2 R)
-                          (ClosedLineSegment (Point 2 R) :+ IpeAttributes Path R)
-                          ()
-        grr = fromDisjointComponents (const ()) (fromFoldable1 graphs)
-
-{-
-    prop "test headOf 5" $  do
-      let (_,d',c) = asLocalD (Dart.Dart (Dart.Arc 5) Dart.Positive) $ grr^._PlanarGraph
-          vi       = c^.headOf d'
-          n        = numVertices grr
-          x        = () --grr^?!vertexAt vi
-      counterexample (show $ (vi, length $ grr^._PlanarGraph.rawVertexData, numVertices c)
-                     )
-       -- somehow the vertexId 10 doesn't make sense                       -- (d',c,vi,n,x
-                      --      ,
-                      --      )) $
-                   $ show x === ""
--}
-    pure ()
-
 
 testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ do
     segs <- runIO $ readInput inFP
@@ -506,13 +487,10 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
                              ()
           )  = fromDisjointSegments segs
 
-
         segsbyColor :: MonoidalNEMap (IpeColor R) (NonEmpty (ClosedLineSegment (Point 2 R) :+ _))
         segsbyColor = foldMap1 (\seg -> MonoidalNEMap.singleton (seg^?!extra._Attr SStroke)
                                                                 (NonEmpty.singleton seg)
                                ) segs
-
-
         graphs0 :: MonoidalNEMap _ (CPlaneGraph (Wrap ()) (NonEmpty (Point 2 R)) _ _)
         graphs0 = fromConnectedSegments <$> segsbyColor
 
@@ -529,46 +507,6 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
                           (ClosedLineSegment (Point 2 R) :+ IpeAttributes Path R)
                           ()
         grr = fromDisjointComponents (const ()) (fromFoldable1 graphs)
-
-    -- runIO $ print grr
-    -- runIO $ print $ numDarts grr
-
-    -- runIO $ traverseOf_ (vertices.withIndex) print grr
-    -- runIO $ traverseOf_ (darts.withIndex) (\(d,_) -> print $ (d, endPoints grr d)) grr
-
-
-    -- runIO $ do
-    --   let [_,_,_,(fi,_)] = grr^..interiorFaces.withIndex
-    --   print "outerboundaryDarts"
-    --   print $ outerBoundaryDarts fi grr -- grr^?!interiorFacePolygonAt fi
-    --   print "outerboundaryvertices"
-    --   print $ outerBoundaryVertices fi grr -- grr^?!interiorFacePolygonAt fi
-    --   print "interiorfacepolygonat"
-    --   print $ grr^?!interiorFacePolygonAt fi
-
-    --   -- for_ (grr^..interiorFaces.withIndex) print
-
-    --   traverseOf_ (interiorFacePolygons.withIndex) print grr
-    --   -- OK: so faceId 4 is the issue somehow.
-
-
-    --   for_ (grr^..connectedComponents.withIndex) $ \(ci,c) ->
-    --     traverseOf_ (faces.withIndex) (\x -> print (ci,x)) c
-
-
-
-    -- runIO $ itraverseOf_ dartSegments (\i s -> print (i,s)) grr
-      -- ifoldMapOf dartSegments
---]
-
-
-
---    runIO $ writeIpeFile outFP . singlePageFromContent  $ drawGraph grr
-
-
-
--- (Dart (Arc 5) +1,ClosedLineSegment (Point2 128 144) (Point2 256 144) :+ Attrs {NoAttr, NoAttr, NoAttr, NoAttr, Attr IpeColor (Named "black"), NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr, NoAttr})
-
 
     xit "fromDisjointSegments" $ do
       show gr `shouldBe` ""
@@ -586,25 +524,6 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
       numConnectedComponents grr `shouldBe` length graphs0
     it "fromDisjointComponents faces" $ do
       numFaces grr `shouldBe` 5
-
-
-
-
-    -- runIO $ mapM_ print (grr^..)
-
-    -- prop "test headOf 5" $  do
-    --   let (_,d',c) = asLocalD (Dart.Dart (Dart.Arc 5) Dart.Positive) $ grr^._PlanarGraph
-    --       vi       = c^.headOf d'
-    --       n        = numVertices grr
-    --       x        = grr^?!vertexAt vi
-    --   counterexample (show (d',c,vi,n,x)) $ show x === ""
-
-
-  -- headOf d = ito $ \ps -> let (_,d',c) = asLocalD d ps
-  --                             vi       = c^.headOf d'
-  --                             -- vi       = if sameDirection d d'
-  --                             --            then c^.headOf d' else c^.tailOf d'
-  --                         in (vi, ps^?!vertexAt vi)
 
     describe "all edges ok" $ do
       for_ (grr^..darts.withIndex) $ \(d, x) ->
@@ -630,7 +549,71 @@ testIpe inFP outFP = describe ("Constructing PlaneGraph from " <> show inFP) $ d
 
 startsWith pref s = pref `List.isPrefixOf` s
 
+--------------------------------------------------------------------------------
+
+testIpe1 inFP outFP = describe ("Merging PlaneGraph from " <> show inFP) $ do
+    segs <- runIO $ readInput inFP
+
+    let (gr :: PlaneGraph () (NonEmpty (Point 2 R))
+                             (ClosedLineSegment (Point 2 R) :+ _)
+                             ()
+          )  = fromDisjointSegments segs
+
+        segsbyColor :: MonoidalNEMap (IpeColor R) (NonEmpty (ClosedLineSegment (Point 2 R) :+ _))
+        segsbyColor = foldMap1 (\seg -> MonoidalNEMap.singleton (seg^?!extra._Attr SStroke)
+                                                                (NonEmpty.singleton seg)
+                               ) segs
+        graphs0 :: MonoidalNEMap _ (CPlaneGraph (Wrap ()) (NonEmpty (Point 2 R)) _ _)
+        graphs0 = fromConnectedSegments <$> segsbyColor
+
+        graphs :: MonoidalNEMap _
+                                (CPlaneGraph (Wrap ())
+                                      (Point 2 R)
+                                      (ClosedLineSegment (Point 2 R) :+ IpeAttributes Path R)
+                                      ()
+                                )
+        graphs = over vertices NonEmpty.head <$> graphs0
+
+        grr :: PlaneGraph ()
+                          (Point 2 R)
+                          (ClosedLineSegment (Point 2 R) :+ IpeAttributes Path R)
+                          ()
+        grr = mergeComponentsInto' (\_orig _extras -> ())
+                                  (NonEmptyV.unsafeFromList
+                                     [ (black, outerFaceId black, Nothing)
+                                     , (green, outerFaceId green, Nothing)
+                                     , (red, outerFaceId red, Just (0, fi))
+                                     ]
+                                  )
+          where
+            [_,_,_,fi] = black^..faces.asIndex
+        black :: CPlaneGraph (Wrap ())
+                                      (Point 2 R)
+                                      (ClosedLineSegment (Point 2 R) :+ IpeAttributes Path R)
+                                      ()
+        (black:|[green,red]) = toNonEmpty graphs
 
 
--- drawGraph       :: OsPath -> _ -> IO ()
--- drawGraph fp gr = writeIpeFile fp . singlePageFromContent  $ drawGraph gr
+    runIO $ do
+      print "==============================="
+      -- mapM_ print segs
+      -- mapM_ print $ MonoidalNEMap.assocs segsbyColor
+      -- mapM_ print $ MonoidalNEMap.assocs graphs
+      mapM_ print $ grr^..interiorFacePolygons.withIndex
+
+      -- mapM_ print $ black^..faces.withIndex
+
+      -- let [_,_,_,(fi,_)] = grr^..interiorFaces.withIndex
+      -- print "outerboundaryDarts"
+      -- print $ outerBoundaryDarts fi grr -- grr^?!interiorFacePolygonAt fi
+      -- print "outerboundaryvertices"
+      -- print $ outerBoundaryVertices fi grr -- grr^?!interiorFacePolygonAt fi
+      -- print "interiorfacepolygonat"
+      -- print $ grr^?!interiorFacePolygonAt fi
+
+
+      writeIpeFile outFP . singlePageFromContent  $ drawGraph grr
+
+    pure ()
+    -- it "combineinto" $ do
+    --   show grr `shouldBe` ""
