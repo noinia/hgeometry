@@ -185,12 +185,10 @@ instance HasOuterFace (PlaneGraph s vertex e f) where
 instance HasOuterBoundaryOf (PlaneGraph s v e f) where
   outerBoundaryDarts f = outerBoundaryDarts f . coerce @_ @(PlanarGraph Primal s v e f)
 
-instance HasInnerComponent (PlaneGraph s v e f) where
+instance HasInnerComponents (PlaneGraph s v e f) where
   innerComponentsAt fi = _PlanarGraph.innerComponentsAt fi
 
--- instance HasInnerComponent (PlanarGraph Primal s v e f) where
---   innerComponentsAt fi = undefined
-  -- TODO:
+
 
 {-
 

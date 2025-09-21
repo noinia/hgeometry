@@ -197,14 +197,14 @@ edgeSegments = theFold
 
 
 
--- instance HasInnerComponent (PlanarGraph w s v e f) where
+-- instance HasInnerComponents (PlanarGraph w s v e f) where
 --   innerComponentsAt fi = undefined
 --    -- TODO: implement this
 
 -- | Renders all interior faces as polygons (which may possibly contain holes)
 interiorFacePolygons :: forall planeGraph vertex r.
                         ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
-                        , HasInnerComponent planeGraph
+                        , HasInnerComponents planeGraph
                         , Point_ vertex 2 r
                         , Ord r, Num r
                         , Eq (FaceIx planeGraph)
@@ -229,7 +229,7 @@ interiorFacePolygons = theFold
 interiorFacePolygonAt    :: forall planeGraph vertex.
                             ( PlaneGraph_ planeGraph vertex
                             , HasOuterBoundaryOf planeGraph
-                            , HasInnerComponent planeGraph
+                            , HasInnerComponents planeGraph
                             , Point_ vertex 2 (NumType vertex)
                             )
                          => FaceIx planeGraph
@@ -248,7 +248,7 @@ interiorFacePolygonAt fi = theFold
 polygonFromFace      :: forall planeGraph vertex r.
                         ( PlaneGraph_ planeGraph vertex
                         , HasOuterBoundaryOf planeGraph
-                        , HasInnerComponent planeGraph
+                        , HasInnerComponents planeGraph
                         , Point_ vertex 2 r
                         )
                      => planeGraph -> FaceIx planeGraph
