@@ -71,7 +71,7 @@ _drawGraph gr = theVertices <> theEdges <> theFaces
 graphPolygons    :: (Ord r, Num r, Point_ point 2 r)
                  => CPlaneGraph s point PolygonEdgeType PolygonFaceData
                  -> [SimplePolygon (Point 2 r)]
-graphPolygons gr = map (&vertices %~ view (core.asPoint)) $ gr^..interiorFacePolygons
+graphPolygons gr = map (&vertices %~ view (core.asPoint)) $ gr^..outerBoundaryPolygons
 
 --------------------------------------------------------------------------------
 buggyPolygon :: SimplePolygon (Point 2 R)

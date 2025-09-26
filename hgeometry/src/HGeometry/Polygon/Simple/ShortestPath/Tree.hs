@@ -27,7 +27,6 @@ import qualified Data.Vector.Mutable as MV
 import qualified Data.Vector.NonEmpty as V
 import           HGeometry.Ext
 import           HGeometry.PlaneGraph.Connected
-import           HGeometry.PlaneGraph.Connected.Type
 import           HGeometry.Point
 import           HGeometry.Polygon.Simple.DualTree
 import           HGeometry.Polygon.Triangulation

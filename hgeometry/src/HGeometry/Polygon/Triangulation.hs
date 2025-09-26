@@ -65,7 +65,7 @@ computeDiagonals pg = monotoneDiags <> extraDiags
                   $ monotoneSubdiv^..interiorFaces.withIndex
 
     -- collectDiags   :: FaceIx planeGraph -> [Diagonal polygon]
-    collectDiags i = let yMonotonePoly  = monotoneSubdiv ^?! interiorFacePolygonAt i
+    collectDiags i = let yMonotonePoly  = monotoneSubdiv ^?! outerBoundaryPolygonAt i
                      in map (coerce . withOriginalId yMonotonePoly) $
                             TM.computeDiagonals yMonotonePoly
 

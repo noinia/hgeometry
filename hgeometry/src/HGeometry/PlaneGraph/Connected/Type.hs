@@ -194,6 +194,8 @@ instance ( Point_ v 2 (NumType v)
 instance HasOuterBoundaryOf (CPlaneGraph s v e f) where
   outerBoundaryDarts f = outerBoundaryDarts f . coerce @_ @(CPlanarGraph Primal s v e f)
 
+instance HasInnerComponents (CPlaneGraph s v e f) where
+  innerComponentsAt fi = _CPlanarGraph .> innerComponentsAt fi
 
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)

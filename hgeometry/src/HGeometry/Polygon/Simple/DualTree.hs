@@ -106,7 +106,7 @@ dualTreeFrom source poly = do
     let inTriangle (_, pg) = case source `inPolygon` pg of
                                Boundary.StrictlyOutside -> False
                                _                        -> True
-    (root',_) <- findOf (interiorFacePolygons.withIndex) inTriangle poly
+    (root',_) <- findOf (outerBoundaryPolygons.withIndex) inTriangle poly
     dualTreeFromTriangle root' poly
 
 -- | Construct the dual tree from a given triangle

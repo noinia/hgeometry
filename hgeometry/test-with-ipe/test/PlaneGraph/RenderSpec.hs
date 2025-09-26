@@ -19,6 +19,7 @@ import           HGeometry.LineSegment
 import           HGeometry.PlaneGraph
 import           HGeometry.Point
 import           HGeometry.Polygon.Simple
+import           HGeometry.Polygon.WithHoles
 import           HGeometry.Transformation
 import           HGeometry.Vector
 -- import           HGeometry.YAML
@@ -91,6 +92,7 @@ spec = describe "render planegraph tests" $ do
 --------------------------------------------------------------------------------
 
 drawGraph    :: ( PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
+                , HasInnerComponents planeGraph
                 , IsTransformable vertex
                 , ConstructablePoint_ vertex 2 r, Ord r, Real r
                 , Fractional r, Show r, Eq (FaceIx planeGraph)
@@ -149,15 +151,17 @@ offset s = translateBy theOffset s
 
 drawFace         :: ( PlaneGraph_ planeGraph vertex, Point_ vertex 2 r
                     , Show (Face planeGraph), Ord r, Fractional r)
-                 => planeGraph -> FaceIx planeGraph -> SimplePolygon (vertex :+ VertexIx planeGraph) -> [IpeObject r]
-drawFace gr f pg = [ iO $ ipeSimplePolygon pg' ! attr SLayer "face"
+                 => planeGraph -> FaceIx planeGraph -> PolygonalDomain (vertex :+ VertexIx planeGraph) -> [IpeObject r]
+drawFace gr f pg = [ iO $ ipePolygon pg' ! attr SLayer "face"
                    , iO $ ipeLabel (tshow (gr^?!faceAt f) :+ c) ! attr SLayer "faceLabel"
                    ]
   where
-    pg' :: SimplePolygon _
+    pg' :: PolygonalDomain _
     pg' = pg&vertices %~ (^.core.asPoint)
-    c = centroid pg'
-
+    c = centroid $ pg'^.outerBoundaryPolygon
+    -- TODO: this may produce points/labels outside of the actual
+    -- face. Maybe pick an arbitrary triangle and take the centroid of
+    -- that
 
 tshow :: Show a => a -> Text.Text
 tshow = Text.pack . show

@@ -222,7 +222,7 @@ incorrectDualTreeNodes        :: forall graph vertex dart r.
 incorrectDualTreeNodes triang = go0 . trimap centroid' id centroid'
   where
     centroid'    :: FaceIx graph -> Point 2 r :+ (FaceIx graph, [vertex])
-    centroid' fi = let pg = triang^?!interiorFacePolygonAt fi
+    centroid' fi = let pg = triang^?!outerBoundaryPolygonAt fi
                    in centroid pg :+ (fi, pg^..outerBoundary.core)
 
     go0 = \case
@@ -274,7 +274,7 @@ drawDualTree gr dt = iO . ipeGroup . concat $ [ verts
     treeEdges = []
 
     drawRoot     = iO $ drawVertex (dt^.rootVertex) ! attr SStroke red
-    drawVertex f = ipeDiskMark $ gr^?!interiorFacePolygonAt f.to centroid
+    drawVertex f = ipeDiskMark $ gr^?!outerBoundaryPolygonAt f.to centroid
 
 
 

@@ -15,7 +15,6 @@ module HGeometry.PlaneGraph.Instances
 
 import Control.Lens
 import Control.Monad.State
-import           Control.Subcategory.Functor
 import Data.Coerce
 import Data.Foldable1
 import qualified Data.List.NonEmpty as NonEmpty
@@ -24,19 +23,14 @@ import qualified Data.Map as Map
 import qualified Data.Map.NonEmpty as NEMap
 import Data.Ord(comparing)
 import Data.Proxy
-import qualified Data.Set as Set
-import Data.Set(Set)
-import Data.Tree
 import qualified Data.Vector.NonEmpty as Vector
 import HGeometry.Ext
-import HGeometry.Foldable.Util
 import HGeometry.HyperPlane.NonVertical
 import HGeometry.Instances ()
 import HGeometry.Plane.LowerEnvelope.Connected(MinimizationDiagram(..), mapVertices)
 import HGeometry.Plane.LowerEnvelope.Connected.Graph
 import HGeometry.PlaneGraph
 import HGeometry.Point
-import HGeometry.Properties
 import HGeometry.VoronoiDiagram
 import HGeometry.VoronoiDiagram.ViaLowerEnvelope
 import Hiraffe.AdjacencyListRep.Map
@@ -48,8 +42,6 @@ import Test.QuickCheck hiding (Positive, Negative)
 import Test.QuickCheck.Instances ()
 import Witherable
 
-
-import Debug.Trace
 --------------------------------------------------------------------------------
 
 data QuickCheckWorld
