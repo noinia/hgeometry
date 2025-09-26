@@ -582,16 +582,16 @@ testIpe1 inFP outFP = describe ("Merging PlaneGraph from " <> show inFP) $ do
                                   (NonEmptyV.unsafeFromList
                                      [ (black, outerFaceId black, Nothing)
                                      , (green, outerFaceId green, Nothing)
-                                     , (red, outerFaceId red, Just (0, fi))
+                                     , (red,   outerFaceId red, Just (0, fi))
                                      ]
                                   )
           where
-            [_,_,_,fi] = black^..faces.asIndex
+            [_,fi,_,_] = black^..faces.asIndex
         black :: CPlaneGraph (Wrap ())
                                       (Point 2 R)
                                       (ClosedLineSegment (Point 2 R) :+ IpeAttributes Path R)
                                       ()
-        (black:|[green,red]) = toNonEmpty graphs
+        (black:|[red,green]) = toNonEmpty graphs
 
 
     runIO $ do

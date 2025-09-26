@@ -14,7 +14,7 @@ import qualified HGeometry.Polygon.Triangulation.MakeMonotone as MM
 import qualified HGeometry.Polygon.Triangulation.TriangulateMonotone as TM
 import           HGeometry.Transformation
 import           Ipe
-import           PlaneGraph.RenderSpec (drawVertex, drawDart, drawEdge)
+import           PlaneGraph.RenderSpec (drawVertex, drawDart, drawEdge, drawFace)
 -- import           System.OsPath
 import           Test.Hspec
 -- import           Test.QuickCheck
@@ -57,6 +57,7 @@ spec = describe "triangulateSpec" $ do
 
 _drawGraph    :: ( PlaneGraph_ planeGraph vertex
                  , IsTransformable vertex
+                 , HasOuterBoundaryOf planeGraph, HasInnerComponents planeGraph
                  , ConstructablePoint_ vertex 2 r, Ord r, Real r, Fractional r, Show r, Eq (FaceIx planeGraph)
                  , Show (Vertex planeGraph), Show (Dart planeGraph), Show (Face planeGraph)
                  , Show (EdgeIx planeGraph)
@@ -66,7 +67,7 @@ _drawGraph gr = theVertices <> theEdges <> theFaces
     theVertices = ifoldMapOf vertices             drawVertex    gr
     theEdges    = ifoldMapOf dartSegments         (drawDart gr) gr
                <> ifoldMapOf edgeSegments         (drawEdge gr) gr
-    theFaces    = [] -- ifoldMapOf interiorFacePolygons (drawFace gr) gr
+    theFaces    = ifoldMapOf interiorFacePolygons (drawFace gr) gr
 
 graphPolygons    :: (Ord r, Num r, Point_ point 2 r)
                  => CPlaneGraph s point PolygonEdgeType PolygonFaceData
