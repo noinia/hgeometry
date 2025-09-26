@@ -594,12 +594,12 @@ testIpe1 inFP outFP = describe ("Merging PlaneGraph from " <> show inFP) $ do
         (black:|[red,green]) = toNonEmpty graphs
 
 
-    runIO $ do
-      print "==============================="
+    -- runIO $ do
+      -- print "==============================="
       -- mapM_ print segs
       -- mapM_ print $ MonoidalNEMap.assocs segsbyColor
       -- mapM_ print $ MonoidalNEMap.assocs graphs
-      mapM_ print $ grr^..interiorFacePolygons.withIndex
+      -- mapM_ print $ grr^..interiorFacePolygons.withIndex
 
       -- mapM_ print $ black^..faces.withIndex
 
@@ -612,7 +612,7 @@ testIpe1 inFP outFP = describe ("Merging PlaneGraph from " <> show inFP) $ do
       -- print $ grr^?!interiorFacePolygonAt fi
 
 
-      writeIpeFile outFP . singlePageFromContent  $ drawGraph grr
+      -- writeIpeFile outFP . singlePageFromContent  $ drawGraph grr
 
     pure ()
     -- it "combineinto" $ do
