@@ -129,7 +129,7 @@ triangulate' (h,pg) = fmap (\simple -> (h, review _UncheckedConvexPolygon $
                                        )
                            )
                     . NonEmpty.fromList
-                    . toListOf interiorFacePolygons . triangulate $ pg
+                    . toListOf outerBoundaryPolygons . triangulate $ pg
 
 
 -- | Render a minimization diagram
