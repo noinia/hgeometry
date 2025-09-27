@@ -84,8 +84,11 @@ common all-setup
       , these                     >= 1.0.1         && < 1.3
       , subcategories             >= 0.2           && < 0.3
 
-      , ghc-typelits-natnormalise >= 0.7.7         && < 0.8
-      , ghc-typelits-knownnat     >= 0.7.6         && < 0.8
+      , ghc-typelits-natnormalise >= 0.8           && < 0.9
+      , ghc-typelits-knownnat     >= 0.8           && < 0.9
+
+      -- , ghc-typelits-natnormalise >= 0.7           && < 0.8
+      -- , ghc-typelits-knownnat     >= 0.7           && < 0.8
 
       -- , entropy                   >= 0.4.1.10      && < 0.5
       -- , pretty-simple             >= 4.1.2.0       && < 5
@@ -279,6 +282,15 @@ library point
 
 --------------------------------------------------------------------------------
 -- * HGeometry Kernel
+
+library bug
+    import: all-setup, kernel-setup
+    visibility: public
+    hs-source-dirs: kernel/src
+    exposed-modules:
+        HGeometry.HyperPlane.Test
+        HGeometry.HyperPlane.Internal
+        HGeometry.HyperPlane.Class
 
 library kernel
     import: all-setup, kernel-setup
