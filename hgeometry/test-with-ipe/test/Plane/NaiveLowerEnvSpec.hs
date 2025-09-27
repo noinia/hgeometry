@@ -119,11 +119,11 @@ testIpe inFp outFp = do
 
 
 
-instance ( Point_ vertex 2 r, Fractional r, Ord r
+instance ( Point_ vertex 2 r, Point_ extra 2 r, Fractional r, Ord r
          , Show r
          )
-         => HasDefaultIpeOut (ClippedMDCell' r vertex) where
-  type DefaultIpeOut (ClippedMDCell' r vertex) = Path
+         => HasDefaultIpeOut (ClippedMDCell'' r vertex extra) where
+  type DefaultIpeOut (ClippedMDCell'' r vertex extra) = Path
   defIO (ClippedMDCell cell) = case cell of
     ActualPolygon cell' -> defIO $ (cell'&vertices %~ (^.asPoint)
                                      :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 r)

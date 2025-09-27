@@ -26,6 +26,7 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Maybe (fromMaybe)
 import           Data.Ord (comparing)
+import           HGeometry.Box as Box
 import           HGeometry.Cyclic
 import           HGeometry.HalfLine
 import           HGeometry.HalfSpace
@@ -38,7 +39,7 @@ import           HGeometry.Point.Either
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Properties
-import           HGeometry.Triangle
+import           HGeometry.Triangle as Triangle
 import           HGeometry.Vector
 
 --------------------------------------------------------------------------------
@@ -267,6 +268,7 @@ instance ( Point_ vertex 2 r, Num r, Ord r
 
 
 --------------------------------------------------------------------------------
+-- * Intersection of a Triangle with an Unbounded Convex Polygon
 
 type instance Intersection (Triangle corner) (UnboundedConvexRegionF r nonEmpty vertex)
   = Intersection (Triangle corner) (ConvexPolygonF (Cyclic nonEmpty) vertex)
@@ -323,6 +325,25 @@ toBoundedFrom tri reg@(Unbounded v pts w) = go $ case extremalVertices reg of
                                  _                          -> error "intersectionPoint: absurd'"
 
 -- -- TODO: this would make for a good property test: test if the points all lie inside the reegion
+
+
+--------------------------------------------------------------------------------
+-- * Intersection of a Rectangle with an Unbounded Convex Polygon
+
+type instance Intersection (Rectangle corner) (UnboundedConvexRegionF r nonEmpty vertex)
+  = Intersection (Rectangle corner) (ConvexPolygonF (Cyclic nonEmpty) vertex)
+
+instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
+         ) => Rectangle corner `HasIntersectionWith` (UnboundedConvexRegionF r NonEmpty vertex)
+
+instance ( Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
+         ) => Rectangle corner `IsIntersectableWith` (UnboundedConvexRegionF r NonEmpty vertex) where
+  rect `intersect` region = rect `intersect` (toBoundedFrom (Box.corners rect) region)
+
+
+
+--------------------------------------------------------------------------------
+
 
 
   -- case traverse (`intersect` box) rays of

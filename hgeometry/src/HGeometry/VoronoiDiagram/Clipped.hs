@@ -41,7 +41,8 @@ deriving instance (Show r, Num r, Show point, r ~ NumType point
 
 -- | Get access to the underling nonEmpty Map
 _ClippedVoronoiDiagram :: (NumType point ~ r)
-                       => Iso' (ClippedVoronoiDiagram point) (NEMap point (ClippedMDCell r point))
+                       => Iso' (ClippedVoronoiDiagram point)
+                               (NEMap point (ClippedMDCell r point ()))
 _ClippedVoronoiDiagram = coerced . _ClippedMinimizationDiagramMap
 {-# INLINE _ClippedVoronoiDiagram #-}
 
