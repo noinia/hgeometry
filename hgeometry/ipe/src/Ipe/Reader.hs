@@ -125,10 +125,12 @@ readXML = first (T.pack . show) . parse' defaultParseOptions
 
 -- | Reading an ipe elemtn from a Text value
 class IpeReadText t where
+  -- | Try to read the text content into a value of type t
   ipeReadText :: Text -> Either ConversionError t
 
 -- | Reading an ipe lement from Xml
 class IpeRead t where
+  -- | Try to convert an xml tree into a value of type t
   ipeRead  :: Node Text Text -> Either ConversionError t
 
 --------------------------------------------------------------------------------
