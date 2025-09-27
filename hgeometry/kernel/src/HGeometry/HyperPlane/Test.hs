@@ -9,8 +9,21 @@ import           Data.Type.Ord
 import           GHC.TypeLits
 import           HGeometry.Properties
 import           HGeometry.Vector
-import           HGeometry.Point
+import           HGeometry.Point.Class(Point_(..), HasVector(..))
 import           Prelude hiding (last)
+
+--------------------------------------------------------------------------------
+
+-- newtype Point d r =  Point (Vector d r)
+
+-- type instance Dimension (Point d r) = d
+-- type instance NumType (Point d r) = r
+
+
+-- class (HasVector point point
+--       , Dimension point ~ d, NumType point ~ r
+--       ) => Point_ point d r | point -> d, point -> r where
+
 
 --------------------------------------------------------------------------------
 
@@ -125,57 +138,18 @@ class ( NumType hyperPlane ~ r
 
   -- | Test if a point lies on a hyperplane.
   --
-  -- >>> Point2 0 2 `onHyperPlane` myLineAgain
-  -- True
-  -- >>> Point2 1 3 `onHyperPlane` myLineAgain
-  -- True
-  -- >>> Point2 1 5 `onHyperPlane` myLineAgain
-  -- False
-  --
-  -- >>> Point2 0 2 `onHyperPlane` myLineAsNV
-  -- True
-  -- >>> Point2 1 3 `onHyperPlane` myLineAsNV
-  -- True
-  -- >>> Point2 1 5 `onHyperPlane` myLineAsNV
-  -- False
   onHyperPlane     :: (Point_ point d r, Eq r, Num r) => point -> hyperPlane -> Bool
   default onHyperPlane :: ( Point_ point d r, Eq r, Num r
                           ) => point -> hyperPlane -> Bool
   q `onHyperPlane` h = (== 0) $ evalHyperPlaneEquation h q
   {-# INLINE onHyperPlane #-}
 
-  -- | Test if a point lies on a hyperplane. Returns the sign when evaluating the
-  -- hyperplane equation.
-  --
-  -- >>> Point2 0 2 `onSideTest` myLineAgain
-  -- EQ
-  -- >>> Point2 1 3 `onSideTest` myLineAgain
-  -- EQ
-  -- >>> Point2 1 5 `onSideTest` myLineAgain
-  -- GT
-  -- >>> Point2 4 5 `onSideTest` myLineAgain
-  -- LT
-  -- >>> Point2 0 0 `onSideTest` HyperPlane2 1 (-1) 0
-  -- LT
-  --
-  -- >>> Point2 1 1 `onSideTest` myVerticalLine
-  -- LT
-  -- >>> Point2 10 1 `onSideTest` myVerticalLine
-  -- GT
-  -- >>> Point2 5 20 `onSideTest` myVerticalLine
-  -- EQ
-  --
-  -- >>> Point2 0 1 `onSideTest` myOtherLine
-  -- LT
-  -- >>> Point2 0 (-2) `onSideTest` myOtherLine
-  -- EQ
-  -- >>> Point2 1 (-3.5) `onSideTest` myOtherLine
-  -- EQ
-  -- >>> Point2 1 (-4) `onSideTest` myOtherLine
-  -- GT
-  onSideTest     :: (Point_ point d r, Ord r, Num r) => point -> hyperPlane -> Ordering
-  onSideTest q h = 0 `compare` evalHyperPlaneEquation h q
-  {-# INLINE onSideTest #-}
+  -- -- | Test if a point lies on a hyperplane. Returns the sign when evaluating the
+  -- -- hyperplane equation.
+  -- --
+  -- onSideTest     :: (Point_ point d r, Ord r, Num r) => point -> hyperPlane -> Ordering
+  -- onSideTest q h = 0 `compare` evalHyperPlaneEquation h q
+  -- {-# INLINE onSideTest #-}
 
 --------------------------------------------------------------------------------
 -- | Non-vertical hyperplanes.
@@ -184,12 +158,6 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
 
   -- | Get the coordinate in dimension \(d\) of the hyperplane at the given position.
   --
-  -- >>> evalAt (Point1 1) myLineAsNV
-  -- 3.0
-  -- >>> evalAt (Point1 10) myLineAsNV
-  -- 12.0
-  -- >>> evalAt (Point1 5) <$> asNonVerticalHyperPlane myOtherLine
-  -- Just (-9.5)
   evalAt     :: ( Num r
                 , 1 <= d
                 , Point_ point (d-1) r
