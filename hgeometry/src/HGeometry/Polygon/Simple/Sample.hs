@@ -26,7 +26,6 @@ import           HGeometry.Ext
 import           HGeometry.PlaneGraph
 import           HGeometry.Point
 import           HGeometry.Polygon
-import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Triangulation
 import           HGeometry.Triangle
 import           HGeometry.Vector
@@ -120,6 +119,6 @@ doubleP = over coordinates realToFrac . view asPoint
 toTriangles :: (SimplePolygon_ polygon point r, Num r, Ord r)
             => polygon -> NonEmpty.NonEmpty (Triangle point)
 toTriangles = NonEmpty.fromList . fmap (fmap (view core))
-            . mapMaybe asTriangle . toListOf interiorFacePolygons . triangulate @()
+            . mapMaybe asTriangle . toListOf outerBoundaryPolygons . triangulate @()
   -- any valid simple polygon produces at least one triangle, so the
   -- NonEmpty.fromList is safe.

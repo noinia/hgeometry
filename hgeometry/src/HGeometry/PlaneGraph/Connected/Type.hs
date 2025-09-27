@@ -188,12 +188,23 @@ instance ( Point_ v 2 (NumType v)
   prevDartOf d = _CPlanarGraph.prevDartOf d
 
   boundaryDartOf f = _CPlanarGraph.boundaryDartOf f
-  boundaryDarts f = boundaryDarts f . coerce @_ @(CPlanarGraph Primal s v e f)
+  boundaryDartsFrom d = _CPlanarGraph .> boundaryDartsFrom d
 
+
+instance HasOuterBoundaryOf (CPlaneGraph s v e f) where
+  outerBoundaryDarts f = outerBoundaryDarts f . coerce @_ @(CPlanarGraph Primal s v e f)
+
+instance HasInnerComponents (CPlaneGraph s v e f) where
+  innerComponentsAt fi = _CPlanarGraph .> innerComponentsAt fi
 
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)
          ) => PlaneGraph_ (CPlaneGraph s v e f) v
+
+instance ( Point_ v 2 (NumType v)
+         , Ord (NumType v), Num (NumType v)
+         ) => HasOuterFace (CPlaneGraph s v e f) where
+  outerFaceDart = defaultOuterFaceDart
 
 instance ( Point_ v 2 (NumType v)
          , Ord (NumType v), Num (NumType v)

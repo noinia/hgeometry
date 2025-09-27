@@ -84,7 +84,7 @@ mainWith (Options inFile outFile) = do
 
           triangles' :: [SimplePolygon (Point 2 R :+ _)]
           triangles' = -- concatMap (^..interiorFacePolygons) subdivs
-                       subdivs^..traverse.interiorFacePolygons
+                       subdivs^..traverse.outerBoundaryPolygons
 
             -- mapMaybe (^?_2.core._Left)
             --          . concatMap (F.toList. internalFacePolygons) $ subdivs
