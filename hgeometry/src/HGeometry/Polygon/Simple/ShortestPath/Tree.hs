@@ -27,7 +27,6 @@ import qualified Data.Vector.Mutable as MV
 import qualified Data.Vector.NonEmpty as V
 import           HGeometry.Ext
 import           HGeometry.PlaneGraph.Connected
-import           HGeometry.PlaneGraph.Connected.Type
 import           HGeometry.Point
 import           HGeometry.Polygon.Simple.DualTree
 import           HGeometry.Polygon.Triangulation
@@ -97,7 +96,7 @@ computeShortestPaths' s poly = case dualTreeFrom s poly of
                  RootTwo   _ a b   -> compute s a <> compute s b
                  RootThree _ a b c -> compute s a <> compute s b <> compute s c
       where
-        triang = (\u -> u :+ Left s) <$> poly^..boundaryVerticesOf (tr^.rootVertex).asIndexedExt
+        triang = (\u -> u :+ Left s) <$> poly^..outerBoundaryVerticesOf (tr^.rootVertex).asIndexedExt
         -- compute' = compute (=.=) s
         -- (=.=) = (==) `on` (view extra)
 

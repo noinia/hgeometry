@@ -84,8 +84,8 @@ common all-setup
       , these                     >= 1.0.1         && < 1.3
       , subcategories             >= 0.2           && < 0.3
 
-      , ghc-typelits-natnormalise >= 0.7.7         && < 1
-      , ghc-typelits-knownnat     >= 0.7.6         && < 1
+      , ghc-typelits-natnormalise >= 0.7.7         && < 0.8
+      , ghc-typelits-knownnat     >= 0.7.6         && < 0.8
 
       -- , entropy                   >= 0.4.1.10      && < 0.5
       -- , pretty-simple             >= 4.1.2.0       && < 5
@@ -483,8 +483,7 @@ library
 
         HGeometry.Polygon.Monotone
 
-
-        -- HGeometry.Polygon.Visibility
+        HGeometry.Polygon.Visibility
         HGeometry.Polygon.Visibility.Naive
 
         HGeometry.PolyLine.Simplification.DouglasPeucker
@@ -555,6 +554,8 @@ library
 
         HGeometry.DelaunayTriangulation.Types
 
+        HGeometry.Polygon.Visibility.NaiveVisibilityPolygon
+
         HGeometry.Polygon.Triangulation.Types
 
         HGeometry.PlaneGraph.Type
@@ -574,7 +575,6 @@ library
 
         -- HGeometry.Plane.LowerEnvelope.DivideAndConquer
         -- HGeometry.Plane.LowerEnvelope.EpsApproximation
-
 
 
 

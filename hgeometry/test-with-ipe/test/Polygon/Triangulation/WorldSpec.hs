@@ -73,7 +73,7 @@ spec = describe "triangulate World" $ do
            \(Country pg) -> isCounterClockwise $ toPG pg
          prop "triangulate yields only triangles" $
            \(Country pg) -> let subdivision = triangulate pg
-                                triangs = subdivision^..interiorFacePolygons
+                                triangs = subdivision^..outerBoundaryPolygons
                             in all isTriangle' triangs
 
          -- describe "debugging myPoly" $ do
@@ -85,7 +85,7 @@ spec = describe "triangulate World" $ do
          --   --         f = if (n `mod` 10) == 0 then traceShow (n,poly) else id
          --   --     in f $
          --          let subdivision = triangulate poly
-         --              triangs = subdivision^..interiorFacePolygons
+         --              triangs = subdivision^..outerBoundaryPolygons
          --              out = [iO' poly]
          --                <> map (\triang ->
          --                           iO' $ (triang&vertices %~ view core
@@ -100,7 +100,7 @@ spec = describe "triangulate World" $ do
 
          -- describe "debugging myPoly Prime" $ do
          --   let subdivision = triangulate myPoly'
-         --       triangs = subdivision^..interiorFacePolygons
+         --       triangs = subdivision^..outerBoundaryPolygons
          --       out = [iO' myPoly']
          --         <> map (\triang ->
          --                                    iO' $ (triang&vertices %~ view core

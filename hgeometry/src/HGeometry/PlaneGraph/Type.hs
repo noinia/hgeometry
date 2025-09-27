@@ -24,8 +24,6 @@ module HGeometry.PlaneGraph.Type
 
 import           Control.Lens hiding (holes, holesOf, (.=))
 import           Data.Coerce
-import           Data.Foldable1
-import           Data.Foldable1.WithIndex
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Data.Map.NonEmpty as NEMap
@@ -163,29 +161,36 @@ instance ( Point_ v 2 (NumType v)
   fromAdjacencyLists = fromEmbedding . toEmbedding
 -}
 
+instance PlanarGraph_ (PlaneGraph s vertex e f) where
+  type DualGraphOf (PlaneGraph s vertex e f) = DualGraphOf (PlanarGraph Primal s vertex e f)
+  type WorldOf     (PlaneGraph s vertex e f) = Primal
+
+  dualGraph = dualGraph . view _PlanarGraph
+  _DualFaceIx     _ = coerced
+  _DualVertexIx   _ = coerced
+  incidentFaceOf  d = _PlanarGraph .> incidentFaceOf d
+
+  prevDartOf      d = _PlanarGraph .> prevDartOf d
+  nextDartOf      d = _PlanarGraph .> nextDartOf d
+
+  boundaryDartOf  f = _PlanarGraph .> boundaryDartOf f
+  boundaryDartsFrom d = _PlanarGraph .> boundaryDartsFrom d
+
+instance ( Point_ vertex 2 r, Ord r, Num r
+         ) => PlaneGraph_ (PlaneGraph s vertex e f) vertex
+
+instance HasOuterFace (PlaneGraph s vertex e f) where
+  outerFaceId = outerFaceId . view _PlanarGraph
+
+instance HasOuterBoundaryOf (PlaneGraph s v e f) where
+  outerBoundaryDarts f = outerBoundaryDarts f . coerce @_ @(PlanarGraph Primal s v e f)
+
+instance HasInnerComponents (PlaneGraph s v e f) where
+  innerComponentsAt fi = _PlanarGraph.innerComponentsAt fi
+
+
+
 {-
-instance ( Point_ v 2 (NumType v)
-         , Ord (NumType v), Num (NumType v)
-
-         ) => PlanarGraph_ (PlaneGraph s v e f) where
-  type DualGraphOf (PlaneGraph s v e f) = PlanarGraph Dual s f e v
-
-  dualGraph = dualGraph . coerce @_ @(PlanarGraph Primal s v e f)
-
-  leftFaceOf  d = _PlanarGraph.leftFaceOf d
-  rightFaceOf d = _PlanarGraph.rightFaceOf d
-
-  nextDartOf d = _PlanarGraph.nextDartOf d
-  prevDartOf d = _PlanarGraph.prevDartOf d
-
-  boundaryDartOf f = _PlanarGraph.boundaryDartOf f
-  boundaryDarts f = boundaryDarts f . coerce @_ @(PlanarGraph Primal s v e f)
-
-
-instance ( Point_ v 2 (NumType v)
-         , Ord (NumType v), Num (NumType v)
-         ) => PlaneGraph_ (PlaneGraph s v e f) v where
-  fromEmbedding = PlaneGraph . fromAdjacencyLists
 
 instance ( Point_ v 2 r, Point_ v' 2 r'
          ) => HasPoints (PlaneGraph s v e f)

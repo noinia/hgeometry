@@ -67,6 +67,7 @@ import           Ipe.Types
 --------------------------------------------------------------------------------
 -- * The IpeOut type and the default combinator to use it
 
+-- | an IpeOut is just a function that can construct an appropriate IpeObject'
 type IpeOut g i r = g -> IpeObject' i r
 
 -- | Give the option to draw zero, one or more things, i.e. by
@@ -125,8 +126,10 @@ iO' = iO . defIO
 -- | Class that specifies a default conversion from a geometry type g into an
 -- ipe object.
 class ToObject (DefaultIpeOut g) => HasDefaultIpeOut g where
+  -- | The type of ipe object (e.g. Path, Group, IpeSymbol) we render to
   type DefaultIpeOut g :: Type -> Type
-
+  -- | The default way of rendering a value of type g into an ipe object. In particular,
+  -- an ipe object of type 'DefaultIpeOut g'
   defIO :: IpeOut g (DefaultIpeOut g) (NumType g)
 
 instance (HasDefaultIpeOut g, a ~ IpeAttributes (DefaultIpeOut g) (NumType g))
@@ -454,8 +457,11 @@ ipeGroup xs = Group (toList xs) :+ mempty
 --------------------------------------------------------------------------------
 -- * Text Converters
 
+-- | Type representing a single line of latex
+type InlineLaTeX = Text
+
 -- | Creates an text label
-ipeLabel            :: IpeOut (Text :+ Point 2 r) TextLabel r
+ipeLabel            :: IpeOut (InlineLaTeX :+ Point 2 r) TextLabel r
 ipeLabel (txt :+ p) = Label txt p :+ mempty
 
 
@@ -473,5 +479,10 @@ labelledWith                      :: (Show lbl, NumType g ~ r, ToObject i)
                                   -> IpeOut g i r     -- ^ how to draw the geometric object
                                   -> IpeOut (g :+ lbl) Group r
 labelledWith ats pos f (g :+ lbl) = ipeGroup [ iO $ f g
-                                     , iO $ ipeLabel (Text.pack (show lbl) :+ pos g) ! ats
+                                     , iO $ ipeLabel ((toInlineLatex $ Text.show lbl) :+ pos g) ! ats
                                      ]
+
+-- | Convert a text into a valid piece of inline latex
+toInlineLatex :: Text -> InlineLaTeX
+toInlineLatex = Text.replace "_" ("\\_")
+-- for the moment we just make sure that our underscores get properly escaped

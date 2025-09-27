@@ -106,12 +106,13 @@ dualTreeFrom source poly = do
     let inTriangle (_, pg) = case source `inPolygon` pg of
                                Boundary.StrictlyOutside -> False
                                _                        -> True
-    (root',_) <- findOf (interiorFacePolygons.withIndex) inTriangle poly
+    (root',_) <- findOf (outerBoundaryPolygons.withIndex) inTriangle poly
     dualTreeFromTriangle root' poly
 
 -- | Construct the dual tree from a given triangle
 dualTreeFromTriangle            :: forall triangulatedPolygon vertex.
                                    ( PlaneGraph_ triangulatedPolygon vertex
+                                   , HasOuterBoundaryOf triangulatedPolygon
                                    , Dart triangulatedPolygon ~ PolygonEdgeType
                                    )
                                 => FaceIx triangulatedPolygon
@@ -125,7 +126,8 @@ dualTreeFromTriangle            :: forall triangulatedPolygon vertex.
                                                    , (VertexIx triangulatedPolygon, vertex)
                                                    )
                                          )
-dualTreeFromTriangle rt poly = case mapMaybe' buildTree $ poly^..boundaryDartsOf rt.withIndex of
+dualTreeFromTriangle rt poly = case mapMaybe' buildTree $
+                                      poly^..outerBoundaryDartsOf rt.withIndex of
     []           -> Just $ RootZero  rt
     [a]          -> Just $ RootOne   rt a
     [a,b]        -> Just $ RootTwo   rt a b

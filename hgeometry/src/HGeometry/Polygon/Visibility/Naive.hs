@@ -5,12 +5,14 @@
 -- License     :  see the LICENSE file
 -- Maintainer  :  Frank Staals
 --
--- Naive algorithm to compute the Visibility graph in a simple polgyon
+-- Naive algorithms to compute the Visibility graph and the Visibility polygon of a
+-- particular point in a simple polgyon
 --
 --------------------------------------------------------------------------------
 module HGeometry.Polygon.Visibility.Naive
   ( visibilityGraph
   , visibilityGraphWith
+  , module HGeometry.Polygon.Visibility.NaiveVisibilityPolygon
   ) where
 
 import Control.Lens
@@ -22,8 +24,8 @@ import HGeometry.Intersection
 import HGeometry.LineSegment
 import HGeometry.Point
 import HGeometry.Polygon
-import HGeometry.Polygon.Simple
 import HGeometry.Vector
+import HGeometry.Polygon.Visibility.NaiveVisibilityPolygon
 
 --------------------------------------------------------------------------------
 

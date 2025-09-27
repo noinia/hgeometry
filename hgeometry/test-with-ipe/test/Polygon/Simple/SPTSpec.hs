@@ -212,7 +212,8 @@ testIpe inFp outFp = describe (show inFp) $ do
 -- | computes the faces (represented by their face Id and a list of vertices)
 --  that have the "wrong" orientation.
 incorrectDualTreeNodes        :: forall graph vertex dart r.
-                                 (PlaneGraph_ graph vertex, Point_ vertex 2 r, Fractional r, Ord r)
+                                   (PlaneGraph_ graph vertex, HasOuterBoundaryOf graph
+                                     , Point_ vertex 2 r, Fractional r, Ord r)
                               => graph
                               -> DualTree (FaceIx graph)
                                           dart
@@ -221,7 +222,7 @@ incorrectDualTreeNodes        :: forall graph vertex dart r.
 incorrectDualTreeNodes triang = go0 . trimap centroid' id centroid'
   where
     centroid'    :: FaceIx graph -> Point 2 r :+ (FaceIx graph, [vertex])
-    centroid' fi = let pg = triang^?!interiorFacePolygonAt fi
+    centroid' fi = let pg = triang^?!outerBoundaryPolygonAt fi
                    in centroid pg :+ (fi, pg^..outerBoundary.core)
 
     go0 = \case
@@ -258,7 +259,7 @@ inCorrectOrientations = \case
 
 
 drawDualTree       :: ( Point_ vertex 2 r, Ord r, Fractional r
-                      , PlaneGraph_ planeGraph vertex
+                      , PlaneGraph_ planeGraph vertex, HasOuterBoundaryOf planeGraph
                       )
                    => planeGraph
                    -> DualTree (FaceIx planeGraph)
@@ -273,7 +274,7 @@ drawDualTree gr dt = iO . ipeGroup . concat $ [ verts
     treeEdges = []
 
     drawRoot     = iO $ drawVertex (dt^.rootVertex) ! attr SStroke red
-    drawVertex f = ipeDiskMark $ gr^?!interiorFacePolygonAt f.to centroid
+    drawVertex f = ipeDiskMark $ gr^?!outerBoundaryPolygonAt f.to centroid
 
 
 

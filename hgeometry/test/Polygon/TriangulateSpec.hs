@@ -9,7 +9,6 @@ import           HGeometry.Number.Real.Rational
 import           HGeometry.PlaneGraph
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Instances ()
-import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Triangulation
 import qualified HGeometry.Polygon.Triangulation.TriangulateMonotone as TM
 import           Test.Hspec
@@ -86,7 +85,7 @@ isTriangle = (== 3) . numVertices
 graphPolygons    :: (Ord r, Num r, Point_ point 2 r)
                  => CPlaneGraph s point PolygonEdgeType PolygonFaceData
                  -> [SimplePolygon (Point 2 r)]
-graphPolygons gr = map (&vertices %~ view (core.asPoint)) $ gr^..interiorFacePolygons
+graphPolygons gr = map (&vertices %~ view (core.asPoint)) $ gr^..outerBoundaryPolygons
 
 buggyPolygon2 :: SimplePolygon (Point 2 R)
 buggyPolygon2 = fromJust . fromPoints $
