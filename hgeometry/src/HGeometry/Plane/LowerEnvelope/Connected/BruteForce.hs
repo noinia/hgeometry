@@ -18,35 +18,21 @@ module HGeometry.Plane.LowerEnvelope.Connected.BruteForce
   ) where
 
 import           Control.Lens
-import           Data.Default.Class
-import qualified Data.Foldable as F
-import           Data.Foldable1
+import           Control.Monad(void)
 import           Data.Foldable1 as F1
 import           Data.Map (Map)
 import qualified Data.Map as Map
-import           Data.Map.NonEmpty (NEMap, pattern IsEmpty, pattern IsNonEmpty)
-import qualified Data.Map.NonEmpty as NEMap
-import           Data.Maybe (fromMaybe)
-import           Data.Ord (comparing)
+import           Data.Map.NonEmpty (pattern IsEmpty, pattern IsNonEmpty)
 import           HGeometry.Combinatorial.Util
-import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Intersection
 import           HGeometry.Plane.LowerEnvelope.Clipped.Type
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.Plane.LowerEnvelope.Connected.Region
 import           HGeometry.Plane.LowerEnvelope.Connected.Regions
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Point
-import           HGeometry.Point.Either
-import           HGeometry.Polygon.Convex
-import           HGeometry.Polygon.Convex.Unbounded
-import           HGeometry.Polygon.Simple
-import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Triangle
-
-import           Debug.Trace
 
 --------------------------------------------------------------------------------
 -- * Computing the (minimization diagram of) the Lower envelope
@@ -72,8 +58,8 @@ connectedLowerEnvelopeWith :: (Plane_ plane r, Ord r, Fractional r, Foldable set
                            -> set plane
                            -> Maybe (MinimizationDiagram r (MDVertex r plane ()) plane)
 connectedLowerEnvelopeWith computeVertexForm' planes = case computeVertexForm' planes of
-  IsNonEmpty vertices -> Just . mapVertices (fmap $ const ()) $ fromVertexForm vertices
-                         -- the fmap replaces the data value in the MDVertex data by ()
+  IsNonEmpty vertices -> Just . mapVertices void $ fromVertexForm vertices
+                         -- the mapVertices replaces the data value in the MDVertex data by ()
   IsEmpty             -> Nothing
 
 

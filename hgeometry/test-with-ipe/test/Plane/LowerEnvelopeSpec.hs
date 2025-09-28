@@ -7,7 +7,7 @@ module Plane.LowerEnvelopeSpec
   -- ) where
   where
 
-import           Control.Lens
+import           Control.Lens hiding (below)
 import           Data.Foldable
 import           Data.Foldable1
 import qualified Data.List as List
@@ -25,15 +25,21 @@ import           Golden
 import           HGeometry.Box
 import           HGeometry.Cyclic
 import           HGeometry.Ext
+import           HGeometry.LineSegment
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Instances ()
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope
+import           HGeometry.Plane.LowerEnvelope.Connected
+import           HGeometry.Plane.LowerEnvelope.Clipped (ClippedMDCell''(..))
 import qualified HGeometry.Plane.LowerEnvelope.Connected.BruteForce as BruteForce
 import qualified HGeometry.Plane.LowerEnvelope.Connected.Randomized as Randomized
 import           HGeometry.Point
+import           HGeometry.Point.Either
+import           HGeometry.Triangle
 import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Convex.Unbounded
+import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Properties
 import           HGeometry.Sequence.Alternating (separators)
 import           HGeometry.Vector
@@ -49,7 +55,8 @@ import           Test.Hspec.QuickCheck
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
-import Debug.Trace
+
+import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -59,8 +66,7 @@ rVoronoiDiagram :: ( Point_ point 2 r, Functor f, Ord point
                    , Ord r, Fractional r, Foldable1 f
                    , Show point, Show r
                    ) => f point -> VoronoiDiagram point ()
-rVoronoiDiagram = voronoiDiagramWith (lowerEnvelopeWith . connectedLowerEnvelopeWith $
-                                       Randomized.computeVertexForm (mkStdGen 1))
+rVoronoiDiagram = voronoiDiagramWith' $ Randomized.computeVertexForm (mkStdGen 1)
 
 --------------------------------------------------------------------------------
 
@@ -148,7 +154,8 @@ instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
 
 spec :: Spec
 spec = describe "lower envelope tests" $ do
-         randomizedSameAsBruteForce
+--         randomizedSameAsBruteForce
+
          -- testIpe [osp|trivial.ipe|]
          --         [osp|trivial_out|]
          -- testIpe [osp|simplest.ipe|]
@@ -167,6 +174,63 @@ spec = describe "lower envelope tests" $ do
          --         [osp|degenerate1_out|]
          -- testIpe [osp|degenerate2.ipe|]
          --         [osp|degenerate2_out|]
+
+         prop "withConflictList correct" $
+           withConflictListTest
+         prop "withExtraConflictLists correct" $
+           \(Positive r') planes -> let r = max r' 3 in
+             withExtraConflictListTest r planes
+
+-- | verify that 'withConflictLists' is correct
+withConflictListTest                     :: NESet.NESet MyPlane -> Positive Int -> Bool
+withConflictListTest planes (Positive r) = iall correctConflictLists $
+      Randomized.withConflictLists remaining (BruteForce.computeVertexForm rNet)
+  where
+    (rNet, remaining) = Randomized.takeSample r planes
+    below     :: Point_ point 3 R => point -> MyPlane -> Bool
+    below v h = verticalSideTest v h == GT
+    correctConflictLists v (_,conflicts) = conflicts == NESet.filter (below v) planes
+
+
+
+instance FoldableWithIndex k (NEMap.NEMap k) where
+  ifoldMap = NEMap.foldMapWithKey
+
+-- | verify that withExtraConflictListTest is correct
+withExtraConflictListTest :: Int -> NESet.NESet MyPlane -> Triangle (Point 2 R)
+                                                  -> Every
+withExtraConflictListTest r planes tri =
+    case Randomized.withConflictLists remaining (BruteForce.computeVertexForm rNet) of
+      NEMap.IsEmpty                 -> discard
+      NEMap.IsNonEmpty verticesRNet ->
+        ifoldMap check . Randomized.withExtraConflictLists (NESet.toSet planes)
+                       . fromVertexFormIn tri rNet $ verticesRNet
+  where
+    check                        :: MyPlane
+                                 -> ClippedMDCell'' R (MDVertex R MyPlane (_, Set.Set MyPlane))
+                                                      (Point 2 R :+ (_, Set.Set MyPlane))
+                                 -> Every
+    check h (ClippedMDCell cell) = case cell of
+      DegenerateVertex v       -> Every $ check' h v
+      DegenerateEdge e         -> Every $ check' h (e^.start) .&&.check' h (e^.end)
+      ActualPolygon convexCell -> foldMapOf vertices (check' h) convexCell
+
+    check'   :: MyPlane
+             -> OriginalOrExtra (MDVertex R MyPlane (_, Set.Set MyPlane))
+                                (Point 2 R :+ (_, Set.Set MyPlane))
+             -> Every
+    check' h = Every . \case
+      Original v                           -> let conflicts = v^.vertexData._2
+                                                  z         = v^.location.zCoord
+                                              in conflicts === NESet.filter (below v z) planes
+      Extra (v :+ (_extraDefs, conflicts)) -> let z = evalAt v h
+                                              in conflicts === NESet.filter (below v z) planes
+
+
+    (rNet, remaining) = Randomized.takeSample r planes
+
+    below                   :: Point_ point 2 R => point -> R -> MyPlane -> Bool
+    below (Point2_ x y) z h = verticalSideTest (Point3 x y z) h == GT
 
 
 -- | Build voronoi diagrams on the input points
@@ -405,31 +469,29 @@ subsets xs = mapMaybe NonEmpty.nonEmpty
 subsets' []     = [[]]
 subsets' (x:xs) = concatMap (\r -> [r,x:r]) (subsets' xs)
 
-smallest hs = toList $ List.head $ filter isBug $ subsets hs
-  where
-    isBug hsL
-      | traceShow ("===========", hsL, "=================") False  = undefined
-      | otherwise
-      = let hs' = NESet.fromList hsL in
-        Randomized.computeVertexForm (mkStdGen 1) hs' /= BruteForce.computeVertexForm hs'
+-- smallest hs = toList $ List.head $ filter isBug $ subsets hs
+--   where
+-- s    isBug hsL
+--       | traceShow ("===========", hsL, "=================") False  = undefined
+--       | otherwise = let hs' = NESet.fromList hsL in
+--         Randomized.computeVertexForm (mkStdGen 1) hs' /= BruteForce.computeVertexForm hs'
 
-debug1 = smallest $ NonEmpty.fromList
-                 [NonVerticalHyperPlane $ fromList' [-25.8,-25.5,-0.94445]
-                 ,NonVerticalHyperPlane $ fromList' [-20.25,-16.66667,-28]
-                 ,NonVerticalHyperPlane $ fromList' [-19,-18.88889,10]
-                 ,NonVerticalHyperPlane $ fromList' [-17.83334,1.47058,14.18181]
-                 ,NonVerticalHyperPlane $ fromList' [-15.8,-6.64706,-25.66667]
-                 ,NonVerticalHyperPlane $ fromList' [-15.46667,-11.95239,-0.8]
-                 ,NonVerticalHyperPlane $ fromList' [-15.44445,-27.66667,28]
-                 ,NonVerticalHyperPlane $ fromList' [-15.06667,-25.75,8.73076]
-                 ,NonVerticalHyperPlane $ fromList' [-15,9.66666,-18]
-                 ]
-  where
-    fromList' [a,b,c] = Vector3 a b c
+-- debug1 = smallest $ NonEmpty.fromList
+--                  [NonVerticalHyperPlane $ fromList' [-25.8,-25.5,-0.94445]
+--                  ,NonVerticalHyperPlane $ fromList' [-20.25,-16.66667,-28]
+--                  ,NonVerticalHyperPlane $ fromList' [-19,-18.88889,10]
+--                  ,NonVerticalHyperPlane $ fromList' [-17.83334,1.47058,14.18181]
+--                  ,NonVerticalHyperPlane $ fromList' [-15.8,-6.64706,-25.66667]
+--                  ,NonVerticalHyperPlane $ fromList' [-15.46667,-11.95239,-0.8]
+--                  ,NonVerticalHyperPlane $ fromList' [-15.44445,-27.66667,28]
+--                  ,NonVerticalHyperPlane $ fromList' [-15.06667,-25.75,8.73076]
+--                  ,NonVerticalHyperPlane $ fromList' [-15,9.66666,-18]
+--                  ]
+--   where
+--     fromList' [a,b,c] = Vector3 a b c
 
 
-debug = do let hs :: NonEmpty (Plane R)
-               hs = NonEmpty.fromList
+buggyPlanes =  NonEmpty.fromList
                  -- [NonVerticalHyperPlane $fromList' [-25.8,-25.5,-0.94445]
                  -- ,NonVerticalHyperPlane $fromList' [-20.25,-16.66667,-28.0]
                  -- ,NonVerticalHyperPlane $fromList' [-19.0,-18.88889,10.0]
@@ -446,6 +508,14 @@ debug = do let hs :: NonEmpty (Plane R)
                  ,NonVerticalHyperPlane $ fromList' [-15.44445,-27.66667,28]
                  ,NonVerticalHyperPlane $ fromList' [-15.06667,-25.75,8.73076]
                  ,NonVerticalHyperPlane $ fromList' [-15,9.66666,-18]
+                 ]
+  where
+    fromList' [a,b,c] = Vector3 a b c
+    fromList' _ = error "fromList'"
+
+debug = do let hs :: NonEmpty (Plane R)
+               hs = buggyPlanes
+                 -- ,NonVerticalHyperPlane $ fromList' [0,0,1]
 
 
                  -- ,NonVerticalHyperPlane $ fromList' [-14,-7.1,27.90909]
@@ -473,7 +543,7 @@ debug = do let hs :: NonEmpty (Plane R)
                  -- ,NonVerticalHyperPlane $ fromList' [23.28571,-13.54546,-1.375]
                  -- ,NonVerticalHyperPlane $ fromList' [24.17857,-16.39286,1.08333]
                  -- ,NonVerticalHyperPlane $ fromList' [24.66666,26.125,25.75]
-                 ]
+                 -- ]
 
                  -- [NonVerticalHyperPlane $ fromList' [-8,6,-1.8]
                  -- ,NonVerticalHyperPlane $ fromList' [-6,-7.66667,5]
@@ -503,7 +573,6 @@ debug = do let hs :: NonEmpty (Plane R)
                     -- , NonVerticalHyperPlane $ fromList' [8,5.66666,-2.125]
                     -- , NonVerticalHyperPlane $ fromList' [8,7.75,4.66666]
                     -- ]
-               fromList' [a,b,c] = Vector3 a b c
 
                v  = Point3 (-0.24717) (-3.55263) 0
            for_ hs $ \h ->

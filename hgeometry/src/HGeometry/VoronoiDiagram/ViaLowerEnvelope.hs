@@ -16,6 +16,7 @@ module HGeometry.VoronoiDiagram.ViaLowerEnvelope
   , asMap
   , voronoiDiagram
   , voronoiDiagramWith
+  , voronoiDiagramWith'
   , voronoiVertices
   -- , edgeGeometries
   , pointToPlane
@@ -26,7 +27,7 @@ import           Control.Subcategory.Functor
 import           Data.Bifunctor
 import           Data.Foldable1
 import qualified Data.List.NonEmpty as NonEmpty
--- import qualified Data.Map as Map
+import           Data.Map (Map)
 import qualified Data.Map.NonEmpty as NEMap
 import           Data.Set (Set)
 import qualified Data.Set as Set
@@ -39,6 +40,8 @@ import           HGeometry.Line.General
 import           HGeometry.Plane.LowerEnvelope ( MinimizationDiagram, Region(..)
                                                , lowerEnvelope, LowerEnvelope(..)
                                                , MDVertex(..), mapVertices
+                                               , VertexForm
+                                               , lowerEnvelopeWith, connectedLowerEnvelopeWith
                                                )
 import qualified HGeometry.Plane.LowerEnvelope as LowerEnvelope
 import           HGeometry.Point
@@ -125,6 +128,18 @@ voronoiDiagramWith lowerEnv pts = case lowerEnv . fmap (\p -> pointToPlane p :+ 
     ParallelStrips strips -> AllColinear $ fmap (^.extra) strips
     ConnectedEnvelope env ->
       ConnectedVD . VoronoiDiagram . mapVertices (first (^.extra)) . cmap (^.extra) $ env
+
+-- | Given a function that can construct the vertices of the lower envelope; use it to
+-- construct the Voronoi Diagram.
+voronoiDiagramWith'          :: ( Point_ point 2 r, Ord point, Functor set, Foldable1 set
+                                , Ord r, Fractional r
+                                , Show point, Show r -- TODO: remove
+                                )
+                             => (set (Plane r :+ point) -> VertexForm Map r (Plane r :+ point))
+                             -> set point -> VoronoiDiagram point ()
+voronoiDiagramWith' lowerEnv =
+  voronoiDiagramWith (lowerEnvelopeWith . connectedLowerEnvelopeWith $ lowerEnv)
+
 
 -- | lifts the point to a plane; so that the lower envelope corresponds to the VD
 pointToPlane :: (Point_ point 2 r, Num r) => point -> Plane r

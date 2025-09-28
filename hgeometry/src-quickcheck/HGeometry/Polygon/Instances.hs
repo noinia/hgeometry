@@ -17,7 +17,6 @@ module HGeometry.Polygon.Instances
 import           Control.Lens hiding (elements)
 import           Control.Monad.State
 import           Data.Aeson (eitherDecodeFileStrict)
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (maybeToList)
 import           HGeometry

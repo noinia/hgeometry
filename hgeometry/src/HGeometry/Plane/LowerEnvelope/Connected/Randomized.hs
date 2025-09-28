@@ -10,10 +10,14 @@
 --------------------------------------------------------------------------------
 module HGeometry.Plane.LowerEnvelope.Connected.Randomized
   ( computeVertexForm
+
+  , withConflictLists
+  , takeSample
+
+  , withExtraConflictLists
   ) where
 
 import           Control.Lens hiding (below)
-import           Data.Bifunctor
 import           Data.Foldable
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -29,7 +33,6 @@ import           Data.Set.NonEmpty (NESet)
 import qualified Data.Set.NonEmpty as NESet
 import qualified Data.Vector.NonEmpty as V
 import           HGeometry.Ext
-import           HGeometry.Foldable.Util
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Intersection
@@ -47,7 +50,8 @@ import           HGeometry.Triangle
 import           Prelude hiding (filter, head, last)
 import           System.Random
 
-
+-- import System.IO.Unsafe(unsafePerformIO)
+-- import Ipe
 import           Debug.Trace
 --------------------------------------------------------------------------------
 
@@ -99,9 +103,7 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) (toSet hs)
       -- TODO: make sure that if the lower envelope has a vertex, we select planes
       -- that generate a plane.
 
-    lowerEnvelopeIn   :: Triangle (Point 2 r)
-                      -> NESet plane
-                      -> Map (Point 3 r) (Definers plane)
+    lowerEnvelopeIn   :: Triangle (Point 2 r) -> NESet plane -> Map (Point 3 r) (Definers plane)
     lowerEnvelopeIn tri planes | traceShow ("LE",tri, toList planes) False = undefined
 
     lowerEnvelopeIn tri planes = let (rNet,remaining) = traceShowWith ("rnet",) $ takeSample r' planes in
@@ -153,15 +155,15 @@ asVertexIn tri (Point3 x y z) (defs,conflictList)
   | traceShow ("asVertexIn ",tri,x,y,z
               ,"defs", defs
               ,"CL:",conflictList
-              , null conflictList && (Point2 x y) `intersects` tri) False = undefined
-  | null conflictList && (Point2 x y) `intersects'` tri = Just defs
-  | otherwise                                           = Nothing
+              , null conflictList && Point2 x y `intersects` tri) False = undefined
+  | null conflictList && Point2 x y `intersects'` tri = Just defs
+  | otherwise                                         = Nothing
   where
-    p `intersects'` tri = p `intersects` tri && notElemOf (vertices.asPoint) p tri
+    p `intersects'` tri' = p `intersects` tri' && notElemOf (vertices.asPoint) p tri'
 
-    toSet :: (Foldable f, Ord a) => f a -> Set a
-    toSet = Set.fromList . toList
-
+    -- toSet :: (Foldable f, Ord a) => f a -> Set a
+    -- toSet = Set.fromList . toList
+{-
 hasNoConflict                     :: Foldable set => (definers, set plane) -> Maybe definers
 hasNoConflict (defs,conflictList)
   | null conflictList              = Just defs
@@ -170,6 +172,8 @@ hasNoConflict (defs,conflictList)
 -- | Get the conflictList of a triangle
 conflictListOf :: Monoid conflictList => Triangle (vertex :+ conflictList) -> conflictList
 conflictListOf = foldMap (^.extra)
+
+-}
 
 -- | Computes conflict list
 withConflictLists        :: ( Plane_ plane r, Ord r, Num r, Ord plane
@@ -198,13 +202,12 @@ withExtraConflictLists        :: (Plane_ plane r, Ord r, Num r--, Point_ corner 
 withExtraConflictLists planes | traceShow ("withExtraConflictLists",planes) False = undefined
 withExtraConflictLists planes = NEMap.mapWithKey $ \h -> fmap (withPolygonVertex h)
   where
-    withPolygonVertex h v = v :+ (defs,belows)
+    withPolygonVertex h v@(Point2_ x y) = v :+ (defs,belows)
       where
         z             = evalAt v h
-        (belows,rest) = Set.partition (sideTest z v GT) planes
-        (defs, _)     = Set.partition (sideTest z v EQ) planes
-        sideTest z (Point2_ x y) res h = verticalSideTest (Point3 x y z) h == res
-
+        (belows,rest) = Set.partition (sideTest GT) planes
+        (defs, _)     = Set.partition (sideTest EQ) rest
+        sideTest res h' = verticalSideTest (Point3 x y z) h' == res
 
 triangulate                        :: (Num r, Ord plane
                                       , Show plane, Show a, Show r
@@ -263,3 +266,13 @@ triangulate' h poly = traceShowWith ("triangulate'", h, poly,"->",) $ mapMaybe' 
 
 
 ----------------------------------------
+
+-- debugRender fp x = unsafePerformIO $ debugRender' fp x
+-- debugRender' fp x = writeIpeFile fp $ singlePageFromContent
+--     [ x
+--     ]
+
+
+-- buggy = fromList
+
+--   [NonVerticalHyperPlane [-24,18.23529,12], NonVerticalHyperPlane [-23.91667,19.33333,-11.44445],NonVerticalHyperPlane [-23.81819,6.2,10.25],NonVerticalHyperPlane [-19.04167,-24,2.36363],NonVerticalHyperPlane [-18.3,-11.5,-3.35295],NonVerticalHyperPlane [-15.36843,-3.8,2.85714],NonVerticalHyperPlane [-9.09091,8.4375,-22],NonVerticalHyperPlane [-4.66667,19,1.46153],NonVerticalHyperPlane [-3.33334,17.55555,0],NonVerticalHyperPlane [-3,-4.85715,-3.2381],NonVerticalHyperPlane [-2.13637,-15,-2.92858],NonVerticalHyperPlane [0,22,-2.33334],NonVerticalHyperPlane [1.63157,6.875,5.21739],NonVerticalHyperPlane [2.13043,1.29166,-13.125],NonVerticalHyperPlane [3.27272,-8.76924,-20.33334],NonVerticalHyperPlane [5.8,-2.66667,19.35],NonVerticalHyperPlane [6.75,-14,-23.3],NonVerticalHyperPlane [9.30769,4,-22],NonVerticalHyperPlane [9.42857,16,-6],NonVerticalHyperPlane [15.17391,16.8,2.77777],NonVerticalHyperPlane [17.1875,3.4375,16.83333],NonVerticalHyperPlane [17.8,6.77777,-5.83334],NonVerticalHyperPlane [17.82352,4.21428,-16],NonVerticalHyperPlane [24,17.64285,-13]])

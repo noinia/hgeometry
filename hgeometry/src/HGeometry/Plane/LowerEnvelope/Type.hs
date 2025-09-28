@@ -7,7 +7,6 @@ module HGeometry.Plane.LowerEnvelope.Type
 import           Control.Lens
 import qualified Data.Vector as Vector
 import           HGeometry.Algorithms.BinarySearch
-import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line.General
