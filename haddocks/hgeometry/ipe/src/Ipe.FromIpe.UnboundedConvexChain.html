@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Ipe.FromIpe.UnboundedConvexChain.html"><span class="hs-identifier">Ipe.FromIpe.UnboundedConvexChain</span></a></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-2"></span><span>
-</span><span id="line-3"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.html/Control.Lens.html"><span class="hs-identifier">Control.Lens</span></a></span><span>
 </span><span id="line-4"></span><span class="hs-keyword">import</span><span>           </span><span class="annot"><span class="hs-identifier">Data.Foldable1</span></span><span>
 </span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.List.NonEmpty</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">NonEmpty</span></span><span>
 </span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Sequence</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Seq</span></span><span>
@@ -33,27 +33,27 @@
 </span><span id="line-33"></span><span>
 </span><span id="line-34"></span><span>
 </span><span id="line-35"></span><span class="annot"><span class="hs-comment">-- | Renders an unbounded convex region as a Path</span></span><span>
-</span><span id="line-36"></span><span id="local-6989586621679476215"><span id="local-6989586621679476217"><span id="local-6989586621679476218"><span class="annot"><a href="Ipe.FromIpe.UnboundedConvexChain.html#renderChain"><span class="hs-identifier hs-type">renderChain</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679476215"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679476217"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679476218"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679476218"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-37"></span><span>            </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">UnboundedConvexRegionF</span></span><span> </span><span class="annot"><a href="#local-6989586621679476218"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476215"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476217"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476218"><span class="hs-identifier hs-type">r</span></a></span><span>
-</span><span id="line-38"></span><span>            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeObject%27"><span class="hs-identifier hs-type">IpeObject'</span></a></span><span> </span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476218"><span class="hs-identifier hs-type">r</span></a></span></span></span></span><span>
+</span><span id="line-36"></span><span id="local-6989586621679477214"><span id="local-6989586621679477216"><span id="local-6989586621679477217"><span class="annot"><a href="Ipe.FromIpe.UnboundedConvexChain.html#renderChain"><span class="hs-identifier hs-type">renderChain</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Foldable1</span></span><span> </span><span class="annot"><a href="#local-6989586621679477214"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Point_</span></span><span> </span><span class="annot"><a href="#local-6989586621679477216"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679477217"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679477217"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span>            </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">UnboundedConvexRegionF</span></span><span> </span><span class="annot"><a href="#local-6989586621679477217"><span class="hs-identifier hs-type">r</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679477214"><span class="hs-identifier hs-type">nonEmpty</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679477216"><span class="hs-identifier hs-type">vertex</span></a></span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeAttributes"><span class="hs-identifier hs-type">IpeAttributes</span></a></span><span> </span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679477217"><span class="hs-identifier hs-type">r</span></a></span><span>
+</span><span id="line-38"></span><span>            </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Ipe.Content.html#IpeObject%27"><span class="hs-identifier hs-type">IpeObject'</span></a></span><span> </span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679477217"><span class="hs-identifier hs-type">r</span></a></span></span></span></span><span>
 </span><span id="line-39"></span><span id="renderChain"><span class="annot"><span class="annottext">renderChain :: forall (nonEmpty :: * -&gt; *) vertex r.
 (Foldable1 nonEmpty, Point_ vertex 2 r, Num r) =&gt;
 (UnboundedConvexRegionF r nonEmpty vertex :+ IpeAttributes Path r)
 -&gt; IpeObject' Path r
-</span><a href="Ipe.FromIpe.UnboundedConvexChain.html#renderChain"><span class="hs-identifier hs-var hs-var">renderChain</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679476827"><span class="annot"><span class="annottext">reg :: UnboundedConvexRegionF r nonEmpty vertex
-</span><a href="#local-6989586621679476827"><span class="hs-identifier hs-var">reg</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unbounded</span></span><span> </span><span id="local-6989586621679476829"><span class="annot"><span class="annottext">Vector 2 r
-</span><a href="#local-6989586621679476829"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679476830"><span class="annot"><span class="annottext">nonEmpty vertex
-</span><a href="#local-6989586621679476830"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span id="local-6989586621679476831"><span class="annot"><span class="annottext">Vector 2 r
-</span><a href="#local-6989586621679476831"><span class="hs-identifier hs-var">w</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679476833"><span class="annot"><span class="annottext">IpeAttributes Path r
-</span><a href="#local-6989586621679476833"><span class="hs-identifier hs-var">ats</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="Ipe.FromIpe.UnboundedConvexChain.html#renderChain"><span class="hs-identifier hs-var hs-var">renderChain</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679477826"><span class="annot"><span class="annottext">reg :: UnboundedConvexRegionF r nonEmpty vertex
+</span><a href="#local-6989586621679477826"><span class="hs-identifier hs-var">reg</span></a></span></span><span class="hs-glyph">@</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Unbounded</span></span><span> </span><span id="local-6989586621679477828"><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679477828"><span class="hs-identifier hs-var">v</span></a></span></span><span> </span><span id="local-6989586621679477829"><span class="annot"><span class="annottext">nonEmpty vertex
+</span><a href="#local-6989586621679477829"><span class="hs-identifier hs-var">pts</span></a></span></span><span> </span><span id="local-6989586621679477830"><span class="annot"><span class="annottext">Vector 2 r
+</span><a href="#local-6989586621679477830"><span class="hs-identifier hs-var">w</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><a href="file:///home/runner/work/hgeometry/hgeometry/dist-newstyle/build/x86_64-linux/ghc-9.10.1/hgeometry-combinatorial-1.0.0.0/doc/html/hgeometry-combinatorial/src/HGeometry.Ext.html/HGeometry.Ext.html#%3A%2B"><span class="hs-operator hs-type">:+</span></a></span><span> </span><span id="local-6989586621679477832"><span class="annot"><span class="annottext">IpeAttributes Path r
+</span><a href="#local-6989586621679477832"><span class="hs-identifier hs-var">ats</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-40"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">PolyLine (Point 2 r)
-</span><a href="#local-6989586621679476834"><span class="hs-identifier hs-var">poly</span></a></span><span class="annot"><span class="annottext">PolyLine (Point 2 r)
+</span><a href="#local-6989586621679477833"><span class="hs-identifier hs-var">poly</span></a></span><span class="annot"><span class="annottext">PolyLine (Point 2 r)
 -&gt; Getting (Path r) (PolyLine (Point 2 r)) (Path r) -&gt; Path r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">AReview (Path r) (PolyLine (Point 2 r))
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">AReview (Path r) (PolyLine (Point 2 r))
 -&gt; Getter (PolyLine (Point 2 r)) (Path r)
 forall t b. AReview t b -&gt; Getter b t
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Review.html/Control.Lens.Review.html#re"><span class="hs-identifier hs-var">re</span></a></span><span> </span><span class="annot"><span class="annottext">AReview (Path r) (PolyLine (Point 2 r))
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.Review.html/Control.Lens.Review.html#re"><span class="hs-identifier hs-var">re</span></a></span><span> </span><span class="annot"><span class="annottext">AReview (Path r) (PolyLine (Point 2 r))
 forall r (p :: * -&gt; * -&gt; *) (f :: * -&gt; *).
 (Choice p, Applicative f) =&gt;
 p (PolyLine (Point 2 r)) (f (PolyLine (Point 2 r)))
@@ -139,10 +139,10 @@ forall a. Semigroup a =&gt; a -&gt; a -&gt; a
      'Pen, 'LineCap, 'LineJoin, 'FillRule, 'Arrow, 'RArrow,
      'StrokeOpacity, 'Opacity, 'Tiling, 'Gradient]
 IpeAttributes Path r
-</span><a href="#local-6989586621679476833"><span class="hs-identifier hs-var">ats</span></a></span><span>
+</span><a href="#local-6989586621679477832"><span class="hs-identifier hs-var">ats</span></a></span><span>
 </span><span id="line-43"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-44"></span><span>    </span><span id="local-6989586621679476834"><span class="annot"><span class="annottext">poly :: PolyLine (Point 2 r)
-</span><a href="#local-6989586621679476834"><span class="hs-identifier hs-var hs-var">poly</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">UnboundedConvexRegionF r NonEmpty vertex
+</span><span id="line-44"></span><span>    </span><span id="local-6989586621679477833"><span class="annot"><span class="annottext">poly :: PolyLine (Point 2 r)
+</span><a href="#local-6989586621679477833"><span class="hs-identifier hs-var hs-var">poly</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">UnboundedConvexRegionF r NonEmpty vertex
 -&gt; Either vertex (Vector 2 vertex)
 forall r vertex.
 UnboundedConvexRegionF r NonEmpty vertex
@@ -159,22 +159,22 @@ forall {k1} {k2} (nonEmpty :: k1 -&gt; *) (vertex :: k1)
 forall a. nonEmpty a -&gt; NonEmpty a
 forall (t :: * -&gt; *) a. Foldable1 t =&gt; t a -&gt; NonEmpty a
 </span><span class="hs-identifier hs-var">toNonEmpty</span></span><span> </span><span class="annot"><span class="annottext">UnboundedConvexRegionF r nonEmpty vertex
-</span><a href="#local-6989586621679476827"><span class="hs-identifier hs-var">reg</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
-</span><span id="line-45"></span><span>             </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679476845"><span class="annot"><span class="annottext">vertex
-</span><a href="#local-6989586621679476845"><span class="hs-identifier hs-var">p</span></a></span></span><span>              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">vertex -&gt; vertex -&gt; PolyLine (Point 2 r)
-</span><a href="#local-6989586621679476846"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">vertex
-</span><a href="#local-6989586621679476845"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">vertex
-</span><a href="#local-6989586621679476845"><span class="hs-identifier hs-var">p</span></a></span><span>
-</span><span id="line-46"></span><span>             </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector2</span></span><span> </span><span id="local-6989586621679476848"><span class="annot"><span class="annottext">vertex
-</span><a href="#local-6989586621679476848"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679476849"><span class="annot"><span class="annottext">vertex
-</span><a href="#local-6989586621679476849"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">vertex -&gt; vertex -&gt; PolyLine (Point 2 r)
-</span><a href="#local-6989586621679476846"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">vertex
-</span><a href="#local-6989586621679476848"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">vertex
-</span><a href="#local-6989586621679476849"><span class="hs-identifier hs-var">q</span></a></span><span>
-</span><span id="line-47"></span><span>    </span><span id="local-6989586621679476846"><span class="annot"><span class="annottext">f :: vertex -&gt; vertex -&gt; PolyLine (Point 2 r)
-</span><a href="#local-6989586621679476846"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679476850"><span class="annot"><span class="annottext">vertex
-</span><a href="#local-6989586621679476850"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679476851"><span class="annot"><span class="annottext">vertex
-</span><a href="#local-6989586621679476851"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r) -&gt; PolyLine (Point 2 r)
+</span><a href="#local-6989586621679477826"><span class="hs-identifier hs-var">reg</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-45"></span><span>             </span><span class="annot"><span class="hs-identifier hs-type">Left</span></span><span> </span><span id="local-6989586621679477844"><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679477844"><span class="hs-identifier hs-var">p</span></a></span></span><span>              </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">vertex -&gt; vertex -&gt; PolyLine (Point 2 r)
+</span><a href="#local-6989586621679477845"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679477844"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679477844"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-46"></span><span>             </span><span class="annot"><span class="hs-identifier hs-type">Right</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Vector2</span></span><span> </span><span id="local-6989586621679477847"><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679477847"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679477848"><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679477848"><span class="hs-identifier hs-var">q</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">vertex -&gt; vertex -&gt; PolyLine (Point 2 r)
+</span><a href="#local-6989586621679477845"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679477847"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679477848"><span class="hs-identifier hs-var">q</span></a></span><span>
+</span><span id="line-47"></span><span>    </span><span id="local-6989586621679477845"><span class="annot"><span class="annottext">f :: vertex -&gt; vertex -&gt; PolyLine (Point 2 r)
+</span><a href="#local-6989586621679477845"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679477849"><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679477849"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span id="local-6989586621679477850"><span class="annot"><span class="annottext">vertex
+</span><a href="#local-6989586621679477850"><span class="hs-identifier hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">NonEmpty (Point 2 r) -&gt; PolyLine (Point 2 r)
 forall polyLine point (f :: * -&gt; *).
 (ConstructablePolyLine_ polyLine point, Foldable1 f) =&gt;
 f point -&gt; polyLine
@@ -191,7 +191,7 @@ forall a b. (a -&gt; b) -&gt; NonEmpty a -&gt; NonEmpty b
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">vertex -&gt; Getting (Point 2 r) vertex (Point 2 r) -&gt; Point 2 r
 forall s a. s -&gt; Getting a s a -&gt; a
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) vertex (Point 2 r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.Getter.html/Control.Lens.Getter.html#%5E."><span class="hs-operator hs-var">^.</span></a></span><span class="annot"><span class="annottext">Getting (Point 2 r) vertex (Point 2 r)
 forall point (d :: Nat) r.
 Point_ point d r =&gt;
 Lens' point (Point d r)
@@ -201,35 +201,35 @@ Lens' vertex (Point 2 r)
 -&gt; NonEmpty vertex -&gt; PolyLine (Point 2 r)
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">vertex
-</span><a href="#local-6989586621679476850"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">vertex -&gt; Vector 2 r -&gt; vertex
+</span><a href="#local-6989586621679477849"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">vertex -&gt; Vector 2 r -&gt; vertex
 forall point (d :: Nat) r.
 (Affine_ point d r, Num r) =&gt;
 point -&gt; Vector d r -&gt; point
 </span><span class="hs-operator hs-var">.-^</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
-</span><a href="#local-6989586621679476829"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">vertex -&gt; NonEmpty vertex -&gt; NonEmpty vertex
+</span><a href="#local-6989586621679477828"><span class="hs-identifier hs-var">v</span></a></span><span> </span><span class="annot"><span class="annottext">vertex -&gt; NonEmpty vertex -&gt; NonEmpty vertex
 forall a. a -&gt; NonEmpty a -&gt; NonEmpty a
 </span><span class="hs-operator hs-var">NonEmpty.&lt;|</span></span><span> </span><span class="annot"><span class="annottext">nonEmpty vertex -&gt; NonEmpty vertex
 forall a. nonEmpty a -&gt; NonEmpty a
 forall (t :: * -&gt; *) a. Foldable1 t =&gt; t a -&gt; NonEmpty a
 </span><span class="hs-identifier hs-var">toNonEmpty</span></span><span> </span><span class="annot"><span class="annottext">nonEmpty vertex
-</span><a href="#local-6989586621679476830"><span class="hs-identifier hs-var">pts</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty vertex -&gt; NonEmpty vertex -&gt; NonEmpty vertex
+</span><a href="#local-6989586621679477829"><span class="hs-identifier hs-var">pts</span></a></span><span> </span><span class="annot"><span class="annottext">NonEmpty vertex -&gt; NonEmpty vertex -&gt; NonEmpty vertex
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">vertex -&gt; NonEmpty vertex
 forall a. a -&gt; NonEmpty a
 </span><span class="hs-identifier hs-var">NonEmpty.singleton</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">vertex
-</span><a href="#local-6989586621679476851"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">vertex -&gt; Vector 2 r -&gt; vertex
+</span><a href="#local-6989586621679477850"><span class="hs-identifier hs-var">q</span></a></span><span> </span><span class="annot"><span class="annottext">vertex -&gt; Vector 2 r -&gt; vertex
 forall point (d :: Nat) r.
 (Affine_ point d r, Num r) =&gt;
 point -&gt; Vector d r -&gt; point
 </span><span class="hs-operator hs-var">.+^</span></span><span> </span><span class="annot"><span class="annottext">Vector 2 r
-</span><a href="#local-6989586621679476831"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679477830"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-49"></span><span>
 </span><span id="line-50"></span><span>
 </span><span id="line-51"></span><span class="hs-comment">-- | Convert to a polyline. Ignores all non-polyline parts</span><span>
 </span><span id="line-52"></span><span class="hs-comment">--</span><span>
 </span><span id="line-53"></span><span class="hs-comment">-- &gt;&gt;&gt; testPath ^? _asPolyLine</span><span>
 </span><span id="line-54"></span><span class="hs-comment">-- Just (PolyLine [Point2 0 0,Point2 10 10,Point2 200 100])</span><span>
-</span><span id="line-55"></span><span id="local-6989586621679476379"><span class="annot"><a href="Ipe.FromIpe.UnboundedConvexChain.html#_asPolyLine"><span class="hs-identifier hs-type">_asPolyLine</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Prism%27"><span class="hs-identifier hs-type">Prism'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679476379"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PolyLine</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679476379"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span>
+</span><span id="line-55"></span><span id="local-6989586621679477378"><span class="annot"><a href="Ipe.FromIpe.UnboundedConvexChain.html#_asPolyLine"><span class="hs-identifier hs-type">_asPolyLine</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.Type.html/Control.Lens.Type.html#Prism%27"><span class="hs-identifier hs-type">Prism'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-type">Path</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679477378"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PolyLine</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Point</span></span><span> </span><span class="annot"><span class="hs-number">2</span></span><span> </span><span class="annot"><a href="#local-6989586621679477378"><span class="hs-identifier hs-type">r</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span></span><span>
 </span><span id="line-56"></span><span id="_asPolyLine"><span class="annot"><span class="annottext">_asPolyLine :: forall r (p :: * -&gt; * -&gt; *) (f :: * -&gt; *).
 (Choice p, Applicative f) =&gt;
 p (PolyLine (Point 2 r)) (f (PolyLine (Point 2 r)))
@@ -239,13 +239,13 @@ p (PolyLine (Point 2 r)) (f (PolyLine (Point 2 r)))
 -&gt; Prism
      (Path r) (Path r) (PolyLine (Point 2 r)) (PolyLine (Point 2 r))
 forall b s a. (b -&gt; s) -&gt; (s -&gt; Maybe a) -&gt; Prism s s a b
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Prism.html/Control.Lens.Prism.html#prism%27"><span class="hs-identifier hs-var">prism'</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLine (Point 2 r) -&gt; Path r
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.Prism.html/Control.Lens.Prism.html#prism%27"><span class="hs-identifier hs-var">prism'</span></a></span><span> </span><span class="annot"><span class="annottext">PolyLine (Point 2 r) -&gt; Path r
 forall {r}. PolyLine (Point 2 r) -&gt; Path r
-</span><a href="#local-6989586621679476864"><span class="hs-identifier hs-var">poly2path</span></a></span><span> </span><span class="annot"><span class="annottext">Path r -&gt; Maybe (PolyLine (Point 2 r))
-</span><a href="#local-6989586621679476865"><span class="hs-identifier hs-var">path2poly</span></a></span><span>
+</span><a href="#local-6989586621679477863"><span class="hs-identifier hs-var">poly2path</span></a></span><span> </span><span class="annot"><span class="annottext">Path r -&gt; Maybe (PolyLine (Point 2 r))
+</span><a href="#local-6989586621679477864"><span class="hs-identifier hs-var">path2poly</span></a></span><span>
 </span><span id="line-57"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-58"></span><span>    </span><span id="local-6989586621679476864"><span class="annot"><span class="annottext">poly2path :: PolyLine (Point 2 r) -&gt; Path r
-</span><a href="#local-6989586621679476864"><span class="hs-identifier hs-var hs-var">poly2path</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Seq (PathSegment r) -&gt; Path r
+</span><span id="line-58"></span><span>    </span><span id="local-6989586621679477863"><span class="annot"><span class="annottext">poly2path :: PolyLine (Point 2 r) -&gt; Path r
+</span><a href="#local-6989586621679477863"><span class="hs-identifier hs-var hs-var">poly2path</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Seq (PathSegment r) -&gt; Path r
 forall r. Seq (PathSegment r) -&gt; Path r
 </span><a href="Ipe.Path.html#Path"><span class="hs-identifier hs-var">Path</span></a></span><span> </span><span class="annot"><span class="annottext">(Seq (PathSegment r) -&gt; Path r)
 -&gt; (PolyLine (Point 2 r) -&gt; Seq (PathSegment r))
@@ -262,14 +262,14 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">PolyLine (Point 2 r) -&gt; PathSegment r
 forall r. PolyLine (Point 2 r) -&gt; PathSegment r
 </span><a href="Ipe.Path.html#PolyLineSegment"><span class="hs-identifier hs-var">PolyLineSegment</span></a></span><span>
-</span><span id="line-59"></span><span>    </span><span id="local-6989586621679476865"><span class="annot"><span class="annottext">path2poly :: Path r -&gt; Maybe (PolyLine (Point 2 r))
-</span><a href="#local-6989586621679476865"><span class="hs-identifier hs-var hs-var">path2poly</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting
+</span><span id="line-59"></span><span>    </span><span id="local-6989586621679477864"><span class="annot"><span class="annottext">path2poly :: Path r -&gt; Maybe (PolyLine (Point 2 r))
+</span><a href="#local-6989586621679477864"><span class="hs-identifier hs-var hs-var">path2poly</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Getting
   (First (PolyLine (Point 2 r))) (Path r) (PolyLine (Point 2 r))
 -&gt; Path r -&gt; Maybe (PolyLine (Point 2 r))
 forall s (m :: * -&gt; *) a.
 MonadReader s m =&gt;
 Getting (First a) s a -&gt; m (Maybe a)
-</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-ea5aa937eedd0462f218acdbfc581f79beb571afb488c5dc937a3e109e6a2626/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#preview"><span class="hs-identifier hs-var">preview</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Seq (PathSegment r)
+</span><a href="file:///home/runner/.cabal/store/ghc-9.10.1-69c3/lens-5.3.5-8b88a30dd39d5cf6af3d15bbd3d4b10b6d686f625d00c4be01315ef5a0386892/share/doc/html/src/Control.Lens.Fold.html/Control.Lens.Fold.html#preview"><span class="hs-identifier hs-var">preview</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Seq (PathSegment r)
  -&gt; Const (First (PolyLine (Point 2 r))) (Seq (PathSegment r)))
 -&gt; Path r -&gt; Const (First (PolyLine (Point 2 r))) (Path r)
 forall r r' (p :: * -&gt; * -&gt; *) (f :: * -&gt; *).
@@ -322,7 +322,7 @@ p (PolyLine (Point 2 r)) (f (PolyLine (Point 2 r)))
 </span><span id="line-61"></span><span>    </span><span class="hs-comment">-- than ignoring everything that does not fit</span><span>
 </span><span id="line-62"></span><span>
 </span><span id="line-63"></span><span class="annot"><span class="hs-comment">-- | Helper to produce a singleton sequence</span></span><span>
-</span><span id="line-64"></span><span id="local-6989586621679476434"><span class="annot"><a href="Ipe.FromIpe.UnboundedConvexChain.html#fromSingleton"><span class="hs-identifier hs-type">fromSingleton</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679476434"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Seq.Seq</span></span><span> </span><span class="annot"><a href="#local-6989586621679476434"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-64"></span><span id="local-6989586621679477433"><span class="annot"><a href="Ipe.FromIpe.UnboundedConvexChain.html#fromSingleton"><span class="hs-identifier hs-type">fromSingleton</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679477433"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Seq.Seq</span></span><span> </span><span class="annot"><a href="#local-6989586621679477433"><span class="hs-identifier hs-type">a</span></a></span></span><span>
 </span><span id="line-65"></span><span id="fromSingleton"><span class="annot"><span class="annottext">fromSingleton :: forall a. a -&gt; Seq a
 </span><a href="Ipe.FromIpe.UnboundedConvexChain.html#fromSingleton"><span class="hs-identifier hs-var hs-var">fromSingleton</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Seq a
 forall a. a -&gt; Seq a
