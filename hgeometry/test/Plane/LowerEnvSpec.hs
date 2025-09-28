@@ -3,32 +3,22 @@ module Plane.LowerEnvSpec
   ( spec
   ) where
 
-import           Data.Coerce
 import qualified Data.Foldable as F
 import           Data.Foldable1
-import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import           Data.Map (Map)
-import qualified Data.Map.NonEmpty as NEMap
-import           Data.Maybe (fromMaybe, listToMaybe)
-import           Data.Ord (comparing)
 import           Data.Set (Set)
 import qualified Data.Set as Set
-import           HGeometry.Combinatorial.Util
-import           HGeometry.Ext
-import           HGeometry.Foldable.Util
 import           HGeometry.HyperPlane
 import           HGeometry.Instances ()
 import           HGeometry.Intersection
 import           HGeometry.Matrix
-import           HGeometry.NonEmpty.Util
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope.Connected (VertexForm)
 import qualified HGeometry.Plane.LowerEnvelope.Connected.BruteForce as BruteForce
 import qualified HGeometry.Plane.LowerEnvelope.Connected.Randomized as Randomized
-import           HGeometry.Point
 import           HGeometry.Vector
 import           System.Random
 import           Test.Hspec
@@ -36,7 +26,6 @@ import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 
-import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -44,7 +33,7 @@ type R = RealNumber 5
 
 
 newtype NonDegenerate plane = NonDegenerate (NonEmpty plane)
-  deriving newtype (Show,Eq,Foldable,Functor)
+  deriving newtype (Show,Eq,Foldable,Functor,Foldable1)
 
 setOf     :: Ord a => Gen a -> Gen (Set a)
 setOf gen = Set.fromList <$> listOf gen

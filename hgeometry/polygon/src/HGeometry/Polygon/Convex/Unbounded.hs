@@ -20,11 +20,9 @@ module HGeometry.Polygon.Convex.Unbounded
   ) where
 
 import           Control.Lens
-import qualified Data.Foldable as F
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (fromMaybe)
 import           Data.Ord (comparing)
 import           HGeometry.Box as Box
 import           HGeometry.Cyclic
@@ -33,11 +31,8 @@ import           HGeometry.HalfSpace
 import           HGeometry.HyperPlane.Class
 import           HGeometry.Intersection
 import           HGeometry.Line
-import           HGeometry.LineSegment
 import           HGeometry.Point
-import           HGeometry.Point.Either
 import           HGeometry.Polygon
-import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Properties
 import           HGeometry.Triangle as Triangle
 import           HGeometry.Vector

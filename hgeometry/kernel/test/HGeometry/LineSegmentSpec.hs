@@ -21,7 +21,6 @@ import Test.QuickCheck ((===), Arbitrary(..), suchThat, Property, counterexample
 import Test.QuickCheck.Instances ()
 import HGeometry.Kernel.Instances ()
 
-import Debug.Trace
 --------------------------------------------------------------------------------
 -- main :: IO ()
 -- main = print $ testStartInt
