@@ -46,7 +46,6 @@ import           Data.Set.NonEmpty (NESet)
 import qualified Data.Set.NonEmpty as Set
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
-import           HGeometry.Foldable.Util
 import           HGeometry.HalfLine
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
@@ -62,8 +61,6 @@ import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm
 import           HGeometry.Point
 import           HGeometry.Point.Either
 import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Convex
-import           HGeometry.Polygon.Convex.Unbounded
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Triangle

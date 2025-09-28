@@ -29,24 +29,15 @@ import qualified Data.Map as Map
 import qualified Data.Map.NonEmpty as NEMap
 import qualified Data.Vector.NonEmpty as Vector
 import           GHC.Generics (Generic)
-import           HGeometry.Box
-import           HGeometry.Foldable.Sort (sortBy )
-import           HGeometry.LineSegment
-import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.PlaneGraph.Class
 import           HGeometry.PlaneGraph.Connected
 import           HGeometry.Point
 import           HGeometry.Properties
-import           HGeometry.Transformation
-import           HGeometry.Vector
-import           Hiraffe.AdjacencyListRep.Map
-import           Hiraffe.Graph.Class
 import           Hiraffe.Graph.Component
 import           Hiraffe.PlanarGraph ( PlanarGraph, World(..)
                                      , DartId, VertexId, FaceId
                                      )
 import qualified Hiraffe.PlanarGraph as PG
-import           Hiraffe.PlanarGraph.Class
 import qualified Hiraffe.PlanarGraph.Dart as Dart
 
 -- import           Data.YAML

@@ -21,33 +21,15 @@ module HGeometry.Plane.LowerEnvelope.Clipped.Type
 import           Control.Lens hiding (IsEmpty, IsNonEmpty)
 import           Control.Subcategory.Functor
 import           Data.Bifunctor
-import           Data.Coerce
-import           Data.Foldable
-import           Data.Foldable1 as F1
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Map.NonEmpty (NEMap, pattern IsEmpty, pattern IsNonEmpty)
+import           Data.Map.NonEmpty (NEMap)
 import qualified Data.Map.NonEmpty as NEMap
-import           Data.Maybe (fromMaybe)
-import           Data.Ord (comparing)
-import qualified Data.Set as Set
-import           HGeometry.Box
-import           HGeometry.Ext
-import           HGeometry.HyperPlane
 import           HGeometry.Intersection
 import           HGeometry.Plane.LowerEnvelope.Connected.Region
 import           HGeometry.Point
 import           HGeometry.Point.Either
-import           HGeometry.Polygon
-import           HGeometry.Polygon.Convex
-import           HGeometry.Polygon.Convex.Unbounded
-import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Properties
-import           HGeometry.Sequence.Alternating (separators)
 import           HGeometry.Triangle
-import           HGeometry.Vector
-import           Hiraffe.Graph.Class
 
 
 --------------------------------------------------------------------------------
