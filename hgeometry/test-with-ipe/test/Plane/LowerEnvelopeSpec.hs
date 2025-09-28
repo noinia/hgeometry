@@ -196,9 +196,14 @@ withConflictListTest planes (Positive r) = iall correctConflictLists $
 instance FoldableWithIndex k (NEMap.NEMap k) where
   ifoldMap = NEMap.foldMapWithKey
 
+
+-- verifyAllTriangles ::
+
+
+
 -- | verify that withExtraConflictListTest is correct
-withExtraConflictListTest :: Int -> NESet.NESet MyPlane -> Triangle (Point 2 R)
-                                                  -> Every
+withExtraConflictListTest              :: Int -> NESet.NESet MyPlane -> Triangle (Point 2 R)
+                                       -> Every
 withExtraConflictListTest r planes tri =
     case Randomized.withConflictLists remaining (BruteForce.computeVertexForm rNet) of
       NEMap.IsEmpty                 -> discard
@@ -206,6 +211,9 @@ withExtraConflictListTest r planes tri =
         ifoldMap check . Randomized.withExtraConflictLists (NESet.toSet planes)
                        . fromVertexFormIn tri rNet $ verticesRNet
   where
+    (rNet, remaining) = Randomized.takeSample r planes
+
+    -- verify that for all vertices of the clipped cell, the conflict list is correct
     check                        :: MyPlane
                                  -> ClippedMDCell'' R (MDVertex R MyPlane (_, Set.Set MyPlane))
                                                       (Point 2 R :+ (_, Set.Set MyPlane))
@@ -215,6 +223,7 @@ withExtraConflictListTest r planes tri =
       DegenerateEdge e         -> Every $ check' h (e^.start) .&&.check' h (e^.end)
       ActualPolygon convexCell -> foldMapOf vertices (check' h) convexCell
 
+    -- verify that for a given vertex its conflict list is correct
     check'   :: MyPlane
              -> OriginalOrExtra (MDVertex R MyPlane (_, Set.Set MyPlane))
                                 (Point 2 R :+ (_, Set.Set MyPlane))
@@ -227,7 +236,6 @@ withExtraConflictListTest r planes tri =
                                               in conflicts === NESet.filter (below v z) planes
 
 
-    (rNet, remaining) = Randomized.takeSample r planes
 
     below                   :: Point_ point 2 R => point -> R -> MyPlane -> Bool
     below (Point2_ x y) z h = verticalSideTest (Point3 x y z) h == GT
