@@ -22,12 +22,8 @@ module HGeometry.PlaneGraph.Type
   , _PlanarGraph
   ) where
 
-import           Control.Lens hiding (holes, holesOf, (.=))
 import           Data.Coerce
-import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
-import qualified Data.Map.NonEmpty as NEMap
-import qualified Data.Vector.NonEmpty as Vector
+import           Control.Lens hiding (holes, holesOf, (.=))
 import           GHC.Generics (Generic)
 import           HGeometry.PlaneGraph.Class
 import           HGeometry.PlaneGraph.Connected

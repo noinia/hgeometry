@@ -32,7 +32,6 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
 import           Control.Lens
 import           Data.Coerce
 import qualified Data.Foldable as F
-import           Data.Foldable1
 import           Data.Foldable1 as F1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -40,17 +39,14 @@ import qualified Data.List.NonEmpty as NonEmpty
 import           Data.Map.NonEmpty (NEMap, pattern IsEmpty, pattern IsNonEmpty)
 import qualified Data.Map.NonEmpty as Map
 import           Data.Maybe (fromMaybe)
-import           Data.Monoid (First(..))
 import           Data.Ord (comparing)
 import           Data.Set.NonEmpty (NESet)
 import qualified Data.Set.NonEmpty as Set
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
-import           HGeometry.HalfLine
 import           HGeometry.HyperPlane.Class
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Intersection
-import           HGeometry.LineSegment
 import           HGeometry.Map.NonEmpty.Monoidal
 import           HGeometry.NonEmpty.Util
 import           HGeometry.Plane.LowerEnvelope.Clipped.Type
@@ -60,14 +56,12 @@ import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm
 import           HGeometry.Point
 import           HGeometry.Point.Either
-import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Triangle
 import           HGeometry.Vector
+import           HGeometry.Polygon.Convex.Unbounded
 
-
-import           Debug.Trace
 
 --------------------------------------------------------------------------------
 
@@ -440,9 +434,9 @@ isInvalid h (u,v) =
     -- successor w.r.t to v, and the CCW predecessor w.r.t u must be the same plane.
     -- if that is not the case the edge must be invalid.
 
--- | Project the vertex onto the plane.
-project                     :: (Point 3 r, a) -> (Point 2 r, a)
-project (Point3 x y _, loc) = (Point2 x y, loc)
+-- -- | Project the vertex onto the plane.
+-- project                     :: (Point 3 r, a) -> (Point 2 r, a)
+-- project (Point3 x y _, loc) = (Point2 x y, loc)
 
 -- | Given a list of vertices of a (possibly unbounded) convex polygonal region (in
 -- arbitrary orientation), sort the vertices so that they are listed in CCW order.

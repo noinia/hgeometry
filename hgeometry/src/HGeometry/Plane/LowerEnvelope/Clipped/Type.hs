@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances  #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Plane.LowerEnvelope.Clipped.Type
@@ -18,7 +19,7 @@ module HGeometry.Plane.LowerEnvelope.Clipped.Type
   , ClippedMDCell''(..)
   ) where
 
-import           Control.Lens hiding (IsEmpty, IsNonEmpty)
+import           Control.Lens
 import           Control.Subcategory.Functor
 import           Data.Bifunctor
 import           Data.Map.NonEmpty (NEMap)
@@ -26,6 +27,7 @@ import qualified Data.Map.NonEmpty as NEMap
 import           HGeometry.Intersection
 import           HGeometry.Plane.LowerEnvelope.Connected.Region
 import           HGeometry.Point
+import           HGeometry.Box
 import           HGeometry.Point.Either
 import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Properties
@@ -135,10 +137,10 @@ type instance Intersection (Triangle corner) (Region r vertex) = Maybe (ClippedM
 
 
 instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
-         ) => Triangle corner `HasIntersectionWith` (Region r vertex)
+         ) => Triangle corner `HasIntersectionWith` Region r vertex
 
 instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
-         ) => Triangle corner `IsIntersectableWith` (Region r vertex) where
+         ) => Triangle corner `IsIntersectableWith` Region r vertex where
   tri `intersect` reg = ClippedMDCell <$> case reg of
     BoundedRegion   convex -> tri `intersect` convex
     UnboundedRegion convex -> tri `intersect` convex
@@ -147,10 +149,10 @@ instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
 type instance Intersection (Rectangle corner) (Region r vertex) = Maybe (ClippedMDCell' r vertex)
 
 instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
-         ) => Rectangle corner `HasIntersectionWith` (Region r vertex)
+         ) => Rectangle corner `HasIntersectionWith` Region r vertex
 
 instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
-         ) => Rectangle corner `IsIntersectableWith` (Region r vertex) where
+         ) => Rectangle corner `IsIntersectableWith` Region r vertex where
   rect `intersect` reg = ClippedMDCell <$> case reg of
     BoundedRegion   convex -> rect `intersect` convex
     UnboundedRegion convex -> rect `intersect` convex
