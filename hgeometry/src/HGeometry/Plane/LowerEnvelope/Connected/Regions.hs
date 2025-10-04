@@ -162,7 +162,7 @@ fromMinimizationDiagramIn                :: ( Plane_ plane r, Ord plane, Ord r, 
                                          -> NEMap plane (ClippedMDCell r plane vtxData)
 fromMinimizationDiagramIn tri planes env = case env of
     Nothing      -> lowestPlane
-    Just diagram -> case Map.mapMaybe (tri `intersect'`) (asMap diagram) of
+    Just diagram -> case Map.mapMaybe (tri `intersect`) (asMap diagram) of
                       IsEmpty                   -> lowestPlane
                       IsNonEmpty clippedDiagram -> clippedDiagram
   where
@@ -175,7 +175,7 @@ fromMinimizationDiagramIn tri planes env = case env of
     polyTri = fromMaybe (error "absurd: bruteForceLowerEnvelopeIn illegal triangle")
             $ fromPoints (Extra <$> tri')
 
-    intersect' a b = traceShowWith (a, "INTERSECT", b, "-> ",) $ a `intersect` b
+    -- intersect' a b = traceShowWith (a, "INTERSECT", b, "-> ",) $ a `intersect` b
 
 --------------------------------------------------------------------------------
 -- * Converting into a minimization diagram

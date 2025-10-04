@@ -160,7 +160,7 @@ instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
 
 spec :: Spec
 spec = describe "lower envelope tests" $ do
---         randomizedSameAsBruteForce
+         randomizedSameAsBruteForce
 
          -- testIpe [osp|trivial.ipe|]
          --         [osp|trivial_out|]
@@ -236,6 +236,21 @@ spec = describe "lower envelope tests" $ do
          prop "original vertices are really original vertices (unbounded)" $
            allOriginal @(UnboundedConvexRegion (Point 2 R))
 
+         specUnbounded
+
+
+-- TODO: move these tests to some module about Unbounded
+specUnbounded :: Spec
+specUnbounded = describe "fromUnbounded correct" $ do
+         prop "boundedFromVertices that intersect triangle are orig vertices " $
+           verifyBoundedFromVertices
+
+         prop "bug, boundedFromVertices that intersect triangle are orig vertices " $ do
+           let tri = Triangle (Point2 2 2) (Point2 1 (-1)) (Point2 2 0)
+               reg = Unbounded (Vector2 (-1) (-0.5))
+                               (NonEmpty.singleton (Point2 0 0.5))
+                               (Vector2 1 (-1.5))
+           verifyBoundedFromVertices tri reg
 
          prop "bug, intersection" $ do
            let tri = Triangle (Point2 2 2) (Point2 1 (-1)) (Point2 2 0)
@@ -243,24 +258,47 @@ spec = describe "lower envelope tests" $ do
                                (NonEmpty.singleton (Point2 0 0.5))
                                (Vector2 1 (-1.5))
            allOriginal @(UnboundedConvexRegion (Point 2 R)) reg tri
--- this should be a bug; not sure why this isn ot registering!
-         runIO $ do
-           let tri :: Triangle (Point 2 R)
-               tri = Triangle (Point2 2 2) (Point2 1 (-1)) (Point2 2 0)
-               reg :: UnboundedConvexRegion (Point 2 R)
-               reg = Unbounded (Vector2 (-1) (-0.5))
-                               (NonEmpty.singleton (Point2 0 0.5))
-                               (Vector2 1 (-1.5))
-           print tri
-           print reg
-           print "=======> intersects in =========> "
-           print $ tri `intersect` reg
 
+
+
+
+         -- runIO $ do
+         --   let tri :: Triangle (Point 2 R)
+         --       tri = Triangle (Point2 2 2) (Point2 1 (-1)) (Point2 2 0)
+         --       reg :: UnboundedConvexRegion (Point 2 R)
+         --       reg = Unbounded (Vector2 (-1) (-0.5))
+         --                       (NonEmpty.singleton (Point2 0 0.5))
+         --                       (Vector2 1 (-1.5))
+         --   print tri
+         --   print reg
+         --   print "=======> via =========> "
+         --   print $ toBoundedFrom tri reg
+         --   print "=======> intersects in =========> "
+         --   print $ tri `intersect` reg
+
+
+
+-- | Make sure that the vertices of the bounded convex region we create that
+-- intersect the triagnle are actually original vertices of the convex region as well.
+verifyBoundedFromVertices         :: Triangle (Point 2 R) -> UnboundedConvexRegion (Point 2 R)
+                                  -> Every
+verifyBoundedFromVertices tri reg = foldMapOf vertices (Every . check) $ toBoundedFrom tri reg
+  where
+    check v | v `intersects` tri = counterexample (show v) -- if v lies inside it should be
+                                 $ isOrigVertex v
+             | otherwise         = property True
+    isOrigVertex v = elemOf vertices v reg
 
 
 
 -- moreover: I think the main issue should be in  the Unbounded.toBoundedFrom function
 -- which displaces vertices
+
+
+--------------------------------------------------------------------------------
+
+
+
 
 
 --                    , _definers = Definers (NonVerticalHyperPlane [-0.5,-2,1.5] :| [NonVerticalHyperPlane [2,1,0],NonVerticalHyperPlane [-1,-1,1]]), _vertexData = (Definers (NonVerticalHyperPlane [-0.5,-2,1.5] :| [NonVerticalHyperPlane [2,1,0],NonVerticalHyperPlane [-1,-1,1]]),fromList [])} :| []) (Vector2 1 (-1.5)))
@@ -293,10 +331,11 @@ allOriginal poly tri = case tri `intersect` poly of
         f = Every . \case
           Extra    _ -> property True
           Original v -> counterexample (show res) . counterexample (show v) . property
-                      $ traceShowWith (v,)
                       $ v `elem` origVertices
 
         origVertices = tri^..vertices <> poly^..vertices
+
+
 
 allOriginal'            :: Int -> Triangle (Point 2 R) -> NESet.NESet MyPlane -> Every
 allOriginal' r tri planes =
