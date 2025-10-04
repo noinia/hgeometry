@@ -86,7 +86,7 @@ computeVertexFormIn         :: forall plane point r.
 computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) (toSet hs)
   where
     n  = length hs
-    r' = sqrt . sqrt @Double . fromIntegral $ n -- r = n^{1/4}
+    r' = max 5 $ sqrt . sqrt @Double . fromIntegral $ n -- r = n^{1/4}
     r  = round $ r' * logBase 2 r'
       -- take a sample of size r*log r
       --
