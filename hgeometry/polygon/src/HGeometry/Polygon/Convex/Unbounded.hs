@@ -36,6 +36,7 @@ import           HGeometry.Polygon
 import           HGeometry.Properties
 import           HGeometry.Triangle as Triangle
 import           HGeometry.Vector
+import           Data.Kind (Type)
 
 --------------------------------------------------------------------------------
 
@@ -43,7 +44,7 @@ import           HGeometry.Vector
 type UnboundedConvexRegion vertex = UnboundedConvexRegionF (NumType vertex) NonEmpty vertex
 
 -- | An unbounded polygonal ConvexRegion whose vertices are stored in an 'nonEmpty'
-data UnboundedConvexRegionF r nonEmpty vertex =
+data UnboundedConvexRegionF r nonEmpty (vertex :: Type) =
   Unbounded (Vector 2 r)
             -- ^ vector indicating the direction of the unbounded edge
             -- incident to the first vertex. Note that this vector
@@ -58,6 +59,14 @@ data UnboundedConvexRegionF r nonEmpty vertex =
 
 type instance NumType   (UnboundedConvexRegionF r nonEmpty vertex) = r
 type instance Dimension (UnboundedConvexRegionF r nonEmpty vertex) = 2
+
+
+-- | Lens to access the chain of vertices in CCW order
+chain :: Lens (UnboundedConvexRegionF r nonEmpty vertex)
+              (UnboundedConvexRegionF r nonEmpty' vertex')
+              (nonEmpty vertex) (nonEmpty' vertex')
+chain = lens (\(Unbounded _ chain' _) -> chain')
+             (\(Unbounded u _ v) chain' -> Unbounded u chain' v)
 
 -- | map a function over the sequence of points
 mapChain                       :: (nonEmpty vertex -> nonEmpty' vertex')
@@ -79,9 +88,9 @@ extremalVertices (Unbounded _ (p :| pts) _) = case NonEmpty.nonEmpty pts of
 boundingRays                          :: (Point_ vertex 2 r, Num r)
                                       => UnboundedConvexRegionF r NonEmpty vertex
                                      -> (Vector 2 (HalfLine vertex))
-boundingRays chain@(Unbounded v _ w) = compute $ case extremalVertices chain of
-                                     Left p   -> Vector2 p p
-                                     Right vs -> vs
+boundingRays chain'@(Unbounded v _ w) = compute $ case extremalVertices chain' of
+                                          Left p   -> Vector2 p p
+                                          Right vs -> vs
   where
     compute (Vector2 p q) = Vector2 (HalfLine p $ negated v) (HalfLine q w)
 
@@ -98,7 +107,28 @@ type instance Dimension (Cone r apex) = 2
 type instance NumType   (Cone r apex) = r
 -}
 
+--------------------------------------------------------------------------------
 
+instance ( Traversable1 nonEmpty
+         , Ixed (nonEmpty vertex), IxValue (nonEmpty vertex) ~ vertex
+         , Index (nonEmpty vertex) ~ Int
+         ) => HasVertices' (UnboundedConvexRegionF r nonEmpty vertex) where
+  type Vertex   (UnboundedConvexRegionF r nonEmpty vertex) = vertex
+  type VertexIx (UnboundedConvexRegionF r nonEmpty vertex) = Int
+  -- I think we could get rid of the Int constraint here, and just use an arbitrary
+  -- Index type. In that case, we need a slightly more general version of 'traversed1'
+  -- to implement 'vertices' in the 'HasVertices' instance.
+  vertexAt i = chain .> iix i
+  numVertices = length . view chain
+
+instance ( Traversable1 nonEmpty
+         , Ixed (nonEmpty vertex)
+         , IxValue (nonEmpty vertex) ~ vertex
+         , IxValue (nonEmpty vertex') ~ vertex'
+         , Index (nonEmpty vertex) ~ Int, Index (nonEmpty vertex') ~ Int
+         ) => HasVertices (UnboundedConvexRegionF r nonEmpty vertex)
+                          (UnboundedConvexRegionF r nonEmpty vertex') where
+  vertices = chain .> traversed1
 
 --------------------------------------------------------------------------------
 
