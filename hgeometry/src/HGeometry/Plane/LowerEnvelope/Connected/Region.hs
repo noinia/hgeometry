@@ -17,7 +17,6 @@ import HGeometry.Polygon
 import HGeometry.Polygon.Convex.Unbounded
 import HGeometry.Properties
 import HGeometry.Vector
-
 import HGeometry.Cyclic
 
 --------------------------------------------------------------------------------

@@ -8,7 +8,6 @@ import           Control.Lens
 import qualified Data.Vector as Vector
 import           HGeometry.Algorithms.BinarySearch
 import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line.General
 import           HGeometry.Plane.LowerEnvelope.Connected
 import           HGeometry.Point

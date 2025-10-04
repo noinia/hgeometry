@@ -127,5 +127,5 @@ upperQuadrant = Unbounded (Vector2 0 (-1)) (origin :| []) (Vector2 1  0)
 
 unboundedPoly :: UnboundedConvexRegion (Point 2 R)
 unboundedPoly = Unbounded (Vector2 1 1.55555)
-                          (NonEmpty.fromList [(Point2 337.54545 636.18181)])
+                          (NonEmpty.fromList [Point2 337.54545 636.18181])
                           (Vector2 (-1) 18)

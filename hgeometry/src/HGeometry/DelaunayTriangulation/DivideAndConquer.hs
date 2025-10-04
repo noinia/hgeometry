@@ -33,7 +33,7 @@ import qualified HGeometry.CircularList.Util as CU
 import           HGeometry.ConvexHull.GrahamScan as GS
 import qualified HGeometry.Cyclic
 import           HGeometry.DelaunayTriangulation.Types
-import qualified HGeometry.DelaunayTriangulation.Types as Naive
+-- import qualified HGeometry.DelaunayTriangulation.Types as Naive
 import           HGeometry.Ext
 import           HGeometry.Foldable.Sort
 import           HGeometry.LineSegment

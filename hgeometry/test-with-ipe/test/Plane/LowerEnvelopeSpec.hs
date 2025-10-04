@@ -10,7 +10,6 @@ module Plane.LowerEnvelopeSpec
 
 import           Control.Lens hiding (below)
 import           Data.Foldable
-import           Data.Bifoldable
 import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
