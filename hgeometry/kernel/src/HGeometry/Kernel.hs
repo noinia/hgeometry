@@ -28,4 +28,4 @@ import HGeometry.Box(Box(..), Box_(..), IsBoxable(..))
 import HGeometry.Ball
 import HGeometry.HyperPlane
 import HGeometry.HalfSpace
-import HGeometry.Triangle (Triangle(..),Triangle_(..))
+import HGeometry.Triangle (Triangle(..))

@@ -1,43 +1,31 @@
 {-# LANGUAGE QuasiQuotes #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Main(main) where
 
 import           Control.Lens
 import           Data.Colour
-import           Data.Colour.Names
 import           Data.Colour.Palette.ColorSet
 import           Data.Colour.SRGB (RGB(..),toSRGB24)
 import qualified Data.Foldable as F
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
 import qualified Data.Map.NonEmpty as NEMap
-import           Data.Maybe (fromMaybe)
 import           Data.Ord (comparing)
-import           HGeometry.Box
+import           HGeometry.Kernel
+import           HGeometry.Box(Rectangle, corners)
 import           HGeometry.Cyclic
 import           HGeometry.Ext
-import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope
-import           HGeometry.Plane.LowerEnvelope.Connected
 import           HGeometry.PlaneGraph
-import           HGeometry.PlaneGraph.Instances
-import           HGeometry.Point
+import           HGeometry.PlaneGraph.Instances()
 import           HGeometry.Polygon
-import           HGeometry.Polygon.Convex
-import           HGeometry.Polygon.Convex.Unbounded
-import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Triangulation
-import           HGeometry.Transformation
-import           HGeometry.Vector
 import           HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane, voronoiDiagram)
-import           Ipe
 import           PLY.Writer
 import           System.OsPath
--- import           Test.QuickCheck
 
-import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -124,8 +112,8 @@ type Vtx r = (Int, Point 3 r :+ VertexAttributes 'Coloured)
 triangulate'        :: (ConvexPolygon_ convexPolygon point r, Ord r, Num r)
                     => (plane, convexPolygon)
                     -> NonEmpty (plane, ConvexPolygon point)
-triangulate' (h,pg) = fmap (\simple -> (h, review _UncheckedConvexPolygon $
-                                           simple&vertices %~ view core
+triangulate' (h,pg) = fmap (\simple' -> (h, review _UncheckedConvexPolygon $
+                                              simple'&vertices %~ view core
                                        )
                            )
                     . NonEmpty.fromList
@@ -147,12 +135,12 @@ renderMinimizationDiagram env = (NonEmpty.fromList vs, NonEmpty.fromList fs)
               . foldMap1 triangulate'
               . toPolygons $ env
 
-    render                            :: HasColour plane
-                                      => ( plane
-                                         , ConvexPolygon (Point 2 r :+ r))
-                                      -> (Int, [Vtx r], [NonEmpty Int])
-                                      -> (Int, [Vtx r], [NonEmpty Int])
-    render (h,pg) acc@(i,vsAcc,fsAcc) =
+    render                        :: HasColour plane
+                                  => ( plane
+                                     , ConvexPolygon (Point 2 r :+ r))
+                                  -> (Int, [Vtx r], [NonEmpty Int])
+                                  -> (Int, [Vtx r], [NonEmpty Int])
+    render (h,pg) (i,vsAcc,fsAcc) =
       let vs'    = (\(j, Point2 x y :+ z) -> (i+j, Point3 x y z :+ ats))
                    <$> toNonEmptyOf (vertices.withIndex) pg
           face'  = fst <$> vs'
@@ -171,7 +159,7 @@ renderPlanes hs = (NonEmpty.fromList vs, NonEmpty.fromList fs)
   where
     (_,vs,fs) = foldr render (0,[],[]) hs
 
-    render h acc@(i,vsAcc,fsAcc) =
+    render h (i,vsAcc,fsAcc) =
       let pg  = renderPlaneIn myRect h
           vs'    = (\(j, Point2 x y :+ z) -> (i+j, Point3 x y z :+ ats))
                    <$> toNonEmptyOf (vertices.withIndex) pg
@@ -221,13 +209,15 @@ verifyOnPlane (h,pg) = allOf vertices onPlane pg
   where
     onPlane (Point2 x y :+ z) = onHyperPlane (Point3 x y z) h
 
--- boundedVertices   :: Fold (MinimizationDiagram r plane) (Point 2 r)
-boundedVertices f = foldMap (\case
-                                BoundedRegion   pts                 -> foldMap f pts
-                                UnboundedRegion (Unbounded _ pts _) -> foldMap f pts
-                            ) . asMap
+-- -- boundedVertices   :: Fold (MinimizationDiagram r plane) (Point 2 r)
+-- boundedVertices   :: Monoid c => (a -> c) -> MinimizationDiagram r a plane -> c
+-- boundedVertices f = foldMap (\case
+--                                 BoundedRegion   pts                 -> foldMap f pts
+--                                 UnboundedRegion (Unbounded _ pts _) -> foldMap f pts
+--                             ) . asMap
 
 
+{-
 -- | compute some sufficiently large rectangle to which we can clip the minimization diagram.
 clippingBox :: (Num r, Ord r, Point_ vertex 2 r, IsBoxable vertex
                ) => MinimizationDiagram r vertex plane -> Rectangle (Point 2 r)
@@ -237,3 +227,5 @@ clippingBox = grow 10 . boundingBox . NonEmpty.fromList . boundedVertices (:[])
 grow                 :: (Num r, Point_ point d r) => r -> Box point -> Box point
 grow delta (Box p q) = Box (p&coordinates %~ subtract delta)
                            (q&coordinates %~ (+delta))
+
+-}

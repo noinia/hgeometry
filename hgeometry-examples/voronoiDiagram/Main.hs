@@ -1,12 +1,12 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Main(main) where
 
 import           Control.Lens hiding (view, element)
 import           Data.Foldable (toList)
 import qualified Data.IntMap as IntMap
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Map as Map
 import qualified Data.Set as Set
 import           GHC.TypeNats
 import           HGeometry.Ext
@@ -57,7 +57,7 @@ updateModel m = \case
     CanvasAction ca  -> zoom canvas $ wrap Canvas.handleInternalCanvasAction ca
     AddPoint         -> addPoint
   where
-    addPoint = noEff $ recomputeDiagram m'
+    addPoint = put $ recomputeDiagram m'
        where
           m' = case m^.canvas.mouseCoordinates of
                  Nothing -> m
