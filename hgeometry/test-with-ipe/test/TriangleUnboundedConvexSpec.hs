@@ -30,7 +30,6 @@ import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
 
-import Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -51,7 +50,7 @@ ipeSpec'                   :: OsPath
                               , Triangle (Point 2 R)
                               )
                            -> Spec
-ipeSpec' outFP (chain,tri) = traceShow chain $
+ipeSpec' outFP (chain,tri) =
   goldenWith dataPath
     (ipeContentGolden { name = outFP })
     [ case tri `intersect` chain of
