@@ -102,10 +102,8 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) (toSet hs)
       -- TODO: make sure that if the lower envelope has a vertex, we select planes
       -- that generate a plane.
 
-    lowerEnvelopeIn   :: Triangle (Point 2 r) -> NESet plane -> Map (Point 3 r) (Definers plane)
-    lowerEnvelopeIn tri planes | traceShow ("LE",tri, toList planes) False = undefined
-
-    lowerEnvelopeIn tri planes = let (rNet,remaining) = traceShowWith ("rnet",) $ takeSample r' planes in
+    lowerEnvelopeIn :: Triangle (Point 2 r) -> NESet plane -> Map (Point 3 r) (Definers plane)
+    lowerEnvelopeIn tri planes = let (rNet,remaining) = takeSample r' planes in
       case withConflictLists remaining (BruteForce.computeVertexForm rNet) of
         IsEmpty                                                                    -> mempty
         IsNonEmpty (verticesRNet :: NEMap (Point 3 r) (Definers plane, Set plane)) ->
@@ -117,8 +115,7 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) (toSet hs)
             env :: NEMap plane (ClippedMDCell'' r (MDVertex r plane (_, Set plane))
                                                   (Point 2 r :+ (ExtraDefiners plane, Set plane))
                                )
-            env = traceShowWith ("Env",) $
-                  withExtraConflictLists (NESet.toSet planes)
+            env = withExtraConflictLists (NESet.toSet planes)
                 . fromVertexFormIn tri rNet $ verticesRNet
 
             -- | Triangulate the lower envelope, and collect the conflict list of each
@@ -151,10 +148,10 @@ asVertexIn :: (Ord r, Num r, Point_ vertex 2 r, Foldable set
               )
            => Triangle vertex -> Point 3 r -> (definers, set plane) -> Maybe definers
 asVertexIn tri (Point3 x y z) (defs,conflictList)
-  | traceShow ("asVertexIn ",tri,x,y,z
-              ,"defs", defs
-              ,"CL:",conflictList
-              , null conflictList && Point2 x y `intersects` tri) False = undefined
+  -- | traceShow ("asVertexIn ",tri,x,y,z
+  --             ,"defs", defs
+  --             ,"CL:",conflictList
+  --             , null conflictList && Point2 x y `intersects` tri) False = undefined
   | null conflictList && Point2 x y `intersects'` tri = Just defs
   | otherwise                                         = Nothing
   where
@@ -198,7 +195,6 @@ withExtraConflictLists        :: (Plane_ plane r, Ord r, Num r--, Point_ corner 
                               -> NEMap plane (ClippedMDCell r plane (a, Set plane))
                               -> NEMap plane (ClippedMDCell'' r (MDVertex r plane (a, Set plane))
                                                                 (Point 2 r :+ (ExtraDefiners plane, Set plane)))
-withExtraConflictLists planes | traceShow ("withExtraConflictLists",planes) False = undefined
 withExtraConflictLists planes = NEMap.mapWithKey $ \h -> fmap (withPolygonVertex h)
   where
     withPolygonVertex h v@(Point2_ x y) = v :+ (defs,belows)
@@ -234,16 +230,14 @@ triangulate'        :: (Num r, Ord plane
                     -> ClippedBoundedRegion r (MDVertex r plane (a, Set plane))
                                               (Point 2 r :+ (ExtraDefiners plane, Set plane))
                     -> [Triangle (Point 2 r) :+ NESet plane]
-triangulate' h poly = traceShowWith ("triangulate'", h, poly,"->",) $ mapMaybe' withConflictList $ case toNonEmptyOf vertices poly of
+triangulate' h poly = mapMaybe' withConflictList $ case toNonEmptyOf vertices poly of
     u :| (v : vs) -> NonEmpty.zipWith (Triangle u) (v :| vs) (NonEmpty.fromList vs)
     _             -> error "absurd. trianglulate; impossible"
   where
-    withConflictList tri = case traceShowWith ("withConflictList,tri",tri,) $ foldMap conflictListOf tri of
+    withConflictList tri = case foldMap conflictListOf tri of
       NESet.IsEmpty                 -> Nothing
       NESet.IsNonEmpty conflictList -> Just $
-        let conflictList' = foldr NESet.insert conflictList (
-              traceShowWith ("edgeDefinersOf",tri,"with",conflictList,"->",) $
-              foldMap edgeDefiners $ edgesOf tri)
+        let conflictList' = foldr NESet.insert conflictList (foldMap edgeDefiners $ edgesOf tri)
         in ((^.asPoint) <$> tri) :+ conflictList'
 
     edgesOf (Triangle a b c) = [(a,b),(b,c),(c,a)]
