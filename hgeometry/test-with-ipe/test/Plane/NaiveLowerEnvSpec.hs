@@ -111,7 +111,7 @@ testIpe inFp outFp = do
               , iO' vd
               , iO $ defIO tri
               ] <> [ iO'' v $ attr SStroke red | v <- Set.toAscList vv ]
-    runIO $ print vd
+    -- runIO $ print vd
     goldenWith [osp|data/test-with-ipe/Plane/LowerEnvelope/|]
                (ipeFileGolden { name = outFp })
                (addStyleSheet opacitiesStyle $ singlePageFromContent out)
