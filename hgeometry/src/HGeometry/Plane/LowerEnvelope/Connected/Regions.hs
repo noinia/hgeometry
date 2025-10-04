@@ -62,6 +62,7 @@ import           HGeometry.Vector
 import           HGeometry.Polygon.Convex.Unbounded
 
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 
@@ -153,7 +154,7 @@ fromMinimizationDiagramIn                :: ( Plane_ plane r, Ord plane, Ord r, 
                                             , Point_ corner 2 r
                                             , Foldable1 set
                                             , Ord vtxData
-                                            , Show r, Show corner, Show plane
+                                            , Show r, Show corner, Show plane, Show vtxData
                                             )
                                          => Triangle corner
                                          -> set plane
@@ -161,7 +162,7 @@ fromMinimizationDiagramIn                :: ( Plane_ plane r, Ord plane, Ord r, 
                                          -> NEMap plane (ClippedMDCell r plane vtxData)
 fromMinimizationDiagramIn tri planes env = case env of
     Nothing      -> lowestPlane
-    Just diagram -> case Map.mapMaybe (tri `intersect`) (asMap diagram) of
+    Just diagram -> case Map.mapMaybe (tri `intersect'`) (asMap diagram) of
                       IsEmpty                   -> lowestPlane
                       IsNonEmpty clippedDiagram -> clippedDiagram
   where
@@ -174,6 +175,8 @@ fromMinimizationDiagramIn tri planes env = case env of
     polyTri = fromMaybe (error "absurd: bruteForceLowerEnvelopeIn illegal triangle")
             $ fromPoints (Extra <$> tri')
 
+    intersect' a b = traceShowWith (a, "INTERSECT", b, "-> ",) $ a `intersect` b
+
 --------------------------------------------------------------------------------
 -- * Converting into a minimization diagram
 
@@ -184,7 +187,7 @@ fromMinimizationDiagramIn tri planes env = case env of
 -- envelope of these planes.
 fromVertexFormIn            :: ( Plane_ plane r, Ord plane, Ord r, Fractional r, Show r, Show plane
                                , Point_ corner 2 r, Foldable1 set
-                               , Show r, Show corner
+                               , Show r, Show corner, Show vertexData
                                , Ord vertexData
                                , HasDefiners vertexData plane
                                )

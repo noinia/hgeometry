@@ -237,6 +237,41 @@ spec = describe "lower envelope tests" $ do
            allOriginal @(UnboundedConvexRegion (Point 2 R))
 
 
+         prop "bug, intersection" $ do
+           let tri = Triangle (Point2 2 2) (Point2 1 (-1)) (Point2 2 0)
+               reg = Unbounded (Vector2 (-1) (-0.5))
+                               (NonEmpty.singleton (Point2 0 0.5))
+                               (Vector2 1 (-1.5))
+           allOriginal @(UnboundedConvexRegion (Point 2 R)) reg tri
+-- this should be a bug; not sure why this isn ot registering!
+         runIO $ do
+           let tri :: Triangle (Point 2 R)
+               tri = Triangle (Point2 2 2) (Point2 1 (-1)) (Point2 2 0)
+               reg :: UnboundedConvexRegion (Point 2 R)
+               reg = Unbounded (Vector2 (-1) (-0.5))
+                               (NonEmpty.singleton (Point2 0 0.5))
+                               (Vector2 1 (-1.5))
+           print tri
+           print reg
+           print "=======> intersects in =========> "
+           print $ tri `intersect` reg
+
+
+
+
+-- moreover: I think the main issue should be in  the Unbounded.toBoundedFrom function
+-- which displaces vertices
+
+
+--                    , _definers = Definers (NonVerticalHyperPlane [-0.5,-2,1.5] :| [NonVerticalHyperPlane [2,1,0],NonVerticalHyperPlane [-1,-1,1]]), _vertexData = (Definers (NonVerticalHyperPlane [-0.5,-2,1.5] :| [NonVerticalHyperPlane [2,1,0],NonVerticalHyperPlane [-1,-1,1]]),fromList [])} :| []) (Vector2 1 (-1.5)))
+
+
+-- ,"-> "
+
+-- ,Just (ClippedMDCell (ActualPolygon (ConvexPolygon [Extra (Point2 1.8 1.4),Extra (Point2 1 (-1)),Extra (Point2 2 0),Original (MDVertex {_location = Point3 2 1.5 0.5, _definers = Definers (NonVerticalHyperPlane [-0.5,-2,1.5] :| [NonVerticalHyperPlane [2,1,0],NonVerticalHyperPlane [-1,-1,1]]), _vertexData = (Definers (NonVerticalHyperPlane [-0.5,-2,1.5] :| [NonVerticalHyperPlane [2,1,0],NonVerticalHyperPlane [-1,-1,1]]),fromList [])})]))))
+
+
+
 
 
 -- | Check if all original vertices of a triangle and a polygon are really original
@@ -258,6 +293,7 @@ allOriginal poly tri = case tri `intersect` poly of
         f = Every . \case
           Extra    _ -> property True
           Original v -> counterexample (show res) . counterexample (show v) . property
+                      $ traceShowWith (v,)
                       $ v `elem` origVertices
 
         origVertices = tri^..vertices <> poly^..vertices
@@ -298,24 +334,29 @@ originalMeansDefiner              :: Int -> NESet.NESet MyPlane -> Triangle (Poi
 originalMeansDefiner r planes tri =
     case Randomized.withConflictLists remaining (BruteForce.computeVertexForm rNet) of
       NEMap.IsEmpty                 -> discard
-      NEMap.IsNonEmpty verticesRNet -> foldMap check $ fromVertexFormIn tri rNet $ verticesRNet
+      NEMap.IsNonEmpty verticesRNet -> ifoldMap check $ fromVertexFormIn tri rNet verticesRNet
   where
     (rNet, remaining) = Randomized.takeSample r planes
-    -- verify that for all vertices of the clipped cell, the conflict list is correct
-    check                      :: HasDefiners vertexData MyPlane
-                               => ClippedMDCell R MyPlane vertexData
-                               -> Every
-    check (ClippedMDCell cell) = case cell of
+
+    -- verify that for all vertices, if it is an original vertex, it has the correct definers
+    check                        :: (HasDefiners vertexData MyPlane, Show vertexData)
+                                 => MyPlane -> ClippedMDCell R MyPlane vertexData
+                                 -> Every
+    check h (ClippedMDCell cell) = case cell of
       DegenerateVertex v       -> Every $ check' v
       DegenerateEdge e         -> Every $ check' (e^.start) .&&.check' (e^.end)
-      ActualPolygon convexCell -> foldMapOf vertices (Every . check') convexCell
+      ActualPolygon convexCell -> foldMapOf vertices ( Every
+                                                     . counterexample (show cell)
+                                                     . counterexample (show h)
+                                                     . check'
+                                                     ) convexCell
 
-    -- verify that for a given vertex its conflict list is correct
-    check'   :: HasDefiners vertexData MyPlane
-             => OriginalOrExtra (MDVertex R MyPlane vertexData) (Point 2 R)
-             -> Property
+    -- verify that for an origianl vertex it has the right definers
+    check' :: Show vertexData
+           => OriginalOrExtra (MDVertex R MyPlane vertexData) (Point 2 R) -> Property
     check' = \case
-      Original v -> case toList $ definersOf (v^.vertexData) of
+      Original v -> counterexample (show v) $
+                    case toList $ definersOf v of
                        (a:b:c:_) -> intersectionPoint (Three a b c) === Just (v^.location)
                        _         -> error "originalMeansDefiner. absurd"
       Extra _    -> property True
