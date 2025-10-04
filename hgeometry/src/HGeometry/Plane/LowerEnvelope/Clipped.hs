@@ -17,6 +17,8 @@ module HGeometry.Plane.LowerEnvelope.Clipped
   , ClippedMDCell, ClippedMDCell'
   , ClippedMDCell''(..)
   , lowerEnvelopeIn
+
+  , foldMapVertices
   ) where
 
 import Data.Foldable1

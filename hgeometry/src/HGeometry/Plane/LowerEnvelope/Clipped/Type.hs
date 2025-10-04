@@ -17,11 +17,14 @@ module HGeometry.Plane.LowerEnvelope.Clipped.Type
   , _ClippedMinimizationDiagramMap
   , ClippedMDCell, ClippedMDCell'
   , ClippedMDCell''(..)
+  , foldMapVertices
   ) where
 
 import           Control.Lens
 import           Control.Subcategory.Functor
 import           Data.Bifunctor
+import           Data.Bifoldable1
+import           Data.Foldable1
 import           Data.Map.NonEmpty (NEMap)
 import qualified Data.Map.NonEmpty as NEMap
 import           HGeometry.Intersection
@@ -115,6 +118,11 @@ instance Functor (ClippedMDCell'' r vertex) where
 instance Bifunctor (ClippedMDCell'' r) where
   bimap f g (ClippedMDCell poly) = ClippedMDCell $ bimap (bimap f g)
                                                          (fmap (bimap f g)) poly
+
+-- | Fold a given function over all vertices
+foldMapVertices   :: Semigroup m
+                  => (OriginalOrExtra vertex extra -> m) -> ClippedMDCell'' r vertex extra -> m
+foldMapVertices f (ClippedMDCell cell) = bifoldMap1 f (foldMap1 f) cell
 
 --
 -- instance HasVertices' (ClippedMDCell'' r vertex extra) where

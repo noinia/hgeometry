@@ -35,7 +35,7 @@ import           HGeometry.Polygon.Convex.Instances ()
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope
 import           HGeometry.Plane.LowerEnvelope.Connected
-import           HGeometry.Plane.LowerEnvelope.Clipped (ClippedMDCell, ClippedMDCell''(..))
+import           HGeometry.Plane.LowerEnvelope.Clipped (foldMapVertices, ClippedMDCell, ClippedMDCell''(..))
 import qualified HGeometry.Plane.LowerEnvelope.Connected.BruteForce as BruteForce
 import qualified HGeometry.Plane.LowerEnvelope.Connected.Randomized as Randomized
 import           HGeometry.Point
@@ -186,10 +186,12 @@ spec = describe "lower envelope tests" $ do
          prop "withExtraConflictLists correct" $
            \(Positive r') planes -> let r = max r' 3 in
              withExtraConflictListTest r planes
-
          prop "original means definer" $
            \(Positive r') planes -> let r = max r' 3 in
-           originalMeansDefiner r planes
+             originalMeansDefiner r planes
+         prop "original vertices are original" $ do
+           \(Positive r') tri planes -> let r = max r' 3 in
+             allOriginal' 3 tri planes
 
          runIO $ do
            for_ [ NonVerticalHyperPlane $ fromList' [-1,-1,1]
@@ -218,11 +220,23 @@ spec = describe "lower envelope tests" $ do
                        ]
            originalMeansDefiner 3 planes tri
 
+
+         prop "bug, original vertices are original" $ do
+           let tri = Triangle (Point2 2 2) (Point2 1 (-1)) (Point2 2 0)
+               planes = NESet.fromList . NonEmpty.fromList . map MyPlane $
+                       [ NonVerticalHyperPlane $ fromList' [-1,-1,1]
+                       , NonVerticalHyperPlane $ fromList' [-0.5,-2,1.5]
+                       , NonVerticalHyperPlane $ fromList' [2,1,0]
+                       ]
+           allOriginal' 3 tri planes
+
          prop "original vertices are really original vertices (bounded)" $
            allOriginal @(ConvexPolygon (Point 2 R))
 
          prop "original vertices are really original vertices (unbounded)" $
            allOriginal @(UnboundedConvexRegion (Point 2 R))
+
+
 
 
 -- | Check if all original vertices of a triangle and a polygon are really original
@@ -247,6 +261,26 @@ allOriginal poly tri = case tri `intersect` poly of
                       $ v `elem` origVertices
 
         origVertices = tri^..vertices <> poly^..vertices
+
+allOriginal'            :: Int -> Triangle (Point 2 R) -> NESet.NESet MyPlane -> Every
+allOriginal' r tri planes =
+    case Randomized.withConflictLists remaining (BruteForce.computeVertexForm rNet) of
+      NEMap.IsEmpty                 -> discard
+      NEMap.IsNonEmpty verticesRNet -> foldMap check $ fromVertexFormIn tri rNet verticesRNet
+  where
+    (rNet, remaining) = Randomized.takeSample r planes
+    check res = foldMapVertices f res
+      where
+        f :: OriginalOrExtra (MDVertex R _ _) extra -> Every
+        f = Every . \case
+          Extra    _ -> property True
+          Original v -> counterexample (show res) . counterexample (show v) . property
+                      $ (v^.asPoint) `elem` origVertices
+
+        origVertices = tri^..vertices <> foldMapVertices (\p -> [p^.asPoint]) res
+
+
+
 
 
 -- seems like intersecting triangles and convex polygons incorrectly produces some 'Original' vertices?
