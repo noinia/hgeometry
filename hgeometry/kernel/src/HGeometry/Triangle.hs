@@ -80,6 +80,33 @@ instance HasVertices' (Triangle point) where
 instance HasVertices (Triangle point) (Triangle point') where
   vertices = cloneIndexedTraversal1 (_TriangleVector.components)
 
+
+
+instance HasEdges' (Triangle point) where
+  type Edge  (Triangle point)  = (point, point)
+  -- ^ Indices are taken modulo 3, The edges of a Triangle a b c are ordered (a,b), (b,c),
+  -- (c,a)
+  type EdgeIx (Triangle point) = Int
+-- (p :: Type -> Type -> Type) (f :: Type -> Type). (Indexable i p, Applicative f) => p a (f b) -> s -> f t
+  edgeAt i = \pEdgeFEdge (Triangle a b c) -> case i `mod` 3 of
+      0 -> (\(a',b') -> Triangle a' b' c ) <$> indexed pEdgeFEdge (0 :: Int) (a,b)
+      1 -> (\(b',c') -> Triangle a  b' c') <$> indexed pEdgeFEdge (1 :: Int) (b,c)
+      _ -> (\(c',a') -> Triangle a' b  c') <$> indexed pEdgeFEdge (2 :: Int) (c,a)
+  {-# INLINE edgeAt #-}
+  numEdges = const 3
+
+
+-- instance HasEdges (Triangle point) (Triangle point) where
+--   edges = conjoined trav (itrav.indexed)
+--     where
+--       trav  f (Triangle a b c) = Triangle <$> f   (a,b) <*> f   (b,c) <*> f   (c,a)
+--       itrav f (Triangle a b c) = Triangle <$> f 0 (a,b) <*> f 1 (b,c) <*> f 2 (c,a)
+--   {-# INLINE edges #-}
+
+-- TODO: Hmm, the edges instance is weird; i.e. if we modify a in both (a,b) and in (c,a)
+-- which a do we use !?
+
+
 -- data AtMostThree = One | Two | Three
 --   deriving (Show,Read,Eq,Ord,Enum,Bounded)
 

@@ -19,9 +19,8 @@ import           Data.Kind (Type)
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Map (Map)
 import qualified Data.Map as Map
-import           Data.Maybe (fromMaybe, isJust)
+import           Data.Maybe (isJust)
 import           Data.Ord (comparing)
 import           Data.Set (Set)
 import qualified Data.Set as Set
@@ -29,7 +28,7 @@ import           Data.Tree
 import           HGeometry.Foldable.Util ()
 import           HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           HGeometry.Vector
-import           Hiraffe.AdjacencyListRep.Map
+-- import           Hiraffe.AdjacencyListRep.Map
 import           Hiraffe.BFS.Pure
 import           Hiraffe.Graph.Class
 

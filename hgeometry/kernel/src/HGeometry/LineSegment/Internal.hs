@@ -23,7 +23,7 @@ module HGeometry.LineSegment.Internal
 
 
 import Control.Lens
-import Data.Functor.Apply
+import Data.Functor.Apply qualified as Apply
 import Data.Kind (Type)
 import HGeometry.Box.Boxable
 import HGeometry.Intersection
@@ -36,6 +36,7 @@ import HGeometry.Properties (NumType, Dimension)
 import HGeometry.Transformation
 import HGeometry.Vector
 import Text.Read
+import Data.Foldable1
 
 -- import HGeometry.Number.Real.Rational
 -- import Debug.Trace
@@ -103,6 +104,13 @@ instance Functor endPoint => Functor (LineSegment endPoint) where
 instance Traversable endPoint => Traversable (LineSegment endPoint) where
   traverse f (LineSegment s t) = LineSegment <$> traverse f s <*> traverse f t
 
+instance Foldable1 endPoint => Foldable1 (LineSegment endPoint) where
+  foldMap1 f (LineSegment s t) = foldMap1 f s <> foldMap1 f t
+
+instance Traversable1 endPoint => Traversable1 (LineSegment endPoint) where
+  traverse1 f (LineSegment s t) = LineSegment <$> traverse1 f s Apply.<.> traverse1 f t
+
+
 
 -- | Lens to get the underlying interval
 _LineSegmentInterval :: Iso (LineSegment endPoint point) (LineSegment endPoint' point')
@@ -158,7 +166,7 @@ instance ( Traversable1 endPoint
          , Point_ point' (Dimension point) (NumType point')
          ) => HasPoints (LineSegment endPoint point) (LineSegment endPoint point')
                         point                        point' where
-  allPoints f (LineSegment s t) = liftF2 LineSegment (traverse1 f s) (traverse1 f t)
+  allPoints f (LineSegment s t) = Apply.liftF2 LineSegment (traverse1 f s) (traverse1 f t)
 
 
 -- foo     :: ( Eq r

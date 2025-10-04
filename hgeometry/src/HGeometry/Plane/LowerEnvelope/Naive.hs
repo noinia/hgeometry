@@ -14,7 +14,6 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line
 import           HGeometry.Line.General
 import qualified HGeometry.Line.LowerEnvelope as Line
@@ -35,7 +34,7 @@ import           HGeometry.Vector
 lowerEnvelope :: ( Plane_ plane r
                  , Ord r, Fractional r, Foldable1 f, Functor f, Ord plane
                  , Show plane, Show r
-                 ) => f plane -> LowerEnvelope plane
+                 ) => f plane -> LowerEnvelope plane ()
 lowerEnvelope = lowerEnvelopeWith bruteForceLowerEnvelope
 
 --------------------------------------------------------------------------------
@@ -49,12 +48,12 @@ lowerEnvelope = lowerEnvelopeWith bruteForceLowerEnvelope
 -- lower envelope algorithm to compute the lower envelope of the (parallel) planes.
 --
 -- \(O(T(n) + n \log n)\).
-lowerEnvelopeWith  :: forall nonEmpty plane r.
+lowerEnvelopeWith  :: forall nonEmpty plane vtxData r.
                       ( Plane_ plane r
                       , Ord r, Fractional r, Foldable1 nonEmpty
                       )
-                   => (nonEmpty plane -> Maybe (MinimizationDiagram r (MDVertex r plane) plane))
-                   -> nonEmpty plane -> LowerEnvelope plane
+                   => (nonEmpty plane -> Maybe (MinimizationDiagram r (MDVertex r plane vtxData) plane))
+                   -> nonEmpty plane -> LowerEnvelope plane vtxData
 lowerEnvelopeWith minimizationDiagram hs = case minimizationDiagram hs of
     Just env -> ConnectedEnvelope env
     Nothing  -> case distinguish (toNonEmpty hs) of

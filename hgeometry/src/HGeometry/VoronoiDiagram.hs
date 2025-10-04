@@ -15,6 +15,7 @@ module HGeometry.VoronoiDiagram
   , voronoiVertices
   , asMap
   , voronoiDiagramWith
+  , voronoiDiagramWith'
   ) where
 
 import HGeometry.VoronoiDiagram.ViaLowerEnvelope

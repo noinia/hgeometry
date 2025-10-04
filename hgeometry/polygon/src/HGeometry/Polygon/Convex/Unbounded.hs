@@ -20,26 +20,23 @@ module HGeometry.Polygon.Convex.Unbounded
   ) where
 
 import           Control.Lens
-import qualified Data.Foldable as F
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (fromMaybe)
 import           Data.Ord (comparing)
+import           HGeometry.Box as Box
 import           HGeometry.Cyclic
 import           HGeometry.HalfLine
 import           HGeometry.HalfSpace
 import           HGeometry.HyperPlane.Class
 import           HGeometry.Intersection
 import           HGeometry.Line
-import           HGeometry.LineSegment
 import           HGeometry.Point
-import           HGeometry.Point.Either
 import           HGeometry.Polygon
-import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Properties
-import           HGeometry.Triangle
+import           HGeometry.Triangle as Triangle
 import           HGeometry.Vector
+import           Data.Kind (Type)
 
 --------------------------------------------------------------------------------
 
@@ -47,7 +44,7 @@ import           HGeometry.Vector
 type UnboundedConvexRegion vertex = UnboundedConvexRegionF (NumType vertex) NonEmpty vertex
 
 -- | An unbounded polygonal ConvexRegion whose vertices are stored in an 'nonEmpty'
-data UnboundedConvexRegionF r nonEmpty vertex =
+data UnboundedConvexRegionF r nonEmpty (vertex :: Type) =
   Unbounded (Vector 2 r)
             -- ^ vector indicating the direction of the unbounded edge
             -- incident to the first vertex. Note that this vector
@@ -62,6 +59,14 @@ data UnboundedConvexRegionF r nonEmpty vertex =
 
 type instance NumType   (UnboundedConvexRegionF r nonEmpty vertex) = r
 type instance Dimension (UnboundedConvexRegionF r nonEmpty vertex) = 2
+
+
+-- | Lens to access the chain of vertices in CCW order
+chain :: Lens (UnboundedConvexRegionF r nonEmpty vertex)
+              (UnboundedConvexRegionF r nonEmpty' vertex')
+              (nonEmpty vertex) (nonEmpty' vertex')
+chain = lens (\(Unbounded _ chain' _) -> chain')
+             (\(Unbounded u _ v) chain' -> Unbounded u chain' v)
 
 -- | map a function over the sequence of points
 mapChain                       :: (nonEmpty vertex -> nonEmpty' vertex')
@@ -83,9 +88,9 @@ extremalVertices (Unbounded _ (p :| pts) _) = case NonEmpty.nonEmpty pts of
 boundingRays                          :: (Point_ vertex 2 r, Num r)
                                       => UnboundedConvexRegionF r NonEmpty vertex
                                      -> (Vector 2 (HalfLine vertex))
-boundingRays chain@(Unbounded v _ w) = compute $ case extremalVertices chain of
-                                     Left p   -> Vector2 p p
-                                     Right vs -> vs
+boundingRays chain'@(Unbounded v _ w) = compute $ case extremalVertices chain' of
+                                          Left p   -> Vector2 p p
+                                          Right vs -> vs
   where
     compute (Vector2 p q) = Vector2 (HalfLine p $ negated v) (HalfLine q w)
 
@@ -102,7 +107,28 @@ type instance Dimension (Cone r apex) = 2
 type instance NumType   (Cone r apex) = r
 -}
 
+--------------------------------------------------------------------------------
 
+instance ( Traversable1 nonEmpty
+         , Ixed (nonEmpty vertex), IxValue (nonEmpty vertex) ~ vertex
+         , Index (nonEmpty vertex) ~ Int
+         ) => HasVertices' (UnboundedConvexRegionF r nonEmpty vertex) where
+  type Vertex   (UnboundedConvexRegionF r nonEmpty vertex) = vertex
+  type VertexIx (UnboundedConvexRegionF r nonEmpty vertex) = Int
+  -- I think we could get rid of the Int constraint here, and just use an arbitrary
+  -- Index type. In that case, we need a slightly more general version of 'traversed1'
+  -- to implement 'vertices' in the 'HasVertices' instance.
+  vertexAt i = chain .> iix i
+  numVertices = length . view chain
+
+instance ( Traversable1 nonEmpty
+         , Ixed (nonEmpty vertex)
+         , IxValue (nonEmpty vertex) ~ vertex
+         , IxValue (nonEmpty vertex') ~ vertex'
+         , Index (nonEmpty vertex) ~ Int, Index (nonEmpty vertex') ~ Int
+         ) => HasVertices (UnboundedConvexRegionF r nonEmpty vertex)
+                          (UnboundedConvexRegionF r nonEmpty vertex') where
+  vertices = chain .> traversed1
 
 --------------------------------------------------------------------------------
 
@@ -267,6 +293,7 @@ instance ( Point_ vertex 2 r, Num r, Ord r
 
 
 --------------------------------------------------------------------------------
+-- * Intersection of a Triangle with an Unbounded Convex Polygon
 
 type instance Intersection (Triangle corner) (UnboundedConvexRegionF r nonEmpty vertex)
   = Intersection (Triangle corner) (ConvexPolygonF (Cyclic nonEmpty) vertex)
@@ -310,19 +337,40 @@ toBoundedFrom tri reg@(Unbounded v pts w) = go $ case extremalVertices reg of
         -- make sure that there is at least one point outside the halfplane
       pt = maximumOn (`squaredEuclideanDistTo` h) (q' :| tri^..folded.asPoint)
         -- the furthest point in the direction perpendicular to the halfplane
-      l' = l&anchorPoint .~ pt
+      l' = l&anchorPoint .~ (pt .+^ w) -- move even a bit further to make sure
+                                       -- that the new vertices (a,b) we get are strictly
+                                       -- outside the input triangle tri
       a  = intersectionPoint p v l' -- no need to negate v here
       b  = intersectionPoint q w l'
 
 
     maximumOn f = maximumBy (comparing f)
 
-    intersectionPoint p v' l = case (LinePV (p^.asPoint) v') `intersect` l of
-                                 Just (Line_x_Line_Point a) -> p&xCoord .~ a^.xCoord
-                                                                &yCoord .~ a^.yCoord
-                                 _                          -> error "intersectionPoint: absurd'"
+    intersectionPoint p v' l'' = case LinePV (p^.asPoint) v' `intersect` l'' of
+      Just (Line_x_Line_Point a) -> p&xCoord .~ a^.xCoord
+                                    &yCoord .~ a^.yCoord
+      _                          -> error "intersectionPoint: absurd'"
 
 -- -- TODO: this would make for a good property test: test if the points all lie inside the reegion
+
+
+--------------------------------------------------------------------------------
+-- * Intersection of a Rectangle with an Unbounded Convex Polygon
+
+type instance Intersection (Rectangle corner) (UnboundedConvexRegionF r nonEmpty vertex)
+  = Intersection (Rectangle corner) (ConvexPolygonF (Cyclic nonEmpty) vertex)
+
+instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
+         ) => Rectangle corner `HasIntersectionWith` (UnboundedConvexRegionF r NonEmpty vertex)
+
+instance ( Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
+         ) => Rectangle corner `IsIntersectableWith` (UnboundedConvexRegionF r NonEmpty vertex) where
+  rect `intersect` region = rect `intersect` (toBoundedFrom (Box.corners rect) region)
+
+
+
+--------------------------------------------------------------------------------
+
 
 
   -- case traverse (`intersect` box) rays of

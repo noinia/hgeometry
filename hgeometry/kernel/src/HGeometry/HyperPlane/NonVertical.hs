@@ -15,7 +15,6 @@ module HGeometry.HyperPlane.NonVertical
   ( NonVerticalHyperPlane(NonVerticalHyperPlane, Plane)
   , asNonVerticalHyperPlane
   , Plane
-  , Plane_, pattern Plane_
   , module HGeometry.HyperPlane.Class
   ) where
 
@@ -169,17 +168,6 @@ type Plane = NonVerticalHyperPlane 3
 pattern Plane       :: r -> r -> r -> Plane r
 pattern Plane a b c = NonVerticalHyperPlane (Vector3 a b c)
 {-# COMPLETE Plane #-}
-
--- | Shorthand for Non-vertical hyperplanes in R^3
-type Plane_ plane = NonVerticalHyperPlane_ plane 3
-
--- | Destructs a Plane in R^3 into the equation z = ax + by + c
-pattern Plane_       :: Plane_ plane r => r -> r -> r -> plane
-pattern Plane_ a b c <- (view hyperPlaneCoefficients -> (Vector3 a b c))
-{-# COMPLETE Plane_ #-}
-
-
-
 
 --------------------------------------------------------------------------------
 

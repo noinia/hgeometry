@@ -17,10 +17,12 @@ module HGeometry.HyperPlane.Class
   ( HyperPlane_(..)
   , ConstructableHyperPlane_(..)
   , NonVerticalHyperPlane_(..)
+  , Plane_, pattern Plane_
   , isParallelTo
   , pointOn
 
   , HyperPlaneFromPoints(..)
+  , showPlaneEquation
   ) where
 
 import Control.Lens hiding (snoc, cons, uncons, unsnoc)
@@ -344,6 +346,17 @@ class HyperPlane_ hyperPlane d r => NonVerticalHyperPlane_ hyperPlane d r where
   verticalSideTest q h = (q^.dCoord) `compare` evalAt (projectPoint q :: Point (d-1) r) h
 
 --------------------------------------------------------------------------------
+-- * Helpers for (NonVertical) Planes in R^3.
+
+-- | Shorthand for Non-vertical hyperplanes in R^3
+type Plane_ plane = NonVerticalHyperPlane_ plane 3
+
+-- | Destructs a Plane in R^3 into the equation z = ax + by + c
+pattern Plane_       :: Plane_ plane r => r -> r -> r -> plane
+pattern Plane_ a b c <- (view hyperPlaneCoefficients -> (Vector3 a b c))
+{-# COMPLETE Plane_ #-}
+
+--------------------------------------------------------------------------------
 -- * Functions on Hyperplanes
 
 -- | Test if two hyperplanes are parallel.
@@ -363,6 +376,20 @@ class HyperPlaneFromPoints hyperPlane where
                            , Num r
                            ) => Vector d point -> hyperPlane
 
+
+--------------------------------------------------------------------------------
+-- * Functions on Non-vertical Hyperplanes
+
+-- | Renders the defining equation of a plane in R^3 in some human readable format.
+--
+-- >>> showPlaneEquation (Plane 5 3 2)
+-- "z = 5x + 3y + 2"
+showPlaneEquation   :: (Plane_ plane r, Show r) => plane -> String
+showPlaneEquation h = let (Vector3 a b c) = show <$> h^.hyperPlaneCoefficients
+                      in "z = " <> a <> "x + " <> b <> "y + " <> c
+
+--------------------------------------------------------------------------------
+-- * Some Instances
 
 instance (HyperPlane_ hyperPlane d r)
          => HyperPlane_ (hyperPlane :+ extra) d r where

@@ -17,18 +17,14 @@ module HGeometry.Polygon.Instances
 import           Control.Lens hiding (elements)
 import           Control.Monad.State
 import           Data.Aeson (eitherDecodeFileStrict)
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Maybe (maybeToList, mapMaybe)
-import           Data.Ord
-import           Data.Ratio
+import           Data.Maybe (maybeToList)
 import           HGeometry
 import           HGeometry.Intersection
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Monotone
 import           HGeometry.Polygon.Simple
-import           HGeometry.Triangle
 import           Paths_hgeometry
 import           System.IO.Unsafe
 import           System.Random.Stateful
@@ -161,10 +157,10 @@ shrinkPolygon      :: (Ord r, Fractional r, Real r)
 shrinkPolygon pg
   | isTriangle pg = simplifyCoords pg
   | otherwise     = cutEars pg -- dropVertices <> simplifyCoords pg
-  where
-    dropVertices = mapMaybe (dropVertex pg) (pg^..vertices.asIndex)
+  -- where
+  --   dropVertices = mapMaybe (dropVertex pg) (pg^..vertices.asIndex)
 
-
+{-
 dropVertex      :: (Ord r, Fractional r, Real r)
                 => SimplePolygon (Point 2 r) -> Int
                 -> Maybe (SimplePolygon (Point 2 r))
@@ -172,6 +168,7 @@ dropVertex pg i = fromPoints' . NonEmpty.tail $ toNonEmptyOf (ccwOuterBoundaryFr
   where
     fromPoints' pts = do pg' <- fromPoints pts
                          if hasNoSelfIntersections pg' then pure pg' else Nothing
+-}
 
 -- | Try to simplify the coordinates of the points in hte polygon
 simplifyCoords     :: forall r. (Ord r, Fractional r, Real r)
@@ -205,6 +202,7 @@ simplifyCoords pg = let (v :| _) = toNonEmptyOf (vertices.vector) pg
   --             in Point2 (fromRational $ numerator a `div` 2 % 1)
   --                       (fromRational $ numerator b `div` 2 % 1)
 
+{-
 -- | Aligns the polygon so that at least one point has x and y- coordinate zero
 alignZero      :: (Polygon_ polygon (Point 2 r) r, Num r, Ord r)
                => polygon -> Point 2 r -> Point 2 r
@@ -234,7 +232,7 @@ gcdPoint p = realToFrac t
     t = foldl1 gcd lst
 
 
-
+-}
 
 isTriangle pg = numVertices pg == 3
 

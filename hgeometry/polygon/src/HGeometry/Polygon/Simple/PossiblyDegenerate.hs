@@ -23,6 +23,9 @@ import HGeometry.Point
 import HGeometry.Point.Either
 import HGeometry.Polygon.Simple.Type
 import HGeometry.Properties
+import Data.Bifoldable1
+import Data.Foldable1
+import Data.Bifoldable
 
 --------------------------------------------------------------------------------
 
@@ -39,6 +42,16 @@ instance Bifunctor PossiblyDegenerateSimplePolygon where
     DegenerateVertex v -> DegenerateVertex (f v)
     DegenerateEdge e   -> DegenerateEdge (fmap f e)
     ActualPolygon poly -> ActualPolygon (g poly)
+
+
+instance Bifoldable1 PossiblyDegenerateSimplePolygon where
+  bifoldMap1 f g = \case
+    DegenerateVertex v -> f v
+    DegenerateEdge e   -> foldMap1 f e
+    ActualPolygon poly -> g poly
+
+instance Bifoldable PossiblyDegenerateSimplePolygon where
+  bifoldMap = bifoldMap1
 
 type instance NumType   (PossiblyDegenerateSimplePolygon vertex polygon) = NumType vertex
 type instance Dimension (PossiblyDegenerateSimplePolygon vertex polygon) = 2

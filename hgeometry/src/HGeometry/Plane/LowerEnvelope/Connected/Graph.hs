@@ -18,19 +18,16 @@ module HGeometry.Plane.LowerEnvelope.Connected.Graph
 import           Data.Foldable1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Map (Map)
 import qualified Data.Map as Map
 import           Data.Map.NonEmpty (NEMap)
 import qualified Data.Map.NonEmpty as NEMap
 import           Data.Semigroup (First(..))
 import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Map.NonEmpty.Monoidal
 import           HGeometry.Plane.LowerEnvelope.Connected.Type
 import           HGeometry.PlaneGraph.Connected.Type (E(..))
 import           HGeometry.Point
 import           HGeometry.Polygon.Convex.Unbounded
-import           HGeometry.Vector
 import           Hiraffe.AdjacencyListRep.Map
 --------------------------------------------------------------------------------
 

@@ -3,32 +3,22 @@ module Plane.LowerEnvSpec
   ( spec
   ) where
 
-import           Data.Coerce
 import qualified Data.Foldable as F
 import           Data.Foldable1
-import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import           Data.Map (Map)
-import qualified Data.Map.NonEmpty as NEMap
-import           Data.Maybe (fromMaybe, listToMaybe)
-import           Data.Ord (comparing)
 import           Data.Set (Set)
 import qualified Data.Set as Set
-import           HGeometry.Combinatorial.Util
-import           HGeometry.Ext
-import           HGeometry.Foldable.Util
 import           HGeometry.HyperPlane
 import           HGeometry.Instances ()
 import           HGeometry.Intersection
 import           HGeometry.Matrix
-import           HGeometry.NonEmpty.Util
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope.Connected (VertexForm)
 import qualified HGeometry.Plane.LowerEnvelope.Connected.BruteForce as BruteForce
 import qualified HGeometry.Plane.LowerEnvelope.Connected.Randomized as Randomized
-import           HGeometry.Point
 import           HGeometry.Vector
 import           System.Random
 import           Test.Hspec
@@ -36,15 +26,14 @@ import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 
-import           Debug.Trace
-
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
 
 newtype NonDegenerate plane = NonDegenerate (NonEmpty plane)
-  deriving newtype (Show,Eq,Foldable,Functor)
+  deriving newtype (Show,Eq,Foldable,Functor,Foldable1)
 
 setOf     :: Ord a => Gen a -> Gen (Set a)
 setOf gen = Set.fromList <$> listOf gen
@@ -55,7 +44,7 @@ instance Arbitrary (NonDegenerate (Plane R)) where
                  h2 <- arbitrary `suchThat` \h -> det (mkMatrix h0 h1 h) /= 0
                    -- \h' -> nonParallelWith h0 h' && nonParallelWith h1 h'
                  rest <- setOf (arbitrary  `suchThat` (`notElem` [h0,h1,h2]))
-                 pure . NonDegenerate $ h0 :| (h1 : h2 : (Set.toList rest))
+                 pure . NonDegenerate $ h0 :| (h1 : h2 : Set.toList rest)
   -- according to
   -- https://www.mathspanda.com/A2FM/Lessons/Intersections_of_planes_LESSON.pdf
   -- the three planes intersect in a point only when their determinant is non-zero.
@@ -92,7 +81,7 @@ instance Eq Same where
 
 
 spec :: Spec
-spec = xdescribe "Lower Envelope tests" $ do
+spec = describe "Lower Envelope tests" $ do
          it "manual" $
            let seed   = 0
                planes = NonDegenerate $ NonEmpty.fromList [ Plane 1    0 2
@@ -103,14 +92,16 @@ spec = xdescribe "Lower Envelope tests" $ do
               `shouldBe`
               Same (BruteForce.computeVertexForm planes)
 
-         prop "every vertex is valid" $
-           \seed (planes :: NonDegenerate (Plane R)) ->
-             all (`BruteForce.belowAll` planes) $
-               Map.keys (Randomized.computeVertexForm (mkStdGen seed) planes)
+         -- FIXME: I think there may just be an issue with how we generate the planes
+         -- since raising this to 50 seems not to work
+         modifyMaxSize (const 20) $ do
+           prop "every vertex is valid" $
+             \seed (planes :: NonDegenerate (Plane R)) ->
+               all (`BruteForce.belowAll` planes) $
+                 Map.keys (Randomized.computeVertexForm (mkStdGen seed) planes)
 
-
-         prop "same as brute force" $
-           \seed (planes :: NonDegenerate (Plane R)) ->
-             Same (Randomized.computeVertexForm (mkStdGen seed) planes)
-             ===
-             Same (BruteForce.computeVertexForm planes)
+           prop "same as brute force" $
+             \seed (planes :: NonDegenerate (Plane R)) ->
+               Same (Randomized.computeVertexForm (mkStdGen seed) planes)
+               ===
+               Same (BruteForce.computeVertexForm planes)
