@@ -160,26 +160,26 @@ instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
 
 spec :: Spec
 spec = describe "lower envelope tests" $ do
-         randomizedSameAsBruteForce
+         -- randomizedSameAsBruteForce
 
-         -- testIpe [osp|trivial.ipe|]
-         --         [osp|trivial_out|]
-         -- testIpe [osp|simplest.ipe|]
-         --         [osp|simplest_out|]
-         -- testIpe [osp|simpler.ipe|]
-         --         [osp|simpler_out|]
-         -- testIpe [osp|simple.ipe|]
-         --         [osp|simple_out|]
-         -- testIpe [osp|simple1.ipe|]
-         --         [osp|simple1_out|]
-         -- testIpe [osp|foo.ipe|]
-         --         [osp|foo_out|]
-         -- testIpe [osp|degenerate.ipe|]
-         --         [osp|degenerate_out|]
-         -- testIpe [osp|degenerate1.ipe|]
-         --         [osp|degenerate1_out|]
-         -- testIpe [osp|degenerate2.ipe|]
-         --         [osp|degenerate2_out|]
+         testIpe [osp|trivial.ipe|]
+                 [osp|trivial_out|]
+         testIpe [osp|simplest.ipe|]
+                 [osp|simplest_out|]
+         testIpe [osp|simpler.ipe|]
+                 [osp|simpler_out|]
+         testIpe [osp|simple.ipe|]
+                 [osp|simple_out|]
+         testIpe [osp|simple1.ipe|]
+                 [osp|simple1_out|]
+         testIpe [osp|foo.ipe|]
+                 [osp|foo_out|]
+         testIpe [osp|degenerate.ipe|]
+                 [osp|degenerate_out|]
+         testIpe [osp|degenerate1.ipe|]
+                 [osp|degenerate1_out|]
+         testIpe [osp|degenerate2.ipe|]
+                 [osp|degenerate2_out|]
 
          prop "withConflictList correct" $
            withConflictListTest
