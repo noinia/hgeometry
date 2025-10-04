@@ -61,8 +61,6 @@ import           HGeometry.Triangle
 import           HGeometry.Vector
 import           HGeometry.Polygon.Convex.Unbounded
 
-
-import Debug.Trace
 --------------------------------------------------------------------------------
 
 
@@ -174,8 +172,6 @@ fromMinimizationDiagramIn tri planes env = case env of
 
     polyTri = fromMaybe (error "absurd: bruteForceLowerEnvelopeIn illegal triangle")
             $ fromPoints (Extra <$> tri')
-
-    -- intersect' a b = traceShowWith (a, "INTERSECT", b, "-> ",) $ a `intersect` b
 
 --------------------------------------------------------------------------------
 -- * Converting into a minimization diagram

@@ -62,7 +62,7 @@ import           Test.QuickCheck.Instances ()
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Polygon.Convex.Unbounded
 
-import           Debug.Trace
+-- import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -98,35 +98,6 @@ grow             :: (Num r, Point_ point d r) => r -> Box point -> Box point
 grow d (Box p q) = Box (p&coordinates %~ subtract d)
                        (q&coordinates %~ (+d))
 
-
-
-
-    -- case fromPoints $ map (^.asPoint) vertices of
-    --   Nothing -> error $ "could not create convex polygon?" <> show vertices
-    --   Just pg -> defIO (pg :: ConvexPolygon (Point 2 r))
-    -- where
-    --   vertices = case region of
-    --     Bounded vs        -> vs
-    --     Unbounded v pts u -> let p  = NonEmpty.head pts
-    --                              q  = NonEmpty.last pts
-    --                              p' = p .-^ (1000 *^ v) -- TODO: clip this somewhere
-    --                              q' = q .+^ (1000 *^ u) -- TODO: clip this somewhere
-    --                          in q' : p' : toList pts
-
-
--- colors =
-
--- 1083.83267 -5893.86633 m
--- -907.76924 6277.03418 l
--- 92.23076 165.92307 l
--- 83.83267 217.24478 l
--- h
-
--- 1083.83267 -5893.86633 m
--- 1092.23076 915.92307 l
--- 92.23076 165.92307 l
--- 83.83267 217.24478 l
--- h
 
 instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
          , Show point, Show r, Show vtxData
@@ -193,12 +164,6 @@ spec = describe "lower envelope tests" $ do
            \(Positive r') tri planes -> let r = max r' 3 in
              allOriginal' 3 tri planes
 
-         runIO $ do
-           for_ [ NonVerticalHyperPlane $ fromList' [-1,-1,1]
-                , NonVerticalHyperPlane $ fromList' [-0.5,-2,1.5]
-                , NonVerticalHyperPlane $ fromList' [2,1,0]
-                ] (putStrLn . showPlaneEquation)
-
          prop "bug" $ do
            let tri = Triangle (Point2 2 2) (Point2 1 (-1)) (Point2 2 0)
                planes = NESet.fromList . NonEmpty.fromList . map MyPlane $
@@ -207,9 +172,6 @@ spec = describe "lower envelope tests" $ do
                        , NonVerticalHyperPlane $ fromList' [2,1,0]
                        ]
            withExtraConflictListTest 3 planes tri
-           -- for some reason we get an inccorrect original vertex !?
-           -- somehow we generate a vertex at (2,1.5) which is not actually an original
-           -- vertex. Not sure how that went
 
          prop "bug origMeansDefiner" $ do
            let tri = Triangle (Point2 2 2) (Point2 1 (-1)) (Point2 2 0)
@@ -230,112 +192,7 @@ spec = describe "lower envelope tests" $ do
                        ]
            allOriginal' 3 tri planes
 
-         prop "original vertices are really original vertices (bounded)" $
-           allOriginal @(ConvexPolygon (Point 2 R))
-
-         prop "original vertices are really original vertices (unbounded)" $
-           allOriginal @(UnboundedConvexRegion (Point 2 R))
-
-         specUnbounded
-
-
--- TODO: move these tests to some module about Unbounded
-specUnbounded :: Spec
-specUnbounded = describe "fromUnbounded correct" $ do
-         prop "boundedFromVertices that intersect triangle are orig vertices " $
-           verifyBoundedFromVertices
-
-         prop "bug, boundedFromVertices that intersect triangle are orig vertices " $ do
-           let tri = Triangle (Point2 2 2) (Point2 1 (-1)) (Point2 2 0)
-               reg = Unbounded (Vector2 (-1) (-0.5))
-                               (NonEmpty.singleton (Point2 0 0.5))
-                               (Vector2 1 (-1.5))
-           verifyBoundedFromVertices tri reg
-
-         prop "bug, intersection" $ do
-           let tri = Triangle (Point2 2 2) (Point2 1 (-1)) (Point2 2 0)
-               reg = Unbounded (Vector2 (-1) (-0.5))
-                               (NonEmpty.singleton (Point2 0 0.5))
-                               (Vector2 1 (-1.5))
-           allOriginal @(UnboundedConvexRegion (Point 2 R)) reg tri
-
-
-
-
-         -- runIO $ do
-         --   let tri :: Triangle (Point 2 R)
-         --       tri = Triangle (Point2 2 2) (Point2 1 (-1)) (Point2 2 0)
-         --       reg :: UnboundedConvexRegion (Point 2 R)
-         --       reg = Unbounded (Vector2 (-1) (-0.5))
-         --                       (NonEmpty.singleton (Point2 0 0.5))
-         --                       (Vector2 1 (-1.5))
-         --   print tri
-         --   print reg
-         --   print "=======> via =========> "
-         --   print $ toBoundedFrom tri reg
-         --   print "=======> intersects in =========> "
-         --   print $ tri `intersect` reg
-
-
-
--- | Make sure that the vertices of the bounded convex region we create that
--- intersect the triagnle are actually original vertices of the convex region as well.
-verifyBoundedFromVertices         :: Triangle (Point 2 R) -> UnboundedConvexRegion (Point 2 R)
-                                  -> Every
-verifyBoundedFromVertices tri reg = foldMapOf vertices (Every . check) $ toBoundedFrom tri reg
-  where
-    check v | v `intersects` tri = counterexample (show v) -- if v lies inside it should be
-                                 $ isOrigVertex v
-             | otherwise         = property True
-    isOrigVertex v = elemOf vertices v reg
-
-
-
--- moreover: I think the main issue should be in  the Unbounded.toBoundedFrom function
--- which displaces vertices
-
-
 --------------------------------------------------------------------------------
-
-
-
-
-
---                    , _definers = Definers (NonVerticalHyperPlane [-0.5,-2,1.5] :| [NonVerticalHyperPlane [2,1,0],NonVerticalHyperPlane [-1,-1,1]]), _vertexData = (Definers (NonVerticalHyperPlane [-0.5,-2,1.5] :| [NonVerticalHyperPlane [2,1,0],NonVerticalHyperPlane [-1,-1,1]]),fromList [])} :| []) (Vector2 1 (-1.5)))
-
-
--- ,"-> "
-
--- ,Just (ClippedMDCell (ActualPolygon (ConvexPolygon [Extra (Point2 1.8 1.4),Extra (Point2 1 (-1)),Extra (Point2 2 0),Original (MDVertex {_location = Point3 2 1.5 0.5, _definers = Definers (NonVerticalHyperPlane [-0.5,-2,1.5] :| [NonVerticalHyperPlane [2,1,0],NonVerticalHyperPlane [-1,-1,1]]), _vertexData = (Definers (NonVerticalHyperPlane [-0.5,-2,1.5] :| [NonVerticalHyperPlane [2,1,0],NonVerticalHyperPlane [-1,-1,1]]),fromList [])})]))))
-
-
-
-
-
--- | Check if all original vertices of a triangle and a polygon are really original
-allOriginal          :: ( IsIntersectableWith (Triangle (Point 2 R)) poly
-                          , Intersection (Triangle (Point 2 R)) poly ~
-                             Maybe (PossiblyDegenerateSimplePolygon
-                               (OriginalOrExtra (Point 2 R) (Point 2 R))
-                               (poly' (OriginalOrExtra (Point 2 R) (Point 2 R))))
-                        , Foldable poly'
-                        , Show (poly' (OriginalOrExtra (Point 2 R) (Point 2 R)))
-                        , HasVertices poly poly
-                        , Vertex poly ~ Point 2 R
-                        ) => poly -> Triangle (Point 2 R) -> Every
-allOriginal poly tri = case tri `intersect` poly of
-    Nothing  -> discard
-    Just res -> bifoldMap f (foldMap f) res
-      where
-        f :: OriginalOrExtra (Point 2 R) (Point 2 R) -> Every
-        f = Every . \case
-          Extra    _ -> property True
-          Original v -> counterexample (show res) . counterexample (show v) . property
-                      $ v `elem` origVertices
-
-        origVertices = tri^..vertices <> poly^..vertices
-
-
 
 allOriginal'            :: Int -> Triangle (Point 2 R) -> NESet.NESet MyPlane -> Every
 allOriginal' r tri planes =
@@ -353,20 +210,6 @@ allOriginal' r tri planes =
                       $ (v^.asPoint) `elem` origVertices
 
         origVertices = tri^..vertices <> foldMapVertices (\p -> [p^.asPoint]) res
-
-
-
-
-
--- seems like intersecting triangles and convex polygons incorrectly produces some 'Original' vertices?
-
-         -- it "definers test" $ do
-         --   let hs = Three (NonVerticalHyperPlane $ fromList' [-1,-1,1])
-         --                  (NonVerticalHyperPlane $ fromList' [-0.5,-2,1.5])
-         --                  (NonVerticalHyperPlane $ fromList' [2,1,0])
-         --   intersectionPoint hs `shouldNotBe` Just (Point3 2 1.5 0.5)
-         --   -- OK: this test verfies that our vertex location 2 1.5. 0.5 is incorrect
-         --
 
 -- | Check that every original vertex is the intersection of its definers
 originalMeansDefiner              :: Int -> NESet.NESet MyPlane -> Triangle (Point 2 R) -> Every
@@ -680,7 +523,7 @@ inRange m x = abs x <= m
 
 randomizedSameAsBruteForce :: Spec
 randomizedSameAsBruteForce = describe "randomized lower envelope tests" $ do
-    modifyMaxSuccess (const 10) $ modifyMaxSize (const 20) $
+    modifyMaxSize (const 50) $
       prop "randomized should be the same as brute force" $
       \(hs :: NESet.NESet MyPlane) ->
         Randomized.computeVertexForm (mkStdGen 1) hs `shouldBe` BruteForce.computeVertexForm hs

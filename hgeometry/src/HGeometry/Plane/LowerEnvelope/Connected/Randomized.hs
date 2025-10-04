@@ -49,9 +49,6 @@ import           HGeometry.Triangle
 import           Prelude hiding (filter, head, last)
 import           System.Random
 
--- import System.IO.Unsafe(unsafePerformIO)
--- import Ipe
-import           Debug.Trace
 --------------------------------------------------------------------------------
 
 -- n_0 :: Int
@@ -89,8 +86,8 @@ computeVertexFormIn         :: forall plane point r.
 computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) (toSet hs)
   where
     n  = length hs
-    r  = sqrt . sqrt @Double . fromIntegral $ n -- r = n^{1/4}
-    r' = max 5 $ round $ r * logBase 2 r
+    r' = sqrt . sqrt @Double . fromIntegral $ n -- r = n^{1/4}
+    r  = round $ r' * logBase 2 r'
       -- take a sample of size r*log r
       --
       -- the max 5 is due to the following: consider some triangle defined by the plane
@@ -104,7 +101,7 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) (toSet hs)
 
     lowerEnvelopeIn :: Triangle (Point 2 r) -> NESet plane -> Map (Point 3 r) (Definers plane)
     -- lowerEnvelopeIn tri planes | traceShow ("LE",tri,length planes) False = undefined
-    lowerEnvelopeIn tri planes = let (rNet,remaining) = takeSample r' planes in
+    lowerEnvelopeIn tri planes = let (rNet,remaining) = takeSample r planes in
       case withConflictLists remaining (BruteForce.computeVertexForm rNet) of
         IsEmpty                                                                    -> mempty
         IsNonEmpty (verticesRNet :: NEMap (Point 3 r) (Definers plane, Set plane)) ->
@@ -123,6 +120,12 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) (toSet hs)
             -- prism. We will already throw away any prisms with an
             triangulatedEnv :: [Triangle (Point 2 r) :+ NESet plane]
             triangulatedEnv = NEMap.foldMapWithKey triangulate env
+              -- traceShow ("n'",length planes
+              --           ,"total size: ", sum (map (\(_ :+ cl) -> length cl) res)
+              --           ," sizes: ",map (\(_ :+ cl) -> length cl) res
+              --           ) res
+              -- where
+              --   res =
 
             -- merge the resulting Maps; making sure to actually combine the definers
             merge = Map.unionWithKey mergeDefiners
@@ -147,16 +150,10 @@ takeSample r = bimap NonEmpty.fromList Set.fromList . splitAt r . toList
 
 -- | Report whether this is really a vertex of the global lower envelope in the region.
 asVertexIn :: (Ord r, Num r, Point_ vertex 2 r, Foldable set
-
               , definers ~ Definers plane
-              , Show (set plane), Show r, Show vertex, Show plane, Ord plane
               )
            => Triangle vertex -> Point 3 r -> (definers, set plane) -> Maybe definers
-asVertexIn tri (Point3 x y z) (defs,conflictList)
-  -- | traceShow ("asVertexIn ",tri,x,y,z
-  --             ,"defs", defs
-  --             ,"CL:",conflictList
-  --             , null conflictList && Point2 x y `intersects` tri) False = undefined
+asVertexIn tri (Point3 x y _) (defs,conflictList)
   | null conflictList && Point2 x y `intersects'` tri = Just defs
   | otherwise                                         = Nothing
   where
