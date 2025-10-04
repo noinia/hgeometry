@@ -47,7 +47,7 @@ pointToPlane' = fmap (/ 100) . pointToPlane
 
 myPlanes :: NonEmpty (Plane R :+ (Int, Point 2 R, Colour Double))
 myPlanes = NonEmpty.zipWith (\i (p :+ c) -> pointToPlane' p :+ (i,p,c)) (NonEmpty.fromList [0..])
-         $ myPoints
+           myPoints
 
 -- myPoints :: NonEmpty (Point 2 R :+ Colour Double)
 -- myPoints = NonEmpty.fromList $
@@ -62,7 +62,7 @@ myColors = NonEmpty.fromList infiniteWebColors
 
 myPoints :: NonEmpty (Point 2 R :+ Colour Double)
 myPoints = NonEmpty.zipWith (flip (:+)) myColors $
-           NonEmpty.fromList $
+           NonEmpty.fromList
            [ Point2 16 80
            , Point2 64 48
            , Point2 208 128
@@ -94,8 +94,8 @@ toPolygons :: (Plane_ plane r, Ord r, Fractional r, Point_ vertex 2 r)
 toPolygons = fmap render . NEMap.toAscList . asMap
   where
     render (h,reg) = (h, case toConvexPolygonIn myRect reg of
-                           Left pg  -> pg&vertices %~ \v -> (v^.asPoint :+ evalAt v h)
-                           Right pg -> pg&vertices %~ \v -> (v^.asPoint :+ evalAt v h)
+                           Left pg  -> pg&vertices %~ \v -> v^.asPoint :+ evalAt v h
+                           Right pg -> pg&vertices %~ \v -> v^.asPoint :+ evalAt v h
                      )
 
 
@@ -190,7 +190,7 @@ main = do
                                       putStrLn "Regions:"
                                       mapM_ print $ toPolygons env
                                       mapM_ (\xs@(h,_) ->
-                                               print $ (h, verifyOnPlane xs)
+                                               print (h, verifyOnPlane xs)
                                             ) $ toPolygons env
                                       -- print vs
 

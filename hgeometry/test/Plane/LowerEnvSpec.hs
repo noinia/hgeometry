@@ -26,7 +26,7 @@ import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 
-
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -44,7 +44,7 @@ instance Arbitrary (NonDegenerate (Plane R)) where
                  h2 <- arbitrary `suchThat` \h -> det (mkMatrix h0 h1 h) /= 0
                    -- \h' -> nonParallelWith h0 h' && nonParallelWith h1 h'
                  rest <- setOf (arbitrary  `suchThat` (`notElem` [h0,h1,h2]))
-                 pure . NonDegenerate $ h0 :| (h1 : h2 : (Set.toList rest))
+                 pure . NonDegenerate $ h0 :| (h1 : h2 : Set.toList rest)
   -- according to
   -- https://www.mathspanda.com/A2FM/Lessons/Intersections_of_planes_LESSON.pdf
   -- the three planes intersect in a point only when their determinant is non-zero.
@@ -92,14 +92,15 @@ spec = describe "Lower Envelope tests" $ do
               `shouldBe`
               Same (BruteForce.computeVertexForm planes)
 
-         -- TODO: increase the size once we have figured out what is wrong exactly
-         modifyMaxSize (const 50) $ do
-           xprop "every vertex is valid" $
+         -- FIXME: I think there may just be an issue with how we generate the planes
+         -- since raising this to 50 seems not to work
+         modifyMaxSize (const 20) $ do
+           prop "every vertex is valid" $
              \seed (planes :: NonDegenerate (Plane R)) ->
                all (`BruteForce.belowAll` planes) $
                  Map.keys (Randomized.computeVertexForm (mkStdGen seed) planes)
 
-           xprop "same as brute force" $
+           prop "same as brute force" $
              \seed (planes :: NonDegenerate (Plane R)) ->
                Same (Randomized.computeVertexForm (mkStdGen seed) planes)
                ===

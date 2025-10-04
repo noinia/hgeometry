@@ -150,7 +150,7 @@ spec = describe "lower envelope tests" $ do
          testIpe [osp|degenerate2.ipe|]
                  [osp|degenerate2_out|]
 
-         prop "withConflictList correct" $
+         prop "withConflictList correct"
            withConflictListTest
          prop "withExtraConflictLists correct" $
            \(Positive r') planes -> let r = max r' 3 in
@@ -519,6 +519,13 @@ instance Arbitrary MyPlane where
 
 inRange m x = abs x <= m
 
+test = ( Randomized.computeVertexForm (mkStdGen 1) debugPlanes
+       , BruteForce.computeVertexForm              debugPlanes
+       )
+
+debugPlanes :: NonEmpty MyPlane
+debugPlanes = NonEmpty.fromList [MyPlane $ NonVerticalHyperPlane $ fromList' [0,1,0]]
+
 randomizedSameAsBruteForce :: Spec
 randomizedSameAsBruteForce = describe "randomized lower envelope tests" $ do
     modifyMaxSize (const 50) $
@@ -540,8 +547,7 @@ subsets xs = mapMaybe NonEmpty.nonEmpty
            . filter (\ys -> length ys >= 6)
            . List.sortBy (comparing length) $ subsets' $ toList xs
 
-subsets' []     = [[]]
-subsets' (x:xs) = concatMap (\r -> [r,x:r]) (subsets' xs)
+subsets' = foldr (\ x -> concatMap (\ r -> [r, x : r])) [[]]
 
 -- smallest hs = toList $ List.head $ filter isBug $ subsets hs
 --   where
@@ -650,9 +656,9 @@ debug = do let hs :: NonEmpty (Plane R)
 
                v  = Point3 (-0.24717) (-3.55263) 0
            for_ hs $ \h ->
-             print $ (h, evalAt (projectPoint v) h
-                     ,verticalSideTest v h
-                     )
+             print (h, evalAt (projectPoint v) h
+                   ,verticalSideTest v h
+                   )
 
            env1 <- renderToIpe [osp|/tmp/bruteforce.ipe|] BruteForce.computeVertexForm hs
            env2 <- renderToIpe [osp|/tmp/randomized.ipe|] (Randomized.computeVertexForm (mkStdGen 1)) hs
@@ -685,7 +691,7 @@ renderToIpe             :: (Plane_ plane R, Ord plane, Show plane
                            ) => OsPath -> _ -> NonEmpty plane -> IO _
 renderToIpe fp mkEnv hs =
    do writeIpeFile fp . addStyleSheet opacitiesStyle $ singlePageFromContent out
-      pure $ env
+      pure env
   where
     Just env = connectedLowerEnvelopeWith mkEnv hs
 

@@ -5,54 +5,34 @@ module Plane.NaiveLowerEnvSpec
   ) where
 
 import           HGeometry.Cyclic
--- import HGeometry.Polygon.Simple
 import           Control.Lens hiding (IsEmpty, IsNonEmpty)
-import           Control.Subcategory.Functor
-import           Data.Bifunctor
-import           Data.Coerce
 import           Data.Foldable
-import           Data.Foldable1 as F1
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Map.NonEmpty (NEMap, pattern IsEmpty, pattern IsNonEmpty)
 import qualified Data.Map.NonEmpty as NEMap
 import           Data.Maybe (fromMaybe)
-import           Data.Ord (comparing)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 import           Golden
-import           HGeometry.Box
 import           HGeometry.Ext
-import           HGeometry.HyperPlane
 import           HGeometry.Intersection
 import           HGeometry.Number.Real.Rational
-import           HGeometry.Plane.LowerEnvelope
 import           HGeometry.Plane.LowerEnvelope.Clipped
-import qualified HGeometry.Plane.LowerEnvelope.Connected.Randomized as Randomized
 import           HGeometry.Point
-import           HGeometry.Point.Either
 import           HGeometry.Polygon
-import           HGeometry.Polygon.Convex
 import           HGeometry.Polygon.Convex.Unbounded
-import           HGeometry.Polygon.Simple
 import           HGeometry.Polygon.Simple.PossiblyDegenerate
-import           HGeometry.Properties
-import           HGeometry.Sequence.Alternating (separators)
 import           HGeometry.Triangle
 import           HGeometry.Vector
 import qualified HGeometry.VoronoiDiagram as VD
 import           HGeometry.VoronoiDiagram.Clipped
-import           HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
-import           Hiraffe.Graph.Class
 import           Ipe
 import           Ipe.Color
 import           System.OsPath
-import           System.Random
 import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
 
-import           Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -125,9 +105,9 @@ instance ( Point_ vertex 2 r, Point_ extra 2 r, Fractional r, Ord r
          => HasDefaultIpeOut (ClippedMDCell'' r vertex extra) where
   type DefaultIpeOut (ClippedMDCell'' r vertex extra) = Path
   defIO (ClippedMDCell cell) = case cell of
-    ActualPolygon cell' -> defIO $ (cell'&vertices %~ (^.asPoint)
-                                     :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 r)
-                                   )
+    ActualPolygon cell' -> defIO (cell'&vertices %~ (^.asPoint)
+                                    :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 r)
+                                 )
     _                   -> error "defIO for clippedMDCell rendering segment or point not defined"
 
 
@@ -183,7 +163,7 @@ convexPoly = fromMaybe (error "absurd") $ fromPoints $ NonEmpty.fromList
 
 unboundedPoly :: UnboundedConvexRegion (Point 2 R)
 unboundedPoly = Unbounded (Vector2 1 1.55555)
-                          (NonEmpty.fromList [(Point2 337.54545 636.18181)])
+                          (NonEmpty.fromList [Point2 337.54545 636.18181])
                           (Vector2 (-1) 18)
 
 -- (MDVertex {_location = Point3 337.54545~ 636.18181~ (-497088), _definers = Definers ((NonVerticalHyperPlane [-960,-1344,681984] :+ Point2 480 672) :| [NonVerticalHyperPlane [-384,-1312,467200] :+ Point2 192 656,NonVerticalHyperPlane [-832,-1024,435200] :+ Point2 416 512])} :| []) (Vector2 (-1) 18);
