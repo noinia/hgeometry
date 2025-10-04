@@ -103,6 +103,7 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) (toSet hs)
       -- that generate a plane.
 
     lowerEnvelopeIn :: Triangle (Point 2 r) -> NESet plane -> Map (Point 3 r) (Definers plane)
+    -- lowerEnvelopeIn tri planes | traceShow ("LE",tri,length planes) False = undefined
     lowerEnvelopeIn tri planes = let (rNet,remaining) = takeSample r' planes in
       case withConflictLists remaining (BruteForce.computeVertexForm rNet) of
         IsEmpty                                                                    -> mempty
@@ -131,6 +132,10 @@ computeVertexFormIn tri0 hs = lowerEnvelopeIn (view asPoint <$> tri0) (toSet hs)
                          -> Map (Point 3 r) (Definers plane)
     lowerEnvelopeIn' (tri :+ conflictList) = lowerEnvelopeIn tri conflictList
 
+
+-- verify tri0 planes tr@(tri :+ cl)
+--   | length cl < length planes = tr
+--   | otherwise                 = error $ show (tri0,planes,tr)
 
 -- | Given a size r > 0; take a sample of the planes from the given size (essentially by just
 -- taking the first r planes.)
@@ -230,7 +235,7 @@ triangulate'        :: (Num r, Ord plane
                     -> ClippedBoundedRegion r (MDVertex r plane (a, Set plane))
                                               (Point 2 r :+ (ExtraDefiners plane, Set plane))
                     -> [Triangle (Point 2 r) :+ NESet plane]
-triangulate' h poly = mapMaybe' withConflictList $ case toNonEmptyOf vertices poly of
+triangulate' _ poly = mapMaybe' withConflictList $ case toNonEmptyOf vertices poly of
     u :| (v : vs) -> NonEmpty.zipWith (Triangle u) (v :| vs) (NonEmpty.fromList vs)
     _             -> error "absurd. trianglulate; impossible"
   where

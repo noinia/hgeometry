@@ -160,7 +160,7 @@ instance ( Point_ point 2 r, Fractional r, Ord r, Ord point
 
 spec :: Spec
 spec = describe "lower envelope tests" $ do
-         -- randomizedSameAsBruteForce
+         randomizedSameAsBruteForce
 
          testIpe [osp|trivial.ipe|]
                  [osp|trivial_out|]
@@ -680,7 +680,8 @@ inRange m x = abs x <= m
 
 randomizedSameAsBruteForce :: Spec
 randomizedSameAsBruteForce = describe "randomized lower envelope tests" $ do
-    prop "randomized should be the same as brute force" $
+    modifyMaxSuccess (const 10) $ modifyMaxSize (const 20) $
+      prop "randomized should be the same as brute force" $
       \(hs :: NESet.NESet MyPlane) ->
         Randomized.computeVertexForm (mkStdGen 1) hs `shouldBe` BruteForce.computeVertexForm hs
 
