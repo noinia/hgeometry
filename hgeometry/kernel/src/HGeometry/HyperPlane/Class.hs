@@ -383,7 +383,7 @@ class HyperPlaneFromPoints hyperPlane where
 -- | Renders the defining equation of a plane in R^3 in some human readable format.
 --
 -- >>> showPlaneEquation (Plane 5 3 2)
--- z = 5x + 3y + 2
+-- "z = 5x + 3y + 2"
 showPlaneEquation   :: (Plane_ plane r, Show r) => plane -> String
 showPlaneEquation h = let (Vector3 a b c) = show <$> h^.hyperPlaneCoefficients
                       in "z = " <> a <> "x + " <> b <> "y + " <> c
