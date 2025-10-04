@@ -45,7 +45,6 @@ import qualified Data.Set.NonEmpty as Set
 import           HGeometry.Combinatorial.Util
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Intersection
 import           HGeometry.Map.NonEmpty.Monoidal
 import           HGeometry.NonEmpty.Util

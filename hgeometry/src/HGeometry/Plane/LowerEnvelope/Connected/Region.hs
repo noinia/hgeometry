@@ -8,23 +8,14 @@ module HGeometry.Plane.LowerEnvelope.Connected.Region
 
 import Control.Lens
 import Data.Bifoldable
-import Data.Bifunctor
 import Data.List.NonEmpty (NonEmpty(..))
 import HGeometry.Box
-import HGeometry.Ext
-import HGeometry.HyperPlane
-import HGeometry.Intersection
-import HGeometry.Number.Real.Rational
 import HGeometry.Plane.LowerEnvelope.Connected.VertexForm (Definers, HasDefiners(..))
 import HGeometry.Point
 import HGeometry.Point.Either
 import HGeometry.Polygon
-import HGeometry.Polygon.Convex
 import HGeometry.Polygon.Convex.Unbounded
-import HGeometry.Polygon.Simple
 import HGeometry.Properties
-import HGeometry.Sequence.Alternating (separators)
-import HGeometry.Triangle
 import HGeometry.Vector
 
 import HGeometry.Cyclic

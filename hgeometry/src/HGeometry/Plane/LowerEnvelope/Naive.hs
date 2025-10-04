@@ -14,7 +14,6 @@ import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Line
 import           HGeometry.Line.General
 import qualified HGeometry.Line.LowerEnvelope as Line

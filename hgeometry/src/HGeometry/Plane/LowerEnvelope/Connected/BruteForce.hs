@@ -25,7 +25,6 @@ import qualified Data.Map as Map
 import           Data.Map.NonEmpty (pattern IsEmpty, pattern IsNonEmpty)
 import           HGeometry.Combinatorial.Util
 import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Plane.LowerEnvelope.Clipped.Type
 import           HGeometry.Plane.LowerEnvelope.Connected.MonoidalMap
 import           HGeometry.Plane.LowerEnvelope.Connected.Region

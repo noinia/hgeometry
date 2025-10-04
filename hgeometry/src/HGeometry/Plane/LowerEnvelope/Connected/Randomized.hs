@@ -34,7 +34,6 @@ import qualified Data.Set.NonEmpty as NESet
 import qualified Data.Vector.NonEmpty as V
 import           HGeometry.Ext
 import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Intersection
 import           HGeometry.Permutation.Shuffle
 import           HGeometry.Plane.LowerEnvelope.Clipped.Type

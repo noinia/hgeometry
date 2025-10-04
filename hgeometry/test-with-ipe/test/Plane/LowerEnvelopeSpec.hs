@@ -7,8 +7,10 @@ module Plane.LowerEnvelopeSpec
   -- ) where
   where
 
+
 import           Control.Lens hiding (below)
 import           Data.Foldable
+import           Data.Bifoldable
 import           Data.Foldable1
 import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -25,13 +27,15 @@ import           Golden
 import           HGeometry.Box
 import           HGeometry.Cyclic
 import           HGeometry.Ext
+import           HGeometry.Intersection
 import           HGeometry.LineSegment
 import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Instances ()
+import           HGeometry.Polygon.Convex.Instances ()
 import           HGeometry.Number.Real.Rational
 import           HGeometry.Plane.LowerEnvelope
 import           HGeometry.Plane.LowerEnvelope.Connected
-import           HGeometry.Plane.LowerEnvelope.Clipped (ClippedMDCell''(..))
+import           HGeometry.Plane.LowerEnvelope.Clipped (ClippedMDCell, ClippedMDCell''(..))
 import qualified HGeometry.Plane.LowerEnvelope.Connected.BruteForce as BruteForce
 import qualified HGeometry.Plane.LowerEnvelope.Connected.Randomized as Randomized
 import           HGeometry.Point
@@ -55,6 +59,8 @@ import           Test.Hspec.QuickCheck
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
+import           HGeometry.Combinatorial.Util
+import           HGeometry.Polygon.Convex.Unbounded
 
 import           Debug.Trace
 --------------------------------------------------------------------------------
@@ -181,6 +187,105 @@ spec = describe "lower envelope tests" $ do
            \(Positive r') planes -> let r = max r' 3 in
              withExtraConflictListTest r planes
 
+         prop "original means definer" $
+           \(Positive r') planes -> let r = max r' 3 in
+           originalMeansDefiner r planes
+
+         runIO $ do
+           for_ [ NonVerticalHyperPlane $ fromList' [-1,-1,1]
+                , NonVerticalHyperPlane $ fromList' [-0.5,-2,1.5]
+                , NonVerticalHyperPlane $ fromList' [2,1,0]
+                ] (putStrLn . showPlaneEquation)
+
+         prop "bug" $ do
+           let tri = Triangle (Point2 2 2) (Point2 1 (-1)) (Point2 2 0)
+               planes = NESet.fromList . NonEmpty.fromList . map MyPlane $
+                       [ NonVerticalHyperPlane $ fromList' [-1,-1,1]
+                       , NonVerticalHyperPlane $ fromList' [-0.5,-2,1.5]
+                       , NonVerticalHyperPlane $ fromList' [2,1,0]
+                       ]
+           withExtraConflictListTest 3 planes tri
+           -- for some reason we get an inccorrect original vertex !?
+           -- somehow we generate a vertex at (2,1.5) which is not actually an original
+           -- vertex. Not sure how that went
+
+         prop "bug origMeansDefiner" $ do
+           let tri = Triangle (Point2 2 2) (Point2 1 (-1)) (Point2 2 0)
+               planes = NESet.fromList . NonEmpty.fromList . map MyPlane $
+                       [ NonVerticalHyperPlane $ fromList' [-1,-1,1]
+                       , NonVerticalHyperPlane $ fromList' [-0.5,-2,1.5]
+                       , NonVerticalHyperPlane $ fromList' [2,1,0]
+                       ]
+           originalMeansDefiner 3 planes tri
+
+         prop "original vertices are really original vertices (bounded)" $
+           allOriginal @(ConvexPolygon (Point 2 R))
+
+         prop "original vertices are really original vertices (unbounded)" $
+           allOriginal @(UnboundedConvexRegion (Point 2 R))
+
+
+-- | Check if all original vertices of a triangle and a polygon are really original
+allOriginal          :: ( IsIntersectableWith (Triangle (Point 2 R)) poly
+                          , Intersection (Triangle (Point 2 R)) poly ~
+                             Maybe (PossiblyDegenerateSimplePolygon
+                               (OriginalOrExtra (Point 2 R) (Point 2 R))
+                               (poly' (OriginalOrExtra (Point 2 R) (Point 2 R))))
+                        , Foldable poly'
+                        , Show (poly' (OriginalOrExtra (Point 2 R) (Point 2 R)))
+                        , HasVertices poly poly
+                        , Vertex poly ~ Point 2 R
+                        ) => poly -> Triangle (Point 2 R) -> Every
+allOriginal poly tri = case tri `intersect` poly of
+    Nothing  -> discard
+    Just res -> bifoldMap f (foldMap f) res
+      where
+        f :: OriginalOrExtra (Point 2 R) (Point 2 R) -> Every
+        f = Every . \case
+          Extra    _ -> property True
+          Original v -> counterexample (show res) . counterexample (show v) . property
+                      $ v `elem` origVertices
+
+        origVertices = tri^..vertices <> poly^..vertices
+
+
+-- seems like intersecting triangles and convex polygons incorrectly produces some 'Original' vertices?
+
+         -- it "definers test" $ do
+         --   let hs = Three (NonVerticalHyperPlane $ fromList' [-1,-1,1])
+         --                  (NonVerticalHyperPlane $ fromList' [-0.5,-2,1.5])
+         --                  (NonVerticalHyperPlane $ fromList' [2,1,0])
+         --   intersectionPoint hs `shouldNotBe` Just (Point3 2 1.5 0.5)
+         --   -- OK: this test verfies that our vertex location 2 1.5. 0.5 is incorrect
+         --
+
+-- | Check that every original vertex is the intersection of its definers
+originalMeansDefiner              :: Int -> NESet.NESet MyPlane -> Triangle (Point 2 R) -> Every
+originalMeansDefiner r planes tri =
+    case Randomized.withConflictLists remaining (BruteForce.computeVertexForm rNet) of
+      NEMap.IsEmpty                 -> discard
+      NEMap.IsNonEmpty verticesRNet -> foldMap check $ fromVertexFormIn tri rNet $ verticesRNet
+  where
+    (rNet, remaining) = Randomized.takeSample r planes
+    -- verify that for all vertices of the clipped cell, the conflict list is correct
+    check                      :: HasDefiners vertexData MyPlane
+                               => ClippedMDCell R MyPlane vertexData
+                               -> Every
+    check (ClippedMDCell cell) = case cell of
+      DegenerateVertex v       -> Every $ check' v
+      DegenerateEdge e         -> Every $ check' (e^.start) .&&.check' (e^.end)
+      ActualPolygon convexCell -> foldMapOf vertices (Every . check') convexCell
+
+    -- verify that for a given vertex its conflict list is correct
+    check'   :: HasDefiners vertexData MyPlane
+             => OriginalOrExtra (MDVertex R MyPlane vertexData) (Point 2 R)
+             -> Property
+    check' = \case
+      Original v -> case toList $ definersOf (v^.vertexData) of
+                       (a:b:c:_) -> intersectionPoint (Three a b c) === Just (v^.location)
+                       _         -> error "originalMeansDefiner. absurd"
+      Extra _    -> property True
+
 -- | verify that 'withConflictLists' is correct
 withConflictListTest                     :: NESet.NESet MyPlane -> Positive Int -> Bool
 withConflictListTest planes (Positive r) = iall correctConflictLists $
@@ -214,8 +319,8 @@ withExtraConflictListTest r planes tri =
     (rNet, remaining) = Randomized.takeSample r planes
 
     -- verify that for all vertices of the clipped cell, the conflict list is correct
-    check                        :: MyPlane
-                                 -> ClippedMDCell'' R (MDVertex R MyPlane (_, Set.Set MyPlane))
+    check                        :: Show c => MyPlane
+                                 -> ClippedMDCell'' R (MDVertex R MyPlane (c, Set.Set MyPlane))
                                                       (Point 2 R :+ (_, Set.Set MyPlane))
                                  -> Every
     check h (ClippedMDCell cell) = case cell of
@@ -224,16 +329,21 @@ withExtraConflictListTest r planes tri =
       ActualPolygon convexCell -> foldMapOf vertices (check' h) convexCell
 
     -- verify that for a given vertex its conflict list is correct
-    check'   :: MyPlane
-             -> OriginalOrExtra (MDVertex R MyPlane (_, Set.Set MyPlane))
+    check'   :: Show c => MyPlane
+             -> OriginalOrExtra (MDVertex R MyPlane (c, Set.Set MyPlane))
                                 (Point 2 R :+ (_, Set.Set MyPlane))
              -> Every
     check' h = Every . \case
       Original v                           -> let conflicts = v^.vertexData._2
                                                   z         = v^.location.zCoord
-                                              in conflicts === NESet.filter (below v z) planes
+                                               in counterexample ("orig " <> show (v^.location
+                                                                                    ,evalAt v h
+                                                                                    , v^.vertexData._1
+                                                                                  )) $
+                                                  conflicts === NESet.filter (below v z) planes
       Extra (v :+ (_extraDefs, conflicts)) -> let z = evalAt v h
-                                              in conflicts === NESet.filter (below v z) planes
+                                              in counterexample ("extra" <> show v) $
+                                                 conflicts === NESet.filter (below v z) planes
 
 
 
@@ -517,9 +627,9 @@ buggyPlanes =  NonEmpty.fromList
                  ,NonVerticalHyperPlane $ fromList' [-15.06667,-25.75,8.73076]
                  ,NonVerticalHyperPlane $ fromList' [-15,9.66666,-18]
                  ]
-  where
-    fromList' [a,b,c] = Vector3 a b c
-    fromList' _ = error "fromList'"
+
+fromList' [a,b,c] = Vector3 a b c
+fromList' _ = error "fromList'"
 
 debug = do let hs :: NonEmpty (Plane R)
                hs = buggyPlanes

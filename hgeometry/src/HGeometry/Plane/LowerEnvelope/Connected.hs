@@ -18,6 +18,7 @@ module HGeometry.Plane.LowerEnvelope.Connected
   , module HGeometry.Plane.LowerEnvelope.Connected.Primitives
   , module HGeometry.Plane.LowerEnvelope.Connected.Regions
   , module HGeometry.Plane.LowerEnvelope.Connected.BruteForce
+  , module HGeometry.Plane.LowerEnvelope.Connected.VertexForm
   ) where
 
 import HGeometry.Plane.LowerEnvelope.Connected.BruteForce
@@ -25,3 +26,4 @@ import HGeometry.Plane.LowerEnvelope.Connected.Primitives
 import HGeometry.Plane.LowerEnvelope.Connected.Region
 import HGeometry.Plane.LowerEnvelope.Connected.Regions
 import HGeometry.Plane.LowerEnvelope.Connected.Type
+import HGeometry.Plane.LowerEnvelope.Connected.VertexForm

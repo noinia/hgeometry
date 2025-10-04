@@ -32,7 +32,7 @@ import           HGeometry.Point.Either
 import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Properties
 import           HGeometry.Triangle
-
+import           Data.Kind (Type)
 
 --------------------------------------------------------------------------------
 -- * Representing (The minimization diagram of) the Lower envelope
@@ -75,13 +75,8 @@ instance CFunctor (ClippedMinimizationDiagram' r) where
 
 -- | Cells in the Minimization diagram (i.e. the projected lower envelope of planes)
 -- parameterized by the numeric type and the planes
+type ClippedMDCell           :: Type -> Type -> Type -> Type
 type ClippedMDCell r plane a = ClippedMDCell' r (MDVertex r plane a)
-
-
--- | Map the plane to some other type
-mapPlane   :: (plane -> plane') -> ClippedMDCell r plane a -> ClippedMDCell r plane' a
-mapPlane f = first (first f)
-
 
 -- | We mostly use ClippedMDCell'''s where the Extra is just a Point
 type ClippedMDCell' r vertex = ClippedMDCell'' r vertex (Point 2 r)
@@ -102,6 +97,7 @@ deriving instance (Eq vertex, Eq r, Eq extra
                   ) => Eq   (ClippedMDCell'' r vertex extra)
 
 
+-- | Iso to get the underlying polygon representing the cell
 _ClippedMDCell :: Iso (ClippedMDCell'' r vertex extra) (ClippedMDCell'' r' vertex' extra')
                       (PossiblyDegenerateSimplePolygon (OriginalOrExtra vertex extra)
                                                        (ClippedBoundedRegion r vertex extra))
@@ -109,6 +105,9 @@ _ClippedMDCell :: Iso (ClippedMDCell'' r vertex extra) (ClippedMDCell'' r' verte
                                                         (ClippedBoundedRegion r' vertex' extra'))
 _ClippedMDCell = coerced
 
+-- | Map the plane to some other type
+mapPlane   :: (plane -> plane') -> ClippedMDCell r plane a -> ClippedMDCell r plane' a
+mapPlane f = first (first f)
 
 instance Functor (ClippedMDCell'' r vertex) where
   fmap = second
