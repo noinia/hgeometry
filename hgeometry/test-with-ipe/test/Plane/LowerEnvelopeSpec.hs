@@ -60,7 +60,6 @@ import           Test.Hspec.WithTempFile
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 import           HGeometry.Combinatorial.Util
-import           HGeometry.Polygon.Convex.Unbounded
 
 -- import           Debug.Trace
 --------------------------------------------------------------------------------

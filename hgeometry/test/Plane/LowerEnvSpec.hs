@@ -81,7 +81,7 @@ instance Eq Same where
 
 
 spec :: Spec
-spec = xdescribe "Lower Envelope tests" $ do
+spec = describe "Lower Envelope tests" $ do
          it "manual" $
            let seed   = 0
                planes = NonDegenerate $ NonEmpty.fromList [ Plane 1    0 2
@@ -92,14 +92,15 @@ spec = xdescribe "Lower Envelope tests" $ do
               `shouldBe`
               Same (BruteForce.computeVertexForm planes)
 
-         prop "every vertex is valid" $
-           \seed (planes :: NonDegenerate (Plane R)) ->
-             all (`BruteForce.belowAll` planes) $
-               Map.keys (Randomized.computeVertexForm (mkStdGen seed) planes)
+         -- TODO: increase the size once we have figured out what is wrong exactly
+         modifyMaxSize (const 50) $ do
+           prop "every vertex is valid" $
+             \seed (planes :: NonDegenerate (Plane R)) ->
+               all (`BruteForce.belowAll` planes) $
+                 Map.keys (Randomized.computeVertexForm (mkStdGen seed) planes)
 
-
-         prop "same as brute force" $
-           \seed (planes :: NonDegenerate (Plane R)) ->
-             Same (Randomized.computeVertexForm (mkStdGen seed) planes)
-             ===
-             Same (BruteForce.computeVertexForm planes)
+           prop "same as brute force" $
+             \seed (planes :: NonDegenerate (Plane R)) ->
+               Same (Randomized.computeVertexForm (mkStdGen seed) planes)
+               ===
+               Same (BruteForce.computeVertexForm planes)

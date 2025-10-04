@@ -25,7 +25,6 @@ import           HGeometry.Number.Real.Rational
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Monotone
 import           HGeometry.Polygon.Simple
-import           HGeometry.Triangle
 import           Paths_hgeometry
 import           System.IO.Unsafe
 import           System.Random.Stateful

@@ -3,29 +3,31 @@ module Polygon.Convex.UnboundedSpec
   , allOriginal
   ) where
 
-import           HGeometry.Intersection
-import           Control.Lens
-import           Control.Monad.State
-import qualified Data.List.NonEmpty as NonEmpty
-import           HGeometry.Boundary
-import           HGeometry.Cyclic
-import           HGeometry.Ext
-import           HGeometry.Instances ()
-import           HGeometry.Kernel.Test.Box
-import           HGeometry.Kernel
-import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Convex
-import           HGeometry.Polygon.Convex.Unbounded
-import           HGeometry.Polygon.Convex.Instances ()
-import           HGeometry.Polygon.Instances ()
-import           Test.Hspec
-import           Test.Hspec.QuickCheck
-import           Test.QuickCheck
-import           Test.QuickCheck.Instances ()
-import           HGeometry.Polygon.Simple.PossiblyDegenerate
+import Data.Bifoldable
+import HGeometry.Intersection
+import Control.Lens
+import Control.Monad.State
+import Data.List.NonEmpty qualified as NonEmpty
+import HGeometry.Boundary
+import HGeometry.Cyclic
+import HGeometry.Instances ()
+import HGeometry.Kernel
+import HGeometry.Polygon.Class
+import HGeometry.Polygon.Convex
+import HGeometry.Polygon.Convex.Unbounded
+import HGeometry.Polygon.Convex.Instances ()
+import HGeometry.Polygon.Instances ()
+import Test.Hspec
+import Test.Hspec.QuickCheck
+import Test.QuickCheck
+import Test.QuickCheck.Instances ()
+import HGeometry.Polygon.Simple.PossiblyDegenerate
+import HGeometry.Number.Real.Rational
+import HGeometry.Point.Either
 
 --------------------------------------------------------------------------------
 
+type R = RealNumber 5
 
 -- TODO: move these tests to some module about Unbounded
 spec :: Spec
