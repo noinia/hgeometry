@@ -49,6 +49,7 @@ import Data.Kind (Type)
 import GHC.Generics (Generic)
 import Control.DeepSeq
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | An unbounded polygonal Convex Region
@@ -304,19 +305,34 @@ instance (Point_ vertex 2 r, Ord r, Fractional r
                  in HalfLine p v'
           q `liesLeftOf` l = q `onSide` asOrientedLine l == LeftSide
 
- -- TODO: not sure if it should be leftSid e or rightSide
 
 instance ( Point_ vertex 2 r, Point_ point 2 r, Ord r, Fractional r
-         , IxValue (endPoint point) ~ point, EndPoint_ (endPoint point)
+         , IxValue (endPoint (Point 2 r)) ~ Point 2 r, EndPoint_ (endPoint (Point 2 r))
+         , HasOnSegment        (LineSegment endPoint (PointF (Vector 2 r))) 2
+         , HasIntersectionWith (ClosedLineSegment (Point 2 r)) (LineSegment endPoint (Point 2 r))
+         , Functor endPoint
          ) => LineSegment endPoint point
                 `HasIntersectionWith` UnboundedConvexRegionF r NonEmpty vertex where
-  seg `intersects` region = case supportingLine seg `intersect` region of
-    Nothing   -> False
-    Just seg' -> (seg^.start.asPoint) `intersects` seg'
-               || (seg^.end.asPoint)  `intersects` seg'
+  seg0 `intersects` region = case supportingLine seg `intersect` region of
+      Nothing     -> False
+      Just inters -> case inters of
+        Line_x_UnboundedConvexRegion_Point p          -> p    `intersects` seg
+        Line_x_UnboundedConvexRegion_LineSegment seg' -> seg' `intersects` seg
+        Line_x_UnboundedConvexRegion_HalfLine  hl     -> hl   `intersects` seg
+        -- TODO: conceviably this could be faster, since we already know they are colinear
+        -- so we just ahve to test if the endpoint ordering is ok;
+    where
+      seg = view asPoint <$> seg0
+      -- (seg^.start.asPoint)  `intersects` seg'
+      --         || (seg^.end.asPoint)    `intersects` seg'
+      --         || pointOf seg'          `intersects` seg
+      -- where
+      --         || (seg'^.start.asPoint) `intersects` seg
+      --         || (seg'^.end.asPoint)   `intersects` seg
 
 --------------------------------------------------------------------------------
 -- * Intersection of a Triangle with an Unbounded Convex Polygon
+
 
 type instance Intersection (Triangle corner) (UnboundedConvexRegionF r nonEmpty vertex)
   = Intersection (Triangle corner) (ConvexPolygonF (Cyclic nonEmpty) vertex)
