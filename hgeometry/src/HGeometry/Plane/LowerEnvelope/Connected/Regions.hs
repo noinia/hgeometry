@@ -24,43 +24,42 @@ module HGeometry.Plane.LowerEnvelope.Connected.Regions
   , fromMinimizationDiagramIn
   , fromVertexFormIn
   , ClippedBoundedRegion
-
-
   -- , extraPoints
   ) where
 
-import           Control.Lens
-import           Data.Coerce
-import qualified Data.Foldable as F
-import           Data.Foldable1 as F1
-import qualified Data.List as List
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Map.NonEmpty (NEMap, pattern IsEmpty, pattern IsNonEmpty)
-import qualified Data.Map.NonEmpty as Map
-import           Data.Maybe (fromMaybe)
-import           Data.Ord (comparing)
-import           Data.Set.NonEmpty (NESet)
-import qualified Data.Set.NonEmpty as Set
-import           HGeometry.Combinatorial.Util
-import           HGeometry.Ext
-import           HGeometry.HyperPlane.Class
-import           HGeometry.Intersection
-import           HGeometry.Map.NonEmpty.Monoidal
-import           HGeometry.NonEmpty.Util
-import           HGeometry.Plane.LowerEnvelope.Clipped.Type
-import           HGeometry.Plane.LowerEnvelope.Connected.Primitives (intersectionVector)
-import           HGeometry.Plane.LowerEnvelope.Connected.Region
-import           HGeometry.Plane.LowerEnvelope.Connected.Type
-import           HGeometry.Plane.LowerEnvelope.Connected.VertexForm
-import           HGeometry.Point
-import           HGeometry.Point.Either
-import           HGeometry.Polygon.Simple.Class
-import           HGeometry.Polygon.Simple.PossiblyDegenerate
-import           HGeometry.Triangle
-import           HGeometry.Vector
-import           HGeometry.Polygon.Convex.Unbounded
+import Data.Bifunctor
+import Control.Lens
+import Data.Foldable qualified as F
+import Data.Foldable1 as F1
+import Data.List qualified as List
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.List.NonEmpty qualified as NonEmpty
+import Data.Map.NonEmpty (NEMap, pattern IsEmpty, pattern IsNonEmpty)
+import Data.Map.NonEmpty qualified as Map
+import Data.Maybe (fromMaybe)
+import Data.Ord (comparing)
+import Data.Set.NonEmpty (NESet)
+import Data.Set.NonEmpty qualified as Set
+import HGeometry.Combinatorial.Util
+import HGeometry.Ext
+import HGeometry.HyperPlane.Class
+import HGeometry.Intersection
+import HGeometry.Map.NonEmpty.Monoidal
+import HGeometry.Set.NonEmpty qualified as Set
+import HGeometry.Plane.LowerEnvelope.Clipped.Type
+import HGeometry.Plane.LowerEnvelope.Connected.Primitives (intersectionVector)
+import HGeometry.Plane.LowerEnvelope.Connected.Region
+import HGeometry.Plane.LowerEnvelope.Connected.Type
+import HGeometry.Plane.LowerEnvelope.Connected.VertexForm
+import HGeometry.Point
+import HGeometry.Point.Either
+import HGeometry.Polygon.Simple.Class
+import HGeometry.Polygon.Simple.PossiblyDegenerate
+import HGeometry.Triangle
+import HGeometry.Vector
+import HGeometry.Polygon.Convex.Unbounded
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 
@@ -87,10 +86,13 @@ findNeighbours h (Definers defs) = withNeighs <$> elemIndex h defs
 -- | Compute the plane that is cheapest vertically above the vertex.
 --
 -- pre: all planes contain the given point
-extractH0                   :: (Plane_ plane r, Eq plane, Ord r, Fractional r)
-                            => Point 3 r -> NonEmpty plane -> (plane, [plane])
-extractH0 (Point3 x y _) hs = case extractMinimaBy (comparing $ evalAt (Point2 x (y+1))) hs of
-                                (h0 :| eqs) :+ rest -> (h0, (filter (/= h0) eqs) <> rest)
+extractH0                   :: (Plane_ plane r, Ord plane, Ord r, Fractional r)
+                            => Point 3 r -> NESet plane -> (plane, [plane])
+extractH0 (Point3 x y _) hs =
+  case first Set.deleteFindMin $ Set.extractMinimaBy (comparing $ evalAt (Point2 x (y+1))) hs of
+    (h0, eqs) :+ rest -> (h0, F.toList eqs <> F.toList rest)
+                         -- note that eqs <> rest is not correctly ordered anymore
+                         -- hence we return a list rather than a Set of planes.
 
 -- | Given three planes h0, h and h' that all intersect in a common vertex v,
 -- and so that h0 is the lowest plane vertically above v, order the
@@ -110,16 +112,19 @@ cmpPlanesAround h0 h h' | h == h'   = EQ
 -- | Merge two lists of definers.
 --
 -- \(O(n\log n)\), where \(n\) is the total number of planes involved.
-mergeDefiners               :: (Plane_ plane r, Eq plane, Ord r, Fractional r
+mergeDefiners               :: (Plane_ plane r, Ord plane, Ord r, Fractional r
                                , Show plane, Show r
                                )
                             => Point 3 r
                             -> Definers plane -> Definers plane
                             -> Definers plane
-mergeDefiners v defs0 defs1 = case extractH0 v (coerce defs0 <> coerce defs1) of
-    (h0, planes) -> Definers . dropDuplicates $ h0 :| List.sortBy (cmpPlanesAround h0) planes
+-- mergeDefiners v defs0 defs1 | traceShow ("MD",v,defs0,defs1) False = undefined
+mergeDefiners v defs0 defs1 = case extractH0 v (toSet defs0 <> toSet defs1) of
+  (h0, planes) -> -- let planes' = traceShowWith ("H0",h0,", + ",) planes in
+    Definers $ h0 :| List.sortBy (cmpPlanesAround h0) planes
   where
-    dropDuplicates = fmap NonEmpty.head . NonEmpty.group1
+    toSet = foldMap1 Set.singleton
+
 -- TODO: We may need some filtering pass to remove planes that are no longer definers
 -- e.g. when some plane passes through v but does not actually show up on the envelope.
 -- I'll leave that for later though.
