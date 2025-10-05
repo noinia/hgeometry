@@ -1,17 +1,20 @@
 module Main(main) where
 
+import Control.DeepSeq
 import Data.Word
 import HGeometry.Plane.LowerEnvelope.Connected.Randomized qualified as Randomized
 import HGeometry.Number.Real.Rational
 import HGeometry.VoronoiDiagram (VoronoiDiagram, voronoiDiagramWith')
+import HGeometry.VoronoiDiagram qualified as BruteForce
 import HGeometry.Kernel
 import Control.Lens
 import System.Random
 import Data.Foldable1
-import Control.DeepSeq (force)
 import Data.List qualified as List
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.List.NonEmpty qualified as NonEmpty
+import Test.Tasty.Bench
+
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -38,5 +41,11 @@ main :: IO ()
 main = do
   let n = 50
   pts <- force . fmap fromPoint <$> randomPoints n
-  let vd = voronoiDiagram pts
-  print vd
+  -- let vd = voronoiDiagram pts
+  -- print vd
+  defaultMain
+    [ bgroup "Lower Envelope/Voronoi Diagram Benchmarks"
+        [ bench "Randomized"    $ nf voronoiDiagram pts
+        , bench "Brute Force"   $ nf BruteForce.voronoiDiagram pts
+        ]
+    ]

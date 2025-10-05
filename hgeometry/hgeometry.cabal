@@ -952,33 +952,41 @@ test-suite svg-hspec
 --------------------------------------------------------------------------------
 -- ** HGeometry Benchmarks
 
-benchmark benchmarks
-  import: all-setup, hgeometry-setup
-  hs-source-dirs: bench
+common bench-setup
+  build-depends:
+      tasty-bench           >= 0.3  && < 1
+    , hgeometry
+    , deepseq-generics      >= 0.2  && < 1
+    , hashable              >= 1.4  && < 2
 
-  main-is: Benchmarks.hs
+benchmark benchmarks
+  import: all-setup, hgeometry-setup, bench-setup
+  hs-source-dirs: bench
+  main-is:
+    Benchmarks.hs
   type: exitcode-stdio-1.0
-  -- ghc-options:
-  --             -prof
-  --             -fprof-late-inline
-  --             -fprof-auto
-  --             -rtsopts "-with-rtsopts=-p"
+
   other-modules:
     ConvexHull.Bench
-
     ConvexHull.GrahamBench
     ConvexHull.GrahamV2
     ConvexHull.GrahamInt
     ConvexHull.GrahamFastest
-
     -- ConvexHull.GrahamClassy
-
     Util
-  build-depends: tasty-bench           >= 0.3  && < 1
-               , hgeometry
-               , deepseq-generics      >= 0.2  && < 1
-               , hashable              >= 1.4  && < 2
 
+benchmark lowerEnv
+  import: all-setup, hgeometry-setup, bench-setup
+  hs-source-dirs: bench
+  main-is:
+    LowerEnvBench.hs
+  type: exitcode-stdio-1.0
+  -- ghc-options:
+  --   -prof
+  --   -fprof-late-inline
+  --   -fprof-auto
+  --   -rtsopts "-with-rtsopts=-p"
+  other-modules:
 
 benchmark vector-bench
     import: all-setup, vector-setup, all-quickcheck-setup, vector-quickcheck-setup
