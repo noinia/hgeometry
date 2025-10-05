@@ -18,6 +18,8 @@ import HGeometry.Polygon.Convex.Unbounded
 import HGeometry.Properties
 import HGeometry.Vector
 import HGeometry.Cyclic
+import GHC.Generics (Generic)
+import Control.DeepSeq
 
 --------------------------------------------------------------------------------
 
@@ -29,11 +31,13 @@ data MDVertex r plane a  = MDVertex { _location   :: Point 3 r
                                     , _definers   :: Definers plane
                                      -- ^ the definers of the vertex
                                     , _vertexData :: a
-                                    } deriving (Show,Eq,Ord,Functor,Foldable)
+                                    } deriving stock (Show,Eq,Ord,Functor,Foldable,Generic)
 makeLenses ''MDVertex
 
 type instance Dimension (MDVertex r plane a) = 2
 type instance NumType   (MDVertex r plane a) = r
+
+instance (NFData r, NFData plane, NFData a) => NFData (MDVertex r plane a)
 
 instance Num r => IsBoxable (MDVertex r plane a) where
   boundingBox = boundingBox . view asPoint
@@ -70,10 +74,12 @@ type ClippedBoundedRegion r vertex corner =
 -- region is to the left of the boundary.
 data Region r vertex = BoundedRegion   (ConvexPolygonF (Cyclic NonEmpty) vertex)
                      | UnboundedRegion (UnboundedConvexRegionF r NonEmpty vertex)
-                     deriving stock (Functor,Foldable,Traversable)
+                     deriving stock (Functor,Foldable,Traversable,Generic)
 
 type instance NumType   (Region r point) = r
 type instance Dimension (Region r point) = Dimension point
+
+instance (NFData r, NFData vertex) => NFData (Region r vertex)
 
 deriving instance (Show r, Show vertex, Point_ vertex 2 r) => Show (Region r vertex)
 deriving instance (Eq r, Eq vertex) => Eq (Region r vertex)

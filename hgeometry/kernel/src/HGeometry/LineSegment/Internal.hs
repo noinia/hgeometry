@@ -37,6 +37,8 @@ import HGeometry.Transformation
 import HGeometry.Vector
 import Text.Read
 import Data.Foldable1
+import GHC.Generics (Generic)
+import Control.DeepSeq
 
 -- import HGeometry.Number.Real.Rational
 -- import Debug.Trace
@@ -64,6 +66,8 @@ import Data.Foldable1
 -- | Data type representing intervals
 type LineSegment :: (Type -> Type) -> Type -> Type
 newtype LineSegment endPoint point = MkLineSegment (Interval endPoint point)
+              deriving (Generic)
+              deriving newtype (NFData)
 
 -- | A type representing Closed LineSegments
 type ClosedLineSegment point = LineSegment (EndPoint Closed) point

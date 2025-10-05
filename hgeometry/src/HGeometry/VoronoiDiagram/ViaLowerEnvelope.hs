@@ -22,33 +22,34 @@ module HGeometry.VoronoiDiagram.ViaLowerEnvelope
   , pointToPlane
   ) where
 
-import           Control.Lens
-import           Control.Subcategory.Functor
-import           Data.Bifunctor
-import           Data.Foldable1
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Map (Map)
-import qualified Data.Map.NonEmpty as NEMap
-import           Data.Set (Set)
-import qualified Data.Set as Set
-import qualified Data.Vector as Vector
-import           HGeometry.Duality
-import           HGeometry.Ext
-import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Line.General
-import           HGeometry.Plane.LowerEnvelope ( MinimizationDiagram, Region(..)
-                                               , lowerEnvelope, LowerEnvelope(..)
-                                               , MDVertex(..), mapVertices
-                                               , VertexForm
-                                               , lowerEnvelopeWith, connectedLowerEnvelopeWith
-                                               )
-import qualified HGeometry.Plane.LowerEnvelope as LowerEnvelope
-import           HGeometry.Point
-import           HGeometry.Properties
-import           HGeometry.Sequence.Alternating (Alternating(..))
-import           HGeometry.Polygon.Convex.Unbounded
-
+import Control.Lens
+import Control.Subcategory.Functor
+import Data.Bifunctor
+import Data.Foldable1
+import Data.List.NonEmpty qualified as NonEmpty
+import Data.Map (Map)
+import Data.Map.NonEmpty qualified as NEMap
+import Data.Set (Set)
+import Data.Set qualified as Set
+import Data.Vector qualified as Vector
+import HGeometry.Duality
+import HGeometry.Ext
+import HGeometry.HyperPlane.Class
+import HGeometry.HyperPlane.NonVertical
+import HGeometry.Line.General
+import HGeometry.Plane.LowerEnvelope ( MinimizationDiagram, Region(..)
+                                     , lowerEnvelope, LowerEnvelope(..)
+                                     , MDVertex(..), mapVertices
+                                     , VertexForm
+                                     , lowerEnvelopeWith, connectedLowerEnvelopeWith
+                                     )
+import HGeometry.Plane.LowerEnvelope qualified as LowerEnvelope
+import HGeometry.Point
+import HGeometry.Properties
+import HGeometry.Sequence.Alternating (Alternating(..))
+import HGeometry.Polygon.Convex.Unbounded
+import GHC.Generics (Generic)
+import Control.DeepSeq
 
 --------------------------------------------------------------------------------
 
@@ -58,7 +59,8 @@ type VoronoiDiagram point vtxData = VoronoiDiagram_ (NumType point) point vtxDat
 data VoronoiDiagram_ r point vtxData =
     AllColinear !(Alternating Vector.Vector (VerticalOrLineEQ r) point)
   | ConnectedVD !(VoronoiDiagram' (MDVertex r point vtxData) point)
-                     --               (NumType point) (Point 2 (NumType point))
+  deriving stock (Generic)
+--               (NumType point) (Point 2 (NumType point))
 
     -- Point 2 (NumType point)) )
 
@@ -69,6 +71,10 @@ deriving instance (Show point, Show r, Num r, Show vtxData
 deriving instance (Eq point, Eq (NumType point), Eq r, Eq vtxData
                   ) => Eq   (VoronoiDiagram_ r point vtxData)
 
+instance (NFData point, NFData r, NFData vtxData, NFData (NumType point)
+         ) => NFData (VoronoiDiagram_ r point vtxData)
+
+
 type instance NumType   (VoronoiDiagram_ r point vtxData) = r
 type instance Dimension (VoronoiDiagram_ r point vtxData) = 2 -- Dimension point
 
@@ -78,12 +84,17 @@ type instance Dimension (VoronoiDiagram_ r point vtxData) = 2 -- Dimension point
 -- | A connected VoronoiDiagram
 newtype VoronoiDiagram' vertex point =
   VoronoiDiagram (MinimizationDiagram (NumType point) vertex point)
+  deriving stock (Generic)
 
 deriving instance ( Show point, Show vertex, Show (NumType point)
                   , Point_ point 2 (NumType point)
                   , Point_ vertex 2 (NumType point)
                   ) => Show (VoronoiDiagram' vertex point)
 deriving instance (Eq point, Eq vertex, Eq (NumType point))     => Eq   (VoronoiDiagram' vertex point)
+
+deriving instance (NFData (NumType point), NFData vertex, NFData point
+                  ) => NFData (VoronoiDiagram' vertex point)
+
 
 type instance NumType   (VoronoiDiagram' vertex point) = NumType point
 type instance Dimension (VoronoiDiagram' vertex point) = 2 -- Dimension point

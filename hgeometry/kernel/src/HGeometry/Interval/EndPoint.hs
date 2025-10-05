@@ -23,6 +23,7 @@ module HGeometry.Interval.EndPoint
 import Control.Lens
 import Data.Foldable1
 import GHC.Generics (Generic)
+import Control.DeepSeq
 import HGeometry.Properties
 import Text.Read
 
@@ -43,6 +44,7 @@ class IsEndPoint endPoint endPoint => EndPoint_ endPoint where
 -- | Possible endpoint types; open or closed
 data EndPointType = Open | Closed deriving (Show,Read,Eq,Ord,Enum,Bounded,Generic)
 
+instance NFData EndPointType
 
 -- testV :: Vector 2 (Point 2 Double)
 -- testV = Vector2 (Point2 5.0 6.0) (Point2 10.0 1.0)
@@ -55,6 +57,7 @@ data EndPointType = Open | Closed deriving (Show,Read,Eq,Ord,Enum,Bounded,Generi
 -- | EndPoint with a type safe tag
 newtype EndPoint (et :: EndPointType) r = EndPoint r
   deriving stock (Eq,Ord,Functor,Foldable,Traversable,Generic)
+  deriving newtype (NFData)
 
 instance Show r => Show (EndPoint Closed r) where
   showsPrec = showsPrecImpl "ClosedE"

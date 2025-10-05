@@ -43,29 +43,30 @@ module HGeometry.Plane.LowerEnvelope.Connected.Type
   -- , EdgeDefiners(..)
   ) where
 
-import           Control.Lens
-import           Control.Subcategory.Functor
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Map.NonEmpty (NEMap)
-import qualified Data.Map.NonEmpty as NEMap
-import           Data.Monoid (First(..))
-import           HGeometry.Box
-import           HGeometry.Cyclic
--- import           HGeometry.Cyclic
-import           HGeometry.Direction
-import           HGeometry.HalfLine
-import           HGeometry.Intersection
-import           HGeometry.LineSegment
-import           HGeometry.Plane.LowerEnvelope.Connected.Region
-import           HGeometry.Point
-import           HGeometry.Point.Either
-import           HGeometry.Polygon.Convex
-import           HGeometry.Polygon.Convex.Unbounded
-import           HGeometry.Polygon.Simple.Class
-import           HGeometry.Properties
-import           HGeometry.Vector
-import           HGeometry.Vector.NonEmpty.Util ()
+import Control.Lens
+import Control.Subcategory.Functor
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.List.NonEmpty qualified as NonEmpty
+import Data.Map.NonEmpty (NEMap)
+import Data.Map.NonEmpty qualified as NEMap
+import Data.Monoid (First(..))
+import HGeometry.Box
+import HGeometry.Cyclic
+import HGeometry.Direction
+import HGeometry.HalfLine
+import HGeometry.Intersection
+import HGeometry.LineSegment
+import HGeometry.Plane.LowerEnvelope.Connected.Region
+import HGeometry.Point
+import HGeometry.Point.Either
+import HGeometry.Polygon.Convex
+import HGeometry.Polygon.Convex.Unbounded
+import HGeometry.Polygon.Simple.Class
+import HGeometry.Properties
+import HGeometry.Vector
+import HGeometry.Vector.NonEmpty.Util ()
+import GHC.Generics (Generic)
+import Control.DeepSeq
 
 --------------------------------------------------------------------------------
 -- * The Minimization Diagram, i.e. the type that we use to represent our
@@ -74,10 +75,12 @@ import           HGeometry.Vector.NonEmpty.Util ()
 -- | A minimization daigram just maps every plane on the lower envelope to the region
 -- above which it is minimal. Every plane has at most one such a region.
 newtype MinimizationDiagram r vertex plane = MinimizationDiagram (NEMap plane (Region r vertex))
-  deriving stock (Show,Eq)
+  deriving stock (Show,Eq,Generic)
+  deriving newtype (NFData)
 
 type instance NumType   (MinimizationDiagram r vertex plane) = r
 type instance Dimension (MinimizationDiagram r vertex plane) = 2
+
 
 instance Constrained (MinimizationDiagram r vertex) where
   type Dom (MinimizationDiagram r vertex) plane = ( Ord plane, NumType plane ~ r

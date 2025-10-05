@@ -20,13 +20,17 @@ import Data.Bifoldable
 import Data.Bitraversable
 import HGeometry.Point
 import HGeometry.Properties
+import GHC.Generics (Generic)
+import Control.DeepSeq
 
 --------------------------------------------------------------------------------
 
 -- | Helper type for distinguishing original vertices from extra ones.
 data OriginalOrExtra orig extra = Original orig
                                 | Extra    extra
-                                deriving (Show,Eq,Functor)
+                                deriving stock (Show,Eq,Functor,Generic)
+
+instance (NFData orig, NFData extra) => NFData (OriginalOrExtra orig extra)
 
 -- | Shorthand for an Original or a Canonical Point
 type OriginalOrCanonical orig = OriginalOrExtra orig (CanonicalPoint orig)

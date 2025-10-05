@@ -20,22 +20,23 @@ module HGeometry.Plane.LowerEnvelope.Clipped.Type
   , foldMapVertices
   ) where
 
-import           Control.Lens
-import           Control.Subcategory.Functor
-import           Data.Bifunctor
-import           Data.Bifoldable1
-import           Data.Foldable1
-import           Data.Map.NonEmpty (NEMap)
-import qualified Data.Map.NonEmpty as NEMap
-import           HGeometry.Intersection
-import           HGeometry.Plane.LowerEnvelope.Connected.Region
-import           HGeometry.Point
-import           HGeometry.Box
-import           HGeometry.Point.Either
-import           HGeometry.Polygon.Simple.PossiblyDegenerate
-import           HGeometry.Properties
-import           HGeometry.Triangle
-import           Data.Kind (Type)
+import Control.Lens
+import Control.Subcategory.Functor
+import Data.Bifunctor
+import Data.Bifoldable1
+import Data.Foldable1
+import Data.Map.NonEmpty (NEMap)
+import Data.Map.NonEmpty qualified as NEMap
+import HGeometry.Intersection
+import HGeometry.Plane.LowerEnvelope.Connected.Region
+import HGeometry.Point
+import HGeometry.Box
+import HGeometry.Point.Either
+import HGeometry.Polygon.Simple.PossiblyDegenerate
+import HGeometry.Properties
+import HGeometry.Triangle
+import Data.Kind (Type)
+import Control.DeepSeq
 
 --------------------------------------------------------------------------------
 -- * Representing (The minimization diagram of) the Lower envelope
@@ -55,6 +56,8 @@ newtype ClippedMinimizationDiagram' r plane =
 -- TODO: expose the a type instead of ()
 
 deriving instance (Show r, Num r, Show plane) => Show (ClippedMinimizationDiagram' r plane)
+deriving instance (NFData r, NFData plane)    => NFData (ClippedMinimizationDiagram' r plane)
+
 
 type instance NumType   (ClippedMinimizationDiagram' r plane) = r
 type instance Dimension (ClippedMinimizationDiagram' r plane) = 2
@@ -98,6 +101,9 @@ deriving instance (Show vertex, Point_ vertex 2 r, Point_ extra  2 r, Show extra
                   ) => Show (ClippedMDCell'' r vertex extra)
 deriving instance (Eq vertex, Eq r, Eq extra
                   ) => Eq   (ClippedMDCell'' r vertex extra)
+
+deriving instance (NFData vertex, NFData r, NFData extra
+                  ) => NFData   (ClippedMDCell'' r vertex extra)
 
 
 -- | Iso to get the underlying polygon representing the cell

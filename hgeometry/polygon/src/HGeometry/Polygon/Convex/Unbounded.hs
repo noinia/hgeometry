@@ -19,24 +19,26 @@ module HGeometry.Polygon.Convex.Unbounded
   , toBoundedFrom
   ) where
 
-import           Control.Lens
-import           Data.Foldable1
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Ord (comparing)
-import           HGeometry.Box as Box
-import           HGeometry.Cyclic
-import           HGeometry.HalfLine
-import           HGeometry.HalfSpace
-import           HGeometry.HyperPlane.Class
-import           HGeometry.Intersection
-import           HGeometry.Line
-import           HGeometry.Point
-import           HGeometry.Polygon
-import           HGeometry.Properties
-import           HGeometry.Triangle as Triangle
-import           HGeometry.Vector
-import           Data.Kind (Type)
+import Control.Lens
+import Data.Foldable1
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.List.NonEmpty qualified as NonEmpty
+import Data.Ord (comparing)
+import HGeometry.Box as Box
+import HGeometry.Cyclic
+import HGeometry.HalfLine
+import HGeometry.HalfSpace
+import HGeometry.HyperPlane.Class
+import HGeometry.Intersection
+import HGeometry.Line
+import HGeometry.Point
+import HGeometry.Polygon
+import HGeometry.Properties
+import HGeometry.Triangle as Triangle
+import HGeometry.Vector
+import Data.Kind (Type)
+import GHC.Generics (Generic)
+import Control.DeepSeq
 
 --------------------------------------------------------------------------------
 
@@ -55,11 +57,13 @@ data UnboundedConvexRegionF r nonEmpty (vertex :: Type) =
             -- ^ the vector indicating the direction of the unbounded
             -- edge incident to the last vertex. The vector points
             -- away from the vertex (i.e. towards +infty).
-  deriving stock (Show,Eq,Functor,Foldable,Traversable)
+  deriving stock (Show,Eq,Functor,Foldable,Traversable,Generic)
 
 type instance NumType   (UnboundedConvexRegionF r nonEmpty vertex) = r
 type instance Dimension (UnboundedConvexRegionF r nonEmpty vertex) = 2
 
+instance (NFData r, NFData (nonEmpty vertex)
+         ) => NFData (UnboundedConvexRegionF r nonEmpty vertex)
 
 -- | Lens to access the chain of vertices in CCW order
 chain :: Lens (UnboundedConvexRegionF r nonEmpty vertex)

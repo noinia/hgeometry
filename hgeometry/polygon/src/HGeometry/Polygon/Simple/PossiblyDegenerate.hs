@@ -14,6 +14,7 @@ module HGeometry.Polygon.Simple.PossiblyDegenerate
   , HalfPlane_x_SimplePolygon_Component
   ) where
 
+import Control.DeepSeq
 import Control.Lens
 import HGeometry.Ext
 import HGeometry.HalfSpace
@@ -26,6 +27,7 @@ import HGeometry.Properties
 import Data.Bifoldable1
 import Data.Foldable1
 import Data.Bifoldable
+import GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 
@@ -35,7 +37,10 @@ data PossiblyDegenerateSimplePolygon vertex polygon =
     DegenerateVertex vertex
   | DegenerateEdge (ClosedLineSegment vertex)
   | ActualPolygon polygon
-  deriving (Show,Eq,Functor)
+  deriving (Show,Eq,Functor,Generic)
+
+instance (NFData vertex, NFData polygon
+         ) => NFData (PossiblyDegenerateSimplePolygon vertex polygon)
 
 instance Bifunctor PossiblyDegenerateSimplePolygon where
   bimap f g = \case
