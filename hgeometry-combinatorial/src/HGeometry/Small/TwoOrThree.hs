@@ -9,7 +9,7 @@
 --
 --------------------------------------------------------------------------------
 module HGeometry.Small.TwoOrThree
-  ( TwoOrThree(..)
+  ( TwoOrThree(..), Two, Three, pattern Two, pattern Three
   ) where
 
 import Data.Foldable1
@@ -18,14 +18,12 @@ import Data.Bitraversable
 import Data.Semigroup.Bitraversable
 import Data.Semigroup.Bifoldable
 import Data.Semigroup.Traversable
-import Linear.V2(V2(..))
-import Linear.V3(V3(..))
+import HGeometry.Combinatorial.Util
 
 --------------------------------------------------------------------------------
 
-
 -- | Either two or three elements
-newtype TwoOrThree a = TwoOrThree (Either (V2 a) (V3 a))
+newtype TwoOrThree a = TwoOrThree (Either (Two a) (Three a))
                      deriving (Show,Eq,Ord)
 
 instance Functor TwoOrThree where

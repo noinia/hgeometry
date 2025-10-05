@@ -1,4 +1,6 @@
 {-# LANGUAGE UndecidableInstances  #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use camelCase" #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Polygon.Convex.Unbounded
@@ -14,11 +16,13 @@ module HGeometry.Polygon.Convex.Unbounded
   , UnboundedConvexRegionF(..)
   , extremalVertices
   , mapChain
-
+  , boundedCore
+  , unboundedBoundingHalfplanes
 
   , toBoundedFrom
   ) where
 
+import HGeometry.Small.TwoOrThree
 import Control.Lens
 import Data.Foldable1
 import Data.List.NonEmpty (NonEmpty(..))
@@ -27,18 +31,24 @@ import Data.Ord (comparing)
 import HGeometry.Box as Box
 import HGeometry.Cyclic
 import HGeometry.HalfLine
+import HGeometry.Foldable.Util
 import HGeometry.HalfSpace
 import HGeometry.HyperPlane.Class
 import HGeometry.Intersection
 import HGeometry.Line
 import HGeometry.Point
 import HGeometry.Polygon
+import HGeometry.LineSegment
+import HGeometry.LineSegment.PossiblyDegenerate
+import HGeometry.Polygon.Simple.PossiblyDegenerate
 import HGeometry.Properties
 import HGeometry.Triangle as Triangle
 import HGeometry.Vector
 import Data.Kind (Type)
 import GHC.Generics (Generic)
 import Control.DeepSeq
+import HGeometry.Line.Class
+import HGeometry.Line.PointAndVector
 
 --------------------------------------------------------------------------------
 
@@ -91,12 +101,43 @@ extremalVertices (Unbounded _ (p :| pts) _) = case NonEmpty.nonEmpty pts of
 -- whereas the first one has it to its right.
 boundingRays                          :: (Point_ vertex 2 r, Num r)
                                       => UnboundedConvexRegionF r NonEmpty vertex
-                                     -> (Vector 2 (HalfLine vertex))
+                                      -> Vector 2 (HalfLine vertex)
 boundingRays chain'@(Unbounded v _ w) = compute $ case extremalVertices chain' of
                                           Left p   -> Vector2 p p
                                           Right vs -> vs
   where
     compute (Vector2 p q) = Vector2 (HalfLine p $ negated v) (HalfLine q w)
+
+
+-- | Computes the core of the unbounded region; i.e. the convex hull of the
+-- vertices of the region.
+boundedCore                     :: ( VertexContainer nonEmpty vertex, Point_ vertex 2 r
+                                   , HasFromFoldable1 nonEmpty
+                                   )
+                                => UnboundedConvexRegionF r nonEmpty vertex
+                                -> PossiblyDegenerateSimplePolygon vertex
+                                        (ConvexPolygonF (Cyclic nonEmpty) vertex)
+boundedCore (Unbounded _ pts _) = case toNonEmpty pts of
+  (u :| [])  -> DegenerateVertex u
+  (u :| [v]) -> DegenerateEdge $ ClosedLineSegment u v
+  _          -> ActualPolygon $ uncheckedFromCCWPoints pts
+
+
+-- | the 2 or three halfplanes bounding the unbounded part of the region
+-- in particular: the region minus its bounded core
+unboundedBoundingHalfplanes :: (Point_ vertex 2 r, Num r)
+                            => UnboundedConvexRegionF r NonEmpty vertex
+                            -> TwoOrThree (HalfPlaneF (LinePV 2 r))
+unboundedBoundingHalfplanes region@(Unbounded v _ w) =
+    TwoOrThree . bimap two three $ extremalVertices region
+  where
+    two (view asPoint -> p) = Two (HalfSpace Positive (LinePV p v))
+                                  (HalfSpace Positive (LinePV p w))
+    three (fmap (view asPoint) -> Vector2 p q) =
+       Three (HalfSpace Positive (LinePV p v)        )
+             (HalfSpace Positive (LinePV q w)        )
+             (HalfSpace Positive (LinePV p (q .-. p)))
+-- TODO: make sure I have the sides right
 
 
 {-
@@ -297,17 +338,141 @@ instance ( Point_ vertex 2 r, Num r, Ord r
 
 
 --------------------------------------------------------------------------------
+-- * Intersection of a Point and a Unbounded Convex Polygon
+
+
+
+
+instance (Point_ vertex 2 r, Ord r, Fractional r
+         ) => Point 2 r `HasIntersectionWith` UnboundedConvexRegionF r NonEmpty vertex where
+  q `intersects` region = all (q `intersects`) (unboundedBoundingHalfplanes region)
+                       || q `intersects` boundedCore region
+
+--------------------------------------------------------------------------------
+-- * Intersection of a LineSegment with an Unbounded Convex Polygon
+
+-- type instance Intersection (LineSegment endPoint point)
+--                            (UnboundedConvexRegionF r nonEmpty vertex) =
+--    Intersection (LineSegment endPoint point)
+--                 (ConvexPolygonF (Cyclic nonEmpty) vertex)
+
+-- data instance Intersection (LineSegment endPoint point)
+--                            (ConvexPolygonF (Cyclic nonEmpty) vertex) =
+
+
+instance (Point_ vertex 2 r, Ord r, Fractional r
+         ) => LinePV 2 r
+                `HasIntersectionWith` UnboundedConvexRegionF r NonEmpty vertex where
+  line `intersects` region = any (line `intersects`) (boundingRays region)
+                          || any (line `intersects`) (boundedCore region)
+
+-- | Intersection between a halfline and a unbounded convex region
+data LineUnboundedConvexRegionIntersection r =
+    Line_x_UnboundedConvexRegion_HalfLine    (HalfLine (Point 2 r))
+  | Line_x_UnboundedConvexRegion_LineSegment (ClosedLineSegment (Point 2 r))
+  | Line_x_UnboundedConvexRegion_Point       (Point 2 r)
+  deriving (Show,Eq)
+
+instance (Ord r, Num r
+         ) => Point 2 r `HasIntersectionWith` LineUnboundedConvexRegionIntersection r where
+  intersects q = \case
+    Line_x_UnboundedConvexRegion_HalfLine    hl  -> q `intersects` hl
+    Line_x_UnboundedConvexRegion_LineSegment seg -> q `intersects` seg
+    Line_x_UnboundedConvexRegion_Point       p   -> p == q
+
+
+type instance Intersection (LinePV 2 r) (UnboundedConvexRegionF r nonEmpty vertex) =
+  Maybe (LineUnboundedConvexRegionIntersection r)
+
+
+
+
+
+-- boundingRayIntersections line rays = case withIntersection <$> rays of
+
+--   where
+--     withIntersection ray = (,ray) <$> line `intersect` ray
+
+-- withIntersection <$> boundingRays
+
+instance (Point_ vertex 2 r, Ord r, Fractional r
+         ) => LinePV 2 r
+                `IsIntersectableWith` UnboundedConvexRegionF r NonEmpty vertex where
+  line `intersect` region = case withIntersection <$> boundingRays region of
+      -- somehow both rays intersect the line
+      Vector2 (Just (ps,_)) (Just (qs,_)) -> Just $ case ps of
+        Line_x_HalfLine_HalfLine hl -> Line_x_UnboundedConvexRegion_HalfLine hl
+        Line_x_HalfLine_Point p     -> case qs of
+          Line_x_HalfLine_HalfLine hl         -> Line_x_UnboundedConvexRegion_HalfLine hl
+          Line_x_HalfLine_Point q | p == q    -> Line_x_UnboundedConvexRegion_Point p
+                                  | otherwise -> Line_x_UnboundedConvexRegion_LineSegment
+                                                   $ ClosedLineSegment p q
+
+      -- the rays do not intersect the line
+      Vector2 Nothing Nothing                 -> boundedIntersection <&> \case
+         SinglePoint p     -> Line_x_UnboundedConvexRegion_Point p
+         ActualSegment seg -> Line_x_UnboundedConvexRegion_LineSegment seg
+
+      -- exactly one ray intersects the line
+      Vector2 ps Nothing               -> intersectBounded <$> ps
+      Vector2 Nothing  qs              -> intersectBounded <$> qs
+    where
+      withIntersection                :: HalfLine vertex
+                                      -> Maybe (LineHalfLineIntersection (Point 2 r) (HalfLine (Point 2 r))
+                                               ,HalfLine (Point 2 r)
+                                               )
+      withIntersection (HalfLine p v) = let ray = HalfLine (p^.asPoint) v
+                                        in (,ray) <$> line `intersect` ray
+
+      boundedIntersection = line `intersect` boundedCore region
+
+      intersectBounded (ps,ray) = case ps of
+          Line_x_HalfLine_HalfLine hl -> Line_x_UnboundedConvexRegion_HalfLine hl
+          Line_x_HalfLine_Point p     -> case boundedIntersection of
+                Nothing                   -> Line_x_UnboundedConvexRegion_HalfLine $ hl p
+                Just (SinglePoint q)      -> Line_x_UnboundedConvexRegion_LineSegment $
+                                               ClosedLineSegment p q
+                Just (ActualSegment seg)  -> let q   = maximumBy cmp seg
+                                                 cmp = comparing (squaredEuclideanDist p)
+                                                 res = ClosedLineSegment p q
+                                             in Line_x_UnboundedConvexRegion_LineSegment res
+                                     -- the closest endpoint of seg must lie on
+                                     -- the dummy edge of the core (connecting the two extremal)
+                                     -- vertices of the chain
+        where
+          hl p = let v  = line^.direction
+                     v' = if p .+^ v `liesLeftOf` ray then v else negated v
+                 in HalfLine p v'
+          q `liesLeftOf` hl = q `onSide` asOrientedLine hl == LeftSide
+
+ -- TODO: not sure if it should be leftSid e or rightSide
+
+instance ( Point_ vertex 2 r, Point_ point 2 r, Ord r, Fractional r
+         , IxValue (endPoint point) ~ point, EndPoint_ (endPoint point)
+         ) => LineSegment endPoint point
+                `HasIntersectionWith` UnboundedConvexRegionF r NonEmpty vertex where
+  seg `intersects` region = case supportingLine seg `intersect` region of
+    Nothing   -> False
+    Just seg' -> (seg^.start.asPoint) `intersects` seg'
+               || (seg^.end.asPoint)  `intersects` seg'
+
+--------------------------------------------------------------------------------
 -- * Intersection of a Triangle with an Unbounded Convex Polygon
 
 type instance Intersection (Triangle corner) (UnboundedConvexRegionF r nonEmpty vertex)
   = Intersection (Triangle corner) (ConvexPolygonF (Cyclic nonEmpty) vertex)
 
 instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
-         ) => Triangle corner `HasIntersectionWith` (UnboundedConvexRegionF r NonEmpty vertex)
+         ) => Triangle corner `HasIntersectionWith` UnboundedConvexRegionF r NonEmpty vertex where
+  tri `intersects` region = anyOf (vertices.asPoint) (`intersects` tri) region
+                         || anyOf (vertices.asPoint) (`intersects` region) tri
+                         || anyOf outerBoundaryEdgeSegments (`intersects` region) tri
+
+-- todo: write a test that ensures compat.
 
 instance ( Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
-         ) => Triangle corner `IsIntersectableWith` (UnboundedConvexRegionF r NonEmpty vertex) where
-  tri `intersect` region = tri `intersect` (toBoundedFrom tri region)
+         ) => Triangle corner `IsIntersectableWith` UnboundedConvexRegionF r NonEmpty vertex where
+  tri `intersect` region = tri `intersect` toBoundedFrom tri region
 
 -- | Given some convex shape S, construct some "big enough" convex polygon B out of the
 -- unbounded convex polygon U so that the intersection \(U \cap S\) is the same as \(B

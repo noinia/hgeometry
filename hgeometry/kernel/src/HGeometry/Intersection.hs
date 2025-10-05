@@ -66,6 +66,16 @@ instance ( IsIntersectableWith (Point d r) geom
   q `intersect` g = q <$ (q^.core) `intersect` g
 
 
+instance (geom `HasIntersectionWith` left
+        , geom `HasIntersectionWith` right
+         ) => geom `HasIntersectionWith` Either left right where
+  q `intersects` e = case e of
+    Left  l -> q `intersects` l
+    Right r -> q `intersects` r
+
+
+
+
 -- instance IsIntersectableWith geomA geomB
 --          => IsIntersectableWith (geomA :+ extra) (geomB :+ extra) where
 --   ga `intersect` gb = (ga^.core) `intersect` (gb^.core)

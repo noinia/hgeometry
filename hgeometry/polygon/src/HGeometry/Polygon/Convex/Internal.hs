@@ -45,6 +45,7 @@ import           HGeometry.HyperPlane.Class
 import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.LineSegment
+import           HGeometry.LineSegment.PossiblyDegenerate
 import           HGeometry.Point
 import           HGeometry.Point.Either
 import           HGeometry.Polygon.Class
@@ -318,6 +319,60 @@ instance ConvexPolygon_ (ConvexPolygonF f point) point r
 
 --------------------------------------------------------------------------------
 
+instance ( HasInPolygon (ConvexPolygonF f point) point r, Num r, Ord r)
+         => Point 2 r `HasIntersectionWith` ConvexPolygonF f point where
+  q `intersects` poly = q `inPolygon` poly /= StrictlyOutside
+
+type instance Intersection (Point 2 r) (ConvexPolygonF f point) = Maybe (Point 2 r)
+
+instance ( HasInPolygon (ConvexPolygonF f point) point r, Num r, Ord r
+         ) => Point 2 r `IsIntersectableWith` ConvexPolygonF f point where
+  q `intersect` poly | q `intersects` poly = Just q
+                     | otherwise           = Nothing
+
+--------------------------------------------------------------------------------
+
+instance ( Num r, Ord r
+         , ConvexPolygon_ (ConvexPolygonF nonEmpty vertex) vertex r
+         )
+         => LinePV 2 r `HasIntersectionWith` ConvexPolygonF nonEmpty vertex where
+  l `intersects` poly = case (onSide p l, onSide q l) of
+                          (OnLine, _) -> True
+                          (_, OnLine) -> True
+                          (sp, sq)    -> sp /= sq
+    where
+      (p,q) = extremes (perpendicularTo l ^. direction) poly
+
+
+type instance Intersection (LinePV 2 r) (ConvexPolygonF nonEmpty vertex) =
+  Maybe (PossiblyDegenerateSegment vertex (ClosedLineSegment (Point 2 r)))
+
+type instance Intersection (LinePV 2 r)
+                           (PossiblyDegenerateSimplePolygon vertex
+                              (ConvexPolygonF nonEmpty vertex)) =
+  Maybe (PossiblyDegenerateSegment vertex (ClosedLineSegment (Point 2 r)))
+
+instance ( Num r, Ord r
+         , ConvexPolygon_ (ConvexPolygonF nonEmpty vertex) vertex r
+         )
+         => LinePV 2 r `IsIntersectableWith` ConvexPolygonF nonEmpty vertex where
+  l `intersect` poly = undefined
+
+instance ( Num r, Ord r
+         , ConvexPolygon_ (ConvexPolygonF nonEmpty vertex) vertex r
+         )
+          => LinePV 2 r `IsIntersectableWith`
+               PossiblyDegenerateSimplePolygon vertex (ConvexPolygonF nonEmpty vertex) where
+  intersect l = \case
+    DegenerateVertex v
+     | v `onLine` l    -> Just $ SinglePoint v
+     | otherwise       -> Nothing
+    DegenerateEdge e   -> l `intersect` (view asPoint <$> e)
+    ActualPolygon poly -> l `intersect` poly
+
+
+--------------------------------------------------------------------------------
+
 -- | A HalfPlane and a Convex polygon intersect in a single component, which is a
 -- possiblyDegenerate convex polygon.
 type instance Intersection (HalfSpaceF line) (ConvexPolygonF f point) =
@@ -333,7 +388,7 @@ type instance Intersection (HalfSpaceF line :+ extra) (ConvexPolygonF f point :+
 
 
 --------------------------------------------------------------------------------
--- * Intersection between Halfspaces and possibly degenerate convex polygons
+-- * Intersection between Points  and possibly degenerate convex polygons
 
 instance ( Point_ vertex 2 r, Num r, Ord r, VertexContainer f vertex
          , HyperPlane_ line 2 r

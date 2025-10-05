@@ -17,7 +17,6 @@ module HGeometry.Plane.LowerEnvelope.Connected.Primitives
 import           Control.Lens
 import           HGeometry.Combinatorial.Util
 import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
 import           HGeometry.Intersection
 import           HGeometry.Line
 import           HGeometry.Line.General

@@ -1,4 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use camelCase" #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.HalfLine
@@ -25,11 +27,13 @@ import HGeometry.HyperPlane
 import HGeometry.Intersection
 import HGeometry.Interval.Class
 import HGeometry.Line.Intersection
+import HGeometry.Line.Class
 import HGeometry.Line.PointAndVector
 import HGeometry.Point
 import HGeometry.Properties
 import HGeometry.Vector
 import Text.Read
+import Data.Type.Ord
 
 --------------------------------------------------------------------------------
 
@@ -80,6 +84,17 @@ instance Point_ point d r => HasSupportingLine (HalfLine point) where
   {-# INLINE supportingLine #-}
 
 --------------------------------------------------------------------------------
+
+instance ( Point_ point d r, Ord r, Num r
+         , HasOnLine (LinePV d r) d
+         , Has_ Metric_ d r
+         , Has_ Metric_ (d+1) r, Has_ Vector_ (1+d) r
+         , d < d+1 -- TODO: this constraint is silly
+         ) => Point d r `HasIntersectionWith` HalfLine point where
+  q `intersects` hl = q `onLine` l && q `intersects` HalfSpace Positive h
+    where
+      l@(LinePV p v) = asOrientedLine hl
+      h              = fromPointAndNormal p v :: HyperPlane d r
 
 
 instance (Ord r, Num r, Point_ point 2 r
