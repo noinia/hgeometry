@@ -7,15 +7,16 @@ module Polygon.Convex.UnboundedSpec
 import Control.Arrow ((&&&))
 import Control.Lens
 import Data.List.NonEmpty qualified as NonEmpty
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.Foldable
 import Golden
-import HGeometry.ConvexHull.GrahamScan (convexHull)
-import HGeometry.Cyclic
+import HGeometry.Intersection
 import HGeometry.Ext
 import HGeometry.Number.Real.Rational
 import HGeometry.Point
 import HGeometry.Polygon.Class
 import HGeometry.Polygon.Convex
-import HGeometry.Polygon.Convex.Instances()
+import HGeometry.Polygon.Convex.Instances ()
 import HGeometry.Polygon.Convex.Unbounded
 import HGeometry.Vector
 import Ipe
@@ -30,17 +31,43 @@ import Test.Hspec.WithTempFile
 
 type R = RealNumber 10
 
+
+-- data OneOrTwo a =
+
+toList' = \case
+  Left x   -> [x]
+  Right xs -> toList xs
+
 --------------------------------------------------------------------------------
 
 spec :: Spec
 spec = describe "Polygon.Convex.Unbounded" $ do
-         unboundeds <- runIO $ sample' $ arbitrary @(UnboundedConvexRegion (Point 2 R))
+         prop "unbounded extremal vertices in intersection" $
+            \(region :: UnboundedConvexRegion (Point 2 R)) ->
+              foldMap Every
+                [ counterexample (show (v,h)) $ v `intersects` h
+                | h <- toList (unboundedBoundingHalfplanes region)
+                , v <- toList' (extremalVertices region)
+                ]
+
+         -- unboundeds <- runIO $ sample' $ arbitrary @(UnboundedConvexRegion (Point 2 R))
+         let unboundeds = [ub]
          let draw region = foldMap (\h -> [iO $ ipeHalfPlane red h])
                                    (unboundedBoundingHalfplanes region)
                            <>
-                           [iO $ defIO region]
+                             [iO $ defIO region]
+             content' = foldMap draw $ take 1 $ reverse unboundeds
          goldenWith [osp|data/test-with-ipe/golden/Polygon/Convex|]
-               (ipeContentGolden { name = [osp|unboundedBoundingHalfplanes|]
-                                 }
+               (ipeFileGolden { name = [osp|unboundedBoundingHalfplanes|]
+                              }
                )
-               (foldMap draw unboundeds)
+               (addStyleSheet opacitiesStyle $ singlePageFromContent content')
+
+
+
+ub :: UnboundedConvexRegion (Point 2 R)
+ub = Unbounded (Vector2 0 (-1)) (Point2 (-2) 0 :| [Point2 (-1.5) (-1),Point2 1 0])
+               (Vector2 0.5 1)
+
+
+  -- (Point2 1 0,HalfSpace Positive (LinePV (Point2 (-2) 0) (Vector2 0 (-1))))

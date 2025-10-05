@@ -47,8 +47,6 @@ import HGeometry.Vector
 import Data.Kind (Type)
 import GHC.Generics (Generic)
 import Control.DeepSeq
-import HGeometry.Line.Class
-import HGeometry.Line.PointAndVector
 
 --------------------------------------------------------------------------------
 
@@ -125,21 +123,17 @@ boundedCore (Unbounded _ pts _) = case toNonEmpty pts of
 
 -- | the 2 or three halfplanes bounding the unbounded part of the region
 -- in particular: the region minus its bounded core
-unboundedBoundingHalfplanes :: (Point_ vertex 2 r, Num r)
+unboundedBoundingHalfplanes :: (Point_ vertex 2 r, Num r, Ord r)
                             => UnboundedConvexRegionF r NonEmpty vertex
                             -> TwoOrThree (HalfPlaneF (LinePV 2 r))
 unboundedBoundingHalfplanes region@(Unbounded v _ w) =
     TwoOrThree . bimap two three $ extremalVertices region
   where
-    two (view asPoint -> p) = Two (HalfSpace Positive (LinePV p v))
-                                  (HalfSpace Positive (LinePV p w))
+    two (view asPoint -> p) = Two (leftHalfPlane $ LinePV p v) (leftHalfPlane $ LinePV p w)
     three (fmap (view asPoint) -> Vector2 p q) =
-       Three (HalfSpace Positive (LinePV p v)        )
-             (HalfSpace Positive (LinePV q w)        )
-             (HalfSpace Positive (LinePV p (q .-. p)))
--- TODO: make sure I have the sides right
-
-
+      Three (leftHalfPlane $ LinePV p v        )
+            (leftHalfPlane $ LinePV q w        )
+            (leftHalfPlane $ LinePV p (q .-. p))
 {-
 data Cone r apex = Cone { _apex                   :: apex
                         , _leftBoundingDirection  :: Vector 2 r
@@ -427,7 +421,7 @@ instance (Point_ vertex 2 r, Ord r, Fractional r
       boundedIntersection = line `intersect` boundedCore region
 
       intersectBounded (ps,ray) = case ps of
-          Line_x_HalfLine_HalfLine hl -> Line_x_UnboundedConvexRegion_HalfLine hl
+          Line_x_HalfLine_HalfLine l  -> Line_x_UnboundedConvexRegion_HalfLine l
           Line_x_HalfLine_Point p     -> case boundedIntersection of
                 Nothing                   -> Line_x_UnboundedConvexRegion_HalfLine $ hl p
                 Just (SinglePoint q)      -> Line_x_UnboundedConvexRegion_LineSegment $
@@ -443,7 +437,7 @@ instance (Point_ vertex 2 r, Ord r, Fractional r
           hl p = let v  = line^.direction
                      v' = if p .+^ v `liesLeftOf` ray then v else negated v
                  in HalfLine p v'
-          q `liesLeftOf` hl = q `onSide` asOrientedLine hl == LeftSide
+          q `liesLeftOf` l = q `onSide` asOrientedLine l == LeftSide
 
  -- TODO: not sure if it should be leftSid e or rightSide
 
