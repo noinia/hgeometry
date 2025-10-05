@@ -372,25 +372,25 @@ toBoundedFrom tri reg@(Unbounded v pts w) = go $ case extremalVertices reg of
 
     go (Vector2 p q) = uncheckedFromCCWPoints $ b NonEmpty.<| a NonEmpty.<| pts
       where
-      l  = lineThrough (p .+^ negated v) (q .+^ w) :: LinePV 2 _
-      h' = HalfSpace Negative l
-      h  = if q' `intersects` h' then h'&halfSpaceSign .~ Positive else h'
-      q' = (q .+^ (w ^+^ w))^.asPoint
-        -- make sure that there is at least one point outside the halfplane
-      pt = maximumOn (`squaredEuclideanDistTo` h) (q' :| tri^..folded.asPoint)
-        -- the furthest point in the direction perpendicular to the halfplane
-      l' = l&anchorPoint .~ (pt .+^ w) -- move even a bit further to make sure
-                                       -- that the new vertices (a,b) we get are strictly
-                                       -- outside the input triangle tri
-      a  = intersectionPoint p v l' -- no need to negate v here
-      b  = intersectionPoint q w l'
+        l  = lineThrough (p .-^ v) (q .+^ w) :: LinePV 2 _
+        h' = HalfSpace Negative l
+        h  = if q' `intersects` h' then h'&halfSpaceSign .~ Positive else h'
+        q' = (q .+^ (w ^+^ w))^.asPoint
+          -- make sure that there is at least one point outside the halfplane
+        pt = maximumOn (`squaredEuclideanDistTo` h) (q' :| tri^..folded.asPoint)
+          -- the furthest point in the direction perpendicular to the halfplane
+        l' = l&anchorPoint .~ (pt .+^ w) -- move even a bit further to make sure
+                                         -- that the new vertices (a,b) we get are strictly
+                                         -- outside the input triangle tri
+        a  = intersectionPoint p v l' -- no need to negate v here
+        b  = intersectionPoint q w l'
 
 
     maximumOn f = maximumBy (comparing f)
 
-    intersectionPoint p v' l'' = case LinePV (p^.asPoint) v' `intersect` l'' of
+    intersectionPoint p v' l = case LinePV (p^.asPoint) v' `intersect` l of
       Just (Line_x_Line_Point a) -> p&xCoord .~ a^.xCoord
-                                    &yCoord .~ a^.yCoord
+                                     &yCoord .~ a^.yCoord
       _                          -> error "intersectionPoint: absurd'"
 
 -- -- TODO: this would make for a good property test: test if the points all lie inside the reegion
