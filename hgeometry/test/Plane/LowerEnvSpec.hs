@@ -187,7 +187,7 @@ myDefs = let (a :| [b,c,d]) = buggyPlanes
 
 
 
-,NonVerticalHyperPlane [-1.0,0.0,0.0],NonVerticalHyperPlane [-1.0,1.0,-1.0]
+-- ,NonVerticalHyperPlane [-1.0,0.0,0.0],NonVerticalHyperPlane [-1.0,1.0,-1.0]
 
 -- ("h0",NonVerticalHyperPlane [-1.0,-1.0,1.0],", + ",
 
