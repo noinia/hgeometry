@@ -9,14 +9,15 @@ import Control.Lens
 -- import Data.List.NonEmpty qualified as NonEmpty
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.Foldable
+import Data.Maybe
 import Golden
 import HGeometry.Intersection
 import HGeometry.Number.Real.Rational
 import HGeometry.Point
-import HGeometry.Line
+import HGeometry.Kernel
+import HGeometry.Polygon
 import HGeometry.Polygon.Convex.Instances ()
 import HGeometry.Polygon.Convex.Unbounded
-import HGeometry.Vector
 import Ipe
 import Ipe.Color
 import System.OsPath
@@ -63,11 +64,6 @@ spec = describe "Polygon.Convex.Unbounded" $ do
                  in addStyleSheet opacitiesStyle $ singlePageFromContent content'
                )
 
-         runIO $ print (line1 `intersect` ub1)
-
-         runIO $ print (line1 `intersects` ub1)
-         runIO $ print (boundedCore ub1)
-         runIO $ print (line1 `intersects` boundedCore ub1)
 
          goldenWith [osp|data/test-with-ipe/golden/Polygon/Convex|]
                (ipeFileGolden { name = [osp|unboundedIntersection|]
@@ -79,6 +75,30 @@ spec = describe "Polygon.Convex.Unbounded" $ do
                  in addStyleSheet opacitiesStyle $ singlePageFromContent content'
                )
 
+         -- runIO $ print (tri1 `intersect` ub3)
+         -- runIO $ print (tri1 `intersects` ub3)
+
+         -- prop "bug" $
+         --   (tri1 `intersects` ub3) === isJust (tri1 `intersect` ub3)
+
+         -- prop "bug tri boundary " $
+         --   anyOf outerBoundaryEdgeSegments (`intersects` ub3) tri1
+
+         -- goldenWith [osp|data/test-with-ipe/golden/Polygon/Convex|]
+         --       (ipeFileGolden { name = [osp|unboundedIntersectionTriangle|]
+         --                      }
+         --       )
+         --      ( let content' = [ iO $ defIO tri1
+         --                       , iO $ defIO ub3
+         --                       ]
+         --         in addStyleSheet opacitiesStyle $ singlePageFromContent content'
+         --       )
+
+-- tri1 :: Triangle (Point 2 R)
+-- tri1 = Triangle (Point2 8 8.1875) (Point2 (-9) (-7)) (Point2 12 15.22222)
+
+-- ub3 :: UnboundedConvexRegion (Point 2 R)
+-- ub3 = Unbounded (Vector2 5.66666 0) (Point2 (-7.33334) (-6) :| [Point2 6.28571 10.5]) (Vector2 1.83929 5.16666)
 
 
 ub :: UnboundedConvexRegion (Point 2 R)
