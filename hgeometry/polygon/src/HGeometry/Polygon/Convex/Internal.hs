@@ -345,31 +345,36 @@ instance ( Num r, Ord r
 
 
 type instance Intersection (LinePV 2 r) (ConvexPolygonF nonEmpty vertex) =
-  Maybe (PossiblyDegenerateSegment vertex (ClosedLineSegment (Point 2 r)))
+  Maybe (PossiblyDegenerateSegment (Point 2 r) (ClosedLineSegment (Point 2 r)))
 
 type instance Intersection (LinePV 2 r)
                            (PossiblyDegenerateSimplePolygon vertex
                               (ConvexPolygonF nonEmpty vertex)) =
-  Maybe (PossiblyDegenerateSegment vertex (ClosedLineSegment (Point 2 r)))
+  Maybe (PossiblyDegenerateSegment (Point 2 r) (ClosedLineSegment (Point 2 r)))
 
-instance ( Num r, Ord r
+instance ( Fractional r, Ord r
          , ConvexPolygon_ (ConvexPolygonF nonEmpty vertex) vertex r
          )
          => LinePV 2 r `IsIntersectableWith` ConvexPolygonF nonEmpty vertex where
   l `intersect` poly = undefined
 
-instance ( Num r, Ord r
+instance ( Fractional r, Ord r
          , ConvexPolygon_ (ConvexPolygonF nonEmpty vertex) vertex r
          )
           => LinePV 2 r `IsIntersectableWith`
                PossiblyDegenerateSimplePolygon vertex (ConvexPolygonF nonEmpty vertex) where
   intersect l = \case
     DegenerateVertex v
-     | v `onLine` l    -> Just $ SinglePoint v
+     | v `onLine` l    -> Just $ SinglePoint (v^.asPoint)
      | otherwise       -> Nothing
-    DegenerateEdge e   -> l `intersect` (view asPoint <$> e)
+    DegenerateEdge e   -> fmap wrap $ l `intersect` (view asPoint <$> e)
     ActualPolygon poly -> l `intersect` poly
 
+
+wrap = \case
+  Line_x_LineSegment_Point p         -> SinglePoint p
+  Line_x_LineSegment_LineSegment seg -> ActualSegment seg
+-- TODO: Unify these types
 
 --------------------------------------------------------------------------------
 
