@@ -154,7 +154,7 @@ asVertexIn :: (Ord r, Num r, Point_ vertex 2 r, Foldable set
               )
            => Triangle vertex -> Point 3 r -> (definers, set plane) -> Maybe definers
 asVertexIn tri (Point3 x y _) (defs,conflictList)
-  | null conflictList && Point2 x y `intersects'` tri = Just defs
+  | Point2 x y `intersects'` tri && null conflictList = Just defs
   | otherwise                                         = Nothing
   where
     p `intersects'` tri' = p `intersects` tri' && notElemOf (vertices.asPoint) p tri'

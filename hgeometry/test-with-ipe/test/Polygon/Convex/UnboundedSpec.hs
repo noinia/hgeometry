@@ -4,18 +4,16 @@ module Polygon.Convex.UnboundedSpec
   (spec
   ) where
 
-import Control.Arrow ((&&&))
+
 import Control.Lens
-import Data.List.NonEmpty qualified as NonEmpty
+-- import Data.List.NonEmpty qualified as NonEmpty
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.Foldable
 import Golden
 import HGeometry.Intersection
-import HGeometry.Ext
 import HGeometry.Number.Real.Rational
 import HGeometry.Point
-import HGeometry.Polygon.Class
-import HGeometry.Polygon.Convex
+import HGeometry.Line
 import HGeometry.Polygon.Convex.Instances ()
 import HGeometry.Polygon.Convex.Unbounded
 import HGeometry.Vector
@@ -56,18 +54,42 @@ spec = describe "Polygon.Convex.Unbounded" $ do
                                    (unboundedBoundingHalfplanes region)
                            <>
                              [iO $ defIO region]
-             content' = foldMap draw $ take 1 $ reverse unboundeds
+
          goldenWith [osp|data/test-with-ipe/golden/Polygon/Convex|]
                (ipeFileGolden { name = [osp|unboundedBoundingHalfplanes|]
                               }
                )
-               (addStyleSheet opacitiesStyle $ singlePageFromContent content')
+               ( let content' = foldMap draw $ take 1 $ reverse unboundeds
+                 in addStyleSheet opacitiesStyle $ singlePageFromContent content'
+               )
+
+         runIO $ print (line1 `intersect` ub1)
+
+         runIO $ print (line1 `intersects` ub1)
+         runIO $ print (boundedCore ub1)
+         runIO $ print (line1 `intersects` boundedCore ub1)
+
+         goldenWith [osp|data/test-with-ipe/golden/Polygon/Convex|]
+               (ipeFileGolden { name = [osp|unboundedIntersection|]
+                              }
+               )
+              ( let content' = [ iO $ defIO ub1
+                               , iO $ defIO line1
+                               ]
+                 in addStyleSheet opacitiesStyle $ singlePageFromContent content'
+               )
 
 
 
 ub :: UnboundedConvexRegion (Point 2 R)
 ub = Unbounded (Vector2 0 (-1)) (Point2 (-2) 0 :| [Point2 (-1.5) (-1),Point2 1 0])
                (Vector2 0.5 1)
+
+
+line1 :: LinePV 2 R
+line1 = LinePV (Point2 6.92307 (-4)) (Vector2 (-14) (-8.42858))
+ub1 :: UnboundedConvexRegion (Point 2 R)
+ub1 = Unbounded (Vector2 1.66667 (-3.08334)) (Point2 (-5.66667) (-7.08334) :| [Point2 (-3.28572) (-10.5)]) (Vector2 8.14286 (-2.75))
 
 
   -- (Point2 1 0,HalfSpace Positive (LinePV (Point2 (-2) 0) (Vector2 0 (-1))))

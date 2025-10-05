@@ -11,7 +11,6 @@ import           HGeometry.Number.Real.Rational
 import           HGeometry.Point
 import           HGeometry.Polygon
 import           HGeometry.Polygon.Instances ()
-import           HGeometry.Polygon.Simple
 import           HGeometry.Sequence.NonEmpty
 import           Test.Hspec
 import           Test.Hspec.QuickCheck

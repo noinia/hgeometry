@@ -233,10 +233,10 @@ sortAroundBoundary h vertices' = case NonEmpty.nonEmpty rest of
     Just rest'  -> let edges' = NonEmpty.zip vertices'' (rest' <> vertices'')
                    in case NonEmpty.break (isInvalid h) edges' of
                         (_,  [])         -> boundedRegion vertices''
-                        (vs, (u,v) : ws) -> let chain = fmap fst
-                                                      . NonEmpty.fromList
-                                                      $ ws <> vs <> [(u,v)]
-                                            in unboundedRegion h chain v u
+                        (vs, (u,v) : ws) -> let chain' = fmap fst
+                                                       . NonEmpty.fromList
+                                                       $ ws <> vs <> [(u,v)]
+                                            in unboundedRegion h chain' v u
   where
     vertices''@(v0 :| rest) = inCCWOrder . Set.toList $ vertices'
     boundedRegion = BoundedRegion . uncheckedFromCCWPoints
@@ -274,7 +274,7 @@ unboundedRegion              :: forall plane r vtxData.
                              -> NonEmpty (MDVertex r plane vtxData)
                              -> MDVertex r plane vtxData -> MDVertex r plane vtxData
                              -> Region r (MDVertex r plane vtxData)
-unboundedRegion h chain v u = UnboundedRegion $ Unbounded wv chain wu
+unboundedRegion h chain' v u = UnboundedRegion $ Unbounded wv chain' wu
   -- mabye this should really return an 'UnboundedConvexRegion' instead?
   where
     (v1,_,v2) = singleVertex h v

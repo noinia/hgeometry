@@ -356,7 +356,22 @@ instance ( Fractional r, Ord r
          , ConvexPolygon_ (ConvexPolygonF nonEmpty vertex) vertex r
          )
          => LinePV 2 r `IsIntersectableWith` ConvexPolygonF nonEmpty vertex where
-  l `intersect` poly = undefined
+  l `intersect` poly = case mapMaybe (l `intersect`) edgeSegs of
+      []      -> Nothing
+      [ex]    -> Just $ case ex of
+        Line_x_LineSegment_Point p -> SinglePoint p
+        Line_x_LineSegment_LineSegment e -> ActualSegment (asClosed e)
+      [e1,e2] -> Just $ case e1 of
+        Line_x_LineSegment_LineSegment e -> ActualSegment (asClosed e)
+        Line_x_LineSegment_Point p       -> case e2 of
+          Line_x_LineSegment_Point q       -> ActualSegment (ClosedLineSegment p q)
+          Line_x_LineSegment_LineSegment e -> ActualSegment (asClosed e)
+      _       -> error "line x convexPolygon intersection. absurd"
+    where
+      edgeSegs = asHalfOpen <$> poly^..outerBoundaryEdgeSegments
+      asHalfOpen s = LineSegment (AnOpenE (s^.start.asPoint)) (AnClosedE (s^.end.asPoint))
+      asClosed s   = ClosedLineSegment (s^.start) (s^.end)
+
 
 instance ( Fractional r, Ord r
          , ConvexPolygon_ (ConvexPolygonF nonEmpty vertex) vertex r
@@ -370,7 +385,8 @@ instance ( Fractional r, Ord r
     DegenerateEdge e   -> fmap wrap $ l `intersect` (view asPoint <$> e)
     ActualPolygon poly -> l `intersect` poly
 
-
+wrap :: LineLineSegmentIntersection seg
+     -> PossiblyDegenerateSegment (Point 2 (NumType seg)) seg
 wrap = \case
   Line_x_LineSegment_Point p         -> SinglePoint p
   Line_x_LineSegment_LineSegment seg -> ActualSegment seg

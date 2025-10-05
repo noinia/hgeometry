@@ -3,17 +3,15 @@ module Polygon.Convex.UnboundedSpec
   , allOriginal
   ) where
 
+import Data.Maybe
 import Data.Bifoldable
 import HGeometry.Intersection
 import Control.Lens
-import Control.Monad.State
 import Data.List.NonEmpty qualified as NonEmpty
-import HGeometry.Boundary
-import HGeometry.Cyclic
+import Data.List.NonEmpty (NonEmpty(..))
 import HGeometry.Instances ()
 import HGeometry.Kernel
-import HGeometry.Polygon.Class
-import HGeometry.Polygon.Convex
+import HGeometry.Polygon
 import HGeometry.Polygon.Convex.Unbounded
 import HGeometry.Polygon.Convex.Instances ()
 import HGeometry.Polygon.Instances ()
@@ -29,10 +27,26 @@ import HGeometry.Point.Either
 
 type R = RealNumber 5
 
--- TODO: move these tests to some module about Unbounded
 spec :: Spec
-spec = describe "Polygon.Convex.Unbounded" $
+spec = describe "Polygon.Convex.Unbounded" $ do
          specUnbounded
+
+         prop "bug" $
+             let line :: LinePV 2 R
+                 line = LinePV (Point2 6.92307 (-4)) (Vector2 (-14) (-8.42858))
+                 convex :: UnboundedConvexRegion (Point 2 R)
+                 convex = Unbounded (Vector2 1.66667 (-3.08334)) (Point2 (-5.66667) (-7.08334) :| [Point2 (-3.28572) (-10.5)]) (Vector2 8.14286 (-2.75))
+           in (line `intersects` convex) === naiveIntersection line convex
+
+
+         prop "line intersects unbounded polygon is constent with edge intersection" $
+          \(line :: LinePV 2 R) (convex :: UnboundedConvexRegion (Point 2 R)) ->
+            (line `intersects` convex) === naiveIntersection line convex
+
+         prop "triangle intersects unbounded polygon is constent with intersect" $
+          \(tri :: Triangle (Point 2 R)) (convex :: UnboundedConvexRegion (Point 2 R)) ->
+            tri `intersects` convex === isJust (tri `intersect` convex)
+
 
 specUnbounded :: Spec
 specUnbounded = describe "fromUnbounded correct" $ do
@@ -93,3 +107,14 @@ verifyBoundedFromVertices tri reg = foldMapOf vertices (Every . check) $ toBound
                                  $ isOrigVertex v
              | otherwise         = property True
     isOrigVertex v = elemOf vertices v reg
+
+
+--------------------------------------------------------------------------------
+
+-- | explicitly test if the line intersects any of the edges
+naiveIntersection             :: LinePV 2 R -> UnboundedConvexRegion (Point 2 R) -> Bool
+naiveIntersection line convex = any (line `intersects`) boundedEdges
+                             || any (line `intersects`) (boundingRays convex)
+  where
+    boundedEdges = zipWith ClosedLineSegment (convex^..chain.traverse)
+                                             (convex^.chain.to NonEmpty.tail)

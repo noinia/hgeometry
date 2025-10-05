@@ -40,6 +40,7 @@ import           HGeometry.HyperPlane.Class
 import           HGeometry.Intersection
 import           HGeometry.LineSegment.Intersection.BentleyOttmann
 import           HGeometry.Point
+import           HGeometry.Line
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Simple.Class
 import           HGeometry.Polygon.Simple.Implementation
@@ -207,6 +208,21 @@ instance ( Point_ point 2 r, Num r, Ord r, VertexContainer f point
          , HyperPlane_ line 2 r
          ) => HasIntersectionWith (HalfSpaceF line) (SimplePolygonF f point) where
   halfPlane `intersects` poly = anyOf (vertices.asPoint) (`intersects` halfPlane) poly
+
+
+--------------------------------------------------------------------------------
+
+instance ( Num r, Ord r
+         , SimplePolygon_ (SimplePolygonF nonEmpty vertex) vertex r
+         )
+         => LinePV 2 r `HasIntersectionWith` SimplePolygonF nonEmpty vertex where
+  l `intersects` poly = case (onSide p l, onSide q l) of
+                          (OnLine, _) -> True
+                          (_, OnLine) -> True
+                          (sp, sq)    -> sp /= sq
+    where
+      (p,q) = extremes (perpendicularTo l ^. direction) poly
+
 
 --------------------------------------------------------------------------------
 
