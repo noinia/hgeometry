@@ -379,10 +379,10 @@ instance ( LineSegment endPoint point `IsIntersectableWith` LineSegment endPoint
 instance ( Ord r, Num r, Point_ point 2 r
          , IxValue (endPoint point) ~ point, EndPoint_ (endPoint point)
          ) => HasIntersectionWith (HalfLine point) (LineSegment endPoint point) where
-  hl `intersects` seg = supportingLine hl `intersects` seg && supportingLine seg `intersects` hl
+  hl `intersects` seg = case ccw (seg^.start) (seg^.end) (hl^.start) of
+    CoLinear -> (seg^.start.asPoint) `intersects` hl || (seg^.end.asPoint) `intersects` hl
+    _        -> supportingLine hl `intersects` seg && supportingLine seg `intersects` hl
   {-# INLINE intersects #-}
-  -- this is incorrect! in particular if hl and seg lie on the same line
-
 
 type instance Intersection (HalfLine point) (LineSegment endPoint point)
   = Maybe (HalfLineLineSegmentIntersection (Point 2 (NumType point))
@@ -404,9 +404,9 @@ instance ( Ord r, Fractional r, Point_ point 2 r
          ) => IsIntersectableWith (HalfLine point) (LineSegment endPoint point) where
   hl `intersect` seg = m `intersect` seg >>= \case
       Line_x_LineSegment_Point q
-        | q `onSide` perpendicularTo m == LeftSide -> Just $ HalfLine_x_LineSegment_Point q
-        | otherwise                                -> Nothing
-      Line_x_LineSegment_LineSegment _             -> case compareColinearInterval m seg of
+        | q `onSide` perpendicularTo m /= RightSide -> Just $ HalfLine_x_LineSegment_Point q
+        | otherwise                                 -> Nothing
+      Line_x_LineSegment_LineSegment _              -> case compareColinearInterval m seg of
         Before   -> Just $ HalfLine_x_LineSegment_LineSegment seg
         OnStart  -> Just $ HalfLine_x_LineSegment_LineSegment seg
         Interior -> Just $ HalfLine_x_LineSegment_LineSegment $ seg&start .~ (hl^.start)

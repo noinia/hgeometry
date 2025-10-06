@@ -149,13 +149,21 @@ spec =
 
     prop "halfline intersects closed lineSegment is constent" $
       \(halfLine :: HalfLine (Point 2 R)) (seg :: ClosedLineSegment (Point 2 R)) ->
-            halfLine `intersects` seg === isJust (halfLine `intersect` seg)
+        counterexample (show $ halfLine `intersect` seg) $
+          halfLine `intersects` seg === isJust (halfLine `intersect` seg)
 
     prop "halfline does not intersect segment" $
       \(halfLine@(HalfLine p v) :: HalfLine (Point 2 R)) ->
         let seg = ClosedLineSegment (p .-^ v) (p .-^ (v ^+^ v))
         in counterexample (show seg) $
              not (halfLine `intersects` seg)
+
+    prop "manual halfLine x segment intersect" $
+      let hl  = HalfLine (Point2 0 0) (Vector2 1 1)             :: HalfLine (Point 2 R)
+          seg = ClosedLineSegment (Point2 0 0) (Point2 1 (-1))  :: ClosedLineSegment (Point 2 R)
+      in isJust (hl `intersect` seg)
+
+
 
 --------------------------------------------------------------------------------
 -- * Make sure our 2d specialized instance ist he same as the generic one.
