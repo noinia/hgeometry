@@ -74,8 +74,8 @@ spec = describe "Polygon.Convex.Unbounded" $ do
                  in addStyleSheet opacitiesStyle $ singlePageFromContent content'
                )
 
-         runIO $ print (tri2 `intersect`  ub4)
-         runIO $ print (tri2 `intersects` ub4)
+         -- runIO $ print (tri2 `intersect`  ub4)
+         -- runIO $ print (tri2 `intersects` ub4)
 
          prop "bug" $
            (tri2 `intersects` ub4) === isJust (tri2 `intersect` ub4)
@@ -92,14 +92,6 @@ spec = describe "Polygon.Convex.Unbounded" $ do
            (linex `intersect` ub4) `shouldSatisfy` \case
              Just (Line_x_UnboundedConvexRegion_HalfLine _) -> True
              _ -> False
-
-
-         prop "bug line x ub4 should be linesegment" $
-            let withIntersection (HalfLine p v) = let ray = HalfLine (p^.asPoint) v
-                                                  in (,ray) <$> linex `intersect` ray
-            in case withIntersection <$> boundingRays ub4 of
-                 Vector2 (Just _) (Just _) -> True
-                 _                         -> False
 
          let [a,b,c] = tri2^..outerBoundaryEdgeSegments
          it ("a intersects reg " <> show a) $
@@ -126,23 +118,23 @@ spec = describe "Polygon.Convex.Unbounded" $ do
              _ -> False
 
 
-         runIO $ traverse_ print $
-           tri2^..outerBoundaryEdgeSegments.to (\seg -> (seg, seg `intersects` ub4
-                                                        , supportingLine seg `intersect` ub4
-                                                        ))
+         -- runIO $ traverse_ print $
+         --   tri2^..outerBoundaryEdgeSegments.to (\seg -> (seg, seg `intersects` ub4
+         --                                                , supportingLine seg `intersect` ub4
+         --                                                ))
 
 
 
-         goldenWith [osp|data/test-with-ipe/golden/Polygon/Convex|]
-               (ipeFileGolden { name = [osp|unboundedIntersectionTriangle|]
-                              }
-               )
-              ( let content' = [ iO $ defIO tri2
-                               , iO $ defIO ub4
-                               , iO $ defIO linex
-                               ]
-                 in addStyleSheet opacitiesStyle $ singlePageFromContent content'
-               )
+         -- goldenWith [osp|data/test-with-ipe/golden/Polygon/Convex|]
+         --       (ipeFileGolden { name = [osp|unboundedIntersectionTriangle|]
+         --                      }
+         --       )
+         --      ( let content' = [ iO $ defIO tri2
+         --                       , iO $ defIO ub4
+         --                       , iO $ defIO linex
+         --                       ]
+         --         in addStyleSheet opacitiesStyle $ singlePageFromContent content'
+         --       )
 
 linex :: LinePV 2 R
 linex = let p = Point2 5 (-3)

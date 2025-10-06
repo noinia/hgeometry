@@ -303,12 +303,9 @@ instance (Point_ vertex 2 r, Ord r, Fractional r
                                      -- vertices of the chain
         where
           hl p = let v  = line^.direction
-                     v' = if p .+^ v `liesLeftOf` ray then v else negated v
+                     v' = if p .+^ v `liesRightOf` ray then v else negated v
                  in HalfLine p v'
-          q `liesLeftOf` l = q `onSide` asOrientedLine l == RightSide
-
--- TODO: Ok; I flipped the 'isLeftOf' to RightSide rather than leftside
--- still not sure if that is really ok
+          q `liesRightOf` l = q `onSide` asOrientedLine l == RightSide
 
 instance ( Point_ vertex 2 r, Point_ point 2 r, Ord r, Fractional r
          , IxValue (endPoint point) ~ point, EndPoint_ (endPoint point)
@@ -322,20 +319,10 @@ instance ( Point_ vertex 2 r, Point_ point 2 r, Ord r, Fractional r
       Just inters -> case inters of
         Line_x_UnboundedConvexRegion_Point p          -> p    `intersects` seg
         Line_x_UnboundedConvexRegion_LineSegment seg' -> seg' `intersects` seg
-        Line_x_UnboundedConvexRegion_HalfLine  hl     -> traceShowWith ("X",) $ hl   `intersects` seg
-        -- TODO: conceviably this could be faster, since we already know they are colinear
-        -- so we just ahve to test if the endpoint ordering is ok;
-    -- where
-    --   seg = view asPoint <$> seg0
-      -- (seg^.start.asPoint)  `intersects` seg'
-      --         || (seg^.end.asPoint)    `intersects` seg'
-      --         || pointOf seg'          `intersects` seg
-      -- where
-      --         || (seg'^.start.asPoint) `intersects` seg
-      --         || (seg'^.end.asPoint)   `intersects` seg
-
--- HalfLine (Point2 (-13.5037406484~) (-9.4763092270~)) (Vector2 5 1.75))))
--- the vector that we get is pointing in the wrong direction
+        Line_x_UnboundedConvexRegion_HalfLine  hl     ->
+          (seg^.start.asPoint) `intersects` hl || (seg^.end.asPoint) `intersects` hl
+            -- this is essentially the simplified version of 'hl `intersects` seg'
+            -- as we already know they are colinear
 
 --------------------------------------------------------------------------------
 -- * Intersection of a Triangle with an Unbounded Convex Polygon
