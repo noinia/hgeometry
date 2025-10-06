@@ -10,11 +10,13 @@ import HGeometry.Number.Real.Rational
 -- import HGeometry.Boundary
 -- import HGeometry.Box
 import HGeometry.LineSegment
+import HGeometry.HalfLine
+import Data.Maybe
+import HGeometry.Line
 import HGeometry.Point
 import HGeometry.Interval
 import HGeometry.HyperPlane
-import HGeometry.Vector ((*^), Vector(..))
-import HGeometry.Line.PointAndVector
+import HGeometry.Vector ((*^), Vector(..),(^+^))
 import Test.Hspec.QuickCheck
 import Test.Hspec
 import Test.QuickCheck ((===), Arbitrary(..), suchThat, Property, counterexample)
@@ -140,6 +142,20 @@ spec =
           in counterexample (show q) $ propOnSegment2Consistent @R q seg
 
     testI
+
+    prop "line intersects closed lineSegment is constent" $
+      \(line :: LinePV 2 R) (seg :: ClosedLineSegment (Point 2 R)) ->
+            line `intersects` seg === isJust (line `intersect` seg)
+
+    prop "halfline intersects closed lineSegment is constent" $
+      \(halfLine :: HalfLine (Point 2 R)) (seg :: ClosedLineSegment (Point 2 R)) ->
+            halfLine `intersects` seg === isJust (halfLine `intersect` seg)
+
+    prop "halfline does not intersect segment" $
+      \(halfLine@(HalfLine p v) :: HalfLine (Point 2 R)) ->
+        let seg = ClosedLineSegment (p .-^ v) (p .-^ (v ^+^ v))
+        in counterexample (show seg) $
+             not (halfLine `intersects` seg)
 
 --------------------------------------------------------------------------------
 -- * Make sure our 2d specialized instance ist he same as the generic one.

@@ -27,6 +27,7 @@ import HGeometry.HyperPlane.NonVertical (NonVerticalHyperPlane(..))
 import HGeometry.Interval
 import HGeometry.Interval.EndPoint ()
 import HGeometry.Line.General
+import HGeometry.HalfLine
 import HGeometry.Line.LineEQ
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment
@@ -79,6 +80,13 @@ bothClosed p q = endPointType p == Closed && endPointType q == Closed
 
 implies :: Bool -> Bool -> Bool
 implies p q = not p || q
+
+
+instance ( Arbitrary point, Arbitrary (Vector (Dimension point) (NumType point))
+         , Num (NumType point), Eq (Vector (Dimension point) (NumType point))
+         , Has_ Additive_ (Dimension point) (NumType point)
+         ) => Arbitrary (HalfLine point) where
+  arbitrary = HalfLine <$> arbitrary <*> (arbitrary `suchThat` (/= zero))
 
 instance ( Arbitrary (endPoint point)
          , IsEndPoint (endPoint point) (endPoint point)

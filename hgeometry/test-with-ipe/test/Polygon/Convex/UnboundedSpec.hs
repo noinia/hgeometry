@@ -1,9 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Polygon.Convex.UnboundedSpec
-  (spec
-  ) where
-
+module Polygon.Convex.UnboundedSpec where
 
 import Control.Lens
 -- import Data.List.NonEmpty qualified as NonEmpty
@@ -15,6 +12,7 @@ import HGeometry.Intersection
 import HGeometry.Number.Real.Rational
 import HGeometry.Point
 import HGeometry.Kernel
+import HGeometry.HalfLine
 import HGeometry.Polygon
 import HGeometry.Polygon.Convex.Instances ()
 import HGeometry.Polygon.Convex.Unbounded
@@ -26,6 +24,7 @@ import Test.Hspec.QuickCheck
 import Test.QuickCheck
 import Test.Hspec.WithTempFile
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 10
@@ -75,25 +74,79 @@ spec = describe "Polygon.Convex.Unbounded" $ do
                  in addStyleSheet opacitiesStyle $ singlePageFromContent content'
                )
 
-         -- runIO $ print (tri1 `intersect` ub3)
-         -- runIO $ print (tri1 `intersects` ub3)
+         runIO $ print (tri2 `intersect`  ub4)
+         runIO $ print (tri2 `intersects` ub4)
 
-         -- prop "bug" $
-         --   (tri1 `intersects` ub3) === isJust (tri1 `intersect` ub3)
+         prop "bug" $
+           (tri2 `intersects` ub4) === isJust (tri2 `intersect` ub4)
 
-         -- prop "bug tri boundary " $
-         --   anyOf outerBoundaryEdgeSegments (`intersects` ub3) tri1
+         prop "bug vertices 1" $
+            anyOf (vertices.asPoint) (`intersects` tri2) ub4 === False
+         prop "bug vertices 2" $
+           anyOf (vertices.asPoint) (`intersects` ub4) tri2  === False
 
-         -- goldenWith [osp|data/test-with-ipe/golden/Polygon/Convex|]
-         --       (ipeFileGolden { name = [osp|unboundedIntersectionTriangle|]
-         --                      }
-         --       )
-         --      ( let content' = [ iO $ defIO tri1
-         --                       , iO $ defIO ub3
-         --                       ]
-         --         in addStyleSheet opacitiesStyle $ singlePageFromContent content'
-         --       )
+         prop "bug tri boundary " $
+           anyOf outerBoundaryEdgeSegments (`intersects` ub4) tri2 === False
 
+         it "bug line x ub4 should be " $
+           (linex `intersect` ub4) `shouldSatisfy` \case
+             Just (Line_x_UnboundedConvexRegion_HalfLine _) -> True
+             _ -> False
+
+
+         prop "bug line x ub4 should be linesegment" $
+            let withIntersection (HalfLine p v) = let ray = HalfLine (p^.asPoint) v
+                                                  in (,ray) <$> linex `intersect` ray
+            in case withIntersection <$> boundingRays ub4 of
+                 Vector2 (Just _) (Just _) -> True
+                 _                         -> False
+
+         let [a,b,c] = tri2^..outerBoundaryEdgeSegments
+         it ("a intersects reg " <> show a) $
+            (a `intersects` ub4) `shouldBe` False
+         it "b intersects reg" $
+            (b `intersects` ub4) `shouldBe` False
+         it "c intersects reg" $
+            (c `intersects` ub4) `shouldBe` False
+
+         prop "the halfline that is the intersection should not intersect a" $
+           case supportingLine a `intersect` ub4 of
+             Just (Line_x_UnboundedConvexRegion_HalfLine hl) ->
+               counterexample (show a) .
+                 counterexample (show $ supportingLine a) .
+                   counterexample (show hl) $
+                    counterexample (show $ hl `intersect` a) $
+                     not (hl `intersects` a)
+             --   HalfLine (Point2 (-13.5037) (-9.47631)) (Vector2 (-5) (-1.75))
+             _ -> property False
+
+         it "bug edges x ub4 should be " $
+           (linex `intersect` ub4) `shouldSatisfy` \case
+             Just (Line_x_UnboundedConvexRegion_HalfLine _) -> True
+             _ -> False
+
+
+         runIO $ traverse_ print $
+           tri2^..outerBoundaryEdgeSegments.to (\seg -> (seg, seg `intersects` ub4
+                                                        , supportingLine seg `intersect` ub4
+                                                        ))
+
+
+
+         goldenWith [osp|data/test-with-ipe/golden/Polygon/Convex|]
+               (ipeFileGolden { name = [osp|unboundedIntersectionTriangle|]
+                              }
+               )
+              ( let content' = [ iO $ defIO tri2
+                               , iO $ defIO ub4
+                               , iO $ defIO linex
+                               ]
+                 in addStyleSheet opacitiesStyle $ singlePageFromContent content'
+               )
+
+linex :: LinePV 2 R
+linex = let p = Point2 5 (-3)
+         in LinePV p (Point2 0 (-4.75) .-. p)
 -- tri1 :: Triangle (Point 2 R)
 -- tri1 = Triangle (Point2 8 8.1875) (Point2 (-9) (-7)) (Point2 12 15.22222)
 
@@ -113,3 +166,10 @@ ub1 = Unbounded (Vector2 1.66667 (-3.08334)) (Point2 (-5.66667) (-7.08334) :| [P
 
 
   -- (Point2 1 0,HalfSpace Positive (LinePV (Point2 (-2) 0) (Vector2 0 (-1))))
+
+
+tri2 :: Triangle (Point 2 R)
+tri2 = Triangle (Point2 5 (-3)) (Point2 0 (-4.75)) (Point2 0 0)
+
+ub4 :: UnboundedConvexRegion (Point 2 R)
+ub4=  Unbounded (Vector2 10.25 8.6) (Point2 3.75 5 :| []) (Vector2 (-6.5) 1.66666)

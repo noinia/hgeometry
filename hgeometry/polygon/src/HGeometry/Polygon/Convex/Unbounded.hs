@@ -21,6 +21,8 @@ module HGeometry.Polygon.Convex.Unbounded
   , unboundedBoundingHalfplanes
 
   , toBoundedFrom
+
+  , LineUnboundedConvexRegionIntersection(..)
   ) where
 
 import HGeometry.Small.TwoOrThree
@@ -49,6 +51,7 @@ import Data.Kind (Type)
 import GHC.Generics (Generic)
 import Control.DeepSeq
 
+import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | An unbounded polygonal Convex Region
@@ -302,8 +305,10 @@ instance (Point_ vertex 2 r, Ord r, Fractional r
           hl p = let v  = line^.direction
                      v' = if p .+^ v `liesLeftOf` ray then v else negated v
                  in HalfLine p v'
-          q `liesLeftOf` l = q `onSide` asOrientedLine l == LeftSide
+          q `liesLeftOf` l = q `onSide` asOrientedLine l == RightSide
 
+-- TODO: Ok; I flipped the 'isLeftOf' to RightSide rather than leftside
+-- still not sure if that is really ok
 
 instance ( Point_ vertex 2 r, Point_ point 2 r, Ord r, Fractional r
          , IxValue (endPoint point) ~ point, EndPoint_ (endPoint point)
@@ -317,7 +322,7 @@ instance ( Point_ vertex 2 r, Point_ point 2 r, Ord r, Fractional r
       Just inters -> case inters of
         Line_x_UnboundedConvexRegion_Point p          -> p    `intersects` seg
         Line_x_UnboundedConvexRegion_LineSegment seg' -> seg' `intersects` seg
-        Line_x_UnboundedConvexRegion_HalfLine  hl     -> hl   `intersects` seg
+        Line_x_UnboundedConvexRegion_HalfLine  hl     -> traceShowWith ("X",) $ hl   `intersects` seg
         -- TODO: conceviably this could be faster, since we already know they are colinear
         -- so we just ahve to test if the endpoint ordering is ok;
     -- where
@@ -329,6 +334,9 @@ instance ( Point_ vertex 2 r, Point_ point 2 r, Ord r, Fractional r
       --         || (seg'^.start.asPoint) `intersects` seg
       --         || (seg'^.end.asPoint)   `intersects` seg
 
+-- HalfLine (Point2 (-13.5037406484~) (-9.4763092270~)) (Vector2 5 1.75))))
+-- the vector that we get is pointing in the wrong direction
+
 --------------------------------------------------------------------------------
 -- * Intersection of a Triangle with an Unbounded Convex Polygon
 
@@ -337,9 +345,12 @@ type instance Intersection (Triangle corner) (UnboundedConvexRegionF r nonEmpty 
 
 instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
          ) => Triangle corner `HasIntersectionWith` UnboundedConvexRegionF r NonEmpty vertex where
-  tri `intersects` region = anyOf (vertices.asPoint) (`intersects` tri) region
-                         || anyOf (vertices.asPoint) (`intersects` region) tri
-                         || anyOf outerBoundaryEdgeSegments (`intersects` region) (view asPoint <$> tri)
+  tri `intersects` region = traceShowWith ("res",) $
+                              traceShowWith ("v1",) (anyOf (vertices.asPoint) (`intersects` tri) region)
+                              ||
+                              (traceShowWith ("v2",) (anyOf (vertices.asPoint) (`intersects` region) tri))
+                              ||
+                              (traceShowWith ("boundary",) (anyOf outerBoundaryEdgeSegments (`intersects` region) (view asPoint <$> tri)))
 
 
 

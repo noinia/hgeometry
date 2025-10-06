@@ -381,6 +381,8 @@ instance ( Ord r, Num r, Point_ point 2 r
          ) => HasIntersectionWith (HalfLine point) (LineSegment endPoint point) where
   hl `intersects` seg = supportingLine hl `intersects` seg && supportingLine seg `intersects` hl
   {-# INLINE intersects #-}
+  -- this is incorrect! in particular if hl and seg lie on the same line
+
 
 type instance Intersection (HalfLine point) (LineSegment endPoint point)
   = Maybe (HalfLineLineSegmentIntersection (Point 2 (NumType point))
