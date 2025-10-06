@@ -17,20 +17,21 @@ module HGeometry.Plane.LowerEnvelope.Connected.VertexForm
   , HasDefiners(..)
   ) where
 
-import           Control.Lens
-import           Data.Foldable1
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Maybe (fromMaybe)
-import           HGeometry.Combinatorial.Util
-import           HGeometry.Ext
-import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Intersection
-import           HGeometry.Line
-import           HGeometry.Plane.LowerEnvelope.Connected.Primitives
-import           HGeometry.Point
-import           HGeometry.Vector
+import Control.Lens
+import Data.Foldable1
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.List.NonEmpty qualified as NonEmpty
+import Data.Maybe (fromMaybe)
+import HGeometry.Combinatorial.Util
+import HGeometry.Ext
+import HGeometry.HyperPlane.Class
+import HGeometry.Intersection
+import HGeometry.Line
+import HGeometry.Plane.LowerEnvelope.Connected.Primitives
+import HGeometry.Point
+import HGeometry.Vector
+import GHC.Generics (Generic)
+import Control.DeepSeq
 
 --------------------------------------------------------------------------------
 -- *  The planes defining a vertex
@@ -65,8 +66,8 @@ instance HasDefiners (Definers plane, b) plane where
 -- | in CCW order, starting with the plane that is minimal at the vertical up direction
 -- from their common vertex.
 newtype Definers plane = Definers (NonEmpty plane)
-  deriving stock (Show,Eq,Ord)
-  deriving newtype (Functor,Foldable,Foldable1)
+  deriving stock (Show,Eq,Ord,Generic)
+  deriving newtype (Functor,Foldable,Foldable1,NFData)
 
 -- | Given the planes in order, starting with the one that is closest in the up direction,
 -- construct the Definers.

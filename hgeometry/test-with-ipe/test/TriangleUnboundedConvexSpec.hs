@@ -30,7 +30,6 @@ import           Test.Hspec
 import           Test.Hspec.WithTempFile
 import           Test.QuickCheck.Instances ()
 
-import Debug.Trace
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
@@ -42,19 +41,19 @@ ipeSpec            :: OsPath -> OsPath -> Spec
 ipeSpec inFp outFP = do input <- runIO go
                         ipeSpec' outFP input
   where
-    go = do [chain :+ _] <- readAllFrom $ dataPath <> inFp
-            [tri   :+ _] <- readAllFrom $ dataPath <> inFp
-            pure (chain, tri)
+    go = do [chain' :+ _] <- readAllFrom $ dataPath <> inFp
+            [tri   :+ _]  <- readAllFrom $ dataPath <> inFp
+            pure (chain', tri)
 
-ipeSpec'                   :: OsPath
-                           -> ( UnboundedConvexRegionF R NonEmpty (Point 2 R)
-                              , Triangle (Point 2 R)
-                              )
-                           -> Spec
-ipeSpec' outFP (chain,tri) = traceShow chain $
+ipeSpec'                    :: OsPath
+                            -> ( UnboundedConvexRegionF R NonEmpty (Point 2 R)
+                               , Triangle (Point 2 R)
+                               )
+                            -> Spec
+ipeSpec' outFP (chain',tri) =
   goldenWith dataPath
     (ipeContentGolden { name = outFP })
-    [ case tri `intersect` chain of
+    [ case tri `intersect` chain' of
         Nothing    -> iO $ ipeLabel ("no intersection" :+ origin)
                          ! attr SStroke black
         Just inter -> case inter of
@@ -64,7 +63,7 @@ ipeSpec' outFP (chain,tri) = traceShow chain $
                                    ! attr SStroke red
           ActualPolygon poly -> iO $ defIO ((^.asPoint) <$> poly)
                                    ! attr SFill red
-    , iO' chain
+    , iO' chain'
     , iO' tri
 --     , iO $ defIO ((toBoundedFrom tri chain)&vertices %~ (^.asPoint)  :: ConvexPolygonF (Cyclic NonEmpty) (Point 2 R)
 --                 ) ! attr SFill blue
@@ -128,5 +127,5 @@ upperQuadrant = Unbounded (Vector2 0 (-1)) (origin :| []) (Vector2 1  0)
 
 unboundedPoly :: UnboundedConvexRegion (Point 2 R)
 unboundedPoly = Unbounded (Vector2 1 1.55555)
-                          (NonEmpty.fromList [(Point2 337.54545 636.18181)])
+                          (NonEmpty.fromList [Point2 337.54545 636.18181])
                           (Vector2 (-1) 18)

@@ -30,18 +30,25 @@ import HGeometry.Point
 import HGeometry.Properties
 import HGeometry.Triangle
 import HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
+import Control.DeepSeq
 
 --------------------------------------------------------------------------------
 
 -- | A Voronoi diagram clipped to a triangle
 newtype ClippedVoronoiDiagram point = ClippedVoronoiDiagram (ClippedMinimizationDiagram point)
 
+
 deriving instance (Show r, Num r, Show point, r ~ NumType point
                   ) => Show (ClippedVoronoiDiagram point)
 
+deriving instance (NFData point, NFData (NumType point)
+                  ) => NFData (ClippedVoronoiDiagram point)
+
+
 -- | Get access to the underling nonEmpty Map
 _ClippedVoronoiDiagram :: (NumType point ~ r)
-                       => Iso' (ClippedVoronoiDiagram point) (NEMap point (ClippedMDCell r point))
+                       => Iso' (ClippedVoronoiDiagram point)
+                               (NEMap point (ClippedMDCell r point ()))
 _ClippedVoronoiDiagram = coerced . _ClippedMinimizationDiagramMap
 {-# INLINE _ClippedVoronoiDiagram #-}
 

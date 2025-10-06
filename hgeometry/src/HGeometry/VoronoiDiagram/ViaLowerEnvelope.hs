@@ -16,56 +16,67 @@ module HGeometry.VoronoiDiagram.ViaLowerEnvelope
   , asMap
   , voronoiDiagram
   , voronoiDiagramWith
+  , voronoiDiagramWith'
   , voronoiVertices
   -- , edgeGeometries
   , pointToPlane
   ) where
 
-import           Control.Lens
-import           Control.Subcategory.Functor
-import           Data.Foldable1
-import qualified Data.List.NonEmpty as NonEmpty
--- import qualified Data.Map as Map
-import qualified Data.Map.NonEmpty as NEMap
-import           Data.Set (Set)
-import qualified Data.Set as Set
-import qualified Data.Vector as Vector
-import           HGeometry.Duality
-import           HGeometry.Ext
-import           HGeometry.HyperPlane.Class
-import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Line.General
-import           HGeometry.Plane.LowerEnvelope ( MinimizationDiagram, Region(..)
-                                               , lowerEnvelope, LowerEnvelope(..)
-                                               , MDVertex(..), mapVertices
-                                               )
-import qualified HGeometry.Plane.LowerEnvelope as LowerEnvelope
-import           HGeometry.Point
-import           HGeometry.Properties
-import           HGeometry.Sequence.Alternating (Alternating(..))
-import           HGeometry.Polygon.Convex.Unbounded
-
+import Control.Lens
+import Control.Subcategory.Functor
+import Data.Bifunctor
+import Data.Foldable1
+import Data.List.NonEmpty qualified as NonEmpty
+import Data.Map (Map)
+import Data.Map.NonEmpty qualified as NEMap
+import Data.Set (Set)
+import Data.Set qualified as Set
+import Data.Vector qualified as Vector
+import HGeometry.Duality
+import HGeometry.Ext
+import HGeometry.HyperPlane.Class
+import HGeometry.HyperPlane.NonVertical
+import HGeometry.Line.General
+import HGeometry.Plane.LowerEnvelope ( MinimizationDiagram, Region(..)
+                                     , lowerEnvelope, LowerEnvelope(..)
+                                     , MDVertex(..), mapVertices
+                                     , VertexForm
+                                     , lowerEnvelopeWith, connectedLowerEnvelopeWith
+                                     )
+import HGeometry.Plane.LowerEnvelope qualified as LowerEnvelope
+import HGeometry.Point
+import HGeometry.Properties
+import HGeometry.Sequence.Alternating (Alternating(..))
+import HGeometry.Polygon.Convex.Unbounded
+import GHC.Generics (Generic)
+import Control.DeepSeq
 
 --------------------------------------------------------------------------------
 
 -- | A Voronoi diagram
-type VoronoiDiagram point = VoronoiDiagram_ (NumType point) point
+type VoronoiDiagram point vtxData = VoronoiDiagram_ (NumType point) point vtxData
 
-data VoronoiDiagram_ r point =
+data VoronoiDiagram_ r point vtxData =
     AllColinear !(Alternating Vector.Vector (VerticalOrLineEQ r) point)
-  | ConnectedVD !(VoronoiDiagram' (MDVertex r point) point)
-                     --               (NumType point) (Point 2 (NumType point))
+  | ConnectedVD !(VoronoiDiagram' (MDVertex r point vtxData) point)
+  deriving stock (Generic)
+--               (NumType point) (Point 2 (NumType point))
 
     -- Point 2 (NumType point)) )
 
 
-deriving instance (Show point, Show r, Num r
+deriving instance (Show point, Show r, Num r, Show vtxData
                   , Point_ point 2 r
-                  ) => Show (VoronoiDiagram_ r point)
-deriving instance (Eq point, Eq (NumType point), Eq r) => Eq   (VoronoiDiagram_ r point)
+                  ) => Show (VoronoiDiagram_ r point vtxData)
+deriving instance (Eq point, Eq (NumType point), Eq r, Eq vtxData
+                  ) => Eq   (VoronoiDiagram_ r point vtxData)
 
-type instance NumType   (VoronoiDiagram_ r point) = r
-type instance Dimension (VoronoiDiagram_ r point) = 2 -- Dimension point
+instance (NFData point, NFData r, NFData vtxData, NFData (NumType point)
+         ) => NFData (VoronoiDiagram_ r point vtxData)
+
+
+type instance NumType   (VoronoiDiagram_ r point vtxData) = r
+type instance Dimension (VoronoiDiagram_ r point vtxData) = 2 -- Dimension point
 
 
 --------------------------------------------------------------------------------
@@ -73,12 +84,17 @@ type instance Dimension (VoronoiDiagram_ r point) = 2 -- Dimension point
 -- | A connected VoronoiDiagram
 newtype VoronoiDiagram' vertex point =
   VoronoiDiagram (MinimizationDiagram (NumType point) vertex point)
+  deriving stock (Generic)
 
 deriving instance ( Show point, Show vertex, Show (NumType point)
                   , Point_ point 2 (NumType point)
                   , Point_ vertex 2 (NumType point)
                   ) => Show (VoronoiDiagram' vertex point)
 deriving instance (Eq point, Eq vertex, Eq (NumType point))     => Eq   (VoronoiDiagram' vertex point)
+
+deriving instance (NFData (NumType point), NFData vertex, NFData point
+                  ) => NFData (VoronoiDiagram' vertex point)
+
 
 type instance NumType   (VoronoiDiagram' vertex point) = NumType point
 type instance Dimension (VoronoiDiagram' vertex point) = 2 -- Dimension point
@@ -107,7 +123,7 @@ asMap = LowerEnvelope.asMap . view _VoronoiDiagramLowerEnvelope
 voronoiDiagram :: ( Point_ point 2 r, Functor f, Ord point
                   , Ord r, Fractional r, Foldable1 f
                   , Show point, Show r
-                  ) => f point -> VoronoiDiagram point
+                  ) => f point -> VoronoiDiagram point ()
 voronoiDiagram = voronoiDiagramWith lowerEnvelope
 
 -- | Given a function to compute a lower envelope; construct use it to construct the
@@ -115,14 +131,26 @@ voronoiDiagram = voronoiDiagramWith lowerEnvelope
 voronoiDiagramWith :: ( Point_ point 2 r, Functor nonEmpty, Ord point
                       , Ord r, Fractional r, Foldable1 nonEmpty
                       )
-                   => (nonEmpty (Plane r :+ point) -> LowerEnvelope (Plane r :+ point))
+                   => (nonEmpty (Plane r :+ point) -> LowerEnvelope (Plane r :+ point) vtxData)
 
                    -> nonEmpty point
-                   -> VoronoiDiagram point
+                   -> VoronoiDiagram point vtxData
 voronoiDiagramWith lowerEnv pts = case lowerEnv . fmap (\p -> pointToPlane p :+ p) $ pts of
     ParallelStrips strips -> AllColinear $ fmap (^.extra) strips
     ConnectedEnvelope env ->
-      ConnectedVD . VoronoiDiagram . mapVertices (fmap (^.extra)) . cmap (^.extra) $ env
+      ConnectedVD . VoronoiDiagram . mapVertices (first (^.extra)) . cmap (^.extra) $ env
+
+-- | Given a function that can construct the vertices of the lower envelope; use it to
+-- construct the Voronoi Diagram.
+voronoiDiagramWith'          :: ( Point_ point 2 r, Ord point, Functor set, Foldable1 set
+                                , Ord r, Fractional r
+                                , Show point, Show r -- TODO: remove
+                                )
+                             => (set (Plane r :+ point) -> VertexForm Map r (Plane r :+ point))
+                             -> set point -> VoronoiDiagram point ()
+voronoiDiagramWith' lowerEnv =
+  voronoiDiagramWith (lowerEnvelopeWith . connectedLowerEnvelopeWith $ lowerEnv)
+
 
 -- | lifts the point to a plane; so that the lower envelope corresponds to the VD
 pointToPlane :: (Point_ point 2 r, Num r) => point -> Plane r

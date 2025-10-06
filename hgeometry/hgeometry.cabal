@@ -30,8 +30,8 @@ data-files:
     test-with-ipe/**/*.ipe
 
 tested-with:
-    GHC == 9.12.1
-  , GHC == 9.10.1
+    GHC == 9.12.2
+  -- , GHC == 9.10.1
   -- , GHC == 9.8.2
 
 source-repository head
@@ -91,7 +91,7 @@ common all-setup
       -- , pretty-simple             >= 4.1.2.0       && < 5
 
 
-    default-language: GHC2021
+    default-language: GHC2024
 
     default-extensions:
         DataKinds
@@ -326,6 +326,7 @@ library kernel
 
         HGeometry.LineSegment
         HGeometry.LineSegment.Class
+        HGeometry.LineSegment.PossiblyDegenerate
 
         HGeometry.Intersection
 
@@ -687,6 +688,7 @@ library quickcheck
     exposed-modules:
       HGeometry.Instances
       HGeometry.Polygon.Instances
+      HGeometry.Polygon.Convex.Instances
       HGeometry.PlaneGraph.Instances
     other-modules:
       Paths_hgeometry
@@ -833,6 +835,7 @@ test-suite hspec
       IntervalTreeSpec
       LowerEnvelope.RegionsSpec
       Polygon.Convex.ConvexSpec
+      Polygon.Convex.UnboundedSpec
       Polygon.TriangulateSpec
       Polygon.SeqSpec
       Polygon.Triangulation.MakeMonotoneSpec
@@ -873,7 +876,7 @@ test-suite with-ipe-hspec
       DelaunayTriangulation.DTSpec
       Polygon.Simple.InPolygonSpec
       Polygon.Convex.ConvexSpec
-      Polygon.Convex.ConvexSpec
+      Polygon.Convex.UnboundedSpec
       Polygon.Convex.IntersectTriangleSpec
       Polygon.VisibilitySpec
       VoronoiDiagram.VoronoiSpec
@@ -950,33 +953,41 @@ test-suite svg-hspec
 --------------------------------------------------------------------------------
 -- ** HGeometry Benchmarks
 
-benchmark benchmarks
-  import: all-setup, hgeometry-setup
-  hs-source-dirs: bench
+common bench-setup
+  build-depends:
+      tasty-bench           >= 0.3  && < 1
+    , hgeometry
+    , deepseq-generics      >= 0.2  && < 1
+    , hashable              >= 1.4  && < 2
 
-  main-is: Benchmarks.hs
+benchmark benchmarks
+  import: all-setup, hgeometry-setup, bench-setup
+  hs-source-dirs: bench
+  main-is:
+    Benchmarks.hs
   type: exitcode-stdio-1.0
-  -- ghc-options:
-  --             -prof
-  --             -fprof-late-inline
-  --             -fprof-auto
-  --             -rtsopts "-with-rtsopts=-p"
+
   other-modules:
     ConvexHull.Bench
-
     ConvexHull.GrahamBench
     ConvexHull.GrahamV2
     ConvexHull.GrahamInt
     ConvexHull.GrahamFastest
-
     -- ConvexHull.GrahamClassy
-
     Util
-  build-depends: tasty-bench           >= 0.3  && < 1
-               , hgeometry
-               , deepseq-generics      >= 0.2  && < 1
-               , hashable              >= 1.4  && < 2
 
+benchmark lowerEnv
+  import: all-setup, hgeometry-setup, bench-setup
+  hs-source-dirs: bench
+  main-is:
+    LowerEnvBench.hs
+  type: exitcode-stdio-1.0
+  -- ghc-options:
+  --   -prof
+  --   -fprof-late-inline
+  --   -fprof-auto
+  --   -rtsopts "-with-rtsopts=-p"
+  other-modules:
 
 benchmark vector-bench
     import: all-setup, vector-setup, all-quickcheck-setup, vector-quickcheck-setup

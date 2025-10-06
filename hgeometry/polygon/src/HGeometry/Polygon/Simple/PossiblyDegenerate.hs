@@ -14,6 +14,7 @@ module HGeometry.Polygon.Simple.PossiblyDegenerate
   , HalfPlane_x_SimplePolygon_Component
   ) where
 
+import Control.DeepSeq
 import Control.Lens
 import HGeometry.Ext
 import HGeometry.HalfSpace
@@ -23,6 +24,11 @@ import HGeometry.Point
 import HGeometry.Point.Either
 import HGeometry.Polygon.Simple.Type
 import HGeometry.Properties
+import Data.Bifoldable1
+import HGeometry.Line
+import Data.Foldable1
+import Data.Bifoldable
+import GHC.Generics (Generic)
 
 --------------------------------------------------------------------------------
 
@@ -32,13 +38,31 @@ data PossiblyDegenerateSimplePolygon vertex polygon =
     DegenerateVertex vertex
   | DegenerateEdge (ClosedLineSegment vertex)
   | ActualPolygon polygon
-  deriving (Show,Eq,Functor)
+  deriving (Show,Eq,Functor,Generic)
+
+instance (NFData vertex, NFData polygon
+         ) => NFData (PossiblyDegenerateSimplePolygon vertex polygon)
+
+instance Foldable (PossiblyDegenerateSimplePolygon vertex) where
+  foldMap f = \case
+    ActualPolygon poly -> f poly
+    _                  -> mempty
 
 instance Bifunctor PossiblyDegenerateSimplePolygon where
   bimap f g = \case
     DegenerateVertex v -> DegenerateVertex (f v)
     DegenerateEdge e   -> DegenerateEdge (fmap f e)
     ActualPolygon poly -> ActualPolygon (g poly)
+
+
+instance Bifoldable1 PossiblyDegenerateSimplePolygon where
+  bifoldMap1 f g = \case
+    DegenerateVertex v -> f v
+    DegenerateEdge e   -> foldMap1 f e
+    ActualPolygon poly -> g poly
+
+instance Bifoldable PossiblyDegenerateSimplePolygon where
+  bifoldMap = bifoldMap1
 
 type instance NumType   (PossiblyDegenerateSimplePolygon vertex polygon) = NumType vertex
 type instance Dimension (PossiblyDegenerateSimplePolygon vertex polygon) = 2
@@ -57,3 +81,26 @@ type HalfPlane_x_SimplePolygon_Component f r vertex =
 -- | If we drag along extra information in the halfplane polygon intersection we lose it
 type instance Intersection (HalfSpaceF line :+ extra) (SimplePolygonF f point :+ extra') =
   Intersection (HalfSpaceF line) (SimplePolygonF f point)
+
+
+--------------------------------------------------------------------------------
+-- * Intersecting lines and possibly degenerate polygons
+
+instance ( Point_ vertex 2 r, Num r, Ord r
+         , LinePV 2 r `HasIntersectionWith` polygon
+         ) => LinePV 2 r
+                `HasIntersectionWith` PossiblyDegenerateSimplePolygon vertex polygon where
+  line `intersects` region = case region of
+    DegenerateVertex v -> (v^.asPoint) `onLine`     line
+    DegenerateEdge e   -> line         `intersects` (view asPoint <$> e)
+    ActualPolygon poly -> line         `intersects` poly
+
+
+instance ( Point_ vertex 2 r, Num r, Ord r
+         , Point 2 r `HasIntersectionWith` polygon
+         ) => Point 2 r
+                `HasIntersectionWith` PossiblyDegenerateSimplePolygon vertex polygon where
+  q `intersects` region = case region of
+    DegenerateVertex v -> q == v^.asPoint
+    DegenerateEdge e   -> q `intersects` (view asPoint <$> e)
+    ActualPolygon poly -> q `intersects` poly

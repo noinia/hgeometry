@@ -89,8 +89,34 @@ groupSpec = describe "cyclic groupWith tests" $ do
                 groupWith even input `shouldBe` ans
               prop "sameOrder" $
                 \(xs :: Cyclic NonEmpty (Int,Char)) ->
-                  (flatten (groupWith (even . fst) xs)) `isShiftOf` xs
+                  flatten (groupWith (even . fst) xs) `isShiftOf` xs
+              prop "same as groupWithOrig" $
+                \(xs :: Cyclic NonEmpty (Int,Char)) ->
+                  let f = even . fst in groupWith f xs === groupWithOrig f xs
 
   where
     cyclic  = Cyclic . NonEmpty.fromList
     flatten = Cyclic . foldMap1 snd
+
+-- | My original implmentation, somewhat poorly documented
+groupWithOrig      :: (Foldable1 cyclic, Eq b)
+                   => (a -> b) -> cyclic a -> Cyclic NonEmpty (b, NonEmpty a)
+groupWithOrig f xs = Cyclic $ case foldrMap1 initialize compute xs of
+    Left res      -> NonEmpty.singleton res
+    Right ((x, first), res@((y, current) :| completed))
+      | x == y    -> (x, first <> current) :| completed
+      | otherwise -> (x, first) NonEmpty.<| res
+  where
+    -- we either have a Left (single run) or a Right (lastRun, otherRuns)
+    -- once we detect that we have more than one run, any future values will just be
+    -- Right's.
+    initialize x = Left (f x, NonEmpty.singleton x)
+    compute x = \case
+        Left (y,current)
+          | b == y    -> Left (y, x NonEmpty.<| current)
+          | otherwise -> Right ((y,current), NonEmpty.singleton (b, NonEmpty.singleton x))
+        Right (first, res@((y,current):|completed))
+          | b == y    -> Right (first, (y, x NonEmpty.<| current) :| completed)
+          | otherwise -> Right (first, (b, NonEmpty.singleton x) NonEmpty.<| res)
+      where
+        b = f x

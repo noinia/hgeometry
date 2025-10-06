@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances  #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Plane.LowerEnvelope.Clipped.Type
@@ -14,41 +15,28 @@ module HGeometry.Plane.LowerEnvelope.Clipped.Type
   ( ClippedMinimizationDiagram
   , ClippedMinimizationDiagram'
   , _ClippedMinimizationDiagramMap
-  , ClippedMDCell
-  , ClippedMDCell'(..)
+  , ClippedMDCell, ClippedMDCell'
+  , ClippedMDCell''(..)
+  , foldMapVertices
   ) where
 
-import           Control.Lens hiding (IsEmpty, IsNonEmpty)
-import           Control.Subcategory.Functor
-import           Data.Bifunctor
-import           Data.Coerce
-import           Data.Foldable
-import           Data.Foldable1 as F1
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Data.Map.NonEmpty (NEMap, pattern IsEmpty, pattern IsNonEmpty)
-import qualified Data.Map.NonEmpty as NEMap
-import           Data.Maybe (fromMaybe)
-import           Data.Ord (comparing)
-import qualified Data.Set as Set
-import           HGeometry.Box
-import           HGeometry.Ext
-import           HGeometry.HyperPlane
-import           HGeometry.Intersection
-import           HGeometry.Plane.LowerEnvelope.Connected.Region
-import           HGeometry.Point
-import           HGeometry.Point.Either
-import           HGeometry.Polygon
-import           HGeometry.Polygon.Convex
-import           HGeometry.Polygon.Convex.Unbounded
-import           HGeometry.Polygon.Simple
-import           HGeometry.Polygon.Simple.PossiblyDegenerate
-import           HGeometry.Properties
-import           HGeometry.Sequence.Alternating (separators)
-import           HGeometry.Triangle
-import           HGeometry.Vector
-import           Hiraffe.Graph.Class
-
+import Control.Lens
+import Control.Subcategory.Functor
+import Data.Bifunctor
+import Data.Bifoldable1
+import Data.Foldable1
+import Data.Map.NonEmpty (NEMap)
+import Data.Map.NonEmpty qualified as NEMap
+import HGeometry.Intersection
+import HGeometry.Plane.LowerEnvelope.Connected.Region
+import HGeometry.Point
+import HGeometry.Box
+import HGeometry.Point.Either
+import HGeometry.Polygon.Simple.PossiblyDegenerate
+import HGeometry.Properties
+import HGeometry.Triangle
+import Data.Kind (Type)
+import Control.DeepSeq
 
 --------------------------------------------------------------------------------
 -- * Representing (The minimization diagram of) the Lower envelope
@@ -63,9 +51,13 @@ type ClippedMinimizationDiagram plane  = ClippedMinimizationDiagram' (NumType pl
 -- | Implementatino of the ClippedMinimizationDiagram type; r is the numeric type of the
 -- planes
 newtype ClippedMinimizationDiagram' r plane =
-  ClippedMinimizationDiagram (NEMap plane (ClippedMDCell r plane))
+  ClippedMinimizationDiagram (NEMap plane (ClippedMDCell r plane ()))
+
+-- TODO: expose the a type instead of ()
 
 deriving instance (Show r, Num r, Show plane) => Show (ClippedMinimizationDiagram' r plane)
+deriving instance (NFData r, NFData plane)    => NFData (ClippedMinimizationDiagram' r plane)
+
 
 type instance NumType   (ClippedMinimizationDiagram' r plane) = r
 type instance Dimension (ClippedMinimizationDiagram' r plane) = 2
@@ -73,7 +65,7 @@ type instance Dimension (ClippedMinimizationDiagram' r plane) = 2
 -- | Get access to the underlying NonEmpty Map
 _ClippedMinimizationDiagramMap :: (NumType plane ~ r)
                                => Iso' (ClippedMinimizationDiagram plane)
-                                       (NEMap plane (ClippedMDCell r plane))
+                                       (NEMap plane (ClippedMDCell r plane ()))
 _ClippedMinimizationDiagramMap = coerced
 {-# INLINE _ClippedMinimizationDiagramMap #-}
 
@@ -82,30 +74,74 @@ instance Constrained (ClippedMinimizationDiagram' r) where
 
 instance CFunctor (ClippedMinimizationDiagram' r) where
   cmap f (ClippedMinimizationDiagram m) = ClippedMinimizationDiagram $
-    NEMap.foldMapWithKey (\plane cell -> NEMap.singleton (f plane) (fmap f <$> cell)) m
+    NEMap.foldMapWithKey (\plane cell -> NEMap.singleton (f plane) (mapPlane f cell)) m
 
 --------------------------------------------------------------------------------
 -- * Representing Cells in a Clipped MinimizationDiagram
 
 -- | Cells in the Minimization diagram (i.e. the projected lower envelope of planes)
 -- parameterized by the numeric type and the planes
-type ClippedMDCell r plane = ClippedMDCell' r (MDVertex r plane)
+type ClippedMDCell           :: Type -> Type -> Type -> Type
+type ClippedMDCell r plane a = ClippedMDCell' r (MDVertex r plane a)
+
+-- | We mostly use ClippedMDCell'''s where the Extra is just a Point
+type ClippedMDCell' r vertex = ClippedMDCell'' r vertex (Point 2 r)
 
 -- | Helper type for representing cells in a minimzation diagram. These cells are possibly
 -- degenerate convex polygons, whose vertices are either of type 'vertex' or of type
 -- 'Point 2 r'.
-newtype ClippedMDCell' r vertex = ClippedMDCell
-  (PossiblyDegenerateSimplePolygon (OriginalOrExtra vertex (Point 2 r))
-                                   (ClippedBoundedRegion r vertex (Point 2 r)))
+newtype ClippedMDCell'' r vertex extra = ClippedMDCell
+  (PossiblyDegenerateSimplePolygon (OriginalOrExtra vertex extra)
+                                   (ClippedBoundedRegion r vertex extra))
 
-type instance NumType   (ClippedMDCell' r vertex) = r
-type instance Dimension (ClippedMDCell' r vertex) = 2
+type instance NumType   (ClippedMDCell'' r vertex extra) = r
+type instance Dimension (ClippedMDCell'' r vertex extra) = 2
 
-deriving instance (Show vertex, Point_ vertex 2 r, Show r) => Show (ClippedMDCell' r vertex)
-deriving instance (Eq vertex, Eq r)     => Eq (ClippedMDCell' r vertex)
+deriving instance (Show vertex, Point_ vertex 2 r, Point_ extra  2 r, Show extra, Show r
+                  ) => Show (ClippedMDCell'' r vertex extra)
+deriving instance (Eq vertex, Eq r, Eq extra
+                  ) => Eq   (ClippedMDCell'' r vertex extra)
 
-instance Functor (ClippedMDCell' r) where
-  fmap f (ClippedMDCell poly) = ClippedMDCell $ bimap (first f) (fmap (first f)) poly
+deriving instance (NFData vertex, NFData r, NFData extra
+                  ) => NFData   (ClippedMDCell'' r vertex extra)
+
+
+-- | Iso to get the underlying polygon representing the cell
+_ClippedMDCell :: Iso (ClippedMDCell'' r vertex extra) (ClippedMDCell'' r' vertex' extra')
+                      (PossiblyDegenerateSimplePolygon (OriginalOrExtra vertex extra)
+                                                       (ClippedBoundedRegion r vertex extra))
+                       (PossiblyDegenerateSimplePolygon (OriginalOrExtra vertex' extra')
+                                                        (ClippedBoundedRegion r' vertex' extra'))
+_ClippedMDCell = coerced
+
+-- | Map the plane to some other type
+mapPlane   :: (plane -> plane') -> ClippedMDCell r plane a -> ClippedMDCell r plane' a
+mapPlane f = first (first f)
+
+instance Functor (ClippedMDCell'' r vertex) where
+  fmap = second
+
+instance Bifunctor (ClippedMDCell'' r) where
+  bimap f g (ClippedMDCell poly) = ClippedMDCell $ bimap (bimap f g)
+                                                         (fmap (bimap f g)) poly
+
+-- | Fold a given function over all vertices
+foldMapVertices   :: Semigroup m
+                  => (OriginalOrExtra vertex extra -> m) -> ClippedMDCell'' r vertex extra -> m
+foldMapVertices f (ClippedMDCell cell) = bifoldMap1 f (foldMap1 f) cell
+
+--
+-- instance HasVertices' (ClippedMDCell'' r vertex extra) where
+--   type VertexIx (ClippedMDCell'' r vertex extra) =
+--     VertexIx (PossiblyDegenerateSimplePolygon (OriginalOrExtra vertex extra)
+--                                               (ClippedBoundedRegion r vertex extra))
+--   type Vertex (ClippedMDCell'' r vertex extra) =
+--     Vertex (PossiblyDegenerateSimplePolygon (OriginalOrExtra vertex extra)
+--                                             (ClippedBoundedRegion r vertex extra))
+--   vertexAt u = _ClippedMDCell.vertexAt u
+
+-- instance HasVertices (ClippedMDCell'' r vertex extra) (ClippedMDCell'' r' vertex' extra') where
+--   vertices = _ClippedMDCell.vertices
 
 --------------------------------------------------------------------------------
 
@@ -114,12 +150,22 @@ type instance Intersection (Triangle corner) (Region r vertex) = Maybe (ClippedM
 
 
 instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
-         ) => Triangle corner `HasIntersectionWith` (Region r vertex)
+         ) => Triangle corner `HasIntersectionWith` Region r vertex
 
 instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
-         ) => Triangle corner `IsIntersectableWith` (Region r vertex) where
-
-
+         ) => Triangle corner `IsIntersectableWith` Region r vertex where
   tri `intersect` reg = ClippedMDCell <$> case reg of
     BoundedRegion   convex -> tri `intersect` convex
     UnboundedRegion convex -> tri `intersect` convex
+
+-- | Intersecting Rectangle and Region in a MinimizationDiagram yields a clipped cell.
+type instance Intersection (Rectangle corner) (Region r vertex) = Maybe (ClippedMDCell' r vertex)
+
+instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
+         ) => Rectangle corner `HasIntersectionWith` Region r vertex
+
+instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
+         ) => Rectangle corner `IsIntersectableWith` Region r vertex where
+  rect `intersect` reg = ClippedMDCell <$> case reg of
+    BoundedRegion   convex -> rect `intersect` convex
+    UnboundedRegion convex -> rect `intersect` convex

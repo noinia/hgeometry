@@ -12,6 +12,7 @@ module HGeometry.Box.Sides
 
   , sideDirections
   , sideValues
+  , intersectingHalfPlanes
   ) where
 
 import Control.Lens hiding ((<.>))
@@ -21,13 +22,18 @@ import GHC.Generics (Generic)
 import HGeometry.Box.Class
 import HGeometry.Box.Corners
 import HGeometry.Direction
--- import HGeometry.Interval()
+import HGeometry.HalfSpace
+import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment
 import HGeometry.Point
+import HGeometry.Vector
 
 --------------------------------------------------------------------------------
 
 -- | The four sides of a rectangle
+--
+-- i.e. a `Sides n e s w` rerpesents an object whose north side is n, east side e, south
+-- side s, and west side w.
 data Sides a = Sides { _north :: !a
                      , _east  :: !a
                      , _south :: !a
@@ -146,3 +152,13 @@ sideValues      :: (Rectangle_ rectangle point, Point_ point 2 r
                    ) => rectangle -> Sides r
 sideValues rect = Sides (rect^.maxPoint.yCoord) (rect^.maxPoint.xCoord)
                         (rect^.minPoint.yCoord) (rect^.minPoint.xCoord)
+
+
+-- | Gets the four halfplanes so that the box is the intersection of the halfplanes.
+intersectingHalfPlanes      :: (Rectangle_ rectangle point, Point_ point 2 r, Num r)
+                            => rectangle -> Sides (HalfSpaceF (LinePV 2 r))
+intersectingHalfPlanes rect =
+  Sides (HalfSpace Negative $ LinePV (rect^.maxPoint.asPoint) (Vector2 1 0))
+        (HalfSpace Negative $ LinePV (rect^.maxPoint.asPoint) (Vector2 0 1))
+        (HalfSpace Positive $ LinePV (rect^.minPoint.asPoint) (Vector2 1 0))
+        (HalfSpace Positive $ LinePV (rect^.minPoint.asPoint) (Vector2 0 1))

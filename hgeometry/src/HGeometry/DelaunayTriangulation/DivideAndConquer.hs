@@ -16,7 +16,6 @@ import           Control.Lens
 import           Control.Monad.Reader
 import           Control.Monad.State
 import qualified Data.CircularList as CL
-import qualified Data.Foldable as F
 import           Data.Foldable1
 import           Data.Function (on)
 import qualified Data.IntMap.Strict as IM
@@ -26,14 +25,14 @@ import qualified Data.Map as M
 import           Data.Maybe (fromJust, fromMaybe)
 import qualified Data.Vector as V
 import qualified Data.Vector.NonEmpty as NV
-import           HGeometry.Algorithms.DivideAndConquer
+-- import           HGeometry.Algorithms.DivideAndConquer
 import           HGeometry.Ball
 import           HGeometry.Boundary
 import qualified HGeometry.CircularList.Util as CU
 import           HGeometry.ConvexHull.GrahamScan as GS
-import qualified HGeometry.Cyclic
+-- import qualified HGeometry.Cyclic
 import           HGeometry.DelaunayTriangulation.Types
-import qualified HGeometry.DelaunayTriangulation.Types as Naive
+-- import qualified HGeometry.DelaunayTriangulation.Types as Naive
 import           HGeometry.Ext
 import           HGeometry.Foldable.Sort
 import           HGeometry.LineSegment
@@ -41,10 +40,9 @@ import           HGeometry.Measured.Size
 import           HGeometry.Point
 import           HGeometry.Polygon.Class
 import           HGeometry.Polygon.Convex
-import           HGeometry.Polygon.Convex.Tangents
 import qualified HGeometry.Polygon.Convex.Merge as Convex
 import           HGeometry.Polygon.Simple.Class
-import           HGeometry.Polygon.Simple.PossiblyDegenerate
+-- import           HGeometry.Polygon.Simple.PossiblyDegenerate
 import           HGeometry.Tree.Binary.Static
 
 -- import           HGeometry.Number.Real.Rational
@@ -153,7 +151,7 @@ fromHull              :: (Point_ point 2 r, Ord point)
                       => Mapping point -> ConvexPolygon (point :+ VertexID) -> Adj
 fromHull (vtxMap,_) p = let vs@(u:v:vs') = lookup' vtxMap . (^.core)
                                         <$> p^..vertices
-                            es           = zipWith3 f vs (tail vs ++ [u]) (vs' ++ [u,v])
+                            es           = zipWith3 f vs (List.drop 1 vs ++ [u]) (vs' ++ [u,v])
                             f prv c nxt  = (c,CL.fromList . List.nub $ [prv, nxt])
                         in IM.fromList es
 

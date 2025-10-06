@@ -1,5 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HGeometry.Kernel.Instances
@@ -26,6 +27,7 @@ import HGeometry.HyperPlane.NonVertical (NonVerticalHyperPlane(..))
 import HGeometry.Interval
 import HGeometry.Interval.EndPoint ()
 import HGeometry.Line.General
+import HGeometry.HalfLine
 import HGeometry.Line.LineEQ
 import HGeometry.Line.PointAndVector
 import HGeometry.LineSegment
@@ -78,6 +80,13 @@ bothClosed p q = endPointType p == Closed && endPointType q == Closed
 
 implies :: Bool -> Bool -> Bool
 implies p q = not p || q
+
+
+instance ( Arbitrary point, Arbitrary (Vector (Dimension point) (NumType point))
+         , Num (NumType point), Eq (Vector (Dimension point) (NumType point))
+         , Has_ Additive_ (Dimension point) (NumType point)
+         ) => Arbitrary (HalfLine point) where
+  arbitrary = HalfLine <$> arbitrary <*> (arbitrary `suchThat` (/= zero))
 
 instance ( Arbitrary (endPoint point)
          , IsEndPoint (endPoint point) (endPoint point)
@@ -196,11 +205,17 @@ instance ( Arbitrary r, Has_ Vector_ (d+1) r, Has_ Additive_ d r
   arbitrary = do a0                <- arbitrary
                  (a :: Vector d r) <- arbitrary `suchThat` (/= zero)
                  pure $ HyperPlane $ cons a0 a
+  shrink (HyperPlane u) = [ HyperPlane u
+                          | v <- shrink u, prefix @d @(d+1) @_ @(Vector d r) v /= zero
+                          ]
+
 
 instance (Arbitrary r, Has_ Additive_ d r
          , Num r, Eq (Vector d r)) => Arbitrary (NonVerticalHyperPlane d r) where
   arbitrary = NonVerticalHyperPlane <$> arbitrary `suchThat` (/= zero)
-
+  shrink (NonVerticalHyperPlane u) = [ NonVerticalHyperPlane u
+                                     | v <- shrink u, v /= zero
+                                     ]
 
 instance Arbitrary boundingHyperPlane => Arbitrary (HalfSpaceF boundingHyperPlane) where
   arbitrary = HalfSpace <$> arbitrary <*> arbitrary

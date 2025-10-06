@@ -196,7 +196,7 @@ grow d (Box p q) = Box (p&coordinates %~ subtract d)
 inputs :: NonEmpty (Point 2 R)
 inputs = NonEmpty.fromList [origin, Point2 10 10, Point2 10 0]
 
-trivialVD :: VoronoiDiagram (Point 2 R)
+trivialVD :: VoronoiDiagram (Point 2 R) ()
 trivialVD = voronoiDiagram inputs
 
 

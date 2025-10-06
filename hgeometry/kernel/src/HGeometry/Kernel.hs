@@ -17,13 +17,15 @@ module HGeometry.Kernel
   , module HGeometry.LineSegment
   , module HGeometry.Box
   , module HGeometry.Ball
+  , module HGeometry.Triangle
   ) where
 
 import HGeometry.Point
 import HGeometry.Vector
 import HGeometry.Line
 import HGeometry.LineSegment
-import HGeometry.Box
+import HGeometry.Box(Box(..), Box_(..), IsBoxable(..))
 import HGeometry.Ball
 import HGeometry.HyperPlane
 import HGeometry.HalfSpace
+import HGeometry.Triangle (Triangle(..))

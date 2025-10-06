@@ -319,18 +319,75 @@ izipWithList f xs = flip evalState xs . itraverse go
 groupWith      :: (Foldable1 cyclic, Eq b)
                => (a -> b) -> cyclic a -> Cyclic NonEmpty (b, NonEmpty a)
 groupWith f xs = Cyclic $ case foldrMap1 initialize compute xs of
-    Left res      -> NonEmpty.singleton res
-    Right ((x, first), res@((y, current) :| completed))
-      | x == y    -> (x, first <> current) :| completed
-      | otherwise -> (x, first) NonEmpty.<| res
+    OneRun y run  -> NonEmpty.singleton (y, run)
+    MoreRuns y current completed b lastRun
+      | b == y    -> (b, lastRun <> current) :| completed -- first and last are the same
+      | otherwise -> (b, lastRun) :| (y,current) : completed
+       -- our last run differs from the current run. Since the thing is cyclic, just
+       -- use the last run as the first run though.
   where
-    initialize x = Left (f x, NonEmpty.singleton x)
+    -- we either have a Single run or Multiple runs once we detect
+    -- that we have more than one run, any future values will just be
+    -- Multiple runs
+    initialize x = OneRun (f x) (NonEmpty.singleton x)
     compute x = \case
-        Left (y,current)
-          | b == y    -> Left (y, x NonEmpty.<| current)
-          | otherwise -> Right ((y,current), NonEmpty.singleton (b, NonEmpty.singleton x))
-        Right (first, res@((y,current):|completed))
-          | b == y    -> Right (first, (y, x NonEmpty.<| current) :| completed)
-          | otherwise -> Right (first, (b, NonEmpty.singleton x) NonEmpty.<| res)
+        OneRun y current
+          | b == y    -> OneRun y (x NonEmpty.<| current)
+          | otherwise -> MoreRuns b (NonEmpty.singleton x) [] y current
+                         -- start a new current run
+        MoreRuns y current completed lastB lastRun
+         | b == y    -> MoreRuns y (x NonEmpty.<| current) completed               lastB lastRun
+         | otherwise -> MoreRuns b (NonEmpty.singleton x)  ((y,current):completed) lastB lastRun
       where
         b = f x
+
+data Runs b a = OneRun   !b (NonEmpty a)
+              | MoreRuns !b (NonEmpty a) [(b,NonEmpty a)] !b (NonEmpty a)
+              -- the first !b (NonEmpty a) is the current run
+              -- the last !b (NonEmpty a) is the last run
+
+
+
+
+
+
+{- Alternative implementation; this one seems to be slower though
+
+groupWith      :: (Foldable1 cyclic, Functor cyclic, Eq b)
+               => (a -> b) -> cyclic a -> Cyclic NonEmpty (b, NonEmpty a)
+groupWith f xs = Cyclic . fmap g $ case unsnoc1 ys of
+    (run1:rest, lastRun) | f' run1 == f' lastRun -> lastRun <> run1 :| rest
+    _                                            -> ys
+  where
+    f'      = fst . NonEmpty.head
+    g run   = (f' run, snd <$> run)
+    ys      = NonEmpty.groupWith1 fst . toNonEmpty . fmap (\x -> (f x,x)) $ xs
+    unsnoc1 = foldrMap1 ([],) (\x (xs',l) -> (x:xs', l))
+-}
+
+
+
+
+
+-- groupWith      :: (Foldable1 cyclic, Eq b)
+--                => (a -> b) -> cyclic a -> Cyclic NonEmpty (b, NonEmpty a)
+
+
+
+
+-- groupWith f xs = Cyclic $ case foldrMap1 initialize compute xs of
+--     Left res      -> NonEmpty.singleton res
+--     Right ((x, first), res@((y, current) :| completed))
+--       | x == y    -> (x, first <> current) :| completed
+--       | otherwise -> (x, first) NonEmpty.<| res
+--   where
+--     initialize x = Left (f x, NonEmpty.singleton x)
+--     compute x = \case
+--         Left (y,current)
+--           | b == y    -> Left (y, x NonEmpty.<| current)
+--           | otherwise -> Right ((y,current), NonEmpty.singleton (b, NonEmpty.singleton x))
+--         Right (first, res@((y,current):|completed))
+--           | b == y    -> Right (first, (y, x NonEmpty.<| current) :| completed)
+--           | otherwise -> Right (first, (b, NonEmpty.singleton x) NonEmpty.<| res)
+--       where
+--         b = f x

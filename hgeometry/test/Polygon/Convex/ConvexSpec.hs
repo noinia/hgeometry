@@ -2,30 +2,32 @@ module Polygon.Convex.ConvexSpec
   (spec
   ) where
 
-import           Control.Lens hiding (elements)
-import           Control.Monad.State
-import qualified Data.List.NonEmpty as NonEmpty
-import           HGeometry.Boundary
-import           HGeometry.ConvexHull.GrahamScan (convexHull)
-import           HGeometry.Cyclic
-import           HGeometry.Ext
-import           HGeometry.Instances ()
-import           HGeometry.Kernel.Test.Box
-import           HGeometry.Kernel
-import           HGeometry.Polygon.Class
-import           HGeometry.Polygon.Convex
-import           HGeometry.Polygon.Convex.MinkowskiSum
-import           HGeometry.Polygon.Convex.Random
-import           HGeometry.Polygon.Instances ()
-import           HGeometry.Polygon.Simple
-import           HGeometry.Transformation
-import           System.Random.Stateful
-import           Test.Hspec
-import           Test.Hspec.QuickCheck
-import           Test.QuickCheck ( Arbitrary(..) , sized , suchThat, choose , forAll , (===)
-                                 , (==>), counterexample, elements
-                                 )
-import           Test.QuickCheck.Instances ()
+import Data.Maybe (isJust)
+import Control.Lens hiding (elements)
+import Control.Monad.State
+import Data.List.NonEmpty qualified as NonEmpty
+import HGeometry.Boundary
+import HGeometry.ConvexHull.GrahamScan (convexHull)
+import HGeometry.Cyclic
+import HGeometry.Ext
+import HGeometry.Instances ()
+import HGeometry.Kernel.Test.Box
+import HGeometry.Kernel
+import HGeometry.Intersection
+import HGeometry.Polygon.Class
+import HGeometry.Polygon.Convex
+import HGeometry.Polygon.Convex.MinkowskiSum
+import HGeometry.Polygon.Convex.Random
+import HGeometry.Polygon.Instances ()
+import HGeometry.Polygon.Simple
+import HGeometry.Transformation
+import System.Random.Stateful
+import Test.Hspec
+import Test.Hspec.QuickCheck
+import Test.QuickCheck ( Arbitrary(..) , sized , suchThat, choose , forAll , (===)
+                       , (==>), counterexample, elements
+                       )
+import Test.QuickCheck.Instances ()
 
 --------------------------------------------------------------------------------
 
@@ -113,7 +115,18 @@ spec = describe "Convex Polygon tests" $ do
             let s = toSimplePolygon convex in
               boundingBox convex === boundingBox s
 
+        prop "line intersects convex polygon is constent" $
+          \(line :: LinePV 2 Rational) (convex :: ConvexPolygon (Point 2 Rational)) ->
+            line `intersects` convex === isJust (line `intersect` convex)
 
+        prop "line intersects convex polygon is constent with simplePolygon" $
+          \(line :: LinePV 2 Rational) (convex :: ConvexPolygon (Point 2 Rational)) ->
+            line `intersects` convex === line `intersects` (toSimplePolygon convex)
+
+        prop "line intersects convex polygon is constent with edge intersection" $
+          \(line :: LinePV 2 Rational) (convex :: ConvexPolygon (Point 2 Rational)) ->
+            line `intersects` convex ===
+                anyOf outerBoundaryEdgeSegments (line `intersects`) convex
 
 --   -- Verify that convexPolygon always returns convex polygons.
 --   specify "verifyConvex (convexPolygon p)" $

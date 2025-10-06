@@ -1,34 +1,31 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Plane.LowerEnvSpec
-  ( spec
-  ) where
+  -- ( spec
+  -- ) where
+  where
 
-import           Data.Coerce
+import           Data.Semigroup
+import           Control.Lens
+import           HGeometry.Point
 import qualified Data.Foldable as F
 import           Data.Foldable1
-import qualified Data.List as List
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import           Data.Map (Map)
-import qualified Data.Map.NonEmpty as NEMap
-import           Data.Maybe (fromMaybe, listToMaybe)
-import           Data.Ord (comparing)
 import           Data.Set (Set)
 import qualified Data.Set as Set
-import           HGeometry.Combinatorial.Util
-import           HGeometry.Ext
-import           HGeometry.Foldable.Util
 import           HGeometry.HyperPlane
 import           HGeometry.Instances ()
 import           HGeometry.Intersection
 import           HGeometry.Matrix
-import           HGeometry.NonEmpty.Util
 import           HGeometry.Number.Real.Rational
-import           HGeometry.Plane.LowerEnvelope.Connected (VertexForm)
+import           HGeometry.Plane.LowerEnvelope.Connected (VertexForm
+                                                           , intersectionPoint
+                                                           , definers
+                                                         )
 import qualified HGeometry.Plane.LowerEnvelope.Connected.BruteForce as BruteForce
 import qualified HGeometry.Plane.LowerEnvelope.Connected.Randomized as Randomized
-import           HGeometry.Point
 import           HGeometry.Vector
 import           System.Random
 import           Test.Hspec
@@ -36,15 +33,15 @@ import           Test.Hspec.QuickCheck
 import           Test.QuickCheck
 import           Test.QuickCheck.Instances ()
 
+import           HGeometry.Combinatorial.Util
 import           Debug.Trace
-
 --------------------------------------------------------------------------------
 
 type R = RealNumber 5
 
 
 newtype NonDegenerate plane = NonDegenerate (NonEmpty plane)
-  deriving newtype (Show,Eq,Foldable,Functor)
+  deriving newtype (Show,Eq,Foldable,Functor,Foldable1)
 
 setOf     :: Ord a => Gen a -> Gen (Set a)
 setOf gen = Set.fromList <$> listOf gen
@@ -55,7 +52,7 @@ instance Arbitrary (NonDegenerate (Plane R)) where
                  h2 <- arbitrary `suchThat` \h -> det (mkMatrix h0 h1 h) /= 0
                    -- \h' -> nonParallelWith h0 h' && nonParallelWith h1 h'
                  rest <- setOf (arbitrary  `suchThat` (`notElem` [h0,h1,h2]))
-                 pure . NonDegenerate $ h0 :| (h1 : h2 : (Set.toList rest))
+                 pure . NonDegenerate $ h0 :| (h1 : h2 : Set.toList rest)
   -- according to
   -- https://www.mathspanda.com/A2FM/Lessons/Intersections_of_planes_LESSON.pdf
   -- the three planes intersect in a point only when their determinant is non-zero.
@@ -103,14 +100,108 @@ spec = xdescribe "Lower Envelope tests" $ do
               `shouldBe`
               Same (BruteForce.computeVertexForm planes)
 
-         prop "every vertex is valid" $
-           \seed (planes :: NonDegenerate (Plane R)) ->
-             all (`BruteForce.belowAll` planes) $
-               Map.keys (Randomized.computeVertexForm (mkStdGen seed) planes)
+         describe "bug cmpPlanesAround" $ do
+           let
+               env = traceShowWith ("env",) $ Randomized.computeVertexForm (mkStdGen 0) buggyPlanes
+           prop "bug" $
+             all (`BruteForce.belowAll` buggyPlanes) $ Map.keys env
 
 
-         prop "same as brute force" $
-           \seed (planes :: NonDegenerate (Plane R)) ->
-             Same (Randomized.computeVertexForm (mkStdGen seed) planes)
-             ===
-             Same (BruteForce.computeVertexForm planes)
+         -- FIXME: Somehow The above indicates a bug in 'mergeDefiners'
+         -- where we call cmpPlanes with three planes that apparently don't intersect in
+          -- a point. In particular with:
+
+-- *** Exception: cmpPlanesAround: precondition failed(NonVerticalHyperPlane [-1.0,-1.0,1.0],NonVerticalHyperPlane [-1.0,0.0,0.0],NonVerticalHyperPlane [-1.0,1.0,-1.0])
+
+         -- this is due to :
+         -- trying to sort the list
+         -- [NonVerticalHyperPlane [-1.0,0.0,0.0],NonVerticalHyperPlane [-1.0,1.0,-1.0],NonVerticalHyperPlane [1.0,1.0,0.0]]
+
+          -- where h0 = NonVerticalHyperPlane [-1.0,-1.0,1.0]
+
+
+         -- FIXME: I think there may just be an issue with how we generate the planes
+         -- since raising this to 50 seems not to work
+         modifyMaxSize (const 20) $ do
+           prop "every vertex is valid" $
+             \seed (planes :: NonDegenerate (Plane R)) ->
+               all (`BruteForce.belowAll` planes) $
+                 Map.keys (Randomized.computeVertexForm (mkStdGen seed) planes)
+
+           prop "same as brute force" $
+             \seed (planes :: NonDegenerate (Plane R)) ->
+               Same (Randomized.computeVertexForm (mkStdGen seed) planes)
+               ===
+               Same (BruteForce.computeVertexForm planes)
+
+
+buggyPlanes = NonEmpty.fromList
+                   [ NonVerticalHyperPlane $ fromList' [1,1,0]
+
+                   , NonVerticalHyperPlane $ fromList' [-1,1,-1]
+
+                   , NonVerticalHyperPlane $ fromList' [-1,0,0]
+                   , NonVerticalHyperPlane $ fromList' [-1,-1,1]
+                   ]
+
+defs0 =  NonVerticalHyperPlane (fromList' [-1.0,0.0,0.0]) :|
+        [ NonVerticalHyperPlane (fromList' [1.0,1.0,0.0])
+        , NonVerticalHyperPlane (fromList' [-1.0,1.0,-1.0])
+        ]
+
+defs1 = NonVerticalHyperPlane (fromList' [-1.0,-1.0,1.0]) :|
+       [NonVerticalHyperPlane (fromList' [1.0,1.0,0.0])
+       ,NonVerticalHyperPlane (fromList' [-1.0,1.0,-1.0])]
+
+
+
+
+verifyAllContainV = it "allContain" $
+                      all (\h -> 0.5 == evalAt (Point2 (-0.5) 1) h) buggyPlanes
+                      -- all contain the point (-0.5, 1, 0.5)
+
+-- (evalAt $ Point2 (-0.5) (1 + 1)) buggyPlanes
+
+isLowestAbove = it "isLowestAbove" $
+         minimumOn (evalAt $ Point2 (-0.5) (1 + 1)) buggyPlanes
+                 `shouldBe` (buggyPlanes ^? ix 3)
+
+
+
+                  -- ,Definers (NonVerticalHyperPlane [-1.0,0.0,0.0] :| [NonVerticalHype
+
+foo = let f (a :| [b,c]) = definers (Three a b c)
+      in (f defs0, f defs1)
+
+-- myDefs = let (a :| [b,c,d]) = buggyPlanes
+--          in intersectionPoint $ Three d b c
+
+myDefs = let (a :| [b,c,d]) = buggyPlanes
+         in definers $ Three d b c
+
+-- rest = let h0 = buggyPlanes ^?! ix 3
+--         in map (definers h0) [NonVerticalHyperPlane $ fromList' [-1.0,0.0,0.0]  -- h
+--                              ,NonVerticalHyperPlane $ fromList' [-1.0,1.0,-1.0] -- h'
+--                              ,NonVerticalHyperPlane $ fromList' [1.0,1.0,0.0]
+--                              ]
+
+
+
+-- ,NonVerticalHyperPlane [-1.0,0.0,0.0],NonVerticalHyperPlane [-1.0,1.0,-1.0]
+
+-- ("h0",NonVerticalHyperPlane [-1.0,-1.0,1.0],", + ",
+
+--   )
+
+-- FIXME:
+--
+ -- cmpPlanesAround: precondition failed(NonVerticalHyperPlane [-1,-1,1],NonVerticalHyperPlane [-1,0,0],NonVerticalHyperPlane [-1,1,-1])
+ --       (after 42 tests and 1 shrink)
+ --         0
+ --
+
+fromList' [a,b,c] = Vector3 a b c
+fromList' _ = error "fromList'"
+
+minimumOn   :: (Ord b, Foldable f) => (a -> b) -> f a -> Maybe a
+minimumOn f = fmap (\(Min (Arg _ x)) -> x) . foldMap (\x -> Just $ Min $ Arg (f x) x)

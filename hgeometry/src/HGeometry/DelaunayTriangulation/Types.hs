@@ -30,8 +30,8 @@ import qualified Data.IntMap.Strict as IM
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map as Map
 import qualified Data.Vector as V
-import qualified Data.Vector.NonEmpty as NonEmptyV
-import           HGeometry.Ext
+-- import qualified Data.Vector.NonEmpty as NonEmptyV
+-- import           HGeometry.Ext
 import           HGeometry.PlaneGraph
 import           HGeometry.Point
 import           HGeometry.Properties

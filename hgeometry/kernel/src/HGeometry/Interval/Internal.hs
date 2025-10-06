@@ -26,11 +26,14 @@ import HGeometry.Point
 import HGeometry.Properties
 import HGeometry.Vector
 import Text.Read
+import GHC.Generics (Generic)
+import Control.DeepSeq
 
 --------------------------------------------------------------------------------
 -- | Data type representing intervals
 newtype Interval endPoint r = MkInterval (Vector 2 (endPoint r))
-  deriving newtype (Eq,Ord)
+  deriving newtype (Eq,Ord,NFData)
+  deriving stock (Generic)
 
 type instance NumType (Interval endPoint r) = r
 

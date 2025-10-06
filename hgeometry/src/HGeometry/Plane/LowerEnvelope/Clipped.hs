@@ -14,9 +14,11 @@ module HGeometry.Plane.LowerEnvelope.Clipped
   ( ClippedMinimizationDiagram
   , ClippedMinimizationDiagram'
   , _ClippedMinimizationDiagramMap
-  , ClippedMDCell
-  , ClippedMDCell'(..)
+  , ClippedMDCell, ClippedMDCell'
+  , ClippedMDCell''(..)
   , lowerEnvelopeIn
+
+  , foldMapVertices
   ) where
 
 import Data.Foldable1
