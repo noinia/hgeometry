@@ -261,7 +261,7 @@ instance (Point_ vertex 2 r, Ord r, Fractional r
                 `IsIntersectableWith` UnboundedConvexRegionF r NonEmpty vertex where
   line `intersect` region = case withIntersection <$> boundingRays region of
       -- somehow both rays intersect the line
-      Vector2 (Just (ps,_)) (Just (qs,_)) -> Just $ case ps of
+      Vector2 (Just ps) (Just qs) -> Just $ case ps of
         Line_x_HalfLine_HalfLine hl -> Line_x_UnboundedConvexRegion_HalfLine hl
         Line_x_HalfLine_Point p     -> case qs of
           Line_x_HalfLine_HalfLine hl         -> Line_x_UnboundedConvexRegion_HalfLine hl
@@ -280,14 +280,14 @@ instance (Point_ vertex 2 r, Ord r, Fractional r
     where
       withIntersection                :: HalfLine vertex
                                       -> Maybe (LineHalfLineIntersection (Point 2 r) (HalfLine (Point 2 r))
-                                               ,HalfLine (Point 2 r)
+
                                                )
       withIntersection (HalfLine p v) = let ray = HalfLine (p^.asPoint) v
-                                        in (,ray) <$> line `intersect` ray
+                                        in line `intersect` ray
 
       boundedIntersection = line `intersect` boundedCore region
 
-      intersectBounded (ps,ray) = case ps of
+      intersectBounded = \case
           Line_x_HalfLine_HalfLine l  -> Line_x_UnboundedConvexRegion_HalfLine l
           Line_x_HalfLine_Point p     -> case boundedIntersection of
                 Nothing                   -> Line_x_UnboundedConvexRegion_HalfLine $ hl p
