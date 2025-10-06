@@ -301,10 +301,16 @@ instance (Point_ vertex 2 r, Ord r, Fractional r
                                      -- the dummy edge of the core (connecting the two extremal)
                                      -- vertices of the chain
         where
-          hl p = let v  = line^.direction
-                     v' = if p .+^ v `liesRightOf` ray then v else negated v
-                 in HalfLine p v'
-          q `liesRightOf` l = q `onSide` asOrientedLine l == RightSide
+          -- | given an intersection point p on one of the unbounded rays, compute
+          -- the halfline that is contained in the unbounded region.
+          hl p = let v       = line^.direction
+                     region' = unboundedBoundingHalfplanes region
+                     v'      = if all (p .+^ v `intersects`) region' then v else negated v
+                  in HalfLine p v'
+                  -- if the point along v lies inside the (the unbounded part of the) region
+                  -- use direction v, otherwise use direction v'.
+                  -- note that since the intersection is guaranteed to be a halfline
+                  -- this remainder of the halflien should lie in the unbounded part
 
 instance ( Point_ vertex 2 r, Point_ point 2 r, Ord r, Fractional r
          , IxValue (endPoint point) ~ point, EndPoint_ (endPoint point)

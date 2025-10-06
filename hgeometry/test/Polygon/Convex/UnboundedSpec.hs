@@ -45,7 +45,8 @@ spec = describe "Polygon.Convex.Unbounded" $ do
 
          prop "triangle intersects unbounded polygon is constent with intersect" $
           \(tri :: Triangle (Point 2 R)) (convex :: UnboundedConvexRegion (Point 2 R)) ->
-            tri `intersects` convex === isJust (tri `intersect` convex)
+            counterexample (show $ tri `intersect` convex) $
+              tri `intersects` convex === isJust (tri `intersect` convex)
 
 
 specUnbounded :: Spec

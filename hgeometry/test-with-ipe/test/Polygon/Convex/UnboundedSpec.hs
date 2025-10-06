@@ -43,7 +43,9 @@ spec = describe "Polygon.Convex.Unbounded" $ do
          prop "unbounded extremal vertices in intersection" $
             \(region :: UnboundedConvexRegion (Point 2 R)) ->
               foldMap Every
-                [ counterexample (show (v,h)) $ v `intersects` h
+                [ counterexample (show (v,h)) $
+                    v `intersects` h
+
                 | h <- toList (unboundedBoundingHalfplanes region)
                 , v <- toList' (extremalVertices region)
                 ]
@@ -123,18 +125,42 @@ spec = describe "Polygon.Convex.Unbounded" $ do
          --                                                , supportingLine seg `intersect` ub4
          --                                                ))
 
+         prop "bug : triangle intersects unbounded polygon is constent with intersect" $
+           let tri = tri3 ; convex = ub5 in
+            counterexample (show $ tri `intersect` convex) $
+              tri `intersects` convex === isJust (tri `intersect` convex)
 
+         let [a',b',c'] = tri3^..outerBoundaryEdgeSegments
+         it ("a' intersects reg " <> show a) $
+            (a' `intersects` ub5) `shouldBe` False
+         it "b' intersects reg" $
+            (b' `intersects` ub5) `shouldBe` False
+         it "c' intersects reg" $
+           counterexample (show c') $ counterexample (show $ supportingLine c') $
+            counterexample (show $ (supportingLine c') `intersect` ub5) $
+             (c' `intersects` ub5) `shouldBe` False
+
+         modifyMaxDiscardRatio (*4) $
+           prop "line x unbounded region intersects in the correct halfline" $
+             \(line :: LinePV 2 R) (region :: UnboundedConvexRegion (Point 2 R)) ->
+                case line `intersect` region of
+                  Just (Line_x_UnboundedConvexRegion_HalfLine hl@(HalfLine p v)) ->
+                     let q = p .+^ v
+                     in counterexample (show hl) $ counterexample (show q) $
+                          q `intersects` region
+                             -- verify that q actually lies in the region.
+                  _ -> discard
 
          -- goldenWith [osp|data/test-with-ipe/golden/Polygon/Convex|]
          --       (ipeFileGolden { name = [osp|unboundedIntersectionTriangle|]
          --                      }
          --       )
-         --      ( let content' = [ iO $ defIO tri2
-         --                       , iO $ defIO ub4
-         --                       , iO $ defIO linex
+         --      ( let content' = [ iO $ defIO tri3
+         --                       , iO $ defIO ub5
          --                       ]
          --         in addStyleSheet opacitiesStyle $ singlePageFromContent content'
          --       )
+
 
 linex :: LinePV 2 R
 linex = let p = Point2 5 (-3)
@@ -165,3 +191,10 @@ tri2 = Triangle (Point2 5 (-3)) (Point2 0 (-4.75)) (Point2 0 0)
 
 ub4 :: UnboundedConvexRegion (Point 2 R)
 ub4=  Unbounded (Vector2 10.25 8.6) (Point2 3.75 5 :| []) (Vector2 (-6.5) 1.66666)
+
+
+tri3 :: Triangle (Point 2 R)
+tri3 = Triangle (Point2 0 (-1)) (Point2 0 0) (Point2 2 0)
+
+ub5 :: UnboundedConvexRegion (Point 2 R)
+ub5 = Unbounded (Vector2 0.5 (-1.83334)) (Point2 0 0.66666 :| [Point2 1.33333 1]) (Vector2 1.66667 0.66666)
