@@ -51,7 +51,6 @@ import Data.Kind (Type)
 import GHC.Generics (Generic)
 import Control.DeepSeq
 
-import Debug.Trace
 --------------------------------------------------------------------------------
 
 -- | An unbounded polygonal Convex Region
@@ -332,12 +331,10 @@ type instance Intersection (Triangle corner) (UnboundedConvexRegionF r nonEmpty 
 
 instance (Point_ vertex 2 r, Point_ corner 2 r, Ord r, Fractional r
          ) => Triangle corner `HasIntersectionWith` UnboundedConvexRegionF r NonEmpty vertex where
-  tri `intersects` region = traceShowWith ("res",) $
-                              traceShowWith ("v1",) (anyOf (vertices.asPoint) (`intersects` tri) region)
-                              ||
-                              (traceShowWith ("v2",) (anyOf (vertices.asPoint) (`intersects` region) tri))
-                              ||
-                              (traceShowWith ("boundary",) (anyOf outerBoundaryEdgeSegments (`intersects` region) (view asPoint <$> tri)))
+  tri `intersects` region =
+       anyOf (vertices.asPoint) (`intersects` tri) region
+    || anyOf (vertices.asPoint) (`intersects` region) tri
+    || anyOf outerBoundaryEdgeSegments (`intersects` region) (view asPoint <$> tri)
 
 
 
