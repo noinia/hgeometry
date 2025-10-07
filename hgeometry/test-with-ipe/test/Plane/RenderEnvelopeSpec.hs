@@ -22,7 +22,8 @@ import           HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
 import           HGeometry.Triangle
 import           HGeometry.Point
 import qualified HGeometry.VoronoiDiagram as VD
-import           HGeometry.Box
+import           HGeometry.Box as Box
+import           HGeometry.Vector
 import           HGeometry.Transformation
 import           HGeometry.Graphics.Camera
 import           Data.List.NonEmpty (NonEmpty(..))
@@ -48,15 +49,25 @@ triangles = -- scaleUniformlyBy 5 <$>
         -- back plane
         , Triangle (Point3 0 1 0) (Point3 1 1 0) (Point3 1 1 1) :+ orange
         , Triangle (Point3 0 1 0) (Point3 1 1 1) (Point3 0 1 1) :+ orange
-        ]
+        ] <> ((\tri -> tri&extra %~ getColor
+                         &vertices.coordinates %~ realToFrac
+              ) <$> myTriangles
+             )
 
+getColor :: core :+ IpeColor Double -> IpeColor Double
+getColor = view extra
+
+myTriangles :: [Triangle (Point 3 R) :+ (Plane R :+ IpeColor Double)]
+myTriangles = asTrianglesAbove domain planes
 
 planes :: NonEmpty (Plane R :+ IpeColor Double)
-planes = points&traverse.core %~ pointToPlane
+planes = NonEmpty.singleton $ Plane 0 0 (0.5) :+ red
+
+-- planes = points&traverse.core %~ pointToPlane
 
 points :: NonEmpty (Point 2 R :+ IpeColor Double)
 points = NonEmpty.fromList
-         [ Point2 2 3 :+ red
+         [ Point2 (1/2) (1/3) :+ red
          ]
 
 
@@ -67,6 +78,29 @@ myCamera = blenderCamera
 -- | fit to something that fits in this rectangle
 screenBox :: Rectangle (Point 2 Double)
 screenBox = Rectangle origin (Point2 500 500)
+
+
+-- | The domain in which we want to render the planes
+domain :: Rectangle (Point 2 R)
+domain = Rectangle origin (Point2 2 1)
+
+-- | Given a rectangular domain, and a set of planes, generates the
+-- triangles that represent the planes above the domain.
+asTrianglesAbove      :: (Plane_ plane r, Num r, Foldable f)
+                      => Rectangle (Point 2 r)
+                      -> f plane -> [Triangle (Point 3 r) :+ plane]
+asTrianglesAbove rect = foldMap (foldMap (:[]) . asTrianglePairAbove rect)
+
+-- | Given a rectangular domain, and a plane h, generate two triangles
+-- that represent the plane above the domain.
+asTrianglePairAbove        :: (Plane_ plane r, Num r)
+                           => Rectangle (Point 2 r)
+                           -> plane -> Vector 2 (Triangle (Point 3 r) :+ plane)
+asTrianglePairAbove rect h = Vector2 (Triangle tl tr br :+ h)
+                                     (Triangle tl br bl :+ h)
+  where
+    Corners tl tr br bl = (\p@(Point2 x y) -> Point3 x y (evalAt p h)) <$> Box.corners rect
+
 
 
 -- theTransform =
