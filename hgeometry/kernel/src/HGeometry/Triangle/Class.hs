@@ -14,6 +14,8 @@ module HGeometry.Triangle.Class
   , triangleSignedArea2X
   , intersectingHalfPlanes
   , toBarricentric, fromBarricentric
+  -- * Re-exports from Hiraffe
+  , HasVertices(..), HasVertices'(..)
   ) where
 
 import Control.Lens

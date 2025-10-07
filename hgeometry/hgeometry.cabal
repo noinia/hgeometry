@@ -313,6 +313,8 @@ library kernel
 
         HGeometry.Box
         HGeometry.Box.Class
+        HGeometry.Box.Boxable
+
     -- --
     -- --    HGeometry.SoS.Point
     -- --    HGeometry.SoS.Orientation
@@ -353,7 +355,6 @@ library kernel
     other-modules:
         HGeometry.Line.Intersection
         HGeometry.Box.Internal
-        HGeometry.Box.Boxable
         HGeometry.Box.Corners
         HGeometry.Box.Sides
         HGeometry.Box.Intersection
@@ -883,6 +884,7 @@ test-suite with-ipe-hspec
 
       Plane.LowerEnvelopeSpec
       Plane.NaiveLowerEnvSpec
+      Plane.RenderEnvelopeSpec
 
       LineSegmentSpec
       LineSegment.Intersection.WithHalfSpaceSpec

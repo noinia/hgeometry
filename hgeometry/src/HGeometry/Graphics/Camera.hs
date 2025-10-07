@@ -31,6 +31,7 @@ import HGeometry.Number.Radical
 import HGeometry.Point
 import HGeometry.Transformation
 import HGeometry.Vector
+import Data.Traversable
 
 --------------------------------------------------------------------------------
 
@@ -61,6 +62,27 @@ data Camera r = Camera { _cameraPosition     :: !(Point 3 r)
                        -- (i.e. the size of the screen on which we draw, in terms of world
                        -- coordinates)
                        } deriving (Show,Eq,Ord)
+
+--------------------------------------------------------------------------------
+
+instance Functor Camera where
+  fmap = fmapDefault
+instance Foldable Camera where
+  foldMap = foldMapDefault
+
+-- over coordinates f pos
+-- over coordinates f pos
+
+instance Traversable Camera where
+  -- ^ be aware that this invalidate some of the invariants that vectors are unit vectors.
+  traverse f (Camera pos n up focalD nearD farD dims) =
+    Camera <$> (Point <$> traverse f (pos^.vector))
+           <*> traverse f         n
+           <*> traverse f         up
+           <*> f                  focalD
+           <*> f                  nearD
+           <*> f                  farD
+           <*> traverse f         dims
 
 --------------------------------------------------------------------------------
 
