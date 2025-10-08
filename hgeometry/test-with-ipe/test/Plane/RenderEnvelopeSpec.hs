@@ -2,33 +2,34 @@
 module Plane.RenderEnvelopeSpec
   where
 
-import           Control.Lens
-import           Test.Hspec
-import           Test.Hspec.QuickCheck
-import           Ipe
-import           Ipe.Color
-import           System.OsPath
-import           Test.Hspec.WithTempFile
-import           Golden
-import qualified HGeometry.Plane.LowerEnvelope.Connected.BruteForce as BruteForce
-import           HGeometry.HyperPlane.NonVertical
-import           HGeometry.Instances ()
-import           HGeometry.Ext
-import           HGeometry.Polygon.Convex.Instances ()
-import           HGeometry.Number.Real.Rational
-import           HGeometry.Plane.LowerEnvelope
-import           HGeometry.VoronoiDiagram
-import           HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
-import           HGeometry.Triangle
-import           HGeometry.Point
-import qualified HGeometry.VoronoiDiagram as VD
-import           HGeometry.Box as Box
-import           HGeometry.Vector
-import           HGeometry.Transformation
-import           HGeometry.Graphics.Camera
-import           Data.List.NonEmpty (NonEmpty(..))
-import qualified Data.List.NonEmpty as NonEmpty
-import           Ipe.Color
+import Control.Lens
+import Test.Hspec
+import Test.Hspec.QuickCheck
+import Ipe
+import Ipe.Color
+import System.OsPath
+import Test.Hspec.WithTempFile
+import Golden
+import HGeometry.Plane.LowerEnvelope.Connected.BruteForce qualified as BruteForce
+import HGeometry.HyperPlane.NonVertical
+import HGeometry.Instances ()
+import HGeometry.Ext
+import HGeometry.Polygon.Convex.Instances ()
+import HGeometry.Number.Real.Rational
+import HGeometry.Plane.LowerEnvelope
+import HGeometry.VoronoiDiagram
+import HGeometry.VoronoiDiagram.ViaLowerEnvelope (pointToPlane)
+import HGeometry.Triangle
+import HGeometry.Point
+import HGeometry.VoronoiDiagram qualified as VD
+import HGeometry.Box as Box
+import HGeometry.Vector
+import HGeometry.Transformation
+import HGeometry.Graphics.Camera
+import Data.List.NonEmpty (NonEmpty(..))
+import Data.List.NonEmpty qualified as NonEmpty
+import Ipe.Color
+import HGeometry.LineSegment.Intersection.BentleyOttmann
 
 --------------------------------------------------------------------------------
 
@@ -61,9 +62,11 @@ myTriangles :: [Triangle (Point 3 R) :+ (Plane R :+ IpeColor Double)]
 myTriangles = asTrianglesAbove domain planes
 
 planes :: NonEmpty (Plane R :+ IpeColor Double)
-planes = NonEmpty.singleton $ Plane 0 0 (0.5) :+ red
-
--- planes = points&traverse.core %~ pointToPlane
+planes = NonEmpty.fromList
+           [ Plane 0 0 (0.5)   :+ red
+           , Plane 0 (-0.25) 1 :+ gray
+           ]
+-- planes = points&mapped.core %~ pointToPlane
 
 points :: NonEmpty (Point 2 R :+ IpeColor Double)
 points = NonEmpty.fromList
@@ -128,7 +131,31 @@ spec = describe "Plane.RenderEnvelope"  $ do
            )
 
 
-         --------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+
+-- in the end this should be a planeGraph rather than a
+
+-- | Construct a connected Plane Graph out of a bunch of triangles.
+constructCPlaneGraph      :: forall nonEmpty simplePolygon vertex r.
+                               (Foldable1 nonEmpty, Point_ vertex 2 r
+                               , SimplePolygon_ simplePolygon vertex
+                               )
+                          => nonEmpty simplePolygon
+                          -> CPlaneGraph s (Point 2 r :+ [vertex]) () [simplePolygon]
+constructCPlaneGraph tris = undefined
+  -- where
+  --   allEdgeSegments = foldMap1
+
+
+-- connected at least again
+fromIntersections                 :: nonEmpty lineSegment
+                                  -> Intersections r lineSegment
+                                  -> CPlaneGraph s (Point 2 r) () ()
+fromIntersections segs intersects = undefined
+
+
+--------------------------------------------------------------------------------
 
 renderToIpe       :: forall point r r' f.
                        (Foldable f, Functor f, Point_ point 3 r, Real r, Real r')
